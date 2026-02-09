@@ -1,0 +1,13 @@
+<Project>
+  <ItemGroup>
+    <!-- Central package versions (EF Core 9 + Pomelo 9) -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0" />
+    <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+
+    <!-- Other shared packages -->
+    <PackageVersion Include="FluentValidation" Version="11.3.1" />
+    <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
+  </ItemGroup>
+</Project>
