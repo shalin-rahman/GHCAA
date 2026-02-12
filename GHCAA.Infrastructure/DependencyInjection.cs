@@ -23,6 +23,16 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IEmailService, GmailEmailService>();
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IMemberService, MemberService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<ILookupService, LookupService>();
+            services.AddScoped<INetworkingService, NetworkingService>();
+            services.AddScoped<ICommunicationService, CommunicationService>();
+            services.AddScoped<IFinancialService, FinancialService>();
+            services.AddScoped<IFinancialLedgerService, FinancialLedgerService>();
+            services.AddScoped<INewsService, NewsService>();
 
             return services;
         }

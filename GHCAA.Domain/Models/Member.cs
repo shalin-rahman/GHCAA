@@ -27,7 +27,7 @@ namespace GHCAA.Domain.Models
         // B. Academic (2.1 B)
         public int HSCAdmissionYear { get; set; } // 1950 - Current
         public int GHCAdmissionYear { get; set; } // Separated from HSC
-        public Degree LastDegreeFromGHC { get; set; } = Degree.Other; // Dropdown: HSC, Bachelor, etc.
+        public string LastCertificateFromGHC { get; set; } = "Other"; // Dynamic lookup: HSC, Bachelor, etc.
         public string SubjectGroup { get; set; } = null!;
         public int GHCLastCertificatePassingYear { get; set; } // 1950 - Current
 
@@ -40,13 +40,20 @@ namespace GHCAA.Domain.Models
         public string? CertificatePath { get; set; }
         public string? PaymentProofPath { get; set; }
 
-        // Workflow & Audit
-        public MembershipStatus Status { get; set; } = MembershipStatus.Applied;
-        public DateTime AppliedDate { get; set; } = DateTime.UtcNow;
+        // Workflow & Status
+        public MembershipStatus Status { get; set; }
+        public DateTime AppliedDate { get; set; }
         public DateTime? ApprovedDate { get; set; }
-        public int? ApprovedBy { get; set; } // Admin user id
+        public int? ApprovedBy { get; set; } // Admin ID
+        public string? MembershipNumber { get; set; }
+
+        // Privacy Settings
+        public bool IsMobilePublic { get; set; } = false;
+        public bool IsEmailPublic { get; set; } = false;
+        public bool IsAddressPublic { get; set; } = false;
+
         public bool IsArchived { get; set; } = false;
-        public string? MembershipNumber { get; set; } // GHC-YYYY-XXXX
+        public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow;
 
         // Membership details
         public MembershipType MembershipType { get; set; } = MembershipType.General;

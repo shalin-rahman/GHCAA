@@ -141,5 +141,36 @@ namespace GHCAA.Tests.Services
             BCrypt.Net.BCrypt.Verify(password, user.PasswordHash).Should().BeTrue();
             BCrypt.Net.BCrypt.Verify("WrongPassword", user.PasswordHash).Should().BeFalse();
         }
+
+        [Test]
+        public async Task ChangePasswordAsync_WithValidData_ShouldUpdatePassword()
+        {
+            // Arrange
+            var user = await _service.CreateUserAccountAsync(1, "user1", "OldPassword123");
+            
+            // Act
+            var result = await _service.ChangePasswordAsync(user.Id, "OldPassword123", "NewPassword456");
+
+            // Assert
+            result.Should().BeTrue();
+            var updatedUser = await _context.Users.FindAsync(user.Id);
+            BCrypt.Net.BCrypt.Verify("NewPassword456", updatedUser!.PasswordHash).Should().BeTrue();
+            BCrypt.Net.BCrypt.Verify("OldPassword123", updatedUser.PasswordHash).Should().BeFalse();
+        }
+
+        [Test]
+        public async Task ChangePasswordAsync_WithWrongOldPassword_ShouldReturnFalse()
+        {
+            // Arrange
+            var user = await _service.CreateUserAccountAsync(1, "user1", "OldPassword123");
+
+            // Act
+            var result = await _service.ChangePasswordAsync(user.Id, "WrongOldPassword", "NewPassword456");
+
+            // Assert
+            result.Should().BeFalse();
+            var updatedUser = await _context.Users.FindAsync(user.Id);
+            BCrypt.Net.BCrypt.Verify("OldPassword123", updatedUser!.PasswordHash).Should().BeTrue();
+        }
     }
 }

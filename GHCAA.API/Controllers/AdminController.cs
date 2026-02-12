@@ -1,9 +1,11 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GHCAA.API.Controllers
 {
+    [Authorize(Policy = "AdminOnly")]
     [ApiController]
     [Route("api/admin")]
     public class AdminController : ControllerBase
@@ -13,6 +15,27 @@ namespace GHCAA.API.Controllers
         public AdminController(IMemberService memberService)
         {
             _memberService = memberService;
+        }
+
+        [HttpGet("members")]
+        public async Task<IActionResult> GetAllMembers([FromQuery] bool includeArchived = false, CancellationToken cancellationToken = default)
+        {
+            // Standard Admins cannot see archived records
+            if (includeArchived && !User.IsInRole("SuperAdmin"))
+            {
+                return Forbid();
+            }
+
+            var members = await _memberService.GetAllMembersAsync(includeArchived, cancellationToken);
+            return Ok(members);
+        }
+
+        [HttpGet("members/{id}")]
+        public async Task<IActionResult> GetMemberById(int id, CancellationToken cancellationToken)
+        {
+            var profile = await _memberService.GetProfileAsync(id, cancellationToken);
+            if (profile == null) return NotFound();
+            return Ok(profile);
         }
 
         [HttpPost("members/{id}/approve")]
@@ -36,6 +59,33 @@ namespace GHCAA.API.Controllers
             {
                 return BadRequest(new { Message = ex.Message });
             }
+        }
+
+        [HttpDelete("members/{id}")]
+        [Authorize(Policy = "SuperAdminOnly")]
+        public async Task<IActionResult> ArchiveMember(int id, CancellationToken cancellationToken)
+        {
+            var success = await _memberService.ArchiveMemberAsync(id, cancellationToken);
+            if (!success) return NotFound();
+            return Ok(new { Message = "Member archived successfully" });
+        }
+
+        [HttpPost("members/{id}/restore")]
+        [Authorize(Policy = "SuperAdminOnly")]
+        public async Task<IActionResult> RestoreMember(int id, CancellationToken cancellationToken)
+        {
+            var success = await _memberService.RestoreMemberAsync(id, cancellationToken);
+            if (!success) return NotFound();
+            return Ok(new { Message = "Member restored successfully" });
+        }
+
+        [HttpPut("members/{id}")]
+        public async Task<IActionResult> UpdateMemberAdmin(int id, [FromBody] UpdateProfileDto dto, CancellationToken cancellationToken)
+        {
+            // Admins can update all membership information
+            var success = await _memberService.UpdateProfileAsync(id, dto, cancellationToken);
+            if (!success) return NotFound();
+            return Ok(new { Message = "Member updated by admin successfully" });
         }
     }
 }

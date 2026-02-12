@@ -63,7 +63,7 @@ namespace GHCAA.Infrastructure.Services
                 EmergencyContactPhone = dto.EmergencyContactPhone,
                 HSCAdmissionYear = dto.HSCAdmissionYear,
                 GHCAdmissionYear = dto.GHCAdmissionYear,
-                LastDegreeFromGHC = Enum.Parse<Enums.Degree>(dto.LastDegreeFromGHC),
+                LastCertificateFromGHC = dto.LastDegreeFromGHC,
                 SubjectGroup = dto.SubjectGroup,
                 GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear,
                 ProfessionalSector = dto.ProfessionalSector,
@@ -196,6 +196,126 @@ namespace GHCAA.Infrastructure.Services
                 MembershipNumber = membershipNumber,
                 DefaultPassword = defaultPassword
             };
+        }
+
+        public async Task<MemberProfileDto?> GetProfileAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null) return null;
+
+            return new MemberProfileDto
+            {
+                Id = member.Id,
+                FullName = member.FullName,
+                Email = member.Email,
+                MobileNo = member.MobileNo,
+                MembershipNumber = member.MembershipNumber,
+                Status = member.Status,
+                GHCLastCertificatePassingYear = member.GHCLastCertificatePassingYear,
+                LastCertificateFromGHC = member.LastCertificateFromGHC,
+                SubjectGroup = member.SubjectGroup,
+                ProfessionalSector = member.ProfessionalSector,
+                Designation = member.Designation,
+                PhotoPath = member.PhotoPath,
+                PresentAddress = member.PresentAddress,
+                PermanentAddress = member.PermanentAddress,
+                BloodGroup = member.BloodGroup,
+                IsMobilePublic = member.IsMobilePublic,
+                IsEmailPublic = member.IsEmailPublic,
+                IsAddressPublic = member.IsAddressPublic
+            };
+        }
+
+        public async Task<bool> UpdateProfileAsync(int memberId, UpdateProfileDto dto, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null) return false;
+
+            member.PresentAddress = dto.PresentAddress;
+            member.PermanentAddress = dto.PermanentAddress;
+            member.ProfessionalSector = dto.ProfessionalSector;
+            member.Designation = dto.Designation;
+            member.SubjectGroup = dto.SubjectGroup;
+            member.LastCertificateFromGHC = dto.LastDegreeFromGHC;
+            member.GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear;
+            member.IsMobilePublic = dto.IsMobilePublic;
+            member.IsEmailPublic = dto.IsEmailPublic;
+            member.IsAddressPublic = dto.IsAddressPublic;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Profile updated for member {MemberId}", memberId);
+            _logger.LogInformation("Profile updated for member {MemberId}", memberId);
+            return true;
+        }
+
+        public async Task<bool> ArchiveMemberAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null) return false;
+
+            member.IsArchived = true;
+            
+            // Also archive the associated user if exists
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
+            if (user != null)
+            {
+                user.IsArchived = true;
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Member {MemberId} archived (soft delete)", memberId);
+            return true;
+        }
+
+        public async Task<bool> RestoreMemberAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            // Must use IgnoreQueryFilters to see archived records
+            var member = await _db.Members.IgnoreQueryFilters().FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null) return false;
+
+            member.IsArchived = false;
+
+            var user = await _db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
+            if (user != null)
+            {
+                user.IsArchived = false;
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Member {MemberId} restored", memberId);
+            return true;
+        }
+
+        public async Task<IEnumerable<MemberProfileDto>> GetAllMembersAsync(bool includeArchived = false, CancellationToken cancellationToken = default)
+        {
+            IQueryable<Member> query = _db.Members;
+            
+            if (includeArchived)
+            {
+                query = query.IgnoreQueryFilters();
+            }
+
+            return await query.Select(member => new MemberProfileDto
+            {
+                Id = member.Id,
+                FullName = member.FullName,
+                Email = member.Email,
+                MobileNo = member.MobileNo,
+                MembershipNumber = member.MembershipNumber,
+                Status = member.Status,
+                GHCLastCertificatePassingYear = member.GHCLastCertificatePassingYear,
+                LastCertificateFromGHC = member.LastCertificateFromGHC,
+                SubjectGroup = member.SubjectGroup,
+                ProfessionalSector = member.ProfessionalSector,
+                Designation = member.Designation,
+                PhotoPath = member.PhotoPath,
+                PresentAddress = member.PresentAddress,
+                PermanentAddress = member.PermanentAddress,
+                BloodGroup = member.BloodGroup,
+                IsMobilePublic = member.IsMobilePublic,
+                IsEmailPublic = member.IsEmailPublic,
+                IsAddressPublic = member.IsAddressPublic
+            }).ToListAsync(cancellationToken);
         }
     }
 }

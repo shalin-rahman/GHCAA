@@ -14,5 +14,12 @@ namespace GHCAA.Domain
         public enum FileUploadStatus { Pending, Approved, Rejected }
         public enum OtpPurpose { Registration, PasswordReset }
         public enum PaymentStatus { Pending, Completed, Failed, Refunded }
+
+        // Financial Ledger Enums
+        public enum FinancialRecordType { Income, Expense }
+        public enum FinancialCategory { MembershipFee, Donation, Event, Maintenance, Salary, Utilities, Other }
+
+        // News & Updates Enums
+        public enum NewsCategory { News, OrganisationalUpdate, BusinessInformation }
     }
 }

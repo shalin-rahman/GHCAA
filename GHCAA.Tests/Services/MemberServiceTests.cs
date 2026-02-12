@@ -448,6 +448,86 @@ public class MemberServiceTests
     }
 
     [Test]
+    public async Task GetProfileAsync_WithValidMember_ShouldReturnProfile()
+    {
+        // Arrange
+        var member = new Member
+        {
+            FullName = "Test Member",
+            Email = "test@example.com",
+            MobileNo = "01712345678",
+            FatherName = "Father",
+            MotherName = "Mother",
+            NID = "1234567890",
+            PresentAddress = "Present",
+            PermanentAddress = "Permanent",
+            EmergencyContactName = "EC",
+            EmergencyContactRelation = "Brother",
+            EmergencyContactPhone = "01812345678",
+            SubjectGroup = "Science",
+            ProfessionalSector = "IT",
+            Designation = "Software Engineer"
+        };
+        await _context.Members.AddAsync(member);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetProfileAsync(member.Id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.FullName.Should().Be(member.FullName);
+        result.Email.Should().Be(member.Email);
+    }
+
+    [Test]
+    public async Task UpdateProfileAsync_WithValidData_ShouldUpdateMember()
+    {
+        // Arrange
+        var member = new Member
+        {
+            FullName = "Test Member",
+            Email = "test@example.com",
+            MobileNo = "01712345678",
+            FatherName = "Father",
+            MotherName = "Mother",
+            NID = "1234567890",
+            PresentAddress = "Old Address",
+            PermanentAddress = "Permanent",
+            EmergencyContactName = "EC",
+            EmergencyContactRelation = "Brother",
+            EmergencyContactPhone = "01812345678",
+            SubjectGroup = "Science",
+            ProfessionalSector = "IT",
+            Designation = "Software Engineer",
+            IsMobilePublic = false
+        };
+        await _context.Members.AddAsync(member);
+        await _context.SaveChangesAsync();
+
+        var updateDto = new UpdateProfileDto
+        {
+            PresentAddress = "New Address",
+            PermanentAddress = "Perm Address",
+            ProfessionalSector = "New IT",
+            Designation = "Senior Dev",
+            IsMobilePublic = true,
+            IsEmailPublic = true,
+            IsAddressPublic = true
+        };
+
+        // Act
+        var result = await _service.UpdateProfileAsync(member.Id, updateDto);
+
+        // Assert
+        result.Should().BeTrue();
+        var updatedMember = await _context.Members.FindAsync(member.Id);
+        updatedMember!.PresentAddress.Should().Be("New Address");
+        updatedMember.Designation.Should().Be("Senior Dev");
+        updatedMember.IsMobilePublic.Should().BeTrue();
+    }
+
+    [Test]
     public async Task GetStatusAsync_WithInvalidMemberId_ShouldThrowException()
     {
         // Act & Assert

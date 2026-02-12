@@ -62,6 +62,21 @@ namespace GHCAA.Infrastructure.Services
             return user;
         }
 
+        public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword, CancellationToken cancellationToken = default)
+        {
+            var user = await _db.Users.FindAsync(new object[] { userId }, cancellationToken);
+            if (user == null) return false;
+
+            if (!BCrypt.Net.BCrypt.Verify(oldPassword, user.PasswordHash))
+            {
+                return false;
+            }
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
         public string GenerateDefaultPassword()
         {
             var random = new Random();

@@ -13,13 +13,15 @@ namespace GHCAA.Domain.Models
         public string PasswordHash { get; set; } = null!;
 
         // Link to Member (created only after approval)
-        public int MemberId { get; set; }
+        public int? MemberId { get; set; }
 
         // Audit
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
+        public bool IsArchived { get; set; } = false;
 
         // Navigation
         public Member? Member { get; set; }
+        public ICollection<Role> Roles { get; set; } = new List<Role>();
     }
 }
