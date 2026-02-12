@@ -1,0 +1,26 @@
+<div style="padding: 20px; font-family: sans-serif;">
+  <h1>GHCAA Portal</h1>
+
+  @if (!authService.currentUser()) {
+    <div style="border: 1px solid #ccc; padding: 20px; width: 300px;">
+      <h2>Login</h2>
+      <div style="margin-bottom: 10px;">
+        <input [(ngModel)]="credentials.username" placeholder="Username" style="width: 100%; padding: 8px;" />
+      </div>
+      <div style="margin-bottom: 10px;">
+        <input [(ngModel)]="credentials.password" type="password" placeholder="Password" style="width: 100%; padding: 8px;" />
+      </div>
+      <button (click)="login()" style="padding: 8px 16px; background: blue; color: white; border: none; cursor: pointer;">Login</button>
+    </div>
+  } @else {
+    <div style="border: 1px solid #green; padding: 20px; width: 300px;">
+      <h2>Welcome, {{ authService.currentUser()?.username }}</h2>
+      <p>Member ID: {{ authService.currentUser()?.memberId }}</p>
+      <button (click)="logout()" style="padding: 8px 16px; background: red; color: white; border: none; cursor: pointer;">Logout</button>
+    </div>
+  }
+
+  <div style="margin-top: 20px;">
+    <router-outlet></router-outlet>
+  </div>
+</div>
