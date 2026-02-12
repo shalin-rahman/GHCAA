@@ -14,17 +14,23 @@ namespace GHCAA.Tests.Services
     public class UserServiceTests
     {
         private ApplicationDbContext _context = null!;
+        private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
         private Mock<ILogger<UserService>> _mockLogger = null!;
         private UserService _service = null!;
 
         [SetUp]
         public void Setup()
         {
+            _connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseSqlite(_connection)
                 .Options;
 
             _context = new ApplicationDbContext(options);
+            _context.Database.EnsureCreated();
+
             _mockLogger = new Mock<ILogger<UserService>>();
             _service = new UserService(_context, _mockLogger.Object);
         }
@@ -32,15 +38,19 @@ namespace GHCAA.Tests.Services
         [TearDown]
         public void TearDown()
         {
-            _context.Database.EnsureDeleted();
             _context.Dispose();
+            _connection.Close();
         }
 
         [Test]
         public async Task CreateUserAccountAsync_WithValidData_ShouldCreateUser()
         {
             // Arrange
-            var memberId = 1;
+            var member = new Member { FullName = "Test Member", Email = "valid@e.com", NID = "V1", MobileNo = "V1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+            await _context.Members.AddAsync(member);
+            await _context.SaveChangesAsync();
+
+            var memberId = member.Id;
             var username = "GHC-2007-0001";
             var password = "TestPassword123";
 
@@ -64,7 +74,11 @@ namespace GHCAA.Tests.Services
         public async Task CreateUserAccountAsync_WithDuplicateMemberId_ShouldThrowException()
         {
             // Arrange
-            var memberId = 1;
+            var member = new Member { FullName = "Test Member", Email = "dup@e.com", NID = "D1", MobileNo = "D1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+            await _context.Members.AddAsync(member);
+            await _context.SaveChangesAsync();
+
+            var memberId = member.Id;
             await _context.Users.AddAsync(new User
             {
                 Username = "existing",
@@ -85,19 +99,24 @@ namespace GHCAA.Tests.Services
         public async Task CreateUserAccountAsync_WithDuplicateUsername_ShouldThrowException()
         {
             // Arrange
+            var member1 = new Member { FullName = "Test Member 1", Email = "test1@e.com", NID = "1231", MobileNo = "1231", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+            var member2 = new Member { FullName = "Test Member 2", Email = "test2@e.com", NID = "1232", MobileNo = "1232", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+            await _context.Members.AddRangeAsync(member1, member2);
+            await _context.SaveChangesAsync();
+
             var username = "GHC-2007-0001";
             await _context.Users.AddAsync(new User
             {
                 Username = username,
                 PasswordHash = "hash",
-                MemberId = 1,
+                MemberId = null,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             });
             await _context.SaveChangesAsync();
 
             // Act & Assert
-            var act = async () => await _service.CreateUserAccountAsync(2, username, "password");
+            var act = async () => await _service.CreateUserAccountAsync(member2.Id, username, "password");
             await act.Should().ThrowAsync<InvalidOperationException>()
                 .WithMessage($"Username '{username}' is already taken");
         }
@@ -131,10 +150,14 @@ namespace GHCAA.Tests.Services
         public async Task CreateUserAccountAsync_ShouldHashPasswordWithBCrypt()
         {
             // Arrange
+            var member = new Member { FullName = "BCrypt Test", Email = "bcrypt@e.com", NID = "B1", MobileNo = "B1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+            await _context.Members.AddAsync(member);
+            await _context.SaveChangesAsync();
+
             var password = "MySecurePassword123";
 
             // Act
-            var user = await _service.CreateUserAccountAsync(1, "testuser", password);
+            var user = await _service.CreateUserAccountAsync(member.Id, "testuserhash", password);
 
             // Assert
             user.PasswordHash.Should().StartWith("$2"); // BCrypt hash starts with $2a, $2b, etc.
@@ -146,7 +169,11 @@ namespace GHCAA.Tests.Services
         public async Task ChangePasswordAsync_WithValidData_ShouldUpdatePassword()
         {
             // Arrange
-            var user = await _service.CreateUserAccountAsync(1, "user1", "OldPassword123");
+            var member = new Member { FullName = "Test Member", Email = "test@e.com", NID = "123", MobileNo = "123", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+            await _context.Members.AddAsync(member);
+            await _context.SaveChangesAsync();
+
+            var user = await _service.CreateUserAccountAsync(member.Id, "user1", "OldPassword123");
             
             // Act
             var result = await _service.ChangePasswordAsync(user.Id, "OldPassword123", "NewPassword456");
@@ -162,10 +189,15 @@ namespace GHCAA.Tests.Services
         public async Task ChangePasswordAsync_WithWrongOldPassword_ShouldReturnFalse()
         {
             // Arrange
-            var user = await _service.CreateUserAccountAsync(1, "user1", "OldPassword123");
+            var member = new Member { FullName = "Test Member", Email = "pw2@e.com", NID = "P2", MobileNo = "P2", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+            await _context.Members.AddAsync(member);
+            await _context.SaveChangesAsync();
+
+            var user = await _service.CreateUserAccountAsync(member.Id, "user1", "OldPassword123");
 
             // Act
             var result = await _service.ChangePasswordAsync(user.Id, "WrongOldPassword", "NewPassword456");
+
 
             // Assert
             result.Should().BeFalse();

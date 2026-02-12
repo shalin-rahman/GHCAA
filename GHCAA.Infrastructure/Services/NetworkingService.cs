@@ -20,9 +20,20 @@ namespace GHCAA.Infrastructure.Services
             _db = db;
         }
 
+        public async Task<MemberProfileDto?> GetMemberProfileAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members
+                .Where(m => m.Id == memberId && m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return member == null ? null : MapToDto(member);
+        }
+
         public async Task<IEnumerable<MemberProfileDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default)
         {
-            var query = _db.Members.AsQueryable();
+            var query = _db.Members
+                .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(filter.FullName))
                 query = query.Where(m => m.FullName.Contains(filter.FullName));
@@ -50,7 +61,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<MemberProfileDto>> GetExecutiveCommitteeAsync(int? year = null, CancellationToken cancellationToken = default)
         {
             // For now, filtering by ECPosition being not None
-            var query = _db.Members.Where(m => m.ECPosition != Enums.ECPosition.None);
+            var query = _db.Members.Where(m => m.ECPosition != Enums.ECPosition.None && m.Status == Enums.MembershipStatus.Active && !m.IsArchived);
 
             // If year is provided, we might filter by GHCAdmissionYear or a specific term (not yet implemented)
             // Assuming current EC for now.
@@ -62,6 +73,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<MemberProfileDto>> GetLatestAlumniUpdatesAsync(int count = 10, CancellationToken cancellationToken = default)
         {
             var members = await _db.Members
+                .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
                 .OrderByDescending(m => m.LastUpdateDate)
                 .Take(count)
                 .ToListAsync(cancellationToken);

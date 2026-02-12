@@ -8,6 +8,7 @@ namespace GHCAA.Application.Interfaces
     public interface INetworkingService
     {
         Task<IEnumerable<MemberProfileDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default);
+        Task<MemberProfileDto?> GetMemberProfileAsync(int memberId, CancellationToken cancellationToken = default);
         Task<IEnumerable<MemberProfileDto>> GetExecutiveCommitteeAsync(int? year = null, CancellationToken cancellationToken = default);
         Task<IEnumerable<MemberProfileDto>> GetLatestAlumniUpdatesAsync(int count = 10, CancellationToken cancellationToken = default);
     }

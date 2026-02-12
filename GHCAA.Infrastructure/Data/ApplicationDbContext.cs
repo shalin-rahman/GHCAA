@@ -19,6 +19,12 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<EmailTemplate> EmailTemplates { get; set; } = null!;
         public DbSet<FinancialRecord> FinancialRecords { get; set; } = null!;
         public DbSet<NewsPost> NewsPosts { get; set; } = null!;
+        public DbSet<MembershipDue> MembershipDues { get; set; } = null!;
+        public DbSet<JobOpportunity> JobOpportunities { get; set; } = null!;
+        public DbSet<ActivityLog> ActivityLogs { get; set; } = null!;
+        public DbSet<EventGallery> EventGalleries { get; set; } = null!;
+        public DbSet<EventPhoto> EventPhotos { get; set; } = null!;
+        public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -74,8 +80,8 @@ namespace GHCAA.Infrastructure.Data
                     Id = 2, 
                     Code = "WELCOME_EMAIL", 
                     Subject = "Welcome to GHC Alumni Association!", 
-                    Body = "Dear {{FullName}}, welcome! Your membership number is {{MembershipNumber}}.",
-                    Variables = "['FullName', 'MembershipNumber']"
+                    Body = "Dear {{FullName}}, welcome! Your membership number is {{MembershipNumber}} and your default password is {{DefaultPassword}}.",
+                    Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                 }
             );
 
@@ -106,7 +112,7 @@ namespace GHCAA.Infrastructure.Data
                 IsActive = true,
                 IsArchived = false,
                 CreatedAt = new DateTime(2024, 1, 1),
-                MemberId = 0 // SuperAdmin might not be a member
+                MemberId = null // SuperAdmin might not be a member
             });
 
             modelBuilder.Entity<FileUpload>()
@@ -118,6 +124,30 @@ namespace GHCAA.Infrastructure.Data
             modelBuilder.Entity<Member>().Property(m => m.FullName).HasMaxLength(200);
             modelBuilder.Entity<User>().Property(u => u.Username).HasMaxLength(100).IsRequired();
             modelBuilder.Entity<FileUpload>().Property(f => f.FileName).HasMaxLength(260);
+
+            // ChatMessage Relationships
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(c => c.Sender)
+                .WithMany()
+                .HasForeignKey(c => c.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(c => c.Receiver)
+                .WithMany()
+                .HasForeignKey(c => c.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ActivityLog Index
+            modelBuilder.Entity<ActivityLog>()
+                .HasIndex(a => new { a.MemberId, a.Timestamp });
+
+            // Event Gallery Relationships
+            modelBuilder.Entity<EventGallery>()
+                .HasMany(g => g.Photos)
+                .WithOne(p => p.EventGallery)
+                .HasForeignKey(p => p.EventGalleryId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

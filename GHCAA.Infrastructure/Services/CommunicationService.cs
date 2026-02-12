@@ -90,6 +90,14 @@ namespace GHCAA.Infrastructure.Services
             }
         }
 
+        public async Task SendMemberCustomEmailAsync(int memberId, string subject, string htmlBody, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
+            if (member == null) throw new KeyNotFoundException("Member not found");
+
+            await _emailService.SendEmailAsync(member.Email, subject, htmlBody, cancellationToken);
+        }
+
         private async Task SendTemplatedEmailAsync(string to, Member member, string templateCode, Dictionary<string, string>? customVars, CancellationToken cancellationToken)
         {
             var template = await GetTemplateByCodeAsync(templateCode, cancellationToken);

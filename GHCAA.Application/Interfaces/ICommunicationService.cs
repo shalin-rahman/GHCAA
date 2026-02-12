@@ -19,5 +19,6 @@ namespace GHCAA.Application.Interfaces
         
         // Custom one-off email
         Task SendCustomEmailAsync(IEnumerable<string> emails, string subject, string htmlBody, CancellationToken cancellationToken = default);
+        Task SendMemberCustomEmailAsync(int memberId, string subject, string htmlBody, CancellationToken cancellationToken = default);
     }
 }

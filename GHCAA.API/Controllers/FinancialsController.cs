@@ -14,10 +14,12 @@ namespace GHCAA.API.Controllers
     public class FinancialsController : ControllerBase
     {
         private readonly IFinancialService _financialService;
+        private readonly GHCAA.Infrastructure.Data.ApplicationDbContext _db;
 
-        public FinancialsController(IFinancialService financialService)
+        public FinancialsController(IFinancialService financialService, GHCAA.Infrastructure.Data.ApplicationDbContext db)
         {
             _financialService = financialService;
+            _db = db;
         }
 
         [HttpGet("my-history")]
@@ -52,6 +54,33 @@ namespace GHCAA.API.Controllers
         {
             var success = await _financialService.UpdatePaymentStatusAsync(id, status, notes, cancellationToken);
             return success ? Ok() : NotFound();
+        }
+
+        [HttpGet("my-dues")]
+        public async Task<IActionResult> GetMyDues(CancellationToken cancellationToken)
+        {
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            int memberId;
+            if (memberIdClaim == null || !int.TryParse(memberIdClaim, out memberId)) // Corrected condition
+            {
+                // Fallback or handle null - usually if logged in, MemberId should be there
+                var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+                var user = await _db.Users.FindAsync(userId);
+                memberId = user?.MemberId ?? 0;
+            }
+            // else block is not needed as memberId is already assigned by out var or will be assigned in the if block
+            // if (memberIdClaim != null && int.TryParse(memberIdClaim, out memberId)) { } // This is redundant
+
+            var dues = await _financialService.GetMemberDuesAsync(memberId, cancellationToken);
+            return Ok(dues);
+        }
+
+        [HttpPost("generate-dues")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GenerateDues([FromQuery] int year, CancellationToken cancellationToken)
+        {
+            await _financialService.GenerateAnnualDuesAsync(year, cancellationToken);
+            return Ok(new { Message = $"Dues generation for year {year} initiated/completed." });
         }
 
         [HttpGet("membership-history/{memberId}")]

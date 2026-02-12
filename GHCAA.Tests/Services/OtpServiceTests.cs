@@ -14,6 +14,7 @@ namespace GHCAA.Tests.Services;
 public class OtpServiceTests
 {
     private ApplicationDbContext _context = null!;
+    private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
     private Mock<IEmailService> _mockEmail = null!;
     private Mock<IConfiguration> _mockConfig = null!;
     private Mock<ILogger<OtpService>> _mockLogger = null!;
@@ -22,11 +23,16 @@ public class OtpServiceTests
     [SetUp]
     public void Setup()
     {
+        _connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseSqlite(_connection)
             .Options;
 
         _context = new ApplicationDbContext(options);
+        _context.Database.EnsureCreated();
+
         _mockEmail = new Mock<IEmailService>();
         _mockConfig = new Mock<IConfiguration>();
         _mockLogger = new Mock<ILogger<OtpService>>();
@@ -39,8 +45,8 @@ public class OtpServiceTests
     [TearDown]
     public void TearDown()
     {
-        _context.Database.EnsureDeleted();
         _context.Dispose();
+        _connection.Close();
     }
 
     [Test]

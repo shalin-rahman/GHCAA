@@ -66,5 +66,12 @@ namespace GHCAA.API.Controllers
             await _commService.SendCustomEmailAsync(dto.Emails, dto.Subject, dto.Body, cancellationToken);
             return Ok(new { Message = "Custom emails queued for delivery" });
         }
+
+        [HttpPost("send-custom-to-member/{memberId}")]
+        public async Task<IActionResult> SendCustomToMember(int memberId, [FromBody] CustomEmailDto dto, CancellationToken cancellationToken)
+        {
+            await _commService.SendMemberCustomEmailAsync(memberId, dto.Subject, dto.Body, cancellationToken);
+            return Ok(new { Message = "Email sent to member" });
+        }
     }
 }

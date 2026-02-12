@@ -15,28 +15,39 @@ namespace GHCAA.Tests.Services;
 public class MemberServiceTests
 {
     private ApplicationDbContext _context = null!;
+    private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
     private Mock<IFileStorageService> _mockStorage = null!;
     private Mock<IFileUploadRepository> _mockFileRepo = null!;
     private Mock<IOtpService> _mockOtp = null!;
     private Mock<IEmailService> _mockEmail = null!;
     private Mock<IUserService> _mockUserService = null!;
     private Mock<ILogger<MemberService>> _mockLogger = null!;
+    private Mock<IActivityService> _mockActivityService = null!;
     private MemberService _service = null!;
+
+    private Mock<ICommunicationService> _mockCommunication = null!;
 
     [SetUp]
     public void Setup()
     {
+        _connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseSqlite(_connection)
             .Options;
 
         _context = new ApplicationDbContext(options);
+        _context.Database.EnsureCreated();
+
         _mockStorage = new Mock<IFileStorageService>();
         _mockFileRepo = new Mock<IFileUploadRepository>();
         _mockOtp = new Mock<IOtpService>();
         _mockEmail = new Mock<IEmailService>();
         _mockUserService = new Mock<IUserService>();
         _mockLogger = new Mock<ILogger<MemberService>>();
+        _mockActivityService = new Mock<IActivityService>();
+        _mockCommunication = new Mock<ICommunicationService>();
 
         _service = new MemberService(
             _context,
@@ -45,15 +56,17 @@ public class MemberServiceTests
             _mockOtp.Object,
             _mockEmail.Object,
             _mockUserService.Object,
-            _mockLogger.Object
+            _mockCommunication.Object,
+            _mockLogger.Object,
+            _mockActivityService.Object
         );
     }
 
     [TearDown]
     public void TearDown()
     {
-        _context.Database.EnsureDeleted();
         _context.Dispose();
+        _connection.Close();
     }
 
     private MemberRegistrationDto CreateValidDto()
@@ -511,6 +524,9 @@ public class MemberServiceTests
             PermanentAddress = "Perm Address",
             ProfessionalSector = "New IT",
             Designation = "Senior Dev",
+            SubjectGroup = "Science",
+            LastDegreeFromGHC = "Bachelor",
+            GHCLastCertificatePassingYear = 2007,
             IsMobilePublic = true,
             IsEmailPublic = true,
             IsAddressPublic = true

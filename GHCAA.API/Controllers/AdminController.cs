@@ -17,6 +17,13 @@ namespace GHCAA.API.Controllers
             _memberService = memberService;
         }
 
+        [HttpGet("stats")]
+        public async Task<IActionResult> GetStats(CancellationToken cancellationToken)
+        {
+            var stats = await _memberService.GetDashboardStatsAsync(cancellationToken);
+            return Ok(stats);
+        }
+
         [HttpGet("members")]
         public async Task<IActionResult> GetAllMembers([FromQuery] bool includeArchived = false, CancellationToken cancellationToken = default)
         {
@@ -36,6 +43,14 @@ namespace GHCAA.API.Controllers
             var profile = await _memberService.GetProfileAsync(id, cancellationToken);
             if (profile == null) return NotFound();
             return Ok(profile);
+        }
+
+        [HttpGet("members/{id}/documents")]
+        public async Task<IActionResult> GetDocuments(int id, CancellationToken cancellationToken)
+        {
+            var docs = await _memberService.GetMemberDocumentsAsync(id, cancellationToken);
+            if (docs == null) return NotFound();
+            return Ok(docs);
         }
 
         [HttpPost("members/{id}/approve")]
@@ -77,6 +92,14 @@ namespace GHCAA.API.Controllers
             var success = await _memberService.RestoreMemberAsync(id, cancellationToken);
             if (!success) return NotFound();
             return Ok(new { Message = "Member restored successfully" });
+        }
+
+        [HttpPost("members/{id}/reactivate")]
+        public async Task<IActionResult> ReactivateMember(int id, CancellationToken cancellationToken)
+        {
+            var success = await _memberService.ReactivateMemberAsync(id, cancellationToken);
+            if (!success) return NotFound();
+            return Ok(new { Message = "Member reactivated to Active status successfully" });
         }
 
         [HttpPut("members/{id}")]

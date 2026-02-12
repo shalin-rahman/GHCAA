@@ -15,5 +15,10 @@ namespace GHCAA.Application.Interfaces
         // Membership History
         Task<IEnumerable<MembershipHistory>> GetMemberMembershipHistoryAsync(int memberId, CancellationToken cancellationToken = default);
         Task RecordMembershipChangeAsync(int memberId, string from, string to, int? adminId = null, string? reason = null, CancellationToken cancellationToken = default);
+
+        // Annual Dues
+        Task<IEnumerable<MembershipDue>> GetMemberDuesAsync(int memberId, CancellationToken cancellationToken = default);
+        Task GenerateAnnualDuesAsync(int year, CancellationToken cancellationToken = default);
+        Task<bool> MarkDueAsPaidAsync(int dueId, int paymentHistoryId, CancellationToken cancellationToken = default);
     }
 }

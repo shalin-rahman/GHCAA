@@ -15,24 +15,30 @@ namespace GHCAA.Tests.Services;
 public class NetworkingServiceTests
 {
     private ApplicationDbContext _context = null!;
+    private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
     private NetworkingService _service = null!;
 
     [SetUp]
     public void Setup()
     {
+        _connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseSqlite(_connection)
             .Options;
 
         _context = new ApplicationDbContext(options);
+        _context.Database.EnsureCreated();
+
         _service = new NetworkingService(_context);
     }
 
     [TearDown]
     public void TearDown()
     {
-        _context.Database.EnsureDeleted();
         _context.Dispose();
+        _connection.Close();
     }
 
     [Test]
@@ -85,6 +91,30 @@ public class NetworkingServiceTests
         // Assert
         results.Should().HaveCount(1);
         results.First().FullName.Should().Be("President");
+    }
+
+    [Test]
+    public async Task SearchMembersAsync_ShouldHideInactiveAndArchivedMembers()
+    {
+        // Arrange
+        var inactive = CreateValidMember("Inactive Member", "i@e.com", "01744444444", "5555555555");
+        inactive.Status = Enums.MembershipStatus.InactivePayment;
+
+        var archived = CreateValidMember("Archived Member", "a@e.com", "01755555555", "6666666666");
+        archived.IsArchived = true;
+
+        var active = CreateValidMember("Active Member", "active@e.com", "01766666666", "7777777777");
+        active.Status = Enums.MembershipStatus.Active;
+
+        _context.Members.AddRange(inactive, archived, active);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var results = await _service.SearchMembersAsync(new MemberSearchFilterDto());
+
+        // Assert
+        results.Should().HaveCount(1);
+        results.First().FullName.Should().Be("Active Member");
     }
 
     private Member CreateValidMember(string name, string email, string phone, string nid)

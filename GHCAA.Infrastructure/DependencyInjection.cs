@@ -33,7 +33,12 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IFinancialService, FinancialService>();
             services.AddScoped<IFinancialLedgerService, FinancialLedgerService>();
             services.AddScoped<INewsService, NewsService>();
-
+            services.AddScoped<IJobHubService, JobHubService>();
+            services.AddScoped<IIDCardService, IDCardService>();
+            services.AddScoped<IActivityService, ActivityService>();
+            services.AddScoped<IGalleryService, GalleryService>();
+            services.AddScoped<IChatService, ChatService>();
+            
             return services;
         }
     }

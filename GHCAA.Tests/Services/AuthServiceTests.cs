@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
@@ -17,28 +18,36 @@ namespace GHCAA.Tests.Services
     public class AuthServiceTests
     {
         private ApplicationDbContext _context = null!;
+        private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
         private Mock<ITokenService> _mockTokenService = null!;
         private Mock<ILogger<AuthService>> _mockLogger = null!;
+        private Mock<IActivityService> _mockActivityService = null!;
         private AuthService _service = null!;
 
         [SetUp]
         public void Setup()
         {
+            _connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseSqlite(_connection)
                 .Options;
 
             _context = new ApplicationDbContext(options);
+            _context.Database.EnsureCreated();
+
             _mockTokenService = new Mock<ITokenService>();
             _mockLogger = new Mock<ILogger<AuthService>>();
-            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object);
+            _mockActivityService = new Mock<IActivityService>();
+            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object);
         }
 
         [TearDown]
         public void TearDown()
         {
-            _context.Database.EnsureDeleted();
             _context.Dispose();
+            _connection.Close();
         }
 
         [Test]
@@ -49,6 +58,8 @@ namespace GHCAA.Tests.Services
             var password = "TestPassword123";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
             var memberId = 1;
+            var member = new Member { Id = memberId, FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test1@e.com", NID = "123", FatherName="F", MotherName="M", MobileNo="01", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="P", Designation="D" };
+            await _context.Members.AddAsync(member);
 
             var user = new User
             {
@@ -99,11 +110,15 @@ namespace GHCAA.Tests.Services
             var password = "CorrectPassword";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
+            var memberId = 1;
+            var member = new Member { Id = memberId, FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test2@e.com", NID = "124", FatherName="F", MotherName="M", MobileNo="01", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="P", Designation="D" };
+            await _context.Members.AddAsync(member);
+
             await _context.Users.AddAsync(new User
             {
                 Username = username,
                 PasswordHash = passwordHash,
-                MemberId = 1,
+                MemberId = memberId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             });
@@ -126,11 +141,15 @@ namespace GHCAA.Tests.Services
             var password = "password";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
+            var memberId = 1;
+            var member = new Member { Id = memberId, FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test3@e.com", NID = "125", FatherName="F", MotherName="M", MobileNo="01", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="P", Designation="D" };
+            await _context.Members.AddAsync(member);
+
             await _context.Users.AddAsync(new User
             {
                 Username = username,
                 PasswordHash = passwordHash,
-                MemberId = 1,
+                MemberId = memberId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = false
             });

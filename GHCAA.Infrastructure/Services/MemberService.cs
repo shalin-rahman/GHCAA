@@ -19,7 +19,9 @@ namespace GHCAA.Infrastructure.Services
         private readonly IOtpService _otp;
         private readonly IEmailService _email;
         private readonly IUserService _userService;
+        private readonly ICommunicationService _communicationService;
         private readonly ILogger<MemberService> _logger;
+        private readonly IActivityService _activityService;
 
         public MemberService(
             ApplicationDbContext db,
@@ -28,7 +30,9 @@ namespace GHCAA.Infrastructure.Services
             IOtpService otp,
             IEmailService email,
             IUserService userService,
-            ILogger<MemberService> logger)
+            ICommunicationService communicationService,
+            ILogger<MemberService> logger,
+            IActivityService activityService)
         {
             _db = db;
             _storage = storage;
@@ -36,7 +40,9 @@ namespace GHCAA.Infrastructure.Services
             _otp = otp;
             _email = email;
             _userService = userService;
+            _communicationService = communicationService;
             _logger = logger;
+            _activityService = activityService;
         }
 
         public async Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default)
@@ -184,12 +190,27 @@ namespace GHCAA.Infrastructure.Services
 
             await _db.SaveChangesAsync(cancellationToken);
 
+            await _activityService.LogActivityAsync(memberId, "Approved", $"Member approved by Admin {approvedByAdminId}. Membership Number: {membershipNumber}", approvedByAdminId, cancellationToken: cancellationToken);
+
             _logger.LogInformation("Member {MemberId} approved by Admin {AdminId}. Membership Number: {MembershipNumber}", 
                 memberId, approvedByAdminId, membershipNumber);
 
             // Create user account
             var defaultPassword = _userService.GenerateDefaultPassword();
             await _userService.CreateUserAccountAsync(memberId, membershipNumber, defaultPassword, cancellationToken);
+
+            // Send Welcome Email
+            try
+            {
+                var customVars = new Dictionary<string, string> { { "DefaultPassword", defaultPassword } };
+                await _activityService.LogActivityAsync(memberId, "EmailSent", "Welcome email with credentials sent to member.", approvedByAdminId, cancellationToken: cancellationToken);
+                await _communicationService.SendIndividualEmailAsync(memberId, "WELCOME_EMAIL", customVars, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send welcome email to member {MemberId}", memberId);
+                // We don't throw here as the approval and account creation were successful
+            }
 
             return new ApproveMemberResultDto
             {
@@ -244,7 +265,7 @@ namespace GHCAA.Infrastructure.Services
 
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Profile updated for member {MemberId}", memberId);
-            _logger.LogInformation("Profile updated for member {MemberId}", memberId);
+            await _activityService.LogActivityAsync(memberId, "ProfileUpdate", "Member updated their profile information.", memberId, cancellationToken: cancellationToken);
             return true;
         }
 
@@ -263,6 +284,7 @@ namespace GHCAA.Infrastructure.Services
             }
 
             await _db.SaveChangesAsync(cancellationToken);
+            await _activityService.LogActivityAsync(memberId, "Archived", "Member archived (soft deleted).", cancellationToken: cancellationToken);
             _logger.LogInformation("Member {MemberId} archived (soft delete)", memberId);
             return true;
         }
@@ -282,8 +304,60 @@ namespace GHCAA.Infrastructure.Services
             }
 
             await _db.SaveChangesAsync(cancellationToken);
+            await _activityService.LogActivityAsync(memberId, "Restored", "Member record restored from archives.", cancellationToken: cancellationToken);
             _logger.LogInformation("Member {MemberId} restored", memberId);
             return true;
+        }
+
+        public async Task<bool> ReactivateMemberAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
+            if (member == null) return false;
+
+            member.Status = Enums.MembershipStatus.Active;
+            await _db.SaveChangesAsync(cancellationToken);
+            await _activityService.LogActivityAsync(memberId, "Reactivated", "Member reactivated to Active status.", cancellationToken: cancellationToken);
+            _logger.LogInformation("Member {MemberId} reactivated to Active status", memberId);
+            return true;
+        }
+
+        public async Task<object?> GetMemberDocumentsAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
+            if (member == null) return null;
+
+            return new
+            {
+                Photo = member.PhotoPath,
+                Certificate = member.CertificatePath,
+                PaymentProof = member.PaymentProofPath
+            };
+        }
+
+        public async Task<object> GetDashboardStatsAsync(CancellationToken cancellationToken = default)
+        {
+            var totalMembers = await _db.Members.CountAsync(m => !m.IsArchived, cancellationToken);
+            var applied = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Applied && !m.IsArchived, cancellationToken);
+            var active = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived, cancellationToken);
+            var inactive = await _db.Members.CountAsync(m => (m.Status == Enums.MembershipStatus.InactivePayment || m.Status == Enums.MembershipStatus.InactiveResigned) && !m.IsArchived, cancellationToken);
+            
+            var totalCollection = await _db.FinancialRecords
+                .Where(r => r.RecordType == Enums.FinancialRecordType.Income)
+                .SumAsync(r => r.Amount, cancellationToken);
+            
+            var totalExpense = await _db.FinancialRecords
+                .Where(r => r.RecordType == Enums.FinancialRecordType.Expense)
+                .SumAsync(r => r.Amount, cancellationToken);
+
+            return new
+            {
+                TotalMembers = totalMembers,
+                Applied = applied,
+                Active = active,
+                Inactive = inactive,
+                Balance = totalCollection - totalExpense,
+                LastUpdated = DateTime.UtcNow
+            };
         }
 
         public async Task<IEnumerable<MemberProfileDto>> GetAllMembersAsync(bool includeArchived = false, CancellationToken cancellationToken = default)

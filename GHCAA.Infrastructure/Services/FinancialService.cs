@@ -14,10 +14,12 @@ namespace GHCAA.Infrastructure.Services
     public class FinancialService : IFinancialService
     {
         private readonly ApplicationDbContext _db;
+        private readonly ICommunicationService _communication;
 
-        public FinancialService(ApplicationDbContext db)
+        public FinancialService(ApplicationDbContext db, ICommunicationService communication)
         {
             _db = db;
+            _communication = communication;
         }
 
         public async Task<IEnumerable<PaymentHistory>> GetMemberPaymentHistoryAsync(int memberId, CancellationToken cancellationToken = default)
@@ -33,6 +35,14 @@ namespace GHCAA.Infrastructure.Services
             payment.PaidAt = DateTime.UtcNow;
             await _db.PaymentHistories.AddAsync(payment, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Send Notification
+            await _communication.SendIndividualEmailAsync(payment.MemberId, "PAYMENT_RECEIVED", new Dictionary<string, string>
+            {
+                { "Amount", payment.Amount.ToString("N2") },
+                { "TrxID", payment.TransactionId }
+            }, cancellationToken);
+
             return payment;
         }
 
@@ -45,6 +55,14 @@ namespace GHCAA.Infrastructure.Services
             if (notes != null) payment.Notes = notes;
 
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Send Notification
+            await _communication.SendIndividualEmailAsync(payment.MemberId, "PAYMENT_STATUS_UPDATED", new Dictionary<string, string>
+            {
+                { "Status", status.ToString() },
+                { "TrxID", payment.TransactionId }
+            }, cancellationToken);
+
             return true;
         }
 
@@ -70,6 +88,63 @@ namespace GHCAA.Infrastructure.Services
 
             await _db.MembershipHistories.AddAsync(history, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<IEnumerable<MembershipDue>> GetMemberDuesAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            return await _db.MembershipDues
+                .Where(d => d.MemberId == memberId)
+                .OrderByDescending(d => d.Year)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task GenerateAnnualDuesAsync(int year, CancellationToken cancellationToken = default)
+        {
+            // Only generate for Active members
+            var activeMembers = await _db.Members
+                .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
+                .ToListAsync(cancellationToken);
+
+            foreach (var member in activeMembers)
+            {
+                // Check if due already exists for this year
+                var exists = await _db.MembershipDues.AnyAsync(d => d.MemberId == member.Id && d.Year == year, cancellationToken);
+                if (exists) continue;
+
+                var amount = member.MembershipType switch
+                {
+                    Enums.MembershipType.Founding => 5000,
+                    Enums.MembershipType.Life => 0, // Life members might not have annual dues
+                    Enums.MembershipType.Executive => 2000,
+                    _ => 1000 // General members
+                };
+
+                if (amount == 0) continue;
+
+                _db.MembershipDues.Add(new MembershipDue
+                {
+                    MemberId = member.Id,
+                    Year = year,
+                    Amount = amount,
+                    DueDate = new DateTime(year, 3, 31), // Default due date Mar 31
+                    IsPaid = false
+                });
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<bool> MarkDueAsPaidAsync(int dueId, int paymentHistoryId, CancellationToken cancellationToken = default)
+        {
+            var due = await _db.MembershipDues.FindAsync(new object[] { dueId }, cancellationToken);
+            if (due == null) return false;
+
+            due.IsPaid = true;
+            due.PaymentDate = DateTime.UtcNow;
+            due.PaymentHistoryId = paymentHistoryId;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
         }
     }
 }

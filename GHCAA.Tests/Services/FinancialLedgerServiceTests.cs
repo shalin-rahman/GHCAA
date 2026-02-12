@@ -15,24 +15,30 @@ namespace GHCAA.Tests.Services;
 public class FinancialLedgerServiceTests
 {
     private ApplicationDbContext _context = null!;
+    private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
     private FinancialLedgerService _service = null!;
 
     [SetUp]
     public void Setup()
     {
+        _connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseSqlite(_connection)
             .Options;
 
         _context = new ApplicationDbContext(options);
+        _context.Database.EnsureCreated();
+
         _service = new FinancialLedgerService(_context);
     }
 
     [TearDown]
     public void TearDown()
     {
-        _context.Database.EnsureDeleted();
         _context.Dispose();
+        _connection.Close();
     }
 
     [Test]
