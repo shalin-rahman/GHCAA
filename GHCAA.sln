@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHCAA.Application", "GHCAA.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHCAA.Infrastructure", "GHCAA.Infrastructure\GHCAA.Infrastructure.csproj", "{3C1001AD-B2ED-4085-8FC6-F24A94C97AD6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHCAA.Tests", "GHCAA.Tests\GHCAA.Tests.csproj", "{8D36AD04-8999-4996-89BC-943CC50D20D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,18 @@ Global
 		{3C1001AD-B2ED-4085-8FC6-F24A94C97AD6}.Release|x64.Build.0 = Release|Any CPU
 		{3C1001AD-B2ED-4085-8FC6-F24A94C97AD6}.Release|x86.ActiveCfg = Release|Any CPU
 		{3C1001AD-B2ED-4085-8FC6-F24A94C97AD6}.Release|x86.Build.0 = Release|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Debug|x64.Build.0 = Debug|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Debug|x86.Build.0 = Debug|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Release|x64.ActiveCfg = Release|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Release|x64.Build.0 = Release|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Release|x86.ActiveCfg = Release|Any CPU
+		{8D36AD04-8999-4996-89BC-943CC50D20D6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

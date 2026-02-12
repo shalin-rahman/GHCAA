@@ -18,6 +18,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly IFileUploadRepository _fileRepo;
         private readonly IOtpService _otp;
         private readonly IEmailService _email;
+        private readonly IUserService _userService;
         private readonly ILogger<MemberService> _logger;
 
         public MemberService(
@@ -26,6 +27,7 @@ namespace GHCAA.Infrastructure.Services
             IFileUploadRepository fileRepo,
             IOtpService otp,
             IEmailService email,
+            IUserService userService,
             ILogger<MemberService> logger)
         {
             _db = db;
@@ -33,6 +35,7 @@ namespace GHCAA.Infrastructure.Services
             _fileRepo = fileRepo;
             _otp = otp;
             _email = email;
+            _userService = userService;
             _logger = logger;
         }
 
@@ -119,6 +122,79 @@ namespace GHCAA.Infrastructure.Services
                 MemberId = m.Id,
                 Message = $"Status: {m.Status}",
                 EmailSent = !string.IsNullOrEmpty(m.Email)
+            };
+        }
+
+        public async Task<bool> VerifyEmailAsync(string email, string otpCode, CancellationToken cancellationToken = default)
+        {
+            // Verify OTP
+            var isValid = await _otp.VerifyOtpAsync(email, otpCode, cancellationToken);
+            if (!isValid)
+            {
+                _logger.LogWarning("Invalid OTP attempt for email {Email}", email);
+                return false;
+            }
+
+            // Update member's email verification status
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Email == email, cancellationToken);
+            if (member == null)
+            {
+                _logger.LogWarning("Member not found for email {Email}", email);
+                return false;
+            }
+
+            member.EmailVerified = true;
+            await _db.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Email verified for MemberId {MemberId}", member.Id);
+            return true;
+        }
+
+        public async Task<ApproveMemberResultDto> ApproveMemberAsync(int memberId, int approvedByAdminId, CancellationToken cancellationToken = default)
+        {
+            // Find member
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null)
+            {
+                _logger.LogWarning("Approval failed: Member {MemberId} not found", memberId);
+                throw new KeyNotFoundException($"Member with ID {memberId} not found");
+            }
+
+            // Validate status
+            if (member.Status != Enums.MembershipStatus.Applied)
+            {
+                _logger.LogWarning("Approval failed: Member {MemberId} has status {Status}, expected Applied", memberId, member.Status);
+                throw new InvalidOperationException($"Member must have 'Applied' status to be approved. Current status: {member.Status}");
+            }
+
+            // Generate membership number: GHC-{PassingYear}-{Serial}
+            var passingYear = member.GHCLastCertificatePassingYear;
+            var existingMembersCount = await _db.Members
+                .Where(m => m.GHCLastCertificatePassingYear == passingYear && m.MembershipNumber != null)
+                .CountAsync(cancellationToken);
+            
+            var serial = (existingMembersCount + 1).ToString("D4"); // 4-digit zero-padded
+            var membershipNumber = $"GHC-{passingYear}-{serial}";
+
+            // Update member
+            member.Status = Enums.MembershipStatus.Active;
+            member.MembershipNumber = membershipNumber;
+            member.ApprovedDate = DateTime.UtcNow;
+            member.ApprovedBy = approvedByAdminId;
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Member {MemberId} approved by Admin {AdminId}. Membership Number: {MembershipNumber}", 
+                memberId, approvedByAdminId, membershipNumber);
+
+            // Create user account
+            var defaultPassword = _userService.GenerateDefaultPassword();
+            await _userService.CreateUserAccountAsync(memberId, membershipNumber, defaultPassword, cancellationToken);
+
+            return new ApproveMemberResultDto
+            {
+                MembershipNumber = membershipNumber,
+                DefaultPassword = defaultPassword
             };
         }
     }
