@@ -1,5 +1,4 @@
-using System.Threading;
-using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -36,15 +35,15 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("record-payment")]
-        public async Task<IActionResult> RecordPayment([FromBody] PaymentHistory payment, CancellationToken cancellationToken)
+        public async Task<IActionResult> RecordPayment([FromBody] CreatePaymentHistoryDto dto, CancellationToken cancellationToken)
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
             if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var memberId))
             {
-                payment.MemberId = memberId;
+                dto.MemberId = memberId;
             }
 
-            var result = await _financialService.RecordPaymentAsync(payment, cancellationToken);
+            var result = await _financialService.RecordPaymentAsync(dto, cancellationToken);
             return Ok(result);
         }
 
@@ -75,12 +74,48 @@ namespace GHCAA.API.Controllers
             return Ok(dues);
         }
 
-        [HttpPost("generate-dues")]
+        [HttpPost("dues/generate")]
         [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GenerateDues([FromQuery] int year, CancellationToken cancellationToken)
+        public async Task<IActionResult> GenerateAnnualDues([FromQuery] int year, CancellationToken cancellationToken)
         {
             await _financialService.GenerateAnnualDuesAsync(year, cancellationToken);
-            return Ok(new { Message = $"Dues generation for year {year} initiated/completed." });
+            return Ok(new { Message = $"Annual dues for {year} generated successfully." });
+        }
+
+        [HttpGet("fees/config")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetFeeConfigs(CancellationToken cancellationToken)
+        {
+            var configs = await _financialService.GetMembershipFeeConfigsAsync(cancellationToken);
+            return Ok(configs);
+        }
+
+        [HttpPost("fees/config")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> AddFeeConfig([FromBody] CreateMembershipFeeConfigDto dto, CancellationToken cancellationToken)
+        {
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var adminId))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _financialService.AddMembershipFeeConfigAsync(dto, adminId, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpPut("fees/config")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UpdateFeeConfig([FromBody] UpdateMembershipFeeConfigDto dto, CancellationToken cancellationToken)
+        {
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var adminId))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _financialService.UpdateMembershipFeeConfigAsync(dto, adminId, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("membership-history/{memberId}")]

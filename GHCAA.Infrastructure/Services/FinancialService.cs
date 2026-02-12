@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
@@ -22,28 +23,52 @@ namespace GHCAA.Infrastructure.Services
             _communication = communication;
         }
 
-        public async Task<IEnumerable<PaymentHistory>> GetMemberPaymentHistoryAsync(int memberId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<PaymentHistoryDto>> GetMemberPaymentHistoryAsync(int memberId, CancellationToken cancellationToken = default)
         {
-            return await _db.PaymentHistories
+            var history = await _db.PaymentHistories
                 .Where(p => p.MemberId == memberId)
                 .OrderByDescending(p => p.PaidAt)
                 .ToListAsync(cancellationToken);
+            
+            return history.Select(MapToPaymentDto);
         }
 
-        public async Task<PaymentHistory> RecordPaymentAsync(PaymentHistory payment, CancellationToken cancellationToken = default)
+        public async Task<PaymentHistoryDto> RecordPaymentAsync(CreatePaymentHistoryDto dto, CancellationToken cancellationToken = default)
         {
-            payment.PaidAt = DateTime.UtcNow;
+            if (!dto.MemberId.HasValue) 
+                throw new ArgumentException("MemberId is required for recording payment.");
+
+            var payment = new PaymentHistory
+            {
+                MemberId = dto.MemberId.Value,
+                TransactionId = dto.TransactionId,
+                Amount = dto.Amount,
+                PaidAt = dto.PaidAt,
+                Status = Enums.PaymentStatus.Pending,
+                Notes = dto.Notes
+            };
+
             await _db.PaymentHistories.AddAsync(payment, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
 
             // Send Notification
-            await _communication.SendIndividualEmailAsync(payment.MemberId, "PAYMENT_RECEIVED", new Dictionary<string, string>
+            // We use simple fire-and-forget or await? The interface awaits.
+            // Using try-catch for notification to not block payment recording if email fails?
+            // Existing code awaited it. keeping it consistent.
+            try 
             {
-                { "Amount", payment.Amount.ToString("N2") },
-                { "TrxID", payment.TransactionId }
-            }, cancellationToken);
+                await _communication.SendIndividualEmailAsync(payment.MemberId, "PAYMENT_RECEIVED", new Dictionary<string, string>
+                {
+                    { "Amount", payment.Amount.ToString("N2") },
+                    { "TrxID", payment.TransactionId }
+                }, cancellationToken);
+            }
+            catch 
+            {
+                // Log warning? For now just continue as payment is recorded.
+            }
 
-            return payment;
+            return MapToPaymentDto(payment);
         }
 
         public async Task<bool> UpdatePaymentStatusAsync(int paymentId, Enums.PaymentStatus status, string? notes = null, CancellationToken cancellationToken = default)
@@ -57,21 +82,39 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Send Notification
-            await _communication.SendIndividualEmailAsync(payment.MemberId, "PAYMENT_STATUS_UPDATED", new Dictionary<string, string>
+            try
             {
-                { "Status", status.ToString() },
-                { "TrxID", payment.TransactionId }
-            }, cancellationToken);
+                await _communication.SendIndividualEmailAsync(payment.MemberId, "PAYMENT_STATUS_UPDATED", new Dictionary<string, string>
+                {
+                    { "Status", status.ToString() },
+                    { "TrxID", payment.TransactionId }
+                }, cancellationToken);
+            }
+            catch
+            {
+                // Ignore email failure
+            }
 
             return true;
         }
 
-        public async Task<IEnumerable<MembershipHistory>> GetMemberMembershipHistoryAsync(int memberId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<MembershipHistoryDto>> GetMemberMembershipHistoryAsync(int memberId, CancellationToken cancellationToken = default)
         {
-            return await _db.MembershipHistories
+            var history = await _db.MembershipHistories
                 .Where(h => h.MemberId == memberId)
                 .OrderByDescending(h => h.ChangedAt)
                 .ToListAsync(cancellationToken);
+
+            return history.Select(h => new MembershipHistoryDto
+            {
+                Id = h.Id,
+                MemberId = h.MemberId,
+                OldType = h.ChangedFrom,
+                NewType = h.ChangedTo,
+                ChangeDate = h.ChangedAt,
+                Reason = h.Reason,
+                ChangedByAdminId = h.ChangedByAdminId
+            });
         }
 
         public async Task RecordMembershipChangeAsync(int memberId, string from, string to, int? adminId = null, string? reason = null, CancellationToken cancellationToken = default)
@@ -90,12 +133,115 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<MembershipDue>> GetMemberDuesAsync(int memberId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<MembershipDueDto>> GetMemberDuesAsync(int memberId, CancellationToken cancellationToken = default)
         {
-            return await _db.MembershipDues
+            var dues = await _db.MembershipDues
                 .Where(d => d.MemberId == memberId)
                 .OrderByDescending(d => d.Year)
                 .ToListAsync(cancellationToken);
+
+            return dues.Select(d => new MembershipDueDto
+            {
+                Id = d.Id,
+                MemberId = d.MemberId,
+                Year = d.Year,
+                Amount = d.Amount,
+                DueDate = d.DueDate,
+                IsPaid = d.IsPaid,
+                PaidAt = d.PaymentDate
+            });
+        }
+
+        public async Task<IEnumerable<MembershipFeeConfigDto>> GetMembershipFeeConfigsAsync(CancellationToken cancellationToken = default)
+        {
+            var configs = await _db.MembershipFeeConfigs
+                .OrderBy(c => c.MembershipType)
+                .ThenByDescending(c => c.EffectiveDate)
+                .ToListAsync(cancellationToken);
+
+            return configs.Select(c => new MembershipFeeConfigDto
+            {
+                Id = c.Id,
+                MembershipType = c.MembershipType.ToString(),
+                Amount = c.Amount,
+                EffectiveDate = c.EffectiveDate,
+                Description = c.Description
+            });
+        }
+
+        public async Task<MembershipFeeConfigDto> AddMembershipFeeConfigAsync(CreateMembershipFeeConfigDto dto, int adminMemberId, CancellationToken cancellationToken = default)
+        {
+            if (!Enum.TryParse<Enums.MembershipType>(dto.MembershipType, true, out var type))
+            {
+                throw new ArgumentException($"Invalid MembershipType: {dto.MembershipType}");
+            }
+
+            var config = new MembershipFeeConfig
+            {
+                MembershipType = type,
+                Amount = dto.Amount,
+                EffectiveDate = dto.EffectiveDate,
+                Description = dto.Description,
+                CreatedByAdminId = adminMemberId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _db.MembershipFeeConfigs.Add(config);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return new MembershipFeeConfigDto
+            {
+                Id = config.Id,
+                MembershipType = config.MembershipType.ToString(),
+                Amount = config.Amount,
+                EffectiveDate = config.EffectiveDate,
+                Description = config.Description
+            };
+        }
+
+        public async Task<MembershipFeeConfigDto> UpdateMembershipFeeConfigAsync(UpdateMembershipFeeConfigDto dto, int adminMemberId, CancellationToken cancellationToken = default)
+        {
+            var config = await _db.MembershipFeeConfigs.FindAsync(new object[] { dto.Id }, cancellationToken);
+            if (config == null) throw new KeyNotFoundException($"MembershipFeeConfig with ID {dto.Id} not found.");
+
+            config.Amount = dto.Amount;
+            config.EffectiveDate = dto.EffectiveDate;
+            config.Description = dto.Description;
+            // distinct from "CreatedBy", we might want "UpdatedBy" later, but for now simple update.
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return new MembershipFeeConfigDto
+            {
+                Id = config.Id,
+                MembershipType = config.MembershipType.ToString(),
+                Amount = config.Amount,
+                EffectiveDate = config.EffectiveDate,
+                Description = config.Description
+            };
+        }
+
+        public async Task<decimal> GetApplicableMembershipFeeAsync(Enums.MembershipType type, int year, CancellationToken cancellationToken = default)
+        {
+            // Logic: Find the latest config that is effective on or before the start of the target year (or end of it? usually start).
+            // Let's assume dues for 2024 are based on the fee set before or during 2024.
+            // A fee set on Jan 1 2024 is applicable for 2024.
+            // A fee set on Dec 31 2023 is applicable for 2024.
+            // A fee set on Feb 1 2024 might be applicable for 2025?
+            // "Applicable Date" usually means "Any dues generated for a period starting AFTER this date".
+            // Let's use: The most recent config where EffectiveDate <= Dec 31 of that year. 
+            // Actually simpler: typically fees don't change mid-year. 
+            // Let's Find the config with max EffectiveDate where EffectiveDate <= Now (or generation time).
+            // But we generate for a specific year.
+            
+            var targetDate = new DateTime(year, 12, 31); // End of the target year
+
+            var config = await _db.MembershipFeeConfigs
+                .Where(c => c.MembershipType == type && c.EffectiveDate <= targetDate)
+                .OrderByDescending(c => c.EffectiveDate)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return config?.Amount ?? 0;
         }
 
         public async Task GenerateAnnualDuesAsync(int year, CancellationToken cancellationToken = default)
@@ -105,30 +251,38 @@ namespace GHCAA.Infrastructure.Services
                 .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
                 .ToListAsync(cancellationToken);
 
+            // Pre-fetch fees to avoid N+1 queries
+            var membershipTypes = Enum.GetValues<Enums.MembershipType>();
+            var feeMap = new Dictionary<Enums.MembershipType, decimal>();
+            
+            foreach (var type in membershipTypes)
+            {
+                 feeMap[type] = await GetApplicableMembershipFeeAsync(type, year, cancellationToken);
+            }
+
             foreach (var member in activeMembers)
             {
                 // Check if due already exists for this year
                 var exists = await _db.MembershipDues.AnyAsync(d => d.MemberId == member.Id && d.Year == year, cancellationToken);
                 if (exists) continue;
 
-                var amount = member.MembershipType switch
+                if (!feeMap.TryGetValue(member.MembershipType, out var amount))
                 {
-                    Enums.MembershipType.Founding => 5000,
-                    Enums.MembershipType.Life => 0, // Life members might not have annual dues
-                    Enums.MembershipType.Executive => 2000,
-                    _ => 1000 // General members
-                };
+                    amount = 0;
+                }
 
                 if (amount == 0) continue;
 
-                _db.MembershipDues.Add(new MembershipDue
+                var due = new MembershipDue
                 {
                     MemberId = member.Id,
                     Year = year,
                     Amount = amount,
                     DueDate = new DateTime(year, 3, 31), // Default due date Mar 31
                     IsPaid = false
-                });
+                };
+                
+                _db.MembershipDues.Add(due);
             }
 
             await _db.SaveChangesAsync(cancellationToken);
@@ -145,6 +299,20 @@ namespace GHCAA.Infrastructure.Services
 
             await _db.SaveChangesAsync(cancellationToken);
             return true;
+        }
+
+        private static PaymentHistoryDto MapToPaymentDto(PaymentHistory p)
+        {
+            return new PaymentHistoryDto
+            {
+                Id = p.Id,
+                MemberId = p.MemberId,
+                TransactionId = p.TransactionId,
+                Amount = p.Amount,
+                PaidAt = p.PaidAt,
+                Status = p.Status,
+                Notes = p.Notes
+            };
         }
     }
 }

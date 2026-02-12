@@ -21,7 +21,7 @@ namespace GHCAA.Domain.Models
         public DateTime PublishDate { get; set; } = DateTime.UtcNow;
 
         public bool IsActive { get; set; } = true;
-
+        public string? ImageUrl { get; set; }
         public int AuthorId { get; set; }
         
         public DateTime? LastModified { get; set; }

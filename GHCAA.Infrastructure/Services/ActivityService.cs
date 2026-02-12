@@ -19,7 +19,7 @@ namespace GHCAA.Infrastructure.Services
             _db = db;
         }
 
-        public async Task LogActivityAsync(int memberId, string type, string description, int? actorId = null, string? ipAddress = null, CancellationToken cancellationToken = default)
+        public async Task LogActivityAsync(int? memberId, string type, string description, int? actorId = null, string? ipAddress = null, CancellationToken cancellationToken = default)
         {
             var log = new ActivityLog
             {

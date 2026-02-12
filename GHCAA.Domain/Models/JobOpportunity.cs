@@ -11,6 +11,7 @@ namespace GHCAA.Domain.Models
         public string Description { get; set; } = null!;
         public string Requirements { get; set; } = null!;
         public string ContactEmail { get; set; } = null!;
+        public string? ApplicationLink { get; set; }
         public int PostedByMemberId { get; set; }
         public DateTime PostedDate { get; set; } = DateTime.UtcNow;
         public DateTime? ExpiryDate { get; set; }

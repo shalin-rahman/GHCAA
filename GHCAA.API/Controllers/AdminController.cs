@@ -11,10 +11,12 @@ namespace GHCAA.API.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IMemberService _memberService;
+        private readonly IIDCardService _idCardService;
 
-        public AdminController(IMemberService memberService)
+        public AdminController(IMemberService memberService, IIDCardService idCardService)
         {
             _memberService = memberService;
+            _idCardService = idCardService;
         }
 
         [HttpGet("stats")]
@@ -109,6 +111,20 @@ namespace GHCAA.API.Controllers
             var success = await _memberService.UpdateProfileAsync(id, dto, cancellationToken);
             if (!success) return NotFound();
             return Ok(new { Message = "Member updated by admin successfully" });
+        }
+
+        [HttpGet("members/{id}/id-card")]
+        public async Task<IActionResult> GetMemberIDCard(int id, CancellationToken cancellationToken)
+        {
+            var dataUri = await _idCardService.GenerateIDCardDataUriAsync(id, cancellationToken);
+            return Ok(new { DataUri = dataUri });
+        }
+
+        [HttpGet("members/{id}/certificate")]
+        public async Task<IActionResult> GetMemberCertificate(int id, CancellationToken cancellationToken)
+        {
+            var dataUri = await _idCardService.GenerateCertificateDataUriAsync(id, cancellationToken);
+            return Ok(new { DataUri = dataUri });
         }
     }
 }

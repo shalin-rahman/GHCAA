@@ -15,10 +15,32 @@ namespace GHCAA.API.Controllers
     public class GalleryController : ControllerBase
     {
         private readonly IGalleryService _galleryService;
+        private readonly IFileStorageService _fileStorage;
 
-        public GalleryController(IGalleryService galleryService)
+        public GalleryController(IGalleryService galleryService, IFileStorageService fileStorage)
         {
             _galleryService = galleryService;
+            _fileStorage = fileStorage;
+        }
+
+        [HttpPost("upload-photo")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UploadPhoto(IFormFile file, CancellationToken cancellationToken)
+        {
+            if (file == null || file.Length == 0) return BadRequest("No file uploaded");
+            
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            if (!int.TryParse(memberIdClaim, out var memberId))
+            {
+                // Fallback to simpler user ID claim if needed, but Admin should have MemberId
+                return Unauthorized();
+            }
+
+            using var stream = file.OpenReadStream();
+            var path = await _fileStorage.SaveFileAsync(stream, file.FileName, memberId, Domain.Enums.FileUploadType.GalleryPhoto, cancellationToken);
+            
+            // Return single path string or object
+            return Ok(new { Path = path });
         }
 
         [HttpGet]

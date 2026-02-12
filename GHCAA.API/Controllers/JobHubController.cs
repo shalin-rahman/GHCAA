@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
-using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,7 +26,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostJob([FromBody] JobOpportunity job, CancellationToken cancellationToken)
+        public async Task<IActionResult> PostJob([FromBody] CreateJobDto job, CancellationToken cancellationToken)
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
@@ -38,8 +34,7 @@ namespace GHCAA.API.Controllers
                 return BadRequest("Invalid user session");
             }
 
-            job.PostedByMemberId = memberId;
-            var result = await _jobService.PostJobAsync(job, cancellationToken);
+            var result = await _jobService.PostJobAsync(job, memberId, cancellationToken);
             return Ok(result);
         }
 

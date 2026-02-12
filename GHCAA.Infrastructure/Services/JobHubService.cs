@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
@@ -20,47 +21,58 @@ namespace GHCAA.Infrastructure.Services
             _db = db;
         }
 
-        public async Task<IEnumerable<JobOpportunity>> GetActiveJobsAsync(Enums.JobCategory? category = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<JobDto>> GetActiveJobsAsync(Enums.JobCategory? category = null, CancellationToken cancellationToken = default)
         {
             var query = _db.JobOpportunities
+                .Include(j => j.PostedBy)
                 .Where(j => j.IsActive && (j.ExpiryDate == null || j.ExpiryDate > DateTime.UtcNow));
 
             if (category.HasValue)
                 query = query.Where(j => j.Category == category.Value);
 
-            return await query.OrderByDescending(j => j.PostedDate).ToListAsync(cancellationToken);
+            var jobs = await query
+                .OrderByDescending(j => j.PostedDate)
+                .ToListAsync(cancellationToken);
+
+            return jobs.Select(MapToDto);
         }
 
-        public async Task<JobOpportunity> PostJobAsync(JobOpportunity job, CancellationToken cancellationToken = default)
+        public async Task<JobDto> PostJobAsync(CreateJobDto dto, int memberId, CancellationToken cancellationToken = default)
         {
-            job.PostedDate = DateTime.UtcNow;
+            var job = new JobOpportunity
+            {
+                Title = dto.Title,
+                Company = dto.CompanyName,
+                Location = dto.Location,
+                Description = dto.Description,
+                Requirements = dto.Requirements,
+                ContactEmail = dto.ApplicationEmail ?? "",
+                ApplicationLink = dto.ApplicationLink,
+                Category = dto.Category,
+                PostedByMemberId = memberId,
+                PostedDate = DateTime.UtcNow,
+                ExpiryDate = dto.ApplicationDeadline,
+                IsActive = true
+            };
+
             await _db.JobOpportunities.AddAsync(job, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
-            return job;
+
+            // Reload to get member info if needed, or just map locally
+            // Ideally we want the member name, which we might not have yet unless we include it
+            var postedBy = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            job.PostedBy = postedBy;
+
+            return MapToDto(job);
         }
 
-        public async Task<JobOpportunity?> GetJobByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<JobDto?> GetJobByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            return await _db.JobOpportunities.Include(j => j.PostedBy).FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
-        }
-
-        public async Task<bool> UpdateJobAsync(JobOpportunity job, CancellationToken cancellationToken = default)
-        {
-            var existing = await _db.JobOpportunities.FindAsync(new object[] { job.Id }, cancellationToken);
-            if (existing == null) return false;
-
-            existing.Title = job.Title;
-            existing.Company = job.Company;
-            existing.Location = job.Location;
-            existing.Description = job.Description;
-            existing.Requirements = job.Requirements;
-            existing.ContactEmail = job.ContactEmail;
-            existing.ExpiryDate = job.ExpiryDate;
-            existing.IsActive = job.IsActive;
-            existing.Category = job.Category;
-
-            await _db.SaveChangesAsync(cancellationToken);
-            return true;
+            var job = await _db.JobOpportunities
+                .Include(j => j.PostedBy)
+                .FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
+            
+            return job == null ? null : MapToDto(job);
         }
 
         public async Task<bool> DeactivateJobAsync(int id, CancellationToken cancellationToken = default)
@@ -73,12 +85,36 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
-        public async Task<IEnumerable<JobOpportunity>> GetMemberJobsAsync(int memberId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<JobDto>> GetMemberJobsAsync(int memberId, CancellationToken cancellationToken = default)
         {
-            return await _db.JobOpportunities
+            var jobs = await _db.JobOpportunities
+                .Include(j => j.PostedBy)
                 .Where(j => j.PostedByMemberId == memberId)
                 .OrderByDescending(j => j.PostedDate)
                 .ToListAsync(cancellationToken);
+
+            return jobs.Select(MapToDto);
+        }
+
+        private static JobDto MapToDto(JobOpportunity job)
+        {
+            return new JobDto
+            {
+                Id = job.Id,
+                Title = job.Title,
+                CompanyName = job.Company,
+                Location = job.Location,
+                Description = job.Description,
+                Requirements = job.Requirements,
+                ApplicationEmail = job.ContactEmail,
+                ApplicationLink = job.ApplicationLink,
+                PostedDate = job.PostedDate,
+                ApplicationDeadline = job.ExpiryDate ?? DateTime.MaxValue,
+                Category = job.Category,
+                IsActive = job.IsActive,
+                PostedByMemberId = job.PostedByMemberId,
+                PostedByMemberName = job.PostedBy?.FullName
+            };
         }
     }
 }

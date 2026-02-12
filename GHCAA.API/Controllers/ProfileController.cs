@@ -13,11 +13,13 @@ namespace GHCAA.API.Controllers
     {
         private readonly IMemberService _memberService;
         private readonly IUserService _userService;
+        private readonly IIDCardService _idCardService;
 
-        public ProfileController(IMemberService memberService, IUserService userService)
+        public ProfileController(IMemberService memberService, IUserService userService, IIDCardService idCardService)
         {
             _memberService = memberService;
             _userService = userService;
+            _idCardService = idCardService;
         }
 
         [HttpGet]
@@ -60,6 +62,26 @@ namespace GHCAA.API.Controllers
             }
 
             return Ok(new { Message = "Password changed successfully" });
+        }
+
+        [HttpGet("id-card")]
+        public async Task<IActionResult> GetIDCard(CancellationToken cancellationToken)
+        {
+            var memberId = GetMemberId();
+            if (memberId == 0) return Unauthorized();
+
+            var dataUri = await _idCardService.GenerateIDCardDataUriAsync(memberId, cancellationToken);
+            return Ok(new { DataUri = dataUri });
+        }
+
+        [HttpGet("certificate")]
+        public async Task<IActionResult> GetCertificate(CancellationToken cancellationToken)
+        {
+            var memberId = GetMemberId();
+            if (memberId == 0) return Unauthorized();
+
+            var dataUri = await _idCardService.GenerateCertificateDataUriAsync(memberId, cancellationToken);
+            return Ok(new { DataUri = dataUri });
         }
 
         private int GetMemberId()

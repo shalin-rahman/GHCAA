@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -43,24 +44,24 @@ namespace GHCAA.API.Controllers
 
         [HttpPost]
         [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> CreateNews([FromBody] NewsPost post, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateNews([FromBody] CreateNewsDto dto, CancellationToken cancellationToken)
         {
             var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (int.TryParse(authorIdClaim, out var authorId))
+            if (!int.TryParse(authorIdClaim, out var authorId))
             {
-                post.AuthorId = authorId;
+                return Unauthorized();
             }
 
-            var result = await _newsService.CreateNewsAsync(post, cancellationToken);
+            var result = await _newsService.CreateNewsAsync(dto, authorId, cancellationToken);
             return CreatedAtAction(nameof(GetNewsById), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}")]
         [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> UpdateNews(int id, [FromBody] NewsPost post, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateNews(int id, [FromBody] UpdateNewsDto dto, CancellationToken cancellationToken)
         {
-            post.Id = id;
-            var result = await _newsService.UpdateNewsAsync(post, cancellationToken);
+            dto.Id = id;
+            var result = await _newsService.UpdateNewsAsync(dto, cancellationToken);
             return Ok(result);
         }
 
