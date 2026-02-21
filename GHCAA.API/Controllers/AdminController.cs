@@ -78,6 +78,21 @@ namespace GHCAA.API.Controllers
             }
         }
 
+        [HttpPost("members/{id}/reject")]
+        public async Task<IActionResult> RejectMember(int id, [FromBody] RejectMemberDto dto, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var success = await _memberService.RejectMemberAsync(id, dto.RejectedByAdminId, dto.Reason, cancellationToken);
+                if (!success) return NotFound();
+                return Ok(new { Message = "Application rejected and user notified." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
         [HttpDelete("members/{id}")]
         [Authorize(Policy = "SuperAdminOnly")]
         public async Task<IActionResult> ArchiveMember(int id, CancellationToken cancellationToken)

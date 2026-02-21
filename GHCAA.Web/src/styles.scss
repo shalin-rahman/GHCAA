@@ -1,1 +1,243 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global Design System - Enterprise Dark Mode Support */
+
+:root {
+  /* Premium Black & Gold Theme (Light) */
+  --bg-color: #FFFFFF;
+  --surface-color: #F8F9FA;
+  --primary-color: #1A1A1A;
+  /* Near Black */
+  --primary-light: #4A4A4A;
+  --accent-color: #D4AF37;
+  /* Classic Gold */
+  --danger-color: #C62828;
+  --text-main: #212121;
+  --text-muted: #666666;
+  --border-color: #E5E5E5;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+
+  /* Tier Colors (Refined) */
+  --tier-founding: #D4AF37;
+  --tier-executive: #2C3E50;
+  --tier-general: #34495E;
+  --tier-associate: #7F8C8D;
+  --tier-advisory: #8E44AD;
+}
+
+body.dark-theme {
+  /* OLED True Black Theme Overrides */
+  --bg-color: #000000;
+  --surface-color: #0A0A0A;
+  --primary-color: #D4AF37;
+  /* Gold as primary in dark */
+  --primary-light: #E5C158;
+  --accent-color: #FFFFFF;
+  --danger-color: #FF5252;
+  --text-main: #F5F5F5;
+  --text-muted: #999999;
+  --border-color: #1A1A1A;
+  --glass-bg: rgba(10, 10, 10, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --shadow-md: 0 8px 32px 0 rgba(0, 0, 0, 0.9);
+
+  /* Dark Mode Tier Overrides */
+  --tier-founding: #FFD700;
+  --tier-executive: #ECF0F1;
+  --tier-general: #BDC3C7;
+  --tier-associate: #95A5A6;
+  --tier-advisory: #AF7AC5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Outfit', sans-serif;
+  transition: background-color 0.3s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Classes */
+.glass-effect {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md);
+}
+
+/* Glassmorphism & Cards */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+}
+
+/* Responsive Shell Layout Framework */
+.app-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+
+  .sidebar {
+    width: 260px;
+    height: 100%;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+
+    &.collapsed {
+      width: 80px;
+    }
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+    background-color: var(--bg-color);
+  }
+
+  .top-bar {
+    height: 64px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    @extend .glass-effect;
+  }
+}
+
+/* Mobile Bottom Navigation */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  @extend .glass-effect;
+  z-index: 200;
+
+  @media (max-width: 768px) {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+}
+
+/* Accessibility & Mobile Targets */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Utilities */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.text-accent {
+  color: var(--accent-color);
+}
+
+.text-danger {
+  color: var(--danger-color);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* Buttons & Controls - Compact Edition */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  line-height: normal;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active {
+  transform: translateY(0);
+  scale: 0.98;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+.btn-accent {
+  background: var(--accent-color);
+  color: var(--primary-color);
+}
+
+.btn-secondary {
+  background: var(--surface-color);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
+}
+
+input,
+select,
+textarea {
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  color: var(--text-main);
+  outline: none;
+  transition: 0.2s;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}

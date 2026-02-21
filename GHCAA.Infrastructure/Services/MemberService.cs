@@ -219,6 +219,27 @@ namespace GHCAA.Infrastructure.Services
             };
         }
 
+        public async Task<bool> RejectMemberAsync(int id, int adminId, string reason, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FindAsync(new object[] { id }, cancellationToken);
+            if (member == null) return false;
+
+            if (member.Status != Enums.MembershipStatus.Applied)
+                throw new InvalidOperationException("Only pending registrations can be rejected.");
+
+            // Remove registry filing or archive it? 
+            // Better to remove it so they can re-register if it was a data error.
+            _db.Members.Remove(member);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Notify user via email
+            await _email.SendEmailAsync(member.Email, "GHCAA Application Update", 
+                $"Dear {member.FullName}, your registry application was not approved for the following reason: {reason}. You are welcome to submit a new application with updated data.");
+
+            _logger.LogWarning("Admin {AdminId} rejected application {MemberId} for: {Reason}", adminId, id, reason);
+            return true;
+        }
+
         public async Task<MemberProfileDto?> GetProfileAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
@@ -241,6 +262,18 @@ namespace GHCAA.Infrastructure.Services
                 PresentAddress = member.PresentAddress,
                 PermanentAddress = member.PermanentAddress,
                 BloodGroup = member.BloodGroup,
+                MembershipType = member.MembershipType,
+                FatherName = member.FatherName,
+                MotherName = member.MotherName,
+                DateOfBirth = member.DateOfBirth,
+                Gender = member.Gender,
+                NID = member.NID,
+                EmergencyContactName = member.EmergencyContactName,
+                EmergencyContactRelation = member.EmergencyContactRelation,
+                EmergencyContactPhone = member.EmergencyContactPhone,
+                HSCAdmissionYear = member.HSCAdmissionYear,
+                GHCAdmissionYear = member.GHCAdmissionYear,
+                CertificatePath = member.CertificatePath,
                 IsMobilePublic = member.IsMobilePublic,
                 IsEmailPublic = member.IsEmailPublic,
                 IsAddressPublic = member.IsAddressPublic
@@ -386,6 +419,18 @@ namespace GHCAA.Infrastructure.Services
                 PresentAddress = member.PresentAddress,
                 PermanentAddress = member.PermanentAddress,
                 BloodGroup = member.BloodGroup,
+                MembershipType = member.MembershipType,
+                FatherName = member.FatherName,
+                MotherName = member.MotherName,
+                DateOfBirth = member.DateOfBirth,
+                Gender = member.Gender,
+                NID = member.NID,
+                EmergencyContactName = member.EmergencyContactName,
+                EmergencyContactRelation = member.EmergencyContactRelation,
+                EmergencyContactPhone = member.EmergencyContactPhone,
+                HSCAdmissionYear = member.HSCAdmissionYear,
+                GHCAdmissionYear = member.GHCAdmissionYear,
+                CertificatePath = member.CertificatePath,
                 IsMobilePublic = member.IsMobilePublic,
                 IsEmailPublic = member.IsEmailPublic,
                 IsAddressPublic = member.IsAddressPublic

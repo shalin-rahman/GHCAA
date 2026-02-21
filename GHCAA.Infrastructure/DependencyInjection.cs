@@ -38,6 +38,7 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IGalleryService, GalleryService>();
             services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IContactService, ContactService>();
             
             return services;
         }

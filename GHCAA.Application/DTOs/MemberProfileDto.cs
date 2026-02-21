@@ -10,8 +10,22 @@ namespace GHCAA.Application.DTOs
         public string MobileNo { get; set; } = null!;
         public string? MembershipNumber { get; set; }
         public MembershipStatus Status { get; set; }
+        public MembershipType MembershipType { get; set; }
         
+        // Personal
+        public string FatherName { get; set; } = null!;
+        public string MotherName { get; set; } = null!;
+        public DateTime DateOfBirth { get; set; }
+        public Gender Gender { get; set; }
+        public BloodGroup BloodGroup { get; set; }
+        public string NID { get; set; } = null!;
+        public string EmergencyContactName { get; set; } = null!;
+        public string EmergencyContactRelation { get; set; } = null!;
+        public string EmergencyContactPhone { get; set; } = null!;
+
         // Academic
+        public int HSCAdmissionYear { get; set; }
+        public int GHCAdmissionYear { get; set; }
         public int GHCLastCertificatePassingYear { get; set; }
         public string LastCertificateFromGHC { get; set; } = null!;
         public string SubjectGroup { get; set; } = null!;
@@ -22,9 +36,9 @@ namespace GHCAA.Application.DTOs
         
         // Info
         public string? PhotoPath { get; set; }
+        public string? CertificatePath { get; set; }
         public string PresentAddress { get; set; } = null!;
         public string PermanentAddress { get; set; } = null!;
-        public BloodGroup BloodGroup { get; set; }
         
         // Privacy
         public bool IsMobilePublic { get; set; }

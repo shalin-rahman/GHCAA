@@ -68,7 +68,8 @@ namespace GHCAA.Infrastructure.Services
             {
                 Token = token,
                 Username = user.Username,
-                MemberId = user.MemberId
+                MemberId = user.MemberId,
+                Role = user.Roles?.FirstOrDefault()?.Name ?? "Member"
             };
         }
     }

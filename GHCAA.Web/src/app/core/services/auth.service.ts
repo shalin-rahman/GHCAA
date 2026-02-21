@@ -24,7 +24,8 @@ export class AuthService {
                 const user: User = {
                     username: response.username,
                     memberId: response.memberId,
-                    token: response.token
+                    token: response.token,
+                    role: response.role ?? 'Member'
                 };
                 this.setSession(user);
                 return user;

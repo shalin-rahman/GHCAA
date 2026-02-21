@@ -21,5 +21,6 @@ namespace GHCAA.Application.Interfaces
         Task<bool> RestoreMemberAsync(int memberId, CancellationToken cancellationToken = default);
         Task<bool> ReactivateMemberAsync(int memberId, CancellationToken cancellationToken = default);
         Task<IEnumerable<MemberProfileDto>> GetAllMembersAsync(bool includeArchived = false, CancellationToken cancellationToken = default);
+        Task<bool> RejectMemberAsync(int id, int adminId, string reason, CancellationToken cancellationToken = default);
     }
 }
