@@ -1,0 +1,234 @@
+.sidebar {
+    background: #000 !important;
+    border-right: 1px solid rgba(197, 160, 89, 0.1) !important;
+}
+
+.sidebar-brand {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(197, 160, 89, 0.1);
+}
+
+.brand-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    mix-blend-mode: screen;
+    background-color: transparent;
+    border: 1px solid var(--accent-color);
+}
+
+.brand-name {
+    font-weight: 900;
+    font-size: 1.25rem;
+    color: #fff;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    margin: 0.25rem 1rem;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.3s;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background: rgba(197, 160, 89, 0.1);
+    color: var(--accent-color);
+}
+
+.nav-item .icon {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 1rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.user-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: var(--bg-color);
+}
+
+.nav-spacer {
+    flex: 1;
+}
+
+.top-bar {
+    background: #000 !important;
+    border-bottom: 1px solid rgba(197, 160, 89, 0.1) !important;
+    height: 80px !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+}
+
+.left-section,
+.right-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.breadcrumbs {
+    .current-page {
+        color: var(--accent-color) !important;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+}
+
+.user-profile {
+    border-left-color: rgba(197, 160, 89, 0.1) !important;
+}
+
+.avatar {
+    background: var(--gold-gradient) !important;
+    color: #000 !important;
+    border-radius: 4px !important;
+}
+
+.username {
+    color: #fff !important;
+}
+
+.role {
+    color: var(--accent-color) !important;
+    font-weight: 800;
+}
+
+.main-content {
+    background-color: #000 !important;
+}
+
+.page-content {
+    padding: 0 !important;
+    /* Let pages handle their own padding/hero */
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+
+    .username {
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .role {
+        font-size: 0.7rem;
+        opacity: 0.7;
+    }
+}
+
+.b-nav-item.active {
+    color: var(--primary-color);
+    border-top: 3px solid var(--primary-color);
+}
+
+.page-content {
+    padding-top: 1.5rem;
+    padding-bottom: 5rem;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        width: 260px !important;
+        transform: translateX(0);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex !important;
+
+        &.collapsed {
+            transform: translateX(-100%);
+        }
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 900;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .app-shell {
+        flex-direction: column;
+    }
+
+    .main-content {
+        height: 100vh;
+        width: 100%;
+        padding-bottom: 80px;
+        /* Space for bottom nav */
+    }
+
+    .top-bar {
+        padding: 0 1rem;
+    }
+
+    .mobile-nav {
+        display: flex;
+        justify-content: space-around;
+        padding: 0 0.5rem;
+    }
+
+    .b-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        font-size: 1.25rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        height: 100%;
+    }
+
+    .b-nav-item.active {
+        color: var(--primary-color);
+        background: rgba(212, 175, 55, 0.05);
+        border-top: 3px solid var(--primary-color);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

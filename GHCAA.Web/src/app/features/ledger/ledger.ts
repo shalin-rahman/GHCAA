@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LedgerService, FinancialRecord, LedgerSummary } from '../../core/services/ledger.service';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-ledger',
@@ -153,6 +154,7 @@ import { LedgerService, FinancialRecord, LedgerSummary } from '../../core/servic
 })
 export class Ledger implements OnInit {
   private ledgerService = inject(LedgerService);
+  private notify = inject(NotificationService);
 
   transactions = signal<FinancialRecord[]>([]);
   summary = signal<LedgerSummary | null>(null);
@@ -208,14 +210,14 @@ export class Ledger implements OnInit {
 
     this.ledgerService.addRecord(this.newRecord).subscribe({
       next: () => {
-        alert('Transaction recorded successfully!');
+        this.notify.success('Financial transaction recorded successfully.');
         this.submitting.set(false);
         this.showForm.set(false);
         this.loadData();
       },
       error: () => {
         this.submitting.set(false);
-        alert('Error adding record. Check all fields.');
+        this.notify.error('Failed to save transaction. Please check your data.');
       }
     });
   }

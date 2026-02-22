@@ -1,1 +1,36 @@
-<p>login works!</p>
+<div class="login-page">
+    <div class="glass-card login-card">
+        <div class="login-header">
+            <img src="/assets/logo.jpg" alt="Logo" class="logo">
+            <h2>Member Portal</h2>
+            <p>Login to your account</p>
+        </div>
+
+        <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" [(ngModel)]="credentials.username" required
+                    placeholder="Enter your username" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" [(ngModel)]="credentials.password" required
+                    placeholder="••••••••" class="form-control">
+            </div>
+
+            <div class="error-msg" *ngIf="errorMessage">
+                {{ errorMessage }}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full" [disabled]="loginForm.invalid || loading">
+                {{ loading ? 'Authenticating...' : 'Login' }}
+            </button>
+
+            <div class="form-footer">
+                <a href="javascript:void(0)" (click)="forgotPassword()">Forgot Password?</a>
+                <span>Don't have an account? <a routerLink="/register">Apply for Membership</a></span>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,29 +1,30 @@
 /* Global Design System - Enterprise Dark Mode Support */
 
 :root {
-  /* Premium Black & Gold Theme (Light) */
-  --bg-color: #FFFFFF;
-  --surface-color: #F8F9FA;
-  --primary-color: #1A1A1A;
-  /* Near Black */
-  --primary-light: #4A4A4A;
-  --accent-color: #D4AF37;
-  /* Classic Gold */
-  --danger-color: #C62828;
-  --text-main: #212121;
-  --text-muted: #666666;
-  --border-color: #E5E5E5;
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+  /* Premium Fancy Aesthetic - Deep Charcoal & Gold Leaf */
+  --bg-color: #ffffff;
+  --surface-color: #fdfdfd;
+  --primary-color: #121212;
+  /* Deep Obsidian */
+  --primary-light: #2a2a2a;
+  --accent-color: #c5a059;
+  /* Champagne Gold */
+  --accent-gold-bright: #e5c15e;
+  /* Sunlit Gold */
+  --accent-gold-dark: #8e6d2a;
+  /* Bronze Gold */
+  --danger-color: #b33939;
+  --text-main: #1a1a1a;
+  --text-muted: #5e5e5e;
+  --border-color: #f0f0f0;
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(197, 160, 89, 0.15);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 12px 48px rgba(0, 0, 0, 0.08);
 
-  /* Tier Colors (Refined) */
-  --tier-founding: #D4AF37;
-  --tier-executive: #2C3E50;
-  --tier-general: #34495E;
-  --tier-associate: #7F8C8D;
-  --tier-advisory: #8E44AD;
+  /* Fancy Gradients */
+  --gold-gradient: linear-gradient(135deg, #c5a059 0%, #e5c15e 50%, #8e6d2a 100%);
+  --dark-gradient: linear-gradient(135deg, #121212 0%, #2a2a2a 100%);
 }
 
 body.dark-theme {
@@ -240,4 +241,45 @@ input:focus,
 select:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive Utilities */
+.hide-mobile {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.show-mobile {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  .app-shell .main-content {
+    padding-bottom: 90px;
+    /* Space for bottom nav */
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+    /* Prevent zoom on iOS */
+  }
 }

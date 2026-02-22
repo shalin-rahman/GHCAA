@@ -1,0 +1,184 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.filters {
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.8rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    background: var(--bg-color);
+    color: var(--text-main);
+}
+
+.filter-select {
+    width: 200px;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-color);
+    color: var(--text-main);
+}
+
+.form-container {
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    background: var(--surface-color);
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    color: var(--primary-color);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    background: var(--bg-color);
+    color: var(--text-main);
+}
+
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.job-card {
+    padding: 2rem;
+    transition: 0.3s;
+    margin-bottom: 1.5rem;
+}
+
+.job-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-color);
+}
+
+.job-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.company {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.tags {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.tag {
+    padding: 0.2rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    border: 1px solid transparent;
+}
+
+.tag-type {
+    background: rgba(0, 77, 64, 0.1);
+    color: var(--primary-color);
+}
+
+.tag-deadline {
+    background: rgba(178, 34, 34, 0.1);
+    color: var(--danger-color);
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .job-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .job-main button {
+        width: 100%;
+    }
+
+    .filters {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width {
+        grid-column: span 1;
+    }
+
+    .form-container {
+        padding: 1.5rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}

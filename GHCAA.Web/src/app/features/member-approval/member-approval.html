@@ -1,1 +1,162 @@
-<p>member-approval works!</p>
+<div class="admin-feature">
+    <div class="header">
+        <div class="title-group">
+            <h2>Registry Audit Desk</h2>
+            <p>Review and adjudicate incoming membership applications.</p>
+        </div>
+        <div class="stats">
+            <div class="stat-badge">Pending Verification: {{ requests().length }}</div>
+        </div>
+    </div>
+
+    <div class="glass-card table-container">
+        @if (loading()) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Fetching Registry data...</p>
+        </div>
+        } @else {
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Applicant Profile</th>
+                    <th>Academic Credentials</th>
+                    <th>Status</th>
+                    <th class="text-right">Operations</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (reg of requests(); track reg.id) {
+                @if (reg.status === 0) {
+                <tr [class.viewing]="selectedMember()?.id === reg.id">
+                    <td>
+                        <div class="member-cell">
+                            <div class="avatar-box">
+                                @if (reg.photoPath) {
+                                <img [src]="reg.photoPath" alt="Profile">
+                                } @else {
+                                <div class="avatar">{{ reg.fullName[0] }}</div>
+                                }
+                            </div>
+                            <div class="info">
+                                <strong>{{ reg.fullName }}</strong>
+                                <small>{{ reg.email }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="academic-info">
+                            <strong>{{ reg.subjectGroup }}</strong>
+                            <small>Class of {{ reg.ghcLastCertificatePassingYear }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge" [ngClass]="getStatusClass(reg.status)">
+                            {{ getStatusName(reg.status) }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <button (click)="viewDetails(reg)" class="btn btn-secondary btn-sm">Audit Details</button>
+                            <button (click)="approve(reg.id)" class="btn btn-primary btn-sm">Direct Verify</button>
+                        </div>
+                    </td>
+                </tr>
+                }
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal-overlay" *ngIf="selectedMember()" (click)="closeAudit()">
+        <div class="modal-content glass-card reveal-top" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <div class="header-info">
+                    <h3>Applicant Registry File: {{ selectedMember()?.fullName }}</h3>
+                    <span class="badge pending">Audit in Progress</span>
+                </div>
+                <button class="close-btn" (click)="closeAudit()">×</button>
+            </div>
+
+            <div class="modal-body audit-tabs">
+                <div class="tab-content audit-grid" *ngIf="!rejecting()">
+                    <div class="audit-section">
+                        <h4>Identity & Profile</h4>
+                        <div class="profile-preview">
+                            <img *ngIf="selectedMember()?.photoPath" [src]="selectedMember()?.photoPath"
+                                class="audit-photo">
+                            <div class="profile-details">
+                                <div class="data-row"><span>Father's Name:</span> <strong>{{
+                                        selectedMember()?.fatherName }}</strong></div>
+                                <div class="data-row"><span>Mother's Name:</span> <strong>{{
+                                        selectedMember()?.motherName }}</strong></div>
+                                <div class="data-row"><span>Date of Birth:</span> <strong>{{
+                                        selectedMember()?.dateOfBirth | date }}</strong></div>
+                                <div class="data-row"><span>NID / Identity:</span> <strong>{{ selectedMember()?.nid
+                                        }}</strong></div>
+                                <div class="data-row"><span>Blood Group:</span> <strong>{{ selectedMember()?.bloodGroup
+                                        }}</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="audit-section">
+                        <h4>Academic Verification</h4>
+                        <div class="data-row"><span>Subject / Group:</span> <strong>{{ selectedMember()?.subjectGroup
+                                }}</strong></div>
+                        <div class="data-row"><span>Degree at GHC:</span> <strong>{{
+                                selectedMember()?.lastCertificateFromGHC }}</strong></div>
+                        <div class="data-row"><span>Passing Year:</span> <strong>{{
+                                selectedMember()?.ghcLastCertificatePassingYear }}</strong></div>
+                        <div class="data-row"><span>HSC Adm. Year:</span> <strong>{{ selectedMember()?.hscAdmissionYear
+                                }}</strong></div>
+
+                        <div class="doc-link" *ngIf="selectedMember()?.certificatePath">
+                            <a [href]="selectedMember()?.certificatePath" target="_blank"
+                                class="btn btn-sm btn-secondary w-full">Inspect Certificate Copy ↗</a>
+                        </div>
+                    </div>
+
+                    <div class="audit-section">
+                        <h4>Vocational Details</h4>
+                        <div class="data-row"><span>Sector:</span> <strong>{{ selectedMember()?.professionalSector
+                                }}</strong></div>
+                        <div class="data-row"><span>Designation:</span> <strong>{{ selectedMember()?.designation
+                                }}</strong></div>
+                    </div>
+
+                    <div class="audit-section">
+                        <h4>Emergency Contact</h4>
+                        <div class="data-row"><span>Contact Name:</span> <strong>{{
+                                selectedMember()?.emergencyContactName }}</strong></div>
+                        <div class="data-row"><span>Mobile:</span> <strong>{{ selectedMember()?.emergencyContactPhone
+                                }}</strong></div>
+                    </div>
+                </div>
+
+                <div class="rejection-form reveal-text" *ngIf="rejecting()">
+                    <h4>Application Rejection</h4>
+                    <p>Provide a clear reason for rejecting this registry filing. This will be transmitted to the
+                        applicant.</p>
+                    <textarea [(ngModel)]="rejectionReason" rows="5"
+                        placeholder="Reason for rejection (e.g. Invalid certificate copy, NID mismatch)..."></textarea>
+                    <div class="reject-actions">
+                        <button class="btn btn-secondary" (click)="rejecting.set(false)">Back to Audit</button>
+                        <button class="btn btn-danger" (click)="confirmReject()" [disabled]="!rejectionReason">Execute
+                            Rejection</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" *ngIf="!rejecting()">
+                <button class="btn btn-danger-outline" (click)="rejecting.set(true)">Decline Filing</button>
+                <div class="right-btns">
+                    <button class="btn btn-secondary" (click)="closeAudit()">Suspend</button>
+                    <button class="btn btn-primary" (click)="approve(selectedMember()!.id)">Verify & Approve</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

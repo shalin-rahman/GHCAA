@@ -61,6 +61,22 @@ export const routes: Routes = [
             {
                 path: 'messages',
                 loadComponent: () => import('./features/messages/messages').then(m => m.Messages)
+            },
+            {
+                path: 'assistant',
+                loadComponent: () => import('./features/assistant/assistant').then(m => m.Assistant)
+            },
+            {
+                path: 'gallery',
+                loadComponent: () => import('./features/gallery/gallery').then(m => m.Gallery)
+            },
+            {
+                path: 'news',
+                loadComponent: () => import('./features/news/news').then(m => m.News)
+            },
+            {
+                path: 'events',
+                loadComponent: () => import('./features/events/events').then(m => m.Events)
             }
         ]
     },
@@ -69,10 +85,22 @@ export const routes: Routes = [
         loadComponent: () => import('./layouts/admin-layout/admin-layout').then(m => m.AdminLayout),
         canActivate: [authGuard, adminGuard],
         children: [
-            { path: '', redirectTo: 'approvals', pathMatch: 'full' },
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            {
+                path: 'dashboard',
+                loadComponent: () => import('./features/admin-dashboard/admin-dashboard').then(m => m.AdminDashboard)
+            },
             {
                 path: 'approvals',
                 loadComponent: () => import('./features/member-approval/member-approval').then(m => m.MemberApproval)
+            },
+            {
+                path: 'members',
+                loadComponent: () => import('./features/admin-members/admin-members').then(m => m.AdminMembers)
+            },
+            {
+                path: 'news',
+                loadComponent: () => import('./features/admin-news/admin-news').then(m => m.AdminNews)
             },
             {
                 path: 'ledger',

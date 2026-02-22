@@ -1,1 +1,93 @@
-<p>portal-layout works!</p>
+<div class="app-shell" [class.collapsed]="isSidebarCollapsed()">
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" *ngIf="!isSidebarCollapsed()" (click)="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar glass-effect" [class.collapsed]="isSidebarCollapsed()">
+        <div class="sidebar-brand">
+            <img src="/assets/logo.jpg" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
+            <span class="brand-name" *ngIf="!isSidebarCollapsed()">HARAGANGIAN</span>
+        </div>
+
+        <nav class="nav-list">
+            <!-- Portal nav items driven by NavService (based on API role) -->
+            @for (item of nav.portalNavItems(); track item.path) {
+            <a [routerLink]="item.path" routerLinkActive="active" class="nav-item">
+                <span class="icon">{{ item.icon }}</span>
+                <span class="label" *ngIf="!isSidebarCollapsed()">{{ item.label }}</span>
+            </a>
+            }
+
+            <div class="nav-spacer"></div>
+
+            <!-- Admin Panel link — visible only to Admin/SuperAdmin via NavService -->
+            @if (nav.isAdmin()) {
+            <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item admin-link">
+                <span class="icon">🛠️</span>
+                <span class="label" *ngIf="!isSidebarCollapsed()">Admin Panel</span>
+            </a>
+            }
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info" *ngIf="!isSidebarCollapsed()">
+                <div class="user-avatar">{{ auth.currentUser()?.username?.[0]?.toUpperCase() }}</div>
+                <div class="user-details">
+                    <span class="user-name">{{ auth.currentUser()?.username }}</span>
+                    <small class="user-role">{{ nav.isAdmin() ? 'Administrator' : 'Alumni Member' }}</small>
+                </div>
+            </div>
+            <button (click)="auth.logout()" class="btn btn-secondary logout-btn">
+                <span class="icon">🚪</span>
+                <span *ngIf="!isSidebarCollapsed()">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="left-section">
+                <button class="touch-target btn-icon toggle-btn" (click)="toggleSidebar()">
+                    <img src="/assets/logo.jpg" alt="Logo" class="mini-logo" onerror="this.style.display='none'">
+                </button>
+                <div class="breadcrumbs">
+                    <span class="text-muted">Portal</span>
+                    <span class="separator">/</span>
+                    <span class="current-page">{{ currentPageTitle() }}</span>
+                </div>
+            </div>
+
+            <div class="right-section">
+                <button class="touch-target btn-icon theme-toggle" (click)="theme.toggleTheme()"
+                    [title]="'Toggle Dark/Light Mode'">
+                    {{ theme.theme() === 'light' ? '🌙' : '☀️' }}
+                </button>
+                <div class="user-profile">
+                    <div class="avatar">{{ auth.currentUser()?.username?.[0]?.toUpperCase() }}</div>
+                    <div class="user-details hide-mobile">
+                        <span class="username">{{ auth.currentUser()?.username }}</span>
+                        <small class="role">{{ nav.isAdmin() ? 'Administrator' : 'Alumni Member' }}</small>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="page-content container">
+            <router-outlet></router-outlet>
+        </section>
+    </main>
+
+    <!-- Mobile Bottom Navigation (role-aware items) -->
+    <nav class="mobile-nav show-mobile">
+        @for (item of nav.mobileNavItems(); track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active" class="touch-target b-nav-item">
+            <span class="icon">{{ item.icon }}</span>
+        </a>
+        }
+        <button (click)="auth.logout()" class="touch-target b-nav-item">
+            <span>🚪</span>
+        </button>
+    </nav>
+</div>

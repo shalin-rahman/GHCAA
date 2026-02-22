@@ -1,0 +1,38 @@
+<div class="messages-page">
+    <div class="header">
+        <h2>Global Alumni Chat</h2>
+        <p>Real-time networking with Haragangians worldwide</p>
+    </div>
+
+    <div class="glass-card chat-container">
+        <div class="chat-main">
+            <div class="message-list" #scrollContainer [scrollTop]="scrollContainer.scrollHeight">
+                @for (msg of chat.messages(); track msg.id) {
+                <div class="msg-wrapper" [ngClass]="{ 'is-me': msg.isMe }">
+                    <div class="msg-avatar" *ngIf="!msg.isMe">{{ msg.sender[0] }}</div>
+                    <div class="msg-content">
+                        <div class="msg-header">
+                            <span class="sender">{{ msg.sender }}</span>
+                            <span class="time">{{ msg.time }}</span>
+                        </div>
+                        <div class="bubble">
+                            <p>{{ msg.text }}</p>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <div class="chat-footer">
+                <div class="input-area">
+                    <input type="text" [(ngModel)]="newMessage" (keyup.enter)="send()"
+                        placeholder="Type your message here...">
+                    <button (click)="send()" class="btn btn-primary">
+                        <span class="icon">✈️</span> Send
+                    </button>
+                </div>
+                <p class="chat-tip">Be respectful. Follow the HARAGANGIAN Code of Ethics.</p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,1 +1,61 @@
-<p>dashboard works!</p>
+<div class="dashboard-grid">
+    <!-- Quick Stats -->
+    <div class="stats-row">
+        <div class="glass-card stat-card profile-summary">
+            <div class="membership-info" *ngIf="profile(); else loadingProf">
+                <span class="icon">🏆</span>
+                <div class="val">{{ profile().membershipNumber || 'Pending' }}</div>
+                <small>{{ getMembershipType(profile().membershipType) }} Member</small>
+            </div>
+            <ng-template #loadingProf><small>Loading Membership...</small></ng-template>
+        </div>
+        <div class="glass-card stat-card">
+            <span class="icon">💼</span>
+            <div class="val">12</div>
+            <small>Active Jobs</small>
+        </div>
+        <div class="glass-card stat-card">
+            <span class="icon">🎟️</span>
+            <div class="val">3</div>
+            <small>Upcoming Events</small>
+        </div>
+    </div>
+
+    <!-- Main Activity & Chat -->
+    <div class="main-row">
+        <div class="glass-card activity-feed">
+            <h3>Recent Activity</h3>
+            <div class="feed-items">
+                @for (act of activities(); track act.id) {
+                <div class="feed-item">
+                    <div class="dot" [style.background]="act.color"></div>
+                    <div class="text">
+                        <strong>{{ act.title }}</strong>
+                        <p>{{ act.desc }}</p>
+                        <small>{{ act.time }}</small>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        <div class="glass-card chat-widget">
+            <h3>Real-time Chat</h3>
+            <div class="chat-box" #scrollMe [scrollTop]="scrollMe.scrollHeight">
+                @for (msg of chat.messages(); track msg.id) {
+                <div class="msg" [ngClass]="{ 'me': msg.isMe }">
+                    <div class="bubble">
+                        <small *ngIf="!msg.isMe">{{ msg.sender }}</small>
+                        <p>{{ msg.text }}</p>
+                        <span class="time">{{ msg.time }}</span>
+                    </div>
+                </div>
+                }
+            </div>
+            <div class="chat-input">
+                <input [(ngModel)]="newMessage" (keyup.enter)="send()" placeholder="Type a message...">
+                <button (click)="send()" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
+</div>

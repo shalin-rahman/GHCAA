@@ -56,6 +56,10 @@ export class AdminService {
     }
 
     archiveMember(id: number): Observable<any> {
-        return this.http.post(`/api/admin/members/${id}/archive`, {});
+        return this.http.delete(`/api/admin/members/${id}`);
+    }
+
+    reactivateMember(id: number): Observable<any> {
+        return this.http.post(`/api/admin/members/${id}/reactivate`, {});
     }
 }

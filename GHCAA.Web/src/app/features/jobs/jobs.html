@@ -1,1 +1,96 @@
-<p>jobs works!</p>
+<div class="header">
+    <h2>Job Hub</h2>
+    <button class="btn btn-primary" (click)="showForm.set(true)">+ Post a Job</button>
+</div>
+
+<!-- Filters -->
+<div class="filters glass-card" *ngIf="!showForm()">
+    <input type="text" placeholder="Search jobs..." class="search-input">
+    <select class="filter-select" (change)="onCategoryChange($event)">
+        <option value="">All Categories</option>
+        @for (cat of categories; track cat.id) {
+        <option [value]="cat.id">{{ cat.name }}</option>
+        }
+    </select>
+</div>
+
+<!-- Job Creation Form -->
+<div class="glass-card form-container" *ngIf="showForm()">
+    <div class="form-header">
+        <h3>Post a New Opportunity</h3>
+        <button class="close-btn" (click)="showForm.set(false)">✕</button>
+    </div>
+    <form (submit)="postJob()" class="job-form">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Job Title *</label>
+                <input type="text" [(ngModel)]="newJob.title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label>Company Name *</label>
+                <input type="text" [(ngModel)]="newJob.companyName" name="companyName" required>
+            </div>
+            <div class="form-group">
+                <label>Location *</label>
+                <input type="text" [(ngModel)]="newJob.location" name="location" required>
+            </div>
+            <div class="form-group">
+                <label>Category *</label>
+                <select [(ngModel)]="newJob.category" name="category" required>
+                    @for (cat of categories; track cat.id) {
+                    <option [value]="cat.id">{{ cat.name }}</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group full-width">
+                <label>Description *</label>
+                <textarea [(ngModel)]="newJob.description" name="description" required rows="3"></textarea>
+            </div>
+            <div class="form-group full-width">
+                <label>Requirements *</label>
+                <textarea [(ngModel)]="newJob.requirements" name="requirements" required rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Deadline *</label>
+                <input type="date" [(ngModel)]="newJob.deadline" name="deadline" required>
+            </div>
+            <div class="form-group">
+                <label>Application Link/Email</label>
+                <input type="text" [(ngModel)]="newJob.applicationEmail" name="appEmail">
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+                {{ submitting() ? 'Posting...' : 'Public Opportunity' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="showForm.set(false)">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<!-- Job List -->
+<div class="job-list" *ngIf="!showForm()">
+    @if (loading()) {
+    <div class="loading">Searching opportunities...</div>
+    } @else {
+    @for (job of jobs(); track job.id) {
+    <div class="glass-card job-card">
+        <div class="job-main">
+            <div class="job-info">
+                <h3>{{ job.title }}</h3>
+                <p class="company">{{ job.companyName }} • {{ job.location }}</p>
+                <div class="tags">
+                    <span class="tag tag-type">{{ getCategoryName(job.category) }}</span>
+                    <span class="tag tag-deadline">Deadline: {{ job.deadline | date }}</span>
+                </div>
+            </div>
+            <button class="btn btn-accent">Apply Now</button>
+        </div>
+    </div>
+    } @empty {
+    <div class="empty-state glass-card">
+        <p>No job opportunities found. Be the first to post!</p>
+    </div>
+    }
+    }
+</div>

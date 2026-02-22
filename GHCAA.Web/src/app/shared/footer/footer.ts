@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
-    selector: 'app-footer',
-    standalone: true,
-    imports: [RouterLink],
-    template: `
+  selector: 'app-footer',
+  standalone: true,
+  imports: [RouterLink],
+  template: `
     <footer class="footer">
       <div class="container footer-grid">
         <div class="footer-brand">
@@ -48,7 +48,7 @@ import { RouterLink } from '@angular/router';
       </div>
     </footer>
   `,
-    styles: [`
+  styles: [`
     .footer { 
       background: #111111; 
       color: white; 
@@ -58,7 +58,7 @@ import { RouterLink } from '@angular/router';
     }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap: 4rem; padding-bottom: 4rem; }
     
-    .footer-brand .footer-logo { height: 60px; border-radius: 50%; margin-bottom: 1.5rem; border: 2px solid var(--accent-color); }
+    .footer-brand .footer-logo { height: 60px; border-radius: 50%; margin-bottom: 1.5rem; border: 2px solid var(--accent-color); mix-blend-mode: screen; background-color: transparent; }
     .motto { font-style: italic; color: var(--accent-color); font-weight: 600; margin-bottom: 0.5rem; font-size: 1rem; }
     .bengali-motto { font-size: 0.85rem; opacity: 0.6; }
 

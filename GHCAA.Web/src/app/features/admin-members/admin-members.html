@@ -1,0 +1,163 @@
+<div class="admin-feature">
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Member Registry</h2>
+            <small>{{ filteredMembers().length }} of {{ allMembers().length }} members shown</small>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar glass-card">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                placeholder="Search by name, email, membership no…" class="search-input">
+        </div>
+        <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)" class="status-select">
+            @for (s of statusOptions; track s.value) {
+            <option [value]="s.value">{{ s.label }}</option>
+            }
+        </select>
+    </div>
+
+    <!-- Table -->
+    <div class="glass-card table-wrap">
+        @if (loading()) {
+        <div class="loading-state">Loading members...</div>
+        } @else if (filteredMembers().length === 0) {
+        <div class="empty-state">
+            <span>👥</span>
+            <p>No members match your filters.</p>
+        </div>
+        } @else {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Membership No.</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (member of filteredMembers(); track member.id) {
+                <tr>
+                    <td class="member-cell" (click)="openDetail(member)">
+                        <div class="member-avatar">{{ member.fullName?.[0] }}</div>
+                        <div class="member-info">
+                            <span class="member-name">{{ member.fullName }}</span>
+                            <small>{{ member.email }}</small>
+                        </div>
+                    </td>
+                    <td>{{ member.membershipNumber || '—' }}</td>
+                    <td>
+                        <span class="status-badge" [class]="getStatusClass(member.status)">
+                            {{ getStatusLabel(member.status) }}
+                        </span>
+                    </td>
+                    <td>{{ member.ghcLastCertificatePassingYear || '—' }}</td>
+                    <td class="actions-cell">
+                        @if (member.status === 0) {
+                        <button class="icon-btn approve" (click)="approveMember(member.id, 1)"
+                            title="Approve">✅</button>
+                        }
+                        @if (nav.isSuperAdmin()) {
+                        <button class="icon-btn archive" (click)="archiveMember(member.id)" title="Archive">🗄️</button>
+                        }
+                        <button class="icon-btn detail" (click)="openDetail(member)" title="View">👁️</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>
+
+<!-- Member Detail Modal -->
+@if (selectedMember()) {
+<div class="modal-overlay" (click)="closeDetail()">
+    <div class="modal-box glass-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-avatar">{{ selectedMember()?.fullName?.[0] }}</div>
+            <div>
+                <h3>{{ selectedMember()?.fullName }}</h3>
+                <small>{{ selectedMember()?.membershipNumber || 'Pending Membership No.' }}</small>
+            </div>
+            <button class="close-btn" (click)="closeDetail()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Email</label>
+                    <span>{{ selectedMember()?.email }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Mobile</label>
+                    <span>{{ selectedMember()?.mobileNo }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Status</label>
+                    <span class="status-badge" [class]="getStatusClass(selectedMember()?.status)">
+                        {{ getStatusLabel(selectedMember()?.status) }}
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <label>Gender</label>
+                    <span>{{ selectedMember()?.gender }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Blood Group</label>
+                    <span>{{ selectedMember()?.bloodGroup }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>NID</label>
+                    <span>{{ selectedMember()?.nid }}</span>
+                </div>
+                <div class="detail-item full">
+                    <label>Present Address</label>
+                    <span>{{ selectedMember()?.presentAddress }}</span>
+                </div>
+                <div class="detail-item full">
+                    <label>Permanent Address</label>
+                    <span>{{ selectedMember()?.permanentAddress }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Last Degree from GHC</label>
+                    <span>{{ selectedMember()?.lastCertificateFromGHC }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Passing Year</label>
+                    <span>{{ selectedMember()?.ghcLastCertificatePassingYear }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>HSC Admission Year</label>
+                    <span>{{ selectedMember()?.hscAdmissionYear }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>GHC Admission Year</label>
+                    <span>{{ selectedMember()?.ghcAdmissionYear }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Professional Sector</label>
+                    <span>{{ selectedMember()?.professionalSector }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Designation</label>
+                    <span>{{ selectedMember()?.designation }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Emergency Contact</label>
+                    <span>{{ selectedMember()?.emergencyContactName }} ({{ selectedMember()?.emergencyContactRelation
+                        }})</span>
+                </div>
+                <div class="detail-item">
+                    <label>Emergency Phone</label>
+                    <span>{{ selectedMember()?.emergencyContactPhone }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}

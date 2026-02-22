@@ -42,7 +42,15 @@ namespace GHCAA.Infrastructure.Data
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Roles)
                 .WithMany(r => r.Users)
-                .UsingEntity(j => j.ToTable("UserRoles"));
+                .UsingEntity<Dictionary<string, object>>(
+                    "UserRoles",
+                    j => j.HasOne<Role>().WithMany().HasForeignKey("RolesId"),
+                    j => j.HasOne<User>().WithMany().HasForeignKey("UsersId"),
+                    j =>
+                    {
+                        j.HasKey("RolesId", "UsersId");
+                        j.ToTable("UserRoles");
+                    });
 
             // LookupItem Unique Constraint
             modelBuilder.Entity<LookupItem>()
@@ -104,8 +112,50 @@ namespace GHCAA.Infrastructure.Data
                 new Role { Id = 3, Name = "Member" }
             );
 
-            // Seed Super Admin
-            // Password: SuperAdminPassword123!
+            // Seed Admin Member: shalin (Required for linkage)
+            modelBuilder.Entity<Member>().HasData(new Member
+            {
+                Id = 1,
+                FullName = "Habibur Rahman Shalin",
+                FatherName = "Father",
+                MotherName = "Mother",
+                DateOfBirth = new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                Gender = Domain.Enums.Gender.Male,
+                BloodGroup = Domain.Enums.BloodGroup.APositive,
+                NID = "0000000001",
+                MobileNo = "01700000001",
+                Email = "shalin.rahman@gmail.com",
+                PresentAddress = "Munshiganj",
+                PermanentAddress = "Munshiganj",
+                EmergencyContactName = "Emergency",
+                EmergencyContactRelation = "Family",
+                EmergencyContactPhone = "01700000000",
+                HSCAdmissionYear = 1950,
+                GHCAdmissionYear = 1950,
+                LastCertificateFromGHC = "Other",
+                SubjectGroup = "Other",
+                GHCLastCertificatePassingYear = 1952,
+                ProfessionalSector = "Other",
+                Designation = "Admin",
+                Status = Domain.Enums.MembershipStatus.Active,
+                AppliedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                MembershipNumber = "ADM-SHALIN-1",
+                MembershipType = Domain.Enums.MembershipType.Honorary
+            });
+
+            // Seed Admin User: shalin
+            // Password: shalin (hashed)
+            var shalinUser = new User
+            {
+                Id = 2,
+                Username = "shalin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("shalin"),
+                IsActive = true,
+                IsArchived = false,
+                CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                MemberId = 1 // Linked to shalin member
+            };
+
             modelBuilder.Entity<User>().HasData(new User
             {
                 Id = 1,
@@ -113,9 +163,15 @@ namespace GHCAA.Infrastructure.Data
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("SuperAdminPassword123!"),
                 IsActive = true,
                 IsArchived = false,
-                CreatedAt = new DateTime(2024, 1, 1),
-                MemberId = null // SuperAdmin might not be a member
-            });
+                CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                MemberId = null 
+            }, shalinUser);
+
+            // Seed many-to-many Roles for Users
+            modelBuilder.Entity("UserRoles").HasData(
+                new { RolesId = 1, UsersId = 1 }, // SuperAdmin -> SuperAdmin Role
+                new { RolesId = 2, UsersId = 2 }  // shalin -> Admin Role
+            );
 
             modelBuilder.Entity<FileUpload>()
                 .HasIndex(f => new { f.MemberId, f.UploadType });
@@ -153,11 +209,11 @@ namespace GHCAA.Infrastructure.Data
 
             // Seed Initial Membership Fees
             modelBuilder.Entity<MembershipFeeConfig>().HasData(
-                new MembershipFeeConfig { Id = 1, MembershipType = Domain.Enums.MembershipType.Founding, Amount = 5000, EffectiveDate = new DateTime(2023, 1, 1), Description = "Founding Member Fee" },
-                new MembershipFeeConfig { Id = 2, MembershipType = Domain.Enums.MembershipType.Executive, Amount = 2000, EffectiveDate = new DateTime(2023, 1, 1), Description = "Executive Member Fee" },
-                new MembershipFeeConfig { Id = 3, MembershipType = Domain.Enums.MembershipType.General, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1), Description = "General Member Fee" },
-                new MembershipFeeConfig { Id = 4, MembershipType = Domain.Enums.MembershipType.Associate, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1), Description = "Associate Member Fee" }, // Assuming same as General
-                new MembershipFeeConfig { Id = 5, MembershipType = Domain.Enums.MembershipType.Life, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1), Description = "Life Member Fee" }
+                new MembershipFeeConfig { Id = 1, MembershipType = Domain.Enums.MembershipType.Founding, Amount = 5000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Founding Member Fee" },
+                new MembershipFeeConfig { Id = 2, MembershipType = Domain.Enums.MembershipType.Executive, Amount = 2000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Executive Member Fee" },
+                new MembershipFeeConfig { Id = 3, MembershipType = Domain.Enums.MembershipType.General, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "General Member Fee" },
+                new MembershipFeeConfig { Id = 4, MembershipType = Domain.Enums.MembershipType.Associate, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Associate Member Fee" }, // Assuming same as General
+                new MembershipFeeConfig { Id = 5, MembershipType = Domain.Enums.MembershipType.Life, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Life Member Fee" }
             );
         }
     }

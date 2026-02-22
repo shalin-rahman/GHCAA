@@ -40,8 +40,9 @@ namespace GHCAA.Infrastructure.Services
         public async Task<NewsPostDto?> GetNewsByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var post = await _db.NewsPosts
+                .IgnoreQueryFilters()
                 .Include(n => n.Author)
-                .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
+                .FirstOrDefaultAsync(n => n.Id == id && n.IsActive, cancellationToken);
             
             return post == null ? null : MapToDto(post);
         }

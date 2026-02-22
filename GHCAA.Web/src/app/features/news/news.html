@@ -1,0 +1,56 @@
+<div class="news-page">
+    <div class="header">
+        <h2>Haraganga News Hub</h2>
+        <p>Announcements, updates, and stories from the alumni community</p>
+    </div>
+
+    @if (loading()) {
+    <div class="loading">Loading news...</div>
+    } @else {
+    <div class="news-list">
+        @for (post of news(); track post.id) {
+        <article class="news-article glass-card" (click)="selectedPost.set(post)">
+            <div class="article-img" *ngIf="post.imageUrl" [style.background-image]="'url(' + post.imageUrl + ')'">
+            </div>
+            <div class="article-body">
+                <div class="meta">
+                    <span class="cat">{{ post.category }}</span>
+                    <span>{{ post.createdAt | date:'mediumDate' }}</span>
+                </div>
+                <h3>{{ post.title }}</h3>
+                <p>{{ post.content | slice:0:180 }}...</p>
+                <div class="footer">
+                    <span class="author">By {{ post.authorName }}</span>
+                    <button class="btn-text">Read More →</button>
+                </div>
+            </div>
+        </article>
+        } @empty {
+        <div class="empty-state glass-card">
+            <p>No news posts available at the moment. Stay tuned!</p>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- Full Post Modal -->
+    @if (selectedPost(); as post) {
+    <div class="modal-overlay" (click)="selectedPost.set(null)">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="m-header">
+                <button class="close" (click)="selectedPost.set(null)">✕</button>
+                <img [src]="post.imageUrl || '/assets/logo.jpg'" class="m-img" *ngIf="post.imageUrl">
+                <div class="m-meta">
+                    <span class="cat-tag">{{ post.category }}</span>
+                    <span class="date">{{ post.createdAt | date:'fullDate' }}</span>
+                </div>
+                <h2>{{ post.title }}</h2>
+                <div class="author-line">Posted by <strong>{{ post.authorName }}</strong></div>
+            </div>
+            <div class="m-body">
+                <p>{{ post.content }}</p>
+            </div>
+        </div>
+    </div>
+    }
+</div>
