@@ -1,0 +1,70 @@
+<div class="assistant-page">
+    <div class="header">
+        <div class="title-group">
+            <h2>GHC AI Assistant</h2>
+            <p>Search alumni, ask about association rules, or get help with the portal</p>
+        </div>
+        <div class="ai-badge">Powered by GHCAA-AI</div>
+    </div>
+
+    <div class="glass-card chat-container">
+        <div class="message-list" #scrollContainer [scrollTop]="scrollContainer.scrollHeight">
+            <!-- AI Welcome -->
+            <div class="msg ai animate-fade">
+                <div class="avatar">🤖</div>
+                <div class="content">
+                    <div class="bubble">
+                        <p>Hello! I am your Haraganga AI Assistant. You can ask me things like <strong>"Find me alumni
+                                from 2012"</strong> or <strong>"Who is in the Corporate sector?"</strong>.</p>
+                        <p>How can I help you today?</p>
+                    </div>
+                </div>
+            </div>
+
+            @for (msg of messages(); track msg.id) {
+            <div class="msg" [ngClass]="msg.isAi ? 'ai' : 'user'">
+                <div class="avatar" *ngIf="msg.isAi">🤖</div>
+                <div class="content">
+                    <div class="bubble">
+                        <p>{{ msg.text }}</p>
+
+                        <!-- Search Results Grid if AI found members -->
+                        @if (msg.members && msg.members.length > 0) {
+                        <div class="member-results">
+                            @for (m of msg.members; track m.id) {
+                            <div class="member-mini-card">
+                                <div class="m-avatar">{{ m.fullName[0] }}</div>
+                                <div class="m-info">
+                                    <strong>{{ m.fullName }}</strong>
+                                    <small>Batch {{ m.ghcLastCertificatePassingYear }} • {{ m.professionalSector
+                                        }}</small>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+                    <span class="time">{{ msg.time }}</span>
+                </div>
+            </div>
+            }
+
+            @if (typing()) {
+            <div class="msg ai">
+                <div class="avatar">🤖</div>
+                <div class="typing-indicator">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+            }
+        </div>
+
+        <div class="input-container">
+            <input type="text" [(ngModel)]="userInput" (keyup.enter)="ask()"
+                placeholder="Type your question here (e.g. 'Search for alumni in 2015')" [disabled]="typing()">
+            <button (click)="ask()" class="btn btn-primary" [disabled]="!userInput.trim() || typing()">
+                <span class="icon">✨</span> Ask AI
+            </button>
+        </div>
+    </div>
+</div>

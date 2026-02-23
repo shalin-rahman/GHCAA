@@ -1,0 +1,204 @@
+<section class="hero">
+    <div class="hero-pattern"></div>
+    <div class="container hero-content">
+        <h1 class="reveal-text">Reconnecting <span class="highlight">HARAGANGIAN</span></h1>
+        <p class="reveal-subtitle">Sharing Heritage, Aligning Lives, Integrating Networks <br> (ঐতিহ্যের বিনিময়, জীবনের
+            সমন্বয় ও সংহতির সেতুবন্ধন)</p>
+        <div class="hero-btns">
+            <a routerLink="/register" class="btn btn-primary btn-lg">Join Association</a>
+            <a href="#constitution" class="btn btn-accent btn-lg">Read Constitution</a>
+        </div>
+    </div>
+    <div class="hero-overlay"></div>
+</section>
+
+<!-- Purpose & Symbolism (Merged for compactness) -->
+<section id="vision" class="purpose-identity-section container">
+    <div class="split-view">
+        <div class="left-purpose">
+            <div class="section-header align-left">
+                <h2>Purpose & Objectives</h2>
+                <p>Guided by Article II of our Constitution</p>
+                <div class="underline"></div>
+            </div>
+            <div class="purpose-list">
+                <div class="p-item glass-card">
+                    <span class="p-icon">🔗</span>
+                    <div class="p-text">
+                        <strong>Networking</strong>
+                        <p>Connecting alumni through reunions and professional exchange.</p>
+                    </div>
+                </div>
+                <div class="p-item glass-card">
+                    <span class="p-icon">🏗️</span>
+                    <div class="p-text">
+                        <strong>Heritage</strong>
+                        <p>Celebrating legacy and maintaining archival projects.</p>
+                    </div>
+                </div>
+                <div class="p-item glass-card">
+                    <span class="p-icon">📚</span>
+                    <div class="p-text">
+                        <strong>Advancement</strong>
+                        <p>Mentorship and supporting college digital literacy.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-symbolism">
+            <div class="centered-logo-box">
+                <div class="logo-wrapper">
+                    <div class="brand-icon main-logo-large">GHC</div>
+                    <div class="logo-glow"></div>
+                </div>
+                <div class="logo-caption">
+                    <h3>The GHGCAA Seal</h3>
+                    <p>Authenticity • Unity • Excellence</p>
+                </div>
+            </div>
+            <div class="symbols-grid-compact">
+                <div class="s-badge" title="Historic Heritage">🏛️</div>
+                <div class="s-badge" title="Lifelong Learning">📖</div>
+                <div class="s-badge" title="Graduation Success">🎓</div>
+                <div class="s-badge" title="Community Bond">🤝</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Membership Registry (Compact Redesign) -->
+<section id="membership" class="membership-section container">
+    <div class="section-header">
+        <h2>Membership Registry</h2>
+        <div class="underline"></div>
+    </div>
+
+    <div class="compact-membership-grid">
+        <div class="tier-selector">
+            @for (tier of membershipTiers; track tier.id) {
+            <div (click)="selectedTier.set(tier)" class="tier-mini-card" [class.active]="selectedTier().id === tier.id"
+                [style.border-left-color]="tier.color">
+                <strong>{{ tier.name }}</strong>
+                <span class="tier-tag">{{ ['founding', 'life', 'executive', 'general'].includes(tier.id) ? 'Voting' :
+                    'Non-Voting' }}</span>
+            </div>
+            }
+        </div>
+
+        <div class="tier-content-panel glass-card animate-fade">
+            <div class="panel-header-mini">
+                <h3 [style.color]="selectedTier().color">{{ selectedTier().name }}</h3>
+                <p>{{ selectedTier().shortDesc }}</p>
+            </div>
+            <div class="criteria-summary">
+                <div class="summary-col">
+                    <h6><span class="icon">📝</span> Eligibility</h6>
+                    <ul>
+                        @for (item of selectedTier().criteria.slice(0, 2); track item) {
+                        <li>{{ item }}</li>
+                        }
+                    </ul>
+                </div>
+                <div class="summary-col">
+                    <h6><span class="icon">🛡️</span> Rights</h6>
+                    <ul>
+                        @for (item of selectedTier().rights.slice(0, 2); track item) {
+                        <li>{{ item }}</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <a routerLink="/register" class="btn btn-primary btn-sm">Join This Tier</a>
+        </div>
+    </div>
+</section>
+
+<!-- Latest News -->
+<section id="news" class="news-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Latest Announcements</h2>
+            <div class="underline"></div>
+        </div>
+
+        <div class="news-grid">
+            @for (item of news(); track item.id) {
+            <div class="news-card glass-card">
+                <div class="news-date">{{ item.publishedAt | date:'MMM d, y' }}</div>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.summary }}</p>
+                <a href="#" class="read-more">Read Full Story →</a>
+            </div>
+            } @empty {
+            <div class="full-width text-center">No recent announcements available.</div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- EC Members Preview -->
+<section id="ec" class="ec-section container">
+    <div class="section-header">
+        <h2>Executive Committee</h2>
+        <p>The leadership driving our association forward.</p>
+        <div class="underline"></div>
+    </div>
+
+    <div class="ec-carousel">
+        @for (member of committee(); track member.id) {
+        <div class="ec-card glass-card">
+            <div class="ec-photo">
+                @if (member.photoPath) {
+                <img [src]="member.photoPath" [alt]="member.fullName">
+                } @else {
+                👤
+                }
+            </div>
+            <h4>{{ member.fullName }}</h4>
+            <small>{{ member.designation }}</small>
+        </div>
+        } @empty {
+        <div class="ec-card glass-card">
+            <div class="ec-photo">👤</div>
+            <h4>Prof. Md. Abdul Aziz</h4>
+            <small>President</small>
+        </div>
+        <div class="ec-card glass-card">
+            <div class="ec-photo">👤</div>
+            <h4>Dr. Shahana Begum</h4>
+            <small>General Secretary</small>
+        </div>
+        }
+    </div>
+</section>
+
+<section class="final-cta">
+    <div class="container cta-content glass-card">
+        <div class="cta-text">
+            <h2>Ready to Step Into the Legacy?</h2>
+            <p>Join thousands of Haragangians contributing to the future of our mother institution.</p>
+        </div>
+        <div class="cta-actions">
+            <a routerLink="/register" class="btn btn-primary btn-lg">Complete Registration</a>
+            <a href="mailto:haragangian@gmail.com" class="btn btn-secondary">Contact Secretariat</a>
+        </div>
+    </div>
+</section>
+
+<section class="stat-banner">
+    <div class="container stats">
+        <div class="stat-item">
+            <span class="count">2500+</span>
+            <span class="label">Total Members</span>
+        </div>
+        <div class="stat-item">
+            <span class="count">50+</span>
+            <span class="label">Events Hosted</span>
+        </div>
+        <div class="stat-item">
+            <span class="count">2025</span>
+            <span class="label">Est. Year</span>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,123 @@
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header h2 {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.page-header small {
+    color: var(--text-muted);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--surface-color);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    font-size: 1.8rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.stat-action {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+.stat-card.pending .stat-value {
+    color: #f59e0b;
+}
+
+.stat-card.total .stat-value {
+    color: var(--primary-color);
+}
+
+.stat-card.active .stat-value {
+    color: #10b981;
+}
+
+.stat-card.finance .stat-value {
+    font-size: 1.4rem;
+    color: #6366f1;
+}
+
+.quick-actions {
+    padding: 2rem;
+}
+
+.quick-actions h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.1rem;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    background: var(--bg-color);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: var(--primary-color);
+    color: #000;
+    border-color: var(--primary-color);
+}
+
+.action-btn.secondary {
+    border-style: dashed;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-muted);
+}

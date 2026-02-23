@@ -1,0 +1,69 @@
+<div class="admin-feature">
+    <div class="page-header">
+        <h2>Admin Dashboard</h2>
+        <small>Real-time overview of GHCAA operations</small>
+    </div>
+
+    @if (loading()) {
+    <div class="loading-state">Loading statistics...</div>
+    } @else {
+    <div class="stats-grid">
+        <div class="stat-card pending">
+            <div class="stat-icon">📝</div>
+            <div class="stat-body">
+                <div class="stat-value">{{ stats()?.applied ?? 0 }}</div>
+                <div class="stat-label">Pending Approvals</div>
+            </div>
+            <a routerLink="/admin/approvals" class="stat-action">Review →</a>
+        </div>
+        <div class="stat-card total">
+            <div class="stat-icon">👥</div>
+            <div class="stat-body">
+                <div class="stat-value">{{ stats()?.totalMembers ?? 0 }}</div>
+                <div class="stat-label">Total Members</div>
+            </div>
+            <a routerLink="/admin/members" class="stat-action">View All →</a>
+        </div>
+        <div class="stat-card active">
+            <div class="stat-icon">✅</div>
+            <div class="stat-body">
+                <div class="stat-value">{{ stats()?.active ?? 0 }}</div>
+                <div class="stat-label">Active Members</div>
+            </div>
+            <a routerLink="/admin/members" class="stat-action">Browse →</a>
+        </div>
+        <div class="stat-card finance">
+            <div class="stat-icon">💰</div>
+            <div class="stat-body">
+                <div class="stat-value">৳ {{ stats()?.balance | number }}</div>
+                <div class="stat-label">Treasury Balance</div>
+            </div>
+            <a routerLink="/admin/ledger" class="stat-action">Ledger →</a>
+        </div>
+    </div>
+
+    <div class="quick-actions glass-card">
+        <h3>Quick Actions</h3>
+        <div class="action-grid">
+            <a routerLink="/admin/approvals" class="action-btn">
+                <span>📝</span> Review Applications
+            </a>
+            <a routerLink="/admin/members" class="action-btn">
+                <span>👤</span> Manage Members
+            </a>
+            <a routerLink="/admin/news" class="action-btn">
+                <span>📰</span> Post News
+            </a>
+            <a routerLink="/admin/ledger" class="action-btn">
+                <span>📖</span> Financial Ledger
+            </a>
+            <a routerLink="/admin/comm" class="action-btn">
+                <span>✉️</span> Communications
+            </a>
+            <a routerLink="/portal/dashboard" class="action-btn secondary">
+                <span>🏠</span> Member Portal
+            </a>
+        </div>
+    </div>
+    }
+</div>

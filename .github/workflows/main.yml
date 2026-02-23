@@ -1,0 +1,52 @@
+name: GHCAA CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.x
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Restore Backend
+      run: dotnet restore GHCAA.API/GHCAA.API.csproj
+
+    - name: Build Backend
+      run: dotnet build GHCAA.API/GHCAA.API.csproj -c Release --no-restore
+
+    - name: Install Frontend Dependencies
+      working-directory: ./GHCAA.Web
+      run: npm ci
+
+    - name: Build Frontend
+      working-directory: ./GHCAA.Web
+      run: npm run build
+
+    - name: Publish API
+      run: dotnet publish GHCAA.API/GHCAA.API.csproj -c Release -o ./publish/api
+
+    - name: Package Application
+      run: |
+        mkdir -p ./publish/api/wwwroot
+        cp -r GHCAA.Web/dist/GHCAA.Web/browser/* ./publish/api/wwwroot/
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ghcaa-deployment-package
+        path: ./publish/api

@@ -3,6 +3,9 @@ using GHCAA.Application;
 using GHCAA.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using GHCAA.API.Extensions;
+using GHCAA.API.Middleware;
+using GHCAA.Application.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -11,37 +14,30 @@ var configuration = builder.Configuration;
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(configuration);
 
-// JWT configuration from appsettings
-var jwt = configuration.GetSection("JwtSettings");
-var secret = jwt["Secret"] ?? throw new InvalidOperationException("JwtSettings:Secret is not configured (use __User Secrets__ in dev).");
+// Configure JWT Authentication
+builder.Services.AddJwtAuthentication(configuration);
+builder.Services.AddAppAuthorization();
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = true;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = jwt["Issuer"],
-        ValidateAudience = true,
-        ValidAudience = jwt["Audience"],
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-        ValidateLifetime = true
-    };
-});
-
-builder.Services.AddAuthorization();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDirectoryBrowser();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<GHCAA.Application.Interfaces.IRealTimeService, GHCAA.API.Services.RealTimeService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200") // Local Angular dev server
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -51,9 +47,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<AuditLogMiddleware>();
+
+app.UseCors("AngularApp");
+
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // serve wwwroot/uploads
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<GHCAA.API.Hubs.ChatHub>("/hubs/chat");
 app.Run();

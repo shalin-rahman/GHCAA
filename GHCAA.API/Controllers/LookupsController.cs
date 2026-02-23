@@ -1,0 +1,64 @@
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
+using GHCAA.Application.Interfaces;
+using GHCAA.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace GHCAA.API.Controllers
+{
+    [ApiController]
+    [Route("api/lookups")]
+    public class LookupsController : ControllerBase
+    {
+        private readonly ILookupService _lookupService;
+
+        public LookupsController(ILookupService lookupService)
+        {
+            _lookupService = lookupService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllLookups(CancellationToken cancellationToken)
+        {
+            var lookups = await _lookupService.GetAllLookupsAsync(cancellationToken);
+            return Ok(lookups);
+        }
+
+        [HttpGet("{category}")]
+        public async Task<IActionResult> GetByCategory(string category, CancellationToken cancellationToken)
+        {
+            var lookups = await _lookupService.GetByCategoryAsync(category, cancellationToken);
+            return Ok(lookups);
+        }
+
+        // Admin Management
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPost]
+        public async Task<IActionResult> CreateLookup([FromBody] LookupItem item, CancellationToken cancellationToken)
+        {
+            var result = await _lookupService.AddLookupItemAsync(item, cancellationToken);
+            return CreatedAtAction(nameof(GetByCategory), new { category = result.Category }, result);
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateLookup(int id, [FromBody] LookupItem item, CancellationToken cancellationToken)
+        {
+            var success = await _lookupService.UpdateLookupItemAsync(id, item, cancellationToken);
+            if (!success) return NotFound();
+            return Ok(new { Message = "Lookup updated successfully" });
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteLookup(int id, CancellationToken cancellationToken)
+        {
+            var success = await _lookupService.DeleteLookupItemAsync(id, cancellationToken);
+            if (!success) return NotFound();
+            return Ok(new { Message = "Lookup deleted successfully" });
+        }
+    }
+}

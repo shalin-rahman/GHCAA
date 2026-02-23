@@ -18,7 +18,11 @@ namespace GHCAA.Infrastructure.Services
         private readonly IFileUploadRepository _fileRepo;
         private readonly IOtpService _otp;
         private readonly IEmailService _email;
+        private readonly IUserService _userService;
+        private readonly ICommunicationService _communicationService;
         private readonly ILogger<MemberService> _logger;
+        private readonly IActivityService _activityService;
+        private readonly INotificationService _notificationService;
 
         public MemberService(
             ApplicationDbContext db,
@@ -26,14 +30,22 @@ namespace GHCAA.Infrastructure.Services
             IFileUploadRepository fileRepo,
             IOtpService otp,
             IEmailService email,
-            ILogger<MemberService> logger)
+            IUserService userService,
+            ICommunicationService communicationService,
+            ILogger<MemberService> logger,
+            IActivityService activityService,
+            INotificationService notificationService)
         {
             _db = db;
             _storage = storage;
             _fileRepo = fileRepo;
             _otp = otp;
             _email = email;
+            _userService = userService;
+            _communicationService = communicationService;
             _logger = logger;
+            _activityService = activityService;
+            _notificationService = notificationService;
         }
 
         public async Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default)
@@ -60,7 +72,7 @@ namespace GHCAA.Infrastructure.Services
                 EmergencyContactPhone = dto.EmergencyContactPhone,
                 HSCAdmissionYear = dto.HSCAdmissionYear,
                 GHCAdmissionYear = dto.GHCAdmissionYear,
-                LastDegreeFromGHC = Enum.Parse<Enums.Degree>(dto.LastDegreeFromGHC),
+                LastCertificateFromGHC = dto.LastDegreeFromGHC,
                 SubjectGroup = dto.SubjectGroup,
                 GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear,
                 ProfessionalSector = dto.ProfessionalSector,
@@ -120,6 +132,361 @@ namespace GHCAA.Infrastructure.Services
                 Message = $"Status: {m.Status}",
                 EmailSent = !string.IsNullOrEmpty(m.Email)
             };
+        }
+
+        public async Task<bool> VerifyEmailAsync(string email, string otpCode, CancellationToken cancellationToken = default)
+        {
+            // Verify OTP
+            var isValid = await _otp.VerifyOtpAsync(email, otpCode, cancellationToken);
+            if (!isValid)
+            {
+                _logger.LogWarning("Invalid OTP attempt for email {Email}", email);
+                return false;
+            }
+
+            // Update member's email verification status
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Email == email, cancellationToken);
+            if (member == null)
+            {
+                _logger.LogWarning("Member not found for email {Email}", email);
+                return false;
+            }
+
+            member.EmailVerified = true;
+            await _db.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Email verified for MemberId {MemberId}", member.Id);
+            return true;
+        }
+
+        public async Task<ApproveMemberResultDto> ApproveMemberAsync(int memberId, int approvedByAdminId, CancellationToken cancellationToken = default)
+        {
+            // Find member
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null)
+            {
+                _logger.LogWarning("Approval failed: Member {MemberId} not found", memberId);
+                throw new KeyNotFoundException($"Member with ID {memberId} not found");
+            }
+
+            // Validate status
+            if (member.Status != Enums.MembershipStatus.Applied)
+            {
+                _logger.LogWarning("Approval failed: Member {MemberId} has status {Status}, expected Applied", memberId, member.Status);
+                throw new InvalidOperationException($"Member must have 'Applied' status to be approved. Current status: {member.Status}");
+            }
+
+            // Generate membership number: GHC-{PassingYear}-{Serial}
+            var passingYear = member.GHCLastCertificatePassingYear;
+            var existingMembersCount = await _db.Members
+                .Where(m => m.GHCLastCertificatePassingYear == passingYear && m.MembershipNumber != null)
+                .CountAsync(cancellationToken);
+            
+            var serial = (existingMembersCount + 1).ToString("D4"); // 4-digit zero-padded
+            var membershipNumber = $"GHC-{passingYear}-{serial}";
+
+            // Update member
+            member.Status = Enums.MembershipStatus.Active;
+            member.MembershipNumber = membershipNumber;
+            member.ApprovedDate = DateTime.UtcNow;
+            member.ApprovedBy = approvedByAdminId;
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            await _activityService.LogActivityAsync(memberId, "Approved", $"Member approved by Admin {approvedByAdminId}. Membership Number: {membershipNumber}", approvedByAdminId, cancellationToken: cancellationToken);
+
+            _logger.LogInformation("Member {MemberId} approved by Admin {AdminId}. Membership Number: {MembershipNumber}", 
+                memberId, approvedByAdminId, membershipNumber);
+
+            // Create user account
+            var defaultPassword = _userService.GenerateDefaultPassword();
+            await _userService.CreateUserAccountAsync(memberId, membershipNumber, defaultPassword, cancellationToken);
+
+            // Send Welcome Email
+            try
+            {
+                var customVars = new Dictionary<string, string> { { "DefaultPassword", defaultPassword } };
+                await _activityService.LogActivityAsync(memberId, "EmailSent", "Welcome email with credentials sent to member.", approvedByAdminId, cancellationToken: cancellationToken);
+                await _communicationService.SendIndividualEmailAsync(memberId, "WELCOME_EMAIL", customVars, cancellationToken);
+                
+                // Add System Notification
+                await _notificationService.CreateNotificationAsync(memberId, "Welcome to GHCAA!", "Your membership has been approved. You can now access the full portal.", "Approval", "/portal/dashboard", cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send welcome email to member {MemberId}", memberId);
+                // We don't throw here as the approval and account creation were successful
+            }
+
+            return new ApproveMemberResultDto
+            {
+                MembershipNumber = membershipNumber,
+                DefaultPassword = defaultPassword
+            };
+        }
+
+        public async Task<bool> RejectMemberAsync(int id, int adminId, string reason, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FindAsync(new object[] { id }, cancellationToken);
+            if (member == null) return false;
+
+            if (member.Status != Enums.MembershipStatus.Applied)
+                throw new InvalidOperationException("Only pending registrations can be rejected.");
+
+            // Remove registry filing or archive it? 
+            // Better to remove it so they can re-register if it was a data error.
+            _db.Members.Remove(member);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Notify user via email
+            await _email.SendEmailAsync(member.Email, "GHCAA Application Update", 
+                $"Dear {member.FullName}, your registry application was not approved for the following reason: {reason}. You are welcome to submit a new application with updated data.");
+
+            _logger.LogWarning("Admin {AdminId} rejected application {MemberId} for: {Reason}", adminId, id, reason);
+            return true;
+        }
+
+        public async Task<MemberProfileDto?> GetProfileAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null) return null;
+
+            return new MemberProfileDto
+            {
+                Id = member.Id,
+                FullName = member.FullName,
+                Email = member.Email,
+                MobileNo = member.MobileNo,
+                MembershipNumber = member.MembershipNumber,
+                Status = member.Status,
+                GHCLastCertificatePassingYear = member.GHCLastCertificatePassingYear,
+                LastCertificateFromGHC = member.LastCertificateFromGHC,
+                SubjectGroup = member.SubjectGroup,
+                ProfessionalSector = member.ProfessionalSector,
+                Designation = member.Designation,
+                PhotoPath = member.PhotoPath,
+                PresentAddress = member.PresentAddress,
+                PermanentAddress = member.PermanentAddress,
+                BloodGroup = member.BloodGroup,
+                MembershipType = member.MembershipType,
+                Category = member.Category,
+                ECPosition = member.ECPosition,
+                FatherName = member.FatherName,
+                MotherName = member.MotherName,
+                DateOfBirth = member.DateOfBirth,
+                Gender = member.Gender,
+                NID = member.NID,
+                EmergencyContactName = member.EmergencyContactName,
+                EmergencyContactRelation = member.EmergencyContactRelation,
+                EmergencyContactPhone = member.EmergencyContactPhone,
+                HSCAdmissionYear = member.HSCAdmissionYear,
+                GHCAdmissionYear = member.GHCAdmissionYear,
+                CertificatePath = member.CertificatePath,
+                IsMobilePublic = member.IsMobilePublic,
+                IsEmailPublic = member.IsEmailPublic,
+                IsAddressPublic = member.IsAddressPublic
+            };
+        }
+
+        public async Task<bool> UpdateProfileAsync(int memberId, UpdateProfileDto dto, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null) return false;
+
+            member.PresentAddress = dto.PresentAddress;
+            member.PermanentAddress = dto.PermanentAddress;
+            member.ProfessionalSector = dto.ProfessionalSector;
+            member.Designation = dto.Designation;
+            member.SubjectGroup = dto.SubjectGroup;
+            member.LastCertificateFromGHC = dto.LastDegreeFromGHC;
+            member.GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear;
+            member.IsMobilePublic = dto.IsMobilePublic;
+            member.IsEmailPublic = dto.IsEmailPublic;
+            member.IsAddressPublic = dto.IsAddressPublic;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Profile updated for member {MemberId}", memberId);
+            await _activityService.LogActivityAsync(memberId, "ProfileUpdate", "Member updated their profile information.", memberId, cancellationToken: cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> ArchiveMemberAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null) return false;
+
+            member.IsArchived = true;
+            
+            // Also archive the associated user if exists
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
+            if (user != null)
+            {
+                user.IsArchived = true;
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+            await _activityService.LogActivityAsync(memberId, "Archived", "Member archived (soft deleted).", cancellationToken: cancellationToken);
+            _logger.LogInformation("Member {MemberId} archived (soft delete)", memberId);
+            return true;
+        }
+
+        public async Task<bool> RestoreMemberAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            // Must use IgnoreQueryFilters to see archived records
+            var member = await _db.Members.IgnoreQueryFilters().FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null) return false;
+
+            member.IsArchived = false;
+
+            var user = await _db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
+            if (user != null)
+            {
+                user.IsArchived = false;
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+            await _activityService.LogActivityAsync(memberId, "Restored", "Member record restored from archives.", cancellationToken: cancellationToken);
+            _logger.LogInformation("Member {MemberId} restored", memberId);
+            return true;
+        }
+
+        public async Task<bool> ReactivateMemberAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
+            if (member == null) return false;
+
+            member.Status = Enums.MembershipStatus.Active;
+            await _db.SaveChangesAsync(cancellationToken);
+            await _activityService.LogActivityAsync(memberId, "Reactivated", "Member reactivated to Active status.", cancellationToken: cancellationToken);
+            _logger.LogInformation("Member {MemberId} reactivated to Active status", memberId);
+            return true;
+        }
+
+        public async Task<object?> GetMemberDocumentsAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
+            if (member == null) return null;
+
+            return new
+            {
+                Photo = member.PhotoPath,
+                Certificate = member.CertificatePath,
+                PaymentProof = member.PaymentProofPath
+            };
+        }
+
+        public async Task<object> GetDashboardStatsAsync(CancellationToken cancellationToken = default)
+        {
+            var totalMembers = await _db.Members.CountAsync(m => !m.IsArchived, cancellationToken);
+            var applied = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Applied && !m.IsArchived, cancellationToken);
+            var active = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived, cancellationToken);
+            var inactive = await _db.Members.CountAsync(m => (m.Status == Enums.MembershipStatus.InactivePayment || m.Status == Enums.MembershipStatus.InactiveResigned) && !m.IsArchived, cancellationToken);
+            
+            var totalCollection = await _db.FinancialRecords
+                .Where(r => r.RecordType == Enums.FinancialRecordType.Income)
+                .SumAsync(r => r.Amount, cancellationToken);
+            
+            var totalExpense = await _db.FinancialRecords
+                .Where(r => r.RecordType == Enums.FinancialRecordType.Expense)
+                .SumAsync(r => r.Amount, cancellationToken);
+
+            return new
+            {
+                TotalMembers = totalMembers,
+                Applied = applied,
+                Active = active,
+                Inactive = inactive,
+                Balance = totalCollection - totalExpense,
+                LastUpdated = DateTime.UtcNow
+            };
+        }
+
+        public async Task<IEnumerable<MemberProfileDto>> GetAllMembersAsync(bool includeArchived = false, CancellationToken cancellationToken = default)
+        {
+            IQueryable<Member> query = _db.Members;
+            
+            if (includeArchived)
+            {
+                query = query.IgnoreQueryFilters();
+            }
+
+            return await query.Select(member => new MemberProfileDto
+            {
+                Id = member.Id,
+                FullName = member.FullName,
+                Email = member.Email,
+                MobileNo = member.MobileNo,
+                MembershipNumber = member.MembershipNumber,
+                Status = member.Status,
+                GHCLastCertificatePassingYear = member.GHCLastCertificatePassingYear,
+                LastCertificateFromGHC = member.LastCertificateFromGHC,
+                SubjectGroup = member.SubjectGroup,
+                ProfessionalSector = member.ProfessionalSector,
+                Designation = member.Designation,
+                PhotoPath = member.PhotoPath,
+                PresentAddress = member.PresentAddress,
+                PermanentAddress = member.PermanentAddress,
+                BloodGroup = member.BloodGroup,
+                MembershipType = member.MembershipType,
+                Category = member.Category,
+                ECPosition = member.ECPosition,
+                FatherName = member.FatherName,
+                MotherName = member.MotherName,
+                DateOfBirth = member.DateOfBirth,
+                Gender = member.Gender,
+                NID = member.NID,
+                EmergencyContactName = member.EmergencyContactName,
+                EmergencyContactRelation = member.EmergencyContactRelation,
+                EmergencyContactPhone = member.EmergencyContactPhone,
+                HSCAdmissionYear = member.HSCAdmissionYear,
+                GHCAdmissionYear = member.GHCAdmissionYear,
+                CertificatePath = member.CertificatePath,
+                IsMobilePublic = member.IsMobilePublic,
+                IsEmailPublic = member.IsEmailPublic,
+                IsAddressPublic = member.IsAddressPublic
+            }).ToListAsync(cancellationToken);
+        }
+
+        public async Task<bool> AdminUpdateMemberAsync(int id, AdminMemberUpdateDto dto, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FindAsync(new object[] { id }, cancellationToken);
+            if (member == null) return false;
+
+            member.FullName = dto.FullName;
+            member.FatherName = dto.FatherName;
+            member.MotherName = dto.MotherName;
+            member.DateOfBirth = dto.DateOfBirth;
+            member.NID = dto.NID;
+            member.MobileNo = dto.MobileNo;
+            member.Email = dto.Email;
+            member.PresentAddress = dto.PresentAddress;
+            member.PermanentAddress = dto.PermanentAddress;
+            member.HSCAdmissionYear = dto.HSCAdmissionYear;
+            member.GHCAdmissionYear = dto.GHCAdmissionYear;
+            member.LastCertificateFromGHC = dto.LastCertificateFromGHC;
+            member.SubjectGroup = dto.SubjectGroup;
+            member.GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear;
+            member.ProfessionalSector = dto.ProfessionalSector;
+            member.Designation = dto.Designation;
+            member.MembershipNumber = dto.MembershipNumber;
+
+            if (Enum.TryParse<Enums.MembershipType>(dto.MembershipType, true, out var mType))
+                member.MembershipType = mType;
+
+            if (Enum.TryParse<Enums.MemberCategory>(dto.Category, true, out var mCat))
+                member.Category = mCat;
+            
+            if (Enum.TryParse<Enums.ECPosition>(dto.ECPosition, true, out var ecPos))
+                member.ECPosition = ecPos;
+
+            member.IsMobilePublic = dto.IsMobilePublic;
+            member.IsEmailPublic = dto.IsEmailPublic;
+            member.IsAddressPublic = dto.IsAddressPublic;
+            member.LastUpdateDate = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Member {MemberId} information updated by Admin", id);
+            return true;
         }
     }
 }

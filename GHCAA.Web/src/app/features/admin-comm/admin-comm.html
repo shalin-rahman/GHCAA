@@ -1,0 +1,128 @@
+<div class="admin-feature">
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Association Communications</h2>
+            <p>Broadcast announcements and manage email ecosystem.</p>
+        </div>
+    </div>
+
+    <div class="tab-nav">
+        <button [class.active]="activeTab() === 'send'" (click)="activeTab.set('send')">Broadcast Message</button>
+        <button [class.active]="activeTab() === 'templates'" (click)="activeTab.set('templates')">Email
+            Templates</button>
+    </div>
+
+    @if (activeTab() === 'send') {
+    <div class="glass-card broadcast-panel reveal-top">
+        <h3>Initiate Broadcast</h3>
+        <div class="broadcast-form">
+            <div class="form-group">
+                <label>Target Audience</label>
+                <div class="radio-grid">
+                    <label class="radio-item">
+                        <input type="radio" [(ngModel)]="sendOptions.method" value="batch">
+                        <span>Specific Batch</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" [(ngModel)]="sendOptions.method" value="type">
+                        <span>Membership Type</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" [(ngModel)]="sendOptions.method" value="custom">
+                        <span>Custom Broadcast</span>
+                    </label>
+                </div>
+            </div>
+
+            @if (sendOptions.method === 'batch') {
+            <div class="form-group">
+                <label>Select Batch Year</label>
+                <select [(ngModel)]="sendOptions.target">
+                    <option value="">Select Passing Year</option>
+                    @for (year of years; track year) {
+                    <option [value]="year">{{ year }}</option>
+                    }
+                </select>
+            </div>
+            }
+
+            @if (sendOptions.method === 'type') {
+            <div class="form-group">
+                <label>Select Membership Level</label>
+                <select [(ngModel)]="sendOptions.target">
+                    <option value="">All Active Members</option>
+                    <option value="General">General</option>
+                    <option value="Life">Life Member</option>
+                    <option value="Executive">Executive Committee</option>
+                    <option value="Associate">Associate</option>
+                </select>
+            </div>
+            }
+
+            @if (sendOptions.method !== 'custom') {
+            <div class="form-group">
+                <label>Email Template</label>
+                <select [(ngModel)]="sendOptions.templateCode">
+                    <option value="">Select Template</option>
+                    @for (t of templates(); track t.id) {
+                    <option [value]="t.code">{{ t.description }} ({{ t.subject }})</option>
+                    }
+                </select>
+                <small class="hint">Variable fields like {{ '{' }}MemberName{{ '}' }} will be auto-populated.</small>
+            </div>
+            } @else {
+            <div class="form-group">
+                <label>Target Emails (Comma separated)</label>
+                <textarea [(ngModel)]="sendOptions.target" rows="3"
+                    placeholder="example1@mail.com, example2@mail.com..."></textarea>
+                <small class="hint">Leave empty to target all active members.</small>
+            </div>
+            <div class="form-group">
+                <label>Subject Line</label>
+                <input type="text" [(ngModel)]="sendOptions.customSubject" placeholder="Enter email subject">
+            </div>
+            <div class="form-group">
+                <label>Message Body (HTML Supported)</label>
+                <textarea [(ngModel)]="sendOptions.customBody" rows="10"
+                    placeholder="Compose your manual message..."></textarea>
+            </div>
+            }
+
+            <div class="form-actions">
+                <button class="btn btn-primary btn-lg" (click)="sendMessage()" [disabled]="sending()">
+                    {{ sending() ? 'Broadcasting...' : '🚀 Launch Broadcast' }}
+                </button>
+                <p class="warning">⚠️ This action will send emails to multiple members. Verify content before sending.
+                </p>
+            </div>
+        </div>
+    </div>
+    } @else {
+    <div class="glass-card templates-panel reveal-top">
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Template Code</th>
+                        <th>Description</th>
+                        <th>Subject</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (t of templates(); track t.id) {
+                    <tr>
+                        <td><code>{{ t.code }}</code></td>
+                        <td>{{ t.description }}</td>
+                        <td>{{ t.subject }}</td>
+                        <td>
+                            <button class="icon-btn">✏️ Edit</button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+</div>

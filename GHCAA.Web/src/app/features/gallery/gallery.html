@@ -1,0 +1,55 @@
+<div class="gallery-page">
+    <div class="header">
+        <h2>Event Gallery</h2>
+        <p>Capturing the spirit of Haragangians across generations</p>
+    </div>
+
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Developing memories...</p>
+    </div>
+    } @else {
+    <div class="gallery-grid">
+        @for (g of galleries(); track g.id) {
+        <div class="gallery-card glass-card" (click)="selectedGallery.set(g)">
+            <div class="card-img"
+                [style.background-image]="'url(' + (g.photos[0]?.photoPath || '/assets/logo.jpg') + ')'">
+                <div class="photo-count">{{ g.photos.length }} Photos</div>
+            </div>
+            <div class="card-body">
+                <h3>{{ g.title }}</h3>
+                <div class="meta">
+                    <span>📅 {{ g.eventDate | date }}</span>
+                    <span>📍 {{ g.location }}</span>
+                </div>
+            </div>
+        </div>
+        } @empty {
+        <div class="empty-state glass-card">
+            <p>No event galleries published yet. Check back soon for reunion photos!</p>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- Lightbox / Detail View -->
+    @if (selectedGallery(); as gallery) {
+    <div class="lightbox" (click)="selectedGallery.set(null)">
+        <div class="lightbox-content animate-slide-up" (click)="$event.stopPropagation()">
+            <div class="l-header">
+                <h3>{{ gallery.title }}</h3>
+                <button class="close-btn" (click)="selectedGallery.set(null)">✕</button>
+            </div>
+            <p class="l-desc">{{ gallery.description }}</p>
+            <div class="photo-strip">
+                @for (p of gallery.photos; track p.id) {
+                <div class="photo-wrapper">
+                    <img [src]="p.photoPath" [alt]="gallery.title" (click)="viewFull(p.photoPath)">
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+    }
+</div>

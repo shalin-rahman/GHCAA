@@ -1,0 +1,97 @@
+<div class="admin-feature">
+    <div class="page-header">
+        <div class="header-text">
+            <h2>News Management</h2>
+            <small>Create, edit, and publish news articles</small>
+        </div>
+        <button class="btn btn-primary" (click)="openForm()">+ New Post</button>
+    </div>
+
+    <!-- Create / Edit Form -->
+    @if (showForm()) {
+    <div class="glass-card form-panel">
+        <h3>{{ editingId() ? 'Edit Post' : 'Create New Post' }}</h3>
+        <form (ngSubmit)="saveNews()" class="news-form">
+            <div class="form-group">
+                <label>Title *</label>
+                <input type="text" [(ngModel)]="form.title" name="title" required placeholder="Article headline">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select [(ngModel)]="form.category" name="category">
+                        @for (c of categories; track c.value) {
+                        <option [value]="c.value">{{ c.label }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Image URL (optional)</label>
+                    <input type="text" [(ngModel)]="form.imageUrl" name="imageUrl" placeholder="https://...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Content *</label>
+                <textarea [(ngModel)]="form.content" name="content" rows="8" required
+                    placeholder="Write article content..."></textarea>
+            </div>
+            <div class="form-group toggle-row">
+                <label class="toggle-label">
+                    <input type="checkbox" [(ngModel)]="form.isActive" name="isActive">
+                    <span class="toggle-switch"></span>
+                    Publish immediately
+                </label>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                    {{ saving() ? 'Saving...' : (editingId() ? 'Update Post' : 'Publish Post') }}
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="cancelForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- News Table -->
+    <div class="glass-card table-wrap">
+        @if (loading()) {
+        <div class="loading-state">Loading news posts...</div>
+        } @else if (newsList().length === 0) {
+        <div class="empty-state">
+            <span>📰</span>
+            <p>No news articles yet.</p>
+            <button class="btn btn-primary" (click)="openForm()">Create First Post</button>
+        </div>
+        } @else {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (post of newsList(); track post.id) {
+                <tr>
+                    <td class="title-cell">{{ post.title }}</td>
+                    <td><span class="pill">{{ getCategoryLabel(post.category) }}</span></td>
+                    <td>
+                        <span class="status-badge" [class.active]="post.isActive" [class.inactive]="!post.isActive">
+                            {{ post.isActive ? 'Published' : 'Draft' }}
+                        </span>
+                    </td>
+                    <td>{{ post.createdAt | date:'mediumDate' }}</td>
+                    <td class="actions-cell">
+                        <button class="icon-btn" (click)="editPost(post)" title="Edit">✏️</button>
+                        <button class="icon-btn" (click)="deletePost(post.id)" title="Delete">🗑️</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>

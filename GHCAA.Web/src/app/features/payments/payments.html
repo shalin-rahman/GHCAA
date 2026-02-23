@@ -1,0 +1,112 @@
+<div class="payments-page">
+    <div class="header">
+        <div class="title-group">
+            <h2>Fees & Dues</h2>
+            <p>Manage your membership contributions and annual fees.</p>
+        </div>
+        <button class="btn btn-primary" (click)="openPayModal()">
+            <span class="icon">➕</span> Record New Payment
+        </button>
+    </div>
+
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Gathering financial history...</p>
+    </div>
+    } @else {
+    <!-- Outstanding Dues -->
+    <div class="section">
+        <h3>Pending Dues</h3>
+        <div class="dues-grid">
+            @for (due of dues(); track due.id) {
+            @if (!due.isPaid) {
+            <div class="glass-card due-card reveal-top">
+                <div class="due-header">
+                    <span class="year">{{ due.year }}</span>
+                    <span class="type">Annual Fee</span>
+                </div>
+                <div class="amount">৳ {{ due.amount | number }}</div>
+                <div class="due-footer">
+                    <button class="btn btn-accent btn-sm" (click)="openPayModal(due)">Pay Now</button>
+                </div>
+            </div>
+            }
+            } @empty {
+            <div class="glass-card empty-card full-width">
+                <span class="icon">✅</span>
+                <p>No outstanding dues. You are all set!</p>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="section">
+        <h3>Recent Transactions</h3>
+        <div class="glass-card table-wrap reveal-bottom">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Transaction ID</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (p of history(); track p.id) {
+                    <tr>
+                        <td>{{ p.paidAt | date:'mediumDate' }}</td>
+                        <td><code>{{ p.transactionId }}</code></td>
+                        <td class="amount">৳ {{ p.amount | number }}</td>
+                        <td>
+                            <span class="status-pill" [class]="getStatusClass(p.status)">
+                                {{ getStatusLabel(p.status) }}
+                            </span>
+                        </td>
+                        <td class="notes">{{ p.notes || '—' }}</td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="5" class="empty-row">No payment history found.</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+</div>
+
+<!-- Payment Modal -->
+@if (showPayModal()) {
+<div class="modal-overlay" (click)="showPayModal.set(false)">
+    <div class="modal-box glass-card reveal-top" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Record Payment</h3>
+            <button class="close-btn" (click)="showPayModal.set(false)">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Amount (৳)</label>
+                <input type="number" [(ngModel)]="paymentForm.amount" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label>Transaction ID (bKash/Bank/Nagad) *</label>
+                <input type="text" [(ngModel)]="paymentForm.transactionId" placeholder="e.g. 8K029SXL">
+            </div>
+            <div class="form-group">
+                <label>Notes / Purpose</label>
+                <textarea [(ngModel)]="paymentForm.notes" rows="3" placeholder="e.g. Annual Dues 2024"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="showPayModal.set(false)">Cancel</button>
+            <button class="btn btn-primary" (click)="submitPayment()" [disabled]="!paymentForm.transactionId">Submit for
+                Verification</button>
+        </div>
+    </div>
+</div>
+}

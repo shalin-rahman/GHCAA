@@ -1,0 +1,300 @@
+<div class="admin-feature">
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Member Registry</h2>
+            <small>{{ filteredMembers().length }} of {{ allMembers().length }} members shown</small>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar glass-card">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                placeholder="Search by name, email, membership no…" class="search-input">
+        </div>
+        <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)" class="status-select">
+            @for (s of statusOptions; track s.value) {
+            <option [value]="s.value">{{ s.label }}</option>
+            }
+        </select>
+    </div>
+
+    <!-- Table -->
+    <div class="glass-card table-wrap">
+        @if (loading()) {
+        <div class="loading-state">Loading members...</div>
+        } @else if (filteredMembers().length === 0) {
+        <div class="empty-state">
+            <span>👥</span>
+            <p>No members match your filters.</p>
+        </div>
+        } @else {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Membership No.</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (member of filteredMembers(); track member.id) {
+                <tr>
+                    <td class="member-cell" (click)="openDetail(member)">
+                        <div class="member-avatar">{{ member.fullName?.[0] }}</div>
+                        <div class="member-info">
+                            <span class="member-name">{{ member.fullName }}</span>
+                            <small>{{ member.email }}</small>
+                        </div>
+                    </td>
+                    <td>{{ member.membershipNumber || '—' }}</td>
+                    <td>
+                        <span class="status-badge" [class]="getStatusClass(member.status)">
+                            {{ getStatusLabel(member.status) }}
+                        </span>
+                    </td>
+                    <td>{{ member.ghcLastCertificatePassingYear || '—' }}</td>
+                    <td class="actions-cell">
+                        @if (member.status === 0) {
+                        <button class="icon-btn approve" (click)="approveMember(member.id, 1)"
+                            title="Approve">✅</button>
+                        }
+                        @if (nav.isSuperAdmin()) {
+                        <button class="icon-btn archive" (click)="archiveMember(member.id)" title="Archive">🗄️</button>
+                        }
+                        <button class="icon-btn contact" (click)="contactMember(member.email)"
+                            title="Contact">📨</button>
+                        <button class="icon-btn detail" (click)="openDetail(member)" title="View">👁️</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>
+
+<!-- Member Detail Modal -->
+@if (selectedMember()) {
+<div class="modal-overlay" (click)="closeDetail()">
+    <div class="modal-box glass-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            @if (selectedMember()?.photoPath) {
+            <img [src]="selectedMember().photoPath" class="modal-avatar photo" alt="Photo">
+            } @else {
+            <div class="modal-avatar">{{ selectedMember()?.fullName?.[0] }}</div>
+            }
+            <div class="header-info">
+                @if (isEditing()) {
+                <input type="text" [(ngModel)]="selectedMember().fullName" class="edit-input title-input">
+                <input type="text" [(ngModel)]="selectedMember().membershipNumber" class="edit-input sub-input"
+                    placeholder="Membership Number">
+                } @else {
+                <h3>{{ selectedMember()?.fullName }}</h3>
+                <small>{{ selectedMember()?.membershipNumber || 'Pending Membership No.' }}</small>
+                }
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn edit-btn" (click)="toggleEdit()" [title]="isEditing() ? 'Cancel' : 'Edit'">
+                    {{ isEditing() ? '✕' : '✏️' }}
+                </button>
+                <button class="close-btn" (click)="closeDetail()">✕</button>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div class="detail-grid">
+                <!-- Personal -->
+                <div class="detail-item">
+                    <label>Email</label>
+                    <input *ngIf="isEditing()" type="email" [(ngModel)]="selectedMember().email">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.email }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Mobile</label>
+                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().mobileNo">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.mobileNo }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Status</label>
+                    <span class="status-badge" [class]="getStatusClass(selectedMember()?.status)">
+                        {{ getStatusLabel(selectedMember()?.status) }}
+                    </span>
+                </div>
+                <!-- Identity -->
+                <div class="detail-item">
+                    <label>Father's Name</label>
+                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().fatherName">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.fatherName }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Mother's Name</label>
+                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().motherName">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.motherName }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Date of Birth</label>
+                    <input *ngIf="isEditing()" type="date" [ngModel]="selectedMember().dateOfBirth | date:'yyyy-MM-dd'"
+                        (ngModelChange)="selectedMember().dateOfBirth = $event">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.dateOfBirth | date }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>NID</label>
+                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().nid">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.nid }}</span>
+                </div>
+
+                <!-- Membership Settings -->
+                <div class="detail-item">
+                    <label>Membership Type</label>
+                    <select *ngIf="isEditing()" [(ngModel)]="selectedMember().membershipType">
+                        @for (t of membershipTypes; track t.value) {
+                        <option [value]="t.value">{{ t.label }}</option>
+                        }
+                    </select>
+                    <span *ngIf="!isEditing()" class="badge info">{{ selectedMember()?.membershipType }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Special Category</label>
+                    <select *ngIf="isEditing()" [(ngModel)]="selectedMember().category">
+                        @for (c of memberCategories; track c.value) {
+                        <option [value]="c.value">{{ c.label }}</option>
+                        }
+                    </select>
+                    <span
+                        *ngIf="!isEditing() && selectedMember()?.category !== 'None' && selectedMember()?.category !== 0"
+                        class="badge" [class.lifelong]="getCategoryLabel(selectedMember()?.category) === 'Lifelong'"
+                        [class.donor]="getCategoryLabel(selectedMember()?.category) === 'Donor'"
+                        [class.patron]="getCategoryLabel(selectedMember()?.category) === 'Patron'">{{
+                        getCategoryLabel(selectedMember()?.category) }}</span>
+                    <span
+                        *ngIf="!isEditing() && (selectedMember()?.category === 'None' || selectedMember()?.category === 0)"
+                        class="text-muted">None</span>
+                </div>
+                <div class="detail-item">
+                    <label>EC Position</label>
+                    <select *ngIf="isEditing()" [(ngModel)]="selectedMember().ecPosition">
+                        @for (p of ecPositions; track p.value) {
+                        <option [value]="p.value">{{ p.label }}</option>
+                        }
+                    </select>
+                    <span *ngIf="!isEditing()" class="badge accent">{{ selectedMember()?.ecPosition || 'None' }}</span>
+                </div>
+
+                <div class="detail-item full">
+                    <label>Present Address</label>
+                    <textarea *ngIf="isEditing()" [(ngModel)]="selectedMember().presentAddress"></textarea>
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.presentAddress }}</span>
+                </div>
+                <div class="detail-item full">
+                    <label>Permanent Address</label>
+                    <textarea *ngIf="isEditing()" [(ngModel)]="selectedMember().permanentAddress"></textarea>
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.permanentAddress }}</span>
+                </div>
+
+                <!-- Academic -->
+                <div class="detail-item">
+                    <label>Last Degree from GHC</label>
+                    <input *ngIf="isEditing()" type="text" list="degree-list"
+                        [(ngModel)]="selectedMember().lastCertificateFromGHC">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.lastCertificateFromGHC }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Subject/Group</label>
+                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().subjectGroup">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.subjectGroup }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Passing Year</label>
+                    <input *ngIf="isEditing()" type="number" list="years-list"
+                        [(ngModel)]="selectedMember().ghcLastCertificatePassingYear">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.ghcLastCertificatePassingYear }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>HSC Admission Year</label>
+                    <input *ngIf="isEditing()" type="number" list="years-list"
+                        [(ngModel)]="selectedMember().hscAdmissionYear">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.hscAdmissionYear }}</span>
+                </div>
+
+                <!-- Professional -->
+                <div class="detail-item">
+                    <label>Professional Sector</label>
+                    <input *ngIf="isEditing()" type="text" list="sector-list"
+                        [(ngModel)]="selectedMember().professionalSector">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.professionalSector }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Designation</label>
+                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().designation">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.designation }}</span>
+                </div>
+
+                <!-- Emergency -->
+                <div class="detail-item">
+                    <label>Emergency Contact</label>
+                    <div *ngIf="isEditing()" class="flex-row">
+                        <input type="text" [(ngModel)]="selectedMember().emergencyContactName" placeholder="Name">
+                        <input type="text" [(ngModel)]="selectedMember().emergencyContactRelation"
+                            placeholder="Relation">
+                    </div>
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.emergencyContactName }} ({{
+                        selectedMember()?.emergencyContactRelation }})</span>
+                </div>
+                <div class="detail-item">
+                    <label>Emergency Phone</label>
+                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().emergencyContactPhone">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.emergencyContactPhone }}</span>
+                </div>
+
+                <!-- Privacy Checks -->
+                <div class="detail-item full privacy-grid">
+                    <label>Privacy Settings</label>
+                    <div class="checks">
+                        <label><input type="checkbox" [(ngModel)]="selectedMember().isMobilePublic"
+                                [disabled]="!isEditing()"> Public Mobile</label>
+                        <label><input type="checkbox" [(ngModel)]="selectedMember().isEmailPublic"
+                                [disabled]="!isEditing()"> Public Email</label>
+                        <label><input type="checkbox" [(ngModel)]="selectedMember().isAddressPublic"
+                                [disabled]="!isEditing()"> Public Address</label>
+                    </div>
+                    <!-- Attachments (Read Only) -->
+                    <div class="detail-item full docs-section"
+                        style="margin-top: 1rem; border-top: 1px solid var(--glass-border); padding-top: 1rem;">
+                        <label>Registry Attachments</label>
+                        <div class="doc-links" style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                            <a *ngIf="selectedMember()?.certificatePath" [href]="selectedMember().certificatePath"
+                                target="_blank" class="doc-link"
+                                style="color: var(--primary-color); text-decoration: none; font-size: 0.85rem; font-weight: 700;">📜
+                                Qualification Certificate</a>
+                            <a *ngIf="selectedMember()?.paymentProofPath" [href]="selectedMember().paymentProofPath"
+                                target="_blank" class="doc-link"
+                                style="color: var(--primary-color); text-decoration: none; font-size: 0.85rem; font-weight: 700;">💳
+                                Fee Receipt</a>
+                            <span *ngIf="!selectedMember()?.certificatePath && !selectedMember()?.paymentProofPath"
+                                class="text-muted">No documents uploaded.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" *ngIf="isEditing()">
+                <button class="btn btn-secondary" (click)="toggleEdit()">Discard Changes</button>
+                <button class="btn btn-primary" (click)="saveMember()">Save Inducted Information</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datalists for Searchable Dropdowns -->
+    <datalist id="years-list">
+        <option *ngFor="let y of yearsList" [value]="y"></option>
+    </datalist>
+    <datalist id="degree-list">
+        <option *ngFor="let d of degreeOptions" [value]="d"></option>
+    </datalist>
+    <datalist id="sector-list">
+        <option *ngFor="let s of sectorOptions" [value]="s"></option>
+    </datalist>
+</div>
+}

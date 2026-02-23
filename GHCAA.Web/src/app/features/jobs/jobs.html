@@ -1,0 +1,182 @@
+<div class="jobs-page">
+    <div class="header">
+        <div class="title-group">
+            <h2>Opportunities Hub</h2>
+            <p>Careers, Mentorship, and Professional Growth</p>
+        </div>
+        <button class="btn btn-primary" (click)="showForm.set(true)" *ngIf="!showForm()">
+            <span class="icon">✨</span> Share Opportunity
+        </button>
+    </div>
+
+    @if (showForm()) {
+    <div class="glass-card form-box reveal-top">
+        <div class="form-header">
+            <h3>Share with Alumni Community</h3>
+            <button class="close-btn" (click)="showForm.set(false)">✕</button>
+        </div>
+
+        <form (submit)="postJob()" class="job-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Post Title *</label>
+                    <input type="text" [(ngModel)]="newJob.title" name="title"
+                        placeholder="e.g. Senior Software Engineer / Career Mentor" required>
+                </div>
+                <div class="form-group">
+                    <label>Organization / Company *</label>
+                    <input type="text" [(ngModel)]="newJob.companyName" name="companyName"
+                        placeholder="Where is this opportunity?" required>
+                </div>
+                <div class="form-group">
+                    <label>Work Location / Remote *</label>
+                    <input type="text" [(ngModel)]="newJob.location" name="location"
+                        placeholder="e.g. Dhaka, Remote, Global">
+                </div>
+                <div class="form-group">
+                    <label>Opportunity Category *</label>
+                    <select [(ngModel)]="newJob.category" name="category">
+                        @for (cat of categories; track cat.id) {
+                        <option [value]="cat.id">{{ cat.name }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label>Description & Scope *</label>
+                    <textarea [(ngModel)]="newJob.description" name="description" rows="4"
+                        placeholder="Describe the role or the type of guidance you can offer..."></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label>Prerequisites / Ideal Profile</label>
+                    <textarea [(ngModel)]="newJob.requirements" name="requirements" rows="3"
+                        placeholder="Who are you looking for?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Valid Until / Deadline</label>
+                    <input type="date" [(ngModel)]="newJob.deadline" name="deadline">
+                </div>
+                <div class="form-group">
+                    <label>Application / Contact Method</label>
+                    <input type="text" [(ngModel)]="newJob.applicationEmail" name="appEmail"
+                        placeholder="Email, Link, or Mobile">
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary btn-lg" [disabled]="submitting()">
+                    {{ submitting() ? 'Broadcasting...' : '🚀 Post Opportunity' }}
+                </button>
+                <button type="button" class="btn btn-secondary btn-lg" (click)="showForm.set(false)">Discard</button>
+            </div>
+        </form>
+    </div>
+    } @else {
+    <!-- Controls -->
+    <div class="controls-bar glass-card reveal-top">
+        <div class="filter-group">
+            <span class="icon">🔍</span>
+            <input type="text" placeholder="Filter by title or company..." (input)="loadJobs()">
+        </div>
+        <div class="filter-group">
+            <span class="icon">🏷️</span>
+            <select (change)="onFilterChange($event)">
+                <option value="">All Categories</option>
+                @for (cat of categories; track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <!-- Job Grid -->
+    <div class="jobs-list">
+        @if (loading()) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Scanning for opportunities...</p>
+        </div>
+        } @else {
+        <div class="grid">
+            @for (job of jobs(); track job.id) {
+            <div class="glass-card job-card reveal-card" [class.mentorship]="job.category === 7">
+                <div class="card-badges">
+                    <span class="badge cat">{{ getCategoryName(job.category) }}</span>
+                    @if (job.category === 7) {
+                    <span class="badge mentor">MENTORSHIP</span>
+                    }
+                </div>
+                <div class="card-content">
+                    <h3>{{ job.title }}</h3>
+                    <p class="meta">{{ job.companyName }} <span>•</span> {{ job.location }}</p>
+                    <p class="excerpt">{{ job.description | slice:0:120 }}{{ job.description.length > 120 ? '...' : ''
+                        }}</p>
+                </div>
+                <div class="card-footer">
+                    <div class="posted-by">
+                        <div class="mini-avatar">{{ job.postedByMemberName[0] }}</div>
+                        <span>By {{ job.postedByMemberName }}</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm" (click)="viewJob(job)">Details ↗</button>
+                </div>
+            </div>
+            } @empty {
+            <div class="empty-state glass-card full-width">
+                <div class="icon">💼</div>
+                <h3>No Open Opportunities</h3>
+                <p>Be the bridge. If you know of any job openings or want to offer mentorship, share it now!</p>
+                <button class="btn btn-primary" (click)="showForm.set(true)">Post First Opportunity</button>
+            </div>
+            }
+        </div>
+        }
+    </div>
+    }
+</div>
+
+<!-- Job Detail Modal -->
+@if (selectedJob()) {
+<div class="modal-overlay" (click)="selectedJob.set(null)">
+    <div class="modal-content glass-card reveal-top" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div class="header-main">
+                <span class="badge">{{ getCategoryName(selectedJob()!.category) }}</span>
+                <h3>{{ selectedJob()?.title }}</h3>
+            </div>
+            <button class="close-btn" (click)="selectedJob.set(null)">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="detail-hero">
+                <div class="v-item"><strong>Company/Org:</strong> {{ selectedJob()?.companyName }}</div>
+                <div class="v-item"><strong>Location:</strong> {{ selectedJob()?.location }}</div>
+                <div class="v-item" *ngIf="selectedJob()?.deadline"><strong>Deadline:</strong> {{
+                    selectedJob()?.deadline | date }}</div>
+            </div>
+
+            <div class="detail-section">
+                <h4>Description</h4>
+                <p class="long-text">{{ selectedJob()?.description }}</p>
+            </div>
+
+            <div class="detail-section" *ngIf="selectedJob()?.requirements">
+                <h4>Requirements / Prerequisites</h4>
+                <p class="long-text">{{ selectedJob()?.requirements }}</p>
+            </div>
+
+            <div class="detail-section contact-box">
+                <h4>How to Apply / Reach Out</h4>
+                <p>{{ selectedJob()?.applicationEmail || 'Contact ' + selectedJob()?.postedByMemberName + ' for more
+                    info.' }}</p>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="selectedJob.set(null)">Close</button>
+            <a [href]="'mailto:' + selectedJob()?.applicationEmail" class="btn btn-primary"
+                *ngIf="selectedJob()?.applicationEmail?.includes('@')">
+                Email Recruiter
+            </a>
+        </div>
+    </div>
+</div>
+}

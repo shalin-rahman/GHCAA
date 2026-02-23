@@ -1,0 +1,95 @@
+<div class="credentials-page">
+    <div class="header">
+        <div class="header-main">
+            <h2>Member Credentials</h2>
+            <p>Your official digital identity as a Haragangian</p>
+        </div>
+        <div class="header-btns">
+            <button class="btn btn-primary" (click)="download()">
+                <span class="icon">🪪</span> Download ID Card
+            </button>
+            <button class="btn btn-accent" (click)="downloadCert()">
+                <span class="icon">📑</span> Download Certificate
+            </button>
+        </div>
+    </div>
+
+    <div class="credentials-container" *ngIf="profile(); else loading">
+        <!-- Front View -->
+        <div class="id-card glass-card reveal-card">
+            <div class="card-header">
+                <img src="/assets/logo.jpg" alt="Logo" class="logo">
+                <div class="header-text">
+                    <h3>GHCAA</h3>
+                    <small>ALUMNI ASSOCIATION</small>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="photo-placeholder">
+                    @if (profile()?.photoPath) {
+                    <img [src]="profile()?.photoPath" alt="Profile" class="profile-img">
+                    } @else {
+                    <span>👤</span>
+                    }
+                </div>
+                <div class="details">
+                    <div class="name">{{ profile()?.fullName || 'Member Name' }}</div>
+                    <div class="role-badge">{{ getMembershipName(profile()?.membershipType) }} Member</div>
+                    <div class="meta-grid">
+                        <div class="meta-item">
+                            <span class="label">Member ID</span>
+                            <span class="value">#{{ profile()?.membershipNumber || 'PENDING' }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="label">Grad. Year</span>
+                            <span class="value">{{ profile()?.ghcLastCertificatePassingYear || 'N/A' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="qr-code">
+                    <div class="qr-box"></div>
+                    <small>VERIFY IDENTITY</small>
+                </div>
+                <div class="institution">
+                    <strong>Govt. Haraganga College</strong>
+                    <span>Est. 1938</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back View -->
+        <div class="id-card back glass-card reveal-card" style="animation-delay: 0.2s;">
+            <div class="back-content">
+                <div class="back-header">
+                    <h4>Terms & Conditions</h4>
+                    <div class="divider"></div>
+                </div>
+                <ul class="terms-list">
+                    <li>This card is non-transferable and remains the property of GHCAA.</li>
+                    <li>Loss must be reported to the IT Cell immediately.</li>
+                    <li>Valid for official GHC Alumni events and campus access.</li>
+                    <li>Bearer must uphold the association's code of ethics.</li>
+                </ul>
+                <div class="expiry-box">
+                    <strong>Valid Until</strong>
+                    <span>December 2030</span>
+                </div>
+                <div class="official-seal">
+                    <img src="/assets/logo.jpg" alt="Seal">
+                    <p>OFFICIAL SEAL</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #loading>
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Fetching your secure credentials...</p>
+        </div>
+    </ng-template>
+</div>

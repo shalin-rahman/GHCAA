@@ -1,0 +1,193 @@
+<div class="directory-page">
+    <div class="header">
+        <h2>Member Directory</h2>
+        <p>Find and connect with fellow Haragangians</p>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="glass-card filters">
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label>Name / Email</label>
+                <div class="input-with-icon">
+                    <span class="icon">🔍</span>
+                    <input type="text" [(ngModel)]="filters.query" (input)="search()" placeholder="Search by name...">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Batch / Year</label>
+                <select [(ngModel)]="filters.year" (change)="search()">
+                    <option [ngValue]="null">All Batches</option>
+                    @for (year of years; track year) {
+                    <option [ngValue]="year">{{ year }}</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Blood Group</label>
+                <select [(ngModel)]="filters.bloodGroup" (change)="search()">
+                    <option value="">All Groups</option>
+                    <option value="APositive">A+</option>
+                    <option value="ANegative">A-</option>
+                    <option value="BPositive">B+</option>
+                    <option value="BNegative">B-</option>
+                    <option value="OPositive">O+</option>
+                    <option value="ONegative">O-</option>
+                    <option value="ABPositive">AB+</option>
+                    <option value="ABNegative">AB-</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Professional Sector</label>
+                <select [(ngModel)]="filters.sector" (change)="search()">
+                    <option value="">All Sectors</option>
+                    <option value="Teaching">Teaching</option>
+                    <option value="Business">Business</option>
+                    <option value="IT">IT</option>
+                    <option value="Medical">Medical</option>
+                    <option value="Govt. Service">Govt. Service</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Law">Law</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="member-list">
+        @if (loading()) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Searching directory...</p>
+        </div>
+        } @else {
+        <div class="grid-container">
+            @for (m of members(); track m.id) {
+            <div class="glass-card member-card reveal-card">
+                <div class="member-header">
+                    <div class="avatar-container">
+                        @if (m.photoPath) {
+                        <img [src]="m.photoPath" alt="Profile" class="avatar-img">
+                        } @else {
+                        <div class="avatar">{{ m.fullName[0] }}</div>
+                        }
+                    </div>
+                    <div class="name-info">
+                        <h4>{{ m.fullName }}</h4>
+                        <span class="badge">{{ m.membershipNumber || 'Alumni' }}</span>
+                    </div>
+                </div>
+                <div class="member-body">
+                    <div class="info-item">
+                        <span class="icon">🎓</span>
+                        <span>Batch of {{ m.ghcLastCertificatePassingYear }}</span>
+                    </div>
+                    <div class="info-item" *ngIf="m.professionalSector">
+                        <span class="icon">💼</span>
+                        <span>{{ m.designation }} at {{ m.professionalSector }}</span>
+                    </div>
+                    <div class="info-item" *ngIf="m.bloodGroup">
+                        <span class="icon">🩸</span>
+                        <span>Blood Group: <strong>{{ m.bloodGroup }}</strong></span>
+                    </div>
+                    <div class="info-item" *ngIf="m.isEmailPublic && m.email">
+                        <span class="icon">📧</span>
+                        <a [href]="'mailto:' + m.email">{{ m.email }}</a>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-accent btn-sm" (click)="viewProfile(m.id)">View Full Profile</button>
+                </div>
+            </div>
+            } @empty {
+            <div class="empty-state glass-card full-width">
+                <span class="icon">🔍</span>
+                <p>No members found matching your search. Try different filters.</p>
+            </div>
+            }
+        </div>
+        }
+    </div>
+</div>
+
+<!-- Profile Detail Modal -->
+@if (selectedMember()) {
+<div class="modal-overlay" (click)="selectedMember.set(null)">
+    <div class="modal-content glass-card reveal-top" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div class="header-info">
+                <h3>Member Profile</h3>
+                <span class="badge">{{ selectedMember()?.membershipNumber || 'Alumni' }}</span>
+            </div>
+            <button class="close-btn" (click)="selectedMember.set(null)">×</button>
+        </div>
+
+        <div class="modal-body profile-viewer">
+            <div class="viewer-header">
+                <div class="viewer-avatar">
+                    @if (selectedMember()?.photoPath) {
+                    <img [src]="selectedMember()?.photoPath" alt="Profile">
+                    } @else {
+                    <div class="avatar-ph">{{ selectedMember()?.fullName[0] }}</div>
+                    }
+                </div>
+                <div class="viewer-main">
+                    <h2>{{ selectedMember()?.fullName }}</h2>
+                    <p class="role">{{ selectedMember()?.designation }} at {{ selectedMember()?.professionalSector }}
+                    </p>
+                    <div class="social-tags">
+                        <span class="tag">🎓 Batch of {{ selectedMember()?.ghcLastCertificatePassingYear }}</span>
+                        <span class="tag">🩸 {{ selectedMember()?.bloodGroup }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="viewer-grid">
+                <div class="v-section">
+                    <h4>Academic Background</h4>
+                    <div class="v-item">
+                        <span class="v-label">Degree from GHC</span>
+                        <span class="v-value">{{ selectedMember()?.lastCertificateFromGHC }}</span>
+                    </div>
+                    <div class="v-item">
+                        <span class="v-label">Subject / Group</span>
+                        <span class="v-value">{{ selectedMember()?.subjectGroup }}</span>
+                    </div>
+                </div>
+
+                <div class="v-section">
+                    <h4>Contact Information</h4>
+                    <div class="v-item">
+                        <span class="v-label">Email Address</span>
+                        <span class="v-value">
+                            @if (selectedMember()?.isEmailPublic) {
+                            <a [href]="'mailto:' + selectedMember()?.email">{{ selectedMember()?.email }}</a>
+                            } @else {
+                            <span class="private">Email Private</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="v-item">
+                        <span class="v-label">Mobile Number</span>
+                        <span class="v-value">
+                            @if (selectedMember()?.isMobilePublic) {
+                            {{ selectedMember()?.mobileNo }}
+                            } @else {
+                            <span class="private">Mobile Private</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="selectedMember.set(null)">Close</button>
+            <button class="btn btn-primary" (click)="sendMessage(selectedMember()!.memberId || selectedMember()!.id)">
+                <span class="icon">💬</span> Send Message
+            </button>
+        </div>
+    </div>
+</div>
+}
