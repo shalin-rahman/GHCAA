@@ -91,5 +91,20 @@ namespace GHCAA.Infrastructure.Services
                 Details = byCategory.ToList()
             };
         }
+
+        public async Task<byte[]> ExportRecordsAsync(int? year = null, CancellationToken cancellationToken = default)
+        {
+            var records = await GetRecordsAsync(year, null, cancellationToken);
+            
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Date,Type,Category,Amount,Description,Reference");
+
+            foreach (var r in records)
+            {
+                csv.AppendLine($"{r.Date:yyyy-MM-dd},{r.RecordType},{r.Category},{r.Amount},\"{r.Description?.Replace("\"", "\"\"")}\",\"{r.Reference?.Replace("\"", "\"\"")}\"");
+            }
+
+            return System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+        }
     }
 }

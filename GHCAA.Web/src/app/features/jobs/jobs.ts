@@ -19,15 +19,18 @@ export class Jobs implements OnInit {
   loading = signal(true);
   showForm = signal(false);
   submitting = signal(false);
+  selectedJob = signal<Job | null>(null);
 
   categories = [
-    { id: 0, name: 'IT & Technology' },
-    { id: 1, name: 'Finance & Accounts' },
-    { id: 2, name: 'Engineering' },
-    { id: 3, name: 'Marketing' },
-    { id: 4, name: 'Education' },
-    { id: 5, name: 'Healthcare' },
-    { id: 6, name: 'Other' }
+    { id: 0, name: 'IT & Software Development' },
+    { id: 1, name: 'Finance & Banking' },
+    { id: 2, name: 'Engineering & Construction' },
+    { id: 3, name: 'Marketing & Sales' },
+    { id: 4, name: 'Education & Research' },
+    { id: 5, name: 'Healthcare & Pharma' },
+    { id: 6, name: 'Govt. & Public Sector' },
+    { id: 7, name: 'Mentorship & Career Guidance' },
+    { id: 8, name: 'Other Opportunities' }
   ];
 
   newJob: any = {
@@ -57,28 +60,38 @@ export class Jobs implements OnInit {
   }
 
   postJob() {
+    if (!this.newJob.title || !this.newJob.companyName) {
+      this.notify.error('Please fill in the required fields marked with *');
+      return;
+    }
+
     this.submitting.set(true);
     this.jobService.postJob(this.newJob).subscribe({
       next: () => {
-        this.notify.success('Job opportunity posted successfully! It will be visible to all alumni.');
+        this.notify.success('Opportunity shared with the alumni community!');
         this.submitting.set(false);
         this.showForm.set(false);
         this.loadJobs();
+        // Reset form
+        this.newJob = { title: '', companyName: '', location: '', category: 0, description: '', requirements: '', deadline: '', applicationEmail: '' };
       },
       error: () => {
         this.submitting.set(false);
-        this.notify.error('Failed to post job. Please ensure all mandatory fields are filled.');
+        this.notify.error('Failed to post opportunity.');
       }
     });
   }
 
-  onCategoryChange(e: any) {
-    const cat = e.target.value;
-    this.loadJobs(cat ? Number(cat) : undefined);
+  onFilterChange(e: any) {
+    const val = e.target.value;
+    this.loadJobs(val === '' ? undefined : Number(val));
   }
 
-  getCategoryName(catId: any): string {
-    const c = this.categories.find(x => x.id == catId);
-    return c ? c.name : 'General';
+  getCategoryName(id: number): string {
+    return this.categories.find(c => c.id === id)?.name || 'General';
+  }
+
+  viewJob(job: Job) {
+    this.selectedJob.set(job);
   }
 }

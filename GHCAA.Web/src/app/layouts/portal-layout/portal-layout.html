@@ -6,7 +6,7 @@
     <!-- Sidebar -->
     <aside class="sidebar glass-effect" [class.collapsed]="isSidebarCollapsed()">
         <div class="sidebar-brand">
-            <img src="/assets/logo.jpg" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
+            <div class="brand-icon">GHC</div>
             <span class="brand-name" *ngIf="!isSidebarCollapsed()">HARAGANGIAN</span>
         </div>
 
@@ -49,8 +49,8 @@
     <main class="main-content">
         <header class="top-bar">
             <div class="left-section">
-                <button class="touch-target btn-icon toggle-btn" (click)="toggleSidebar()">
-                    <img src="/assets/logo.jpg" alt="Logo" class="mini-logo" onerror="this.style.display='none'">
+                <button class="toggle-btn" (click)="toggleSidebar()" title="Toggle Sidebar">
+                    <div class="brand-icon">GHC</div>
                 </button>
                 <div class="breadcrumbs">
                     <span class="text-muted">Portal</span>

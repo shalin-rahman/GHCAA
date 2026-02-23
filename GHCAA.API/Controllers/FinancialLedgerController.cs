@@ -61,5 +61,12 @@ namespace GHCAA.API.Controllers
             var success = await _ledgerService.DeleteRecordAsync(id, cancellationToken);
             return success ? Ok() : NotFound();
         }
+
+        [HttpGet("export/csv")]
+        public async Task<IActionResult> ExportCsv([FromQuery] int? year, CancellationToken cancellationToken)
+        {
+            var bytes = await _ledgerService.ExportRecordsAsync(year, cancellationToken);
+            return File(bytes, "text/csv", $"Ledger_{year ?? DateTime.Now.Year}.csv");
+        }
     }
 }

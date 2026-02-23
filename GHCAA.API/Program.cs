@@ -22,6 +22,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDirectoryBrowser();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSignalR();
 
 builder.Services.AddCors(options =>
 {
@@ -51,4 +52,5 @@ app.UseStaticFiles(); // serve wwwroot/uploads
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<GHCAA.API.Hubs.ChatHub>("/hubs/chat");
 app.Run();

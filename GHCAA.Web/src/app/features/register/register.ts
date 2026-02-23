@@ -21,6 +21,8 @@ export class Register {
   submitted = signal(false);
   currentStep = signal(1);
 
+  years: number[] = [];
+
   model: any = {
     FullName: '',
     FatherName: '',
@@ -33,11 +35,11 @@ export class Register {
     Email: '',
     PresentAddress: '',
     PermanentAddress: '',
-    HSCAdmissionYear: 2024,
-    GHCAdmissionYear: 2024,
+    HSCAdmissionYear: null,
+    GHCAdmissionYear: null,
     LastDegreeFromGHC: 'Bachelor',
     SubjectGroup: '',
-    GHCLastCertificatePassingYear: 2024,
+    GHCLastCertificatePassingYear: null,
     ProfessionalSector: '',
     Designation: '',
     EmergencyContactName: '',
@@ -47,6 +49,13 @@ export class Register {
 
   files: { [key: string]: File } = {};
   otpCode = '';
+
+  constructor() {
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear; i >= 1950; i--) {
+      this.years.push(i);
+    }
+  }
 
   nextStep() {
     if (this.currentStep() < 5) {
@@ -80,6 +89,7 @@ export class Register {
 
     if (this.files['photo']) formData.append('photo', this.files['photo']);
     if (this.files['certificate']) formData.append('certificate', this.files['certificate']);
+    if (this.files['paymentProof']) formData.append('paymentProof', this.files['paymentProof']);
 
     this.regService.register(formData).subscribe({
       next: () => {

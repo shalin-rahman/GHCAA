@@ -11,5 +11,6 @@ namespace GHCAA.Application.Interfaces
         Task<IEnumerable<ChatMessage>> GetChatHistoryAsync(int member1Id, int member2Id, int count = 50, CancellationToken cancellationToken = default);
         Task<IEnumerable<ChatMessage>> GetUnreadMessagesAsync(int memberId, CancellationToken cancellationToken = default);
         Task MarkAsReadAsync(int messageId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<object>> GetRecentChatsAsync(int userId, CancellationToken cancellationToken = default);
     }
 }

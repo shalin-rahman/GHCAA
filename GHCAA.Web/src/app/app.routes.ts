@@ -47,6 +47,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/digital-id/digital-id').then(m => m.DigitalId)
             },
             {
+                path: 'payments',
+                loadComponent: () => import('./features/payments/payments').then(m => m.Payments)
+            },
+            {
                 path: 'profile',
                 loadComponent: () => import('./features/profile/profile').then(m => m.Profile)
             },
@@ -101,6 +105,10 @@ export const routes: Routes = [
             {
                 path: 'news',
                 loadComponent: () => import('./features/admin-news/admin-news').then(m => m.AdminNews)
+            },
+            {
+                path: 'comm',
+                loadComponent: () => import('./features/admin-comm/admin-comm').then(m => m.AdminComm)
             },
             {
                 path: 'ledger',

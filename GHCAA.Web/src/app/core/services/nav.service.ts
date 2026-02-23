@@ -21,6 +21,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
     { path: '/portal/gallery', label: 'Event Gallery', icon: '🖼️' },
     { path: '/portal/governance', label: 'Governance', icon: '⚖️' },
     { path: '/portal/id-card', label: 'Digital ID', icon: '🆔' },
+    { path: '/portal/payments', label: 'Fees & Dues', icon: '💰' },
     { path: '/portal/profile', label: 'My Profile', icon: '👤', mobileVisible: true },
 ];
 
@@ -30,6 +31,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/approvals', label: 'Approvals', icon: '📝' },
     { path: '/admin/members', label: 'All Members', icon: '👥' },
     { path: '/admin/news', label: 'News Posts', icon: '📰' },
+    { path: '/admin/comm', label: 'Communications', icon: '✉️' },
     { path: '/admin/ledger', label: 'Financial Ledger', icon: '📖' },
 ];
 

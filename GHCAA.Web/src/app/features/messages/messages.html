@@ -1,38 +1,85 @@
-<div class="messages-page">
-    <div class="header">
-        <h2>Global Alumni Chat</h2>
-        <p>Real-time networking with Haragangians worldwide</p>
-    </div>
-
-    <div class="glass-card chat-container">
-        <div class="chat-main">
-            <div class="message-list" #scrollContainer [scrollTop]="scrollContainer.scrollHeight">
-                @for (msg of chat.messages(); track msg.id) {
-                <div class="msg-wrapper" [ngClass]="{ 'is-me': msg.isMe }">
-                    <div class="msg-avatar" *ngIf="!msg.isMe">{{ msg.sender[0] }}</div>
-                    <div class="msg-content">
-                        <div class="msg-header">
-                            <span class="sender">{{ msg.sender }}</span>
-                            <span class="time">{{ msg.time }}</span>
-                        </div>
-                        <div class="bubble">
-                            <p>{{ msg.text }}</p>
-                        </div>
-                    </div>
-                </div>
-                }
-            </div>
-
-            <div class="chat-footer">
-                <div class="input-area">
-                    <input type="text" [(ngModel)]="newMessage" (keyup.enter)="send()"
-                        placeholder="Type your message here...">
-                    <button (click)="send()" class="btn btn-primary">
-                        <span class="icon">✈️</span> Send
-                    </button>
-                </div>
-                <p class="chat-tip">Be respectful. Follow the HARAGANGIAN Code of Ethics.</p>
+<div class="messaging-layout">
+    <!-- Sidebar: Recent Chats -->
+    <aside class="chat-sidebar glass-card">
+        <div class="sidebar-header">
+            <h3>Conversations</h3>
+            <div class="search-box">
+                <input type="text" placeholder="Search people...">
             </div>
         </div>
-    </div>
+        <div class="conversation-list">
+            @for (c of chat.recentChats(); track c.userId) {
+            <div class="convo-item" [class.active]="chat.activeThreadId() === c.userId"
+                (click)="selectThread(c.userId)">
+                <div class="avatar-box">
+                    @if (c.photoPath) {
+                    <img [src]="c.photoPath" alt="Profile">
+                    } @else {
+                    <div class="avatar-ph">{{ c.fullName[0] }}</div>
+                    }
+                </div>
+                <div class="convo-info">
+                    <div class="convo-top">
+                        <span class="name">{{ c.fullName }}</span>
+                        <span class="time">{{ c.lastMessageTime | date:'shortTime' }}</span>
+                    </div>
+                    <div class="convo-bottom">
+                        <p class="last-msg" [class.unread]="!c.isRead">{{ c.lastMessage }}</p>
+                    </div>
+                </div>
+            </div>
+            } @empty {
+            <div class="empty-list">
+                <p>No recent conversations.</p>
+            </div>
+            }
+        </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="chat-viewport glass-card">
+        @if (chat.activeThreadId()) {
+        <div class="chat-header">
+            <div class="active-user">
+                <h3>{{ getOtherPartyName() }}</h3>
+                <span class="status-online">Active Now</span>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn">📞</button>
+                <button class="icon-btn">📹</button>
+            </div>
+        </div>
+
+        <div class="message-feed" #scrollMe>
+            @for (m of chat.messages(); track m.id) {
+            <div class="msg-row" [class.is-me]="m.senderId !== chat.activeThreadId()">
+                <div class="bubble">
+                    <p>{{ m.messageContent }}</p>
+                    <span class="msg-time">{{ m.sentAt | date:'shortTime' }}</span>
+                </div>
+            </div>
+            } @empty {
+            <div class="chat-start">
+                <p>No messages yet. Say hello!</p>
+            </div>
+            }
+        </div>
+
+        <div class="chat-input-area">
+            <div class="input-container">
+                <button class="icon-btn attachment">📎</button>
+                <input type="text" [(ngModel)]="newMessage" (keyup.enter)="send()" placeholder="Type a message...">
+                <button class="send-btn" (click)="send()" [disabled]="!newMessage.trim()">
+                    <span class="icon">✈️</span>
+                </button>
+            </div>
+        </div>
+        } @else {
+        <div class="no-selection">
+            <div class="illu">💬</div>
+            <h3>Select a conversation</h3>
+            <p>Pick a colleague from the list or find someone in the Directory to start chatting.</p>
+        </div>
+        }
+    </main>
 </div>

@@ -22,6 +22,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly ICommunicationService _communicationService;
         private readonly ILogger<MemberService> _logger;
         private readonly IActivityService _activityService;
+        private readonly INotificationService _notificationService;
 
         public MemberService(
             ApplicationDbContext db,
@@ -32,7 +33,8 @@ namespace GHCAA.Infrastructure.Services
             IUserService userService,
             ICommunicationService communicationService,
             ILogger<MemberService> logger,
-            IActivityService activityService)
+            IActivityService activityService,
+            INotificationService notificationService)
         {
             _db = db;
             _storage = storage;
@@ -43,6 +45,7 @@ namespace GHCAA.Infrastructure.Services
             _communicationService = communicationService;
             _logger = logger;
             _activityService = activityService;
+            _notificationService = notificationService;
         }
 
         public async Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default)
@@ -205,6 +208,9 @@ namespace GHCAA.Infrastructure.Services
                 var customVars = new Dictionary<string, string> { { "DefaultPassword", defaultPassword } };
                 await _activityService.LogActivityAsync(memberId, "EmailSent", "Welcome email with credentials sent to member.", approvedByAdminId, cancellationToken: cancellationToken);
                 await _communicationService.SendIndividualEmailAsync(memberId, "WELCOME_EMAIL", customVars, cancellationToken);
+                
+                // Add System Notification
+                await _notificationService.CreateNotificationAsync(memberId, "Welcome to GHCAA!", "Your membership has been approved. You can now access the full portal.", "Approval", "/portal/dashboard", cancellationToken);
             }
             catch (Exception ex)
             {

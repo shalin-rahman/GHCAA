@@ -1,0 +1,244 @@
+.payments-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding-bottom: 4rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+
+    h2 {
+        margin: 0;
+        font-size: 2.2rem;
+        color: var(--primary-color);
+    }
+
+    p {
+        margin: 0.5rem 0 0;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+}
+
+.section {
+    margin-bottom: 3.5rem;
+
+    h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--primary-color);
+        padding-left: 1rem;
+    }
+}
+
+/* Dues Grid */
+.dues-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.due-card {
+    padding: 1.5rem;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    text-align: center;
+
+    .due-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-bottom: 1rem;
+
+        .year {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #f59e0b;
+        }
+
+        .type {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+    }
+
+    .amount {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+    }
+}
+
+.empty-card {
+    padding: 3rem;
+    text-align: center;
+
+    .icon {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+        color: #10b981;
+    }
+
+    p {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+    }
+}
+
+/* Table */
+.table-wrap {
+    overflow-x: auto;
+    padding: 1rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--glass-border);
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.95rem;
+}
+
+.status-pill {
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+
+    &.pending {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+    }
+
+    &.success {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+    }
+
+    &.failed {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+}
+
+code {
+    background: var(--surface-color);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.amount {
+    font-weight: 700;
+}
+
+.notes {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.modal-box {
+    width: 100%;
+    max-width: 500px;
+    padding: 2rem;
+    border: 1px solid var(--glass-border);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    h3 {
+        margin: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.modal-footer {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    input,
+    textarea {
+        padding: 0.8rem;
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        background: var(--bg-color);
+        color: var(--text-main);
+        font-family: inherit;
+    }
+}
+
+@media (max-width: 600px) {
+    .header {
+        flex-direction: column;
+        gap: 1.5rem;
+
+        .btn {
+            width: 100%;
+        }
+    }
+}

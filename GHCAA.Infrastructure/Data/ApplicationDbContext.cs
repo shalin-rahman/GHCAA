@@ -27,6 +27,7 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
         public DbSet<MembershipFeeConfig> MembershipFeeConfigs { get; set; } = null!;
         public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
+        public DbSet<Notification> Notifications { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

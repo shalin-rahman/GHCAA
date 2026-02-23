@@ -12,5 +12,6 @@ namespace GHCAA.Application.Interfaces
         Task<bool> DeleteRecordAsync(int id, CancellationToken cancellationToken = default);
         
         Task<LedgerSummaryDto> GetSummaryAsync(int year, CancellationToken cancellationToken = default);
+        Task<byte[]> ExportRecordsAsync(int? year = null, CancellationToken cancellationToken = default);
     }
 }

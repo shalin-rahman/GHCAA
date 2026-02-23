@@ -38,9 +38,11 @@ export class AdminService {
     private http = inject(HttpClient);
 
     getPendingMembers(): Observable<MemberApprovalRequest[]> {
-        // Note: The original backend used MemberService.GetAllMembersAsync. 
-        // Usually admin/members.
         return this.http.get<MemberApprovalRequest[]>('/api/admin/members');
+    }
+
+    getMembers(includeArchived: boolean = false): Observable<any[]> {
+        return this.http.get<any[]>(`/api/admin/members?includeArchived=${includeArchived}`);
     }
 
     approveMember(id: number, adminId: number): Observable<any> {

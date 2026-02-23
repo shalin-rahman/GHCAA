@@ -63,5 +63,44 @@ namespace GHCAA.Infrastructure.Services
                 await _db.SaveChangesAsync(cancellationToken);
             }
         }
+
+        public async Task<IEnumerable<object>> GetRecentChatsAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var sent = _db.ChatMessages.Where(m => m.SenderId == userId).Select(m => m.ReceiverId);
+            var received = _db.ChatMessages.Where(m => m.ReceiverId == userId).Select(m => m.SenderId);
+            var otherUserIds = await sent.Union(received).Distinct().ToListAsync(cancellationToken);
+
+            var recentChats = new List<object>();
+
+            foreach (var otherId in otherUserIds)
+            {
+                var lastMsg = await _db.ChatMessages
+                    .Where(m => (m.SenderId == userId && m.ReceiverId == otherId) ||
+                                (m.SenderId == otherId && m.ReceiverId == userId))
+                    .OrderByDescending(m => m.SentAt)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                var otherMember = await _db.Members
+                    .Join(_db.Users, m => m.Id, u => u.MemberId, (m, u) => new { m, u })
+                    .Where(x => x.u.Id == otherId)
+                    .Select(x => new { x.m.FullName, x.m.PhotoPath })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (lastMsg != null)
+                {
+                    recentChats.Add(new
+                    {
+                        UserId = otherId,
+                        FullName = otherMember?.FullName ?? "Unknown Member",
+                        PhotoPath = otherMember?.PhotoPath,
+                        LastMessage = lastMsg.MessageContent,
+                        LastMessageTime = lastMsg.SentAt,
+                        IsRead = lastMsg.IsRead || lastMsg.SenderId == userId
+                    });
+                }
+            }
+
+            return recentChats.OrderByDescending(x => ((dynamic)x).LastMessageTime);
+        }
     }
 }

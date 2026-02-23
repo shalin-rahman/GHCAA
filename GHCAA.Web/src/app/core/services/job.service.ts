@@ -17,6 +17,7 @@ export interface Job {
     postedByMemberName: string;
     isClosed: boolean;
     createdAt: string;
+    applicationEmail?: string;
 }
 
 @Injectable({

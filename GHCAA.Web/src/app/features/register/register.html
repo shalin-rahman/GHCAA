@@ -139,9 +139,14 @@
                         </div>
                         <div class="form-grid">
                             <div class="form-group full-width">
-                                <label>Core Subject / Group *</label>
-                                <input type="text" [(ngModel)]="model.SubjectGroup" name="subjectGroup" required
-                                    placeholder="e.g. Science, Bangla, Commerce">
+                                <label>GHC Last Certificate's Group/Subject *</label>
+                                <select [(ngModel)]="model.SubjectGroup" name="subjectGroup" required>
+                                    <option value="" disabled selected>Select Group/Subject</option>
+                                    <option value="Science">Science</option>
+                                    <option value="Arts">Arts</option>
+                                    <option value="Commerce">Commerce</option>
+                                    <option value="NU Subjects">NU Subjects</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Highest Degree at GHC *</label>
@@ -155,18 +160,25 @@
                             </div>
                             <div class="form-group">
                                 <label>Certificate Passing Year *</label>
-                                <input type="number" [(ngModel)]="model.GHCLastCertificatePassingYear"
+                                <select [(ngModel)]="model.GHCLastCertificatePassingYear"
                                     name="ghcLastCertificatePassingYear" required>
+                                    <option [ngValue]="null" disabled selected>Select Year</option>
+                                    <option *ngFor="let year of years" [ngValue]="year">{{ year }}</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>HSC Admission Year</label>
-                                <input type="number" [(ngModel)]="model.HSCAdmissionYear" name="hscAdmissionYear"
-                                    placeholder="YYYY">
+                                <select [(ngModel)]="model.HSCAdmissionYear" name="hscAdmissionYear">
+                                    <option [ngValue]="null">Select Year (Optional)</option>
+                                    <option *ngFor="let year of years" [ngValue]="year">{{ year }}</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>GHC Admission Year</label>
-                                <input type="number" [(ngModel)]="model.GHCAdmissionYear" name="ghcAdmissionYear"
-                                    placeholder="YYYY">
+                                <select [(ngModel)]="model.GHCAdmissionYear" name="ghcAdmissionYear">
+                                    <option [ngValue]="null">Select Year (Optional)</option>
+                                    <option *ngFor="let year of years" [ngValue]="year">{{ year }}</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -181,13 +193,22 @@
                             <div class="form-grid inner-grid full-width">
                                 <div class="form-group">
                                     <label>Professional Sector *</label>
-                                    <input type="text" [(ngModel)]="model.ProfessionalSector" name="professionalSector"
-                                        required placeholder="e.g. Govt. Service, IT">
+                                    <select [(ngModel)]="model.ProfessionalSector" name="professionalSector" required>
+                                        <option value="" disabled selected>Select Sector</option>
+                                        <option value="Teaching">Teaching</option>
+                                        <option value="Business">Business</option>
+                                        <option value="IT">IT</option>
+                                        <option value="Medical">Medical</option>
+                                        <option value="Govt. Service">Govt. Service</option>
+                                        <option value="Engineering">Engineering</option>
+                                        <option value="Law">Law</option>
+                                        <option value="Other">Other</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Current Designation *</label>
+                                    <label>Current Designation & Organization *</label>
                                     <input type="text" [(ngModel)]="model.Designation" name="designation" required
-                                        placeholder="e.g. Senior Officer">
+                                        placeholder="e.g. Senior Manager, Google">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -232,6 +253,16 @@
                                     <p>{{ files['certificate'] ? files['certificate'].name : 'Drag or click to upload
                                         certificate' }}</p>
                                     @if (files['certificate']) { <span class="file-check">✓</span> }
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Payment Proof (Screenshot/PDF) *</label>
+                                <div class="file-drop" [class.has-file]="files['paymentProof']">
+                                    <input type="file" (change)="onFileSelect($event, 'paymentProof')"
+                                        accept=".pdf,image/*" required>
+                                    <p>{{ files['paymentProof'] ? files['paymentProof'].name : 'Drag or click to upload
+                                        payment proof' }}</p>
+                                    @if (files['paymentProof']) { <span class="file-check">✓</span> }
                                 </div>
                             </div>
                             <div class="form-group full-width">

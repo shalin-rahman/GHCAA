@@ -27,7 +27,11 @@ export class AdminMembers implements OnInit {
     const q = this.searchQuery().toLowerCase();
     const s = this.statusFilter();
     return this.allMembers().filter(m => {
-      const matchQ = !q || m.fullName?.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q) || m.membershipNumber?.toLowerCase().includes(q);
+      const matchQ = !q ||
+        m.fullName?.toLowerCase().includes(q) ||
+        m.email?.toLowerCase().includes(q) ||
+        m.membershipNumber?.toLowerCase().includes(q) ||
+        m.ghcLastCertificatePassingYear?.toString().includes(q);
       const matchS = s === 'all' || String(m.status) === s;
       return matchQ && matchS;
     });
@@ -45,8 +49,8 @@ export class AdminMembers implements OnInit {
 
   loadMembers() {
     this.loading.set(true);
-    this.adminService.getAllMembers().subscribe({
-      next: (data) => { this.allMembers.set(data); this.loading.set(false); },
+    this.adminService.getMembers().subscribe({
+      next: (data: any[]) => { this.allMembers.set(data); this.loading.set(false); },
       error: () => this.loading.set(false)
     });
   }
