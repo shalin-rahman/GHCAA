@@ -64,4 +64,8 @@ export class AdminService {
     reactivateMember(id: number): Observable<any> {
         return this.http.post(`/api/admin/members/${id}/reactivate`, {});
     }
+
+    updateMember(id: number, data: any): Observable<any> {
+        return this.http.put(`/api/admin/members/${id}`, data);
+    }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using GHCAA.API.Extensions;
 using GHCAA.API.Middleware;
+using GHCAA.Application.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -17,12 +18,16 @@ builder.Services.AddInfrastructure(configuration);
 builder.Services.AddJwtAuthentication(configuration);
 builder.Services.AddAppAuthorization();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDirectoryBrowser();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
+builder.Services.AddScoped<GHCAA.Application.Interfaces.IRealTimeService, GHCAA.API.Services.RealTimeService>();
 
 builder.Services.AddCors(options =>
 {

@@ -213,8 +213,9 @@ namespace GHCAA.Infrastructure.Data
                 new MembershipFeeConfig { Id = 1, MembershipType = Domain.Enums.MembershipType.Founding, Amount = 5000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Founding Member Fee" },
                 new MembershipFeeConfig { Id = 2, MembershipType = Domain.Enums.MembershipType.Executive, Amount = 2000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Executive Member Fee" },
                 new MembershipFeeConfig { Id = 3, MembershipType = Domain.Enums.MembershipType.General, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "General Member Fee" },
-                new MembershipFeeConfig { Id = 4, MembershipType = Domain.Enums.MembershipType.Associate, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Associate Member Fee" }, // Assuming same as General
-                new MembershipFeeConfig { Id = 5, MembershipType = Domain.Enums.MembershipType.Life, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Life Member Fee" }
+                new MembershipFeeConfig { Id = 4, MembershipType = Domain.Enums.MembershipType.Associate, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Associate Member Fee" },
+                new MembershipFeeConfig { Id = 5, MembershipType = Domain.Enums.MembershipType.Honorary, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Honorary Member Fee" },
+                new MembershipFeeConfig { Id = 6, MembershipType = Domain.Enums.MembershipType.Advisory, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Advisory Member Fee" }
             );
         }
     }

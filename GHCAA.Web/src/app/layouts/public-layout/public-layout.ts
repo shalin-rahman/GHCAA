@@ -10,7 +10,7 @@ import { AppFooter } from '../../shared/footer/footer';
     <nav class="glass-nav">
       <div class="container nav-content">
         <div class="logo">
-          <img src="/assets/logo.jpg" alt="GHCAA Logo" class="logo-img">
+          <div class="brand-icon">GHC</div>
           <div class="logo-text">
             <span class="abbr">GHCAA</span>
             <span class="full hide-mobile">Govt. Haraganga College Alumni Association</span>
@@ -37,23 +37,29 @@ import { AppFooter } from '../../shared/footer/footer';
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: var(--primary-color);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--glass-border);
       color: white;
-      padding: 0.5rem 0;
+      padding: 0.75rem 0;
     }
     .nav-content { display: flex; justify-content: space-between; align-items: center; }
     .logo { display: flex; align-items: center; gap: 0.75rem; }
-    .logo-img { height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); }
+    
     .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
-    .abbr { font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; }
-    .full { font-size: 0.65rem; opacity: 0.8; text-transform: uppercase; font-weight: 600; }
+    .abbr { font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; color: var(--primary-color); }
+    .full { font-size: 0.65rem; opacity: 0.7; text-transform: uppercase; font-weight: 600; color: #fff; }
     
     .nav-links { display: flex; gap: 2rem; align-items: center; }
-    .nav-link { color: white; text-decoration: none; font-weight: 700; font-size: 0.9rem; border-bottom: 2px solid transparent; transition: 0.3s; }
-    .nav-link:hover { border-bottom-color: var(--accent-color); }
+    .nav-link { 
+        color: rgba(255,255,255,0.8); 
+        text-decoration: none; 
+        font-weight: 700; 
+        font-size: 0.9rem; 
+        transition: 0.3s; 
+    }
+    .nav-link:hover { color: var(--primary-color); }
 
     main { min-height: calc(100vh - 400px); }
 

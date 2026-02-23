@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
     <footer class="footer">
       <div class="container footer-grid">
         <div class="footer-brand">
-            <img src="/assets/logo.jpg" alt="GHCAA" class="footer-logo">
+            <div class="brand-icon footer-brand-icon">GHC</div>
             <p class="motto">"Sharing Heritage, Aligning Lives, Integrating Networks"</p>
             <p class="bengali-motto hide-mobile">ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন</p>
         </div>
@@ -58,9 +58,14 @@ import { RouterLink } from '@angular/router';
     }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap: 4rem; padding-bottom: 4rem; }
     
-    .footer-brand .footer-logo { height: 60px; border-radius: 50%; margin-bottom: 1.5rem; border: 2px solid var(--accent-color); mix-blend-mode: screen; background-color: transparent; }
-    .motto { font-style: italic; color: var(--accent-color); font-weight: 600; margin-bottom: 0.5rem; font-size: 1rem; }
-    .bengali-motto { font-size: 0.85rem; opacity: 0.6; }
+    .footer-brand .footer-brand-icon { 
+        margin-bottom: 1.5rem; 
+        font-size: 1.5rem;
+        width: 60px;
+        height: 60px;
+    }
+    .motto { font-style: italic; color: var(--primary-color); font-weight: 600; margin-bottom: 0.5rem; font-size: 1rem; }
+    .bengali-motto { font-size: 0.85rem; opacity: 0.5; color: #fff; }
 
     .footer-links h4, .footer-contact h4 { color: #fff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1.5rem; border-bottom: 2px solid var(--accent-color); display: inline-block; padding-bottom: 0.25rem; }
     .footer-links { display: flex; flex-direction: column; gap: 0.75rem; }

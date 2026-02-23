@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminCommService, EmailTemplate } from '../../core/services/admin-comm.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'app-admin-comm',
@@ -14,6 +15,7 @@ import { NotificationService } from '../../core/services/notification.service';
 export class AdminComm implements OnInit {
     private commService = inject(AdminCommService);
     private notify = inject(NotificationService);
+    private route = inject(ActivatedRoute);
 
     templates = signal<EmailTemplate[]>([]);
     loading = signal(true);
@@ -40,6 +42,16 @@ export class AdminComm implements OnInit {
 
     ngOnInit() {
         this.loadTemplates();
+
+        // Handle pre-filled target from Registry/Individual contact
+        this.route.queryParams.subscribe(params => {
+            if (params['target']) {
+                this.sendOptions.target = params['target'];
+            }
+            if (params['method']) {
+                this.sendOptions.method = params['method'];
+            }
+        });
     }
 
     loadTemplates() {
@@ -68,8 +80,12 @@ export class AdminComm implements OnInit {
                 templateCode: this.sendOptions.templateCode
             });
         } else {
+            const emailList = this.sendOptions.target
+                ? this.sendOptions.target.split(',').map(e => e.trim()).filter(e => e.length > 0)
+                : [];
+
             obs = this.commService.sendCustom({
-                emails: [], // This would need a way to input custom emails or select all
+                emails: emailList,
                 subject: this.sendOptions.customSubject,
                 body: this.sendOptions.customBody
             });

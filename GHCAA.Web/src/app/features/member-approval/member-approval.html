@@ -58,6 +58,8 @@
                     <td>
                         <div class="action-btns">
                             <button (click)="viewDetails(reg)" class="btn btn-secondary btn-sm">Audit Details</button>
+                            <button (click)="contactMember(reg.email)" class="btn btn-secondary btn-sm"
+                                title="Contact Applicant">📨</button>
                             <button (click)="approve(reg.id)" class="btn btn-primary btn-sm">Direct Verify</button>
                         </div>
                     </td>
@@ -151,6 +153,8 @@
             </div>
 
             <div class="modal-footer" *ngIf="!rejecting()">
+                <button class="btn btn-secondary" (click)="contactMember(selectedMember()!.email)">Contact
+                    Applicant</button>
                 <button class="btn btn-danger-outline" (click)="rejecting.set(true)">Decline Filing</button>
                 <div class="right-btns">
                     <button class="btn btn-secondary" (click)="closeAudit()">Suspend</button>

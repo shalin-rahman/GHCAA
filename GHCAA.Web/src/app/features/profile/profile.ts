@@ -18,6 +18,8 @@ export class Profile implements OnInit {
     loading = signal(true);
     saving = signal(false);
     profile: any = {};
+    yearsList = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
+    sectorOptions = ['Govt. Service', 'Corporate', 'Business', 'Education', 'Medical/Health', 'Engineering', 'Law', 'Other'];
 
     ngOnInit() {
         this.profileService.getProfile().subscribe({
@@ -30,8 +32,14 @@ export class Profile implements OnInit {
     }
 
     getMembershipType(type: any): string {
-        const types = ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory', 'Life'];
+        const types = ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory'];
         return types[type] || 'General';
+    }
+
+    getCategoryLabel(cat: any): string {
+        const cats = ['None', 'Lifelong', 'Donor', 'Patron'];
+        if (typeof cat === 'number') return cats[cat] || 'None';
+        return cat || 'None';
     }
 
     getDegreeName(degree: any): string {

@@ -15,10 +15,14 @@ namespace GHCAA.Infrastructure.Services
     public class JobHubService : IJobHubService
     {
         private readonly ApplicationDbContext _db;
+        private readonly INotificationService _notification;
+        private readonly IUserService _userService;
 
-        public JobHubService(ApplicationDbContext db)
+        public JobHubService(ApplicationDbContext db, INotificationService notification, IUserService userService)
         {
             _db = db;
+            _notification = notification;
+            _userService = userService;
         }
 
         public async Task<IEnumerable<JobDto>> GetActiveJobsAsync(Enums.JobCategory? category = null, CancellationToken cancellationToken = default)
@@ -57,6 +61,15 @@ namespace GHCAA.Infrastructure.Services
 
             await _db.JobOpportunities.AddAsync(job, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Notify the poster
+            await _notification.CreateNotificationAsync(
+                memberId,
+                "Job Posted",
+                $"Your job posting '{job.Title}' at {job.Company} has been published successfully.",
+                "Career",
+                "/portal/jobs",
+                cancellationToken);
 
             // Reload to get member info if needed, or just map locally
             // Ideally we want the member name, which we might not have yet unless we include it

@@ -3,6 +3,16 @@
     border-right: 1px solid rgba(197, 160, 89, 0.1) !important;
 }
 
+.mini-logo {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    box-shadow: 0 2px 8px rgba(197, 160, 89, 0.15);
+}
+
 .sidebar-brand {
     height: 80px;
     display: flex;
@@ -94,6 +104,11 @@
     justify-content: center;
     outline: none;
     transition: 0.2s;
+
+    .mini-logo {
+        width: 28px;
+        height: 28px;
+    }
 
     &:hover {
         transform: scale(1.05);

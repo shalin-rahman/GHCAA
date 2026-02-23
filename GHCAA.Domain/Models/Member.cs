@@ -57,6 +57,7 @@ namespace GHCAA.Domain.Models
 
         // Membership details
         public MembershipType MembershipType { get; set; } = MembershipType.General;
+        public MemberCategory Category { get; set; } = MemberCategory.None;
         public ECPosition ECPosition { get; set; } = ECPosition.None;
 
         // Navigation

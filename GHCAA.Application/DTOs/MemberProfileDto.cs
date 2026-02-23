@@ -11,6 +11,8 @@ namespace GHCAA.Application.DTOs
         public string? MembershipNumber { get; set; }
         public MembershipStatus Status { get; set; }
         public MembershipType MembershipType { get; set; }
+        public MemberCategory Category { get; set; }
+        public ECPosition ECPosition { get; set; }
         
         // Personal
         public string FatherName { get; set; } = null!;

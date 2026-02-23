@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-member-approval',
@@ -14,6 +15,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class MemberApproval implements OnInit {
   private adminService = inject(AdminService);
   private auth = inject(AuthService);
+  private router = inject(Router);
 
   requests = signal<any[]>([]);
   loading = signal(true);
@@ -75,6 +77,10 @@ export class MemberApproval implements OnInit {
         }
       });
     }
+  }
+
+  contactMember(email: string) {
+    this.router.navigate(['/admin/comm'], { queryParams: { target: email, method: 'custom' } });
   }
 
   getStatusName(status: any): string {

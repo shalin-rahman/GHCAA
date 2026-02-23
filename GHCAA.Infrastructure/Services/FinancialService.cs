@@ -16,11 +16,13 @@ namespace GHCAA.Infrastructure.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly ICommunicationService _communication;
+        private readonly INotificationService _notification;
 
-        public FinancialService(ApplicationDbContext db, ICommunicationService communication)
+        public FinancialService(ApplicationDbContext db, ICommunicationService communication, INotificationService notification)
         {
             _db = db;
             _communication = communication;
+            _notification = notification;
         }
 
         public async Task<IEnumerable<PaymentHistoryDto>> GetMemberPaymentHistoryAsync(int memberId, CancellationToken cancellationToken = default)
@@ -68,6 +70,15 @@ namespace GHCAA.Infrastructure.Services
                 // Log warning? For now just continue as payment is recorded.
             }
 
+            // In-app Notification
+            await _notification.CreateNotificationAsync(
+                payment.MemberId,
+                "Payment Recorded",
+                $"Your payment of {payment.Amount:N2} (TrxID: {payment.TransactionId}) has been received and is pending verification.",
+                "Payment",
+                "/portal/payments",
+                cancellationToken);
+
             return MapToPaymentDto(payment);
         }
 
@@ -94,6 +105,15 @@ namespace GHCAA.Infrastructure.Services
             {
                 // Ignore email failure
             }
+
+            // In-app Notification
+            await _notification.CreateNotificationAsync(
+                payment.MemberId,
+                "Payment Status Updated",
+                $"The status of your transaction {payment.TransactionId} has been updated to {status}.",
+                "Payment",
+                "/portal/payments",
+                cancellationToken);
 
             return true;
         }

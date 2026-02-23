@@ -113,8 +113,9 @@ public class NetworkingServiceTests
         var results = await _service.SearchMembersAsync(new MemberSearchFilterDto());
 
         // Assert
-        results.Should().HaveCount(1);
-        results.First().FullName.Should().Be("Active Member");
+        results.Should().Contain(r => r.FullName == "Active Member");
+        results.Should().NotContain(r => r.FullName == "Inactive Member");
+        results.Should().NotContain(r => r.FullName == "Archived Member");
     }
 
     private Member CreateValidMember(string name, string email, string phone, string nid)

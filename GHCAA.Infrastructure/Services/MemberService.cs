@@ -269,6 +269,8 @@ namespace GHCAA.Infrastructure.Services
                 PermanentAddress = member.PermanentAddress,
                 BloodGroup = member.BloodGroup,
                 MembershipType = member.MembershipType,
+                Category = member.Category,
+                ECPosition = member.ECPosition,
                 FatherName = member.FatherName,
                 MotherName = member.MotherName,
                 DateOfBirth = member.DateOfBirth,
@@ -426,6 +428,8 @@ namespace GHCAA.Infrastructure.Services
                 PermanentAddress = member.PermanentAddress,
                 BloodGroup = member.BloodGroup,
                 MembershipType = member.MembershipType,
+                Category = member.Category,
+                ECPosition = member.ECPosition,
                 FatherName = member.FatherName,
                 MotherName = member.MotherName,
                 DateOfBirth = member.DateOfBirth,
@@ -441,6 +445,48 @@ namespace GHCAA.Infrastructure.Services
                 IsEmailPublic = member.IsEmailPublic,
                 IsAddressPublic = member.IsAddressPublic
             }).ToListAsync(cancellationToken);
+        }
+
+        public async Task<bool> AdminUpdateMemberAsync(int id, AdminMemberUpdateDto dto, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FindAsync(new object[] { id }, cancellationToken);
+            if (member == null) return false;
+
+            member.FullName = dto.FullName;
+            member.FatherName = dto.FatherName;
+            member.MotherName = dto.MotherName;
+            member.DateOfBirth = dto.DateOfBirth;
+            member.NID = dto.NID;
+            member.MobileNo = dto.MobileNo;
+            member.Email = dto.Email;
+            member.PresentAddress = dto.PresentAddress;
+            member.PermanentAddress = dto.PermanentAddress;
+            member.HSCAdmissionYear = dto.HSCAdmissionYear;
+            member.GHCAdmissionYear = dto.GHCAdmissionYear;
+            member.LastCertificateFromGHC = dto.LastCertificateFromGHC;
+            member.SubjectGroup = dto.SubjectGroup;
+            member.GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear;
+            member.ProfessionalSector = dto.ProfessionalSector;
+            member.Designation = dto.Designation;
+            member.MembershipNumber = dto.MembershipNumber;
+
+            if (Enum.TryParse<Enums.MembershipType>(dto.MembershipType, true, out var mType))
+                member.MembershipType = mType;
+
+            if (Enum.TryParse<Enums.MemberCategory>(dto.Category, true, out var mCat))
+                member.Category = mCat;
+            
+            if (Enum.TryParse<Enums.ECPosition>(dto.ECPosition, true, out var ecPos))
+                member.ECPosition = ecPos;
+
+            member.IsMobilePublic = dto.IsMobilePublic;
+            member.IsEmailPublic = dto.IsEmailPublic;
+            member.IsAddressPublic = dto.IsAddressPublic;
+            member.LastUpdateDate = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Member {MemberId} information updated by Admin", id);
+            return true;
         }
     }
 }

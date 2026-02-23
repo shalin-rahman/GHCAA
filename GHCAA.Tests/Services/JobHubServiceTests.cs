@@ -6,6 +6,7 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using NUnit.Framework;
 using System;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace GHCAA.Tests.Services
         private ApplicationDbContext _context = null!;
         private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
         private JobHubService _service = null!;
+        private Mock<INotificationService> _notificationMock = null!;
+        private Mock<IUserService> _userServiceMock = null!;
 
         [SetUp]
         public void Setup()
@@ -33,7 +36,9 @@ namespace GHCAA.Tests.Services
             _context = new ApplicationDbContext(options);
             _context.Database.EnsureCreated();
 
-            _service = new JobHubService(_context);
+            _notificationMock = new Mock<INotificationService>();
+            _userServiceMock = new Mock<IUserService>();
+            _service = new JobHubService(_context, _notificationMock.Object, _userServiceMock.Object);
         }
 
         [TearDown]

@@ -21,6 +21,7 @@ public class FinancialServiceTests
     private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
     private FinancialService _service = null!;
     private Mock<ICommunicationService> _communicationMock = null!;
+    private Mock<INotificationService> _notificationMock = null!;
 
     [SetUp]
     public void Setup()
@@ -36,7 +37,8 @@ public class FinancialServiceTests
         _context.Database.EnsureCreated();
 
         _communicationMock = new Mock<ICommunicationService>();
-        _service = new FinancialService(_context, _communicationMock.Object);
+        _notificationMock = new Mock<INotificationService>();
+        _service = new FinancialService(_context, _communicationMock.Object, _notificationMock.Object);
     }
 
     [TearDown]

@@ -72,6 +72,12 @@
             </div>
             } @else {
             <div class="form-group">
+                <label>Target Emails (Comma separated)</label>
+                <textarea [(ngModel)]="sendOptions.target" rows="3"
+                    placeholder="example1@mail.com, example2@mail.com..."></textarea>
+                <small class="hint">Leave empty to target all active members.</small>
+            </div>
+            <div class="form-group">
                 <label>Subject Line</label>
                 <input type="text" [(ngModel)]="sendOptions.customSubject" placeholder="Enter email subject">
             </div>

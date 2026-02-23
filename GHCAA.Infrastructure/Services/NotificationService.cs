@@ -2,24 +2,18 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SignalR;
-using GHCAA.API.Hubs; // I'll need to move the Hub or handle dependency carefully.
 
 namespace GHCAA.Infrastructure.Services
 {
     public class NotificationService : INotificationService
     {
         private readonly ApplicationDbContext _db;
-        // We'll use IHubContext to send real-time notifications
-        // But wait, NotificationService is in Infrastructure, ChatHub is in API.
-        // This is a common circular dependency issue.
-        // Best practice: Interface for Hub or use a Message Broker.
-        // For simplicity here, I'll just use the DB for now and let the API pull or use a specific event.
-        // Actually, I can use IHubContext<ChatHub> if I move Hub to a neutral place or use dynamic.
+        private readonly IRealTimeService _realTime;
         
-        public NotificationService(ApplicationDbContext db)
+        public NotificationService(ApplicationDbContext db, IRealTimeService realTime)
         {
             _db = db;
+            _realTime = realTime;
         }
 
         public async Task CreateNotificationAsync(int userId, string title, string message, string type, string? targetUrl = null, CancellationToken cancellationToken = default)
@@ -38,7 +32,8 @@ namespace GHCAA.Infrastructure.Services
             _db.Notifications.Add(notification);
             await _db.SaveChangesAsync(cancellationToken);
             
-            // Note: Real-time broadcast will be handled by a higher level or by injecting IHubContext if possible.
+            // Broadcast in real-time
+            await _realTime.SendNotificationToUserAsync(userId, notification);
         }
 
         public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(int userId, CancellationToken cancellationToken = default)

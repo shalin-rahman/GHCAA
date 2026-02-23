@@ -14,6 +14,15 @@
                 <span class="m-number">{{ profile.membershipNumber || 'PENDING APPROVAL' }}</span>
                 <h3>{{ profile.fullName }}</h3>
                 <p class="m-type">{{ getMembershipType(profile.membershipType) }} Member</p>
+                <div class="special-labels" style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                    <span *ngIf="profile.category && profile.category !== 'None' && profile.category !== 0"
+                        class="badge" [class]="getCategoryLabel(profile.category).toLowerCase()"
+                        style="padding: 2px 8px; font-size: 0.7rem; border-radius: 4px; font-weight: 700;">
+                        {{ getCategoryLabel(profile.category) }}
+                    </span>
+                    <span class="ec-pos" *ngIf="profile.ecPosition && profile.ecPosition !== 'None'">{{
+                        profile.ecPosition }}</span>
+                </div>
             </div>
             <div class="badge-icon" [ngClass]="profile.status === 1 ? 'active' : 'pending'">
                 {{ profile.status === 1 ? 'Verified' : 'Review' }}
@@ -37,21 +46,31 @@
 
     <div class="glass-card profile-card">
         <form (submit)="updateProfile()">
+            <!-- Academic Update -->
+            <div class="section">
+                <h4>Academic Credentials</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Passing Year</label>
+                        <input type="number" list="years-list" [(ngModel)]="profile.ghcLastCertificatePassingYear"
+                            name="passYear">
+                    </div>
+                    <div class="form-group">
+                        <label>Subject Group</label>
+                        <input type="text" [(ngModel)]="profile.subjectGroup" name="subjectGroup"
+                            placeholder="e.g. Science">
+                    </div>
+                </div>
+            </div>
+
             <!-- Profession -->
             <div class="section">
                 <h4>Professional Information</h4>
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Professional Sector</label>
-                        <select [(ngModel)]="profile.professionalSector" name="sector">
-                            <option value="Govt. Service">Govt. Service</option>
-                            <option value="Corporate">Corporate</option>
-                            <option value="Business">Business</option>
-                            <option value="Education">Education</option>
-                            <option value="Medical">Medical/Health</option>
-                            <option value="Engineering">Engineering</option>
-                            <option value="Other">Other</option>
-                        </select>
+                        <input type="text" list="sector-list" [(ngModel)]="profile.professionalSector" name="sector"
+                            placeholder="Select or type sector">
                     </div>
                     <div class="form-group">
                         <label>Current Designation</label>
@@ -68,6 +87,10 @@
                     <div class="form-group full-width">
                         <label>Present Address</label>
                         <textarea [(ngModel)]="profile.presentAddress" name="presentAddress" rows="2"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Permanent Address</label>
+                        <textarea [(ngModel)]="profile.permanentAddress" name="permanentAddress" rows="2"></textarea>
                     </div>
                 </div>
             </div>
@@ -108,5 +131,13 @@
             </div>
         </form>
     </div>
+
+    <!-- Datalists -->
+    <datalist id="years-list">
+        <option *ngFor="let y of yearsList" [value]="y"></option>
+    </datalist>
+    <datalist id="sector-list">
+        <option *ngFor="let s of sectorOptions" [value]="s"></option>
+    </datalist>
     }
 </div>

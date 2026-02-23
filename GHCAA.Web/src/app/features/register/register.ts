@@ -22,6 +22,9 @@ export class Register {
   currentStep = signal(1);
 
   years: number[] = [];
+  subjectOptions = ['Science', 'Arts', 'Commerce', 'NU Subjects'];
+  degreeOptions = ['HSC', 'Bachelor', 'Masters', 'PhD', 'Other'];
+  sectorOptions = ['Govt. Service', 'Corporate', 'Business', 'Education', 'Medical/Health', 'Engineering', 'Law', 'Other'];
 
   model: any = {
     FullName: '',

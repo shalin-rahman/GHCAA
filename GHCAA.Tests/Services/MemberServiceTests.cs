@@ -23,6 +23,7 @@ public class MemberServiceTests
     private Mock<IUserService> _mockUserService = null!;
     private Mock<ILogger<MemberService>> _mockLogger = null!;
     private Mock<IActivityService> _mockActivityService = null!;
+    private Mock<INotificationService> _mockNotificationService = null!;
     private MemberService _service = null!;
 
     private Mock<ICommunicationService> _mockCommunication = null!;
@@ -48,6 +49,7 @@ public class MemberServiceTests
         _mockLogger = new Mock<ILogger<MemberService>>();
         _mockActivityService = new Mock<IActivityService>();
         _mockCommunication = new Mock<ICommunicationService>();
+        _mockNotificationService = new Mock<INotificationService>();
 
         _service = new MemberService(
             _context,
@@ -58,7 +60,8 @@ public class MemberServiceTests
             _mockUserService.Object,
             _mockCommunication.Object,
             _mockLogger.Object,
-            _mockActivityService.Object
+            _mockActivityService.Object,
+            _mockNotificationService.Object
         );
     }
 
@@ -831,5 +834,71 @@ public class MemberServiceTests
         updatedMember.ApprovedDate.Should().NotBeNull();
         updatedMember.ApprovedDate.Should().BeOnOrAfter(beforeApproval);
         updatedMember.ApprovedDate.Should().BeOnOrBefore(DateTime.UtcNow);
+    }
+
+    [Test]
+    public async Task AdminUpdateMemberAsync_WithValidData_ShouldUpdateRestrictedFields()
+    {
+        // Arrange
+        var member = new Member
+        {
+            FullName = "Original Name",
+            Email = "original@example.com",
+            NID = "1234567890",
+            MobileNo = "01712345678",
+            Status = Enums.MembershipStatus.Active,
+            MembershipType = Enums.MembershipType.General,
+            Category = Enums.MemberCategory.None,
+            FatherName = "Father",
+            MotherName = "Mother",
+            PresentAddress = "Address",
+            PermanentAddress = "Address",
+            EmergencyContactName = "Contact",
+            EmergencyContactRelation = "Relation",
+            EmergencyContactPhone = "01999999999",
+            SubjectGroup = "Science",
+            ProfessionalSector = "IT",
+            Designation = "Developer"
+        };
+        await _context.Members.AddAsync(member);
+        await _context.SaveChangesAsync();
+
+        var updateDto = new AdminMemberUpdateDto
+        {
+            FullName = "Updated Name",
+            MembershipType = "Executive",
+            Category = "Lifelong",
+            ECPosition = "President",
+            MembershipNumber = "GHC-2007-9999",
+            FatherName = "Updated Father",
+            MotherName = "Updated Mother",
+            Email = "updated@example.com",
+            MobileNo = "01799999999",
+            NID = "9999999999",
+            DateOfBirth = new DateTime(1991, 1, 1),
+            LastCertificateFromGHC = "Bachelor",
+            GHCLastCertificatePassingYear = 2007,
+            HSCAdmissionYear = 2005,
+            GHCAdmissionYear = 2005,
+            // ... include other required fields to avoid validation issues if any (though this is service layer)
+            PresentAddress = "New Address",
+            PermanentAddress = "New Perm Address",
+            ProfessionalSector = "New Sector",
+            Designation = "Senior Dev",
+            SubjectGroup = "Commerce"
+        };
+
+        // Act
+        var result = await _service.AdminUpdateMemberAsync(member.Id, updateDto);
+
+        // Assert
+        result.Should().BeTrue();
+        var updatedMember = await _context.Members.FindAsync(member.Id);
+        updatedMember!.FullName.Should().Be("Updated Name");
+        updatedMember.MembershipType.Should().Be(Enums.MembershipType.Executive);
+        updatedMember.Category.Should().Be(Enums.MemberCategory.Lifelong);
+        updatedMember.ECPosition.Should().Be(Enums.ECPosition.President);
+        updatedMember.MembershipNumber.Should().Be("GHC-2007-9999");
+        updatedMember.SubjectGroup.Should().Be("Commerce");
     }
 }

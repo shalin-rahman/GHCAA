@@ -154,6 +154,24 @@
     color: #ef4444;
 }
 
+.badge.lifelong {
+    background: rgba(16, 185, 129, 0.2);
+    color: #059669;
+    border: 1px solid #059669;
+}
+
+.badge.donor {
+    background: rgba(245, 158, 11, 0.2);
+    color: #d97706;
+    border: 1px solid #d97706;
+}
+
+.badge.patron {
+    background: rgba(139, 92, 246, 0.2);
+    color: #7c3aed;
+    border: 1px solid #7c3aed;
+}
+
 .actions-cell {
     display: flex;
     gap: 0.35rem;
@@ -180,6 +198,11 @@
 
 .icon-btn.archive {
     border-color: #ef4444;
+}
+
+.icon-btn.contact {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
 }
 
 .loading-state,
@@ -301,4 +324,139 @@
     .detail-item.full {
         grid-column: span 1;
     }
+}
+
+.header-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.edit-input {
+    background: var(--bg-color);
+    border: 1px solid var(--glass-border);
+    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+    color: var(--text-main);
+    font-family: inherit;
+    outline: none;
+}
+
+.edit-input.title-input {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.edit-input.sub-input {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.detail-item input,
+.detail-item select,
+.detail-item textarea {
+    background: var(--bg-color);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 0.45rem 0.75rem;
+    color: var(--text-main);
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.detail-item input:focus,
+.detail-item select:focus,
+.detail-item textarea:focus {
+    border-color: var(--primary-color);
+}
+
+.detail-item textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.flex-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
+.badge.info {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+}
+
+.badge.accent {
+    background: rgba(147, 51, 234, 0.15);
+    color: #a855f7;
+}
+
+.privacy-grid .checks {
+    display: flex;
+    gap: 1.5rem;
+    padding-top: 0.5rem;
+}
+
+.privacy-grid .checks label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-transform: none;
+    font-size: 0.8rem;
+    letter-spacing: normal;
+    cursor: pointer;
+}
+
+.modal-footer {
+    padding: 1.25rem 1.75rem;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    background: var(--surface-color);
+    position: sticky;
+    bottom: 0;
+}
+
+.btn {
+    padding: 0.65rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: #000;
+    border: none;
+}
+
+.btn-secondary {
+    background: var(--bg-color);
+    color: var(--text-main);
+    border: 1px solid var(--glass-border);
+}
+
+.btn:hover {
+    filter: brightness(1.1);
 }

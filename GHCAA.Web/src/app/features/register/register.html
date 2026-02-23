@@ -140,45 +140,28 @@
                         <div class="form-grid">
                             <div class="form-group full-width">
                                 <label>GHC Last Certificate's Group/Subject *</label>
-                                <select [(ngModel)]="model.SubjectGroup" name="subjectGroup" required>
-                                    <option value="" disabled selected>Select Group/Subject</option>
-                                    <option value="Science">Science</option>
-                                    <option value="Arts">Arts</option>
-                                    <option value="Commerce">Commerce</option>
-                                    <option value="NU Subjects">NU Subjects</option>
-                                </select>
+                                <input type="text" [(ngModel)]="model.SubjectGroup" name="subjectGroup" required
+                                    list="subject-list" placeholder="Select or type Group/Subject">
                             </div>
                             <div class="form-group">
                                 <label>Highest Degree at GHC *</label>
-                                <select [(ngModel)]="model.LastDegreeFromGHC" name="lastDegreeFromGHC" required>
-                                    <option value="HSC">HSC</option>
-                                    <option value="Bachelor">Bachelor</option>
-                                    <option value="Masters">Masters</option>
-                                    <option value="PhD">PhD</option>
-                                    <option value="Other">Other</option>
-                                </select>
+                                <input type="text" [(ngModel)]="model.LastDegreeFromGHC" name="lastDegreeFromGHC"
+                                    required list="degree-list" placeholder="Select or type Degree">
                             </div>
                             <div class="form-group">
                                 <label>Certificate Passing Year *</label>
-                                <select [(ngModel)]="model.GHCLastCertificatePassingYear"
-                                    name="ghcLastCertificatePassingYear" required>
-                                    <option [ngValue]="null" disabled selected>Select Year</option>
-                                    <option *ngFor="let year of years" [ngValue]="year">{{ year }}</option>
-                                </select>
+                                <input type="number" [(ngModel)]="model.GHCLastCertificatePassingYear"
+                                    name="ghcLastCertificatePassingYear" required list="year-list" placeholder="YYYY">
                             </div>
                             <div class="form-group">
                                 <label>HSC Admission Year</label>
-                                <select [(ngModel)]="model.HSCAdmissionYear" name="hscAdmissionYear">
-                                    <option [ngValue]="null">Select Year (Optional)</option>
-                                    <option *ngFor="let year of years" [ngValue]="year">{{ year }}</option>
-                                </select>
+                                <input type="number" [(ngModel)]="model.HSCAdmissionYear" name="hscAdmissionYear"
+                                    list="year-list" placeholder="YYYY (Optional)">
                             </div>
                             <div class="form-group">
                                 <label>GHC Admission Year</label>
-                                <select [(ngModel)]="model.GHCAdmissionYear" name="ghcAdmissionYear">
-                                    <option [ngValue]="null">Select Year (Optional)</option>
-                                    <option *ngFor="let year of years" [ngValue]="year">{{ year }}</option>
-                                </select>
+                                <input type="number" [(ngModel)]="model.GHCAdmissionYear" name="ghcAdmissionYear"
+                                    list="year-list" placeholder="YYYY (Optional)">
                             </div>
                         </div>
                     </div>
@@ -193,17 +176,8 @@
                             <div class="form-grid inner-grid full-width">
                                 <div class="form-group">
                                     <label>Professional Sector *</label>
-                                    <select [(ngModel)]="model.ProfessionalSector" name="professionalSector" required>
-                                        <option value="" disabled selected>Select Sector</option>
-                                        <option value="Teaching">Teaching</option>
-                                        <option value="Business">Business</option>
-                                        <option value="IT">IT</option>
-                                        <option value="Medical">Medical</option>
-                                        <option value="Govt. Service">Govt. Service</option>
-                                        <option value="Engineering">Engineering</option>
-                                        <option value="Law">Law</option>
-                                        <option value="Other">Other</option>
-                                    </select>
+                                    <input type="text" [(ngModel)]="model.ProfessionalSector" name="professionalSector"
+                                        required list="sector-list" placeholder="Select or type Sector">
                                 </div>
                                 <div class="form-group">
                                     <label>Current Designation & Organization *</label>
@@ -293,6 +267,21 @@
                         </div>
                     </div>
                 </form>
+
+                <!-- Datalists -->
+                <datalist id="year-list">
+                    <option *ngFor="let year of years" [value]="year"></option>
+                </datalist>
+                <datalist id="subject-list">
+                    <option *ngFor="let s of subjectOptions" [value]="s"></option>
+                </datalist>
+                <datalist id="degree-list">
+                    <option *ngFor="let d of degreeOptions" [value]="d"></option>
+                </datalist>
+                <datalist id="sector-list">
+                    <option *ngFor="let sec of sectorOptions" [value]="sec"></option>
+                </datalist>
+
                 } @else {
                 <div class="otp-stage reveal-text">
                     <div class="icon-box">🏦</div>
