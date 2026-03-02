@@ -1,0 +1,8 @@
+<div class="toast-container">
+    @for (toast of notify.toasts(); track toast.id) {
+    <div class="toast glass-effect" [ngClass]="toast.type" (click)="notify.remove(toast.id)">
+        <span class="icon">{{ getIcon(toast.type) }}</span>
+        <span class="message">{{ toast.message }}</span>
+    </div>
+    }
+</div>

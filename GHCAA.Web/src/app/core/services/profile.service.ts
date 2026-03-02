@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_ENDPOINTS } from '../constants/api.endpoints';
 
 export interface MemberProfile {
     id: number;
@@ -37,20 +38,21 @@ export interface MemberProfile {
 })
 export class ProfileService {
     private http = inject(HttpClient);
+    private apiUrl = API_ENDPOINTS.PROFILE;
 
     getProfile(): Observable<MemberProfile> {
-        return this.http.get<MemberProfile>('/api/profile');
+        return this.http.get<MemberProfile>(this.apiUrl);
     }
 
-    updateProfile(profile: Partial<MemberProfile>): Observable<any> {
-        return this.http.put('/api/profile', profile);
+    updateProfile(profile: any): Observable<any> {
+        return this.http.put(this.apiUrl, profile);
     }
 
     getIDCard(): Observable<{ dataUri: string }> {
-        return this.http.get<{ dataUri: string }>('/api/profile/id-card');
+        return this.http.get<{ dataUri: string }>(`${this.apiUrl}/id-card`);
     }
 
     getCertificate(): Observable<{ dataUri: string }> {
-        return this.http.get<{ dataUri: string }>('/api/profile/certificate');
+        return this.http.get<{ dataUri: string }>(`${this.apiUrl}/certificate`);
     }
 }

@@ -25,5 +25,8 @@ namespace GHCAA.Domain
 
         // Job Hub Enums
         public enum JobCategory { IT, Finance, Engineering, Marketing, Education, Health, Other }
+
+        // Event Registration Enums
+        public enum EventRegistrationStatus { Pending, Approved, Rejected }
     }
 }

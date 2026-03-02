@@ -28,6 +28,8 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<MembershipFeeConfig> MembershipFeeConfigs { get; set; } = null!;
         public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
         public DbSet<Notification> Notifications { get; set; } = null!;
+        public DbSet<AlumniEvent> AlumniEvents { get; set; } = null!;
+        public DbSet<EventRegistration> EventRegistrations { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -93,6 +95,14 @@ namespace GHCAA.Infrastructure.Data
                     Subject = "Welcome to GHC Alumni Association!", 
                     Body = "Dear {{FullName}}, welcome! Your membership number is {{MembershipNumber}} and your default password is {{DefaultPassword}}.",
                     Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
+                },
+                new EmailTemplate 
+                { 
+                    Id = 3, 
+                    Code = "EVENT_REGISTRATION_CONFIRMATION", 
+                    Subject = "Registration Confirmed: {{EventTitle}}", 
+                    Body = "Dear {{FullName}}, your registration for the event <strong>{{EventTitle}}</strong> has been approved. <br/><br/><strong>Event Details:</strong><br/>Date: {{EventDate}}<br/>Location: {{EventLocation}}<br/><br/>Looking forward to seeing you there!",
+                    Variables = "['FullName', 'EventTitle', 'EventDate', 'EventLocation']"
                 }
             );
 

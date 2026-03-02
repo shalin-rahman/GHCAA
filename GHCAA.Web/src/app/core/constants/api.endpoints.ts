@@ -1,0 +1,39 @@
+export const API_ENDPOINTS = {
+    ADMIN: {
+        MEMBERS: '/api/admin/members',
+        STATS: '/api/admin/stats',
+        COMMUNICATION: '/api/admin/comm'
+    },
+    AUTH: {
+        LOGIN: '/api/auth/login',
+        REGISTER: '/api/auth/register',
+        VERIFY_EMAIL: '/api/auth/verify-email',
+        STATUS: '/api/auth/status'
+    },
+    EVENTS: '/api/events',
+    GALLERY: '/api/gallery',
+    NEWS: '/api/news',
+    JOBS: '/api/jobs',
+    PROFILE: '/api/profile',
+    FINANCIALS: '/api/financials',
+    MESSAGING: {
+        RECENT: '/api/messaging/recent',
+        HISTORY: '/api/messaging/history'
+    },
+    HUBS: {
+        CHAT: '/hubs/chat'
+    },
+    NOTIFICATIONS: {
+        BASE: '/api/notifications',
+        READ_ALL: '/api/notifications/read-all'
+    },
+    NETWORKING: {
+        COMMITTEE: '/api/networking/committee',
+        SEARCH: '/api/networking/search',
+        UPDATES: '/api/networking/updates'
+    },
+    LOOKUPS: '/api/lookups',
+    LEDGER: '/api/ledger',
+    CONTACT: '/api/contact',
+    ASSISTANT: '/api/assistant/ask'
+} as const;

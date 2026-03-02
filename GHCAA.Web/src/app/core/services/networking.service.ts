@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_ENDPOINTS } from '../constants/api.endpoints';
 
 @Injectable({
     providedIn: 'root'
@@ -8,18 +9,15 @@ import { Observable } from 'rxjs';
 export class NetworkingService {
     private http = inject(HttpClient);
 
-    getCommittee(year?: number): Observable<any[]> {
-        let params: Record<string, string> = {};
-        if (year) params['year'] = year.toString();
-        return this.http.get<any[]>('/api/networking/committee', { params });
+    getCommittee(params: any = {}): Observable<any[]> {
+        return this.http.get<any[]>(API_ENDPOINTS.NETWORKING.COMMITTEE, { params });
     }
 
     searchMembers(filter: any): Observable<any[]> {
-        return this.http.get<any[]>('/api/networking/search', { params: filter });
+        return this.http.get<any[]>(API_ENDPOINTS.NETWORKING.SEARCH, { params: filter });
     }
 
-    getLatestUpdates(count: number = 10): Observable<any[]> {
-        let params: Record<string, string> = { count: count.toString() };
-        return this.http.get<any[]>('/api/networking/updates', { params });
+    getUpdates(params: any): Observable<any[]> {
+        return this.http.get<any[]>(API_ENDPOINTS.NETWORKING.UPDATES, { params });
     }
 }

@@ -79,7 +79,13 @@
 }
 
 .form-footer a {
-    color: var(--primary-color);
-    font-weight: 600;
+    color: var(--accent-color);
+    font-weight: 700;
     text-decoration: none;
+    transition: 0.3s;
+}
+
+.form-footer a:hover {
+    filter: brightness(1.2);
+    text-decoration: underline;
 }

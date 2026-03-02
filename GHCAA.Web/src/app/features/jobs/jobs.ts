@@ -66,7 +66,7 @@ export class Jobs implements OnInit {
     }
 
     this.submitting.set(true);
-    this.jobService.postJob(this.newJob).subscribe({
+    this.jobService.createJob(this.newJob).subscribe({
       next: () => {
         this.notify.success('Opportunity shared with the alumni community!');
         this.submitting.set(false);

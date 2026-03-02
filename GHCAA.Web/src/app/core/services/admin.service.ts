@@ -31,41 +31,44 @@ export interface MemberApprovalRequest {
     certificatePath?: string;
 }
 
+import { API_ENDPOINTS } from '../constants/api.endpoints';
+
 @Injectable({
     providedIn: 'root'
 })
 export class AdminService {
     private http = inject(HttpClient);
+    private apiUrl = API_ENDPOINTS.ADMIN.MEMBERS;
 
     getPendingMembers(): Observable<MemberApprovalRequest[]> {
-        return this.http.get<MemberApprovalRequest[]>('/api/admin/members');
+        return this.http.get<MemberApprovalRequest[]>(this.apiUrl);
     }
 
     getMembers(includeArchived: boolean = false): Observable<any[]> {
-        return this.http.get<any[]>(`/api/admin/members?includeArchived=${includeArchived}`);
+        return this.http.get<any[]>(`${this.apiUrl}?includeArchived=${includeArchived}`);
     }
 
     approveMember(id: number, adminId: number): Observable<any> {
-        return this.http.post(`/api/admin/members/${id}/approve`, { approvedByAdminId: adminId });
+        return this.http.post(`${this.apiUrl}/${id}/approve`, { approvedByAdminId: adminId });
     }
 
     rejectMember(id: number, adminId: number, reason: string): Observable<any> {
-        return this.http.post(`/api/admin/members/${id}/reject`, { rejectedByAdminId: adminId, reason });
+        return this.http.post(`${this.apiUrl}/${id}/reject`, { rejectedByAdminId: adminId, reason });
     }
 
     getStats(): Observable<any> {
-        return this.http.get('/api/admin/stats');
+        return this.http.get(API_ENDPOINTS.ADMIN.STATS);
     }
 
     archiveMember(id: number): Observable<any> {
-        return this.http.delete(`/api/admin/members/${id}`);
+        return this.http.delete(`${this.apiUrl}/${id}`);
     }
 
     reactivateMember(id: number): Observable<any> {
-        return this.http.post(`/api/admin/members/${id}/reactivate`, {});
+        return this.http.post(`${this.apiUrl}/${id}/reactivate`, {});
     }
 
     updateMember(id: number, data: any): Observable<any> {
-        return this.http.put(`/api/admin/members/${id}`, data);
+        return this.http.put(`${this.apiUrl}/${id}`, data);
     }
 }

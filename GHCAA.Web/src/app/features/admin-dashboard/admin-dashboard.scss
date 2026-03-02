@@ -107,9 +107,10 @@
 }
 
 .action-btn:hover {
-    background: var(--primary-color);
+    background: var(--gold-gradient);
     color: #000;
-    border-color: var(--primary-color);
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(197, 160, 89, 0.4);
 }
 
 .action-btn.secondary {

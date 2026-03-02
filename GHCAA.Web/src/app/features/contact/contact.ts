@@ -27,8 +27,8 @@ export class Contact {
     if (form.invalid) return;
     this.loading.set(true);
 
-    this.contactService.submitMessage(this.model).subscribe({
-      next: (res) => {
+    this.contactService.sendMessage(this.model).subscribe({
+      next: (res: any) => {
         this.loading.set(false);
         this.notify.success(res.message || 'Your enquiry has been sent. We will respond within 24-48 hours.');
         form.reset();

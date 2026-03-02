@@ -57,6 +57,55 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.ToTable("ActivityLogs");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.AlumniEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AdminNote")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("RegistrationDeadline")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal?>("RegistrationFee")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AlumniEvents");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.ChatMessage", b =>
                 {
                     b.Property<int>("Id")
@@ -166,7 +215,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Id = 1,
                             Body = "Hello {{FullName}}, your OTP is: <strong>{{OtpCode}}</strong>. Valid for 10 minutes.",
                             Code = "OTP_EMAIL",
-                            LastUpdated = new DateTime(2026, 2, 23, 1, 5, 3, 24, DateTimeKind.Utc).AddTicks(6312),
+                            LastUpdated = new DateTime(2026, 3, 2, 19, 13, 56, 45, DateTimeKind.Utc).AddTicks(83),
                             Subject = "Your GHC Alumni Association Verification Code",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -175,9 +224,18 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Id = 2,
                             Body = "Dear {{FullName}}, welcome! Your membership number is {{MembershipNumber}} and your default password is {{DefaultPassword}}.",
                             Code = "WELCOME_EMAIL",
-                            LastUpdated = new DateTime(2026, 2, 23, 1, 5, 3, 24, DateTimeKind.Utc).AddTicks(7235),
+                            LastUpdated = new DateTime(2026, 3, 2, 19, 13, 56, 45, DateTimeKind.Utc).AddTicks(981),
                             Subject = "Welcome to GHC Alumni Association!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Body = "Dear {{FullName}}, your registration for the event <strong>{{EventTitle}}</strong> has been approved. <br/><br/><strong>Event Details:</strong><br/>Date: {{EventDate}}<br/>Location: {{EventLocation}}<br/><br/>Looking forward to seeing you there!",
+                            Code = "EVENT_REGISTRATION_CONFIRMATION",
+                            LastUpdated = new DateTime(2026, 3, 2, 19, 13, 56, 45, DateTimeKind.Utc).AddTicks(983),
+                            Subject = "Registration Confirmed: {{EventTitle}}",
+                            Variables = "['FullName', 'EventTitle', 'EventDate', 'EventLocation']"
                         });
                 });
 
@@ -236,6 +294,50 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("EventGalleryId");
 
                     b.ToTable("EventPhotos");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.EventRegistration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("ApprovedByAdminId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EventId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PaymentReference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ReceiptPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("RegisteredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("EventRegistrations");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.FileUpload", b =>
@@ -695,7 +797,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsEmailPublic = false,
                             IsMobilePublic = false,
                             LastCertificateFromGHC = "Other",
-                            LastUpdateDate = new DateTime(2026, 2, 23, 1, 5, 3, 25, DateTimeKind.Utc).AddTicks(7725),
+                            LastUpdateDate = new DateTime(2026, 3, 2, 19, 13, 56, 46, DateTimeKind.Utc).AddTicks(1012),
                             MembershipNumber = "ADM-SHALIN-1",
                             MembershipType = 4,
                             MobileNo = "01700000001",
@@ -783,7 +885,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 1,
                             Amount = 5000m,
-                            CreatedAt = new DateTime(2026, 2, 23, 1, 5, 3, 568, DateTimeKind.Utc).AddTicks(8961),
+                            CreatedAt = new DateTime(2026, 3, 2, 19, 13, 56, 561, DateTimeKind.Utc).AddTicks(1418),
                             Description = "Founding Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 0
@@ -792,7 +894,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 2,
                             Amount = 2000m,
-                            CreatedAt = new DateTime(2026, 2, 23, 1, 5, 3, 569, DateTimeKind.Utc).AddTicks(155),
+                            CreatedAt = new DateTime(2026, 3, 2, 19, 13, 56, 561, DateTimeKind.Utc).AddTicks(2645),
                             Description = "Executive Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 1
@@ -801,7 +903,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 3,
                             Amount = 1000m,
-                            CreatedAt = new DateTime(2026, 2, 23, 1, 5, 3, 569, DateTimeKind.Utc).AddTicks(159),
+                            CreatedAt = new DateTime(2026, 3, 2, 19, 13, 56, 561, DateTimeKind.Utc).AddTicks(2649),
                             Description = "General Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 2
@@ -810,7 +912,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 4,
                             Amount = 1000m,
-                            CreatedAt = new DateTime(2026, 2, 23, 1, 5, 3, 569, DateTimeKind.Utc).AddTicks(161),
+                            CreatedAt = new DateTime(2026, 3, 2, 19, 13, 56, 561, DateTimeKind.Utc).AddTicks(2651),
                             Description = "Associate Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 3
@@ -819,7 +921,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 5,
                             Amount = 0m,
-                            CreatedAt = new DateTime(2026, 2, 23, 1, 5, 3, 569, DateTimeKind.Utc).AddTicks(225),
+                            CreatedAt = new DateTime(2026, 3, 2, 19, 13, 56, 561, DateTimeKind.Utc).AddTicks(2653),
                             Description = "Honorary Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 4
@@ -828,7 +930,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 6,
                             Amount = 0m,
-                            CreatedAt = new DateTime(2026, 2, 23, 1, 5, 3, 569, DateTimeKind.Utc).AddTicks(228),
+                            CreatedAt = new DateTime(2026, 3, 2, 19, 13, 56, 561, DateTimeKind.Utc).AddTicks(2656),
                             Description = "Advisory Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 5
@@ -1101,7 +1203,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsArchived = false,
-                            PasswordHash = "$2a$11$TJZYgpcHqVct.TadUtyKPevHWV5.FKUIS0G.uWytUCJqAWfZLEP3O",
+                            PasswordHash = "$2a$11$0ZO8YtuWvKUkGqtdkVCGFuXAJFujW1Ttzxj7EQ8djnA/m9tYL4ruu",
                             Username = "superadmin"
                         },
                         new
@@ -1111,7 +1213,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsActive = true,
                             IsArchived = false,
                             MemberId = 1,
-                            PasswordHash = "$2a$11$WgiZ9fPVPELxMlIqspGJVO8gO76TZ1bERdcmU8arLu7bVdr8/XxMy",
+                            PasswordHash = "$2a$11$bgS883RYYSiJE8oWvTYqne65D5Ld2CQIOitsDrHVh8DVO0I1a3Sm6",
                             Username = "shalin"
                         });
                 });
@@ -1180,6 +1282,25 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("EventGallery");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.EventRegistration", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.AlumniEvent", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GHCAA.Domain.Models.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.FileUpload", b =>

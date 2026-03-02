@@ -7,7 +7,7 @@
 
 .header h2 {
     font-size: 1.75rem;
-    color: var(--primary-color);
+    color: var(--text-main);
     font-weight: 800;
     letter-spacing: -0.5px;
 }
@@ -126,11 +126,8 @@
 }
 
 .badge {
-    padding: 0.35rem 0.85rem;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
+    // Inherits .badge from global styles.scss
+    letter-spacing: 0.5px;
 }
 
 .badge.pending {
@@ -156,24 +153,16 @@
 
 /* Modal Styling */
 .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
+    // Inherits .modal-overlay from global styles.scss
     z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 2rem;
 }
 
 .modal-content {
-    width: 100%;
+    // We add .modal-card in HTML for the shared styles
     max-width: 900px;
-    max-height: 90vh;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--accent-color);
 }
 
 .modal-header {
@@ -188,7 +177,7 @@
 .modal-header h3 {
     font-size: 1.25rem;
     font-weight: 800;
-    color: var(--primary-color);
+    color: var(--text-main);
 }
 
 .close-btn {

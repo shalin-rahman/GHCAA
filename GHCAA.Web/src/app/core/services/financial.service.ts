@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_ENDPOINTS } from '../constants/api.endpoints';
 
 export interface PaymentRecord {
     id: number;
@@ -23,7 +24,7 @@ export interface MembershipDue {
 @Injectable({ providedIn: 'root' })
 export class FinancialService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/financials';
+    private apiUrl = API_ENDPOINTS.FINANCIALS;
 
     getMyHistory(): Observable<PaymentRecord[]> {
         return this.http.get<PaymentRecord[]>(`${this.apiUrl}/my-history`);

@@ -10,17 +10,25 @@ export interface EmailTemplate {
     description: string;
 }
 
-@Injectable({ providedIn: 'root' })
+import { API_ENDPOINTS } from '../constants/api.endpoints';
+
+@Injectable({
+    providedIn: 'root'
+})
 export class AdminCommService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/admin/comm';
+    private apiUrl = API_ENDPOINTS.ADMIN.COMMUNICATION;
+
+    getLogs(): Observable<any[]> {
+        return this.http.get<any[]>(this.apiUrl);
+    }
 
     getTemplates(): Observable<EmailTemplate[]> {
         return this.http.get<EmailTemplate[]>(`${this.apiUrl}/templates`);
     }
 
-    updateTemplate(id: number, template: EmailTemplate): Observable<any> {
-        return this.http.put(`${this.apiUrl}/templates/${id}`, template);
+    sendMessage(payload: any): Observable<any> {
+        return this.http.post(this.apiUrl, payload);
     }
 
     sendBatch(dto: any): Observable<any> {

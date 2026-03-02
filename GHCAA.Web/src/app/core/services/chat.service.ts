@@ -21,6 +21,8 @@ export interface RecentChat {
     isRead: boolean;
 }
 
+import { API_ENDPOINTS } from '../constants/api.endpoints';
+
 @Injectable({ providedIn: 'root' })
 export class ChatService {
     private http = inject(HttpClient);
@@ -40,7 +42,7 @@ export class ChatService {
         if (!token) return;
 
         this.hubConnection = new signalR.HubConnectionBuilder()
-            .withUrl('/hubs/chat', {
+            .withUrl(API_ENDPOINTS.HUBS.CHAT, {
                 accessTokenFactory: () => token
             })
             .withAutomaticReconnect()
@@ -59,14 +61,14 @@ export class ChatService {
     }
 
     loadRecentChats() {
-        this.http.get<RecentChat[]>('/api/messaging/recent').subscribe(data => {
+        this.http.get<RecentChat[]>(API_ENDPOINTS.MESSAGING.RECENT).subscribe(data => {
             this.recentChats.set(data);
         });
     }
 
     loadHistory(otherUserId: number) {
         this.activeThreadId.set(otherUserId);
-        this.http.get<ChatMessage[]>(`/api/messaging/history/${otherUserId}`).subscribe(data => {
+        this.http.get<ChatMessage[]>(`${API_ENDPOINTS.MESSAGING.HISTORY}/${otherUserId}`).subscribe(data => {
             this.messages.set(data);
         });
     }

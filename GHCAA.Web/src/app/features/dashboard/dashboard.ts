@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { AlertService } from '../../core/services/alert.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
+import { JobService } from '../../core/services/job.service';
+import { EventsService } from '../../core/services/events.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,10 +16,14 @@ import { ProfileService } from '../../core/services/profile.service';
 })
 export class Dashboard implements OnInit {
   alertService = inject(AlertService);
-  auth = inject(AuthService);
+  private auth = inject(AuthService);
   private profileService = inject(ProfileService);
+  private jobService = inject(JobService);
+  private eventsService = inject(EventsService);
 
   profile = signal<any>(null);
+  jobCount = signal<number>(0);
+  eventCount = signal<number>(0);
 
   activities = signal([
     { id: 1, title: 'Annual Reunion', desc: 'Photos from the 2024 reunion uploaded.', time: '2h ago', color: 'var(--primary-color)' },
@@ -26,8 +32,23 @@ export class Dashboard implements OnInit {
   ]);
 
   ngOnInit() {
-    this.profileService.getProfile().subscribe(p => this.profile.set(p));
+    this.profileService.getProfile().subscribe({
+      next: p => this.profile.set(p),
+      error: () => console.warn('Could not load profile')
+    });
     this.alertService.loadNotifications();
+    this.loadStats();
+  }
+
+  loadStats() {
+    this.jobService.getJobs().subscribe({
+      next: jobs => this.jobCount.set(jobs.length),
+      error: () => this.jobCount.set(0)
+    });
+    this.eventsService.getEvents().subscribe({
+      next: evs => this.eventCount.set(evs.length),
+      error: () => this.eventCount.set(0)
+    });
   }
 
   getMembershipType(type: any): string {

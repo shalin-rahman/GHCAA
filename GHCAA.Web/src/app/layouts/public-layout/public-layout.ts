@@ -6,66 +6,7 @@ import { AppFooter } from '../../shared/footer/footer';
   selector: 'app-public-layout',
   standalone: true,
   imports: [RouterOutlet, RouterLink, AppFooter],
-  template: `
-    <nav class="glass-nav">
-      <div class="container nav-content">
-        <div class="logo">
-          <div class="brand-icon">GHC</div>
-          <div class="logo-text">
-            <span class="abbr">GHCAA</span>
-            <span class="full hide-mobile">Govt. Haraganga College Alumni Association</span>
-          </div>
-        </div>
-        <div class="nav-links hide-mobile">
-          <a routerLink="/" class="nav-link">Home</a>
-          <a routerLink="/about" class="nav-link">About Us</a>
-          <a routerLink="/register" class="nav-link">Join</a>
-          <a routerLink="/contact" class="nav-link">Contact</a>
-          <a routerLink="/login" class="btn btn-primary">Member Login</a>
-        </div>
-      </div>
-    </nav>
-    
-    <main>
-      <router-outlet></router-outlet>
-    </main>
-    
-    <app-footer></app-footer>
-  `,
-  styles: [`
-    .glass-nav {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: rgba(10, 10, 15, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--glass-border);
-      color: white;
-      padding: 0.75rem 0;
-    }
-    .nav-content { display: flex; justify-content: space-between; align-items: center; }
-    .logo { display: flex; align-items: center; gap: 0.75rem; }
-    
-    .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
-    .abbr { font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; color: var(--primary-color); }
-    .full { font-size: 0.65rem; opacity: 0.7; text-transform: uppercase; font-weight: 600; color: #fff; }
-    
-    .nav-links { display: flex; gap: 2rem; align-items: center; }
-    .nav-link { 
-        color: rgba(255,255,255,0.8); 
-        text-decoration: none; 
-        font-weight: 700; 
-        font-size: 0.9rem; 
-        transition: 0.3s; 
-    }
-    .nav-link:hover { color: var(--primary-color); }
-
-    main { min-height: calc(100vh - 400px); }
-
-    @media (max-width: 600px) {
-        .logo-text .full { display: none; }
-    }
-  `]
+  templateUrl: './public-layout.html',
+  styleUrl: './public-layout.scss'
 })
 export class PublicLayout { }

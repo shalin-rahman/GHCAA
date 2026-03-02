@@ -73,7 +73,7 @@
 
     <!-- Details Modal -->
     <div class="modal-overlay" *ngIf="selectedMember()" (click)="closeAudit()">
-        <div class="modal-content glass-card reveal-top" (click)="$event.stopPropagation()">
+        <div class="modal-content modal-card glass-card reveal-top" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <div class="header-info">
                     <h3>Applicant Registry File: {{ selectedMember()?.fullName }}</h3>

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_ENDPOINTS } from '../constants/api.endpoints';
 
 export interface Job {
     id: number;
@@ -25,20 +26,17 @@ export interface Job {
 })
 export class JobService {
     private http = inject(HttpClient);
+    private apiUrl = API_ENDPOINTS.JOBS;
 
-    getJobs(category?: number): Observable<Job[]> {
-        let params: Record<string, string> = {};
-        if (category !== undefined) {
-            params['category'] = category.toString();
-        }
-        return this.http.get<Job[]>('/api/jobs', { params });
+    getJobs(params?: any): Observable<Job[]> {
+        return this.http.get<Job[]>(this.apiUrl, { params });
     }
 
     getJobById(id: number): Observable<Job> {
-        return this.http.get<Job>(`/api/jobs/${id}`);
+        return this.http.get<Job>(`${this.apiUrl}/${id}`);
     }
 
-    postJob(job: Partial<Job>): Observable<Job> {
-        return this.http.post<Job>('/api/jobs', job);
+    createJob(job: Partial<Job>): Observable<Job> {
+        return this.http.post<Job>(this.apiUrl, job);
     }
 }

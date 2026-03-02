@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_ENDPOINTS } from '../constants/api.endpoints';
 
 export interface ContactMessage {
     fullName: string;
@@ -15,7 +16,7 @@ export interface ContactMessage {
 export class ContactService {
     private http = inject(HttpClient);
 
-    submitMessage(msg: ContactMessage): Observable<any> {
-        return this.http.post('/api/contact', msg);
+    sendMessage(msg: any): Observable<any> {
+        return this.http.post(API_ENDPOINTS.CONTACT, msg);
     }
 }

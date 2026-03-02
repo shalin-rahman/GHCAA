@@ -65,6 +65,7 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IContactService, ContactService>();
             services.AddScoped<IAssistantService, AssistantService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IEventService, EventService>();
             
             return services;
         }

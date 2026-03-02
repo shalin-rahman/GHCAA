@@ -1,75 +1,164 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EventsService, AlumniEvent } from '../../core/services/events.service';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { EventsService, AlumniEvent, EventRegistration } from '../../core/services/events.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
-    selector: 'app-events',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
-    <div class="events-page">
-      <div class="header">
-        <h2>Upcoming Events</h2>
-        <p>Save the date for our upcoming gatherings and professional sessions</p>
-      </div>
-
-      <div class="events-list">
-        @for (ev of events(); track ev.id) {
-          <div class="event-card glass-card">
-            <div class="date-badge">
-                <span class="day">{{ ev.date | date:'dd' }}</span>
-                <span class="month">{{ ev.date | date:'MMM' }}</span>
-            </div>
-            <div class="event-details">
-                <div class="type">{{ ev.type }}</div>
-                <h3>{{ ev.title }}</h3>
-                <p>{{ ev.description }}</p>
-                <div class="footer">
-                    <span>📍 {{ ev.location }}</span>
-                    <span>⏰ {{ ev.date | date:'shortTime' }}</span>
-                </div>
-            </div>
-            <div class="actions">
-                <button class="btn btn-primary">RSVP Now</button>
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-  `,
-    styles: [`
-    .events-page { padding-bottom: 5rem; }
-    .header { margin-bottom: 3.5rem; }
-    
-    .events-list { display: flex; flex-direction: column; gap: 2rem; max-width: 900px; }
-    
-    .event-card { display: flex; gap: 2rem; padding: 2rem; align-items: center; }
-    
-    .date-badge { width: 80px; height: 80px; background: var(--primary-color); color: var(--accent-color); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
-    .day { font-size: 1.75rem; font-weight: 800; line-height: 1; }
-    .month { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-top: 4px; }
-    
-    .event-details { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
-    .type { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--accent-color); letter-spacing: 1px; }
-    .event-details h3 { font-size: 1.4rem; color: var(--text-main); }
-    .event-details p { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; }
-    
-    .footer { display: flex; gap: 2rem; margin-top: 0.75rem; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); }
-    
-    .actions { padding-left: 2rem; border-left: 1px solid var(--glass-border); flex-shrink: 0; }
-
-    @media (max-width: 768px) {
-        .event-card { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-        .actions { border: none; padding: 0; width: 100%; }
-        .actions button { width: 100%; }
-    }
-  `]
+  selector: 'app-events',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  templateUrl: './events.html',
+  styleUrl: './events.scss'
 })
 export class Events implements OnInit {
-    private eventsService = inject(EventsService);
-    events = signal<AlumniEvent[]>([]);
+  private eventsService = inject(EventsService);
+  private auth = inject(AuthService);
+  private fb = inject(FormBuilder);
 
-    ngOnInit() {
-        this.eventsService.getEvents().subscribe(data => this.events.set(data));
+  events = signal<AlumniEvent[]>([]);
+  activeTab = signal<'upcoming' | 'my-registrations' | 'admin'>('upcoming');
+  myRegistrations = signal<EventRegistration[]>([]);
+  adminRegistrations = signal<EventRegistration[]>([]);
+
+  // Modal & Form State
+  showModal = signal<boolean>(false);
+  showCreateEvent = signal<boolean>(false);
+  selectedEvent = signal<AlumniEvent | null>(null);
+  selectedFile: File | null = null;
+  isSubmitting = signal<boolean>(false);
+
+  isAdmin = computed(() => this.auth.currentUser()?.role === 'SuperAdmin' || this.auth.currentUser()?.role === 'Admin');
+
+  regForm = this.fb.group({
+    paymentReference: ['', [Validators.required, Validators.minLength(4)]]
+  });
+
+  eventForm = this.fb.group({
+    title: ['', Validators.required],
+    description: ['', Validators.required],
+    date: ['', Validators.required],
+    location: ['', Validators.required],
+    registrationFee: [0],
+    registrationDeadline: [''],
+    adminNote: [''],
+    isActive: [true]
+  });
+
+  ngOnInit() {
+    this.loadEvents();
+    this.loadMyRegistrations();
+    if (this.isAdmin()) {
+      this.loadAdminRegistrations();
     }
+  }
+
+  loadEvents() {
+    this.eventsService.getEvents().subscribe({
+      next: data => this.events.set(data),
+      error: () => this.events.set([])
+    });
+  }
+
+  loadMyRegistrations() {
+    if (this.auth.isAuthenticated()) {
+      this.eventsService.getMyRegistrations().subscribe({
+        next: data => this.myRegistrations.set(data),
+        error: () => this.myRegistrations.set([])
+      });
+    }
+  }
+
+  loadAdminRegistrations() {
+    this.eventsService.getAllRegistrations().subscribe({
+      next: data => this.adminRegistrations.set(data),
+      error: () => this.adminRegistrations.set([])
+    });
+  }
+
+  openRegisterModal(ev: AlumniEvent) {
+    if (!this.auth.isAuthenticated()) {
+      alert('Please login to register for events.');
+      return;
+    }
+    this.selectedEvent.set(ev);
+    this.showModal.set(true);
+  }
+
+  closeModal() {
+    this.showModal.set(false);
+    this.regForm.reset();
+    this.selectedFile = null;
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
+  }
+
+  submitRegistration() {
+    if (this.regForm.invalid || !this.selectedEvent()) return;
+
+    this.isSubmitting.set(true);
+    const evId = this.selectedEvent()!.id;
+    const ref = this.regForm.value.paymentReference!;
+
+    this.eventsService.registerForEvent(evId, ref, this.selectedFile || undefined).subscribe({
+      next: () => {
+        alert('Registration submitted successfully! Wait for admin approval.');
+        this.isSubmitting.set(false);
+        this.closeModal();
+        this.loadMyRegistrations();
+        if (this.isAdmin()) this.loadAdminRegistrations();
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Registration failed. Please try again.');
+        this.isSubmitting.set(false);
+      }
+    });
+  }
+
+  submitEvent() {
+    if (this.eventForm.invalid) return;
+
+    const evData = this.eventForm.value as Partial<AlumniEvent>;
+    this.eventsService.createEvent(evData).subscribe({
+      next: () => {
+        alert('Event created successfully!');
+        this.showCreateEvent.set(false);
+        this.eventForm.reset({ isActive: true });
+        this.loadEvents();
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Failed to create event.');
+      }
+    });
+  }
+
+  approveReg(regId: number, approve: boolean) {
+    const action = approve ? 'approve' : 'reject';
+    if (confirm(`Are you sure you want to ${action} this registration?`)) {
+      this.eventsService.approveRegistration(regId, approve).subscribe(() => {
+        this.loadAdminRegistrations();
+        this.loadMyRegistrations(); // Refresh if current user is the one approved
+      });
+    }
+  }
+
+  isRegistrationOpen(ev: AlumniEvent): boolean {
+    if (!ev.isActive) return false;
+    if (!ev.registrationDeadline) return true;
+    return new Date(ev.registrationDeadline) > new Date();
+  }
+
+  askAdmin(ev: AlumniEvent) {
+    const message = `I have a question about the event: ${ev.title}`;
+    // Navigate to chat or open a contact modal
+    // For now, we'll use a mailto or an alert
+    window.location.href = `mailto:admin@ghcaa.org?subject=Query on ${ev.title}&body=${message}`;
+  }
 }

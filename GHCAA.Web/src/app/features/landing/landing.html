@@ -67,6 +67,33 @@
     </div>
 </section>
 
+<!-- Professional Opportunities (Job Hub Preview) -->
+<section id="jobs" class="jobs-preview-section container">
+    <div class="section-header align-left flex justify-between items-end">
+        <div>
+            <h2>Professional Network</h2>
+            <p>Exclusive opportunities within the Haragangian corporate circle.</p>
+        </div>
+        <a routerLink="/portal/jobs" class="read-more mb-4">Explore Job Hub →</a>
+    </div>
+
+    <div class="jobs-compact-grid">
+        @for (job of jobs(); track job.id) {
+        <div class="job-mini-card glass-card">
+            <div class="job-badge bg-accent text-primary-dark">Hiring</div>
+            <h3>{{ job.title }}</h3>
+            <p class="company text-accent font-bold">{{ job.companyName }}</p>
+            <div class="job-meta flex gap-4 text-xs opacity-60 mt-2">
+                <span>📍 {{ job.location }}</span>
+                <span>📅 Deadline: {{ job.deadline | date:'shortDate' }}</span>
+            </div>
+        </div>
+        } @empty {
+        <div class="full-width opacity-30 text-center py-6 text-sm italic">New career opportunities coming soon.</div>
+        }
+    </div>
+</section>
+
 <!-- Membership Registry (Compact Redesign) -->
 <section id="membership" class="membership-section container">
     <div class="section-header">
@@ -114,6 +141,35 @@
     </div>
 </section>
 
+<section id="events" class="events-preview-section container">
+    <div class="section-header">
+        <h2>Upcoming Events</h2>
+        <p>Join the movement - Participate in our upcoming gatherings.</p>
+        <div class="underline"></div>
+    </div>
+
+    <div class="events-preview-grid">
+        @for (ev of events(); track ev.id) {
+        <div class="event-mini-card glass-card">
+            <div class="event-mini-date">
+                <span class="day">{{ ev.date | date:'dd' }}</span>
+                <span class="month">{{ ev.date | date:'MMM' }}</span>
+            </div>
+            <div class="event-mini-info">
+                <h4>{{ ev.title }}</h4>
+                <p><span class="icon">📍</span> {{ ev.location }}</p>
+            </div>
+            <a routerLink="/portal/events" class="btn btn-primary btn-sm">Register</a>
+        </div>
+        } @empty {
+        <div class="full-width text-center py-10 opacity-50 italic">No events scheduled at this moment.</div>
+        }
+    </div>
+    <div class="text-center mt-8">
+        <a routerLink="/portal/events" class="btn btn-accent">View All Events</a>
+    </div>
+</section>
+
 <!-- Latest News -->
 <section id="news" class="news-section">
     <div class="container">
@@ -125,14 +181,17 @@
         <div class="news-grid">
             @for (item of news(); track item.id) {
             <div class="news-card glass-card">
-                <div class="news-date">{{ item.publishedAt | date:'MMM d, y' }}</div>
+                <div class="news-date">{{ item.createdAt | date:'MMM d, y' }}</div>
                 <h3>{{ item.title }}</h3>
-                <p>{{ item.summary }}</p>
-                <a href="#" class="read-more">Read Full Story →</a>
+                <p>{{ item.content }}</p>
+                <a routerLink="/portal/news" class="read-more">Read Full Story →</a>
             </div>
             } @empty {
             <div class="full-width text-center">No recent announcements available.</div>
             }
+        </div>
+        <div class="text-center mt-8">
+            <a routerLink="/portal/news" class="btn btn-outline border-white/20">All News</a>
         </div>
     </div>
 </section>

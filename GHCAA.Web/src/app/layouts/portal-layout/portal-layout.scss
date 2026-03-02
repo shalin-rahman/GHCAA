@@ -37,19 +37,41 @@
     padding: 1rem 1.5rem;
     margin: 0.25rem 1rem;
     text-decoration: none;
-    color: rgba(255, 255, 255, 0.5);
-    border-radius: 4px;
-    font-weight: 700;
-    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.85rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: 0.3s;
+    letter-spacing: 1.2px;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.nav-item:hover,
+.nav-item:hover {
+    background: rgba(197, 160, 89, 0.08);
+    color: #fff;
+}
+
 .nav-item.active {
-    background: rgba(197, 160, 89, 0.1);
-    color: var(--accent-color);
+    background: var(--gold-gradient);
+    color: #000 !important;
+    box-shadow: 0 4px 15px rgba(197, 160, 89, 0.45);
+    transform: translateX(5px);
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 20%;
+        bottom: 20%;
+        width: 4px;
+        background: #000;
+        border-radius: 4px 0 0 4px;
+    }
+}
+
+.nav-item.active .icon {
+    color: #000;
 }
 
 .nav-item .icon {
@@ -119,12 +141,47 @@
     }
 }
 
+.toggle-bt.mini-logo {
+    width: 32px;
+    height: 32px;
+    background: var(--gold-gradient);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.25rem;
+    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.25);
+
+    .abbr {
+        font-weight: 900;
+        font-size: 0.85rem;
+        color: #000 !important; // Pure black on Gold background
+        letter-spacing: -0.5px;
+    }
+}
+
 .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+
+    .text-muted {
+        color: rgba(255, 255, 255, 0.45) !important;
+        letter-spacing: 0.5px;
+    }
+
+    .separator {
+        color: rgba(197, 160, 89, 0.3);
+    }
+
     .current-page {
-        color: var(--accent-color) !important;
+        color: #fff !important; // Absolute white for the current page title in the dark top-bar
         font-weight: 900;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 1.5px;
+        text-shadow: 0 0 10px rgba(197, 160, 89, 0.3);
     }
 }
 
@@ -140,6 +197,8 @@
 
 .username {
     color: #fff !important;
+    font-weight: 800;
+    letter-spacing: 0.5px;
 }
 
 .role {
@@ -148,7 +207,8 @@
 }
 
 .main-content {
-    background-color: #000 !important;
+    background-color: var(--bg-color) !important;
+    color: var(--text-main);
 }
 
 .page-content {
@@ -169,6 +229,33 @@
     .role {
         font-size: 0.7rem;
         opacity: 0.7;
+    }
+}
+
+.logo-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+
+    .abbr {
+        font-weight: 950; // Ultra bold for premium feel
+        font-size: 1.15rem;
+        color: var(--accent-color) !important; // Champagne Gold on Black
+        letter-spacing: 1px;
+    }
+
+    .full {
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45); // Muted ghostly white on Black
+        font-weight: 700;
+        letter-spacing: 0.5px;
     }
 }
 

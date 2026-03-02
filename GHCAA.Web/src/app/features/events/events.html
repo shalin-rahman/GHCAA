@@ -1,0 +1,209 @@
+<div class="events-page mb-10">
+    <div class="header">
+        <h2 class="text-3xl font-bold">Events & Gatherings</h2>
+        <p class="text-muted">Stay connected with your fellow alumni</p>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs mb-8 flex gap-6 border-b border-white/10 pb-2">
+        <button (click)="activeTab.set('upcoming')" [class.active]="activeTab() === 'upcoming'"
+            class="tab-btn px-2 py-2 font-semibold text-sm">Active Events</button>
+        <button (click)="activeTab.set('my-registrations')" [class.active]="activeTab() === 'my-registrations'"
+            class="tab-btn px-2 py-2 font-semibold text-sm">My Participations</button>
+
+        <div class="flex-1"></div>
+
+        <button *ngIf="isAdmin()" (click)="showCreateEvent.set(true)" class="btn btn-accent btn-sm rounded-lg">+ Create
+            Event</button>
+    </div>
+
+    <!-- Upcoming Events Tab -->
+    <div *ngIf="activeTab() === 'upcoming'" class="tab-content">
+        <div class="events-list grid gap-6">
+            @for (ev of events(); track ev.id) {
+            <div class="event-card glass-card p-6 flex flex-col md:flex-row gap-6 items-center">
+                <div
+                    class="date-badge flex flex-col items-center justify-center bg-blue-600 text-white p-4 rounded-xl w-20 h-20 shrink-0">
+                    <span class="day text-2xl font-bold leading-none">{{ ev.date | date:'dd' }}</span>
+                    <span class="month text-xs uppercase font-bold">{{ ev.date | date:'MMM' }}</span>
+                </div>
+                <div class="event-details flex-1">
+                    <div class="type text-xs uppercase font-bold text-accent tracking-wider mb-1">{{ ev.type || 'ALUMNI
+                        EVENT' }}</div>
+                    <h3 class="text-xl font-bold mb-2">{{ ev.title }}</h3>
+                    <p class="text-sm text-muted line-clamp-2 mb-4">{{ ev.description }}</p>
+                    <div class="footer flex gap-6 text-sm font-medium text-muted">
+                        <span>📍 {{ ev.location }}</span>
+                        <span>⏰ {{ ev.date | date:'shortTime' }}</span>
+                        <span *ngIf="ev.registrationFee">💰 {{ ev.registrationFee | currency:'BDT ':'code' }}</span>
+                    </div>
+                </div>
+                <div class="actions md:pl-6 md:border-l border-white/10 shrink-0 flex flex-col gap-2">
+                    <button *ngIf="isRegistrationOpen(ev)" (click)="openRegisterModal(ev)"
+                        class="btn btn-primary px-6 py-2 rounded-lg">Register Now</button>
+                    <button *ngIf="!isRegistrationOpen(ev)" disabled
+                        class="btn btn-secondary opacity-50 px-6 py-2 rounded-lg cursor-not-allowed">Registration
+                        Closed</button>
+                    <button (click)="askAdmin(ev)"
+                        class="btn btn-outline border-white/20 px-6 py-2 rounded-lg text-sm">Ask Admin</button>
+                </div>
+            </div>
+            <div *ngIf="ev.adminNote" class="mt-2 text-xs text-accent italic px-6 opacity-80">
+                Note: {{ ev.adminNote }}
+            </div>
+            <div *ngIf="ev.registrationDeadline" class="text-xs text-gray-400 px-6 mt-1 flex items-center gap-2">
+                ⏳ Final Date for Participation: <span [class.text-red-400]="!isRegistrationOpen(ev)">{{
+                    ev.registrationDeadline | date:'medium' }}</span>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- My Registrations Tab -->
+    <div *ngIf="activeTab() === 'my-registrations'" class="tab-content animate-fade-in">
+        <div *ngIf="myRegistrations().length === 0" class="text-center py-20 glass-card">
+            <p class="text-muted italic">You haven't participated in any events yet.</p>
+        </div>
+        <div class="registrations-list grid gap-4">
+            @for (reg of myRegistrations(); track reg.id) {
+            <div class="reg-card glass-card p-5 flex justify-between items-center border-l-4"
+                [class.border-yellow-500]="reg.status === 'Pending'"
+                [class.border-green-500]="reg.status === 'Approved'">
+                <div>
+                    <h4 class="font-bold text-lg">{{ reg.event?.title }}</h4>
+                    <div class="flex gap-4 mt-1 opacity-70 text-xs">
+                        <span>📅 {{ reg.registeredAt | date:'mediumDate' }}</span>
+                        <span class="font-mono">Ref: {{ reg.paymentReference }}</span>
+                    </div>
+                </div>
+                <div class="status-badge px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg"
+                    [ngClass]="{
+              'bg-yellow-500 text-black': reg.status === 'Pending',
+              'bg-green-500 text-white': reg.status === 'Approved',
+              'bg-red-500 text-white': reg.status === 'Rejected'
+            }">
+                    {{ reg.status }}
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Create Event Form (Admin Only) -->
+    <div *ngIf="showCreateEvent()"
+        class="create-event-modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="modal-card glass-card max-w-2xl w-full p-8 shadow-2xl border border-white/10">
+            <h3 class="text-2xl font-bold text-accent mb-6">Configure New Event</h3>
+            <form [formGroup]="eventForm" (ngSubmit)="submitEvent()">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Event Title</label>
+                        <input type="text" formControlName="title"
+                            class="w-full bg-black/40 border border-white/20 rounded-lg p-3 outline-none focus:border-accent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Date & Time</label>
+                        <input type="datetime-local" formControlName="date"
+                            class="w-full bg-black/40 border border-white/20 rounded-lg p-3 outline-none focus:border-accent">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Location</label>
+                    <input type="text" formControlName="location"
+                        class="w-full bg-black/40 border border-white/20 rounded-lg p-3 outline-none focus:border-accent">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Description</label>
+                    <textarea formControlName="description" rows="3"
+                        class="w-full bg-black/40 border border-white/20 rounded-lg p-3 outline-none focus:border-accent"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Participation Last Date</label>
+                        <input type="datetime-local" formControlName="registrationDeadline"
+                            class="w-full bg-black/40 border border-white/20 rounded-lg p-3 outline-none focus:border-accent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Admin Note</label>
+                        <input type="text" formControlName="adminNote" placeholder="Internal notes..."
+                            class="w-full bg-black/40 border border-white/20 rounded-lg p-3 outline-none focus:border-accent">
+                    </div>
+                </div>
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Registration Fee (BDT)</label>
+                        <input type="number" formControlName="registrationFee"
+                            class="w-full bg-black/40 border border-white/20 rounded-lg p-3 outline-none focus:border-accent">
+                    </div>
+                    <div class="flex items-end pb-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" formControlName="isActive"
+                                class="w-5 h-5 rounded border-white/20 bg-black/40 text-accent">
+                            <span class="font-semibold">Event is Active</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <button type="button" (click)="showCreateEvent.set(false)"
+                        class="flex-1 px-4 py-3 rounded-xl border border-white/10 hover:bg-white/5 font-bold">Cancel</button>
+                    <button type="submit" [disabled]="eventForm.invalid"
+                        class="flex-1 px-4 py-3 rounded-xl bg-accent text-primary-dark hover:brightness-110 font-bold">Create
+                        Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Registration Modal -->
+<div *ngIf="showModal()"
+    class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="modal-card glass-card max-w-lg w-full p-8 shadow-2xl border border-white/10 animate-fade-in">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-accent">Register for Event</h3>
+            <button (click)="closeModal()" class="text-muted hover:text-white transition-colors">&times;</button>
+        </div>
+
+        <div class="mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
+            <h4 class="font-bold text-lg">{{ selectedEvent()?.title }}</h4>
+            <p class="text-sm text-muted">{{ selectedEvent()?.date | date:'fullDate' }}</p>
+            <div class="mt-2 text-accent font-bold" *ngIf="selectedEvent()?.registrationFee">
+                Fee: {{ selectedEvent()?.registrationFee | currency:'BDT ':'code' }}
+            </div>
+        </div>
+
+        <form [formGroup]="regForm" (ngSubmit)="submitRegistration()">
+            <div class="mb-4">
+                <label class="block text-sm font-semibold mb-2">Payment Reference (TrxID / Receipt No.)</label>
+                <input type="text" formControlName="paymentReference"
+                    class="w-full bg-black/40 border border-white/20 rounded-lg p-3 outline-none focus:border-accent transition-all font-mono"
+                    placeholder="e.g. BKASH-XXXXX or 123456">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-2">Receipt / Payment Proof (Image/PDF)</label>
+                <div
+                    class="file-drop-zone border-2 border-dashed border-white/20 rounded-xl p-6 text-center hover:border-accent transition-all cursor-pointer relative">
+                    <input type="file" (change)="onFileSelected($event)"
+                        class="absolute inset-0 opacity-0 cursor-pointer">
+                    <div *ngIf="!selectedFile" class="text-muted">
+                        <p class="mb-1 font-semibold">Click or drag to upload</p>
+                        <p class="text-xs">Max size: 5MB</p>
+                    </div>
+                    <div *ngIf="selectedFile" class="text-accent font-semibold flex items-center justify-center gap-2">
+                        📄 {{ selectedFile.name }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button type="button" (click)="closeModal()"
+                    class="flex-1 px-4 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all font-bold">Cancel</button>
+                <button type="submit" [disabled]="regForm.invalid || isSubmitting()"
+                    class="flex-1 px-4 py-3 rounded-xl bg-accent text-primary-dark hover:brightness-110 transition-all font-bold disabled:opacity-50">
+                    {{ isSubmitting() ? 'Processing...' : 'Submit Registration' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -9,6 +9,7 @@ Alumni Association Management System for Government Haraganga College.
 - **Notifications**: System alerts for application status, news, and events.
 - **Finance**: Membership dues tracking, ledger management, and CSV export.
 - **Job Hub**: Portal for alumni to browse and post employment opportunities.
+- **Event Management**: Configure upcoming alumni events with fee details, member participation tracking, payment reference/receipt verification, and automated email confirmations.
 
 ## Tech Stack
 

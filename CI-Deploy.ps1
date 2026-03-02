@@ -11,6 +11,15 @@ Write-Host "Cleaning build directory..." -ForegroundColor Yellow
 if (Test-Path $PublishPath) { Remove-Item -Recurse -Force $PublishPath }
 New-Item -ItemType Directory -Path $PublishPath | Out-Null
 
+# 1.5 Run Backend Tests
+Write-Host "Running Backend Unit Tests..." -ForegroundColor Yellow
+dotnet test GHCAA.Tests/GHCAA.Tests.csproj
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Backend build aborted: Unit tests failed."
+}
+Write-Host "OK - All backend tests passed." -ForegroundColor Green
+Write-Host ""
+
 # 2. Backend Build
 Write-Host "Building API..." -ForegroundColor Yellow
 Set-Location "$RootPath\GHCAA.API"

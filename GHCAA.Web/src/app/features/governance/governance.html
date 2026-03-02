@@ -7,23 +7,14 @@
     <!-- Committee List -->
     <div class="committee-section">
         @if (loading()) {
-        <div class="loading-state">
-            <div class="spinner"></div>
-            <p>Loading current committee...</p>
-        </div>
+        <div class="loading">Loading current committee...</div>
         } @else {
         <div class="committee-grid">
             @for (member of committee(); track member.id) {
             <div class="glass-card committee-card"
                 [ngClass]="{'executive-head': member.position === 0 || member.position === 1}">
                 <div class="card-content">
-                    <div class="member-photo">
-                        @if (member.photoPath) {
-                        <img [src]="member.photoPath" [alt]="member.fullName">
-                        } @else {
-                        <div class="avatar-large">{{ member.fullName[0] }}</div>
-                        }
-                    </div>
+                    <div class="avatar-large">{{ member.fullName[0] }}</div>
                     <div class="member-details">
                         <span class="position-badge">{{ getPositionName(member.position) }}</span>
                         <h3>{{ member.fullName }}</h3>
@@ -35,12 +26,8 @@
                 </div>
             </div>
             } @empty {
-            <div class="empty-state glass-card reveal-bottom">
-                <div class="icon-box">🛡️</div>
-                <h3>Interim Management</h3>
-                <p>The Interim Executive Committee (IEC) is currently managing the association operations while
-                    elections
-                    are being prepared. Check back soon for the newly elected committee members.</p>
+            <div class="empty-state glass-card">
+                <p>The Interim Executive Committee (IEC) is currently managing the association operations.</p>
             </div>
             }
         </div>
@@ -48,30 +35,26 @@
     </div>
 
     <!-- Constitution Quick Reference -->
-    <div class="constitution-reference section">
+    <div class="constitution-reference section container">
         <div class="section-header">
             <h2>Governance Pillars</h2>
-            <p>Our association is built on foundations of integrity and shared values.</p>
             <div class="underline"></div>
         </div>
         <div class="pillars-grid">
             <div class="glass-card pillar-card">
-                <div class="pillar-icon">⚖️</div>
                 <h4>Political Neutrality</h4>
                 <p>The association maintains strict political and religious neutrality to ensure an inclusive
-                    environment for all alumni regardless of their affiliations.</p>
+                    environment for all alumni.</p>
             </div>
             <div class="glass-card pillar-card">
-                <div class="pillar-icon">🤝</div>
                 <h4>Life-Long Connection</h4>
                 <p>Governance is focused on long-term connection, professional mentorship, and supporting the college's
-                    legacy across generations.</p>
+                    legacy.</p>
             </div>
             <div class="glass-card pillar-card">
-                <div class="pillar-icon">📈</div>
                 <h4>Transparency</h4>
                 <p>All financial records and meeting minutes are archived for member inspection at the annual general
-                    meetings to ensure complete accountability.</p>
+                    meetings.</p>
             </div>
         </div>
     </div>

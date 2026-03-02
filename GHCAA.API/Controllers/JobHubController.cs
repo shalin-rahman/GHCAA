@@ -19,6 +19,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetActiveJobs([FromQuery] Enums.JobCategory? category, CancellationToken cancellationToken)
         {
             var jobs = await _jobService.GetActiveJobsAsync(category, cancellationToken);
@@ -39,6 +40,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetJob(int id, CancellationToken cancellationToken)
         {
             var job = await _jobService.GetJobByIdAsync(id, cancellationToken);

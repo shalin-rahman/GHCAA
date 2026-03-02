@@ -19,12 +19,35 @@
 
 .wizard-sidebar {
     background: var(--primary-color);
-    padding: 4rem 2.5rem;
+    padding: 4.5rem 2.5rem;
     display: flex;
     flex-direction: column;
     gap: 4rem;
     color: white;
     border-right: 1px solid var(--glass-border);
+
+    /* Contrast Fix for Dark Mode Gold Sidebar */
+    body.dark-theme & {
+        color: #000;
+
+        .brand-box h3 {
+            color: #000;
+        }
+
+        .step-txt {
+            color: #000;
+        }
+
+        .sidebar-help p {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .sidebar-help a {
+            color: #000;
+            border-bottom: 1px solid #000;
+            display: inline-block;
+        }
+    }
 }
 
 .brand-box img {
@@ -68,6 +91,12 @@
     border-color: var(--accent-color);
     color: var(--accent-color);
     box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+
+    body.dark-theme & {
+        background: #000;
+        color: #fff;
+        border-color: #000;
+    }
 }
 
 .step-link.done {
@@ -134,10 +163,10 @@
 }
 
 .step-header h2 {
-    font-size: 2rem;
+    font-size: 2.25rem;
     color: var(--primary-color);
-    font-weight: 800;
-    letter-spacing: -1px;
+    font-weight: 900;
+    letter-spacing: -1.2px;
 }
 
 .step-header p {

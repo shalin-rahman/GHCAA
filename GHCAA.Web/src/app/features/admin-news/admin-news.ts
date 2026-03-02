@@ -36,8 +36,8 @@ export class AdminNews implements OnInit {
 
     loadNews() {
         this.loading.set(true);
-        this.newsService.getAdminNews().subscribe({
-            next: (data) => { this.newsList.set(data); this.loading.set(false); },
+        this.newsService.getNewsAdmin().subscribe({
+            next: (data: NewsPost[]) => { this.newsList.set(data); this.loading.set(false); },
             error: () => this.loading.set(false)
         });
     }

@@ -1,26 +1,77 @@
-import { Injectable, signal } from '@angular/core';
-import { of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { API_ENDPOINTS } from '../constants/api.endpoints';
 
 export interface AlumniEvent {
     id: number;
     title: string;
     description: string;
-    date: Date;
+    date: string;
     location: string;
-    type: 'Reunion' | 'Seminar' | 'Networking' | 'Sports';
+    registrationFee?: number;
+    type?: string;
+    isActive: boolean;
+    imageUrl?: string;
+    registrationDeadline?: string;
+    adminNote?: string;
+}
+
+export interface EventRegistration {
+    id: number;
+    eventId: number;
+    event?: AlumniEvent;
+    memberId: number;
+    memberName?: string;
+    paymentReference: string;
+    receiptPath?: string;
+    status: 'Pending' | 'Approved' | 'Rejected';
+    registeredAt: string;
 }
 
 @Injectable({
     providedIn: 'root'
 })
 export class EventsService {
-    private mockEvents: AlumniEvent[] = [
-        { id: 1, title: 'Annual Grand Reunion 2025', description: 'Join us for the biggest gathering of Haragangians at the college campus.', date: new Date('2025-12-25T10:00:00'), location: 'College Playground', type: 'Reunion' },
-        { id: 2, title: 'Corporate Career Path Seminar', description: 'Learning from the veterans on how to build a career in multinational companies.', date: new Date('2025-05-15T15:00:00'), location: 'Auditorium', type: 'Seminar' },
-        { id: 3, title: 'Alumni Football Tournament', description: 'Inter-batch football tournament and friendly matches.', date: new Date('2025-08-10T09:00:00'), location: 'GHC Stadium', type: 'Sports' }
-    ];
+    private http = inject(HttpClient);
+    private apiUrl = API_ENDPOINTS.EVENTS;
 
-    getEvents() {
-        return of(this.mockEvents);
+    getEvents(): Observable<AlumniEvent[]> {
+        return this.http.get<AlumniEvent[]>(this.apiUrl);
+    }
+
+    getEventById(id: number): Observable<AlumniEvent> {
+        return this.http.get<AlumniEvent>(`${this.apiUrl}/${id}`);
+    }
+
+    registerForEvent(eventId: number, paymentRef: string, receiptFile?: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('EventId', eventId.toString());
+        formData.append('PaymentReference', paymentRef);
+        if (receiptFile) {
+            formData.append('receipt', receiptFile);
+        }
+        return this.http.post(`${this.apiUrl}/register`, formData);
+    }
+
+    getMyRegistrations(): Observable<EventRegistration[]> {
+        return this.http.get<EventRegistration[]>(`${this.apiUrl}/my-registrations`);
+    }
+
+    // Admin Methods
+    getAllEventsForAdmin(): Observable<AlumniEvent[]> {
+        return this.http.get<AlumniEvent[]>(`${this.apiUrl}/admin/all`);
+    }
+
+    createEvent(ev: Partial<AlumniEvent>): Observable<AlumniEvent> {
+        return this.http.post<AlumniEvent>(`${this.apiUrl}/admin`, ev);
+    }
+
+    getAllRegistrations(): Observable<EventRegistration[]> {
+        return this.http.get<EventRegistration[]>(`${this.apiUrl}/admin/registrations`);
+    }
+
+    approveRegistration(registrationId: number, approve: boolean): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/approve-registration`, { registrationId, approve });
     }
 }

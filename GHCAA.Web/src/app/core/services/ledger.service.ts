@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_ENDPOINTS } from '../constants/api.endpoints';
 
 export interface FinancialRecord {
     id: number;
@@ -24,19 +25,17 @@ export interface LedgerSummary {
 })
 export class LedgerService {
     private http = inject(HttpClient);
+    private apiUrl = API_ENDPOINTS.LEDGER;
 
-    getRecords(year?: number, type?: number): Observable<FinancialRecord[]> {
-        let params: any = {};
-        if (year) params.year = year.toString();
-        if (type) params.type = type.toString();
-        return this.http.get<FinancialRecord[]>('/api/ledger', { params });
+    getRecords(params: any): Observable<FinancialRecord[]> {
+        return this.http.get<FinancialRecord[]>(this.apiUrl, { params });
     }
 
     getSummary(year: number): Observable<LedgerSummary> {
-        return this.http.get<LedgerSummary>('/api/ledger/summary', { params: { year: year.toString() } });
+        return this.http.get<LedgerSummary>(`${this.apiUrl}/summary`, { params: { year: year.toString() } });
     }
 
     addRecord(record: Partial<FinancialRecord>): Observable<FinancialRecord> {
-        return this.http.post<FinancialRecord>('/api/ledger', record);
+        return this.http.post<FinancialRecord>(this.apiUrl, record);
     }
 }

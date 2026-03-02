@@ -57,7 +57,7 @@ export class AdminComm implements OnInit {
     loadTemplates() {
         this.loading.set(true);
         this.commService.getTemplates().subscribe({
-            next: (data) => {
+            next: (data: EmailTemplate[]) => {
                 this.templates.set(data);
                 this.loading.set(false);
             },

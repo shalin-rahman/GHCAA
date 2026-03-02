@@ -1,15 +1,11 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { NetworkingService } from '../../core/services/networking.service';
+import { EventsService, AlumniEvent } from '../../core/services/events.service';
+import { NewsService, NewsPost } from '../../core/services/news.service';
+import { JobService, Job } from '../../core/services/job.service';
 
-interface News {
-  id: number;
-  title: string;
-  summary: string;
-  publishedAt: string;
-}
 
 interface TierDetail {
   id: string;
@@ -28,10 +24,14 @@ interface TierDetail {
   styleUrl: './landing.scss',
 })
 export class Landing implements OnInit {
-  private http = inject(HttpClient);
   private networking = inject(NetworkingService);
+  private eventsService = inject(EventsService);
+  private newsService = inject(NewsService);
+  private jobService = inject(JobService);
 
-  news = signal<News[]>([]);
+  news = signal<NewsPost[]>([]);
+  events = signal<AlumniEvent[]>([]);
+  jobs = signal<Job[]>([]);
   committee = signal<any[]>([]);
 
   membershipTiers: TierDetail[] = [
@@ -155,13 +155,29 @@ export class Landing implements OnInit {
 
   ngOnInit() {
     this.loadNews();
+    this.loadEvents();
+    this.loadJobs();
     this.loadCommittee();
   }
 
   loadNews() {
-    this.http.get<News[]>('/api/news').subscribe({
+    this.newsService.getNews().subscribe({
       next: (data) => this.news.set(data.slice(0, 3)),
-      error: () => this.news.set([]) // Silently fail - no news yet
+      error: () => this.news.set([])
+    });
+  }
+
+  loadEvents() {
+    this.eventsService.getEvents().subscribe({
+      next: (data) => this.events.set(data.slice(0, 3)),
+      error: () => this.events.set([])
+    });
+  }
+
+  loadJobs() {
+    this.jobService.getJobs().subscribe({
+      next: (data) => this.jobs.set(data.slice(0, 2)),
+      error: () => this.jobs.set([])
     });
   }
 

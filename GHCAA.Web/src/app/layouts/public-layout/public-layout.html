@@ -1,1 +1,24 @@
-<p>public-layout works!</p>
+<nav class="glass-nav">
+    <div class="container nav-content">
+        <div class="logo">
+            <div class="brand-icon">GHC</div>
+            <div class="logo-text">
+                <span class="abbr">GHCAA</span>
+                <span class="full hide-mobile">Govt. Haraganga College Alumni Association</span>
+            </div>
+        </div>
+        <div class="nav-links hide-mobile">
+            <a routerLink="/" class="nav-link">Home</a>
+            <a routerLink="/about" class="nav-link">About Us</a>
+            <a routerLink="/register" class="nav-link">Join</a>
+            <a routerLink="/contact" class="nav-link">Contact</a>
+            <a routerLink="/login" class="btn btn-primary">Member Login</a>
+        </div>
+    </div>
+</nav>
+
+<main>
+    <router-outlet></router-outlet>
+</main>
+
+<app-footer></app-footer>

@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { Observable, tap, map, catchError, of } from 'rxjs';
 import { LoginDto, TokenResponseDto, User } from '../models/auth.models';
 
+import { API_ENDPOINTS } from '../constants/api.endpoints';
+
 @Injectable({
     providedIn: 'root'
 })
@@ -19,7 +21,7 @@ export class AuthService {
     constructor() { }
 
     login(credentials: LoginDto): Observable<User> {
-        return this.http.post<TokenResponseDto>('/api/auth/login', credentials).pipe(
+        return this.http.post<TokenResponseDto>(API_ENDPOINTS.AUTH.LOGIN, credentials).pipe(
             map(response => {
                 const user: User = {
                     username: response.username,
