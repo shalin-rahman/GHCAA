@@ -247,6 +247,12 @@
             font-size: 0.8rem;
         }
 
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
         .username {
             font-weight: 800;
             font-size: 0.85rem;

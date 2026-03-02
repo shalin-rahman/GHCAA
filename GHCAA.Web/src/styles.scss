@@ -44,8 +44,8 @@
 body.dark-theme {
   --bg-color: #000000;
   --surface-color: #0c0c0c;
-  --primary-color: #c5a059;
-  --primary-rgb: 197, 160, 89;
+  --primary-color: #ffffff;
+  --primary-rgb: 255, 255, 255;
 
   --text-main: #f5f5f5;
   --text-muted: #888888;
@@ -746,8 +746,10 @@ p {
     font-size: 0.8rem;
   }
 }
+
 /* Premium Tab Navigation - Global Standard */
-.tab-nav, .tabs {
+.tab-nav,
+.tabs {
   display: flex;
   gap: 3rem;
   margin-bottom: 3.5rem;
@@ -786,7 +788,7 @@ p {
 
     &.active {
       color: var(--accent-color) !important;
-      
+
       &::after {
         width: 100%;
       }
@@ -797,7 +799,7 @@ p {
     gap: 1.5rem;
     overflow-x: auto;
     white-space: nowrap;
-    
+
     button {
       font-size: 0.75rem !important;
     }
