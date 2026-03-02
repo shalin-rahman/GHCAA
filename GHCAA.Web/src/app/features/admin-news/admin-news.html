@@ -1,24 +1,41 @@
 <div class="admin-feature">
-    <div class="page-header">
+    @if (!showForm()) {
+    <div class="page-header flex justify-between items-center mb-8">
         <div class="header-text">
-            <h2>News Management</h2>
-            <small>Create, edit, and publish news articles</small>
+            <h2 class="text-2xl font-black text-accent uppercase tracking-tighter">News Management</h2>
+            <small class="text-muted block mt-1">Create, edit, and publish institutional news articles</small>
         </div>
-        <button class="btn btn-primary" (click)="openForm()">+ New Post</button>
+        <button class="btn btn-accent shadow-gold" (click)="openForm()">
+            <span class="icon">✍️</span> Draft New Story
+        </button>
     </div>
+    } @else {
+    <div class="page-header flex items-center gap-6 mb-8">
+        <button (click)="cancelForm()" class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
+            <span>←</span>
+        </button>
+        <div>
+            <h2 class="text-2xl font-black text-accent uppercase tracking-tighter">
+                {{ editingId() ? 'Edit Article Asset' : 'New Article Draft' }}
+            </h2>
+            <p class="text-xs uppercase font-black tracking-widest text-muted">Editorial Mode</p>
+        </div>
+    </div>
+    }
 
-    <!-- Create / Edit Form -->
+    <!-- Create / Edit Form Section -->
     @if (showForm()) {
-    <div class="glass-card form-panel">
-        <h3>{{ editingId() ? 'Edit Post' : 'Create New Post' }}</h3>
-        <form (ngSubmit)="saveNews()" class="news-form">
+    <div class="glass-card p-10 reveal-top max-w-5xl mx-auto">
+        <form (ngSubmit)="saveNews()" class="news-form space-y-8">
             <div class="form-group">
-                <label>Title *</label>
-                <input type="text" [(ngModel)]="form.title" name="title" required placeholder="Article headline">
+                <label>Article Headline *</label>
+                <input type="text" [(ngModel)]="form.title" name="title" required
+                    placeholder="Enter a compelling title..." class="text-xl font-black">
             </div>
-            <div class="form-row">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="form-group">
-                    <label>Category *</label>
+                    <label>Asset Category *</label>
                     <select [(ngModel)]="form.category" name="category">
                         @for (c of categories; track c.value) {
                         <option [value]="c.value">{{ c.label }}</option>
@@ -26,34 +43,44 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Image URL (optional)</label>
+                    <label>Cover Image URL</label>
                     <input type="text" [(ngModel)]="form.imageUrl" name="imageUrl" placeholder="https://...">
                 </div>
             </div>
+
             <div class="form-group">
-                <label>Content *</label>
-                <textarea [(ngModel)]="form.content" name="content" rows="8" required
-                    placeholder="Write article content..."></textarea>
+                <label>Article Content *</label>
+                <textarea [(ngModel)]="form.content" name="content" rows="12" required
+                    placeholder="Compose your article here..."></textarea>
             </div>
-            <div class="form-group toggle-row">
-                <label class="toggle-label">
-                    <input type="checkbox" [(ngModel)]="form.isActive" name="isActive">
-                    <span class="toggle-switch"></span>
-                    Publish immediately
-                </label>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary" [disabled]="saving()">
-                    {{ saving() ? 'Saving...' : (editingId() ? 'Update Post' : 'Publish Post') }}
-                </button>
-                <button type="button" class="btn btn-secondary" (click)="cancelForm()">Cancel</button>
+
+            <div class="flex items-center justify-between pt-6 border-t border-white/5">
+                <div class="form-group">
+                    <label>Visibility Status</label>
+                    <div class="flex items-center gap-4 py-2">
+                        <input type="checkbox" [(ngModel)]="form.isActive" name="isActive"
+                            class="w-6 h-6 border-accent text-accent">
+                        <span class="text-[10px] text-muted font-bold uppercase tracking-widest">Publish this article to
+                            public portal</span>
+                    </div>
+                </div>
+
+                <div class="form-actions flex gap-4">
+                    <button type="button" class="btn btn-secondary px-8 h-12" (click)="cancelForm()">Discard
+                        Draft</button>
+                    <button type="submit" class="btn btn-accent shadow-gold px-12 h-12 font-black"
+                        [disabled]="saving()">
+                        {{ saving() ? 'Transmitting...' : (editingId() ? 'Update Article' : 'Publish Article') }}
+                    </button>
+                </div>
             </div>
         </form>
     </div>
     }
 
-    <!-- News Table -->
-    <div class="glass-card table-wrap">
+    @if (!showForm()) {
+    <!-- News Table Section -->
+    <div class="glass-card overflow-hidden">
         @if (loading()) {
         <div class="loading-state">Loading news posts...</div>
         } @else if (newsList().length === 0) {
@@ -94,4 +121,5 @@
         </table>
         }
     </div>
+    }
 </div>

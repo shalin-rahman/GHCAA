@@ -7,9 +7,12 @@
     </div>
 
     <div class="tab-nav">
-        <button [class.active]="activeTab() === 'send'" (click)="activeTab.set('send')">Broadcast Message</button>
-        <button [class.active]="activeTab() === 'templates'" (click)="activeTab.set('templates')">Email
-            Templates</button>
+        <button [class.active]="activeTab() === 'send'" (click)="activeTab.set('send')">
+            <span class="icon">🚀</span> Broadcast Message
+        </button>
+        <button [class.active]="activeTab() === 'templates'" (click)="activeTab.set('templates')">
+            <span class="icon">📄</span> Email Templates
+        </button>
     </div>
 
     @if (activeTab() === 'send') {

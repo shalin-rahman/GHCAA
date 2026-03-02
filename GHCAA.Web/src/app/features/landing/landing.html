@@ -1,9 +1,16 @@
 <section class="hero">
     <div class="hero-pattern"></div>
     <div class="container hero-content">
+        <div class="hero-logo-box">
+            <img src="/assets/logo.jpg" alt="GHCAA Official Seal" class="hero-seal">
+        </div>
         <h1 class="reveal-text">Reconnecting <span class="highlight">HARAGANGIAN</span></h1>
-        <p class="reveal-subtitle">Sharing Heritage, Aligning Lives, Integrating Networks <br> (ঐতিহ্যের বিনিময়, জীবনের
-            সমন্বয় ও সংহতির সেতুবন্ধন)</p>
+        <div class="reveal-subtitle">
+            <div class="subtitle-pill px-10">
+                Sharing Heritage, Aligning Lives, Integrating Networks
+                <span class="bn-inline ml-4">(ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন)</span>
+            </div>
+        </div>
         <div class="hero-btns">
             <a routerLink="/register" class="btn btn-primary btn-lg">Join Association</a>
             <a href="#constitution" class="btn btn-accent btn-lg">Read Constitution</a>
@@ -49,7 +56,7 @@
         <div class="right-symbolism">
             <div class="centered-logo-box">
                 <div class="logo-wrapper">
-                    <div class="brand-icon main-logo-large">GHC</div>
+                    <img src="/assets/logo.jpg" alt="Govt. Haraganga College Official Seal" class="main-logo-large">
                     <div class="logo-glow"></div>
                 </div>
                 <div class="logo-caption">
@@ -162,11 +169,14 @@
             <a routerLink="/portal/events" class="btn btn-primary btn-sm">Register</a>
         </div>
         } @empty {
-        <div class="full-width text-center py-10 opacity-50 italic">No events scheduled at this moment.</div>
+        <div class="empty-placeholder">
+            <span class="pulse-dot"></span>
+            <p>No events scheduled at this moment. New projects are being planned.</p>
+        </div>
         }
     </div>
-    <div class="text-center mt-8">
-        <a routerLink="/portal/events" class="btn btn-accent">View All Events</a>
+    <div class="section-footer text-center mt-12">
+        <a routerLink="/portal/events" class="btn btn-accent shadow-gold px-12">View All Events</a>
     </div>
 </section>
 
@@ -187,11 +197,14 @@
                 <a routerLink="/portal/news" class="read-more">Read Full Story →</a>
             </div>
             } @empty {
-            <div class="full-width text-center">No recent announcements available.</div>
+            <div class="empty-placeholder dark">
+                <span class="pulse-dot gold"></span>
+                <p>No recent announcements available. Check back soon for institutional updates.</p>
+            </div>
             }
         </div>
-        <div class="text-center mt-8">
-            <a routerLink="/portal/news" class="btn btn-outline border-white/20">All News</a>
+        <div class="section-footer text-center mt-12">
+            <a routerLink="/portal/news" class="btn btn-accent shadow-gold px-12">All News</a>
         </div>
     </div>
 </section>

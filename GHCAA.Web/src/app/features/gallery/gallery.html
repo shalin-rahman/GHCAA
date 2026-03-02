@@ -10,9 +10,10 @@
         <p>Developing memories...</p>
     </div>
     } @else {
+    @if (!selectedGallery()) {
     <div class="gallery-grid">
         @for (g of galleries(); track g.id) {
-        <div class="gallery-card glass-card" (click)="selectedGallery.set(g)">
+        <div class="gallery-card glass-card reveal-card" (click)="selectedGallery.set(g)">
             <div class="card-img"
                 [style.background-image]="'url(' + (g.photos[0]?.photoPath || '/assets/logo.jpg') + ')'">
                 <div class="photo-count">{{ g.photos.length }} Photos</div>
@@ -31,21 +32,29 @@
         </div>
         }
     </div>
-    }
-
-    <!-- Lightbox / Detail View -->
-    @if (selectedGallery(); as gallery) {
-    <div class="lightbox" (click)="selectedGallery.set(null)">
-        <div class="lightbox-content animate-slide-up" (click)="$event.stopPropagation()">
-            <div class="l-header">
-                <h3>{{ gallery.title }}</h3>
-                <button class="close-btn" (click)="selectedGallery.set(null)">✕</button>
+    } @else {
+    @let gallery = selectedGallery();
+    <div class="gallery-detail-container reveal-top">
+        <div class="detail-header flex items-center gap-6 mb-10">
+            <button (click)="selectedGallery.set(null)"
+                class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
+                <span>←</span>
+            </button>
+            <div>
+                <h2 class="text-2xl font-black text-accent uppercase tracking-tighter">{{ gallery?.title }}</h2>
+                <p class="text-xs uppercase font-black tracking-widest text-muted">
+                    {{ gallery?.eventDate | date }} • {{ gallery?.location }}
+                </p>
             </div>
-            <p class="l-desc">{{ gallery.description }}</p>
-            <div class="photo-strip">
-                @for (p of gallery.photos; track p.id) {
-                <div class="photo-wrapper">
-                    <img [src]="p.photoPath" [alt]="gallery.title" (click)="viewFull(p.photoPath)">
+        </div>
+
+        <div class="glass-card p-10">
+            <p class="text-lg leading-relaxed opacity-80 mb-10 max-w-4xl">{{ gallery?.description }}</p>
+
+            <div class="photo-grid-immersive">
+                @for (p of gallery?.photos; track p.id) {
+                <div class="photo-reveal">
+                    <img [src]="p.photoPath" [alt]="gallery?.title" (click)="viewFull(p.photoPath)">
                 </div>
                 }
             </div>

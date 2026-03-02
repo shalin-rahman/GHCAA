@@ -1,4 +1,5 @@
 <div class="jobs-page">
+    @if (!selectedJob()) {
     <div class="header">
         <div class="title-group">
             <h2>Opportunities Hub</h2>
@@ -71,8 +72,8 @@
         </form>
     </div>
     } @else {
-    <!-- Controls -->
-    <div class="controls-bar glass-card reveal-top">
+    <!-- Controls Section -->
+    <div class="controls-bar glass-card reveal-top flex flex-col md:flex-row gap-6 p-6">
         <div class="filter-group">
             <span class="icon">🔍</span>
             <input type="text" placeholder="Filter by title or company..." (input)="loadJobs()">
@@ -131,52 +132,73 @@
         }
     </div>
     }
-</div>
+    }
 
-<!-- Job Detail Modal -->
-@if (selectedJob()) {
-<div class="modal-overlay" (click)="selectedJob.set(null)">
-    <div class="modal-content glass-card reveal-top" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <div class="header-main">
-                <span class="badge">{{ getCategoryName(selectedJob()!.category) }}</span>
-                <h3>{{ selectedJob()?.title }}</h3>
-            </div>
-            <button class="close-btn" (click)="selectedJob.set(null)">✕</button>
-        </div>
-
-        <div class="modal-body">
-            <div class="detail-hero">
-                <div class="v-item"><strong>Company/Org:</strong> {{ selectedJob()?.companyName }}</div>
-                <div class="v-item"><strong>Location:</strong> {{ selectedJob()?.location }}</div>
-                <div class="v-item" *ngIf="selectedJob()?.deadline"><strong>Deadline:</strong> {{
-                    selectedJob()?.deadline | date }}</div>
-            </div>
-
-            <div class="detail-section">
-                <h4>Description</h4>
-                <p class="long-text">{{ selectedJob()?.description }}</p>
-            </div>
-
-            <div class="detail-section" *ngIf="selectedJob()?.requirements">
-                <h4>Requirements / Prerequisites</h4>
-                <p class="long-text">{{ selectedJob()?.requirements }}</p>
-            </div>
-
-            <div class="detail-section contact-box">
-                <h4>How to Apply / Reach Out</h4>
-                <p>{{ selectedJob()?.applicationEmail || 'Contact ' + selectedJob()?.postedByMemberName + ' for more
-                    info.' }}</p>
+    <!-- Immersive Detail View (Inline) -->
+    @if (selectedJob(); as job) {
+    <div class="job-immersive-view animate-fade-in">
+        <div class="detail-header flex items-center gap-6 mb-10">
+            <button (click)="selectedJob.set(null)"
+                class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
+                <span>←</span>
+            </button>
+            <div>
+                <h2 class="text-2xl font-black text-accent uppercase tracking-tighter">{{ job.title }}</h2>
+                <p class="text-xs uppercase font-black tracking-widest text-muted">{{ job.companyName }} • {{
+                    job.location }}</p>
             </div>
         </div>
 
-        <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="selectedJob.set(null)">Close</button>
-            <a [href]="'mailto:' + selectedJob()?.applicationEmail" class="btn btn-primary"
-                *ngIf="selectedJob()?.applicationEmail?.includes('@')">
-                Email Recruiter
-            </a>
+        <div class="glass-card p-10 max-w-5xl mx-auto shadow-2xl border-accent/10">
+            <div class="detail-grid grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div class="col-span-2 space-y-10">
+                    <section>
+                        <h4 class="text-xs font-black uppercase tracking-widest text-accent mb-4">Opportunity Brief</h4>
+                        <p class="text-lg leading-relaxed opacity-90 font-light">{{ job.description }}</p>
+                    </section>
+
+                    <section *ngIf="job.requirements">
+                        <h4 class="text-xs font-black uppercase tracking-widest text-accent mb-4">Prerequisites & Ideal
+                            Profile</h4>
+                        <p class="text-md leading-relaxed opacity-80 bg-white/5 p-6 rounded-2xl border border-white/5">
+                            {{ job.requirements }}</p>
+                    </section>
+                </div>
+
+                <div class="sidebar space-y-8">
+                    <div class="info-card bg-accent/5 p-6 rounded-2xl border border-accent/10">
+                        <h5 class="text-[10px] font-black uppercase tracking-widest text-accent mb-4">Logistics</h5>
+                        <div class="space-y-4">
+                            <div class="l-item">
+                                <span class="block text-[10px] text-muted uppercase font-bold">Category</span>
+                                <span class="font-black">{{ getCategoryName(job.category) }}</span>
+                            </div>
+                            <div class="l-item" *ngIf="job.deadline">
+                                <span class="block text-[10px] text-muted uppercase font-bold">Closing Date</span>
+                                <span class="font-black">{{ job.deadline | date:'longDate' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-card bg-white/5 p-6 rounded-2xl border border-white/5">
+                        <h5 class="text-[10px] font-black uppercase tracking-widest text-muted mb-4">Reach Out</h5>
+                        <div
+                            class="mini-avatar-big mb-4 w-12 h-12 bg-accent text-black rounded-full flex items-center justify-center font-black">
+                            {{ job.postedByMemberName[0] }}
+                        </div>
+                        <p class="text-sm font-bold mb-4">Posted by {{ job.postedByMemberName }}</p>
+
+                        <a [href]="'mailto:' + job.applicationEmail"
+                            class="btn btn-accent w-full py-4 h-14 shadow-gold font-black"
+                            *ngIf="job.applicationEmail?.includes('@')">
+                            Email Recruiter
+                        </a>
+                        <p class="text-[10px] text-center mt-4 opacity-50" *ngIf="!job.applicationEmail">No direct
+                            contact provided.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    }
 </div>
-}

@@ -2,22 +2,33 @@
     <!-- Quick Stats -->
     <div class="stats-row">
         <div class="glass-card stat-card profile-summary">
-            <div class="membership-info" *ngIf="profile(); else loadingProf">
-                <span class="icon">🏆</span>
+            <div class="icon-box">🏆</div>
+            <div class="stat-info" *ngIf="profile(); else loadingProf">
                 <div class="val">{{ profile().membershipNumber || 'Pending' }}</div>
                 <small>{{ getMembershipType(profile().membershipType) }} Member</small>
             </div>
-            <ng-template #loadingProf><small>Loading Membership...</small></ng-template>
+            <ng-template #loadingProf>
+                <div class="stat-info">
+                    <div class="val text-sm opacity-50">Syncing...</div>
+                    <small>Membership</small>
+                </div>
+            </ng-template>
         </div>
+
         <div class="glass-card stat-card">
-            <span class="icon">💼</span>
-            <div class="val">{{ jobCount() }}</div>
-            <small>Active Jobs</small>
+            <div class="icon-box">💼</div>
+            <div class="stat-info">
+                <div class="val">{{ jobCount() }}</div>
+                <small>Active Jobs</small>
+            </div>
         </div>
+
         <div class="glass-card stat-card">
-            <span class="icon">🎟️</span>
-            <div class="val">{{ eventCount() }}</div>
-            <small>Upcoming Events</small>
+            <div class="icon-box">🎟️</div>
+            <div class="stat-info">
+                <div class="val">{{ eventCount() }}</div>
+                <small>Upcoming Events</small>
+            </div>
         </div>
     </div>
 
@@ -28,7 +39,7 @@
             <div class="feed-items">
                 @for (act of activities(); track act.id) {
                 <div class="feed-item">
-                    <div class="dot" [style.background]="act.color"></div>
+                    <div class="dot" [style.background]="act.color" [style.color]="act.color"></div>
                     <div class="text">
                         <strong>{{ act.title }}</strong>
                         <p>{{ act.desc }}</p>
@@ -40,28 +51,35 @@
         </div>
 
         <div class="glass-card alert-widget">
-            <div class="header-row">
-                <h3>System Notifications</h3>
-                <span class="badge" *ngIf="alertService.unreadCount() > 0">{{ alertService.unreadCount() }} New</span>
+            <div class="header-row flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black">Notifications</h3>
+                <span class="badge bg-gold-gradient text-black" *ngIf="alertService.unreadCount() > 0">
+                    {{ alertService.unreadCount() }} New
+                </span>
             </div>
-            <div class="alert-list">
+
+            <div class="alert-list custom-scrollbar">
                 @for (n of alertService.notifications(); track n.id) {
                 <div class="alert-item" [class.unread]="!n.isRead" (click)="alertService.markAsRead(n.id)">
                     <div class="alert-icon">{{ n.type === 'Approval' ? '✅' : '📢' }}</div>
                     <div class="alert-body">
                         <strong>{{ n.title }}</strong>
                         <p>{{ n.message }}</p>
-                        <small>{{ n.createdAt | date:'shortTime' }}</small>
+                        <small>{{ n.createdAt | date:'shortTime' }} • {{ n.createdAt | date:'mediumDate' }}</small>
                     </div>
                 </div>
                 } @empty {
-                <div class="empty-alerts">
-                    <p>No notifications yet.</p>
+                <div class="empty-alerts py-20 text-center opacity-40 italic">
+                    <p>No new notifications.</p>
                 </div>
                 }
             </div>
-            <div class="alert-footer">
-                <button class="btn btn-link" (click)="alertService.markAllAsRead()">Mark all as read</button>
+
+            <div class="alert-footer pt-4 border-t border-white/5 mt-4">
+                <button class="btn btn-link text-accent text-xs font-black uppercase tracking-widest hover:underline"
+                    (click)="alertService.markAllAsRead()">
+                    Dismiss All
+                </button>
             </div>
         </div>
     </div>

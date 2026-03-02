@@ -8,16 +8,15 @@
     <div class="glass-card loading-box">Syncing profile with registry...</div>
     } @else {
     <!-- Membership Card (Read Only) -->
-    <div class="glass-card membership-status-card">
+    <div class="glass-card membership-status-card mb-8">
         <div class="status-header">
             <div class="main-info">
-                <span class="m-number">{{ profile.membershipNumber || 'PENDING APPROVAL' }}</span>
+                <span class="m-number">{{ profile.membershipNumber || 'PENDING REGISTRY AUDIT' }}</span>
                 <h3>{{ profile.fullName }}</h3>
                 <p class="m-type">{{ getMembershipType(profile.membershipType) }} Member</p>
-                <div class="special-labels" style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                <div class="special-labels">
                     <span *ngIf="profile.category && profile.category !== 'None' && profile.category !== 0"
-                        class="badge" [class]="getCategoryLabel(profile.category).toLowerCase()"
-                        style="padding: 2px 8px; font-size: 0.7rem; border-radius: 4px; font-weight: 700;">
+                        class="category-badge" [class]="getCategoryLabel(profile.category).toLowerCase()">
                         {{ getCategoryLabel(profile.category) }}
                     </span>
                     <span class="ec-pos" *ngIf="profile.ecPosition && profile.ecPosition !== 'None'">{{
@@ -47,9 +46,10 @@
     <div class="glass-card profile-card">
         <form (submit)="updateProfile()">
             <!-- Academic Update -->
-            <div class="section">
-                <h4>Academic Credentials</h4>
-                <div class="form-grid">
+            <div class="section-block">
+                <h4 class="text-accent uppercase tracking-widest text-xs font-black border-b border-accent pb-2 mb-8">
+                    Academic Credentials</h4>
+                <div class="space-y-6">
                     <div class="form-group">
                         <label>Passing Year</label>
                         <input type="number" list="years-list" [(ngModel)]="profile.ghcLastCertificatePassingYear"
@@ -64,9 +64,10 @@
             </div>
 
             <!-- Profession -->
-            <div class="section">
-                <h4>Professional Information</h4>
-                <div class="form-grid">
+            <div class="section-block mt-10">
+                <h4 class="text-accent uppercase tracking-widest text-xs font-black border-b border-accent pb-2 mb-8">
+                    Professional Information</h4>
+                <div class="space-y-6">
                     <div class="form-group">
                         <label>Professional Sector</label>
                         <input type="text" list="sector-list" [(ngModel)]="profile.professionalSector" name="sector"
@@ -81,14 +82,15 @@
             </div>
 
             <!-- Contact Details -->
-            <div class="section">
-                <h4>Communication Address</h4>
-                <div class="form-grid">
-                    <div class="form-group full-width">
+            <div class="section-block mt-10">
+                <h4 class="text-accent uppercase tracking-widest text-xs font-black border-b border-accent pb-2 mb-8">
+                    Communication Address</h4>
+                <div class="space-y-6">
+                    <div class="form-group">
                         <label>Present Address</label>
                         <textarea [(ngModel)]="profile.presentAddress" name="presentAddress" rows="2"></textarea>
                     </div>
-                    <div class="form-group full-width">
+                    <div class="form-group">
                         <label>Permanent Address</label>
                         <textarea [(ngModel)]="profile.permanentAddress" name="permanentAddress" rows="2"></textarea>
                     </div>
@@ -96,9 +98,10 @@
             </div>
 
             <!-- Privacy Settings -->
-            <div class="section privacy">
-                <h4>Privacy & Visibility</h4>
-                <p class="text-muted">Control your visibility in the HARAGANGIAN member directory</p>
+            <div class="section-block mt-10">
+                <h4 class="text-accent uppercase tracking-widest text-xs font-black border-b border-accent pb-2 mb-8">
+                    Privacy & Visibility</h4>
+                <p class="text-muted text-xs mb-6">Control your visibility in the HARAGANGIAN member directory</p>
                 <div class="toggle-list">
                     <div class="toggle-item">
                         <label class="switch">

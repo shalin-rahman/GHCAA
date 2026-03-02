@@ -26,10 +26,12 @@
 }
 
 .logo {
-    height: 34px;
-    width: 34px;
-    border-radius: 8px;
-    object-fit: cover;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: white;
+    border: 1.5px solid var(--accent-color);
 }
 
 .brand-text {

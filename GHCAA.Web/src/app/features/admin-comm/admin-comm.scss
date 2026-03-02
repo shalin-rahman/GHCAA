@@ -1,30 +1,3 @@
-.tab-nav {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    padding: 0.5rem;
-    background: var(--surface-color);
-    border-radius: 12px;
-    border: 1px solid var(--glass-border);
-
-    button {
-        flex: 1;
-        padding: 0.75rem;
-        border: none;
-        background: transparent;
-        color: var(--text-muted);
-        font-weight: 700;
-        cursor: pointer;
-        border-radius: 8px;
-        transition: 0.3s;
-
-        &.active {
-            background: var(--primary-color);
-            color: #000;
-        }
-    }
-}
-
 .broadcast-panel {
     padding: 2.5rem;
 
@@ -57,42 +30,6 @@
         input {
             accent-color: var(--primary-color);
         }
-    }
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-
-    label {
-        font-size: 0.75rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        letter-spacing: 0.5px;
-    }
-
-    input,
-    select,
-    textarea {
-        padding: 0.8rem 1rem;
-        border: 1px solid var(--glass-border);
-        border-radius: 10px;
-        background: var(--bg-color);
-        color: var(--text-main);
-        font-family: inherit;
-
-        &:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-    }
-
-    .hint {
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        font-style: italic;
     }
 }
 

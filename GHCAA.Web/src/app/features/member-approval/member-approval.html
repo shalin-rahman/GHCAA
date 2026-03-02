@@ -71,96 +71,138 @@
         }
     </div>
 
-    <!-- Details Modal -->
-    <div class="modal-overlay" *ngIf="selectedMember()" (click)="closeAudit()">
-        <div class="modal-content modal-card glass-card reveal-top" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <div class="header-info">
-                    <h3>Applicant Registry File: {{ selectedMember()?.fullName }}</h3>
-                    <span class="badge pending">Audit in Progress</span>
-                </div>
-                <button class="close-btn" (click)="closeAudit()">×</button>
+    <!-- Audit Detail View (In-Page) -->
+    @if (selectedMember()) {
+    <div class="glass-card p-10 reveal-top mt-10">
+        <div class="flex items-start justify-between mb-10 border-b border-accent/20 pb-6">
+            <div>
+                <h3 class="text-2xl font-black text-accent tracking-tighter">Registry Audit: {{
+                    selectedMember()?.fullName }}</h3>
+                <p class="text-muted text-xs uppercase tracking-widest font-bold mt-1">Institutional Membership
+                    Verification</p>
             </div>
+            <div class="flex items-center gap-4">
+                <span class="status-badge bg-gold-gradient text-black">In-Review</span>
+                <button (click)="closeAudit()" class="btn btn-secondary !p-2">✕</button>
+            </div>
+        </div>
 
-            <div class="modal-body audit-tabs">
-                <div class="tab-content audit-grid" *ngIf="!rejecting()">
-                    <div class="audit-section">
-                        <h4>Identity & Profile</h4>
-                        <div class="profile-preview">
-                            <img *ngIf="selectedMember()?.photoPath" [src]="selectedMember()?.photoPath"
-                                class="audit-photo">
-                            <div class="profile-details">
-                                <div class="data-row"><span>Father's Name:</span> <strong>{{
-                                        selectedMember()?.fatherName }}</strong></div>
-                                <div class="data-row"><span>Mother's Name:</span> <strong>{{
-                                        selectedMember()?.motherName }}</strong></div>
-                                <div class="data-row"><span>Date of Birth:</span> <strong>{{
-                                        selectedMember()?.dateOfBirth | date }}</strong></div>
-                                <div class="data-row"><span>NID / Identity:</span> <strong>{{ selectedMember()?.nid
-                                        }}</strong></div>
-                                <div class="data-row"><span>Blood Group:</span> <strong>{{ selectedMember()?.bloodGroup
-                                        }}</strong></div>
-                            </div>
+        <div class="audit-grid grid grid-cols-1 lg:grid-cols-2 gap-12" *ngIf="!rejecting()">
+            <div class="audit-section">
+                <h4
+                    class="text-accent uppercase tracking-widest text-[10px] font-black border-b border-accent pb-2 mb-6">
+                    Identity Verification</h4>
+                <div class="flex gap-8 items-start">
+                    <img *ngIf="selectedMember()?.photoPath" [src]="selectedMember()?.photoPath"
+                        class="w-32 h-40 rounded-xl object-cover border-2 border-accent shadow-lg">
+                    <div class="flex-1 space-y-4">
+                        <div class="input-group">
+                            <label>Father's Name</label>
+                            <span class="value-display">{{ selectedMember()?.fatherName }}</span>
                         </div>
-                    </div>
-
-                    <div class="audit-section">
-                        <h4>Academic Verification</h4>
-                        <div class="data-row"><span>Subject / Group:</span> <strong>{{ selectedMember()?.subjectGroup
-                                }}</strong></div>
-                        <div class="data-row"><span>Degree at GHC:</span> <strong>{{
-                                selectedMember()?.lastCertificateFromGHC }}</strong></div>
-                        <div class="data-row"><span>Passing Year:</span> <strong>{{
-                                selectedMember()?.ghcLastCertificatePassingYear }}</strong></div>
-                        <div class="data-row"><span>HSC Adm. Year:</span> <strong>{{ selectedMember()?.hscAdmissionYear
-                                }}</strong></div>
-
-                        <div class="doc-link" *ngIf="selectedMember()?.certificatePath">
-                            <a [href]="selectedMember()?.certificatePath" target="_blank"
-                                class="btn btn-sm btn-secondary w-full">Inspect Certificate Copy ↗</a>
+                        <div class="input-group">
+                            <label>Mother's Name</label>
+                            <span class="value-display">{{ selectedMember()?.motherName }}</span>
                         </div>
-                    </div>
-
-                    <div class="audit-section">
-                        <h4>Vocational Details</h4>
-                        <div class="data-row"><span>Sector:</span> <strong>{{ selectedMember()?.professionalSector
-                                }}</strong></div>
-                        <div class="data-row"><span>Designation:</span> <strong>{{ selectedMember()?.designation
-                                }}</strong></div>
-                    </div>
-
-                    <div class="audit-section">
-                        <h4>Emergency Contact</h4>
-                        <div class="data-row"><span>Contact Name:</span> <strong>{{
-                                selectedMember()?.emergencyContactName }}</strong></div>
-                        <div class="data-row"><span>Mobile:</span> <strong>{{ selectedMember()?.emergencyContactPhone
-                                }}</strong></div>
-                    </div>
-                </div>
-
-                <div class="rejection-form reveal-text" *ngIf="rejecting()">
-                    <h4>Application Rejection</h4>
-                    <p>Provide a clear reason for rejecting this registry filing. This will be transmitted to the
-                        applicant.</p>
-                    <textarea [(ngModel)]="rejectionReason" rows="5"
-                        placeholder="Reason for rejection (e.g. Invalid certificate copy, NID mismatch)..."></textarea>
-                    <div class="reject-actions">
-                        <button class="btn btn-secondary" (click)="rejecting.set(false)">Back to Audit</button>
-                        <button class="btn btn-danger" (click)="confirmReject()" [disabled]="!rejectionReason">Execute
-                            Rejection</button>
+                        <div class="input-group">
+                            <label>Birth Date</label>
+                            <span class="value-display">{{ selectedMember()?.dateOfBirth | date }}</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Ident. NID</label>
+                            <span class="value-display">{{ selectedMember()?.nid }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="modal-footer" *ngIf="!rejecting()">
-                <button class="btn btn-secondary" (click)="contactMember(selectedMember()!.email)">Contact
-                    Applicant</button>
-                <button class="btn btn-danger-outline" (click)="rejecting.set(true)">Decline Filing</button>
-                <div class="right-btns">
-                    <button class="btn btn-secondary" (click)="closeAudit()">Suspend</button>
-                    <button class="btn btn-primary" (click)="approve(selectedMember()!.id)">Verify & Approve</button>
+            <div class="audit-section">
+                <h4
+                    class="text-accent uppercase tracking-widest text-[10px] font-black border-b border-accent pb-2 mb-6">
+                    Academic Audit</h4>
+                <div class="space-y-4">
+                    <div class="input-group">
+                        <label>Group/Subject</label>
+                        <span class="value-display">{{ selectedMember()?.subjectGroup }}</span>
+                    </div>
+                    <div class="input-group">
+                        <label>GHC Degree</label>
+                        <span class="value-display">{{ selectedMember()?.lastCertificateFromGHC }}</span>
+                    </div>
+                    <div class="input-group">
+                        <label>Passing Year</label>
+                        <span class="value-display">{{ selectedMember()?.ghcLastCertificatePassingYear }}</span>
+                    </div>
+                    <div class="input-group" *ngIf="selectedMember()?.certificatePath">
+                        <label>Registry Proof</label>
+                        <a [href]="selectedMember()?.certificatePath" target="_blank"
+                            class="text-accent font-black hover:underline">Download Official Transcript ↗</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="audit-section">
+                <h4
+                    class="text-accent uppercase tracking-widest text-[10px] font-black border-b border-accent pb-2 mb-6">
+                    Vocational Registry</h4>
+                <div class="space-y-4">
+                    <div class="input-group">
+                        <label>Professional Sector</label>
+                        <span class="value-display">{{ selectedMember()?.professionalSector }}</span>
+                    </div>
+                    <div class="input-group">
+                        <label>Official Title</label>
+                        <span class="value-display">{{ selectedMember()?.designation }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="audit-section">
+                <h4
+                    class="text-accent uppercase tracking-widest text-[10px] font-black border-b border-accent pb-2 mb-6">
+                    Emergency Relay</h4>
+                <div class="space-y-4">
+                    <div class="input-group">
+                        <label>Relay Point</label>
+                        <span class="value-display">{{ selectedMember()?.emergencyContactName }}</span>
+                    </div>
+                    <div class="input-group">
+                        <label>Contact Comms</label>
+                        <span class="value-display">{{ selectedMember()?.emergencyContactPhone }}</span>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="rejection-form max-w-2xl mx-auto py-10" *ngIf="rejecting()">
+            <h4 class="text-red-500 font-black text-xl mb-4">Registry Invalidation Reason</h4>
+            <p class="text-muted text-sm mb-8">Formal reason for declining this membership application. This will be
+                transmitted via electronic mail to the applicant.</p>
+            <div class="form-group">
+                <label>Audit Conclusion</label>
+                <textarea [(ngModel)]="rejectionReason" rows="5"
+                    placeholder="e.g. Identity documents mismatch, Transcript unrecognized..."></textarea>
+            </div>
+            <div class="flex gap-4 justify-end mt-8">
+                <button class="btn btn-secondary" (click)="rejecting.set(false)">Return to Audit</button>
+                <button class="btn bg-red-600 text-white" (click)="confirmReject()"
+                    [disabled]="!rejectionReason">Execute Decline</button>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-12 pt-8 border-t border-accent/10" *ngIf="!rejecting()">
+            <div class="flex gap-4">
+                <button class="btn btn-secondary" (click)="contactMember(selectedMember()!.email)">Relay
+                    Message</button>
+                <button class="btn btn-outline text-red-500 border-red-500/20" (click)="rejecting.set(true)">Request
+                    Rejection</button>
+            </div>
+            <div class="flex gap-4">
+                <button class="btn btn-secondary" (click)="closeAudit()">Defer Audit</button>
+                <button class="btn btn-accent shadow-gold" (click)="approve(selectedMember()!.id)">Verify & Induct
+                    Member</button>
+            </div>
+        </div>
     </div>
+    }
 </div>

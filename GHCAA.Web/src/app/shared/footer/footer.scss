@@ -13,19 +13,23 @@
     padding-bottom: 4rem;
 }
 
-.footer-brand .footer-brand-icon {
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    width: 60px;
-    height: 60px;
+.footer-logo {
+    height: 64px;
+    width: 64px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: white;
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
 }
 
 .motto {
     font-style: italic;
-    color: var(--primary-color);
-    font-weight: 600;
+    color: var(--accent-color);
+    font-weight: 850;
     margin-bottom: 0.5rem;
     font-size: 1rem;
+    letter-spacing: 0.5px;
 }
 
 .bengali-motto {
@@ -100,10 +104,25 @@
 .footer-bottom {
     background: rgba(0, 0, 0, 0.3);
     padding: 1.5rem 0;
-    text-align: center;
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.4);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+    .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .footer-bot-logo {
+        height: 28px;
+        width: 28px;
+        border-radius: 50%;
+        background: white;
+        border: 1px solid var(--accent-color);
+        object-fit: contain;
+    }
 }
 
 @media (max-width: 992px) {

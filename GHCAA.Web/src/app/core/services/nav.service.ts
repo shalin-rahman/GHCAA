@@ -33,6 +33,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/news', label: 'News Posts', icon: '📰' },
     { path: '/admin/comm', label: 'Communications', icon: '✉️' },
     { path: '/admin/ledger', label: 'Financial Ledger', icon: '📖' },
+    { path: '/admin/events', label: 'Manage Events', icon: '🗓️' },
 ];
 
 @Injectable({ providedIn: 'root' })

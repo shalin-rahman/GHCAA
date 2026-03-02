@@ -74,4 +74,12 @@ export class EventsService {
     approveRegistration(registrationId: number, approve: boolean): Observable<any> {
         return this.http.post(`${this.apiUrl}/admin/approve-registration`, { registrationId, approve });
     }
+
+    updateEvent(id: number, ev: Partial<AlumniEvent>): Observable<AlumniEvent> {
+        return this.http.put<AlumniEvent>(`${this.apiUrl}/admin/${id}`, ev);
+    }
+
+    deleteEvent(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/admin/${id}`);
+    }
 }

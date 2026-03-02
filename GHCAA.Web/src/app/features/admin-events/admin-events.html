@@ -1,0 +1,205 @@
+<div class="admin-events reveal-top">
+    @if (!showForm()) {
+    <div class="page-header flex justify-between items-center mb-10">
+        <div>
+            <h2 class="text-3xl font-black text-accent tracking-tighter">Event Ecosystem</h2>
+            <p class="text-muted">Manage alumni gatherings, institutional projects, and participation approvals.</p>
+        </div>
+        <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
+            <span class="icon">✨</span> Launch New Event
+        </button>
+    </div>
+    } @else {
+    <div class="page-header flex items-center gap-6 mb-10">
+        <button (click)="showForm.set(false)" class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
+            <span>←</span>
+        </button>
+        <div>
+            <h2 class="text-2xl font-black text-accent tracking-tighter">
+                {{ editingEventId() ? 'Update Event Configuration' : 'Initial Event Setup' }}
+            </h2>
+            <p class="text-xs uppercase font-black tracking-widest text-muted">Configuring Event Asset</p>
+        </div>
+    </div>
+    }
+
+    <!-- Event Form Section (Inline) -->
+    @if (showForm()) {
+    <div class="glass-card p-10 reveal-top max-w-4xl mx-auto border-accent/20">
+        <form [formGroup]="eventForm" (ngSubmit)="submitEvent()" class="space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="input-group">
+                    <label>Engagement Title</label>
+                    <input type="text" formControlName="title" placeholder="Annual Reunion 2024">
+                </div>
+                <div class="input-group">
+                    <label>Scheduled Date & Time</label>
+                    <input type="datetime-local" formControlName="date">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Venue / Location</label>
+                <input type="text" formControlName="location" placeholder="Main Campus Auditorium">
+            </div>
+
+            <div class="input-group">
+                <label>Project Brief / Description</label>
+                <textarea formControlName="description" rows="5"
+                    placeholder="Describe the purpose and plan for this event..."></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="input-group">
+                    <label>Participation Deadline</label>
+                    <input type="datetime-local" formControlName="registrationDeadline">
+                </div>
+                <div class="input-group">
+                    <label>Public Secretariat Note</label>
+                    <input type="text" formControlName="adminNote" placeholder="Public instruction or status update...">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="input-group">
+                    <label>Endowment Fee (BDT)</label>
+                    <input type="number" formControlName="registrationFee" placeholder="0.00">
+                </div>
+                <div class="input-group">
+                    <label>Visibility Status</label>
+                    <div class="flex items-center gap-4 py-2">
+                        <input type="checkbox" formControlName="isActive" class="w-6 h-6 border-accent text-accent">
+                        <span class="text-[10px] text-muted font-bold uppercase tracking-widest">Publish asset on public
+                            portal</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 pt-4 border-t border-white/5">
+                <button type="button" (click)="showForm.set(false)" class="btn btn-secondary flex-1 py-4 h-14">Discard
+                    Changes</button>
+                <button type="submit" [disabled]="eventForm.invalid || isSubmitting()"
+                    class="btn btn-accent flex-1 py-4 h-14 shadow-gold font-black">
+                    {{ isSubmitting() ? 'Transmitting...' : (editingEventId() ? 'Save Configuration' : 'Launch Asset')
+                    }}
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    @if (!showForm()) {
+    <!-- Tab Navigation -->
+    <div class="tabs tab-nav">
+        <button (click)="activeTab.set('manage')" [class.active]="activeTab() === 'manage'">
+            <span class="icon">🗓️</span> Management Hub
+        </button>
+        <button (click)="activeTab.set('approvals')" [class.active]="activeTab() === 'approvals'">
+            <span class="icon">📝</span> Participation Approvals
+            <span class="badge bg-gold-gradient text-black" *ngIf="registrations().length > 0">
+                {{ registrations().length }}
+            </span>
+        </button>
+    </div>
+
+    <!-- Management Hub Tab -->
+    <div *ngIf="activeTab() === 'manage'" class="animate-fade-in">
+        <div class="grid gap-4">
+            @for (ev of events(); track ev.id) {
+            <div
+                class="glass-card p-6 flex flex-col md:flex-row justify-between items-center gap-6 hover:border-accent/40 transition-all group">
+                <div class="flex items-center gap-6">
+                    <div
+                        class="date-box w-16 h-16 bg-surface border border-white/5 rounded-2xl flex flex-col items-center justify-center group-hover:bg-accent/10 transition-colors">
+                        <span class="text-xl font-black text-accent">{{ ev.date | date:'dd' }}</span>
+                        <span class="text-[10px] uppercase font-bold text-muted">{{ ev.date | date:'MMM' }}</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <h3 class="text-lg font-black">{{ ev.title }}</h3>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider"
+                                [class]="ev.isActive ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'">
+                                {{ ev.isActive ? 'Active' : 'Archived' }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-muted opacity-80">{{ ev.location }} • {{ ev.date | date:'shortTime' }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button (click)="openEditForm(ev)" class="btn btn-secondary btn-sm rounded-xl">Edit Config</button>
+                    <button (click)="deleteEvent(ev.id)"
+                        class="btn btn-secondary btn-sm border-red-500/20 text-red-500 hover:bg-red-500/10">Purge</button>
+                </div>
+            </div>
+            } @empty {
+            <div class="py-20 text-center glass-card border-dashed">
+                <p class="text-muted italic opacity-50">No events found. Start by launching your first project.</p>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Participation Approvals Tab -->
+    <div *ngIf="activeTab() === 'approvals'" class="animate-fade-in">
+        <!-- Approvals Content (Same as before but wrapped in @if(!showForm)) -->
+        <div class="glass-card table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th class="px-6 py-4">Participant Profile</th>
+                        <th class="px-6 py-4">Event Asset</th>
+                        <th class="px-6 py-4">Financial Ref</th>
+                        <th class="px-6 py-4">Audit Status</th>
+                        <th class="px-6 py-4 text-right">Registry Decision</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    @for (reg of registrations(); track reg.id) {
+                    <tr class="hover:bg-white/[0.02] transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-black text-xs">
+                                    {{ reg.memberName?.[0]?.toUpperCase() }}
+                                </div>
+                                <div class="text-sm font-bold">{{ reg.memberName }}</div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm opacity-80">{{ reg.event?.title }}</td>
+                        <td class="px-6 py-4">
+                            <code class="text-xs text-accent font-bold">{{ reg.paymentReference }}</code>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="status-badge" [ngClass]="{
+                                    'bg-yellow-500/10 text-yellow-500': reg.status === 'Pending',
+                                    'bg-green-500/10 text-green-500': reg.status === 'Approved',
+                                    'bg-red-500/10 text-red-500': reg.status === 'Rejected'
+                                }">
+                                {{ reg.status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button *ngIf="reg.status === 'Pending'" (click)="approveReg(reg.id, true)"
+                                    class="p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all">✅
+                                    Verify</button>
+                                <button *ngIf="reg.status === 'Pending'" (click)="approveReg(reg.id, false)"
+                                    class="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">❌
+                                    Decline</button>
+                            </div>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="5" class="py-20 text-center text-muted italic opacity-40">All clear. No pending
+                            participations.</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+</div>

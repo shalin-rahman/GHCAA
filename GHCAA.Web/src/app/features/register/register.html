@@ -53,8 +53,8 @@
                             <h2>Identity & Profile</h2>
                             <p>Enter your primary identity details as per academic registers.</p>
                         </div>
-                        <div class="form-grid">
-                            <div class="form-group full-width">
+                        <div class="space-y-6">
+                            <div class="form-group">
                                 <label>Full Legal Name *</label>
                                 <input type="text" [(ngModel)]="model.FullName" name="fullName" required
                                     placeholder="Full Name as per SSC Certificate">
@@ -107,7 +107,7 @@
                             <h2>Reachability</h2>
                             <p>Provide verified communication channels for official correspondence.</p>
                         </div>
-                        <div class="form-grid">
+                        <div class="space-y-6">
                             <div class="form-group">
                                 <label>Primary Email *</label>
                                 <input type="email" [(ngModel)]="model.Email" name="email" required
@@ -118,12 +118,12 @@
                                 <input type="text" [(ngModel)]="model.MobileNo" name="mobileNo" required
                                     placeholder="01XXXXXXXXX">
                             </div>
-                            <div class="form-group full-width">
+                            <div class="form-group">
                                 <label>Present Address *</label>
                                 <textarea [(ngModel)]="model.PresentAddress" name="presentAddress" required rows="2"
                                     placeholder="House, Street, Area, District"></textarea>
                             </div>
-                            <div class="form-group full-width">
+                            <div class="form-group">
                                 <label>Permanent Home Address *</label>
                                 <textarea [(ngModel)]="model.PermanentAddress" name="permanentAddress" required rows="2"
                                     placeholder="Village/Area, PO, PS, District"></textarea>
@@ -137,9 +137,9 @@
                             <h2>Academic Credentials</h2>
                             <p>Verify your degree years and subject groups at GHC.</p>
                         </div>
-                        <div class="form-grid">
-                            <div class="form-group full-width">
-                                <label>GHC Last Certificate's Group/Subject *</label>
+                        <div class="space-y-6">
+                            <div class="form-group">
+                                <label>Certificate's Subject *</label>
                                 <input type="text" [(ngModel)]="model.SubjectGroup" name="subjectGroup" required
                                     list="subject-list" placeholder="Select or type Group/Subject">
                             </div>
@@ -149,7 +149,7 @@
                                     required list="degree-list" placeholder="Select or type Degree">
                             </div>
                             <div class="form-group">
-                                <label>Certificate Passing Year *</label>
+                                <label>Passing Year *</label>
                                 <input type="number" [(ngModel)]="model.GHCLastCertificatePassingYear"
                                     name="ghcLastCertificatePassingYear" required list="year-list" placeholder="YYYY">
                             </div>
@@ -172,30 +172,28 @@
                             <h2>Vocation & Safety</h2>
                             <p>Current professional status and fallback contact point.</p>
                         </div>
-                        <div class="form-grid">
-                            <div class="form-grid inner-grid full-width">
-                                <div class="form-group">
-                                    <label>Professional Sector *</label>
-                                    <input type="text" [(ngModel)]="model.ProfessionalSector" name="professionalSector"
-                                        required list="sector-list" placeholder="Select or type Sector">
-                                </div>
-                                <div class="form-group">
-                                    <label>Current Designation & Organization *</label>
-                                    <input type="text" [(ngModel)]="model.Designation" name="designation" required
-                                        placeholder="e.g. Senior Manager, Google">
-                                </div>
+                        <div class="space-y-6">
+                            <div class="form-group">
+                                <label>Sector *</label>
+                                <input type="text" [(ngModel)]="model.ProfessionalSector" name="professionalSector"
+                                    required list="sector-list" placeholder="Select or type Sector">
                             </div>
                             <div class="form-group">
-                                <label>Emergency Contact *</label>
+                                <label>Job Title/Org *</label>
+                                <input type="text" [(ngModel)]="model.Designation" name="designation" required
+                                    placeholder="e.g. Senior Manager, Google">
+                            </div>
+                            <div class="form-group">
+                                <label>Emergency Name *</label>
                                 <input type="text" [(ngModel)]="model.EmergencyContactName" name="emergencyContactName"
                                     required placeholder="Person Name">
                             </div>
                             <div class="form-group">
-                                <label>Relation *</label>
+                                <label>Emergency Relation *</label>
                                 <input type="text" [(ngModel)]="model.EmergencyContactRelation"
                                     name="emergencyContactRelation" required placeholder="e.g. Brother">
                             </div>
-                            <div class="form-group full-width">
+                            <div class="form-group">
                                 <label>Emergency Phone *</label>
                                 <input type="text" [(ngModel)]="model.EmergencyContactPhone"
                                     name="emergencyContactPhone" required placeholder="Contact Number">
@@ -209,37 +207,37 @@
                             <h2>Registry Filing</h2>
                             <p>Attach necessary documentation to formalize your registry.</p>
                         </div>
-                        <div class="form-grid">
+                        <div class="space-y-6">
                             <div class="form-group">
-                                <label>Formal Profile Photo *</label>
+                                <label>Profile Photo *</label>
                                 <div class="file-drop" [class.has-file]="files['photo']">
                                     <input type="file" (change)="onFileSelect($event, 'photo')" accept="image/*"
                                         required>
-                                    <p>{{ files['photo'] ? files['photo'].name : 'Drag or click to upload photo' }}</p>
+                                    <p>{{ files['photo'] ? files['photo'].name : 'Click to select formal photo' }}</p>
                                     @if (files['photo']) { <span class="file-check">✓</span> }
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>GHC Certificate Copy *</label>
+                                <label>Cert. Proof *</label>
                                 <div class="file-drop" [class.has-file]="files['certificate']">
                                     <input type="file" (change)="onFileSelect($event, 'certificate')"
                                         accept=".pdf,image/*" required>
-                                    <p>{{ files['certificate'] ? files['certificate'].name : 'Drag or click to upload
-                                        certificate' }}</p>
+                                    <p>{{ files['certificate'] ? files['certificate'].name : 'Upload Transcript/Card' }}
+                                    </p>
                                     @if (files['certificate']) { <span class="file-check">✓</span> }
                                 </div>
                             </div>
-                            <div class="form-group full-width">
-                                <label>Payment Proof (Screenshot/PDF) *</label>
+                            <div class="form-group">
+                                <label>Pay Evidence *</label>
                                 <div class="file-drop" [class.has-file]="files['paymentProof']">
                                     <input type="file" (change)="onFileSelect($event, 'paymentProof')"
                                         accept=".pdf,image/*" required>
-                                    <p>{{ files['paymentProof'] ? files['paymentProof'].name : 'Drag or click to upload
-                                        payment proof' }}</p>
+                                    <p>{{ files['paymentProof'] ? files['paymentProof'].name : 'Upload Screenshot/PDF'
+                                        }}</p>
                                     @if (files['paymentProof']) { <span class="file-check">✓</span> }
                                 </div>
                             </div>
-                            <div class="form-group full-width">
+                            <div class="form-group">
                                 <div class="consent-box glass-card">
                                     <label class="checkbox-container">
                                         <input type="checkbox" name="agree" required ngModel>

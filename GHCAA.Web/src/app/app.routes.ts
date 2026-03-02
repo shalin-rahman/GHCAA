@@ -113,6 +113,10 @@ export const routes: Routes = [
             {
                 path: 'ledger',
                 loadComponent: () => import('./features/ledger/ledger').then(m => m.Ledger)
+            },
+            {
+                path: 'events',
+                loadComponent: () => import('./features/admin-events/admin-events').then(m => m.AdminEvents)
             }
         ]
     }
