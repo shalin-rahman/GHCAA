@@ -32,4 +32,23 @@ export class GalleryService {
     getGallery(id: number): Observable<EventGallery> {
         return this.http.get<EventGallery>(`${this.apiUrl}/${id}`);
     }
+
+    // Admin Methods
+    uploadPhoto(file: File): Observable<{ path: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<{ path: string }>(`${this.apiUrl}/upload-photo`, formData);
+    }
+
+    createGallery(gallery: any): Observable<EventGallery> {
+        return this.http.post<EventGallery>(`${this.apiUrl}/admin`, gallery);
+    }
+
+    addPhotos(galleryId: number, photoPaths: string[]): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/admin/${galleryId}/photos`, photoPaths);
+    }
+
+    deleteGallery(id: number): Observable<boolean> {
+        return this.http.delete<boolean>(`${this.apiUrl}/admin/${id}`);
+    }
 }

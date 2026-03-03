@@ -4,7 +4,7 @@
         <div class="hero-logo-box">
             <img src="/assets/logo.jpg" alt="GHCAA Official Seal" class="hero-seal">
         </div>
-        <h1 class="reveal-text">Reconnecting <span class="highlight">HARAGANGIAN</span></h1>
+        <h2 class="reveal-text">Reconnecting <span class="highlight">HARAGANGIAN</span></h2>
         <div class="reveal-subtitle">
             <div class="subtitle-pill px-10">
                 Sharing Heritage, Aligning Lives, Integrating Networks
@@ -13,7 +13,8 @@
         </div>
         <div class="hero-btns">
             <a routerLink="/register" class="btn btn-primary btn-lg">Join Association</a>
-            <a href="#constitution" class="btn btn-accent btn-lg">Read Constitution</a>
+            <a href="/assets/GHCAA constitution 4.0.pdf" target="_blank" class="btn btn-accent btn-lg">Read
+                Constitution</a>
         </div>
     </div>
     <div class="hero-overlay"></div>
@@ -21,13 +22,14 @@
 
 <!-- Purpose & Symbolism (Merged for compactness) -->
 <section id="vision" class="purpose-identity-section container">
+    <div class="section-header">
+        <h2>Purpose & Objectives</h2>
+        <p>Guided by Article II of our Constitution</p>
+        <div class="underline"></div>
+    </div>
+
     <div class="split-view">
         <div class="left-purpose">
-            <div class="section-header align-left">
-                <h2>Purpose & Objectives</h2>
-                <p>Guided by Article II of our Constitution</p>
-                <div class="underline"></div>
-            </div>
             <div class="purpose-list">
                 <div class="p-item glass-card">
                     <span class="p-icon">🔗</span>
@@ -76,12 +78,10 @@
 
 <!-- Professional Opportunities (Job Hub Preview) -->
 <section id="jobs" class="jobs-preview-section container">
-    <div class="section-header align-left flex justify-between items-end">
-        <div>
-            <h2>Professional Network</h2>
-            <p>Exclusive opportunities within the Haragangian corporate circle.</p>
-        </div>
-        <a routerLink="/portal/jobs" class="read-more mb-4">Explore Job Hub →</a>
+    <div class="section-header">
+        <h2>Professional Network</h2>
+        <p>Exclusive opportunities within the Haragangian corporate circle.</p>
+        <div class="underline"></div>
     </div>
 
     <div class="jobs-compact-grid">
@@ -98,6 +98,11 @@
         } @empty {
         <div class="full-width opacity-30 text-center py-6 text-sm italic">New career opportunities coming soon.</div>
         }
+    </div>
+
+    <div class="text-center mt-12">
+        <a routerLink="/portal/jobs" class="btn btn-accent px-10 py-3 rounded-full font-bold shadow-gold">Explore Job
+            Hub →</a>
     </div>
 </section>
 

@@ -84,10 +84,12 @@
         @for (item of nav.mobileNavItems(); track item.path) {
         <a [routerLink]="item.path" routerLinkActive="active" class="touch-target b-nav-item">
             <span class="icon">{{ item.icon }}</span>
+            <span class="label">{{ item.label }}</span>
         </a>
         }
         <button (click)="auth.logout()" class="touch-target b-nav-item">
-            <span>🚪</span>
+            <span class="icon">🚪</span>
+            <span class="label">Logout</span>
         </button>
     </nav>
 </div>

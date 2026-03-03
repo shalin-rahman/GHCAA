@@ -98,8 +98,8 @@
                 }
             </div>
             <div class="header-actions">
-                <button class="icon-btn edit-btn" (click)="toggleEdit()" [title]="isEditing() ? 'Cancel' : 'Edit'">
-                    {{ isEditing() ? '✕' : '✏️' }}
+                <button class="btn btn-secondary btn-sm" (click)="toggleEdit()">
+                    {{ isEditing() ? 'Discard Changes' : 'Edit Profile' }}
                 </button>
                 <button class="close-btn" (click)="closeDetail()">✕</button>
             </div>

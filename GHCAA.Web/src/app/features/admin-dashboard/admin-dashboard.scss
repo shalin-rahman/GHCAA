@@ -121,8 +121,15 @@
 }
 
 .action-btn.secondary {
-    border: 1.5px dashed var(--accent-color);
-    color: var(--accent-color);
+    background: var(--gold-gradient) !important;
+    color: #000 !important;
+    border: none !important;
+    box-shadow: var(--shadow-gold) !important;
+
+    &:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 10px 25px rgba(197, 160, 89, 0.6) !important;
+    }
 }
 
 .loading-state {

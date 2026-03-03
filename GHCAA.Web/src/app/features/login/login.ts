@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -17,6 +17,7 @@ export class Login {
   private auth = inject(AuthService);
   private router = inject(Router);
   private notify = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
 
   credentials: LoginDto = { username: '', password: '' };
   loading = false;
@@ -25,6 +26,7 @@ export class Login {
   onLogin() {
     this.loading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges(); // Stablize for NG0100
 
     this.auth.login(this.credentials).subscribe({
       next: (user) => {

@@ -12,16 +12,16 @@ export interface NavItem {
 // All portal navigation items
 const ALL_NAV_ITEMS: NavItem[] = [
     { path: '/portal/dashboard', label: 'Dashboard', icon: '📊', mobileVisible: true },
-    { path: '/portal/news', label: 'News Hub', icon: '📰', mobileVisible: true },
-    { path: '/portal/events', label: 'Events', icon: '🎟️' },
-    { path: '/portal/assistant', label: 'AI Assistant', icon: '✨', mobileVisible: true },
+    { path: '/portal/news', label: 'News', icon: '📰', mobileVisible: true },
+    { path: '/portal/events', label: 'Events', icon: '🎟️', mobileVisible: true },
+    { path: '/portal/assistant', label: 'Assistance', icon: '✨', mobileVisible: true },
     { path: '/portal/messages', label: 'Messaging', icon: '💬' },
     { path: '/portal/jobs', label: 'Job Hub', icon: '💼', mobileVisible: true },
     { path: '/portal/directory', label: 'Alumni Directory', icon: '🔍' },
     { path: '/portal/gallery', label: 'Event Gallery', icon: '🖼️' },
     { path: '/portal/governance', label: 'Governance', icon: '⚖️' },
     { path: '/portal/id-card', label: 'Digital ID', icon: '🆔' },
-    { path: '/portal/payments', label: 'Fees & Dues', icon: '💰' },
+    { path: '/portal/payments', label: 'Payments', icon: '💰', mobileVisible: true },
     { path: '/portal/profile', label: 'My Profile', icon: '👤', mobileVisible: true },
 ];
 

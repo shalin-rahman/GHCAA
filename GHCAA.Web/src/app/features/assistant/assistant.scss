@@ -14,7 +14,7 @@
 }
 
 .ai-badge {
-    background: var(--primary-color);
+    background: #000;
     color: var(--accent-color);
     padding: 0.4rem 1rem;
     border-radius: 20px;
@@ -22,6 +22,7 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 1px;
+    border: 1px solid var(--accent-color);
 }
 
 .chat-container {
