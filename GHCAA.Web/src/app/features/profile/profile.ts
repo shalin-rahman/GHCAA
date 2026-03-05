@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProfileService, MemberProfile } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { getECPositionName, EC_ROLES } from '../../core/constants/governance.constants';
 
 @Component({
     selector: 'app-profile',
@@ -12,6 +13,8 @@ import { NotificationService } from '../../core/services/notification.service';
     styleUrl: './profile.scss'
 })
 export class Profile implements OnInit {
+    getECPositionName = getECPositionName;
+    ecRoles = EC_ROLES;
     private profileService = inject(ProfileService);
     private notify = inject(NotificationService);
 

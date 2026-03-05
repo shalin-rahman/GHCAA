@@ -24,7 +24,7 @@
 
     .mini-logo {
         height: 42px;
-        width: 42px;
+        max-width: 32px;
         object-fit: contain;
         border-radius: 50%;
         border: 2px solid var(--accent-color);
@@ -80,4 +80,73 @@ main {
     .logo-text .full {
         display: none;
     }
+}
+
+/* Special Day Navigation Styles */
+.nav-announcement {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-align: center;
+    max-width: 400px;
+    animation: slideDown 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    white-space: nowrap;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.glass-nav.special-day {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 1100px) {
+    .nav-announcement {
+        position: static;
+        transform: none;
+        font-size: 0.8rem;
+        margin-left: auto;
+        margin-right: 1.5rem;
+        white-space: normal;
+        max-width: 180px;
+        order: 2;
+    }
+
+    .logo {
+        order: 1;
+    }
+}
+
+@media (max-width: 600px) {
+    .nav-announcement {
+        font-size: 0.7rem;
+        margin-right: 0.5rem;
+        max-width: 120px;
+    }
+
+    .logo-text .abbr {
+        font-size: 0.9rem;
+    }
+}
+
+.nav-link[style*="color"] {
+    opacity: 1 !important;
+}
+
+.nav-link[style*="color"]:hover {
+    filter: brightness(0.9);
 }

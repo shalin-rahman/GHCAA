@@ -39,10 +39,18 @@ namespace GHCAA.API.Controllers
 
         [HttpGet("committee")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetExecutiveCommittee([FromQuery] int? year, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetExecutiveCommittee([FromQuery] int? periodId, CancellationToken cancellationToken)
         {
-            var committee = await _networkingService.GetExecutiveCommitteeAsync(year, cancellationToken);
+            var committee = await _networkingService.GetExecutiveCommitteeAsync(periodId, cancellationToken);
             return Ok(committee);
+        }
+
+        [HttpGet("periods")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPeriods(CancellationToken cancellationToken)
+        {
+            var periods = await _networkingService.GetECPeriodsAsync(cancellationToken);
+            return Ok(periods);
         }
 
         [HttpGet("updates")]

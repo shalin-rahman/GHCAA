@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
@@ -248,10 +250,14 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<MemberProfileDto?> GetProfileAsync(int memberId, CancellationToken cancellationToken = default)
         {
-            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            var member = await _db.Members
+                .Include(m => m.ECMembers)
+                .ThenInclude(em => em.ECPeriod)
+                .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            
             if (member == null) return null;
 
-            return new MemberProfileDto
+            var dto = new MemberProfileDto
             {
                 Id = member.Id,
                 FullName = member.FullName,
@@ -286,6 +292,20 @@ namespace GHCAA.Infrastructure.Services
                 IsEmailPublic = member.IsEmailPublic,
                 IsAddressPublic = member.IsAddressPublic
             };
+
+            if (member.ECMembers != null && member.ECMembers.Any())
+            {
+                dto.ECHistory = member.ECMembers.Select(em => new ECHistoryDto
+                {
+                    PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
+                    Position = em.Position,
+                    StartDate = em.StartDate,
+                    EndDate = em.EndDate,
+                    ChangeReason = em.ChangeReason
+                }).OrderByDescending(h => h.StartDate).ToList();
+            }
+
+            return dto;
         }
 
         public async Task<bool> UpdateProfileAsync(int memberId, UpdateProfileDto dto, CancellationToken cancellationToken = default)
@@ -403,48 +423,66 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<IEnumerable<MemberProfileDto>> GetAllMembersAsync(bool includeArchived = false, CancellationToken cancellationToken = default)
         {
-            IQueryable<Member> query = _db.Members;
+            IQueryable<Member> query = _db.Members
+                .Include(m => m.ECMembers)
+                .ThenInclude(em => em.ECPeriod);
             
             if (includeArchived)
             {
                 query = query.IgnoreQueryFilters();
             }
 
-            return await query.Select(member => new MemberProfileDto
-            {
-                Id = member.Id,
-                FullName = member.FullName,
-                Email = member.Email,
-                MobileNo = member.MobileNo,
-                MembershipNumber = member.MembershipNumber,
-                Status = member.Status,
-                GHCLastCertificatePassingYear = member.GHCLastCertificatePassingYear,
-                LastCertificateFromGHC = member.LastCertificateFromGHC,
-                SubjectGroup = member.SubjectGroup,
-                ProfessionalSector = member.ProfessionalSector,
-                Designation = member.Designation,
-                PhotoPath = member.PhotoPath,
-                PresentAddress = member.PresentAddress,
-                PermanentAddress = member.PermanentAddress,
-                BloodGroup = member.BloodGroup,
-                MembershipType = member.MembershipType,
-                Category = member.Category,
-                ECPosition = member.ECPosition,
-                FatherName = member.FatherName,
-                MotherName = member.MotherName,
-                DateOfBirth = member.DateOfBirth,
-                Gender = member.Gender,
-                NID = member.NID,
-                EmergencyContactName = member.EmergencyContactName,
-                EmergencyContactRelation = member.EmergencyContactRelation,
-                EmergencyContactPhone = member.EmergencyContactPhone,
-                HSCAdmissionYear = member.HSCAdmissionYear,
-                GHCAdmissionYear = member.GHCAdmissionYear,
-                CertificatePath = member.CertificatePath,
-                IsMobilePublic = member.IsMobilePublic,
-                IsEmailPublic = member.IsEmailPublic,
-                IsAddressPublic = member.IsAddressPublic
-            }).ToListAsync(cancellationToken);
+            var members = await query.ToListAsync(cancellationToken);
+            return members.Select(member => {
+                var dto = new MemberProfileDto
+                {
+                    Id = member.Id,
+                    FullName = member.FullName,
+                    Email = member.Email,
+                    MobileNo = member.MobileNo,
+                    MembershipNumber = member.MembershipNumber,
+                    Status = member.Status,
+                    GHCLastCertificatePassingYear = member.GHCLastCertificatePassingYear,
+                    LastCertificateFromGHC = member.LastCertificateFromGHC,
+                    SubjectGroup = member.SubjectGroup,
+                    ProfessionalSector = member.ProfessionalSector,
+                    Designation = member.Designation,
+                    PhotoPath = member.PhotoPath,
+                    PresentAddress = member.PresentAddress,
+                    PermanentAddress = member.PermanentAddress,
+                    BloodGroup = member.BloodGroup,
+                    MembershipType = member.MembershipType,
+                    Category = member.Category,
+                    ECPosition = member.ECPosition,
+                    FatherName = member.FatherName,
+                    MotherName = member.MotherName,
+                    DateOfBirth = member.DateOfBirth,
+                    Gender = member.Gender,
+                    NID = member.NID,
+                    EmergencyContactName = member.EmergencyContactName,
+                    EmergencyContactRelation = member.EmergencyContactRelation,
+                    EmergencyContactPhone = member.EmergencyContactPhone,
+                    HSCAdmissionYear = member.HSCAdmissionYear,
+                    GHCAdmissionYear = member.GHCAdmissionYear,
+                    CertificatePath = member.CertificatePath,
+                    IsMobilePublic = member.IsMobilePublic,
+                    IsEmailPublic = member.IsEmailPublic,
+                    IsAddressPublic = member.IsAddressPublic
+                };
+
+                if (member.ECMembers != null && member.ECMembers.Any())
+                {
+                    dto.ECHistory = member.ECMembers.Select(em => new ECHistoryDto
+                    {
+                        PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
+                        Position = em.Position,
+                        StartDate = em.StartDate,
+                        EndDate = em.EndDate,
+                        ChangeReason = em.ChangeReason
+                    }).OrderByDescending(h => h.StartDate).ToList();
+                }
+                return dto;
+            });
         }
 
         public async Task<bool> AdminUpdateMemberAsync(int id, AdminMemberUpdateDto dto, CancellationToken cancellationToken = default)
@@ -476,8 +514,45 @@ namespace GHCAA.Infrastructure.Services
             if (Enum.TryParse<Enums.MemberCategory>(dto.Category, true, out var mCat))
                 member.Category = mCat;
             
+            // Robust enum parsing (handles names or numeric indices)
             if (Enum.TryParse<Enums.ECPosition>(dto.ECPosition, true, out var ecPos))
-                member.ECPosition = ecPos;
+            {
+                if (member.ECPosition != ecPos)
+                {
+                    var oldPos = member.ECPosition;
+                    member.ECPosition = ecPos;
+                    
+                    var activePeriod = await _db.ECPeriods.FirstOrDefaultAsync(p => p.IsActive, cancellationToken);
+                    if (activePeriod != null)
+                    {
+                        var now = DateTime.UtcNow;
+                        
+                        // 1. End all currently active EC records for this member in this period
+                        var currentECRecords = await _db.ECMembers
+                            .Where(em => em.MemberId == id && em.ECPeriodId == activePeriod.Id && em.EndDate == null)
+                            .ToListAsync(cancellationToken);
+                        
+                        foreach (var record in currentECRecords)
+                        {
+                            record.EndDate = now;
+                            record.ChangeReason = dto.ECChangeReason ?? $"Position changed from {oldPos} to {ecPos}.";
+                        }
+                        
+                        // 2. Start the new position if it's not 'None'
+                        if (ecPos != Enums.ECPosition.None)
+                        {
+                            _db.ECMembers.Add(new ECMember 
+                            { 
+                                MemberId = id, 
+                                ECPeriodId = activePeriod.Id, 
+                                Position = ecPos,
+                                StartDate = now,
+                                ChangeReason = dto.ECChangeReason
+                            });
+                        }
+                    }
+                }
+            }
 
             member.IsMobilePublic = dto.IsMobilePublic;
             member.IsEmailPublic = dto.IsEmailPublic;

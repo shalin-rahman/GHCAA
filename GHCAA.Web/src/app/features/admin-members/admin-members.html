@@ -185,7 +185,35 @@
                         <option [value]="p.value">{{ p.label }}</option>
                         }
                     </select>
-                    <span *ngIf="!isEditing()" class="badge accent">{{ selectedMember()?.ecPosition || 'None' }}</span>
+                    <span *ngIf="!isEditing()" class="badge accent">{{ getECPositionLabel(selectedMember()?.ecPosition)
+                        }}</span>
+                </div>
+
+                <div class="detail-item full" *ngIf="isEditing()">
+                    <label>EC Change Reason (Optional)</label>
+                    <input type="text" [(ngModel)]="selectedMember().ecChangeReason"
+                        placeholder="Reason for mid-term promotion/change...">
+                </div>
+
+                <!-- EC History -->
+                <div class="detail-item full" *ngIf="!isEditing() && selectedMember()?.ecHistory?.length > 0">
+                    <label>Executive Committee History</label>
+                    <div class="history-list">
+                        <div class="history-item" *ngFor="let h of selectedMember().ecHistory">
+                            <div class="h-main">
+                                <span class="h-period">{{ h.periodTitle }}</span>
+                                <span class="h-pos">{{ getECPositionLabel(h.position) }}</span>
+                                <span class="h-status" *ngIf="!h.endDate">(Current)</span>
+                            </div>
+                            <div class="h-meta">
+                                <small class="h-date">{{ h.startDate | date:'MMM yyyy' }} - {{ h.endDate ? (h.endDate |
+                                    date:'MMM yyyy') : 'Now' }}</small>
+                                <span class="h-reason" *ngIf="h.changeReason" [title]="h.changeReason">
+                                    <i class="reason-icon">ⓘ</i> {{ h.changeReason }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="detail-item full">

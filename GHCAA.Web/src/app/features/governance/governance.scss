@@ -6,6 +6,29 @@
 .header {
     text-align: center;
     margin-bottom: 4rem;
+
+    .period-selector-wrap {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+
+        .period-select {
+            background: var(--surface-color);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+
+            &:focus {
+                border-color: var(--accent-color);
+                box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.2);
+            }
+        }
+    }
 }
 
 .committee-grid {

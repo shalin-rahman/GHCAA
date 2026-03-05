@@ -75,4 +75,21 @@ export class AdminService {
     importMembers(formData: FormData): Observable<any> {
         return this.http.post(API_ENDPOINTS.ADMIN.MEMBERS_IMPORT, formData);
     }
+
+    // Theme Management
+    getAllThemes(): Observable<any[]> {
+        return this.http.get<any[]>(`${API_ENDPOINTS.THEMES}/all`);
+    }
+
+    createTheme(theme: any): Observable<any> {
+        return this.http.post(API_ENDPOINTS.THEMES, theme);
+    }
+
+    updateTheme(id: number, theme: any): Observable<any> {
+        return this.http.put(`${API_ENDPOINTS.THEMES}/${id}`, theme);
+    }
+
+    deleteTheme(id: number): Observable<any> {
+        return this.http.delete(`${API_ENDPOINTS.THEMES}/${id}`);
+    }
 }

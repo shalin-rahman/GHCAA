@@ -62,5 +62,6 @@ namespace GHCAA.Domain.Models
 
         // Navigation
         public User? User { get; set; }
+        public ICollection<ECMember> ECMembers { get; set; } = new List<ECMember>();
     }
 }

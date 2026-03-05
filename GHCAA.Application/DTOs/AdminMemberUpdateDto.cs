@@ -38,5 +38,7 @@ namespace GHCAA.Application.DTOs
         public bool IsMobilePublic { get; set; }
         public bool IsEmailPublic { get; set; }
         public bool IsAddressPublic { get; set; }
+        
+        public string? ECChangeReason { get; set; }
     }
 }

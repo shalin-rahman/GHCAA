@@ -75,7 +75,12 @@
                     </div>
                     <div class="name-info">
                         <h4>{{ m.fullName }}</h4>
-                        <span class="badge">{{ m.membershipNumber || 'Alumni' }}</span>
+                        <div class="badges">
+                            <span class="badge">{{ m.membershipNumber || 'Alumni' }}</span>
+                            @if (m.ecPosition && m.ecPosition !== 'None') {
+                            <span class="badge badge-ec">{{ getECPositionName(m.ecPosition) }}</span>
+                            }
+                        </div>
                     </div>
                 </div>
                 <div class="member-body">
@@ -178,6 +183,34 @@
                             }
                         </span>
                     </div>
+                </div>
+
+                <div class="v-section">
+                    <h4>Association History</h4>
+                    @if (selectedMember()?.ecHistory && selectedMember()?.ecHistory.length > 0) {
+                    <div class="history-timeline">
+                        @for (h of selectedMember()?.ecHistory; track h.startDate) {
+                        <div class="history-item">
+                            <div class="h-dot" [class.current]="!h.endDate"></div>
+                            <div class="h-content">
+                                <div class="h-row">
+                                    <span class="h-pos">{{ getECPositionName(h.position) }}</span>
+                                    <span class="h-period">{{ h.periodTitle }}</span>
+                                </div>
+                                <div class="h-dates">
+                                    {{ h.startDate | date:'MMM yyyy' }} - {{ h.endDate ? (h.endDate | date:'MMM yyyy') :
+                                    'Present' }}
+                                </div>
+                                @if (h.changeReason) {
+                                <p class="h-reason">{{ h.changeReason }}</p>
+                                }
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    } @else {
+                    <p class="empty-history">No executive committee records found.</p>
+                    }
                 </div>
             </div>
         </div>

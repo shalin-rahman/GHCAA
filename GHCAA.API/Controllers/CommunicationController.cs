@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
@@ -28,6 +29,13 @@ namespace GHCAA.API.Controllers
             return Ok(templates);
         }
 
+        [HttpGet("logs")]
+        public async Task<IActionResult> GetLogs([FromQuery] int count = 100, CancellationToken cancellationToken = default)
+        {
+            var logs = await _commService.GetRecentLogsAsync(count, cancellationToken);
+            return Ok(logs);
+        }
+
         [HttpPut("templates/{id}")]
         public async Task<IActionResult> UpdateTemplate(int id, [FromBody] EmailTemplate template, CancellationToken cancellationToken)
         {
@@ -36,54 +44,61 @@ namespace GHCAA.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("send-individual")]
-        public async Task<IActionResult> SendIndividual([FromBody] BulkEmailDto dto, CancellationToken cancellationToken)
+        [HttpPost("templates")]
+        public async Task<IActionResult> CreateTemplate([FromBody] EmailTemplate template, CancellationToken cancellationToken)
         {
-            if (!dto.MemberId.HasValue) return BadRequest("MemberId is required");
-            await _commService.SendIndividualEmailAsync(dto.MemberId.Value, dto.TemplateCode, dto.CustomVars, cancellationToken);
-            return Ok(new { Message = "Email queued for delivery" });
+            var result = await _commService.CreateTemplateAsync(template, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpDelete("templates/{id}")]
+        public async Task<IActionResult> DeleteTemplate(int id, CancellationToken cancellationToken)
+        {
+            await _commService.DeleteTemplateAsync(id, cancellationToken);
+            return NoContent();
         }
 
         [HttpPost("send-batch")]
         public async Task<IActionResult> SendBatch([FromBody] BulkEmailDto dto, CancellationToken cancellationToken)
         {
-            if (!dto.PassingYear.HasValue) return BadRequest("PassingYear is required");
-            await _commService.SendBatchEmailAsync(dto.PassingYear.Value, dto.TemplateCode, dto.CustomVars, cancellationToken);
-            return Ok(new { Message = $"Emails queued for batch {dto.PassingYear}" });
+            var years = dto.PassingYears ?? (dto.PassingYear.HasValue ? new List<int> { dto.PassingYear.Value } : null);
+            if (years == null || !years.Any()) return BadRequest("At least one PassingYear is required");
+            
+            await _commService.SendBatchEmailAsync(years, dto.TemplateCode, dto.CustomVars, cancellationToken);
+            return Ok(new { Message = $"Emails queued for batches: {string.Join(", ", years)}" });
         }
 
         [HttpPost("send-type")]
         public async Task<IActionResult> SendType([FromBody] BulkEmailDto dto, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(dto.MembershipType)) return BadRequest("MembershipType is required");
-            await _commService.SendTypeEmailAsync(dto.MembershipType, dto.TemplateCode, dto.CustomVars, cancellationToken);
-            return Ok(new { Message = $"Emails queued for type {dto.MembershipType}" });
+            var types = dto.MembershipTypes ?? (!string.IsNullOrEmpty(dto.MembershipType) ? new List<string> { dto.MembershipType } : null);
+            if (types == null || !types.Any()) return BadRequest("At least one MembershipType is required");
+            
+            await _commService.SendTypeEmailAsync(types, dto.TemplateCode, dto.CustomVars, cancellationToken);
+            return Ok(new { Message = $"Emails queued for types: {string.Join(", ", types)}" });
         }
 
         [HttpPost("send-custom")]
         public async Task<IActionResult> SendCustom([FromBody] CustomEmailDto dto, CancellationToken cancellationToken)
         {
-            if (dto.TargetMethod == "batch" && !string.IsNullOrEmpty(dto.TargetValue))
+            if (dto.TargetMethod == "batch")
             {
-                await _commService.SendBatchCustomEmailAsync(int.Parse(dto.TargetValue), dto.Subject, dto.Body, cancellationToken);
+                var years = dto.TargetValues?.Select(int.Parse).ToList() ?? (string.IsNullOrEmpty(dto.TargetValue) ? null : new List<int> { int.Parse(dto.TargetValue) });
+                if (years == null) return BadRequest("Target batch values required");
+                await _commService.SendBatchCustomEmailAsync(years, dto.Subject, dto.Body, cancellationToken);
             }
-            else if (dto.TargetMethod == "type" && !string.IsNullOrEmpty(dto.TargetValue))
+            else if (dto.TargetMethod == "type")
             {
-                await _commService.SendTypeCustomEmailAsync(dto.TargetValue, dto.Subject, dto.Body, cancellationToken);
+                var types = dto.TargetValues ?? (string.IsNullOrEmpty(dto.TargetValue) ? null : new List<string> { dto.TargetValue });
+                if (types == null) return BadRequest("Target membership type values required");
+                await _commService.SendTypeCustomEmailAsync(types, dto.Subject, dto.Body, cancellationToken);
             }
             else
             {
-                await _commService.SendCustomEmailAsync(dto.Emails, dto.Subject, dto.Body, cancellationToken);
+                await _commService.SendCustomEmailAsync(dto.Emails, dto.TemplateCode, dto.Subject, dto.Body, null, cancellationToken);
             }
             
             return Ok(new { Message = "Custom emails queued for delivery" });
-        }
-
-        [HttpPost("send-custom-to-member/{memberId}")]
-        public async Task<IActionResult> SendCustomToMember(int memberId, [FromBody] CustomEmailDto dto, CancellationToken cancellationToken)
-        {
-            await _commService.SendMemberCustomEmailAsync(memberId, dto.Subject, dto.Body, cancellationToken);
-            return Ok(new { Message = "Email sent to member" });
         }
     }
 }

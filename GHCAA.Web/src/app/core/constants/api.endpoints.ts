@@ -30,11 +30,13 @@ export const API_ENDPOINTS = {
     },
     NETWORKING: {
         COMMITTEE: '/api/networking/committee',
+        COMMITTEE_PERIODS: '/api/networking/periods',
         SEARCH: '/api/networking/search',
         UPDATES: '/api/networking/updates'
     },
     LOOKUPS: '/api/lookups',
     LEDGER: '/api/ledger',
     CONTACT: '/api/contact',
-    ASSISTANT: '/api/assistant/ask'
+    ASSISTANT: '/api/assistant/ask',
+    THEMES: '/api/theme'
 } as const;

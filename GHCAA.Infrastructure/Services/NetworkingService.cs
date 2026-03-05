@@ -23,6 +23,8 @@ namespace GHCAA.Infrastructure.Services
         public async Task<MemberProfileDto?> GetMemberProfileAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members
+                .Include(m => m.ECMembers)
+                .ThenInclude(em => em.ECPeriod)
                 .Where(m => m.Id == memberId && m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -58,16 +60,37 @@ namespace GHCAA.Infrastructure.Services
             return members.Select(MapToDto);
         }
 
-        public async Task<IEnumerable<MemberProfileDto>> GetExecutiveCommitteeAsync(int? year = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<MemberProfileDto>> GetExecutiveCommitteeAsync(int? periodId = null, CancellationToken cancellationToken = default)
         {
-            // For now, filtering by ECPosition being not None
-            var query = _db.Members.Where(m => m.ECPosition != Enums.ECPosition.None && m.Status == Enums.MembershipStatus.Active && !m.IsArchived);
-
-            // If year is provided, we might filter by GHCAdmissionYear or a specific term (not yet implemented)
-            // Assuming current EC for now.
+            // If no period specified, get current active one
+            var query = _db.ECMembers
+                .Include(em => em.Member)
+                .Include(em => em.ECPeriod)
+                .AsQueryable();
             
-            var members = await query.OrderBy(m => m.FullName).ToListAsync(cancellationToken);
-            return members.Select(MapToDto);
+            if (periodId.HasValue)
+            {
+                query = query.Where(em => em.ECPeriodId == periodId.Value);
+            }
+            else
+            {
+                query = query.Where(em => em.ECPeriod!.IsActive);
+            }
+
+            var results = await query.ToListAsync(cancellationToken);
+            return results.Select(em => {
+                var dto = MapToDto(em.Member!);
+                dto.ECPosition = em.Position; // Use position from history for that period
+                return dto;
+            });
+        }
+
+        public async Task<IEnumerable<object>> GetECPeriodsAsync(CancellationToken cancellationToken = default)
+        {
+            return await _db.ECPeriods
+                .OrderByDescending(p => p.StartDate)
+                .Select(p => new { p.Id, p.Title, p.IsActive })
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<MemberProfileDto>> GetLatestAlumniUpdatesAsync(int count = 10, CancellationToken cancellationToken = default)
@@ -83,8 +106,7 @@ namespace GHCAA.Infrastructure.Services
 
         private MemberProfileDto MapToDto(Member m)
         {
-            // Privacy Filtering
-            return new MemberProfileDto
+            var dto = new MemberProfileDto
             {
                 Id = m.Id,
                 FullName = m.FullName,
@@ -101,10 +123,26 @@ namespace GHCAA.Infrastructure.Services
                 PresentAddress = m.IsAddressPublic ? m.PresentAddress : "Confidential",
                 PermanentAddress = m.IsAddressPublic ? m.PermanentAddress : "Confidential",
                 BloodGroup = m.BloodGroup,
+                MembershipType = m.MembershipType,
+                Category = m.Category,
+                ECPosition = m.ECPosition,
                 IsMobilePublic = m.IsMobilePublic,
                 IsEmailPublic = m.IsEmailPublic,
                 IsAddressPublic = m.IsAddressPublic
             };
+
+            if (m.ECMembers != null && m.ECMembers.Any())
+            {
+                dto.ECHistory = m.ECMembers.Select(em => new ECHistoryDto
+                {
+                    PeriodTitle = em.ECPeriod?.Title ?? "Unknown Period",
+                    Position = em.Position,
+                    StartDate = em.ECPeriod?.StartDate ?? DateTime.MinValue,
+                    EndDate = em.ECPeriod?.EndDate
+                }).OrderByDescending(h => h.StartDate).ToList();
+            }
+
+            return dto;
         }
     }
 }

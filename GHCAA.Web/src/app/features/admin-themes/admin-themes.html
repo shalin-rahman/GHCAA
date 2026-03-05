@@ -1,0 +1,125 @@
+<div class="admin-feature">
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Special Day Themes</h2>
+            <small>Manage dynamic navigation bar appearance for specific dates.</small>
+        </div>
+        <button class="btn btn-primary" (click)="openCreate()">+ Add New Theme</button>
+    </div>
+
+    <div class="glass-card table-wrap">
+        @if (loading()) {
+        <div class="loading-padding">Loading themes...</div>
+        } @else if (themes().length === 0) {
+        <div class="empty-state">No special day themes configured yet.</div>
+        } @else {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Title / Event</th>
+                    <th>Dates</th>
+                    <th>Colors</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (theme of themes(); track theme.id) {
+                <tr>
+                    <td>
+                        <div class="theme-info">
+                            <strong>{{ theme.title }}</strong>
+                            <small>{{ theme.announcementText }}</small>
+                        </div>
+                    </td>
+                    <td>{{ theme.startDate | date }} - {{ theme.endDate | date }}</td>
+                    <td>
+                        <div class="color-preview-row">
+                            <span class="color-dot" [style.background]="theme.backgroundColor"
+                                title="Background"></span>
+                            <span class="color-dot" [style.background]="theme.textColor" title="Text"></span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge" [class.active]="theme.isEnabled">
+                            {{ theme.isEnabled ? 'Active' : 'Disabled' }}
+                        </span>
+                    </td>
+                    <td class="actions-cell">
+                        <button class="icon-btn edit" (click)="openEdit(theme)" title="Edit">✏️</button>
+                        <button class="icon-btn delete" (click)="deleteTheme(theme.id)" title="Delete">🗑️</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>
+
+<!-- Theme Modal -->
+@if (showModal()) {
+<div class="modal-overlay" (click)="showModal.set(false)">
+    <div class="modal-box glass-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ isEditing() ? 'Edit' : 'Create' }} Special Day Theme</h3>
+            <button class="close-btn" (click)="showModal.set(false)">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label>Internal Title</label>
+                    <input type="text" [(ngModel)]="selectedTheme.title" placeholder="e.g., Independence Day 2025">
+                </div>
+                <div class="form-group full">
+                    <label>Announcement Text (Max 40 chars)</label>
+                    <input type="text" [(ngModel)]="selectedTheme.announcementText"
+                        placeholder="e.g., Celebrating Freedom Together!">
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" [(ngModel)]="selectedTheme.startDate">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" [(ngModel)]="selectedTheme.endDate">
+                </div>
+                <div class="form-group">
+                    <label>Nav Background Color</label>
+                    <div class="color-picker-wrap">
+                        <input type="color" [(ngModel)]="selectedTheme.backgroundColor">
+                        <span>{{ selectedTheme.backgroundColor }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nav Text/Icon Color</label>
+                    <div class="color-picker-wrap">
+                        <input type="color" [(ngModel)]="selectedTheme.textColor">
+                        <span>{{ selectedTheme.textColor }}</span>
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <label class="checkbox-label">
+                        <input type="checkbox" [(ngModel)]="selectedTheme.isEnabled"> Is Enabled
+                    </label>
+                </div>
+            </div>
+
+            <!-- Live Preview -->
+            <div class="preview-section">
+                <label>Real-time Preview</label>
+                <div class="nav-preview" [style.background]="selectedTheme.backgroundColor"
+                    [style.color]="selectedTheme.textColor">
+                    <div class="preview-logo">GHCAA</div>
+                    <div class="preview-text">{{ selectedTheme.announcementText || 'Announcement Text Here' }}</div>
+                    <div class="preview-links">Home . About . Join</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="showModal.set(false)">Cancel</button>
+            <button class="btn btn-primary" (click)="saveTheme()">Save Theme Settings</button>
+        </div>
+    </div>
+</div>
+}

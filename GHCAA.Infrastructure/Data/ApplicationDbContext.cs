@@ -30,6 +30,10 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<Notification> Notifications { get; set; } = null!;
         public DbSet<AlumniEvent> AlumniEvents { get; set; } = null!;
         public DbSet<EventRegistration> EventRegistrations { get; set; } = null!;
+        public DbSet<SpecialDayTheme> SpecialDayThemes { get; set; } = null!;
+        public DbSet<EmailLog> EmailLogs { get; set; } = null!;
+        public DbSet<ECPeriod> ECPeriods { get; set; } = null!;
+        public DbSet<ECMember> ECMembers { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -85,6 +89,7 @@ namespace GHCAA.Infrastructure.Data
                     Id = 1, 
                     Code = "OTP_EMAIL", 
                     Subject = "Your GHC Alumni Association Verification Code", 
+                    Description = "Sent during registration and password reset",
                     Body = "Hello {{FullName}}, your OTP is: <strong>{{OtpCode}}</strong>. Valid for 10 minutes.",
                     Variables = "['FullName', 'OtpCode']"
                 },
@@ -93,6 +98,7 @@ namespace GHCAA.Infrastructure.Data
                     Id = 2, 
                     Code = "WELCOME_EMAIL", 
                     Subject = "Welcome to GHC Alumni Association!", 
+                    Description = "Sent after admin approves registration",
                     Body = "Dear {{FullName}}, welcome! Your membership number is {{MembershipNumber}} and your default password is {{DefaultPassword}}.",
                     Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                 },
@@ -101,6 +107,7 @@ namespace GHCAA.Infrastructure.Data
                     Id = 3, 
                     Code = "EVENT_REGISTRATION_CONFIRMATION", 
                     Subject = "Registration Confirmed: {{EventTitle}}", 
+                    Description = "Sent after event registration approval",
                     Body = "Dear {{FullName}}, your registration for the event <strong>{{EventTitle}}</strong> has been approved. <br/><br/><strong>Event Details:</strong><br/>Date: {{EventDate}}<br/>Location: {{EventLocation}}<br/><br/>Looking forward to seeing you there!",
                     Variables = "['FullName', 'EventTitle', 'EventDate', 'EventLocation']"
                 }
@@ -226,6 +233,16 @@ namespace GHCAA.Infrastructure.Data
                 new MembershipFeeConfig { Id = 4, MembershipType = Domain.Enums.MembershipType.Associate, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Associate Member Fee" },
                 new MembershipFeeConfig { Id = 5, MembershipType = Domain.Enums.MembershipType.Honorary, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Honorary Member Fee" },
                 new MembershipFeeConfig { Id = 6, MembershipType = Domain.Enums.MembershipType.Advisory, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Advisory Member Fee" }
+            );
+
+            // Seed initial EC Period
+            modelBuilder.Entity<ECPeriod>().HasData(
+                new ECPeriod { Id = 1, Title = "Current Executive Committee", StartDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc), IsActive = true }
+            );
+
+            // Link existing members to EC if applicable
+            modelBuilder.Entity<ECMember>().HasData(
+                new ECMember { Id = 1, ECPeriodId = 1, MemberId = 1, Position = Domain.Enums.ECPosition.President, StartDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
             );
         }
     }

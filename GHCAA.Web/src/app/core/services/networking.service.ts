@@ -13,6 +13,10 @@ export class NetworkingService {
         return this.http.get<any[]>(API_ENDPOINTS.NETWORKING.COMMITTEE, { params });
     }
 
+    getPeriods(): Observable<any[]> {
+        return this.http.get<any[]>(API_ENDPOINTS.NETWORKING.COMMITTEE_PERIODS);
+    }
+
     searchMembers(filter: any): Observable<any[]> {
         return this.http.get<any[]>(API_ENDPOINTS.NETWORKING.SEARCH, { params: filter });
     }

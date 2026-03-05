@@ -7,28 +7,31 @@
     </div>
 
     <div class="tab-nav">
-        <button [class.active]="activeTab() === 'send'" (click)="activeTab.set('send')">
+        <button [class.active]="activeTab() === 'send'" (click)="setTab('send')">
             <span class="icon">🚀</span> Broadcast Message
         </button>
-        <button [class.active]="activeTab() === 'templates'" (click)="activeTab.set('templates')">
+        <button [class.active]="activeTab() === 'templates'" (click)="setTab('templates')">
             <span class="icon">📄</span> Email Templates
+        </button>
+        <button [class.active]="activeTab() === 'logs'" (click)="setTab('logs')">
+            <span class="icon">📜</span> Delivery Logs
         </button>
     </div>
 
     @if (activeTab() === 'send') {
     <div class="glass-card broadcast-panel reveal-top">
-        <h3>Initiate Broadcast</h3>
+        <h3>🚀 Initiate Broadcast</h3>
         <div class="broadcast-form">
             <div class="form-group">
                 <label>Target Audience</label>
                 <div class="radio-grid">
                     <label class="radio-item">
                         <input type="radio" [(ngModel)]="sendOptions.method" value="batch">
-                        <span>Specific Batch</span>
+                        <span>Specific Batch(es)</span>
                     </label>
                     <label class="radio-item">
                         <input type="radio" [(ngModel)]="sendOptions.method" value="type">
-                        <span>Membership Type</span>
+                        <span>Membership Type(s)</span>
                     </label>
                     <label class="radio-item">
                         <input type="radio" [(ngModel)]="sendOptions.method" value="custom">
@@ -38,29 +41,42 @@
             </div>
 
             @if (sendOptions.method === 'batch') {
-            <div class="form-group row-flex">
-                <div class="flex-1">
-                    <label>Select Batch Year</label>
-                    <select [(ngModel)]="sendOptions.target">
-                        <option value="">Select Passing Year</option>
-                        @for (year of years; track year) {
-                        <option [value]="year">{{ year }}</option>
-                        }
-                    </select>
+            <div class="form-group">
+                <div class="group-header">
+                    <label>Select Batch Year(s)</label>
+                    <div class="selection-actions">
+                        <button class="btn-link" (click)="selectAllYears()">Select All</button>
+                        <button class="btn-link" (click)="clearYears()">Clear</button>
+                    </div>
+                </div>
+                <div class="multi-select-chips">
+                    @for (year of years; track year) {
+                    <div class="select-chip" [class.selected]="isSelected(year, sendOptions.targetYears)"
+                        (click)="toggleSelection(year, sendOptions.targetYears)">
+                        {{ year }}
+                    </div>
+                    }
                 </div>
             </div>
             }
 
             @if (sendOptions.method === 'type') {
             <div class="form-group">
-                <label>Select Membership Level</label>
-                <select [(ngModel)]="sendOptions.target">
-                    <option value="">All Active Members</option>
-                    <option value="General">General</option>
-                    <option value="Life">Life Member</option>
-                    <option value="Executive">Executive Committee</option>
-                    <option value="Associate">Associate</option>
-                </select>
+                <div class="group-header">
+                    <label>Select Membership Level(s)</label>
+                    <div class="selection-actions">
+                        <button class="btn-link" (click)="selectAllTypes()">Select All</button>
+                        <button class="btn-link" (click)="clearTypes()">Clear</button>
+                    </div>
+                </div>
+                <div class="multi-select-chips">
+                    @for (type of membershipTypes; track type.value) {
+                    <div class="select-chip" [class.selected]="isSelected(type.value, sendOptions.targetTypes)"
+                        (click)="toggleSelection(type.value, sendOptions.targetTypes)">
+                        {{ type.label }}
+                    </div>
+                    }
+                </div>
             </div>
             }
 
@@ -88,32 +104,32 @@
                     <option [value]="t.code">{{ t.description }} ({{ t.subject }})</option>
                     }
                 </select>
-                <small class="hint">Variable fields like {{ '{' }}{{ '{' }}FullName{{ '}' }}{{ '}' }} will be
-                    auto-populated.</small>
+                <small class="hint">Variable fields like <code>{{ '{' }}{{ '{' }}FullName{{ '}' }}{{ '}' }}</code> will
+                    be auto-populated.</small>
             </div>
             } @else {
             @if (sendOptions.method === 'custom') {
-            <div class="form-group">
+            <div class="form-group full">
                 <label>Target Emails (Comma separated)</label>
-                <textarea [(ngModel)]="sendOptions.target" rows="2"
+                <textarea [(ngModel)]="sendOptions.target" rows="3"
                     placeholder="example1@mail.com, example2@mail.com..."></textarea>
             </div>
             }
 
-            <div class="form-group">
+            <div class="form-group full">
                 <label>Subject Line</label>
                 <input type="text" [(ngModel)]="sendOptions.customSubject" placeholder="Enter email subject">
             </div>
 
-            <div class="form-group richness">
+            <div class="form-group richness full">
                 <label>Message Content</label>
-                <div id="broadcast-editor" style="height: 300px; background: white; color: black; border-radius: 8px;">
+                <div id="broadcast-editor" style="height: 350px;">
                 </div>
             </div>
             }
 
             <div class="form-actions">
-                <button class="btn btn-primary btn-lg" (click)="sendMessage()" [disabled]="sending()">
+                <button class="btn btn-accent btn-lg" (click)="sendMessage()" [disabled]="sending()">
                     {{ sending() ? '⌛ Broadcasting...' : '🚀 Launch Broadcast' }}
                 </button>
                 <p class="warning">⚠️ This action will send emails to multiple members. Verify content before sending.
@@ -121,8 +137,17 @@
             </div>
         </div>
     </div>
-    } @else {
+    }
+
+    @if (activeTab() === 'templates') {
     <div class="glass-card templates-panel reveal-top">
+        <div class="panel-header">
+            <h3>📄 System Templates</h3>
+            <div class="header-actions">
+                <button class="btn btn-outline btn-sm" (click)="loadTemplates()">🔄 Refresh</button>
+                <button class="btn btn-accent btn-sm" (click)="addNewTemplate()">+ Add New Template</button>
+            </div>
+        </div>
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
@@ -134,15 +159,90 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @if (loading()) {
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 3rem; color: var(--accent-color);">
+                            <div class="loader">⌛ Loading templates...</div>
+                        </td>
+                    </tr>
+                    } @else if (templates().length === 0) {
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 4rem; opacity: 0.5;">
+                            <div class="empty-state">
+                                <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📭</span>
+                                No email templates found. Click "Add New Template" to create one.
+                            </div>
+                        </td>
+                    </tr>
+                    } @else {
                     @for (t of templates(); track t.id) {
                     <tr>
                         <td><code>{{ t.code }}</code></td>
                         <td>{{ t.description }}</td>
                         <td>{{ t.subject }}</td>
                         <td>
-                            <button class="btn btn-outline btn-sm" (click)="editTemplate(t)">✏️ Edit Content</button>
+                            <div class="actions-cell">
+                                <button class="btn btn-outline btn-sm" (click)="editTemplate(t)">✏️ Edit</button>
+                                <button class="btn btn-danger-link btn-sm" (click)="deleteTemplate(t)">🗑️
+                                    Delete</button>
+                            </div>
                         </td>
                     </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+
+    @if (activeTab() === 'logs') {
+    <div class="glass-card logs-panel reveal-top">
+        <div class="panel-header">
+            <h3>📜 Communication Delivery Logs</h3>
+            <div class="header-actions">
+                <button class="btn btn-outline btn-sm" (click)="loadLogs()">🔄 Refresh</button>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Recipient</th>
+                        <th>Subject</th>
+                        <th>Target</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (loading()) {
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 3rem;">
+                            <div class="loader">⌛ Loading logs...</div>
+                        </td>
+                    </tr>
+                    } @else if (logs().length === 0) {
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 4rem; opacity: 0.5;">
+                            No email logs found yet.
+                        </td>
+                    </tr>
+                    } @else {
+                    @for (log of logs(); track log.id) {
+                    <tr>
+                        <td>{{ log.sentDate | date:'short' }}</td>
+                        <td>{{ log.recipientEmail }}</td>
+                        <td>{{ log.subject }}</td>
+                        <td><small>{{ log.targetAudience }}</small></td>
+                        <td>
+                            <span class="status-badge" [class.success]="log.status === 'Sent'"
+                                [class.error]="log.status === 'Failed'">
+                                {{ log.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    }
                     }
                 </tbody>
             </table>
@@ -153,31 +253,62 @@
     <!-- Template Edit Modal -->
     @if (editingTemplate()) {
     <div class="modal-overlay">
-        <div class="modal-card wide glass-card">
+        <div class="modal-card wide">
             <div class="modal-header">
-                <h3>Edit Template: {{ editingTemplate()?.code }}</h3>
+                <h3>{{ editingTemplate()?.id === 0 ? 'Create New' : 'Edit' }} Email Template: {{ editingTemplate()?.code
+                    }}</h3>
                 <button class="close-btn" (click)="cancelEdit()">×</button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Subject</label>
-                    <input type="text" [(ngModel)]="editingTemplate()!.subject">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Template Code (Unique)</label>
+                        <input type="text" [(ngModel)]="editingTemplate()!.code"
+                            [disabled]="editingTemplate()!.id !== 0" placeholder="e.g., WELCOME_EMAIL">
+                    </div>
+                    <div class="form-group">
+                        <label>Internal Description</label>
+                        <input type="text" [(ngModel)]="editingTemplate()!.description"
+                            placeholder="e.g., Sent after approval">
+                    </div>
+                    <div class="form-group full">
+                        <label>Email Subject</label>
+                        <input type="text" [(ngModel)]="editingTemplate()!.subject" placeholder="Enter subject line">
+                    </div>
                 </div>
-                <div class="form-group richness">
+                <div class="form-group richness full">
                     <label>HTML Content</label>
-                    <div id="template-editor"
-                        style="height: 400px; background: white; color: black; border-radius: 8px;"></div>
+                    <div id="template-editor" style="height: 450px;"></div>
                 </div>
                 <div class="variables-guide">
                     <strong>Allowed Variables:</strong>
-                    <code>{{ '{' }}{{ '{' }}FullName{{ '}' }}{{ '}' }}</code>,
-                    <code>{{ '{' }}{{ '{' }}MembershipNumber{{ '}' }}{{ '}' }}</code>,
-                    <code>{{ '{' }}{{ '{' }}PassingYear{{ '}' }}{{ '}' }}</code>
+                    <div class="var-list">
+                        <code>{{ '{' }}{{ '{' }}FullName{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}FatherName{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}MotherName{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}DateOfBirth{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}Gender{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}BloodGroup{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}NID{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}MembershipNumber{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}MembershipType{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}Email{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}MobileNo{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}PresentAddress{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}PermanentAddress{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}PassingYear{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}HSCAdmissionYear{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}SubjectGroup{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}ProfessionalSector{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}Designation{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}OtpCode{{ '}' }}{{ '}' }}</code>
+                        <code>{{ '{' }}{{ '{' }}DefaultPassword{{ '}' }}{{ '}' }}</code>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
-                <button class="btn btn-primary" (click)="saveTemplate()" [disabled]="isSaving()">
+                <button class="btn btn-accent" (click)="saveTemplate()" [disabled]="isSaving()">
                     {{ isSaving() ? 'Saving...' : '💾 Save Template' }}
                 </button>
             </div>

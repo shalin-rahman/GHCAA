@@ -3,6 +3,7 @@ using System;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GHCAA.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260305105203_UpdateEmailTemplatesWithDescription")]
+    partial class UpdateEmailTemplatesWithDescription
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,53 +177,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.ToTable("ContactMessages");
                 });
 
-            modelBuilder.Entity("GHCAA.Domain.Models.EmailLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("InitiatedByMemberId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("RecipientEmail")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<DateTime>("SentDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("TargetAudience")
-                        .HasColumnType("text");
-
-                    b.Property<string>("TemplateCode")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("EmailLogs");
-                });
-
             modelBuilder.Entity("GHCAA.Domain.Models.EmailTemplate", b =>
                 {
                     b.Property<int>("Id")
@@ -268,7 +224,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "Hello {{FullName}}, your OTP is: <strong>{{OtpCode}}</strong>. Valid for 10 minutes.",
                             Code = "OTP_EMAIL",
                             Description = "Sent during registration and password reset",
-                            LastUpdated = new DateTime(2026, 3, 5, 17, 11, 55, 232, DateTimeKind.Utc).AddTicks(9857),
+                            LastUpdated = new DateTime(2026, 3, 5, 10, 52, 2, 79, DateTimeKind.Utc).AddTicks(5842),
                             Subject = "Your GHC Alumni Association Verification Code",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -278,7 +234,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "Dear {{FullName}}, welcome! Your membership number is {{MembershipNumber}} and your default password is {{DefaultPassword}}.",
                             Code = "WELCOME_EMAIL",
                             Description = "Sent after admin approves registration",
-                            LastUpdated = new DateTime(2026, 3, 5, 17, 11, 55, 233, DateTimeKind.Utc).AddTicks(930),
+                            LastUpdated = new DateTime(2026, 3, 5, 10, 52, 2, 79, DateTimeKind.Utc).AddTicks(7099),
                             Subject = "Welcome to GHC Alumni Association!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                         },
@@ -288,7 +244,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "Dear {{FullName}}, your registration for the event <strong>{{EventTitle}}</strong> has been approved. <br/><br/><strong>Event Details:</strong><br/>Date: {{EventDate}}<br/>Location: {{EventLocation}}<br/><br/>Looking forward to seeing you there!",
                             Code = "EVENT_REGISTRATION_CONFIRMATION",
                             Description = "Sent after event registration approval",
-                            LastUpdated = new DateTime(2026, 3, 5, 17, 11, 55, 233, DateTimeKind.Utc).AddTicks(933),
+                            LastUpdated = new DateTime(2026, 3, 5, 10, 52, 2, 79, DateTimeKind.Utc).AddTicks(7102),
                             Subject = "Registration Confirmed: {{EventTitle}}",
                             Variables = "['FullName', 'EventTitle', 'EventDate', 'EventLocation']"
                         });
@@ -852,7 +808,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsEmailPublic = false,
                             IsMobilePublic = false,
                             LastCertificateFromGHC = "Other",
-                            LastUpdateDate = new DateTime(2026, 3, 5, 17, 11, 55, 234, DateTimeKind.Utc).AddTicks(2583),
+                            LastUpdateDate = new DateTime(2026, 3, 5, 10, 52, 2, 80, DateTimeKind.Utc).AddTicks(8306),
                             MembershipNumber = "ADM-SHALIN-1",
                             MembershipType = 4,
                             MobileNo = "01700000001",
@@ -940,7 +896,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 1,
                             Amount = 5000m,
-                            CreatedAt = new DateTime(2026, 3, 5, 17, 11, 55, 819, DateTimeKind.Utc).AddTicks(8530),
+                            CreatedAt = new DateTime(2026, 3, 5, 10, 52, 2, 583, DateTimeKind.Utc).AddTicks(1809),
                             Description = "Founding Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 0
@@ -949,7 +905,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 2,
                             Amount = 2000m,
-                            CreatedAt = new DateTime(2026, 3, 5, 17, 11, 55, 820, DateTimeKind.Utc).AddTicks(88),
+                            CreatedAt = new DateTime(2026, 3, 5, 10, 52, 2, 583, DateTimeKind.Utc).AddTicks(3078),
                             Description = "Executive Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 1
@@ -958,7 +914,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 3,
                             Amount = 1000m,
-                            CreatedAt = new DateTime(2026, 3, 5, 17, 11, 55, 820, DateTimeKind.Utc).AddTicks(92),
+                            CreatedAt = new DateTime(2026, 3, 5, 10, 52, 2, 583, DateTimeKind.Utc).AddTicks(3081),
                             Description = "General Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 2
@@ -967,7 +923,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 4,
                             Amount = 1000m,
-                            CreatedAt = new DateTime(2026, 3, 5, 17, 11, 55, 820, DateTimeKind.Utc).AddTicks(94),
+                            CreatedAt = new DateTime(2026, 3, 5, 10, 52, 2, 583, DateTimeKind.Utc).AddTicks(3084),
                             Description = "Associate Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 3
@@ -976,7 +932,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 5,
                             Amount = 0m,
-                            CreatedAt = new DateTime(2026, 3, 5, 17, 11, 55, 820, DateTimeKind.Utc).AddTicks(97),
+                            CreatedAt = new DateTime(2026, 3, 5, 10, 52, 2, 583, DateTimeKind.Utc).AddTicks(3086),
                             Description = "Honorary Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 4
@@ -985,7 +941,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 6,
                             Amount = 0m,
-                            CreatedAt = new DateTime(2026, 3, 5, 17, 11, 55, 820, DateTimeKind.Utc).AddTicks(101),
+                            CreatedAt = new DateTime(2026, 3, 5, 10, 52, 2, 583, DateTimeKind.Utc).AddTicks(3090),
                             Description = "Advisory Member Fee",
                             EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipType = 5
@@ -1300,7 +1256,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsArchived = false,
-                            PasswordHash = "$2a$11$vcukc.0F.Y2hvHPuFf8L0.ErZyqQo.TwHNd9shgbqDjEbbSk2O.Ly",
+                            PasswordHash = "$2a$11$TPYZxS1G3TSMBj2taptvoOCun9Ooyqp/RghIbuGGWFWZZw/.2m/Ii",
                             Username = "superadmin"
                         },
                         new
@@ -1310,7 +1266,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsActive = true,
                             IsArchived = false,
                             MemberId = 1,
-                            PasswordHash = "$2a$11$WJgG9GNtOVE2UqmX/hvNtOfTAXJJfx9pRzZQRTo8gJTMoqtjsaHVi",
+                            PasswordHash = "$2a$11$m39S2eEjr44HaTGJEj9XluwihNh3dGjtECz2C6GU875werROmPwKG",
                             Username = "shalin"
                         });
                 });

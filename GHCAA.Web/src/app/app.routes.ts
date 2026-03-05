@@ -117,6 +117,10 @@ export const routes: Routes = [
             {
                 path: 'events',
                 loadComponent: () => import('./features/admin-events/admin-events').then(m => m.AdminEvents)
+            },
+            {
+                path: 'themes',
+                loadComponent: () => import('./features/admin-themes/admin-themes').then(m => m.AdminThemes)
             }
         ]
     }

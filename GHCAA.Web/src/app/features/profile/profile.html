@@ -20,7 +20,7 @@
                         {{ getCategoryLabel(profile.category) }}
                     </span>
                     <span class="ec-pos" *ngIf="profile.ecPosition && profile.ecPosition !== 'None'">{{
-                        profile.ecPosition }}</span>
+                        getECPositionName(profile.ecPosition) }}</span>
                 </div>
             </div>
             <div class="badge-icon" [ngClass]="profile.status === 1 ? 'active' : 'pending'">
@@ -41,6 +41,34 @@
                 <p>{{ (profile.approvedDate || profile.appliedDate) | date:'MMM yyyy' }}</p>
             </div>
         </div>
+    </div>
+
+    <!-- EC History Section -->
+    <div class="glass-card mb-8">
+        <h4 class="text-accent uppercase tracking-widest text-xs font-black border-b border-accent pb-2 mb-6">
+            Association Governance History</h4>
+        @if (profile.ecHistory && profile.ecHistory.length > 0) {
+        <div class="ec-history-list">
+            @for (h of profile.ecHistory; track h.startDate) {
+            <div class="ec-history-item">
+                <div class="h-main">
+                    <span class="h-pos">{{ getECPositionName(h.position) }}</span>
+                    <span class="h-period">{{ h.periodTitle }}</span>
+                </div>
+                <div class="h-meta">
+                    <span class="h-dates">{{ h.startDate | date:'MMM yyyy' }} - {{ h.endDate ? (h.endDate | date:'MMM
+                        yyyy') : 'Present' }}</span>
+                    @if (!h.endDate) { <span class="current-badge">Active</span> }
+                </div>
+                @if (h.changeReason) {
+                <p class="h-reason">Note: {{ h.changeReason }}</p>
+                }
+            </div>
+            }
+        </div>
+        } @else {
+        <p class="text-muted text-sm italic">You haven't held any positions in the Executive Committee yet.</p>
+        }
     </div>
 
     <div class="glass-card profile-card">

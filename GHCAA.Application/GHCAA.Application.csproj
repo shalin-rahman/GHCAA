@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GHCAA.Domain\GHCAA.Domain.csproj" />
     <!-- FluentValidation pinned to available version -->
     <PackageReference Include="FluentValidation" Version="11.4.0" />

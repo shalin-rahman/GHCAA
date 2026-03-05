@@ -5,6 +5,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router } from '@angular/router';
+import { EC_ROLES, getECPositionName } from '../../core/constants/governance.constants';
 
 @Component({
   selector: 'app-admin-members',
@@ -87,18 +88,7 @@ export class AdminMembers implements OnInit {
     { value: 'Patron', label: 'Patron Member' }
   ];
 
-  ecPositions = [
-    { value: 'President', label: 'President' },
-    { value: 'VicePresident', label: 'Vice President' },
-    { value: 'GeneralSecretary', label: 'General Secretary' },
-    { value: 'JointSecretary', label: 'Joint Secretary' },
-    { value: 'Treasurer', label: 'Treasurer' },
-    { value: 'OrganizingSecretary', label: 'Organizing Secretary' },
-    { value: 'OfficeSecretary', label: 'Office Secretary' },
-    { value: 'InformationSecretary', label: 'Information Secretary' },
-    { value: 'Member', label: 'EC Member' },
-    { value: 'None', label: 'Not in EC' }
-  ];
+  ecPositions = EC_ROLES.map((label, index) => ({ value: index, label }));
 
   yearsList = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
 
@@ -215,6 +205,10 @@ export class AdminMembers implements OnInit {
     const cats = ['None', 'Lifelong', 'Donor', 'Patron'];
     if (typeof cat === 'number') return cats[cat] || 'None';
     return cat || 'None';
+  }
+
+  getECPositionLabel(pos: any): string {
+    return getECPositionName(pos);
   }
 
   // --- Import Actions ---

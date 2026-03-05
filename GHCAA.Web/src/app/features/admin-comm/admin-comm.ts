@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminCommService, EmailTemplate } from '../../core/services/admin-comm.service';
+import { AdminCommService, EmailTemplate, EmailLog } from '../../core/services/admin-comm.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ActivatedRoute } from '@angular/router';
 
@@ -18,9 +18,10 @@ export class AdminComm implements OnInit {
     private route = inject(ActivatedRoute);
 
     templates = signal<EmailTemplate[]>([]);
+    logs = signal<EmailLog[]>([]);
     loading = signal(true);
     sending = signal(false);
-    activeTab = signal('send'); // 'send' or 'templates'
+    activeTab = signal('send'); // 'send', 'templates', 'logs'
 
     // Editing Template
     editingTemplate = signal<EmailTemplate | null>(null);
@@ -33,12 +34,22 @@ export class AdminComm implements OnInit {
     sendOptions = {
         method: 'batch', // 'batch', 'type', 'custom'
         target: '',
+        targetYears: [] as number[],
+        targetTypes: [] as string[],
         templateCode: '',
         customSubject: '',
         customBody: ''
     };
 
     years: number[] = [];
+    membershipTypes = [
+        { value: 'Founding', label: 'Founding Member' },
+        { value: 'Executive', label: 'Executive Committee' },
+        { value: 'General', label: 'General Member' },
+        { value: 'Associate', label: 'Associate Member' },
+        { value: 'Honorary', label: 'Honorary Member' },
+        { value: 'Advisory', label: 'Advisory Member' }
+    ];
 
     constructor() {
         const currentYear = new Date().getFullYear();
@@ -65,6 +76,15 @@ export class AdminComm implements OnInit {
         });
     }
 
+    setTab(tab: string) {
+        this.activeTab.set(tab);
+        if (tab === 'logs') {
+            this.loadLogs();
+        } else if (tab === 'templates') {
+            this.loadTemplates();
+        }
+    }
+
     loadTemplates() {
         this.loading.set(true);
         this.commService.getTemplates().subscribe({
@@ -72,7 +92,26 @@ export class AdminComm implements OnInit {
                 this.templates.set(data);
                 this.loading.set(false);
             },
-            error: () => this.loading.set(false)
+            error: (err) => {
+                this.loading.set(false);
+                this.notify.error('Failed to load email templates.');
+                console.error('Error loading templates:', err);
+            }
+        });
+    }
+
+    loadLogs() {
+        this.loading.set(true);
+        this.commService.getLogs().subscribe({
+            next: (data) => {
+                this.logs.set(data);
+                this.loading.set(false);
+            },
+            error: (err) => {
+                this.loading.set(false);
+                this.notify.error('Failed to load email logs.');
+                console.error('Error loading logs:', err);
+            }
         });
     }
 
@@ -127,22 +166,79 @@ export class AdminComm implements OnInit {
         if (!template) return;
 
         this.isSaving.set(true);
+        const isNew = !template.id;
+
         this.commService.saveTemplate(template).subscribe({
             next: () => {
-                this.notify.success('Template updated successfully.');
+                this.notify.success(isNew ? 'Template created successfully.' : 'Template updated successfully.');
                 this.isSaving.set(false);
                 this.editingTemplate.set(null);
                 this.loadTemplates();
             },
             error: () => {
-                this.notify.error('Failed to update template.');
+                this.notify.error('Failed to save template.');
                 this.isSaving.set(false);
             }
         });
     }
 
+    addNewTemplate() {
+        this.editingTemplate.set({
+            id: 0,
+            code: '',
+            description: '',
+            subject: '',
+            body: ''
+        });
+        setTimeout(() => this.initEditor('template-editor', '', (html) => {
+            const t = this.editingTemplate();
+            if (t) t.body = html;
+        }), 100);
+    }
+
     cancelEdit() {
         this.editingTemplate.set(null);
+    }
+
+    selectAllYears() {
+        this.sendOptions.targetYears = [...this.years];
+    }
+
+    clearYears() {
+        this.sendOptions.targetYears = [];
+    }
+
+    selectAllTypes() {
+        this.sendOptions.targetTypes = this.membershipTypes.map(t => t.value);
+    }
+
+    clearTypes() {
+        this.sendOptions.targetTypes = [];
+    }
+
+    deleteTemplate(template: EmailTemplate) {
+        if (confirm(`Are you sure you want to delete the template '${template.code}'?`)) {
+            this.commService.deleteTemplate(template.id).subscribe({
+                next: () => {
+                    this.notify.success('Template deleted successfully.');
+                    this.loadTemplates();
+                },
+                error: () => this.notify.error('Failed to delete template.')
+            });
+        }
+    }
+
+    toggleSelection(item: any, list: any[]) {
+        const index = list.indexOf(item);
+        if (index > -1) {
+            list.splice(index, 1);
+        } else {
+            list.push(item);
+        }
+    }
+
+    isSelected(item: any, list: any[]): boolean {
+        return list.indexOf(item) > -1;
     }
 
     sendMessage() {
@@ -156,40 +252,40 @@ export class AdminComm implements OnInit {
             return;
         }
 
+        if (this.sendOptions.method === 'batch' && this.sendOptions.targetYears.length === 0) {
+            this.notify.warning('Please select at least one batch year.');
+            return;
+        }
+
+        if (this.sendOptions.method === 'type' && this.sendOptions.targetTypes.length === 0) {
+            this.notify.warning('Please select at least one membership type.');
+            return;
+        }
+
         this.sending.set(true);
 
         let obs;
         if (this.isManualMessage) {
-            // Manual message can be sent to batch or type too if we expand API, 
-            // but currently API sendBatch/sendType expects a templateCode.
-            // We'll treat all manual as "custom" targeting the specific list 
-            // OR if it's batch/type we need to handle it.
-
-            // For now, let's assume sendCustom handles the manual logic.
-            // If the user picked Batch + Manual, we might need a different API.
-            // However, typical behavior is manual to custom list.
-
-            const emailList = this.sendOptions.method === 'custom'
-                ? this.sendOptions.target.split(',').map(e => e.trim()).filter(e => e.length > 0)
-                : []; // If batch + manual, we'd need email list from batch
-
             obs = this.commService.sendCustom({
-                emails: emailList,
                 subject: this.sendOptions.customSubject,
                 body: this.sendOptions.customBody,
-                // Add context if it's batch/type manual
                 targetMethod: this.sendOptions.method,
-                targetValue: this.sendOptions.target
+                targetValues: this.sendOptions.method === 'batch'
+                    ? this.sendOptions.targetYears.map(y => y.toString())
+                    : (this.sendOptions.method === 'type' ? this.sendOptions.targetTypes : []),
+                emails: this.sendOptions.method === 'custom'
+                    ? this.sendOptions.target.split(',').map(e => e.trim()).filter(e => e.length > 0)
+                    : []
             });
         } else {
             if (this.sendOptions.method === 'batch') {
                 obs = this.commService.sendBatch({
-                    passingYear: Number(this.sendOptions.target),
+                    passingYears: this.sendOptions.targetYears,
                     templateCode: this.sendOptions.templateCode
                 });
             } else if (this.sendOptions.method === 'type') {
                 obs = this.commService.sendType({
-                    membershipType: this.sendOptions.target,
+                    membershipTypes: this.sendOptions.targetTypes,
                     templateCode: this.sendOptions.templateCode
                 });
             } else {
@@ -208,6 +304,8 @@ export class AdminComm implements OnInit {
             next: () => {
                 this.notify.success('Communication broadcast initiated successfully.');
                 this.sending.set(false);
+                // Switch to logs to see if it's sending
+                setTimeout(() => this.setTab('logs'), 1000);
             },
             error: () => {
                 this.notify.error('Failed to initiate broadcast.');

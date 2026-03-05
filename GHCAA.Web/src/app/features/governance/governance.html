@@ -1,22 +1,30 @@
 <div class="governance-page">
     <div class="header">
         <h2>Executive Committee</h2>
-        <p>Current leadership of the Govt. Haraganga College Alumni Association</p>
+        <p>Official leadership records of the association</p>
+
+        <!-- Period Selector -->
+        <div class="period-selector-wrap" *ngIf="periods().length > 1">
+            <select [ngModel]="selectedPeriodId()" (ngModelChange)="onPeriodChange($event)" class="period-select">
+                @for (p of periods(); track p.id) {
+                <option [value]="p.id">{{ p.title }} {{ p.isActive ? '(Current)' : '' }}</option>
+                }
+            </select>
+        </div>
     </div>
 
     <!-- Committee List -->
     <div class="committee-section">
         @if (loading()) {
-        <div class="loading">Loading current committee...</div>
+        <div class="loading">Loading committee records...</div>
         } @else {
         <div class="committee-grid">
             @for (member of committee(); track member.id) {
-            <div class="glass-card committee-card"
-                [ngClass]="{'executive-head': member.position === 0 || member.position === 1}">
+            <div class="glass-card committee-card" [ngClass]="{'executive-head': member.ecPosition < 8}">
                 <div class="card-content">
                     <div class="avatar-large">{{ member.fullName[0] }}</div>
                     <div class="member-details">
-                        <span class="position-badge">{{ getPositionName(member.position) }}</span>
+                        <span class="position-badge">{{ getPositionName(member.ecPosition) }}</span>
                         <h3>{{ member.fullName }}</h3>
                         <p class="batch">Batch of {{ member.ghcLastCertificatePassingYear }}</p>
                         <div class="professional" *ngIf="member.designation">
@@ -27,7 +35,7 @@
             </div>
             } @empty {
             <div class="empty-state glass-card">
-                <p>The Interim Executive Committee (IEC) is currently managing the association operations.</p>
+                <p>No records found for the selected period.</p>
             </div>
             }
         </div>

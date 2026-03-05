@@ -545,6 +545,88 @@
     background: rgba(255, 255, 255, 0.05) !important;
 }
 
-.excel-col {
+/* EC History List */
+.history-list {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.history-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.h-main {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.h-period {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.h-pos {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.h-status {
+    font-size: 0.65rem;
+    font-weight: 800;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.h-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.h-date {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.h-reason {
+    font-size: 0.72rem;
     color: var(--accent-color);
+    cursor: help;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.reason-icon {
+    font-style: normal;
+    background: var(--accent-color);
+    color: #000;
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.6rem;
 }

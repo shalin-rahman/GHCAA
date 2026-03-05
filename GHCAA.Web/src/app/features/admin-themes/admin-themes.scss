@@ -1,0 +1,139 @@
+.admin-feature {
+    padding-bottom: 2rem;
+}
+
+.theme-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.theme-info small {
+    color: var(--text-muted);
+}
+
+.color-preview-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+}
+
+.status-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.status-badge.active {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.form-group.full {
+    grid-column: span 2;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 0.7rem;
+    background: var(--bg-color);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-main);
+    outline: none;
+}
+
+.color-picker-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-color);
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+}
+
+.color-picker-wrap input[type="color"] {
+    width: 40px;
+    height: 30px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    text-transform: none !important;
+    font-size: 0.9rem !important;
+}
+
+.preview-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.preview-section label {
+    display: block;
+    margin-bottom: 1rem;
+    font-weight: 800;
+}
+
+.nav-preview {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.preview-logo {
+    font-weight: 900;
+    font-size: 1.1rem;
+}
+
+.preview-text {
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.preview-links {
+    opacity: 0.7;
+    font-size: 0.8rem;
+}
+
+.loading-padding {
+    padding: 3rem;
+    text-align: center;
+}

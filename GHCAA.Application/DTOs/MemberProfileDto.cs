@@ -46,5 +46,16 @@ namespace GHCAA.Application.DTOs
         public bool IsMobilePublic { get; set; }
         public bool IsEmailPublic { get; set; }
         public bool IsAddressPublic { get; set; }
+        
+        public List<ECHistoryDto> ECHistory { get; set; } = new();
+    }
+
+    public class ECHistoryDto
+    {
+        public string PeriodTitle { get; set; } = null!;
+        public ECPosition Position { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string? ChangeReason { get; set; }
     }
 }

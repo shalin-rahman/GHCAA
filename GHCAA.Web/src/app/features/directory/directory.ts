@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { getECPositionName } from '../../core/constants/governance.constants';
 
 @Component({
     selector: 'app-directory',
@@ -13,6 +14,7 @@ import { NotificationService } from '../../core/services/notification.service';
     styleUrl: './directory.scss'
 })
 export class Directory implements OnInit {
+    getECPositionName = getECPositionName;
     private networkService = inject(NetworkingService);
     private notify = inject(NotificationService);
     private router = inject(Router);

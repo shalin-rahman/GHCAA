@@ -17,6 +17,10 @@ namespace GHCAA.Domain.Models
         [Required]
         public string Body { get; set; } = null!; // Supports HTML
 
+        [Required]
+        [MaxLength(200)]
+        public string Description { get; set; } = null!; // Internal name/usage info
+
         public string? Variables { get; set; } // JSON string of supported variables, e.g., "['FullName', 'MembershipNumber']"
 
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;

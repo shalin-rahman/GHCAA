@@ -11,16 +11,19 @@ namespace GHCAA.Application.Interfaces
         Task<IEnumerable<EmailTemplate>> GetAllTemplatesAsync(CancellationToken cancellationToken = default);
         Task<EmailTemplate?> GetTemplateByCodeAsync(string code, CancellationToken cancellationToken = default);
         Task<EmailTemplate> UpdateTemplateAsync(EmailTemplate template, CancellationToken cancellationToken = default);
+        Task<EmailTemplate> CreateTemplateAsync(EmailTemplate template, CancellationToken cancellationToken = default);
+        Task DeleteTemplateAsync(int id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<EmailLog>> GetRecentLogsAsync(int count = 100, CancellationToken cancellationToken = default);
 
         // Sending logic
         Task SendIndividualEmailAsync(int memberId, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default);
-        Task SendBatchEmailAsync(int passingYear, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default);
-        Task SendTypeEmailAsync(string membershipType, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default);
+        Task SendBatchEmailAsync(IEnumerable<int> passingYears, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default);
+        Task SendTypeEmailAsync(IEnumerable<string> membershipTypes, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default);
         
         // Custom one-off email
-        Task SendCustomEmailAsync(IEnumerable<string> emails, string subject, string htmlBody, CancellationToken cancellationToken = default);
-        Task SendBatchCustomEmailAsync(int passingYear, string subject, string htmlBody, CancellationToken cancellationToken = default);
-        Task SendTypeCustomEmailAsync(string membershipType, string subject, string htmlBody, CancellationToken cancellationToken = default);
+        Task SendCustomEmailAsync(IEnumerable<string> emails, string? templateCode, string? subject, string? htmlBody, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default);
+        Task SendBatchCustomEmailAsync(IEnumerable<int> passingYears, string subject, string htmlBody, CancellationToken cancellationToken = default);
+        Task SendTypeCustomEmailAsync(IEnumerable<string> membershipTypes, string subject, string htmlBody, CancellationToken cancellationToken = default);
         Task SendMemberCustomEmailAsync(int memberId, string subject, string htmlBody, CancellationToken cancellationToken = default);
     }
 }
