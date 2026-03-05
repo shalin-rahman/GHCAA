@@ -93,4 +93,44 @@ public class CommunicationServiceTests
         // Assert
         _mockEmail.Verify(x => x.SendEmailAsync(It.IsAny<string>(), "S", "B", It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
+
+    [Test]
+    public async Task SendBatchCustomEmailAsync_ShouldSendToCorrectYear()
+    {
+        // Arrange
+        var members = new List<Member>
+        {
+            new Member { FullName = "2005-A", Email = "2005a@e.com", GHCLastCertificatePassingYear = 2005, NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" },
+            new Member { FullName = "2010-B", Email = "2010b@e.com", GHCLastCertificatePassingYear = 2010, NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" }
+        };
+        _context.Members.AddRange(members);
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _service.SendBatchCustomEmailAsync(2005, "Manual Subject", "Manual Body");
+
+        // Assert
+        _mockEmail.Verify(x => x.SendEmailAsync("2005a@e.com", "Manual Subject", "Manual Body", It.IsAny<CancellationToken>()), Times.Once);
+        _mockEmail.Verify(x => x.SendEmailAsync("2010b@e.com", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    public async Task SendTypeCustomEmailAsync_ShouldSendToCorrectMembershipType()
+    {
+        // Arrange
+        var members = new List<Member>
+        {
+            new Member { FullName = "Life", Email = "life@e.com", MembershipType = MembershipType.Life, NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" },
+            new Member { FullName = "General", Email = "general@e.com", MembershipType = MembershipType.General, NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" }
+        };
+        _context.Members.AddRange(members);
+        await _context.SaveChangesAsync();
+
+        // Act
+        await _service.SendTypeCustomEmailAsync("Life", "Type Subject", "Type Body");
+
+        // Assert
+        _mockEmail.Verify(x => x.SendEmailAsync("life@e.com", "Type Subject", "Type Body", It.IsAny<CancellationToken>()), Times.Once);
+        _mockEmail.Verify(x => x.SendEmailAsync("general@e.com", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
 }

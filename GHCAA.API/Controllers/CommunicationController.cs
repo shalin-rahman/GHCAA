@@ -63,7 +63,19 @@ namespace GHCAA.API.Controllers
         [HttpPost("send-custom")]
         public async Task<IActionResult> SendCustom([FromBody] CustomEmailDto dto, CancellationToken cancellationToken)
         {
-            await _commService.SendCustomEmailAsync(dto.Emails, dto.Subject, dto.Body, cancellationToken);
+            if (dto.TargetMethod == "batch" && !string.IsNullOrEmpty(dto.TargetValue))
+            {
+                await _commService.SendBatchCustomEmailAsync(int.Parse(dto.TargetValue), dto.Subject, dto.Body, cancellationToken);
+            }
+            else if (dto.TargetMethod == "type" && !string.IsNullOrEmpty(dto.TargetValue))
+            {
+                await _commService.SendTypeCustomEmailAsync(dto.TargetValue, dto.Subject, dto.Body, cancellationToken);
+            }
+            else
+            {
+                await _commService.SendCustomEmailAsync(dto.Emails, dto.Subject, dto.Body, cancellationToken);
+            }
+            
             return Ok(new { Message = "Custom emails queued for delivery" });
         }
 

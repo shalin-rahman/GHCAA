@@ -18,5 +18,9 @@ namespace GHCAA.Application.DTOs
         public List<string> Emails { get; set; } = new();
         public string Subject { get; set; } = null!;
         public string Body { get; set; } = null!;
+        
+        // Optional filters for manual message
+        public string? TargetMethod { get; set; }
+        public string? TargetValue { get; set; }
     }
 }

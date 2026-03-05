@@ -25,6 +25,7 @@ export class NotificationService {
     success(msg: string) { this.show(msg, 'success'); }
     error(msg: string) { this.show(msg, 'error'); }
     info(msg: string) { this.show(msg, 'info'); }
+    warning(msg: string) { this.show(msg, 'warning'); }
 
     remove(id: number) {
         this.toasts.set(this.toasts().filter(t => t.id !== id));

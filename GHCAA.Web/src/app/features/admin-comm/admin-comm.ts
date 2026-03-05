@@ -22,6 +22,13 @@ export class AdminComm implements OnInit {
     sending = signal(false);
     activeTab = signal('send'); // 'send' or 'templates'
 
+    // Editing Template
+    editingTemplate = signal<EmailTemplate | null>(null);
+    isSaving = signal(false);
+
+    // Manual Message Mode
+    isManualMessage = false;
+
     // Send Form
     sendOptions = {
         method: 'batch', // 'batch', 'type', 'custom'
@@ -50,6 +57,10 @@ export class AdminComm implements OnInit {
             }
             if (params['method']) {
                 this.sendOptions.method = params['method'];
+                if (params['method'] === 'custom') {
+                    this.isManualMessage = true;
+                    setTimeout(() => this.initBroadcastEditor(), 200);
+                }
             }
         });
     }
@@ -65,30 +76,132 @@ export class AdminComm implements OnInit {
         });
     }
 
-    sendMessage() {
-        this.sending.set(true);
-        let obs;
+    switchToManual() {
+        this.isManualMessage = true;
+        setTimeout(() => this.initBroadcastEditor(), 100);
+    }
 
-        if (this.sendOptions.method === 'batch') {
-            obs = this.commService.sendBatch({
-                passingYear: Number(this.sendOptions.target),
-                templateCode: this.sendOptions.templateCode
+    editTemplate(template: EmailTemplate) {
+        this.editingTemplate.set({ ...template });
+        // Use timeout to ensure DOM is updated before initializing Quill
+        setTimeout(() => this.initEditor('template-editor', this.editingTemplate()?.body || '', (html) => {
+            const t = this.editingTemplate();
+            if (t) t.body = html;
+        }), 100);
+    }
+
+    private initEditor(elementId: string, initialContent: string, onChange: (html: string) => void) {
+        const editorDiv = document.getElementById(elementId);
+        if (editorDiv && (window as any).Quill) {
+            const quill = new (window as any).Quill(`#${elementId}`, {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        ['link', 'image'],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
             });
-        } else if (this.sendOptions.method === 'type') {
-            obs = this.commService.sendType({
-                membershipType: this.sendOptions.target,
-                templateCode: this.sendOptions.templateCode
+
+            quill.root.innerHTML = initialContent;
+
+            quill.on('text-change', () => {
+                onChange(quill.root.innerHTML);
             });
-        } else {
-            const emailList = this.sendOptions.target
+        }
+    }
+
+    initBroadcastEditor() {
+        if (!this.isManualMessage) return;
+        this.initEditor('broadcast-editor', this.sendOptions.customBody, (html) => {
+            this.sendOptions.customBody = html;
+        });
+    }
+
+    saveTemplate() {
+        const template = this.editingTemplate();
+        if (!template) return;
+
+        this.isSaving.set(true);
+        this.commService.saveTemplate(template).subscribe({
+            next: () => {
+                this.notify.success('Template updated successfully.');
+                this.isSaving.set(false);
+                this.editingTemplate.set(null);
+                this.loadTemplates();
+            },
+            error: () => {
+                this.notify.error('Failed to update template.');
+                this.isSaving.set(false);
+            }
+        });
+    }
+
+    cancelEdit() {
+        this.editingTemplate.set(null);
+    }
+
+    sendMessage() {
+        if (!this.isManualMessage && !this.sendOptions.templateCode) {
+            this.notify.warning('Please select an email template.');
+            return;
+        }
+
+        if (this.isManualMessage && !this.sendOptions.customSubject) {
+            this.notify.warning('Please provide a subject line.');
+            return;
+        }
+
+        this.sending.set(true);
+
+        let obs;
+        if (this.isManualMessage) {
+            // Manual message can be sent to batch or type too if we expand API, 
+            // but currently API sendBatch/sendType expects a templateCode.
+            // We'll treat all manual as "custom" targeting the specific list 
+            // OR if it's batch/type we need to handle it.
+
+            // For now, let's assume sendCustom handles the manual logic.
+            // If the user picked Batch + Manual, we might need a different API.
+            // However, typical behavior is manual to custom list.
+
+            const emailList = this.sendOptions.method === 'custom'
                 ? this.sendOptions.target.split(',').map(e => e.trim()).filter(e => e.length > 0)
-                : [];
+                : []; // If batch + manual, we'd need email list from batch
 
             obs = this.commService.sendCustom({
                 emails: emailList,
                 subject: this.sendOptions.customSubject,
-                body: this.sendOptions.customBody
+                body: this.sendOptions.customBody,
+                // Add context if it's batch/type manual
+                targetMethod: this.sendOptions.method,
+                targetValue: this.sendOptions.target
             });
+        } else {
+            if (this.sendOptions.method === 'batch') {
+                obs = this.commService.sendBatch({
+                    passingYear: Number(this.sendOptions.target),
+                    templateCode: this.sendOptions.templateCode
+                });
+            } else if (this.sendOptions.method === 'type') {
+                obs = this.commService.sendType({
+                    membershipType: this.sendOptions.target,
+                    templateCode: this.sendOptions.templateCode
+                });
+            } else {
+                const emailList = this.sendOptions.target
+                    ? this.sendOptions.target.split(',').map(e => e.trim()).filter(e => e.length > 0)
+                    : [];
+
+                obs = this.commService.sendCustom({
+                    emails: emailList,
+                    templateCode: this.sendOptions.templateCode
+                });
+            }
         }
 
         obs.subscribe({

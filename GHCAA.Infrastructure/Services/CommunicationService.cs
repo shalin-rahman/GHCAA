@@ -90,6 +90,32 @@ namespace GHCAA.Infrastructure.Services
             }
         }
 
+        public async Task SendBatchCustomEmailAsync(int passingYear, string subject, string htmlBody, CancellationToken cancellationToken = default)
+        {
+            var emails = await _db.Members
+                .Where(m => m.GHCLastCertificatePassingYear == passingYear && !m.IsArchived)
+                .Select(m => m.Email)
+                .ToListAsync(cancellationToken);
+
+            foreach (var email in emails)
+            {
+                await _emailService.SendEmailAsync(email, subject, htmlBody, cancellationToken);
+            }
+        }
+
+        public async Task SendTypeCustomEmailAsync(string membershipType, string subject, string htmlBody, CancellationToken cancellationToken = default)
+        {
+            var emails = await _db.Members
+                .Where(m => m.MembershipType.ToString() == membershipType && !m.IsArchived)
+                .Select(m => m.Email)
+                .ToListAsync(cancellationToken);
+
+            foreach (var email in emails)
+            {
+                await _emailService.SendEmailAsync(email, subject, htmlBody, cancellationToken);
+            }
+        }
+
         public async Task SendMemberCustomEmailAsync(int memberId, string subject, string htmlBody, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);

@@ -32,20 +32,22 @@
                     </label>
                     <label class="radio-item">
                         <input type="radio" [(ngModel)]="sendOptions.method" value="custom">
-                        <span>Custom Broadcast</span>
+                        <span>Manual Recipient(s)</span>
                     </label>
                 </div>
             </div>
 
             @if (sendOptions.method === 'batch') {
-            <div class="form-group">
-                <label>Select Batch Year</label>
-                <select [(ngModel)]="sendOptions.target">
-                    <option value="">Select Passing Year</option>
-                    @for (year of years; track year) {
-                    <option [value]="year">{{ year }}</option>
-                    }
-                </select>
+            <div class="form-group row-flex">
+                <div class="flex-1">
+                    <label>Select Batch Year</label>
+                    <select [(ngModel)]="sendOptions.target">
+                        <option value="">Select Passing Year</option>
+                        @for (year of years; track year) {
+                        <option [value]="year">{{ year }}</option>
+                        }
+                    </select>
+                </div>
             </div>
             }
 
@@ -62,7 +64,22 @@
             </div>
             }
 
-            @if (sendOptions.method !== 'custom') {
+            <div class="form-group">
+                <label>Communication Type</label>
+                <div class="radio-grid compact">
+                    <label class="radio-item">
+                        <input type="radio" name="commType" [checked]="!isManualMessage"
+                            (change)="isManualMessage = false">
+                        <span>Use Template</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="commType" [checked]="isManualMessage" (change)="switchToManual()">
+                        <span>Manual Design</span>
+                    </label>
+                </div>
+            </div>
+
+            @if (!isManualMessage) {
             <div class="form-group">
                 <label>Email Template</label>
                 <select [(ngModel)]="sendOptions.templateCode">
@@ -71,29 +88,33 @@
                     <option [value]="t.code">{{ t.description }} ({{ t.subject }})</option>
                     }
                 </select>
-                <small class="hint">Variable fields like {{ '{' }}MemberName{{ '}' }} will be auto-populated.</small>
+                <small class="hint">Variable fields like {{ '{' }}{{ '{' }}FullName{{ '}' }}{{ '}' }} will be
+                    auto-populated.</small>
             </div>
             } @else {
+            @if (sendOptions.method === 'custom') {
             <div class="form-group">
                 <label>Target Emails (Comma separated)</label>
-                <textarea [(ngModel)]="sendOptions.target" rows="3"
+                <textarea [(ngModel)]="sendOptions.target" rows="2"
                     placeholder="example1@mail.com, example2@mail.com..."></textarea>
-                <small class="hint">Leave empty to target all active members.</small>
             </div>
+            }
+
             <div class="form-group">
                 <label>Subject Line</label>
                 <input type="text" [(ngModel)]="sendOptions.customSubject" placeholder="Enter email subject">
             </div>
-            <div class="form-group">
-                <label>Message Body (HTML Supported)</label>
-                <textarea [(ngModel)]="sendOptions.customBody" rows="10"
-                    placeholder="Compose your manual message..."></textarea>
+
+            <div class="form-group richness">
+                <label>Message Content</label>
+                <div id="broadcast-editor" style="height: 300px; background: white; color: black; border-radius: 8px;">
+                </div>
             </div>
             }
 
             <div class="form-actions">
                 <button class="btn btn-primary btn-lg" (click)="sendMessage()" [disabled]="sending()">
-                    {{ sending() ? 'Broadcasting...' : '🚀 Launch Broadcast' }}
+                    {{ sending() ? '⌛ Broadcasting...' : '🚀 Launch Broadcast' }}
                 </button>
                 <p class="warning">⚠️ This action will send emails to multiple members. Verify content before sending.
                 </p>
@@ -119,12 +140,47 @@
                         <td>{{ t.description }}</td>
                         <td>{{ t.subject }}</td>
                         <td>
-                            <button class="icon-btn">✏️ Edit</button>
+                            <button class="btn btn-outline btn-sm" (click)="editTemplate(t)">✏️ Edit Content</button>
                         </td>
                     </tr>
                     }
                 </tbody>
             </table>
+        </div>
+    </div>
+    }
+
+    <!-- Template Edit Modal -->
+    @if (editingTemplate()) {
+    <div class="modal-overlay">
+        <div class="modal-card wide glass-card">
+            <div class="modal-header">
+                <h3>Edit Template: {{ editingTemplate()?.code }}</h3>
+                <button class="close-btn" (click)="cancelEdit()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" [(ngModel)]="editingTemplate()!.subject">
+                </div>
+                <div class="form-group richness">
+                    <label>HTML Content</label>
+                    <div id="template-editor"
+                        style="height: 400px; background: white; color: black; border-radius: 8px;"></div>
+                </div>
+                <div class="variables-guide">
+                    <strong>Allowed Variables:</strong>
+                    <code>{{ '{' }}{{ '{' }}FullName{{ '}' }}{{ '}' }}</code>,
+                    <code>{{ '{' }}{{ '{' }}MembershipNumber{{ '}' }}{{ '}' }}</code>,
+                    <code>{{ '{' }}{{ '{' }}PassingYear{{ '}' }}{{ '}' }}</code>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+                <button class="btn btn-primary" (click)="saveTemplate()" [disabled]="isSaving()">
+                    {{ isSaving() ? 'Saving...' : '💾 Save Template' }}
+                </button>
+            </div>
         </div>
     </div>
     }

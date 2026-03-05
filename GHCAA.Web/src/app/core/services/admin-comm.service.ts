@@ -42,4 +42,8 @@ export class AdminCommService {
     sendCustom(dto: any): Observable<any> {
         return this.http.post(`${this.apiUrl}/send-custom`, dto);
     }
+
+    saveTemplate(template: EmailTemplate): Observable<any> {
+        return this.http.put(`${this.apiUrl}/templates/${template.id}`, template);
+    }
 }
