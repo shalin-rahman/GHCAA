@@ -1,0 +1,29 @@
+<!-- Latest News -->
+<section id="news" class="news-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Latest Announcements</h2>
+            <div class="underline"></div>
+        </div>
+
+        <div class="news-grid">
+            @for (item of news(); track item.id) {
+            <div class="news-card glass-card">
+                <div class="news-date">{{ item.createdAt | date:'MMM d, y' }}</div>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.content }}</p>
+                <a routerLink="/portal/news" class="read-more">Read Full Story →</a>
+            </div>
+            } @empty {
+            <div class="empty-placeholder dark">
+                <span class="pulse-dot gold"></span>
+                <p>No recent announcements available. Check back soon for institutional updates.</p>
+            </div>
+            }
+        </div>
+        <div class="section-footer text-center mt-12">
+            <a routerLink="/portal/news" class="btn btn-accent px-12 py-3 rounded-full font-bold shadow-gold">All
+                News</a>
+        </div>
+    </div>
+</section>
