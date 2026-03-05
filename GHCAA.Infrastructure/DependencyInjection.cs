@@ -16,35 +16,39 @@ namespace GHCAA.Infrastructure
             // Supported values: "PgSql" (default), "MySql", "Sqlite"
             var provider = configuration.GetValue<string>("DatabaseProvider") ?? "PgSql";
 
-            services.AddDbContext<ApplicationDbContext>(options =>
+            if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
             {
-                if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
+                services.AddDbContext<ApplicationDbContext, MySqlApplicationDbContext>(options =>
                 {
                     var conn = configuration.GetConnectionString("MySqlConnection")
                         ?? throw new InvalidOperationException("MySqlConnection string is missing in configuration.");
                     options.UseMySql(conn, ServerVersion.AutoDetect(conn),
-                        o => o.MigrationsAssembly("GHCAA.Infrastructure")
-                               .MigrationsHistoryTable("__EFMigrationsHistory_MySql"));
-                }
-                else if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+                        o => o.MigrationsAssembly("GHCAA.Infrastructure"));
+                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                });
+            }
+            else if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+            {
+                services.AddDbContext<ApplicationDbContext, SqliteApplicationDbContext>(options =>
                 {
                     var conn = configuration.GetConnectionString("SqliteConnection")
                         ?? throw new InvalidOperationException("SqliteConnection string is missing in configuration.");
                     options.UseSqlite(conn,
-                        o => o.MigrationsAssembly("GHCAA.Infrastructure")
-                               .MigrationsHistoryTable("__EFMigrationsHistory_Sqlite"));
-                }
-                else // PgSql (default)
+                        o => o.MigrationsAssembly("GHCAA.Infrastructure"));
+                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                });
+            }
+            else // PgSql (default)
+            {
+                services.AddDbContext<ApplicationDbContext, PgSqlApplicationDbContext>(options =>
                 {
                     var conn = configuration.GetConnectionString("PgSqlConnection")
                         ?? throw new InvalidOperationException("PgSqlConnection string is missing in configuration.");
                     options.UseNpgsql(conn,
-                        o => o.MigrationsAssembly("GHCAA.Infrastructure")
-                               .MigrationsHistoryTable("__EFMigrationsHistory_Postgres"));
-                }
-
-                options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-            });
+                        o => o.MigrationsAssembly("GHCAA.Infrastructure"));
+                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                });
+            }
 
             // Register infrastructure services
             services.AddScoped<IFileStorageService, LocalFileStorageService>();

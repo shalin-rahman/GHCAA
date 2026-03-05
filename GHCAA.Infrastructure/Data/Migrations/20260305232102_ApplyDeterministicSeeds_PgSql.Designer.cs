@@ -11,9 +11,9 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace GHCAA.Infrastructure.Data.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260305191941_MakeSeedsDeterministic_PgSql")]
-    partial class MakeSeedsDeterministic_PgSql
+    [DbContext(typeof(PgSqlApplicationDbContext))]
+    [Migration("20260305232102_ApplyDeterministicSeeds_PgSql")]
+    partial class ApplyDeterministicSeeds_PgSql
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

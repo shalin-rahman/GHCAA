@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NetworkingService } from '../../core/services/networking.service';
 import { getECPositionName } from '../../core/constants/governance.constants';
@@ -7,7 +8,7 @@ import { getECPositionName } from '../../core/constants/governance.constants';
     // ... (rest of metadata)
     selector: 'app-governance',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, FormsModule],
     templateUrl: './governance.html',
     styleUrl: './governance.scss'
 })
@@ -32,9 +33,10 @@ export class Governance implements OnInit {
         });
     }
 
-    onPeriodChange(id: number) {
-        this.selectedPeriodId.set(id);
-        this.loadCommittee(id);
+    onPeriodChange(id: any) {
+        const numId = Number(id);
+        this.selectedPeriodId.set(numId);
+        this.loadCommittee(numId);
     }
 
     loadCommittee(periodId?: number) {
