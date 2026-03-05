@@ -12,32 +12,37 @@ namespace GHCAA.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            // Register DbContext with Multi-Provider Support (PostgreSQL, MySQL, or SQLite)
-            var conn = configuration.GetConnectionString("DefaultConnection");
+            // Register DbContext — provider selected by "DatabaseProvider" in appsettings.json
+            // Supported values: "PgSql" (default), "MySql", "Sqlite"
+            var provider = configuration.GetValue<string>("DatabaseProvider") ?? "PgSql";
+
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                if (string.IsNullOrEmpty(conn)) return;
+                if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
+                {
+                    var conn = configuration.GetConnectionString("MySqlConnection")
+                        ?? throw new InvalidOperationException("MySqlConnection string is missing in configuration.");
+                    options.UseMySql(conn, ServerVersion.AutoDetect(conn),
+                        o => o.MigrationsAssembly("GHCAA.Infrastructure")
+                               .MigrationsHistoryTable("__EFMigrationsHistory_MySql"));
+                }
+                else if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+                {
+                    var conn = configuration.GetConnectionString("SqliteConnection")
+                        ?? throw new InvalidOperationException("SqliteConnection string is missing in configuration.");
+                    options.UseSqlite(conn,
+                        o => o.MigrationsAssembly("GHCAA.Infrastructure")
+                               .MigrationsHistoryTable("__EFMigrationsHistory_Sqlite"));
+                }
+                else // PgSql (default)
+                {
+                    var conn = configuration.GetConnectionString("PgSqlConnection")
+                        ?? throw new InvalidOperationException("PgSqlConnection string is missing in configuration.");
+                    options.UseNpgsql(conn,
+                        o => o.MigrationsAssembly("GHCAA.Infrastructure")
+                               .MigrationsHistoryTable("__EFMigrationsHistory_Postgres"));
+                }
 
-                if (conn.Contains("Host=", StringComparison.OrdinalIgnoreCase) && 
-                    (conn.Contains("User Id=", StringComparison.OrdinalIgnoreCase) || 
-                     conn.Contains("Username=", StringComparison.OrdinalIgnoreCase) ||
-                     conn.Contains("user=", StringComparison.OrdinalIgnoreCase) ||
-                     conn.Contains("dbname=", StringComparison.OrdinalIgnoreCase)))
-                {
-                    // PostgreSQL Detection
-                    options.UseNpgsql(conn);
-                }
-                else if (conn.Contains("Data Source=", StringComparison.OrdinalIgnoreCase))
-                {
-                    // SQLite Detection
-                    options.UseSqlite(conn);
-                }
-                else
-                {
-                    // Default to MySQL
-                    options.UseMySql(conn, ServerVersion.AutoDetect(conn));
-                }
-                // Ignore pending model changes warning to allow database updates in dev
                 options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             });
 

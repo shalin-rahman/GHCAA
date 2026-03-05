@@ -59,7 +59,8 @@ public class CommunicationServiceTests
         {
             Code = "TEST_CODE",
             Subject = "Hi {{FullName}}",
-            Body = "Welcome to batch {{PassingYear}}!"
+            Body = "Welcome to batch {{PassingYear}}!",
+            Description = "Test individual email"
         };
         _context.EmailTemplates.Add(template);
         await _context.SaveChangesAsync();
@@ -85,7 +86,7 @@ public class CommunicationServiceTests
             new Member { FullName = "B", Email = "b@e.com", GHCLastCertificatePassingYear = 2005, NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" }
         };
         _context.Members.AddRange(members);
-        _context.EmailTemplates.Add(new EmailTemplate { Code = "BATCH", Subject = "S", Body = "B" });
+        _context.EmailTemplates.Add(new EmailTemplate { Code = "BATCH", Subject = "S", Body = "B", Description = "Batch test template" });
         await _context.SaveChangesAsync();
 
         // Act

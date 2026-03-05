@@ -75,7 +75,11 @@ public class NetworkingServiceTests
     [Test]
     public async Task GetExecutiveCommitteeAsync_ShouldReturnMembersWithECPosition()
     {
-        // Arrange
+        // Arrange — clear any seeded EC members and periods
+        _context.ECMembers.RemoveRange(_context.ECMembers);
+        _context.ECPeriods.RemoveRange(_context.ECPeriods);
+        await _context.SaveChangesAsync();
+
         var president = CreateValidMember("President", "p@e.com", "01722222222", "3333333333");
         president.ECPosition = Enums.ECPosition.President;
         
@@ -83,6 +87,15 @@ public class NetworkingServiceTests
         normal.ECPosition = Enums.ECPosition.None;
 
         _context.Members.AddRange(president, normal);
+        await _context.SaveChangesAsync();
+
+        // Create an active EC Period and link the president
+        var period = new ECPeriod { Title = "Test Period", StartDate = DateTime.UtcNow, IsActive = true };
+        _context.ECPeriods.Add(period);
+        await _context.SaveChangesAsync();
+
+        var ecMember = new ECMember { MemberId = president.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow };
+        _context.ECMembers.Add(ecMember);
         await _context.SaveChangesAsync();
 
         // Act
