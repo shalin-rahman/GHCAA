@@ -1,6 +1,7 @@
 export const API_ENDPOINTS = {
     ADMIN: {
         MEMBERS: '/api/admin/members',
+        MEMBERS_IMPORT: '/api/admin/members/import',
         STATS: '/api/admin/stats',
         COMMUNICATION: '/api/admin/comm'
     },

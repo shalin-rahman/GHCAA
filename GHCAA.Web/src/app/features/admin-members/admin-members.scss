@@ -460,3 +460,91 @@
 .btn:hover {
     filter: brightness(1.1);
 }
+
+/* Import Modal Premium Styles */
+.modal-box.wide {
+    max-width: 900px;
+}
+
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.card-header-flex h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--primary-color);
+}
+
+.hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.mapping-table-header {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: var(--surface-color);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.mapping-table-header span {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+.upload-zone {
+    transition: transform 0.2s, background 0.2s;
+}
+
+.upload-zone:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--primary-color) !important;
+}
+
+.btn-start {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
+}
+
+.btn-cancel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.spinner {
+    animation: rotate 2s linear infinite;
+    display: inline-block;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.mapping-row {
+    transition: background 0.2s;
+}
+
+.mapping-row:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.excel-col {
+    color: var(--accent-color);
+}

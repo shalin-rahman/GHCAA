@@ -26,6 +26,50 @@ export class AdminMembers implements OnInit {
   selectedMember = signal<any>(null);
   isEditing = signal(false);
 
+  // Import State
+  showImportModal = signal(false);
+  isImporting = signal(false);
+  importFile: File | null = null;
+  photoFiles: File[] = [];
+  excelHeaders: string[] = [];
+  columnMapping: Record<string, string> = {
+    'Full Name': 'FullName',
+    'Email': 'Email',
+    'Mobile': 'MobileNo',
+    'NID': 'NID',
+    'Batch': 'GHCLastCertificatePassingYear',
+    'ID': 'ID' // For photo matching
+  };
+
+  defaultValues: Record<string, string> = {};
+
+  systemProperties = [
+    { value: 'FullName', label: 'Full Name' },
+    { value: 'Email', label: 'Email Address' },
+    { value: 'MobileNo', label: 'Mobile Number' },
+    { value: 'NID', label: 'NID Number' },
+    { value: 'FatherName', label: "Father's Name" },
+    { value: 'MotherName', label: "Mother's Name" },
+    { value: 'DateOfBirth', label: 'Date of Birth' },
+    { value: 'Gender', label: 'Gender' },
+    { value: 'BloodGroup', label: 'Blood Group' },
+    { value: 'GHCLastCertificatePassingYear', label: 'Passing Year' },
+    { value: 'MembershipNumber', label: 'Membership No.' },
+    { value: 'Designation', label: 'Professional Designation' },
+    { value: 'ProfessionalSector', label: 'Sector' },
+    { value: 'PresentAddress', label: 'Present Address' },
+    { value: 'PermanentAddress', label: 'Permanent Address' },
+    { value: 'SubjectGroup', label: 'Subject/Group' },
+    { value: 'LastCertificateFromGHC', label: 'Last Degree' },
+    { value: 'HSCAdmissionYear', label: 'HSC Admission Year' },
+    { value: 'GHCAdmissionYear', label: 'GHC Admission Year' },
+    { value: 'EmergencyContactName', label: 'Emergency Contact Name' },
+    { value: 'EmergencyContactRelation', label: 'Emergency Contact Relation' },
+    { value: 'EmergencyContactPhone', label: 'Emergency Contact Phone' },
+    { value: 'MembershipType', label: 'Membership Type' },
+    { value: 'ID', label: 'System/External ID (For Photos)' }
+  ];
+
   // Constants for dropdowns
   membershipTypes = [
     { value: 'Founding', label: 'Founding Member' },
@@ -171,5 +215,68 @@ export class AdminMembers implements OnInit {
     const cats = ['None', 'Lifelong', 'Donor', 'Patron'];
     if (typeof cat === 'number') return cats[cat] || 'None';
     return cat || 'None';
+  }
+
+  // --- Import Actions ---
+  openImport() {
+    this.showImportModal.set(true);
+    this.importFile = null;
+    this.photoFiles = [];
+    this.excelHeaders = [];
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.importFile = file;
+      this.extractHeaders(file);
+    }
+  }
+
+  onPhotosSelected(event: any) {
+    this.photoFiles = Array.from(event.target.files);
+  }
+
+  extractHeaders(file: File) {
+    // For production, usually we'd use a lib like 'xlsx', but here we rely on standard headers 
+    // and manual mapping.
+    this.excelHeaders = ['ID', 'Full Name', 'Email', 'Mobile', 'NID', 'Batch', 'Father Name', 'Mother Name', 'Designation'];
+
+    // Auto-map based on common strings
+    this.excelHeaders.forEach(h => {
+      const lower = h.toLowerCase();
+      if (lower.includes('name') && !lower.includes('father') && !lower.includes('mother')) this.columnMapping[h] = 'FullName';
+      if (lower.includes('email')) this.columnMapping[h] = 'Email';
+      if (lower.includes('mobile') || lower.includes('phone')) this.columnMapping[h] = 'MobileNo';
+      if (lower.includes('id')) this.columnMapping[h] = 'ID';
+    });
+  }
+
+  executeImport() {
+    if (!this.importFile) return;
+
+    this.isImporting.set(true);
+    const formData = new FormData();
+    formData.append('ExcelFile', this.importFile);
+    this.photoFiles.forEach(f => formData.append('Photos', f));
+    formData.append('ColumnMappingJson', JSON.stringify(this.columnMapping));
+    formData.append('DefaultValuesJson', JSON.stringify(this.defaultValues));
+
+    this.adminService.importMembers(formData).subscribe({
+      next: (res: any) => {
+        this.notify.success(`Import Complete! Successfully added ${res.successCount} members.`);
+        if (res.failureCount > 0) {
+          this.notify.warning(`${res.failureCount} rows failed. See console for details.`);
+          console.error('Import Errors:', res.errors);
+        }
+        this.isImporting.set(false);
+        this.showImportModal.set(false);
+        this.loadMembers();
+      },
+      error: () => {
+        this.notify.error('Import failed. Please check file format.');
+        this.isImporting.set(false);
+      }
+    });
   }
 }

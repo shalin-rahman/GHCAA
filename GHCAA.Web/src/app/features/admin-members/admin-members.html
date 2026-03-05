@@ -4,6 +4,11 @@
             <h2>Member Registry</h2>
             <small>{{ filteredMembers().length }} of {{ allMembers().length }} members shown</small>
         </div>
+        <div class="header-actions">
+            <button class="btn btn-accent btn-md" (click)="openImport()">
+                <span class="icon">📥</span> Bulk Import
+            </button>
+        </div>
     </div>
 
     <!-- Filters -->
@@ -296,5 +301,100 @@
     <datalist id="sector-list">
         <option *ngFor="let s of sectorOptions" [value]="s"></option>
     </datalist>
+</div>
+}
+
+<!-- Bulk Import Modal -->
+@if (showImportModal()) {
+<div class="modal-overlay" (click)="showImportModal.set(false)">
+    <div class="modal-box wide glass-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>📥 Bulk Alumni Import</h3>
+            <button class="close-btn" (click)="showImportModal.set(false)">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="import-steps">
+                <!-- Step 1: Files -->
+                <div class="step-card">
+                    <h4>Step 1: Select Files</h4>
+                    <div class="upload-grid"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+                        <div class="upload-zone"
+                            style="border: 2px dashed var(--glass-border); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 700;">Excel File
+                                (.xlsx)</label>
+                            <input type="file" accept=".xlsx" (change)="onFileSelected($event)">
+                            <p class="file-info" *ngIf="importFile"
+                                style="margin-top: 0.5rem; color: var(--primary-color); font-size: 0.85rem;">{{
+                                importFile.name }}</p>
+                        </div>
+                        <div class="upload-zone"
+                            style="border: 2px dashed var(--glass-border); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 700;">Photo Folder (Select
+                                all images)</label>
+                            <input type="file" multiple accept="image/*" (change)="onPhotosSelected($event)">
+                            <p class="file-info" *ngIf="photoFiles.length > 0"
+                                style="margin-top: 0.5rem; color: var(--primary-color); font-size: 0.85rem;">{{
+                                photoFiles.length }} images selected</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Mapping & Defaults -->
+                @if (importFile && excelHeaders.length > 0) {
+                <div class="step-card" style="margin-top: 2rem;">
+                    <div class="card-header-flex">
+                        <h4>Step 2: Map Columns & Set Defaults</h4>
+                        <span class="hint">Map your Excel headers or set a fixed default value for fields not in
+                            Excel.</span>
+                    </div>
+
+                    <div class="mapping-table-header">
+                        <span class="col-name">System Property</span>
+                        <span class="col-excel">Excel Column</span>
+                        <span class="col-default">Default Value (If blank)</span>
+                    </div>
+
+                    <div class="mapping-grid"
+                        style="display: grid; gap: 0.5rem; max-height: 400px; overflow-y: auto; padding-right: 0.5rem;">
+                        @for (prop of systemProperties; track prop.value) {
+                        <div class="mapping-row"
+                            style="display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 1rem; align-items: center; padding: 0.6rem 0.75rem; background: var(--glass-bg); border-radius: 8px;">
+                            <span class="sys-prop" style="font-weight: 700; font-size: 0.85rem;">{{ prop.label }}</span>
+
+                            <!-- Mapping Dropdown -->
+                            <select [(ngModel)]="columnMapping[prop.value]"
+                                style="padding: 0.4rem; border-radius: 6px; border: 1px solid var(--glass-border); font-size: 0.85rem;">
+                                <option [value]="undefined">-- Select Excel Column --</option>
+                                @for (header of excelHeaders; track header) {
+                                <option [value]="header">{{ header }}</option>
+                                }
+                            </select>
+
+                            <!-- Default Value Input -->
+                            <input type="text" [(ngModel)]="defaultValues[prop.value]" placeholder="Fixed value..."
+                                style="padding: 0.4rem; border-radius: 6px; border: 1px solid var(--glass-border); font-size: 0.85rem; background: var(--bg-color);">
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+        <div class="modal-footer"
+            style="padding: 1.5rem; border-top: 1px solid var(--glass-border); display: flex; justify-content: flex-end; gap: 1rem;">
+            <button class="btn btn-secondary btn-cancel" (click)="showImportModal.set(false)">
+                <span class="icon">❌</span> Cancel
+            </button>
+            <button class="btn btn-primary btn-start" [disabled]="!importFile || isImporting()"
+                (click)="executeImport()">
+                @if (isImporting()) {
+                <span class="spinner">⏳</span> Processing...
+                } @else {
+                <span class="icon">🚀</span> Start Import
+                }
+            </button>
+        </div>
+    </div>
 </div>
 }

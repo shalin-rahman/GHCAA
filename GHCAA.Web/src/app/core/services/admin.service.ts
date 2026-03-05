@@ -71,4 +71,8 @@ export class AdminService {
     updateMember(id: number, data: any): Observable<any> {
         return this.http.put(`${this.apiUrl}/${id}`, data);
     }
+
+    importMembers(formData: FormData): Observable<any> {
+        return this.http.post(API_ENDPOINTS.ADMIN.MEMBERS_IMPORT, formData);
+    }
 }
