@@ -91,7 +91,8 @@ namespace GHCAA.Infrastructure.Data
                     Subject = "Your GHC Alumni Association Verification Code", 
                     Description = "Sent during registration and password reset",
                     Body = "Hello {{FullName}}, your OTP is: <strong>{{OtpCode}}</strong>. Valid for 10 minutes.",
-                    Variables = "['FullName', 'OtpCode']"
+                    Variables = "['FullName', 'OtpCode']",
+                    LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new EmailTemplate 
                 { 
@@ -100,7 +101,8 @@ namespace GHCAA.Infrastructure.Data
                     Subject = "Welcome to GHC Alumni Association!", 
                     Description = "Sent after admin approves registration",
                     Body = "Dear {{FullName}}, welcome! Your membership number is {{MembershipNumber}} and your default password is {{DefaultPassword}}.",
-                    Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
+                    Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']",
+                    LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new EmailTemplate 
                 { 
@@ -109,7 +111,8 @@ namespace GHCAA.Infrastructure.Data
                     Subject = "Registration Confirmed: {{EventTitle}}", 
                     Description = "Sent after event registration approval",
                     Body = "Dear {{FullName}}, your registration for the event <strong>{{EventTitle}}</strong> has been approved. <br/><br/><strong>Event Details:</strong><br/>Date: {{EventDate}}<br/>Location: {{EventLocation}}<br/><br/>Looking forward to seeing you there!",
-                    Variables = "['FullName', 'EventTitle', 'EventDate', 'EventLocation']"
+                    Variables = "['FullName', 'EventTitle', 'EventDate', 'EventLocation']",
+                    LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
 
@@ -158,7 +161,8 @@ namespace GHCAA.Infrastructure.Data
                 Status = Domain.Enums.MembershipStatus.Active,
                 AppliedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 MembershipNumber = "ADM-SHALIN-1",
-                MembershipType = Domain.Enums.MembershipType.Honorary
+                MembershipType = Domain.Enums.MembershipType.Honorary,
+                LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             });
 
             // Seed Admin User: shalin
@@ -167,7 +171,7 @@ namespace GHCAA.Infrastructure.Data
             {
                 Id = 2,
                 Username = "shalin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("shalin"),
+                PasswordHash = "$2a$11$1tNxw.gy4OW16EqT0GpN9eFDSYwhoooPkovDBi1KLYP1SQWEaqQaW", // hardcoded "shalin"
                 IsActive = true,
                 IsArchived = false,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -178,7 +182,7 @@ namespace GHCAA.Infrastructure.Data
             {
                 Id = 1,
                 Username = "superadmin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("SuperAdminPassword123!"),
+                PasswordHash = "$2a$11$PsQ96./aGE/qwhaRF8f/quI32akOnAxuaAXh2Inrvz0CenOsG/Py.", // hardcoded "SuperAdminPassword123!"
                 IsActive = true,
                 IsArchived = false,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -227,12 +231,12 @@ namespace GHCAA.Infrastructure.Data
 
             // Seed Initial Membership Fees
             modelBuilder.Entity<MembershipFeeConfig>().HasData(
-                new MembershipFeeConfig { Id = 1, MembershipType = Domain.Enums.MembershipType.Founding, Amount = 5000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Founding Member Fee" },
-                new MembershipFeeConfig { Id = 2, MembershipType = Domain.Enums.MembershipType.Executive, Amount = 2000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Executive Member Fee" },
-                new MembershipFeeConfig { Id = 3, MembershipType = Domain.Enums.MembershipType.General, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "General Member Fee" },
-                new MembershipFeeConfig { Id = 4, MembershipType = Domain.Enums.MembershipType.Associate, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Associate Member Fee" },
-                new MembershipFeeConfig { Id = 5, MembershipType = Domain.Enums.MembershipType.Honorary, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Honorary Member Fee" },
-                new MembershipFeeConfig { Id = 6, MembershipType = Domain.Enums.MembershipType.Advisory, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Advisory Member Fee" }
+                new MembershipFeeConfig { Id = 1, MembershipType = Domain.Enums.MembershipType.Founding, Amount = 5000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Founding Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new MembershipFeeConfig { Id = 2, MembershipType = Domain.Enums.MembershipType.Executive, Amount = 2000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Executive Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new MembershipFeeConfig { Id = 3, MembershipType = Domain.Enums.MembershipType.General, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "General Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new MembershipFeeConfig { Id = 4, MembershipType = Domain.Enums.MembershipType.Associate, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Associate Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new MembershipFeeConfig { Id = 5, MembershipType = Domain.Enums.MembershipType.Honorary, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Honorary Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new MembershipFeeConfig { Id = 6, MembershipType = Domain.Enums.MembershipType.Advisory, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Advisory Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
             );
 
             // Seed initial EC Period
