@@ -2,55 +2,36 @@ using FluentAssertions;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
-using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
-using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GHCAA.Tests.Services;
 
 [TestFixture]
-public class NetworkingServiceTests
+public class NetworkingServiceTests : TestBase
 {
-    private ApplicationDbContext _context = null!;
-    private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
     private NetworkingService _service = null!;
 
     [SetUp]
     public void Setup()
     {
-        _connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
-        _connection.Open();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(_connection)
-            .Options;
-
-        _context = new ApplicationDbContext(options);
-        _context.Database.EnsureCreated();
-
         _service = new NetworkingService(_context);
-    }
 
-    [TearDown]
-    public void TearDown()
-    {
-        _context.Dispose();
-        _connection.Close();
+        // Clear seeded EC data for deterministic assertions
+        _context.ECMembers.RemoveRange(_context.ECMembers);
+        _context.ECPeriods.RemoveRange(_context.ECPeriods);
+        _context.SaveChanges();
     }
 
     [Test]
     public async Task SearchMembersAsync_ShouldHonorPrivacyFlags()
     {
-        // Arrange
-        var publicMember = CreateValidMember("Public Jane", "public@example.com", "01700000000", "1111111111");
+        var publicMember = CreateValidMember("Public Jane", "public@nttest.com", "01700001111", "NTST1111");
         publicMember.IsEmailPublic = true;
         publicMember.IsMobilePublic = true;
         publicMember.IsAddressPublic = true;
 
-        var privateMember = CreateValidMember("Private John", "private@example.com", "01711111111", "2222222222");
+        var privateMember = CreateValidMember("Private John", "private@nttest.com", "01711112222", "NTST2222");
         privateMember.IsEmailPublic = false;
         privateMember.IsMobilePublic = false;
         privateMember.IsAddressPublic = false;
@@ -58,13 +39,11 @@ public class NetworkingServiceTests
         _context.Members.AddRange(publicMember, privateMember);
         await _context.SaveChangesAsync();
 
-        // Act
         var results = (await _service.SearchMembersAsync(new MemberSearchFilterDto())).ToList();
 
-        // Assert
         var publicResult = results.First(r => r.FullName == "Public Jane");
-        publicResult.Email.Should().Be("public@example.com");
-        publicResult.MobileNo.Should().Be("01700000000");
+        publicResult.Email.Should().Be("public@nttest.com");
+        publicResult.MobileNo.Should().Be("01700001111");
 
         var privateResult = results.First(r => r.FullName == "Private John");
         privateResult.Email.Should().Be("Confidential");
@@ -75,57 +54,45 @@ public class NetworkingServiceTests
     [Test]
     public async Task GetExecutiveCommitteeAsync_ShouldReturnMembersWithECPosition()
     {
-        // Arrange — clear any seeded EC members and periods
-        _context.ECMembers.RemoveRange(_context.ECMembers);
-        _context.ECPeriods.RemoveRange(_context.ECPeriods);
-        await _context.SaveChangesAsync();
-
-        var president = CreateValidMember("President", "p@e.com", "01722222222", "3333333333");
+        var president = CreateValidMember("EC President", "ep@nttest.com", "01722223333", "NTST3333");
         president.ECPosition = Enums.ECPosition.President;
-        
-        var normal = CreateValidMember("Normal Member", "m@e.com", "01733333333", "4444444444");
+
+        var normal = CreateValidMember("Normal Member", "nm@nttest.com", "01733334444", "NTST4444");
         normal.ECPosition = Enums.ECPosition.None;
 
         _context.Members.AddRange(president, normal);
         await _context.SaveChangesAsync();
 
-        // Create an active EC Period and link the president
         var period = new ECPeriod { Title = "Test Period", StartDate = DateTime.UtcNow, IsActive = true };
         _context.ECPeriods.Add(period);
         await _context.SaveChangesAsync();
 
-        var ecMember = new ECMember { MemberId = president.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow };
-        _context.ECMembers.Add(ecMember);
+        _context.ECMembers.Add(new ECMember { MemberId = president.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow });
         await _context.SaveChangesAsync();
 
-        // Act
         var results = await _service.GetExecutiveCommitteeAsync();
 
-        // Assert
         results.Should().HaveCount(1);
-        results.First().FullName.Should().Be("President");
+        results.First().FullName.Should().Be("EC President");
     }
 
     [Test]
     public async Task SearchMembersAsync_ShouldHideInactiveAndArchivedMembers()
     {
-        // Arrange
-        var inactive = CreateValidMember("Inactive Member", "i@e.com", "01744444444", "5555555555");
+        var inactive = CreateValidMember("Inactive Member", "i@nttest.com", "01744445555", "NTST5555");
         inactive.Status = Enums.MembershipStatus.InactivePayment;
 
-        var archived = CreateValidMember("Archived Member", "a@e.com", "01755555555", "6666666666");
+        var archived = CreateValidMember("Archived Member", "a@nttest.com", "01755556666", "NTST6666");
         archived.IsArchived = true;
 
-        var active = CreateValidMember("Active Member", "active@e.com", "01766666666", "7777777777");
+        var active = CreateValidMember("Active Member", "active@nttest.com", "01766667777", "NTST7777");
         active.Status = Enums.MembershipStatus.Active;
 
         _context.Members.AddRange(inactive, archived, active);
         await _context.SaveChangesAsync();
 
-        // Act
         var results = await _service.SearchMembersAsync(new MemberSearchFilterDto());
 
-        // Assert
         results.Should().Contain(r => r.FullName == "Active Member");
         results.Should().NotContain(r => r.FullName == "Inactive Member");
         results.Should().NotContain(r => r.FullName == "Archived Member");
@@ -135,29 +102,16 @@ public class NetworkingServiceTests
     {
         return new Member
         {
-            FullName = name,
-            Email = email,
-            MobileNo = phone,
-            NID = nid,
-            FatherName = "Father",
-            MotherName = "Mother",
+            FullName = name, Email = email, MobileNo = phone, NID = nid,
+            FatherName = "Father", MotherName = "Mother",
             DateOfBirth = new DateTime(1990, 1, 1),
-            Gender = Enums.Gender.Male,
-            BloodGroup = Enums.BloodGroup.APositive,
-            PresentAddress = "Present",
-            PermanentAddress = "Permanent",
-            EmergencyContactName = "Emergency",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01111111111",
-            HSCAdmissionYear = 2005,
-            GHCAdmissionYear = 2005,
-            LastCertificateFromGHC = "HSC",
-            SubjectGroup = "Science",
-            GHCLastCertificatePassingYear = 2007,
-            ProfessionalSector = "IT",
-            Designation = "Software Engineer",
-            Status = Enums.MembershipStatus.Active,
-            AppliedDate = DateTime.UtcNow
+            Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive,
+            PresentAddress = "Present", PermanentAddress = "Permanent",
+            EmergencyContactName = "Emergency", EmergencyContactRelation = "Relation", EmergencyContactPhone = "01111111111",
+            HSCAdmissionYear = 2005, GHCAdmissionYear = 2005, LastCertificateFromGHC = "HSC",
+            SubjectGroup = "Science", GHCLastCertificatePassingYear = 2007,
+            ProfessionalSector = "IT", Designation = "Software Engineer",
+            Status = Enums.MembershipStatus.Active, AppliedDate = DateTime.UtcNow
         };
     }
 }

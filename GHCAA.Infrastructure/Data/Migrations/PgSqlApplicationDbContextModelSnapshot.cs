@@ -104,6 +104,21 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AlumniEvents");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2026, 5, 15, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "The biggest gathering of Haragangians across the globe. Join us for a day of nostalgia, networking, and cultural celebrations.",
+                            ImageUrl = "https://images.unsplash.com/photo-1511578334221-d748ef50b502?q=80&w=2070",
+                            IsActive = true,
+                            Location = "College Ground, Munshiganj",
+                            RegistrationDeadline = new DateTime(2026, 4, 30, 23, 59, 59, 0, DateTimeKind.Utc),
+                            RegistrationFee = 1500m,
+                            Title = "Grand Reunion 2026"
+                        });
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ChatMessage", b =>
@@ -215,6 +230,14 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             ECPeriodId = 1,
                             MemberId = 1,
                             Position = 0,
+                            StartDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ECPeriodId = 1,
+                            MemberId = 101,
+                            Position = 2,
                             StartDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
@@ -345,19 +368,19 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 1,
-                            Body = "Hello {{FullName}}, your OTP is: <strong>{{OtpCode}}</strong>. Valid for 10 minutes.",
+                            Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Verification Code</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>Your security code is:</p><div style='font-size: 24px; font-weight: bold; background: #f8f9fa; padding: 15px; text-align: center; border-radius: 5px; color: #3498db;'>{{OtpCode}}</div><p>Valid for 10 minutes. Do not share this code.</p></div>",
                             Code = "OTP_EMAIL",
-                            Description = "Sent during registration and password reset",
+                            Description = "Security code for login/registration",
                             LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Subject = "Your GHC Alumni Association Verification Code",
+                            Subject = "GHCAA Verification Code: {{OtpCode}}",
                             Variables = "['FullName', 'OtpCode']"
                         },
                         new
                         {
                             Id = 2,
-                            Body = "Dear {{FullName}}, welcome! Your membership number is {{MembershipNumber}} and your default password is {{DefaultPassword}}.",
+                            Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Welcome to GHCAA</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your membership has been approved! We are excited to have you as part of our community.</p><div style='background: #e8f4fd; padding: 15px; border-radius: 5px;'><p><strong>Membership No:</strong> {{MembershipNumber}}</p><p><strong>Default Password:</strong> <code style='background:#fff; padding:2px 5px;'>{{DefaultPassword}}</code></p></div><p>Please log in and change your password immediately.</p></div>",
                             Code = "WELCOME_EMAIL",
-                            Description = "Sent after admin approves registration",
+                            Description = "Official induction message",
                             LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Subject = "Welcome to GHC Alumni Association!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
@@ -365,12 +388,12 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 3,
-                            Body = "Dear {{FullName}}, your registration for the event <strong>{{EventTitle}}</strong> has been approved. <br/><br/><strong>Event Details:</strong><br/>Date: {{EventDate}}<br/>Location: {{EventLocation}}<br/><br/>Looking forward to seeing you there!",
-                            Code = "EVENT_REGISTRATION_CONFIRMATION",
-                            Description = "Sent after event registration approval",
+                            Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Subscription Reminder</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>This is a reminder that your annual membership subscription is now due.</p><p>Maintaining an active status ensures you continue to receive all alumni benefits and voting rights.</p><p>Thank you for your continued support!</p></div>",
+                            Code = "FEE_REMINDER",
+                            Description = "Friendly reminder for yearly dues",
                             LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Subject = "Registration Confirmed: {{EventTitle}}",
-                            Variables = "['FullName', 'EventTitle', 'EventDate', 'EventLocation']"
+                            Subject = "Annual Membership Subscription Due",
+                            Variables = "['FullName']"
                         });
                 });
 
@@ -615,6 +638,23 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("PostedById");
 
                     b.ToTable("JobOpportunities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Category = 0,
+                            Company = "GlobalTech Solutions",
+                            ContactEmail = "careers@globaltech.com",
+                            Description = "Looking for an experienced architect to lead our fintech transition. Great benefits and remote flexibility.",
+                            ExpiryDate = new DateTime(2026, 4, 30, 23, 59, 59, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            Location = "Dhaka, Bangladesh",
+                            PostedByMemberId = 1,
+                            PostedDate = new DateTime(2026, 2, 24, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Requirements = "10+ years of experience, C# Experts only.",
+                            Title = "Senior Software Architect"
+                        });
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.LookupItem", b =>
@@ -914,35 +954,72 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             BloodGroup = 0,
                             Category = 0,
                             DateOfBirth = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Designation = "Admin",
-                            ECPosition = 9,
+                            Designation = "Software Engineer",
+                            ECPosition = 0,
                             Email = "shalin.rahman@gmail.com",
-                            EmailVerified = false,
+                            EmailVerified = true,
                             EmergencyContactName = "Emergency",
                             EmergencyContactPhone = "01700000000",
                             EmergencyContactRelation = "Family",
                             FatherName = "Father",
                             FullName = "Habibur Rahman Shalin",
-                            GHCAdmissionYear = 1950,
-                            GHCLastCertificatePassingYear = 1952,
+                            GHCAdmissionYear = 2013,
+                            GHCLastCertificatePassingYear = 2015,
                             Gender = 0,
-                            HSCAdmissionYear = 1950,
+                            HSCAdmissionYear = 2013,
                             IsAddressPublic = false,
                             IsArchived = false,
                             IsEmailPublic = false,
                             IsMobilePublic = false,
-                            LastCertificateFromGHC = "Other",
+                            LastCertificateFromGHC = "HSC",
                             LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            MembershipNumber = "ADM-SHALIN-1",
-                            MembershipType = 4,
+                            MembershipNumber = "GHC-2015-0001",
+                            MembershipType = 0,
                             MobileNo = "01700000001",
                             MotherName = "Mother",
                             NID = "0000000001",
                             PermanentAddress = "Munshiganj",
                             PresentAddress = "Munshiganj",
-                            ProfessionalSector = "Other",
+                            ProfessionalSector = "Engineering",
                             Status = 1,
-                            SubjectGroup = "Other"
+                            SubjectGroup = "Science"
+                        },
+                        new
+                        {
+                            Id = 101,
+                            AppliedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            BloodGroup = 4,
+                            Category = 0,
+                            DateOfBirth = new DateTime(1992, 5, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Designation = "Communications Manager",
+                            ECPosition = 2,
+                            Email = "jane@example.com",
+                            EmailVerified = true,
+                            EmergencyContactName = "Friend",
+                            EmergencyContactPhone = "01700000003",
+                            EmergencyContactRelation = "None",
+                            FatherName = "James Doe",
+                            FullName = "Jane Doe",
+                            GHCAdmissionYear = 2014,
+                            GHCLastCertificatePassingYear = 2016,
+                            Gender = 1,
+                            HSCAdmissionYear = 2014,
+                            IsAddressPublic = false,
+                            IsArchived = false,
+                            IsEmailPublic = false,
+                            IsMobilePublic = false,
+                            LastCertificateFromGHC = "HSC",
+                            LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            MembershipNumber = "GHC-2016-0001",
+                            MembershipType = 2,
+                            MobileNo = "01700000002",
+                            MotherName = "Mary Doe",
+                            NID = "0000000002",
+                            PermanentAddress = "Dhaka",
+                            PresentAddress = "Dhaka",
+                            ProfessionalSector = "Corporate",
+                            Status = 1,
+                            SubjectGroup = "Humanities"
                         });
                 });
 
@@ -1147,6 +1224,30 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("AuthorId");
 
                     b.ToTable("NewsPosts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AuthorId = 2,
+                            Category = 1,
+                            Content = "The historic library of Govt. Haraganga College has been fully renovated with modern amenities and digital archiving systems, funded by the 1985 batch alumni.",
+                            ImageUrl = "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2070",
+                            IsActive = true,
+                            PublishDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "College Library Renovation Project Completed"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AuthorId = 2,
+                            Category = 0,
+                            Content = "GHCAA members in the UK gathered at the Royal Museum today to discuss international networking and scholarship opportunities for current students.",
+                            ImageUrl = "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=2070",
+                            IsActive = true,
+                            PublishDate = new DateTime(2026, 3, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Haragangian Global Meet 2026: London Chapter"
+                        });
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.Notification", b =>
@@ -1332,6 +1433,19 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SpecialDayThemes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AnnouncementText = "Celebrating 55 Years of Victory! Happy Independence Day to all Haragangians.",
+                            BackgroundColor = "#213921",
+                            EndDate = new DateTime(2026, 3, 27, 23, 59, 59, 0, DateTimeKind.Utc),
+                            IsEnabled = true,
+                            StartDate = new DateTime(2026, 3, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TextColor = "#dc2626",
+                            Title = "Independence Day 2026"
+                        });
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.User", b =>
@@ -1357,6 +1471,12 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("ResetToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ResetTokenExpiry")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Username")
                         .IsRequired()

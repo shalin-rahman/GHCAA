@@ -116,6 +116,24 @@ namespace GHCAA.Infrastructure.Services
                     _db.Members.Add(member);
                     await _db.SaveChangesAsync(cancellationToken);
 
+                    // Sync EC Position with History if an active period exists
+                    if (member.ECPosition != Enums.ECPosition.None)
+                    {
+                        var activePeriod = await _db.ECPeriods.FirstOrDefaultAsync(p => p.IsActive, cancellationToken);
+                        if (activePeriod != null)
+                        {
+                            _db.ECMembers.Add(new ECMember
+                            {
+                                MemberId = member.Id,
+                                ECPeriodId = activePeriod.Id,
+                                Position = member.ECPosition,
+                                StartDate = DateTime.UtcNow,
+                                ChangeReason = "Initial Import"
+                            });
+                            await _db.SaveChangesAsync(cancellationToken);
+                        }
+                    }
+
                     // Handle Photo if externalId is matched with file name
                     if (!string.IsNullOrEmpty(externalId))
                     {
@@ -210,6 +228,8 @@ namespace GHCAA.Infrastructure.Services
                     if (Enum.TryParse<Enums.BloodGroup>(value, true, out var bg)) member.BloodGroup = bg; break;
                 case nameof(Member.MembershipType):
                     if (Enum.TryParse<Enums.MembershipType>(value, true, out var mt)) member.MembershipType = mt; break;
+                case nameof(Member.ECPosition):
+                    if (Enum.TryParse<Enums.ECPosition>(value, true, out var pos)) member.ECPosition = pos; break;
             }
         }
     }

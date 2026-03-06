@@ -1,0 +1,191 @@
+<div class="admin-feature">
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Governance Management</h2>
+            <small>Manage Executive Committee Periods and Role Assignments</small>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-accent btn-md" (click)="openNewPeriod()">
+                <span class="icon">📅</span> New EC Period
+            </button>
+        </div>
+    </div>
+
+    <div class="governance-grid">
+        <!-- Sidebar: Periods List -->
+        <div class="glass-card periods-sidebar">
+            <div class="card-header">
+                <h3>EC Periods</h3>
+            </div>
+            <div class="periods-list">
+                @for (p of periods(); track p.id) {
+                <div class="period-item" [class.active]="selectedPeriod()?.id === p.id" (click)="selectPeriod(p)">
+                    <div class="p-info">
+                        <span class="p-title">{{ p.title }}</span>
+                        <small class="p-dates">{{ p.startDate | date:'mediumDate' }} — {{ p.endDate ? (p.endDate |
+                            date:'mediumDate') : 'Present' }}</small>
+                    </div>
+                    @if (p.isActive) {
+                    <span class="status-badge active-badge">Active</span>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Main Content: Committee Management -->
+        <div class="glass-card committee-main">
+            @if (selectedPeriod()) {
+            <div class="committee-header">
+                <div class="title-wrap">
+                    <h3>{{ selectedPeriod().title }}</h3>
+                    <div class="actions">
+                        @if (!selectedPeriod().isActive) {
+                        <button class="btn btn-primary btn-sm" (click)="activatePeriod(selectedPeriod().id)">
+                            Activate Period
+                        </button>
+                        }
+                        <button class="btn btn-accent btn-sm" (click)="showAssignModal.set(true)">
+                            Assign New Role
+                        </button>
+                    </div>
+                </div>
+                <div class="period-meta">
+                    <span><strong>Term:</strong> {{ selectedPeriod().startDate | date }} to {{ selectedPeriod().endDate
+                        ?
+                        (selectedPeriod().endDate | date) : 'Ongoing' }}</span>
+                </div>
+            </div>
+
+            <div class="committee-table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Position</th>
+                            <th>Assigned</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (em of committeeMembers(); track em.id) {
+                        <tr>
+                            <td class="member-cell">
+                                <div class="avatar">{{ em.member?.fullName?.[0] }}</div>
+                                <div class="info">
+                                    <span class="name">{{ em.member?.fullName }}</span>
+                                    <small>{{ em.member?.membershipNumber }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="role-badge">{{ getRoleName(em.position) }}</span>
+                            </td>
+                            <td>{{ em.startDate | date }}</td>
+                            <td>
+                                <button class="icon-btn delete" (click)="removeMember(em.id)"
+                                    title="Remove">🗑️</button>
+                            </td>
+                        </tr>
+                        } @empty {
+                        <tr class="empty-row">
+                            <td colspan="4">No roles assigned to this period yet.</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            } @else {
+            <div class="no-selection">
+                <span>🎗️</span>
+                <p>Select an EC Period to manage its committee members.</p>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- New Period Modal -->
+@if (showPeriodModal()) {
+<div class="modal-overlay" (click)="showPeriodModal.set(false)">
+    <div class="modal-box glass-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Create New EC Period</h3>
+        </div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label>Period Title</label>
+                    <input type="text" [(ngModel)]="editPeriodData().title"
+                        placeholder="e.g. Executive Committee 2024-2027">
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" [(ngModel)]="editPeriodData().startDate">
+                </div>
+                <div class="form-group">
+                    <label>End Date (Optional)</label>
+                    <input type="date" [(ngModel)]="editPeriodData().endDate">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="showPeriodModal.set(false)">Cancel</button>
+            <button class="btn btn-primary" (click)="savePeriod()" [disabled]="isSavingPeriod()">
+                {{ isSavingPeriod() ? 'Saving...' : 'Create Period' }}
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Assign Role Modal -->
+@if (showAssignModal()) {
+<div class="modal-overlay" (click)="showAssignModal.set(false)">
+    <div class="modal-box glass-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Assign Member to Role</h3>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Select Member</label>
+                <div class="search-box">
+                    <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchMembers($event)"
+                        placeholder="Search by name or membership no...">
+
+                    @if (memberSearchResults().length > 0) {
+                    <div class="results-dropdown glass-card">
+                        @for (m of memberSearchResults(); track m.id) {
+                        <div class="result-item" (click)="pickMember(m)">
+                            <span>{{ m.fullName }}</span>
+                            <small>{{ m.membershipNumber }}</small>
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>EC Position</label>
+                    <select [(ngModel)]="assignData().position">
+                        @for (p of ecPositions; track p.value) {
+                        <option [value]="p.value">{{ p.label }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Reason/Note</label>
+                    <input type="text" [(ngModel)]="assignData().reason" placeholder="e.g. Elected in 4th AGM">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="showAssignModal.set(false)">Cancel</button>
+            <button class="btn btn-primary" (click)="assignRole()" [disabled]="!assignData().memberId">
+                Assign Position
+            </button>
+        </div>
+    </div>
+</div>
+}

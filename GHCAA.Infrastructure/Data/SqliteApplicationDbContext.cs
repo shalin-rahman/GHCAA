@@ -4,7 +4,7 @@ namespace GHCAA.Infrastructure.Data
 {
     public class SqliteApplicationDbContext : ApplicationDbContext
     {
-        public SqliteApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public SqliteApplicationDbContext(DbContextOptions options)
             : base(options)
         {
         }

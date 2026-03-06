@@ -1,68 +1,93 @@
 <div class="admin-feature">
     <div class="page-header">
-        <h2>Admin Dashboard</h2>
-        <small>Real-time overview of GHCAA operations</small>
+        <div class="header-text">
+            <h2>Command Center</h2>
+            <small>Performance overview and system vitals</small>
+        </div>
+        <div class="header-actions">
+            <span class="pulse-line">Live System Status</span>
+            <div class="pulse-dot"></div>
+        </div>
     </div>
 
     @if (loading()) {
-    <div class="loading-state">Loading statistics...</div>
+    <div class="loading-grid">
+        <div class="skeleton card h-32"></div>
+        <div class="skeleton card h-32"></div>
+        <div class="skeleton card h-32"></div>
+        <div class="skeleton card h-32"></div>
+    </div>
     } @else {
-    <div class="stats-grid">
-        <div class="stat-card pending">
-            <div class="stat-icon">📝</div>
-            <div class="stat-body">
-                <div class="stat-value">{{ stats()?.applied ?? 0 }}</div>
-                <div class="stat-label">Pending Approvals</div>
-            </div>
-            <a routerLink="/admin/approvals" class="stat-action">Review →</a>
-        </div>
-        <div class="stat-card total">
+    <div class="stats-grid animate-fade-up">
+        <div class="glass-card stat-card ripple-effect">
             <div class="stat-icon">👥</div>
             <div class="stat-body">
-                <div class="stat-value">{{ stats()?.totalMembers ?? 0 }}</div>
-                <div class="stat-label">Total Members</div>
+                <h3>{{ stats()?.totalMembers || 0 }}</h3>
+                <p>Total Alumni</p>
             </div>
-            <a routerLink="/admin/members" class="stat-action">View All →</a>
+            <div class="stat-trend positive">+12%</div>
         </div>
-        <div class="stat-card active">
+
+        <div class="glass-card stat-card ripple-effect">
             <div class="stat-icon">✅</div>
             <div class="stat-body">
-                <div class="stat-value">{{ stats()?.active ?? 0 }}</div>
-                <div class="stat-label">Active Members</div>
+                <h3>{{ stats()?.active || 0 }}</h3>
+                <p>Verified Members</p>
             </div>
-            <a routerLink="/admin/members" class="stat-action">Browse →</a>
         </div>
-        <div class="stat-card finance">
+
+        <div class="glass-card stat-card ripple-effect accent">
+            <div class="stat-icon">📝</div>
+            <div class="stat-body">
+                <h3>{{ stats()?.applied || 0 }}</h3>
+                <p>Pending Approvals</p>
+            </div>
+            <button class="action-btn" routerLink="/admin/approvals">View All</button>
+        </div>
+
+        <div class="glass-card stat-card ripple-effect dark">
             <div class="stat-icon">💰</div>
             <div class="stat-body">
-                <div class="stat-value">৳ {{ stats()?.balance | number }}</div>
-                <div class="stat-label">Treasury Balance</div>
+                <h3>{{ (stats()?.balance || 0) | currency:'BDT ':'symbol':'1.0-0' }}</h3>
+                <p>Net Fund Balance</p>
             </div>
-            <a routerLink="/admin/ledger" class="stat-action">Ledger →</a>
+            <button class="action-btn gold" routerLink="/admin/ledger">Register</button>
         </div>
     </div>
 
-    <div class="quick-actions glass-card">
-        <h3>Quick Actions</h3>
-        <div class="action-grid">
-            <a routerLink="/admin/approvals" class="action-btn">
-                <span>📝</span> Review Applications
-            </a>
-            <a routerLink="/admin/members" class="action-btn">
-                <span>👤</span> Manage Members
-            </a>
-            <a routerLink="/admin/news" class="action-btn">
-                <span>📰</span> Post News
-            </a>
-            <a routerLink="/admin/ledger" class="action-btn">
-                <span>📖</span> Financial Ledger
-            </a>
-            <a routerLink="/admin/comm" class="action-btn">
-                <span>✉️</span> Communications
-            </a>
-            <a routerLink="/portal/dashboard" class="action-btn secondary">
-                <span>🏠</span> Member Portal
-            </a>
+    <div class="dashboard-content">
+        <div class="glass-card main-chart-card">
+            <div class="card-header">
+                <h3>Membership Growth</h3>
+            </div>
+            <div class="chart-placeholder">
+                <!-- Custom Chart Implementation or SVG -->
+                <div class="growth-visual">
+                    <div class="bar" style="height: 40%"></div>
+                    <div class="bar" style="height: 55%"></div>
+                    <div class="bar" style="height: 45%"></div>
+                    <div class="bar" style="height: 70%"></div>
+                    <div class="bar" style="height: 85%"></div>
+                    <div class="bar featured" style="height: 100%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card news-brief">
+            <div class="card-header">
+                <h3>Recent Announcements</h3>
+            </div>
+            <div class="news-list">
+                <div class="news-item">
+                    <span class="date">May 12</span>
+                    <p>Annual General Meeting scheduled for June 15th.</p>
+                </div>
+                <div class="news-item">
+                    <span class="date">May 05</span>
+                    <p>New Executive Committee selection process started.</p>
+                </div>
+            </div>
+            <button class="btn-link" routerLink="/admin/news">Manage News</button>
         </div>
     </div>
     }

@@ -3,22 +3,16 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
-using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GHCAA.Tests.Services;
 
 [TestFixture]
-public class FinancialServiceTests
+public class FinancialServiceTests : TestBase
 {
-    private ApplicationDbContext _context = null!;
-    private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
     private FinancialService _service = null!;
     private Mock<ICommunicationService> _communicationMock = null!;
     private Mock<INotificationService> _notificationMock = null!;
@@ -26,59 +20,26 @@ public class FinancialServiceTests
     [SetUp]
     public void Setup()
     {
-        _connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
-        _connection.Open();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(_connection)
-            .Options;
-
-        _context = new ApplicationDbContext(options);
-        _context.Database.EnsureCreated();
-
         _communicationMock = new Mock<ICommunicationService>();
         _notificationMock = new Mock<INotificationService>();
         _service = new FinancialService(_context, _communicationMock.Object, _notificationMock.Object);
     }
 
-    [TearDown]
-    public void TearDown()
-    {
-        _context.Dispose();
-        _connection.Close();
-    }
-
     [Test]
     public async Task RecordPaymentAsync_ShouldAddPaymentAndReturnDto()
     {
-        // Arrange
-        var member = new Member 
-        { 
-            FullName = "Payer", Email = "p@e.com", NID = "1", FatherName = "F", MotherName = "M", MobileNo = "01", 
-            PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", 
-            EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" 
-        };
+        var member = new Member { FullName = "Payer", Email = "fsp@e.com", NID = "FSP1", FatherName = "F", MotherName = "M", MobileNo = "FSP1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        var dto = new CreatePaymentHistoryDto
-        {
-            MemberId = member.Id,
-            Amount = 500,
-            TransactionId = "TRX100",
-            PaidAt = DateTime.UtcNow,
-            Notes = "Test Payment"
-        };
-
-        // Act
+        var dto = new CreatePaymentHistoryDto { MemberId = member.Id, Amount = 500, TransactionId = "TRX-FSP-100", PaidAt = DateTime.UtcNow, Notes = "Test Payment" };
         var result = await _service.RecordPaymentAsync(dto);
 
-        // Assert
         result.Should().NotBeNull();
-        result.TransactionId.Should().Be("TRX100");
+        result.TransactionId.Should().Be("TRX-FSP-100");
         result.Amount.Should().Be(500);
 
-        var dbPayment = await _context.PaymentHistories.FirstOrDefaultAsync(p => p.TransactionId == "TRX100");
+        var dbPayment = await _context.PaymentHistories.FirstOrDefaultAsync(p => p.TransactionId == "TRX-FSP-100");
         dbPayment.Should().NotBeNull();
         dbPayment!.MemberId.Should().Be(member.Id);
     }
@@ -86,46 +47,29 @@ public class FinancialServiceTests
     [Test]
     public async Task GetMemberPaymentHistoryAsync_ShouldReturnDtoList()
     {
-        // Arrange
-        var member = new Member 
-        { 
-            FullName = "History User", Email = "h@e.com", NID = "2", FatherName = "F", MotherName = "M", MobileNo = "02", 
-            PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", 
-            EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" 
-        };
+        var member = new Member { FullName = "History User", Email = "fsh@e.com", NID = "FSH1", FatherName = "F", MotherName = "M", MobileNo = "FSH1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        _context.PaymentHistories.Add(new PaymentHistory { MemberId = member.Id, TransactionId = "T1", Amount = 100, PaidAt = DateTime.UtcNow.AddDays(-1), Status = Enums.PaymentStatus.Completed });
-        _context.PaymentHistories.Add(new PaymentHistory { MemberId = member.Id, TransactionId = "T2", Amount = 200, PaidAt = DateTime.UtcNow, Status = Enums.PaymentStatus.Pending });
+        _context.PaymentHistories.Add(new PaymentHistory { MemberId = member.Id, TransactionId = "FSH-T1", Amount = 100, PaidAt = DateTime.UtcNow.AddDays(-1), Status = Enums.PaymentStatus.Completed });
+        _context.PaymentHistories.Add(new PaymentHistory { MemberId = member.Id, TransactionId = "FSH-T2", Amount = 200, PaidAt = DateTime.UtcNow, Status = Enums.PaymentStatus.Pending });
         await _context.SaveChangesAsync();
 
-        // Act
         var result = await _service.GetMemberPaymentHistoryAsync(member.Id);
 
-        // Assert
         result.Should().HaveCount(2);
-        result.First().TransactionId.Should().Be("T2"); // Ordered by Date Descending
+        result.First().TransactionId.Should().Be("FSH-T2"); // Ordered by Date Descending
     }
 
     [Test]
     public async Task GenerateAnnualDuesAsync_ShouldCreateDuesForActiveMembers()
     {
-        // Arrange
-        var member = new Member 
-        { 
-            FullName = "Active User", 
-            Status = Enums.MembershipStatus.Active,
-            MembershipType = Enums.MembershipType.General,
-            Email = "a@e.com", NID = "1", FatherName = "F", MotherName = "M", MobileNo = "01", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D"
-        };
+        var member = new Member { FullName = "Active User", Status = Enums.MembershipStatus.Active, MembershipType = Enums.MembershipType.General, Email = "fsg@e.com", NID = "FSG1", FatherName = "F", MotherName = "M", MobileNo = "FSG1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        // Act
         await _service.GenerateAnnualDuesAsync(2024);
 
-        // Assert
         var due = await _context.MembershipDues.FirstOrDefaultAsync(d => d.MemberId == member.Id);
         due.Should().NotBeNull();
         due!.Amount.Should().Be(1000);
@@ -135,22 +79,18 @@ public class FinancialServiceTests
     [Test]
     public async Task MarkDueAsPaidAsync_ShouldUpdateStatus()
     {
-        // Arrange
-        var member = new Member { FullName = "M", Email = "m@e.com", NID = "1", MobileNo = "1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+        var member = new Member { FullName = "M", Email = "fsm@e.com", NID = "FSM1", MobileNo = "FSM1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        var due = new MembershipDue { MemberId = member.Id, Year = 2024, Amount = 1000, DueDate = DateTime.UtcNow, IsPaid = false };
+        var due = new MembershipDue { MemberId = member.Id, Year = 2025, Amount = 1000, DueDate = DateTime.UtcNow, IsPaid = false };
         _context.MembershipDues.Add(due);
-
-        var payment = new PaymentHistory { MemberId = member.Id, Amount = 1000, TransactionId = "T123", Status = Enums.PaymentStatus.Completed, PaidAt = DateTime.UtcNow };
+        var payment = new PaymentHistory { MemberId = member.Id, Amount = 1000, TransactionId = "FSM-T123", Status = Enums.PaymentStatus.Completed, PaidAt = DateTime.UtcNow };
         _context.PaymentHistories.Add(payment);
         await _context.SaveChangesAsync();
 
-        // Act
         var result = await _service.MarkDueAsPaidAsync(due.Id, payment.Id);
 
-        // Assert
         result.Should().BeTrue();
         var updated = await _context.MembershipDues.FindAsync(due.Id);
         updated!.IsPaid.Should().BeTrue();
@@ -160,19 +100,9 @@ public class FinancialServiceTests
     [Test]
     public async Task AddMembershipFeeConfig_ShouldCreateNewConfig()
     {
-        // Arrange
-        var dto = new CreateMembershipFeeConfigDto
-        {
-            MembershipType = "General",
-            Amount = 1500,
-            EffectiveDate = DateTime.UtcNow.AddDays(1),
-            Description = "New Fee"
-        };
-
-        // Act
+        var dto = new CreateMembershipFeeConfigDto { MembershipType = "General", Amount = 1500, EffectiveDate = DateTime.UtcNow.AddDays(1), Description = "New Fee" };
         var result = await _service.AddMembershipFeeConfigAsync(dto, 1);
 
-        // Assert
         result.Should().NotBeNull();
         result.Amount.Should().Be(1500);
 
@@ -184,25 +114,13 @@ public class FinancialServiceTests
     [Test]
     public async Task GetApplicableMembershipFeeAsync_ShouldReturnCorrectFee()
     {
-        // Seeding is done by EnsureCreated, ensuring default General fee is 1000
-        // Let's add a future fee
-        _context.MembershipFeeConfigs.Add(new MembershipFeeConfig 
-        { 
-            MembershipType = Enums.MembershipType.General, 
-            Amount = 2000, 
-            EffectiveDate = new DateTime(2025, 1, 1), 
-            Description = "Future Fee" 
-        });
+        // Seed adds General=1000 for effective 2023-01-01; add a 2025 future fee
+        _context.MembershipFeeConfigs.Add(new MembershipFeeConfig { MembershipType = Enums.MembershipType.General, Amount = 2000, EffectiveDate = new DateTime(2025, 1, 1), Description = "Future Fee" });
         await _context.SaveChangesAsync();
 
-        // Act
-        // Current fee (2024) should be default 1000 (from seed)
         var fee2024 = await _service.GetApplicableMembershipFeeAsync(Enums.MembershipType.General, 2024);
-        
-        // Future fee (2025) should be 2000
         var fee2025 = await _service.GetApplicableMembershipFeeAsync(Enums.MembershipType.General, 2025);
 
-        // Assert
         fee2024.Should().Be(1000);
         fee2025.Should().Be(2000);
     }

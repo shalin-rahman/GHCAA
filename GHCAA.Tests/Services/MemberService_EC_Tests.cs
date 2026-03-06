@@ -18,21 +18,13 @@ using System.Threading.Tasks;
 namespace GHCAA.Tests.Services
 {
     [TestFixture]
-    public class MemberService_EC_Tests
+    public class MemberService_EC_Tests : TestBase
     {
-        private ApplicationDbContext _context = null!;
-        private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
         private MemberService _service = null!;
 
         [SetUp]
         public void Setup()
         {
-            _connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
-            _connection.Open();
-
-            _context = new ApplicationDbContext(GetOptions());
-            _context.Database.EnsureCreated();
-
             // Minimal mocks
             var storage = new Mock<IFileStorageService>();
             var fileRepo = new Mock<IFileUploadRepository>();
@@ -45,13 +37,6 @@ namespace GHCAA.Tests.Services
             var notify = new Mock<INotificationService>();
 
             _service = new MemberService(_context, storage.Object, fileRepo.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _context.Dispose();
-            _connection.Close();
         }
 
         [Test]
@@ -75,12 +60,11 @@ namespace GHCAA.Tests.Services
             await _service.AdminUpdateMemberAsync(member.Id, updateDto);
 
             // Assert
-            using var dbCheck = new ApplicationDbContext(GetOptions());
-            var ecMember = await dbCheck.ECMembers.FirstOrDefaultAsync(em => em.MemberId == member.Id);
+            var ecMember = await _context.ECMembers.FirstOrDefaultAsync(em => em.MemberId == member.Id);
             ecMember.Should().NotBeNull();
             ecMember!.Position.Should().Be(Enums.ECPosition.President);
             
-            var updatedMember = await dbCheck.Members.FindAsync(member.Id);
+            var updatedMember = await _context.Members.FindAsync(member.Id);
             updatedMember!.ECPosition.Should().Be(Enums.ECPosition.President);
         }
 
@@ -109,21 +93,13 @@ namespace GHCAA.Tests.Services
             await _service.AdminUpdateMemberAsync(member.Id, updateDto);
 
             // Assert
-            using var dbCheck = new ApplicationDbContext(GetOptions());
-            var records = await dbCheck.ECMembers.Where(em => em.MemberId == member.Id).ToListAsync();
+            var records = await _context.ECMembers.Where(em => em.MemberId == member.Id).ToListAsync();
             records.Should().HaveCount(1);
             records[0].EndDate.Should().NotBeNull();
             records[0].ChangeReason.Should().Be("Resigned");
             
-            var updatedMember = await dbCheck.Members.FindAsync(member.Id);
+            var updatedMember = await _context.Members.FindAsync(member.Id);
             updatedMember!.ECPosition.Should().Be(Enums.ECPosition.None);
-        }
-
-        private DbContextOptions<ApplicationDbContext> GetOptions()
-        {
-            return new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseSqlite(_connection)
-                .Options;
         }
 
         private AdminMemberUpdateDto CreateUpdateDto(Member m)

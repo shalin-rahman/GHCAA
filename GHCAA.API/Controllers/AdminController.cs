@@ -135,6 +135,21 @@ namespace GHCAA.API.Controllers
             return Ok(new { DataUri = dataUri });
         }
 
+        [HttpPost("members/{id}/reset-password-admin")]
+        public async Task<IActionResult> ResetPasswordAdmin(int id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var success = await _memberService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
+                if (!success) return NotFound();
+                return Ok(new { Message = "Password reset link sent to member's secondary/primary email." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
         [HttpGet("members/{id}/certificate")]
         public async Task<IActionResult> GetMemberCertificate(int id, CancellationToken cancellationToken)
         {

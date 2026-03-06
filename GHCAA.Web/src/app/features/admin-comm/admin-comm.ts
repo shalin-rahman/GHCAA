@@ -121,17 +121,24 @@ export class AdminComm implements OnInit {
     }
 
     editTemplate(template: EmailTemplate) {
+        console.log('Editing template:', template.code, 'Body length:', template.body?.length);
         this.editingTemplate.set({ ...template });
         // Use timeout to ensure DOM is updated before initializing Quill
-        setTimeout(() => this.initEditor('template-editor', this.editingTemplate()?.body || '', (html) => {
-            const t = this.editingTemplate();
-            if (t) t.body = html;
-        }), 100);
+        setTimeout(() => {
+            const content = this.editingTemplate()?.body || '';
+            this.initEditor('template-editor', content, (html) => {
+                const t = this.editingTemplate();
+                if (t) t.body = html;
+            });
+        }, 200);
     }
 
     private initEditor(elementId: string, initialContent: string, onChange: (html: string) => void) {
         const editorDiv = document.getElementById(elementId);
         if (editorDiv && (window as any).Quill) {
+            // Clear any previous Quill instances or content
+            editorDiv.innerHTML = '';
+
             const quill = new (window as any).Quill(`#${elementId}`, {
                 theme: 'snow',
                 modules: {
@@ -146,11 +153,16 @@ export class AdminComm implements OnInit {
                 }
             });
 
-            quill.root.innerHTML = initialContent;
+            if (initialContent) {
+                quill.root.innerHTML = initialContent;
+            }
 
             quill.on('text-change', () => {
-                onChange(quill.root.innerHTML);
+                const html = quill.root.innerHTML;
+                onChange(html);
             });
+        } else {
+            console.error('Editor DIV not found or Quill not loaded:', elementId);
         }
     }
 

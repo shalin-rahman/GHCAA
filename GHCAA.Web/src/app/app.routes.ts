@@ -103,6 +103,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/admin-members/admin-members').then(m => m.AdminMembers)
             },
             {
+                path: 'members/ec',
+                loadComponent: () => import('./features/admin-governance/admin-governance').then(m => m.AdminGovernance)
+            },
+            {
                 path: 'news',
                 loadComponent: () => import('./features/admin-news/admin-news').then(m => m.AdminNews)
             },
@@ -121,6 +125,14 @@ export const routes: Routes = [
             {
                 path: 'themes',
                 loadComponent: () => import('./features/admin-themes/admin-themes').then(m => m.AdminThemes)
+            },
+            {
+                path: 'roles',
+                loadComponent: () => import('./features/admin-roles/admin-roles').then(m => m.AdminRoles)
+            },
+            {
+                path: 'audit',
+                loadComponent: () => import('./features/admin-audit/admin-audit').then(m => m.AdminAudit)
             }
         ]
     }

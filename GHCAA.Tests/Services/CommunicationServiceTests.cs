@@ -15,9 +15,8 @@ using static GHCAA.Domain.Enums;
 namespace GHCAA.Tests.Services;
 
 [TestFixture]
-public class CommunicationServiceTests
+public class CommunicationServiceTests : TestBase
 {
-    private ApplicationDbContext _context = null!;
     private Mock<IEmailService> _mockEmail = null!;
     private Mock<ILogger<CommunicationService>> _mockLogger = null!;
     private CommunicationService _service = null!;
@@ -25,21 +24,9 @@ public class CommunicationServiceTests
     [SetUp]
     public void Setup()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new ApplicationDbContext(options);
         _mockEmail = new Mock<IEmailService>();
         _mockLogger = new Mock<ILogger<CommunicationService>>();
         _service = new CommunicationService(_context, _mockEmail.Object, _mockLogger.Object);
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        _context.Database.EnsureDeleted();
-        _context.Dispose();
     }
 
     [Test]
@@ -48,12 +35,12 @@ public class CommunicationServiceTests
         // Arrange
         var member = new Member
         {
-            Id = 1,
             FullName = "John Doe",
             Email = "john@example.com",
             NID = "123", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D"
         };
         _context.Members.Add(member);
+        await _context.SaveChangesAsync();
 
         var template = new EmailTemplate
         {
@@ -92,8 +79,8 @@ public class CommunicationServiceTests
         // Act
         await _service.SendBatchEmailAsync(new List<int> { 2005 }, "BATCH");
 
-        // Assert
-        _mockEmail.Verify(x => x.SendEmailAsync(It.IsAny<string>(), "S", "B", It.IsAny<CancellationToken>()), Times.Exactly(2));
+        // Assert — body will have footer appended, so use Contains match
+        _mockEmail.Verify(x => x.SendEmailAsync(It.IsAny<string>(), "S", It.Is<string>(b => b.Contains("B")), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Test]
@@ -112,7 +99,7 @@ public class CommunicationServiceTests
         await _service.SendBatchCustomEmailAsync(new List<int> { 2005 }, "Manual Subject", "Manual Body");
 
         // Assert
-        _mockEmail.Verify(x => x.SendEmailAsync("2005a@e.com", "Manual Subject", "Manual Body", It.IsAny<CancellationToken>()), Times.Once);
+        _mockEmail.Verify(x => x.SendEmailAsync("2005a@e.com", "Manual Subject", It.Is<string>(b => b.Contains("Manual Body")), It.IsAny<CancellationToken>()), Times.Once);
         _mockEmail.Verify(x => x.SendEmailAsync("2010b@e.com", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -132,7 +119,7 @@ public class CommunicationServiceTests
         await _service.SendTypeCustomEmailAsync(new List<string> { "Executive" }, "Type Subject", "Type Body");
 
         // Assert
-        _mockEmail.Verify(x => x.SendEmailAsync("exec@e.com", "Type Subject", "Type Body", It.IsAny<CancellationToken>()), Times.Once);
+        _mockEmail.Verify(x => x.SendEmailAsync("exec@e.com", "Type Subject", It.Is<string>(b => b.Contains("Type Body")), It.IsAny<CancellationToken>()), Times.Once);
         _mockEmail.Verify(x => x.SendEmailAsync("general@e.com", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

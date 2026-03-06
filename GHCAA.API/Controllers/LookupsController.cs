@@ -14,10 +14,19 @@ namespace GHCAA.API.Controllers
     public class LookupsController : ControllerBase
     {
         private readonly ILookupService _lookupService;
+        private readonly IMemberService _memberService;
 
-        public LookupsController(ILookupService lookupService)
+        public LookupsController(ILookupService lookupService, IMemberService memberService)
         {
             _lookupService = lookupService;
+            _memberService = memberService;
+        }
+
+        [HttpGet("stats")]
+        public async Task<IActionResult> GetPublicStats(CancellationToken cancellationToken)
+        {
+            var stats = await _memberService.GetPublicStatsAsync(cancellationToken);
+            return Ok(stats);
         }
 
         [HttpGet]

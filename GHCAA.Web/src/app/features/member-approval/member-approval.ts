@@ -84,12 +84,24 @@ export class MemberApproval implements OnInit {
   }
 
   getStatusName(status: any): string {
-    const statuses = ['Pending Audit', 'Active', 'Inactive', 'Resigned', 'Terminated'];
-    return statuses[status] || 'Unknown';
+    const map: Record<string, string> = {
+      'Applied': 'Pending Audit',
+      'Active': 'Active',
+      'InactivePayment': 'Inactive',
+      'InactiveResigned': 'Resigned',
+      'Terminated': 'Terminated'
+    };
+    return map[String(status)] || 'Unknown';
   }
 
   getStatusClass(status: any): string {
-    const classes = ['pending', 'active', 'inactive', 'inactive', 'terminated'];
-    return classes[status] || '';
+    const map: Record<string, string> = {
+      'Applied': 'pending',
+      'Active': 'active',
+      'InactivePayment': 'inactive',
+      'InactiveResigned': 'inactive',
+      'Terminated': 'terminated'
+    };
+    return map[String(status)] || '';
   }
 }

@@ -9,6 +9,7 @@ export interface EmailTemplate {
     subject: string;
     body: string;
     description: string;
+    variables?: string;
 }
 
 export interface EmailLog {

@@ -2,7 +2,7 @@
     <div class="page-header">
         <div class="header-text">
             <h2>Member Registry</h2>
-            <small>{{ filteredMembers().length }} of {{ allMembers().length }} members shown</small>
+            <small>{{ filteredMembers().length }} members</small>
         </div>
         <div class="header-actions">
             <button class="btn btn-accent btn-md" (click)="openImport()">
@@ -106,6 +106,10 @@
                 <button class="btn btn-secondary btn-sm" (click)="toggleEdit()">
                     {{ isEditing() ? 'Discard Changes' : 'Edit Profile' }}
                 </button>
+                <button class="btn btn-secondary btn-sm" (click)="sendResetLink(selectedMember().id)"
+                    *ngIf="!isEditing()">
+                    🔐 Reset Password
+                </button>
                 <button class="close-btn" (click)="closeDetail()">✕</button>
             </div>
         </div>
@@ -178,6 +182,11 @@
                         *ngIf="!isEditing() && (selectedMember()?.category === 'None' || selectedMember()?.category === 0)"
                         class="text-muted">None</span>
                 </div>
+                <!-- Governance -->
+                <div class="detail-section-title full"
+                    style="margin-top: 1rem; border-top: 1px solid var(--glass-border); padding-top: 1rem; font-weight: 800; color: var(--primary-color);">
+                    Governance Assignment
+                </div>
                 <div class="detail-item">
                     <label>EC Position</label>
                     <select *ngIf="isEditing()" [(ngModel)]="selectedMember().ecPosition">
@@ -185,8 +194,14 @@
                         <option [value]="p.value">{{ p.label }}</option>
                         }
                     </select>
-                    <span *ngIf="!isEditing()" class="badge accent">{{ getECPositionLabel(selectedMember()?.ecPosition)
-                        }}</span>
+                    <span
+                        *ngIf="!isEditing() && selectedMember()?.ecPosition !== 'None' && selectedMember()?.ecPosition !== 8"
+                        class="status-badge ec-active">
+                        {{ getECPositionLabel(selectedMember()?.ecPosition) }}
+                    </span>
+                    <span
+                        *ngIf="!isEditing() && (selectedMember()?.ecPosition === 'None' || selectedMember()?.ecPosition === 8)"
+                        class="text-muted">None</span>
                 </div>
 
                 <div class="detail-item full" *ngIf="isEditing()">

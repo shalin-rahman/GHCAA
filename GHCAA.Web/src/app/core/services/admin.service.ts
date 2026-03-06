@@ -72,6 +72,10 @@ export class AdminService {
         return this.http.put(`${this.apiUrl}/${id}`, data);
     }
 
+    sendPasswordResetLink(id: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${id}/reset-password-admin`, {});
+    }
+
     importMembers(formData: FormData): Observable<any> {
         return this.http.post(API_ENDPOINTS.ADMIN.MEMBERS_IMPORT, formData);
     }

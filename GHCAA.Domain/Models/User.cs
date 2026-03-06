@@ -20,6 +20,10 @@ namespace GHCAA.Domain.Models
         public bool IsActive { get; set; } = true;
         public bool IsArchived { get; set; } = false;
 
+        // Security
+        public string? ResetToken { get; set; }
+        public DateTime? ResetTokenExpiry { get; set; }
+
         // Navigation
         public Member? Member { get; set; }
         public ICollection<Role> Roles { get; set; } = new List<Role>();

@@ -1,0 +1,66 @@
+<div class="admin-feature">
+    <div class="page-header">
+        <div class="header-text">
+            <h2>User Roles & Access Control</h2>
+            <small>Manage permissions and administrative levels for alumni</small>
+        </div>
+    </div>
+
+    <div class="glass-card table-wrap">
+        @if (loading()) {
+        <div class="loading-state">Loading user data...</div>
+        } @else {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Current Roles</th>
+                    <th>Assign New Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (user of users(); track user.id) {
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar">{{ user.fullName?.[0] }}</div>
+                            <div class="info">
+                                <span class="name">{{ user.fullName }}</span>
+                                <small>@{{ user.username }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="tag-list">
+                            @for (role of user.roles; track role) {
+                            <span class="role-tag">
+                                {{ role }}
+                                <button class="remove-btn" (click)="removeRole(user.userId, role)"
+                                    title="Remove Role">✕</button>
+                            </span>
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <select #roleSelect class="role-select">
+                                @for (r of roles(); track r.name) {
+                                <option [value]="r.name">{{ r.name }}</option>
+                                }
+                            </select>
+                            <button class="btn btn-primary btn-sm" (click)="assignRole(user.userId, roleSelect.value)">
+                                Add Role
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                } @empty {
+                <tr class="empty-row">
+                    <td colspan="3">No administrative users found.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>

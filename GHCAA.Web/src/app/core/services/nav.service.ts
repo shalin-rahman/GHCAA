@@ -5,8 +5,10 @@ export interface NavItem {
     path: string;
     label: string;
     icon: string;
-    adminOnly?: boolean;
     mobileVisible?: boolean;
+    exact?: boolean;
+    fragment?: string;
+    roles?: string[];
 }
 
 // All portal navigation items
@@ -30,9 +32,12 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/admin/approvals', label: 'Approvals', icon: '📝' },
     { path: '/admin/members', label: 'All Members', icon: '👥' },
+    { path: '/admin/members/ec', label: 'Executive Committee', icon: '🎗️' },
     { path: '/admin/news', label: 'News Posts', icon: '📰' },
     { path: '/admin/comm', label: 'Communications', icon: '✉️' },
-    { path: '/admin/ledger', label: 'Financial Ledger', icon: '📖' },
+    { path: '/admin/ledger', label: 'Financial Ledger', icon: '📖', roles: ['SuperAdmin'] },
+    { path: '/admin/roles', label: 'User Roles', icon: '🛡️', roles: ['SuperAdmin'] },
+    { path: '/admin/audit', label: 'Audit Logs', icon: '📜', roles: ['SuperAdmin'] },
     { path: '/admin/events', label: 'Manage Events', icon: '🗓️' },
     { path: '/admin/themes', label: 'Special Themes', icon: '🎨' },
 ];
@@ -58,7 +63,10 @@ export class NavService {
     adminNavItems = computed<NavItem[]>(() => {
         const user = this.auth.currentUser();
         if (!user || !['Admin', 'SuperAdmin'].includes(user.role)) return [];
-        return ADMIN_NAV_ITEMS;
+        return ADMIN_NAV_ITEMS.filter(item => {
+            if (!item.roles) return true;
+            return item.roles.includes(user.role);
+        });
     });
 
     /** Whether the current user has admin access */

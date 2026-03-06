@@ -12,10 +12,8 @@ using Moq;
 namespace GHCAA.Tests.Services;
 
 [TestFixture]
-public class MemberServiceTests
+public class MemberServiceTests : TestBase
 {
-    private ApplicationDbContext _context = null!;
-    private Microsoft.Data.Sqlite.SqliteConnection _connection = null!;
     private Mock<IFileStorageService> _mockStorage = null!;
     private Mock<IFileUploadRepository> _mockFileRepo = null!;
     private Mock<IOtpService> _mockOtp = null!;
@@ -31,16 +29,6 @@ public class MemberServiceTests
     [SetUp]
     public void Setup()
     {
-        _connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
-        _connection.Open();
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite(_connection)
-            .Options;
-
-        _context = new ApplicationDbContext(options);
-        _context.Database.EnsureCreated();
-
         _mockStorage = new Mock<IFileStorageService>();
         _mockFileRepo = new Mock<IFileUploadRepository>();
         _mockOtp = new Mock<IOtpService>();
@@ -63,13 +51,6 @@ public class MemberServiceTests
             _mockActivityService.Object,
             _mockNotificationService.Object
         );
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        _context.Dispose();
-        _connection.Close();
     }
 
     private MemberRegistrationDto CreateValidDto()

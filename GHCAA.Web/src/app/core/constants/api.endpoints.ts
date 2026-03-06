@@ -3,7 +3,8 @@ export const API_ENDPOINTS = {
         MEMBERS: '/api/admin/members',
         MEMBERS_IMPORT: '/api/admin/members/import',
         STATS: '/api/admin/stats',
-        COMMUNICATION: '/api/admin/comm'
+        COMMUNICATION: '/api/admin/comm',
+        GOVERNANCE: '/api/admin/governance'
     },
     AUTH: {
         LOGIN: '/api/auth/login',

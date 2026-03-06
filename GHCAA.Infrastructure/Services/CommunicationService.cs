@@ -18,6 +18,38 @@ namespace GHCAA.Infrastructure.Services
         private readonly IEmailService _emailService;
         private readonly ILogger<CommunicationService> _logger;
 
+        private static readonly List<EmailTemplate> DefaultTemplates = new()
+        {
+            new EmailTemplate 
+            { 
+                Code = "OTP_EMAIL", 
+                Subject = "GHCAA Verification Code: {{OtpCode}}", 
+                Description = "Security code for login/registration",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Verification Code</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>Your security code is:</p><div style='font-size: 24px; font-weight: bold; background: #f8f9fa; padding: 15px; text-align: center; border-radius: 5px; color: #3498db;'>{{OtpCode}}</div><p>Valid for 10 minutes. Do not share this code.</p></div>",
+            },
+            new EmailTemplate 
+            { 
+                Code = "WELCOME_EMAIL", 
+                Subject = "Welcome to GHC Alumni Association!", 
+                Description = "Official induction message",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Welcome to GHCAA</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your membership has been approved! We are excited to have you as part of our community.</p><div style='background: #e8f4fd; padding: 15px; border-radius: 5px;'><p><strong>Membership No:</strong> {{MembershipNumber}}</p><p><strong>Default Password:</strong> <code style='background:#fff; padding:2px 5px;'>{{DefaultPassword}}</code></p></div><p>Please log in and change your password immediately.</p></div>",
+            },
+            new EmailTemplate 
+            { 
+                Code = "FEE_REMINDER", 
+                Subject = "Annual Membership Subscription Due", 
+                Description = "Friendly reminder for yearly dues",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Subscription Reminder</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>This is a reminder that your annual membership subscription is now due.</p><p>Maintaining an active status ensures you continue to receive all alumni benefits and voting rights.</p><p>Thank you for your continued support!</p></div>",
+            },
+            new EmailTemplate 
+            { 
+                Code = "PASSWORD_RESET", 
+                Subject = "GHCAA Account Password Reset",
+                Description = "Admin-initiated secure password reset link",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;'><h2 style='color: #c5a059;'>Password Reset</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>An administrator has initiated a password reset for your GHCAA account. Click below to set a new password — the link is valid for 24 hours.</p><div style='text-align: center; margin: 30px 0;'><a href='{{ResetUrl}}' style='background: #111; color: #c5a059; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; border: 1px solid #c5a059;'>Reset My Password</a></div><p style='color: #666; font-size: 0.9rem;'>If you did not request this, please ignore this email.</p></div>",
+            }
+        };
+
         public CommunicationService(ApplicationDbContext db, IEmailService emailService, ILogger<CommunicationService> logger)
         {
             _db = db;
@@ -27,12 +59,36 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<IEnumerable<EmailTemplate>> GetAllTemplatesAsync(CancellationToken cancellationToken = default)
         {
-            return await _db.EmailTemplates.ToListAsync(cancellationToken);
+            var dbTemplates = await _db.EmailTemplates.ToListAsync(cancellationToken);
+            var results = new List<EmailTemplate>(dbTemplates);
+
+            foreach (var def in DefaultTemplates)
+            {
+                if (!results.Any(t => t.Code == def.Code))
+                {
+                    // Add codebase template as virtual entry (Id 0)
+                    results.Add(new EmailTemplate 
+                    { 
+                        Id = 0, 
+                        Code = def.Code, 
+                        Subject = def.Subject, 
+                        Body = def.Body, 
+                        Description = def.Description + " (System Default)"
+                    });
+                }
+            }
+
+            return results;
         }
 
         public async Task<EmailTemplate?> GetTemplateByCodeAsync(string code, CancellationToken cancellationToken = default)
         {
-            return await _db.EmailTemplates.FirstOrDefaultAsync(t => t.Code == code, cancellationToken);
+            var template = await _db.EmailTemplates.FirstOrDefaultAsync(t => t.Code == code, cancellationToken);
+            if (template != null) return template;
+
+            // Fallback to codebase
+            _logger.LogInformation("Template {Code} not found in database, falling back to codebase defaults.", code);
+            return DefaultTemplates.FirstOrDefault(t => t.Code == code);
         }
 
         public async Task<EmailTemplate> UpdateTemplateAsync(EmailTemplate template, CancellationToken cancellationToken = default)
@@ -225,7 +281,8 @@ namespace GHCAA.Infrastructure.Services
 
             try
             {
-                await _emailService.SendEmailAsync(to, subject, body, cancellationToken);
+                var fullBody = body + GetEmailFooter();
+                await _emailService.SendEmailAsync(to, subject, fullBody, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -245,6 +302,29 @@ namespace GHCAA.Infrastructure.Services
                 string key = m.Groups[1].Value.Trim();
                 return vars.TryGetValue(key, out string? value) ? value : m.Value;
             });
+        }
+
+        private string GetEmailFooter()
+        {
+            return @"
+                <div style='margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5c15e; font-family: sans-serif; color: #666;'>
+                    <table width='100%' cellpadding='0' cellspacing='0'>
+                        <tr>
+                            <td style='vertical-align: middle; width: 60px;'>
+                                <img src='https://www.haragangacollege.edu.bd/assets/logo.png' alt='GHCAA Logo' style='width: 50px; height: 50px; border-radius: 50%;' />
+                            </td>
+                            <td style='vertical-align: middle; padding-left: 15px;'>
+                                <div style='font-size: 16px; font-weight: 800; color: #111;'>Govt. Haraganga College Alumni Association</div>
+                                <div style='font-size: 12px; color: #c5a059;'>Sharing Heritage, Aligning Lives, Integrating Networks</div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div style='margin-top: 15px; font-size: 11px;'>
+                        <p>Registered Office: Govt. Haraganga College Campus, Munshiganj, Bangladesh.</p>
+                        <p>Enquiries: <a href='mailto:haragangian@gmail.com' style='color: #c5a059; text-decoration: none;'>haragangian@gmail.com</a></p>
+                        <p style='color: #999; margin-top: 20px;'>&copy; 2025 HARAGANGIAN. All rights reserved.</p>
+                    </div>
+                </div>";
         }
     }
 }

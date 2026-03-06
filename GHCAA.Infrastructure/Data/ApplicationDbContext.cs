@@ -5,7 +5,7 @@ namespace GHCAA.Infrastructure.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(DbContextOptions options)
             : base(options) { }
 
         public DbSet<Member> Members { get; set; } = null!;
@@ -88,9 +88,9 @@ namespace GHCAA.Infrastructure.Data
                 { 
                     Id = 1, 
                     Code = "OTP_EMAIL", 
-                    Subject = "Your GHC Alumni Association Verification Code", 
-                    Description = "Sent during registration and password reset",
-                    Body = "Hello {{FullName}}, your OTP is: <strong>{{OtpCode}}</strong>. Valid for 10 minutes.",
+                    Subject = "GHCAA Verification Code: {{OtpCode}}", 
+                    Description = "Security code for login/registration",
+                    Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Verification Code</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>Your security code is:</p><div style='font-size: 24px; font-weight: bold; background: #f8f9fa; padding: 15px; text-align: center; border-radius: 5px; color: #3498db;'>{{OtpCode}}</div><p>Valid for 10 minutes. Do not share this code.</p></div>",
                     Variables = "['FullName', 'OtpCode']",
                     LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
@@ -99,19 +99,19 @@ namespace GHCAA.Infrastructure.Data
                     Id = 2, 
                     Code = "WELCOME_EMAIL", 
                     Subject = "Welcome to GHC Alumni Association!", 
-                    Description = "Sent after admin approves registration",
-                    Body = "Dear {{FullName}}, welcome! Your membership number is {{MembershipNumber}} and your default password is {{DefaultPassword}}.",
+                    Description = "Official induction message",
+                    Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Welcome to GHCAA</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your membership has been approved! We are excited to have you as part of our community.</p><div style='background: #e8f4fd; padding: 15px; border-radius: 5px;'><p><strong>Membership No:</strong> {{MembershipNumber}}</p><p><strong>Default Password:</strong> <code style='background:#fff; padding:2px 5px;'>{{DefaultPassword}}</code></p></div><p>Please log in and change your password immediately.</p></div>",
                     Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']",
                     LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new EmailTemplate 
                 { 
                     Id = 3, 
-                    Code = "EVENT_REGISTRATION_CONFIRMATION", 
-                    Subject = "Registration Confirmed: {{EventTitle}}", 
-                    Description = "Sent after event registration approval",
-                    Body = "Dear {{FullName}}, your registration for the event <strong>{{EventTitle}}</strong> has been approved. <br/><br/><strong>Event Details:</strong><br/>Date: {{EventDate}}<br/>Location: {{EventLocation}}<br/><br/>Looking forward to seeing you there!",
-                    Variables = "['FullName', 'EventTitle', 'EventDate', 'EventLocation']",
+                    Code = "FEE_REMINDER", 
+                    Subject = "Annual Membership Subscription Due", 
+                    Description = "Friendly reminder for yearly dues",
+                    Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Subscription Reminder</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>This is a reminder that your annual membership subscription is now due.</p><p>Maintaining an active status ensures you continue to receive all alumni benefits and voting rights.</p><p>Thank you for your continued support!</p></div>",
+                    Variables = "['FullName']",
                     LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
@@ -133,8 +133,8 @@ namespace GHCAA.Infrastructure.Data
                 new Role { Id = 3, Name = "Member" }
             );
 
-            // Seed Admin Member: shalin (Required for linkage)
-            modelBuilder.Entity<Member>().HasData(new Member
+            // Seed Members
+            var shalin = new Member
             {
                 Id = 1,
                 FullName = "Habibur Rahman Shalin",
@@ -151,19 +151,56 @@ namespace GHCAA.Infrastructure.Data
                 EmergencyContactName = "Emergency",
                 EmergencyContactRelation = "Family",
                 EmergencyContactPhone = "01700000000",
-                HSCAdmissionYear = 1950,
-                GHCAdmissionYear = 1950,
-                LastCertificateFromGHC = "Other",
-                SubjectGroup = "Other",
-                GHCLastCertificatePassingYear = 1952,
-                ProfessionalSector = "Other",
-                Designation = "Admin",
+                HSCAdmissionYear = 2013,
+                GHCAdmissionYear = 2013,
+                LastCertificateFromGHC = "HSC",
+                SubjectGroup = "Science",
+                GHCLastCertificatePassingYear = 2015,
+                ProfessionalSector = "Engineering",
+                Designation = "Software Engineer",
                 Status = Domain.Enums.MembershipStatus.Active,
                 AppliedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                MembershipNumber = "ADM-SHALIN-1",
-                MembershipType = Domain.Enums.MembershipType.Honorary,
-                LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-            });
+                MembershipNumber = "GHC-2015-0001",
+                MembershipType = Domain.Enums.MembershipType.Founding,
+                LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                ECPosition = Domain.Enums.ECPosition.President,
+                EmailVerified = true
+            };
+
+            var jane = new Member
+            {
+                Id = 101, // Use a distinct ID
+                FullName = "Jane Doe",
+                FatherName = "James Doe",
+                MotherName = "Mary Doe",
+                DateOfBirth = new DateTime(1992, 5, 10, 0, 0, 0, DateTimeKind.Utc),
+                Gender = Domain.Enums.Gender.Female,
+                BloodGroup = Domain.Enums.BloodGroup.OPositive,
+                NID = "0000000002",
+                MobileNo = "01700000002",
+                Email = "jane@example.com",
+                PresentAddress = "Dhaka",
+                PermanentAddress = "Dhaka",
+                EmergencyContactName = "Friend",
+                EmergencyContactRelation = "None",
+                EmergencyContactPhone = "01700000003",
+                HSCAdmissionYear = 2014,
+                GHCAdmissionYear = 2014,
+                LastCertificateFromGHC = "HSC",
+                SubjectGroup = "Humanities",
+                GHCLastCertificatePassingYear = 2016,
+                ProfessionalSector = "Corporate",
+                Designation = "Communications Manager",
+                Status = Domain.Enums.MembershipStatus.Active,
+                AppliedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                MembershipNumber = "GHC-2016-0001",
+                MembershipType = Domain.Enums.MembershipType.General,
+                LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                ECPosition = Domain.Enums.ECPosition.GeneralSecretary,
+                EmailVerified = true
+            };
+
+            modelBuilder.Entity<Member>().HasData(shalin, jane);
 
             // Seed Admin User: shalin
             // Password: shalin (hashed)
@@ -246,7 +283,85 @@ namespace GHCAA.Infrastructure.Data
 
             // Link existing members to EC if applicable
             modelBuilder.Entity<ECMember>().HasData(
-                new ECMember { Id = 1, ECPeriodId = 1, MemberId = 1, Position = Domain.Enums.ECPosition.President, StartDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+                new ECMember { Id = 1, ECPeriodId = 1, MemberId = 1, Position = Domain.Enums.ECPosition.President, StartDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new ECMember { Id = 2, ECPeriodId = 1, MemberId = 101, Position = Domain.Enums.ECPosition.GeneralSecretary, StartDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+            );
+
+            // Seed News
+            modelBuilder.Entity<NewsPost>().HasData(
+                new NewsPost 
+                { 
+                    Id = 1, 
+                    Title = "College Library Renovation Project Completed", 
+                    Content = "The historic library of Govt. Haraganga College has been fully renovated with modern amenities and digital archiving systems, funded by the 1985 batch alumni.", 
+                    Category = Domain.Enums.NewsCategory.OrganisationalUpdate, 
+                    IsActive = true, 
+                    AuthorId = 2, 
+                    PublishDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+                    ImageUrl = "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2070"
+                },
+                new NewsPost 
+                { 
+                    Id = 2, 
+                    Title = "Haragangian Global Meet 2026: London Chapter", 
+                    Content = "GHCAA members in the UK gathered at the Royal Museum today to discuss international networking and scholarship opportunities for current students.", 
+                    Category = Domain.Enums.NewsCategory.News, 
+                    IsActive = true, 
+                    AuthorId = 2, 
+                    PublishDate = new DateTime(2026, 3, 4, 0, 0, 0, DateTimeKind.Utc),
+                    ImageUrl = "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=2070"
+                }
+            );
+
+            // Seed Events
+            modelBuilder.Entity<AlumniEvent>().HasData(
+                new AlumniEvent 
+                { 
+                    Id = 1, 
+                    Title = "Grand Reunion 2026", 
+                    Description = "The biggest gathering of Haragangians across the globe. Join us for a day of nostalgia, networking, and cultural celebrations.", 
+                    Date = new DateTime(2026, 5, 15, 9, 0, 0, DateTimeKind.Utc), 
+                    Location = "College Ground, Munshiganj", 
+                    RegistrationFee = 1500, 
+                    IsActive = true, 
+                    RegistrationDeadline = new DateTime(2026, 4, 30, 23, 59, 59, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+                    ImageUrl = "https://images.unsplash.com/photo-1511578334221-d748ef50b502?q=80&w=2070"
+                }
+            );
+
+            // Seed Jobs
+            modelBuilder.Entity<JobOpportunity>().HasData(
+                new JobOpportunity 
+                { 
+                    Id = 1, 
+                    Title = "Senior Software Architect", 
+                    Company = "GlobalTech Solutions", 
+                    Location = "Dhaka, Bangladesh", 
+                    Description = "Looking for an experienced architect to lead our fintech transition. Great benefits and remote flexibility.", 
+                    Requirements = "10+ years of experience, C# Experts only.", 
+                    ContactEmail = "careers@globaltech.com", 
+                    Category = Domain.Enums.JobCategory.IT, 
+                    PostedByMemberId = 1, 
+                    PostedDate = new DateTime(2026, 2, 24, 0, 0, 0, DateTimeKind.Utc),
+                    ExpiryDate = new DateTime(2026, 4, 30, 23, 59, 59, DateTimeKind.Utc),
+                    IsActive = true 
+                }
+            );
+
+            // Seed Themes (Independence Day)
+            modelBuilder.Entity<SpecialDayTheme>().HasData(
+                new SpecialDayTheme 
+                { 
+                    Id = 1, 
+                    Title = "Independence Day 2026", 
+                    StartDate = new DateTime(2026, 3, 20, 0, 0, 0, DateTimeKind.Utc), 
+                    EndDate = new DateTime(2026, 3, 27, 23, 59, 59, DateTimeKind.Utc), 
+                    BackgroundColor = "#213921", // Deep Green
+                    TextColor = "#dc2626",      // Radiant Red
+                    AnnouncementText = "Celebrating 55 Years of Victory! Happy Independence Day to all Haragangians.", 
+                    IsEnabled = true 
+                }
             );
         }
     }

@@ -344,6 +344,18 @@ namespace GHCAA.Infrastructure.Services
                 user.IsArchived = true;
             }
 
+            // End active EC roles
+            var activeRoles = await _db.ECMembers
+                .Where(em => em.MemberId == memberId && em.EndDate == null)
+                .ToListAsync(cancellationToken);
+            
+            foreach (var role in activeRoles)
+            {
+                role.EndDate = DateTime.UtcNow;
+                role.ChangeReason = "Member archived";
+            }
+            member.ECPosition = Enums.ECPosition.None;
+
             await _db.SaveChangesAsync(cancellationToken);
             await _activityService.LogActivityAsync(memberId, "Archived", "Member archived (soft deleted).", cancellationToken: cancellationToken);
             _logger.LogInformation("Member {MemberId} archived (soft delete)", memberId);
@@ -562,6 +574,64 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Member {MemberId} information updated by Admin", id);
             return true;
+        }
+
+        public async Task<bool> SendAdminPasswordResetLinkAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
+            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
+            
+            if (user == null || member == null) return false;
+
+            // Generate a secure token
+            var token = Guid.NewGuid().ToString("N");
+            user.ResetToken = token;
+            user.ResetTokenExpiry = DateTime.UtcNow.AddHours(24);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Log activity
+            await _activityService.LogActivityAsync(memberId, "Password Reset", "Admin initiated password reset email.", cancellationToken: cancellationToken);
+
+            var resetUrl = $"http://localhost:4200/reset-password?email={member.Email}&token={token}";
+            
+            // Try fetching PASSWORD_RESET template from DB first (database-first strategy)
+            var dbTemplate = await _communicationService.GetTemplateByCodeAsync("PASSWORD_RESET", cancellationToken);
+
+            string subject, body;
+            if (dbTemplate != null)
+            {
+                subject = dbTemplate.Subject
+                    .Replace("{{FullName}}", member.FullName);
+                body = dbTemplate.Body
+                    .Replace("{{FullName}}", member.FullName)
+                    .Replace("{{ResetUrl}}", resetUrl)
+                    .Replace("{{MembershipNumber}}", member.MembershipNumber ?? "Pending");
+            }
+            else
+            {
+                // Fallback to hardcoded HTML
+                subject = "GHCAA Account Password Reset";
+                body = $@"
+                <div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;'>
+                    <h2 style='color: #c5a059;'>Password Reset Initiated</h2>
+                    <p>Hello <strong>{member.FullName}</strong>,</p>
+                    <p>An administrator has initiated a password reset for your GHCAA account.</p>
+                    <p>Please click the button below to set a new password. This link is valid for 24 hours.</p>
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='{resetUrl}' style='background: #111; color: #c5a059; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; border: 1px solid #c5a059;'>Reset My Password</a>
+                    </div>
+                    <p style='color: #666; font-size: 0.9rem;'>If you did not request this, please ignore this email.</p>
+                </div>";
+            }
+
+            await _email.SendEmailAsync(member.Email, subject, body);
+            return true;
+        }
+        public async Task<object> GetPublicStatsAsync(CancellationToken cancellationToken = default)
+        {
+            var count = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Active, cancellationToken);
+            // We add 5000 as a base offset to reflect the existing offline legacy while showing actual new signups
+            return new { TotalMembers = count + 5000, Countries = 15, Batches = 68 };
         }
     }
 }

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { EC_ROLES, getECPositionName } from '../../core/constants/governance.constants';
 
 @Component({
@@ -102,8 +102,7 @@ export class AdminMembers implements OnInit {
       const matchQ = !q ||
         m.fullName?.toLowerCase().includes(q) ||
         m.email?.toLowerCase().includes(q) ||
-        m.membershipNumber?.toLowerCase().includes(q) ||
-        m.ghcLastCertificatePassingYear?.toString().includes(q);
+        m.membershipNumber?.toLowerCase().includes(q);
       const matchS = s === 'all' || String(m.status) === s;
       return matchQ && matchS;
     });
@@ -111,13 +110,15 @@ export class AdminMembers implements OnInit {
 
   statusOptions = [
     { value: 'all', label: 'All Statuses' },
-    { value: '0', label: 'Applied' },
-    { value: '1', label: 'Active' },
-    { value: '2', label: 'Inactive (Payment)' },
-    { value: '3', label: 'Inactive (Resigned)' },
+    { value: 'Applied', label: 'Applied' },
+    { value: 'Active', label: 'Active' },
+    { value: 'InactivePayment', label: 'Inactive (Payment)' },
+    { value: 'InactiveResigned', label: 'Inactive (Resigned)' },
   ];
 
-  ngOnInit() { this.loadMembers(); }
+  ngOnInit() {
+    this.loadMembers();
+  }
 
   loadMembers() {
     this.loading.set(true);
@@ -142,6 +143,14 @@ export class AdminMembers implements OnInit {
     this.adminService.archiveMember(id).subscribe({
       next: () => { this.notify.success('Member archived.'); this.loadMembers(); },
       error: () => this.notify.error('Archive failed.')
+    });
+  }
+
+  sendResetLink(id: number) {
+    if (!confirm('Send a password reset link to this member?')) return;
+    this.adminService.sendPasswordResetLink(id).subscribe({
+      next: () => this.notify.success('Password reset link sent.'),
+      error: () => this.notify.error('Failed to send reset link.')
     });
   }
 
@@ -197,7 +206,12 @@ export class AdminMembers implements OnInit {
   }
 
   getStatusClass(status: any): string {
-    const map: Record<string, string> = { '0': 'pending', '1': 'active', '2': 'inactive', '3': 'resigned' };
+    const map: Record<string, string> = {
+      'Applied': 'pending',
+      'Active': 'active',
+      'InactivePayment': 'inactive',
+      'InactiveResigned': 'resigned'
+    };
     return map[String(status)] ?? '';
   }
 

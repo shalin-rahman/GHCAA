@@ -13,4 +13,8 @@ export class LookupService {
         const url = category ? `${API_ENDPOINTS.LOOKUPS}/${category}` : API_ENDPOINTS.LOOKUPS;
         return this.http.get<any[]>(url);
     }
+
+    getStats(): Observable<any> {
+        return this.http.get<any>(`${API_ENDPOINTS.LOOKUPS}/stats`);
+    }
 }
