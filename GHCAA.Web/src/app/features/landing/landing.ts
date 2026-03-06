@@ -7,6 +7,7 @@ import { LandingMembership } from './sections/membership/membership';
 import { LandingEventsPreview } from './sections/events-preview/events-preview';
 import { LandingNewsPreview } from './sections/news-preview/news-preview';
 import { LandingEcPreview } from './sections/ec-preview/ec-preview';
+import { LandingGalleryPreview } from './sections/gallery-preview/gallery-preview';
 import { LandingCtaBanner } from './sections/cta-banner/cta-banner';
 
 @Component({
@@ -20,6 +21,7 @@ import { LandingCtaBanner } from './sections/cta-banner/cta-banner';
     LandingMembership,
     LandingEventsPreview,
     LandingNewsPreview,
+    LandingGalleryPreview,
     LandingEcPreview,
     LandingCtaBanner
   ],

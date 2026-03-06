@@ -46,10 +46,18 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
-        public async Task<IEnumerable<EventGallery>> GetAllGalleriesAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<EventGallery>> GetAllGalleriesAsync(bool onlyActive = false, CancellationToken cancellationToken = default)
         {
-            return await _db.EventGalleries
+            var query = _db.EventGalleries
                 .Include(g => g.Photos)
+                .AsQueryable();
+
+            if (onlyActive)
+            {
+                query = query.Where(g => g.IsActive);
+            }
+
+            return await query
                 .OrderByDescending(g => g.EventDate)
                 .ToListAsync(cancellationToken);
         }
@@ -59,6 +67,13 @@ namespace GHCAA.Infrastructure.Services
             return await _db.EventGalleries
                 .Include(g => g.Photos)
                 .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
+        }
+
+        public async Task<EventGallery> UpdateEventGalleryAsync(EventGallery gallery, CancellationToken cancellationToken = default)
+        {
+            _db.EventGalleries.Update(gallery);
+            await _db.SaveChangesAsync(cancellationToken);
+            return gallery;
         }
 
         public async Task<bool> DeleteGalleryAsync(int id, CancellationToken cancellationToken = default)

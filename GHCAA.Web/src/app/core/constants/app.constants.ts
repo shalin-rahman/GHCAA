@@ -96,7 +96,9 @@ export const PROFESSIONAL_SECTORS = [
 ];
 
 export const getAcademicYears = (): number[] => {
-    return Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
+    const currentYear = new Date().getFullYear();
+    const startYear = 1950;
+    return Array.from({ length: currentYear - startYear + 1 }, (_, i) => currentYear - i);
 };
 
 export const IS_HSC = (cert: string | undefined | null) => cert === 'HSC';

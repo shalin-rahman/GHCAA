@@ -47,8 +47,42 @@ namespace GHCAA.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetGalleries(CancellationToken cancellationToken)
         {
-            var galleries = await _galleryService.GetAllGalleriesAsync(cancellationToken);
+            // Public viewing shows only active galleries
+            var galleries = await _galleryService.GetAllGalleriesAsync(onlyActive: true, cancellationToken);
             return Ok(galleries);
+        }
+
+        [HttpGet("all")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetAllGalleries(CancellationToken cancellationToken)
+        {
+            // Admin sees everything
+            var galleries = await _galleryService.GetAllGalleriesAsync(onlyActive: false, cancellationToken);
+            return Ok(galleries);
+        }
+
+        [HttpPatch("admin/{id}/toggle-active")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> ToggleActive(int id, CancellationToken cancellationToken)
+        {
+            var gallery = await _galleryService.GetGalleryByIdAsync(id, cancellationToken);
+            if (gallery == null) return NotFound();
+
+            gallery.IsActive = !gallery.IsActive;
+            await _galleryService.UpdateEventGalleryAsync(gallery, cancellationToken);
+            return Ok(new { gallery.IsActive });
+        }
+
+        [HttpPatch("admin/{id}/toggle-featured")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> ToggleFeatured(int id, CancellationToken cancellationToken)
+        {
+            var gallery = await _galleryService.GetGalleryByIdAsync(id, cancellationToken);
+            if (gallery == null) return NotFound();
+
+            gallery.IsFeatured = !gallery.IsFeatured;
+            await _galleryService.UpdateEventGalleryAsync(gallery, cancellationToken);
+            return Ok(new { gallery.IsFeatured });
         }
 
         [HttpGet("{id}")]

@@ -6,6 +6,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { EC_ROLES, getECPositionName, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData } from '../../core/constants/app.constants';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-admin-members',
@@ -45,29 +46,42 @@ export class AdminMembers implements OnInit {
   defaultValues: Record<string, string> = {};
 
   systemProperties = [
+    // Personal
     { value: 'FullName', label: 'Full Name' },
-    { value: 'Email', label: 'Email Address' },
-    { value: 'MobileNo', label: 'Mobile Number' },
-    { value: 'NID', label: 'NID Number' },
     { value: 'FatherName', label: "Father's Name" },
     { value: 'MotherName', label: "Mother's Name" },
     { value: 'DateOfBirth', label: 'Date of Birth' },
     { value: 'Gender', label: 'Gender' },
     { value: 'BloodGroup', label: 'Blood Group' },
-    { value: 'GHCLastCertificatePassingYear', label: 'Passing Year' },
-    { value: 'MembershipNumber', label: 'Membership No.' },
-    { value: 'Designation', label: 'Professional Designation' },
-    { value: 'ProfessionalSector', label: 'Sector' },
+    { value: 'NID', label: 'NID Number' },
+    { value: 'MobileNo', label: 'Mobile Number' },
+    { value: 'Email', label: 'Email Address' },
     { value: 'PresentAddress', label: 'Present Address' },
     { value: 'PermanentAddress', label: 'Permanent Address' },
-    { value: 'HighestCertificate', label: 'Highest Certificate' },
-    { value: 'GHCLastCertificate', label: 'GHC Last Certificate' },
-    { value: 'HSCAdmissionYear', label: 'HSC Admission Year' },
-    { value: 'GHCAdmissionYear', label: 'GHC Admission Year' },
     { value: 'EmergencyContactName', label: 'Emergency Contact Name' },
     { value: 'EmergencyContactRelation', label: 'Emergency Contact Relation' },
     { value: 'EmergencyContactPhone', label: 'Emergency Contact Phone' },
+    // Academic — Highest
+    { value: 'HighestCertificate', label: 'Highest Certificate' },
+    { value: 'HighestCertificateGroup', label: 'Highest Certificate Group' },
+    { value: 'HighestCertificateSubject', label: 'Highest Certificate Subject' },
+    { value: 'HighestCertificatePassingYear', label: 'Highest Certificate Passing Year' },
+    { value: 'HSCAdmissionYear', label: 'HSC Admission Year' },
+    // Academic — GHC
+    { value: 'GHCLastCertificate', label: 'GHC Last Certificate' },
+    { value: 'GHCLastCertificateGroup', label: 'GHC Last Certificate Group' },
+    { value: 'GHCLastCertificateSubject', label: 'GHC Last Certificate Subject' },
+    { value: 'GHCLastCertificatePassingYear', label: 'GHC Passing Year (Batch)' },
+    { value: 'GHCAdmissionYear', label: 'GHC Admission Year' },
+    // Professional
+    { value: 'ProfessionalSector', label: 'Professional Sector' },
+    { value: 'Designation', label: 'Professional Designation' },
+    // Membership
+    { value: 'MembershipNumber', label: 'Membership Number' },
     { value: 'MembershipType', label: 'Membership Type' },
+    { value: 'Category', label: 'Member Category' },
+    { value: 'ECPosition', label: 'EC Position' },
+    // System
     { value: 'ID', label: 'System/External ID (For Photos)' }
   ];
 
@@ -255,18 +269,63 @@ export class AdminMembers implements OnInit {
   }
 
   extractHeaders(file: File) {
-    // For production, usually we'd use a lib like 'xlsx', but here we rely on standard headers 
-    // and manual mapping.
-    this.excelHeaders = ['ID', 'Full Name', 'Email', 'Mobile', 'NID', 'Batch', 'Father Name', 'Mother Name', 'Designation'];
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json<any>(firstSheet, { header: 1 });
 
-    // Auto-map based on common strings
-    this.excelHeaders.forEach(h => {
-      const lower = h.toLowerCase();
-      if (lower.includes('name') && !lower.includes('father') && !lower.includes('mother')) this.columnMapping[h] = 'FullName';
-      if (lower.includes('email')) this.columnMapping[h] = 'Email';
-      if (lower.includes('mobile') || lower.includes('phone')) this.columnMapping[h] = 'MobileNo';
-      if (lower.includes('id')) this.columnMapping[h] = 'ID';
-    });
+        if (jsonData.length > 0) {
+          // First row = headers
+          this.excelHeaders = (jsonData[0] as any[]).filter((h: any) => h != null && String(h).trim() !== '').map((h: any) => String(h).trim());
+
+          // Reset mappings
+          this.columnMapping = {};
+
+          // Auto-map by fuzzy matching
+          this.excelHeaders.forEach(h => {
+            const lower = h.toLowerCase();
+            if ((lower.includes('full') && lower.includes('name')) || lower === 'name') this.columnMapping['FullName'] = h;
+            else if (lower.includes('father')) this.columnMapping['FatherName'] = h;
+            else if (lower.includes('mother')) this.columnMapping['MotherName'] = h;
+            else if (lower.includes('email') || lower.includes('e-mail')) this.columnMapping['Email'] = h;
+            else if (lower.includes('mobile') || lower.includes('phone') || lower.includes('cell')) this.columnMapping['MobileNo'] = h;
+            else if (lower === 'nid' || lower.includes('national id')) this.columnMapping['NID'] = h;
+            else if (lower.includes('batch') || lower.includes('passing year') || lower.includes('session')) this.columnMapping['GHCLastCertificatePassingYear'] = h;
+            else if (lower.includes('designation') || lower.includes('position')) this.columnMapping['Designation'] = h;
+            else if (lower.includes('sector') || lower.includes('profession')) this.columnMapping['ProfessionalSector'] = h;
+            else if (lower.includes('blood')) this.columnMapping['BloodGroup'] = h;
+            else if (lower.includes('gender') || lower.includes('sex')) this.columnMapping['Gender'] = h;
+            else if (lower.includes('dob') || lower.includes('birth')) this.columnMapping['DateOfBirth'] = h;
+            else if (lower.includes('present') && lower.includes('address')) this.columnMapping['PresentAddress'] = h;
+            else if (lower.includes('permanent') && lower.includes('address')) this.columnMapping['PermanentAddress'] = h;
+            else if (lower.includes('address') && !lower.includes('present') && !lower.includes('permanent')) this.columnMapping['PresentAddress'] = h;
+            else if (lower === 'id' || lower === 'sl' || lower === 'serial') this.columnMapping['ID'] = h;
+            else if (lower.includes('membership') && lower.includes('no')) this.columnMapping['MembershipNumber'] = h;
+            else if (lower.includes('membership') && lower.includes('type')) this.columnMapping['MembershipType'] = h;
+            else if (lower.includes('certificate') && lower.includes('highest')) this.columnMapping['HighestCertificate'] = h;
+            else if (lower.includes('certificate') && lower.includes('ghc')) this.columnMapping['GHCLastCertificate'] = h;
+            else if (lower.includes('emergency') && lower.includes('name')) this.columnMapping['EmergencyContactName'] = h;
+            else if (lower.includes('emergency') && lower.includes('relation')) this.columnMapping['EmergencyContactRelation'] = h;
+            else if (lower.includes('emergency') && lower.includes('phone')) this.columnMapping['EmergencyContactPhone'] = h;
+            else if (lower.includes('hsc') && lower.includes('admission')) this.columnMapping['HSCAdmissionYear'] = h;
+            else if (lower.includes('ghc') && lower.includes('admission')) this.columnMapping['GHCAdmissionYear'] = h;
+          });
+
+          this.notify.success(`Found ${this.excelHeaders.length} columns in the Excel file.`);
+        } else {
+          this.notify.warning('The Excel file appears to be empty.');
+          this.excelHeaders = [];
+        }
+      } catch (err) {
+        console.error('Excel parse error:', err);
+        this.notify.error('Failed to read Excel file. Please ensure it is a valid .xlsx file.');
+        this.excelHeaders = [];
+      }
+    };
+    reader.readAsArrayBuffer(file);
   }
 
   executeImport() {
@@ -276,7 +335,16 @@ export class AdminMembers implements OnInit {
     const formData = new FormData();
     formData.append('ExcelFile', this.importFile);
     this.photoFiles.forEach(f => formData.append('Photos', f));
-    formData.append('ColumnMappingJson', JSON.stringify(this.columnMapping));
+
+    // Invert mapping for backend: ExcelColumnName -> SystemPropertyName
+    const invertedMapping: Record<string, string> = {};
+    Object.entries(this.columnMapping).forEach(([sysProp, excelCol]) => {
+      if (excelCol && excelCol !== 'undefined') {
+        invertedMapping[excelCol] = sysProp;
+      }
+    });
+
+    formData.append('ColumnMappingJson', JSON.stringify(invertedMapping));
     formData.append('DefaultValuesJson', JSON.stringify(this.defaultValues));
 
     this.adminService.importMembers(formData).subscribe({

@@ -1,13 +1,15 @@
 <div class="admin-events reveal-top">
     @if (!showForm()) {
-    <div class="page-header flex justify-between items-center mb-10">
-        <div>
-            <h2 class="text-3xl font-black text-accent tracking-tighter">Event Ecosystem</h2>
-            <p class="text-muted">Manage alumni gatherings, institutional projects, and participation approvals.</p>
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Event Ecosystem</h2>
+            <p>Manage alumni gatherings, institutional projects, and participation approvals.</p>
         </div>
-        <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
-            <span class="icon">✨</span> Launch New Event
-        </button>
+        <div class="header-actions">
+            <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
+                <span class="icon">✨</span> Launch New Event
+            </button>
+        </div>
     </div>
     } @else {
     <div class="page-header flex items-center gap-6 mb-10">
@@ -143,7 +145,6 @@
 
     <!-- Participation Approvals Tab -->
     <div *ngIf="activeTab() === 'approvals'" class="animate-fade-in">
-        <!-- Approvals Content (Same as before but wrapped in @if(!showForm)) -->
         <div class="glass-card table-container">
             <table class="admin-table">
                 <thead>
@@ -173,9 +174,9 @@
                         </td>
                         <td class="px-6 py-4">
                             <span class="status-badge" [ngClass]="{
-                                    'bg-yellow-500/10 text-yellow-500': reg.status === 'Pending',
-                                    'bg-green-500/10 text-green-500': reg.status === 'Approved',
-                                    'bg-red-500/10 text-red-500': reg.status === 'Rejected'
+                                    'pending': reg.status === 'Pending',
+                                    'approved': reg.status === 'Approved',
+                                    'rejected': reg.status === 'Rejected'
                                 }">
                                 {{ reg.status }}
                             </span>

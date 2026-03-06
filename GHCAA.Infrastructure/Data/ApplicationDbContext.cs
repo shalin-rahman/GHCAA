@@ -371,13 +371,47 @@ namespace GHCAA.Infrastructure.Data
                 { 
                     Id = 1, 
                     Title = "Independence Day 2026", 
-                    StartDate = new DateTime(2026, 3, 20, 0, 0, 0, DateTimeKind.Utc), 
-                    EndDate = new DateTime(2026, 3, 27, 23, 59, 59, DateTimeKind.Utc), 
-                    BackgroundColor = "#213921", // Deep Green
-                    TextColor = "#dc2626",      // Radiant Red
-                    AnnouncementText = "Celebrating 55 Years of Victory! Happy Independence Day to all Haragangians.", 
-                    IsEnabled = true 
+                    StartDate = new DateTime(2026, 3, 5, 0, 0, 0, DateTimeKind.Utc),
+                    EndDate = new DateTime(2026, 3, 30, 23, 59, 59, DateTimeKind.Utc),
+                    BackgroundColor = "#d63031", // Deep Red
+                    TextColor = "#ffffff",
+                    AnnouncementText = "Happy 55th Independence Day! Celebrating our glorious history.",
+                    IsEnabled = true
                 }
+            );
+
+            // Seed Gallery
+            modelBuilder.Entity<EventGallery>().HasData(
+                new EventGallery 
+                { 
+                    Id = 1, 
+                    Title = "Centennial Celebration", 
+                    Description = "Highlights from the 100th-anniversary gala of Haraganga College.", 
+                    EventDate = new DateTime(2025, 12, 10, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedByAdminId = 1,
+                    IsActive = true,
+                    IsFeatured = true
+                },
+                new EventGallery 
+                { 
+                    Id = 2, 
+                    Title = "Campus Landscapes", 
+                    Description = "Scenic views of the historic GHC campus buildings and grounds.", 
+                    EventDate = new DateTime(2026, 1, 20, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedAt = new DateTime(2026, 1, 20, 0, 0, 0, DateTimeKind.Utc),
+                    CreatedByAdminId = 1,
+                    IsActive = true,
+                    IsFeatured = true
+                }
+            );
+
+            // Seed Photos
+            modelBuilder.Entity<EventPhoto>().HasData(
+                new EventPhoto { Id = 1, EventGalleryId = 1, PhotoPath = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070", Caption = "Gala Evening" },
+                new EventPhoto { Id = 2, EventGalleryId = 1, PhotoPath = "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069", Caption = "Alumni Networking" },
+                new EventPhoto { Id = 3, EventGalleryId = 2, PhotoPath = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986", Caption = "Main Administrative Building" },
+                new EventPhoto { Id = 4, EventGalleryId = 2, PhotoPath = "https://images.unsplash.com/photo-1492538350424-aaee9f201774?q=80&w=2070", Caption = "College Playground" }
             );
         }
     }

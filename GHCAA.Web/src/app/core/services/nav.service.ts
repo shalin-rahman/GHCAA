@@ -34,6 +34,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/members', label: 'All Members', icon: '👥' },
     { path: '/admin/members/ec', label: 'Executive Committee', icon: '🎗️' },
     { path: '/admin/news', label: 'News Posts', icon: '📰' },
+    { path: '/admin/gallery', label: 'Gallery Albums', icon: '🖼️' },
     { path: '/admin/comm', label: 'Communications', icon: '✉️' },
     { path: '/admin/ledger', label: 'Financial Ledger', icon: '📖', roles: ['SuperAdmin'] },
     { path: '/admin/roles', label: 'User Roles', icon: '🛡️', roles: ['SuperAdmin'] },

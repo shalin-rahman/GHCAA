@@ -9,8 +9,9 @@ namespace GHCAA.Application.Interfaces
     {
         Task<EventGallery> CreateEventGalleryAsync(EventGallery gallery, CancellationToken cancellationToken = default);
         Task<bool> AddPhotosToGalleryAsync(int galleryId, IEnumerable<string> photoPaths, CancellationToken cancellationToken = default);
-        Task<IEnumerable<EventGallery>> GetAllGalleriesAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<EventGallery>> GetAllGalleriesAsync(bool onlyActive = false, CancellationToken cancellationToken = default);
         Task<EventGallery?> GetGalleryByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<EventGallery> UpdateEventGalleryAsync(EventGallery gallery, CancellationToken cancellationToken = default);
         Task<bool> DeleteGalleryAsync(int id, CancellationToken cancellationToken = default);
     }
 }

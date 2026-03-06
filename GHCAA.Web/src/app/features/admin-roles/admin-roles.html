@@ -4,11 +4,17 @@
             <h2>User Roles & Access Control</h2>
             <small>Manage permissions and administrative levels for alumni</small>
         </div>
+        <div class="header-actions">
+            <!-- No secondary action here, but kept structure for consistency -->
+        </div>
     </div>
 
     <div class="glass-card table-wrap">
         @if (loading()) {
-        <div class="loading-state">Loading user data...</div>
+        <div class="loading-state">
+            <span>⌛</span>
+            <p>Loading user data...</p>
+        </div>
         } @else {
         <table class="data-table">
             <thead>
@@ -56,7 +62,8 @@
                 </tr>
                 } @empty {
                 <tr class="empty-row">
-                    <td colspan="3">No administrative users found.</td>
+                    <td colspan="3" style="text-align: center; padding: 4rem; color: var(--text-muted);">No
+                        administrative users found.</td>
                 </tr>
                 }
             </tbody>

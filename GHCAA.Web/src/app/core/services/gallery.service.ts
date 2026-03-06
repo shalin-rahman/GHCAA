@@ -15,6 +15,8 @@ export interface EventGallery {
     description: string;
     eventDate: string;
     location: string;
+    isActive: boolean;
+    isFeatured: boolean;
     photos: EventPhoto[];
 }
 
@@ -29,11 +31,23 @@ export class GalleryService {
         return this.http.get<EventGallery[]>(this.apiUrl);
     }
 
+    getAllGalleries(): Observable<EventGallery[]> {
+        return this.http.get<EventGallery[]>(`${this.apiUrl}/all`);
+    }
+
     getGallery(id: number): Observable<EventGallery> {
         return this.http.get<EventGallery>(`${this.apiUrl}/${id}`);
     }
 
     // Admin Methods
+    toggleActive(id: number): Observable<{ isActive: boolean }> {
+        return this.http.patch<{ isActive: boolean }>(`${this.apiUrl}/admin/${id}/toggle-active`, {});
+    }
+
+    toggleFeatured(id: number): Observable<{ isFeatured: boolean }> {
+        return this.http.patch<{ isFeatured: boolean }>(`${this.apiUrl}/admin/${id}/toggle-featured`, {});
+    }
+
     uploadPhoto(file: File): Observable<{ path: string }> {
         const formData = new FormData();
         formData.append('file', file);

@@ -6,14 +6,17 @@
         </div>
         <div class="header-actions">
             <button class="btn btn-secondary btn-sm" (click)="loadLogs()">
-                <span class="icon">🔄</span> Refresh
+                <span class="icon">🔄</span> Refresh Activity
             </button>
         </div>
     </div>
 
     <div class="glass-card audit-container">
         @if (loading()) {
-        <div class="loading-state">Fetching activity stream...</div>
+        <div class="loading-state">
+            <span>⏳</span>
+            <p>Fetching activity stream...</p>
+        </div>
         } @else {
         <div class="audit-timeline">
             @for (log of logs(); track log.id) {

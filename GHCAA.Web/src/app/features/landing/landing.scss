@@ -1054,6 +1054,93 @@
     }
 }
 
+.gallery-section {
+    padding: 5rem 0;
+    background: #050505;
+    border-top: 1px solid rgba(197, 160, 89, 0.05);
+
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-top: 4rem;
+
+        @media (max-width: 1200px) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (max-width: 768px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (max-width: 480px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .gallery-item {
+        position: relative;
+        height: 250px;
+        overflow: hidden;
+        border-radius: 4px;
+        border: 2px solid var(--accent-color);
+        cursor: pointer;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.6s cubic-bezier(0.2, 0, 0.2, 1);
+            opacity: 0.8;
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent 70%);
+            display: flex;
+            align-items: flex-end;
+            padding: 1.5rem;
+            opacity: 1;
+            transition: 0.4s;
+
+            span {
+                color: var(--accent-color) !important;
+                font-weight: 900;
+                font-size: 1rem;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                transform: translateY(0);
+                transition: 0.4s;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        &:hover {
+            border-color: var(--accent-gold-bright);
+
+            img {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        &.placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(197, 160, 89, 0.02);
+            border-style: dashed;
+
+            .photo-placeholder {
+                font-size: 3rem;
+                opacity: 0.2;
+            }
+        }
+    }
+}
+
+
 @media (max-width: 992px) {
     .cta-content {
         flex-direction: column;

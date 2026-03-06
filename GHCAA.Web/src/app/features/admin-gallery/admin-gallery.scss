@@ -1,0 +1,224 @@
+.admin-feature {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+
+    .header-text {
+        h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--primary-color);
+        }
+
+        small {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+}
+
+/* Form Card Overlay Style matching Member Detail if needed, 
+   but for now aligning with the current inline form style using standardized variables */
+.admin-card {
+    padding: 2.5rem;
+    background: var(--surface-color);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+
+    h3 {
+        margin-top: 0;
+        margin-bottom: 2rem;
+        font-size: 1.25rem;
+        color: var(--accent-color);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--glass-border);
+        padding-bottom: 1rem;
+    }
+}
+
+/* Table */
+.table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+        background: var(--surface-color);
+
+        th {
+            padding: 1.1rem 1.25rem;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--glass-border);
+        }
+    }
+
+    tbody {
+        tr {
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+            &:hover {
+                background: rgba(var(--accent-color-rgb), 0.04);
+                transform: scale(1.002);
+            }
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            td {
+                padding: 1.1rem 1.25rem;
+                vertical-align: middle;
+                color: var(--text-main);
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+        }
+    }
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+
+    &.active {
+        background: rgba(16, 185, 129, 0.12);
+        color: #10b981;
+    }
+
+    &.inactive {
+        background: rgba(156, 163, 175, 0.12);
+        color: var(--text-muted);
+    }
+
+    &.featured {
+        background: rgba(var(--accent-color-rgb), 0.12);
+        color: var(--accent-color);
+        border: 1px solid rgba(var(--accent-color-rgb), 0.3);
+    }
+
+    &.regular {
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-muted);
+        border: 1px dashed var(--glass-border);
+    }
+
+    &:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.icon-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+    font-size: 1rem;
+
+    &:hover {
+        background: #ef4444;
+        color: #fff;
+        border-color: #ef4444;
+        transform: translateY(-2px);
+    }
+}
+
+.actions-cell {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.pill {
+    background: rgba(var(--primary-rgb), 0.03);
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+}
+
+.loading-state,
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 2rem;
+    text-align: center;
+    color: var(--text-muted);
+
+    span {
+        font-size: 3.5rem;
+        opacity: 0.4;
+        margin-bottom: 1.5rem;
+    }
+
+    p {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+}
+
+.animate-fade {
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -25,6 +25,10 @@ export const routes: Routes = [
             {
                 path: 'contact',
                 loadComponent: () => import('./features/contact/contact').then(m => m.Contact)
+            },
+            {
+                path: 'gallery',
+                loadComponent: () => import('./features/gallery/gallery').then(m => m.Gallery)
             }
         ]
     },
@@ -109,6 +113,10 @@ export const routes: Routes = [
             {
                 path: 'news',
                 loadComponent: () => import('./features/admin-news/admin-news').then(m => m.AdminNews)
+            },
+            {
+                path: 'gallery',
+                loadComponent: () => import('./features/admin-gallery/admin-gallery').then(m => m.AdminGallery)
             },
             {
                 path: 'comm',

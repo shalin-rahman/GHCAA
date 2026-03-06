@@ -11,6 +11,8 @@ namespace GHCAA.Domain.Models
         public DateTime EventDate { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public int CreatedByAdminId { get; set; }
+        public bool IsActive { get; set; } = true;
+        public bool IsFeatured { get; set; } = false;
         
         // Navigation
         public ICollection<EventPhoto> Photos { get; set; } = new List<EventPhoto>();

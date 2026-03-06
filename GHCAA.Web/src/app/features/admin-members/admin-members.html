@@ -461,7 +461,7 @@
             <button class="btn btn-secondary btn-cancel" (click)="showImportModal.set(false)">
                 <span class="icon">❌</span> Cancel
             </button>
-            <button class="btn btn-primary btn-start" [disabled]="!importFile || isImporting()"
+            <button class="btn btn-accent shadow-gold btn-start" [disabled]="!importFile || isImporting()"
                 (click)="executeImport()">
                 @if (isImporting()) {
                 <span class="spinner">⏳</span> Processing...

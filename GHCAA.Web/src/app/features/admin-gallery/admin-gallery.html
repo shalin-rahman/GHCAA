@@ -1,0 +1,111 @@
+<div class="admin-feature">
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Gallery Management</h2>
+            <small>{{ galleries().length }} albums available</small>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-accent btn-md" (click)="showForm.set(!showForm())">
+                {{ showForm() ? '✕ Close Form' : '📸 New Album' }}
+            </button>
+        </div>
+    </div>
+
+    @if (showForm()) {
+    <div class="admin-card glass-card animate-fade mb-8">
+        <h3>Create New Album</h3>
+        <form (submit)="onSubmit()" class="admin-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Album Title</label>
+                    <input type="text" [(ngModel)]="newGallery.title" name="title" required
+                        placeholder="e.g. Annual Picnic 2024">
+                </div>
+                <div class="form-group">
+                    <label>Event Date</label>
+                    <input type="date" [(ngModel)]="newGallery.eventDate" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" [(ngModel)]="newGallery.location" name="location"
+                        placeholder="e.g. Campus Grounds">
+                </div>
+            </div>
+            <div class="form-group full">
+                <label>Description (Optional)</label>
+                <textarea [(ngModel)]="newGallery.description" name="description" rows="3"></textarea>
+            </div>
+            <div class="mt-8 flex justify-end">
+                <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+                    @if (isSubmitting()) { <span>⏳ Creating...</span> }
+                    @else { <span>Create Album</span> }
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <div class="glass-card table-wrap">
+        @if (loading()) {
+        <div class="loading-state">
+            <span>⌛</span>
+            <p>Loading albums...</p>
+        </div>
+        } @else if (galleries().length === 0) {
+        <div class="empty-state">
+            <span>📸</span>
+            <p>No albums created yet.</p>
+        </div>
+        } @else {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Album Details</th>
+                    <th>Date & Location</th>
+                    <th>Stats</th>
+                    <th>Visibility</th>
+                    <th>Featured</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (gallery of galleries(); track gallery.id) {
+                <tr>
+                    <td>
+                        <div style="font-weight: 700; color: var(--accent-color);">{{ gallery.title }}</div>
+                        <small
+                            style="color: var(--text-muted); display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {{ gallery.description || 'No description provided' }}
+                        </small>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">{{ gallery.eventDate | date }}</div>
+                        <small style="color: var(--text-muted);">{{ gallery.location || '—' }}</small>
+                    </td>
+                    <td>
+                        <span class="pill">
+                            {{ gallery.photos.length }} Photos
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge" [class.active]="gallery.isActive"
+                            [class.inactive]="!gallery.isActive" (click)="toggleActive(gallery.id)">
+                            {{ gallery.isActive ? 'Public' : 'Hidden' }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge" [class.featured]="gallery.isFeatured"
+                            [class.regular]="!gallery.isFeatured" (click)="toggleFeatured(gallery.id)">
+                            {{ gallery.isFeatured ? '★ Featured' : '☆ Regular' }}
+                        </span>
+                    </td>
+                    <td class="actions-cell">
+                        <button class="icon-btn" (click)="deleteGallery(gallery.id)" title="Delete">🗑️</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>

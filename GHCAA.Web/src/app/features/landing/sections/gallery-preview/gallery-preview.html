@@ -1,0 +1,42 @@
+<section id="gallery" class="gallery-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Campus Moments</h2>
+            <p>Capturing the essence of Haragangian life and legacy.</p>
+            <div class="underline"></div>
+        </div>
+
+        <div class="gallery-grid">
+            @for (photo of getFeaturedPhotos(); track photo.id) {
+            <div class="gallery-item glass-card">
+                <img [src]="photo.photoPath" [alt]="photo.galleryTitle">
+                <div class="gallery-overlay">
+                    <span>{{ photo.galleryTitle }}</span>
+                </div>
+            </div>
+            } @empty {
+            <!-- Empty state fallback if no photos exist yet -->
+            <div class="gallery-item glass-card placeholder">
+                <div class="photo-placeholder">📸</div>
+                <div class="gallery-overlay"><span>Annual Picnic 2024</span></div>
+            </div>
+            <div class="gallery-item glass-card placeholder">
+                <div class="photo-placeholder">📸</div>
+                <div class="gallery-overlay"><span>Campus Life</span></div>
+            </div>
+            <div class="gallery-item glass-card placeholder">
+                <div class="photo-placeholder">📸</div>
+                <div class="gallery-overlay"><span>Alumni Meetup</span></div>
+            </div>
+            <div class="gallery-item glass-card placeholder">
+                <div class="photo-placeholder">📸</div>
+                <div class="gallery-overlay"><span>GHC Buildings</span></div>
+            </div>
+            }
+        </div>
+
+        <div class="section-footer">
+            <a routerLink="/gallery" class="btn btn-primary">Visit Full Gallery</a>
+        </div>
+    </div>
+</section>

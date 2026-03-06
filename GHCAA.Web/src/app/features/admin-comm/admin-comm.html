@@ -4,191 +4,169 @@
             <h2>Association Communications</h2>
             <p>Broadcast announcements and manage email ecosystem.</p>
         </div>
+        <div class="header-actions"></div>
     </div>
 
     <div class="tab-nav">
         <button [class.active]="activeTab() === 'send'" (click)="setTab('send')">
-            <span class="icon">🚀</span> Broadcast Message
+            <span class="icon">🚀</span> Broadcast
         </button>
         <button [class.active]="activeTab() === 'templates'" (click)="setTab('templates')">
-            <span class="icon">📄</span> Email Templates
+            <span class="icon">📄</span> Templates
         </button>
         <button [class.active]="activeTab() === 'logs'" (click)="setTab('logs')">
-            <span class="icon">📜</span> Delivery Logs
+            <span class="icon">📜</span> Logs
         </button>
     </div>
 
+    <!-- BROADCAST TAB -->
     @if (activeTab() === 'send') {
     <div class="glass-card broadcast-panel reveal-top">
-        <h3>🚀 Initiate Broadcast</h3>
+        <div class="panel-header mb-6">
+            <h3>🚀 Initiate Broadcast</h3>
+            <button class="btn btn-outline btn-sm" (click)="isManualMessage = !isManualMessage">
+                {{ isManualMessage ? '📄 Use Template' : '✍️ Write Custom' }}
+            </button>
+        </div>
+
         <div class="broadcast-form">
+            <!-- Step 1: Target Audience -->
             <div class="form-group">
-                <label>Target Audience</label>
+                <label>Step 1 — Target Audience</label>
                 <div class="radio-grid">
-                    <label class="radio-item">
-                        <input type="radio" [(ngModel)]="sendOptions.method" value="batch">
-                        <span>Specific Batch(es)</span>
+                    <label class="radio-item" [class.active]="sendOptions.method === 'batch'">
+                        <input type="radio" [(ngModel)]="sendOptions.method" value="batch" name="method">
+                        <span>📅 By Batch Year</span>
                     </label>
-                    <label class="radio-item">
-                        <input type="radio" [(ngModel)]="sendOptions.method" value="type">
-                        <span>Membership Type(s)</span>
+                    <label class="radio-item" [class.active]="sendOptions.method === 'type'">
+                        <input type="radio" [(ngModel)]="sendOptions.method" value="type" name="method">
+                        <span>🏷️ By Membership Type</span>
                     </label>
-                    <label class="radio-item">
-                        <input type="radio" [(ngModel)]="sendOptions.method" value="custom">
-                        <span>Manual Recipient(s)</span>
+                    <label class="radio-item" [class.active]="sendOptions.method === 'custom'">
+                        <input type="radio" [(ngModel)]="sendOptions.method" value="custom" name="method">
+                        <span>✉️ Manual Recipients</span>
                     </label>
                 </div>
             </div>
 
+            <!-- Batch Selection -->
             @if (sendOptions.method === 'batch') {
-            <div class="form-group">
-                <div class="group-header">
-                    <label>Select Batch Year(s)</label>
-                    <div class="selection-actions">
-                        <button class="btn-link" (click)="selectAllYears()">Select All</button>
-                        <button class="btn-link" (click)="clearYears()">Clear</button>
+            <div class="form-group animate-fade">
+                <div class="flex justify-between items-center mb-2">
+                    <label>Select Batch Years ({{ sendOptions.targetYears.length }} selected)</label>
+                    <div class="flex gap-2">
+                        <button class="btn-link text-xs" (click)="selectAllYears()">Select All</button>
+                        <button class="btn-link text-xs" (click)="clearYears()">Clear</button>
                     </div>
                 </div>
-                <div class="multi-select-chips">
+                <div class="checkbox-grid">
                     @for (year of years; track year) {
-                    <div class="select-chip" [class.selected]="isSelected(year, sendOptions.targetYears)"
+                    <label class="checkbox-item" [class.checked]="isSelected(year, sendOptions.targetYears)"
                         (click)="toggleSelection(year, sendOptions.targetYears)">
                         {{ year }}
-                    </div>
+                    </label>
                     }
                 </div>
             </div>
             }
 
+            <!-- Type Selection -->
             @if (sendOptions.method === 'type') {
-            <div class="form-group">
-                <div class="group-header">
-                    <label>Select Membership Level(s)</label>
-                    <div class="selection-actions">
-                        <button class="btn-link" (click)="selectAllTypes()">Select All</button>
-                        <button class="btn-link" (click)="clearTypes()">Clear</button>
+            <div class="form-group animate-fade">
+                <div class="flex justify-between items-center mb-2">
+                    <label>Select Membership Types ({{ sendOptions.targetTypes.length }} selected)</label>
+                    <div class="flex gap-2">
+                        <button class="btn-link text-xs" (click)="selectAllTypes()">Select All</button>
+                        <button class="btn-link text-xs" (click)="clearTypes()">Clear</button>
                     </div>
                 </div>
-                <div class="multi-select-chips">
+                <div class="checkbox-grid types-grid">
                     @for (type of membershipTypes; track type.value) {
-                    <div class="select-chip" [class.selected]="isSelected(type.value, sendOptions.targetTypes)"
+                    <label class="checkbox-item" [class.checked]="isSelected(type.value, sendOptions.targetTypes)"
                         (click)="toggleSelection(type.value, sendOptions.targetTypes)">
                         {{ type.label }}
-                    </div>
+                    </label>
                     }
                 </div>
             </div>
             }
 
-            <div class="form-group">
-                <label>Communication Type</label>
-                <div class="radio-grid compact">
-                    <label class="radio-item">
-                        <input type="radio" name="commType" [checked]="!isManualMessage"
-                            (change)="isManualMessage = false">
-                        <span>Use Template</span>
-                    </label>
-                    <label class="radio-item">
-                        <input type="radio" name="commType" [checked]="isManualMessage" (change)="switchToManual()">
-                        <span>Manual Design</span>
-                    </label>
-                </div>
+            <!-- Custom Emails -->
+            @if (sendOptions.method === 'custom') {
+            <div class="form-group animate-fade">
+                <label>Recipient Emails (comma separated)</label>
+                <textarea [(ngModel)]="sendOptions.target" name="target" rows="2"
+                    placeholder="email1@example.com, email2@example.com"></textarea>
             </div>
+            }
 
+            <hr class="full opacity-10 my-4">
+
+            <!-- Step 2: Message Content -->
             @if (!isManualMessage) {
-            <div class="form-group">
-                <label>Email Template</label>
-                <select [(ngModel)]="sendOptions.templateCode">
-                    <option value="">Select Template</option>
-                    @for (t of templates(); track t.id) {
-                    <option [value]="t.code">{{ t.description }} ({{ t.subject }})</option>
+            <div class="form-group animate-fade">
+                <label>Step 2 — Select Message Template</label>
+                <select [(ngModel)]="sendOptions.templateCode" name="templateCode">
+                    <option value="">-- Choose a template --</option>
+                    @for (temp of templates(); track temp.id) {
+                    <option [value]="temp.code">{{ temp.code }} — {{ temp.description }}</option>
                     }
                 </select>
-                <small class="hint">Variable fields like <code>{{ '{' }}{{ '{' }}FullName{{ '}' }}{{ '}' }}</code> will
-                    be auto-populated.</small>
-            </div>
-            } @else {
-            @if (sendOptions.method === 'custom') {
-            <div class="form-group full">
-                <label>Target Emails (Comma separated)</label>
-                <textarea [(ngModel)]="sendOptions.target" rows="3"
-                    placeholder="example1@mail.com, example2@mail.com..."></textarea>
             </div>
             }
 
-            <div class="form-group full">
-                <label>Subject Line</label>
-                <input type="text" [(ngModel)]="sendOptions.customSubject" placeholder="Enter email subject">
-            </div>
-
-            <div class="form-group richness full">
-                <label>Message Content</label>
-                <div id="broadcast-editor" style="height: 350px;">
+            @if (isManualMessage) {
+            <div class="animate-fade">
+                <div class="form-group">
+                    <label>Step 2 — Subject Line</label>
+                    <input type="text" [(ngModel)]="sendOptions.customSubject" name="subject"
+                        placeholder="e.g. Invitation to Annual Gala">
+                </div>
+                <div class="form-group mt-4">
+                    <label>Message Body (Rich Text)</label>
+                    <div id="broadcast-editor" style="height: 300px;"></div>
                 </div>
             </div>
             }
 
-            <div class="form-actions">
-                <button class="btn btn-accent btn-lg" (click)="sendMessage()" [disabled]="sending()">
-                    {{ sending() ? '⌛ Broadcasting...' : '🚀 Launch Broadcast' }}
+            <div class="mt-8 flex justify-end">
+                <button class="btn btn-primary btn-lg" [disabled]="sending()" (click)="sendMessage()">
+                    {{ sending() ? '⚡ Dispatching...' : '🚀 Dispatch Broadcast' }}
                 </button>
-                <p class="warning">⚠️ This action will send emails to multiple members. Verify content before sending.
-                </p>
             </div>
         </div>
     </div>
     }
 
+    <!-- TEMPLATES TAB -->
     @if (activeTab() === 'templates') {
-    <div class="glass-card templates-panel reveal-top">
-        <div class="panel-header">
-            <h3>📄 System Templates</h3>
-            <div class="header-actions">
-                <button class="btn btn-outline btn-sm" (click)="loadTemplates()">🔄 Refresh</button>
-                <button class="btn btn-accent btn-sm" (click)="addNewTemplate()">+ Add New Template</button>
-            </div>
+    <div class="glass-card reveal-top">
+        <div class="panel-header mb-6">
+            <h3>📄 Email Templates</h3>
+            <button class="btn btn-accent" (click)="addNewTemplate()">+ New Template</button>
         </div>
+
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Template Code</th>
+                        <th>Code</th>
                         <th>Description</th>
-                        <th>Subject</th>
+                        <th>Subject Pattern</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (loading()) {
+                    @for (temp of templates(); track temp.id) {
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 3rem; color: var(--accent-color);">
-                            <div class="loader">⌛ Loading templates...</div>
+                        <td class="font-bold text-accent">{{ temp.code }}</td>
+                        <td>{{ temp.description }}</td>
+                        <td><small>{{ temp.subject }}</small></td>
+                        <td class="actions-cell">
+                            <button class="icon-btn" (click)="editTemplate(temp)" title="Edit">✏️</button>
+                            <button class="icon-btn" (click)="deleteTemplate(temp)" title="Delete">🗑️</button>
                         </td>
                     </tr>
-                    } @else if (templates().length === 0) {
-                    <tr>
-                        <td colspan="4" style="text-align: center; padding: 4rem; opacity: 0.5;">
-                            <div class="empty-state">
-                                <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📭</span>
-                                No email templates found. Click "Add New Template" to create one.
-                            </div>
-                        </td>
-                    </tr>
-                    } @else {
-                    @for (t of templates(); track t.id) {
-                    <tr>
-                        <td><code>{{ t.code }}</code></td>
-                        <td>{{ t.description }}</td>
-                        <td>{{ t.subject }}</td>
-                        <td>
-                            <div class="actions-cell">
-                                <button class="btn btn-outline btn-sm" (click)="editTemplate(t)">✏️ Edit</button>
-                                <button class="btn btn-danger-link btn-sm" (click)="deleteTemplate(t)">🗑️
-                                    Delete</button>
-                            </div>
-                        </td>
-                    </tr>
-                    }
                     }
                 </tbody>
             </table>
@@ -196,128 +174,75 @@
     </div>
     }
 
+    <!-- LOGS TAB -->
     @if (activeTab() === 'logs') {
-    <div class="glass-card logs-panel reveal-top">
-        <div class="panel-header">
-            <h3>📜 Communication Delivery Logs</h3>
-            <div class="header-actions">
-                <button class="btn btn-outline btn-sm" (click)="loadLogs()">🔄 Refresh</button>
-            </div>
+    <div class="glass-card reveal-top">
+        <div class="panel-header mb-6">
+            <h3>📜 Communication History</h3>
+            <button class="btn btn-outline btn-sm" (click)="loadLogs()">🔄 Refresh</button>
         </div>
+
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Date</th>
+                        <th>Timestamp</th>
                         <th>Recipient</th>
                         <th>Subject</th>
-                        <th>Target</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (loading()) {
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 3rem;">
-                            <div class="loader">⌛ Loading logs...</div>
-                        </td>
-                    </tr>
-                    } @else if (logs().length === 0) {
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 4rem; opacity: 0.5;">
-                            No email logs found yet.
-                        </td>
-                    </tr>
-                    } @else {
                     @for (log of logs(); track log.id) {
                     <tr>
                         <td>{{ log.sentDate | date:'short' }}</td>
-                        <td>{{ log.recipientEmail }}</td>
+                        <td><small>{{ log.recipientEmail }}</small></td>
                         <td>{{ log.subject }}</td>
-                        <td><small>{{ log.targetAudience }}</small></td>
                         <td>
-                            <span class="status-badge" [class.success]="log.status === 'Sent'"
-                                [class.error]="log.status === 'Failed'">
+                            <span class="status-badge" [class.active]="log.status === 'Sent'"
+                                [class.inactive]="log.status !== 'Sent'">
                                 {{ log.status }}
                             </span>
                         </td>
                     </tr>
                     }
-                    }
                 </tbody>
             </table>
         </div>
     </div>
     }
 
-    <!-- Template Edit Modal -->
+    <!-- Template Editor Modal -->
     @if (editingTemplate()) {
-    <div class="modal-overlay">
-        <div class="modal-card wide">
+    <div class="modal-overlay" (click)="cancelEdit()">
+        <div class="modal-box glass-card wide animate-pop" (click)="$event.stopPropagation()">
             <div class="modal-header">
-                <h3>{{ editingTemplate()?.id === 0 ? 'Create New' : 'Edit' }} Email Template: {{ editingTemplate()?.code
-                    }}</h3>
-                <button class="close-btn" (click)="cancelEdit()">×</button>
+                <h3>{{ editingTemplate()?.id ? 'Edit' : 'Create' }} Template</h3>
+                <button class="close-btn" (click)="cancelEdit()">✕</button>
             </div>
             <div class="modal-body">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Template Code (Unique)</label>
-                        <input type="text" [(ngModel)]="editingTemplate()!.code"
-                            [disabled]="editingTemplate()!.id !== 0" placeholder="e.g., WELCOME_EMAIL">
+                        <input type="text" [(ngModel)]="editingTemplate()!.code" [disabled]="!!editingTemplate()?.id">
                     </div>
                     <div class="form-group">
-                        <label>Internal Description</label>
-                        <input type="text" [(ngModel)]="editingTemplate()!.description"
-                            placeholder="e.g., Sent after approval">
+                        <label>Subject Pattern</label>
+                        <input type="text" [(ngModel)]="editingTemplate()!.subject">
                     </div>
                     <div class="form-group full">
-                        <label>Email Subject</label>
-                        <input type="text" [(ngModel)]="editingTemplate()!.subject" placeholder="Enter subject line">
+                        <label>Description</label>
+                        <input type="text" [(ngModel)]="editingTemplate()!.description">
                     </div>
-                </div>
-                <div class="form-group richness full">
-                    <label>HTML Content</label>
-                    <div id="template-editor" style="height: 450px;"></div>
-                </div>
-                <div class="variables-guide">
-                    <strong>Allowed Variables:</strong>
-                    <div class="var-list">
-                        <code>{{ '{' }}{{ '{' }}FullName{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}FatherName{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}MotherName{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}DateOfBirth{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}Gender{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}BloodGroup{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}NID{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}MembershipNumber{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}MembershipType{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}Email{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}MobileNo{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}PresentAddress{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}PermanentAddress{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}HSCAdmissionYear{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}HighestCertificate{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}HighestCertificateGroup{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}HighestCertificateSubject{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}HighestCertificatePassingYear{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}GHCAdmissionYear{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}GHCLastCertificate{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}GHCLastCertificateGroup{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}GHCLastCertificateSubject{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}GHCLastCertificatePassingYear{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}ProfessionalSector{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}Designation{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}OtpCode{{ '}' }}{{ '}' }}</code>
-                        <code>{{ '{' }}{{ '{' }}DefaultPassword{{ '}' }}{{ '}' }}</code>
+                    <div class="form-group full">
+                        <label>HTML Content</label>
+                        <div id="template-editor" style="height: 350px;"></div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
-                <button class="btn btn-accent" (click)="saveTemplate()" [disabled]="isSaving()">
-                    {{ isSaving() ? 'Saving...' : '💾 Save Template' }}
-                </button>
+                <button class="btn btn-primary" (click)="saveTemplate()">Save Template</button>
             </div>
         </div>
     </div>

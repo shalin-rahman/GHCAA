@@ -1,13 +1,15 @@
 <div class="admin-feature">
     @if (!showForm()) {
-    <div class="page-header flex justify-between items-center mb-8">
+    <div class="page-header">
         <div class="header-text">
-            <h2 class="text-2xl font-black text-accent uppercase tracking-tighter">News Management</h2>
-            <small class="text-muted block mt-1">Create, edit, and publish institutional news articles</small>
+            <h2>News Management</h2>
+            <small>Create, edit, and publish institutional news articles</small>
         </div>
-        <button class="btn btn-accent shadow-gold" (click)="openForm()">
-            <span class="icon">✍️</span> Draft New Story
-        </button>
+        <div class="header-actions">
+            <button class="btn btn-accent shadow-gold" (click)="openForm()">
+                <span class="icon">✍️</span> Draft New Story
+            </button>
+        </div>
     </div>
     } @else {
     <div class="page-header flex items-center gap-6 mb-8">
@@ -80,14 +82,16 @@
 
     @if (!showForm()) {
     <!-- News Table Section -->
-    <div class="glass-card overflow-hidden">
+    <div class="glass-card table-wrap">
         @if (loading()) {
-        <div class="loading-state">Loading news posts...</div>
+        <div class="loading-state">
+            <span>⌛</span>
+            <p>Loading news posts...</p>
+        </div>
         } @else if (newsList().length === 0) {
         <div class="empty-state">
             <span>📰</span>
             <p>No news articles yet.</p>
-            <button class="btn btn-primary" (click)="openForm()">Create First Post</button>
         </div>
         } @else {
         <table class="data-table">
