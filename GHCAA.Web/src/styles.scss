@@ -100,9 +100,9 @@ p {
 
 /* Layout Grid System */
 .container {
-  max-width: 1400px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 5rem;
 }
 
 .glass-card {
@@ -191,14 +191,15 @@ p {
   box-shadow: var(--shadow-gold);
 }
 
-/* Global Icon Standardization - Single Color Obsidian Gold (#c5a059) */
+/* Global Icon Standardization - Standard Emoji Colors */
 .icon,
 .nav-icon,
 .stat-icon,
 .p-icon,
-.s-badge {
-  /* This specific filter converts grey/black/standard emojis directly to the var(--accent-color) tint */
-  filter: brightness(0) saturate(100%) invert(67%) sepia(21%) saturate(958%) hue-rotate(4deg) brightness(96%) contrast(92%) !important;
+.s-badge,
+.s-badge-mini,
+.v-icon {
+  filter: none !important;
   font-size: 1.25rem !important;
   display: inline-block;
   vertical-align: middle;

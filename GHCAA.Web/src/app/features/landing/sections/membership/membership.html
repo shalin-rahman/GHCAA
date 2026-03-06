@@ -1,45 +1,48 @@
-<section id="membership" class="membership-section container">
-    <div class="section-header">
-        <h2>Membership Registry</h2>
-        <div class="underline"></div>
-    </div>
-
-    <div class="compact-membership-grid">
-        <div class="tier-selector">
-            @for (tier of membershipTiers; track tier.id) {
-            <div (click)="selectedTier.set(tier)" class="tier-mini-card" [class.active]="selectedTier().id === tier.id"
-                [style.border-left-color]="tier.color">
-                <strong>{{ tier.name }}</strong>
-                <span class="tier-tag">{{ ['founding', 'life', 'executive', 'general'].includes(tier.id) ? 'Voting' :
-                    'Non-Voting' }}</span>
-            </div>
-            }
+<section id="membership" class="membership-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Membership Registry</h2>
+            <div class="underline"></div>
         </div>
 
-        <div class="tier-content-panel glass-card animate-fade">
-            <div class="panel-header-mini">
-                <h3 [style.color]="selectedTier().color">{{ selectedTier().name }}</h3>
-                <p>{{ selectedTier().shortDesc }}</p>
-            </div>
-            <div class="criteria-summary">
-                <div class="summary-col">
-                    <h6><span class="icon">📝</span> Eligibility</h6>
-                    <ul>
-                        @for (item of selectedTier().criteria.slice(0, 2); track item) {
-                        <li>{{ item }}</li>
-                        }
-                    </ul>
+        <div class="compact-membership-grid">
+            <div class="tier-selector">
+                @for (tier of membershipTiers; track tier.id) {
+                <div (click)="selectedTier.set(tier)" class="tier-mini-card"
+                    [class.active]="selectedTier().id === tier.id" [style.border-left-color]="tier.color">
+                    <strong>{{ tier.name }}</strong>
+                    <span class="tier-tag">{{ ['founding', 'life', 'executive', 'general'].includes(tier.id) ? 'Voting'
+                        :
+                        'Non-Voting' }}</span>
                 </div>
-                <div class="summary-col">
-                    <h6><span class="icon">🛡️</span> Rights</h6>
-                    <ul>
-                        @for (item of selectedTier().rights.slice(0, 2); track item) {
-                        <li>{{ item }}</li>
-                        }
-                    </ul>
-                </div>
+                }
             </div>
-            <a routerLink="/register" class="btn btn-primary btn-sm">Join This Tier</a>
+
+            <div class="tier-content-panel glass-card animate-fade">
+                <div class="panel-header-mini">
+                    <h3 [style.color]="selectedTier().color">{{ selectedTier().name }}</h3>
+                    <p>{{ selectedTier().shortDesc }}</p>
+                </div>
+                <div class="criteria-summary">
+                    <div class="summary-col">
+                        <h6><span class="icon">📝</span> Eligibility</h6>
+                        <ul>
+                            @for (item of selectedTier().criteria.slice(0, 2); track item) {
+                            <li>{{ item }}</li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="summary-col">
+                        <h6><span class="icon">🛡️</span> Rights</h6>
+                        <ul>
+                            @for (item of selectedTier().rights.slice(0, 2); track item) {
+                            <li>{{ item }}</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <a routerLink="/register" class="btn btn-primary btn-sm">Join This Tier</a>
+            </div>
         </div>
     </div>
 </section>

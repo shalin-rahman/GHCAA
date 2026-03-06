@@ -1,100 +1,101 @@
-<!-- EC Members Preview -->
-<section id="ec" class="ec-section container">
-    <div class="section-header">
-        <h2>Executive Committee</h2>
-        <p>The leadership driving our association forward.</p>
-        <div class="underline"></div>
-    </div>
+<section id="ec" class="ec-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Executive Committee</h2>
+            <p>The leadership driving our association forward.</p>
+            <div class="underline"></div>
+        </div>
 
-    <div class="ec-carousel">
-        @for (member of committee(); track member.id) {
-        <div class="ec-card glass-card">
-            <div class="ec-photo">
-                @if (member.photoPath) {
-                <img [src]="member.photoPath" [alt]="member.fullName">
-                } @else {
-                👤
-                }
+        <div class="ec-carousel">
+            @for (member of committee(); track member.id + '-' + $index) {
+            <div class="ec-card glass-card">
+                <div class="ec-photo">
+                    @if (member.photoPath) {
+                    <img [src]="member.photoPath" [alt]="member.fullName">
+                    } @else {
+                    👤
+                    }
+                </div>
+                <h4>{{ member.fullName }}</h4>
+                <small>{{ member.designation }}</small>
             </div>
-            <h4>{{ member.fullName }}</h4>
-            <small>{{ member.designation }}</small>
+            } @empty {
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>President</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>Vice President</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>General Secretary</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>Joint Secretary</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>Treasurer</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>Organizing Secretary</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>Publicity Secretary</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>Cultural Secretary</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>Sports Secretary</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>Women Affairs Secretary</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>EC Member 1</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>EC Member 2</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>EC Member 3</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>EC Member 4</h4>
+                <small>Vacant</small>
+            </div>
+            <div class="ec-card glass-card">
+                <div class="ec-photo">👤</div>
+                <h4>EC Member 5</h4>
+                <small>Vacant</small>
+            </div>
+            }
         </div>
-        } @empty {
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>President</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>Vice President</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>General Secretary</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>Joint Secretary</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>Treasurer</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>Organizing Secretary</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>Publicity Secretary</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>Cultural Secretary</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>Sports Secretary</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>Women Affairs Secretary</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>EC Member 1</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>EC Member 2</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>EC Member 3</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>EC Member 4</h4>
-            <small>Vacant</small>
-        </div>
-        <div class="ec-card glass-card">
-            <div class="ec-photo">👤</div>
-            <h4>EC Member 5</h4>
-            <small>Vacant</small>
-        </div>
-        }
     </div>
 </section>

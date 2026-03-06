@@ -252,38 +252,43 @@
 }
 
 .purpose-identity-section {
-    padding: 5rem 0;
+    padding: 10rem 0;
     background: #000;
     border-top: 1px solid rgba(197, 160, 89, 0.05);
 
     .purpose-grid-unified {
         display: grid;
-        grid-template-columns: 1fr 1.2fr 1.2fr;
+        grid-template-columns: 0.8fr 1fr 1fr;
         gap: 2rem;
         align-items: center;
         margin-top: 4rem;
     }
 
+    .column-values {
+        padding-left: 0;
+    }
+
     .values-stack {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.8rem;
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
     }
 
     .v-card {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        justify-content: center;
-        padding: 1.25rem 0.5rem;
-        text-align: center;
+        justify-content: flex-start;
+        padding: 0.75rem 1.5rem;
+        gap: 1rem;
         background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(197, 160, 89, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         transition: 0.3s;
+        border-radius: 6px;
 
         .v-icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            margin-bottom: 0;
         }
 
         strong {
@@ -332,13 +337,13 @@
     .symbols-list-unified {
         display: flex;
         flex-direction: column;
-        gap: 1.2rem;
+        gap: 0.5rem;
 
         .s-detail {
             display: flex;
-            gap: 1rem;
+            gap: 0.5rem;
             align-items: center;
-            padding: 0.5rem;
+            padding: 0.2rem 0.5rem;
             border-left: 2px solid transparent;
             transition: 0.3s;
 
@@ -355,10 +360,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid var(--accent-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            font-size: 1rem;
+            font-size: 1.25rem;
             flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .s-cnt {
@@ -520,21 +526,24 @@
 }
 
 .jobs-preview-section {
-    padding: 5rem 0;
+    padding: 10rem 0;
     border-bottom: 1px solid rgba(197, 160, 89, 0.1);
     background: #000;
 }
 
 .jobs-compact-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 2rem;
-    margin-top: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 3.5rem;
+    margin-top: 6rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .job-mini-card {
-    padding: 2rem;
-    background: #050505;
+    padding: 2.5rem;
+    background: #0a0a0a;
     border: 1px solid rgba(197, 160, 89, 0.1);
     position: relative;
     overflow: hidden;
@@ -563,23 +572,43 @@
     }
 
     .company {
-        font-size: 0.95rem;
+        font-size: 0.85rem;
+        opacity: 0.7;
+        margin-bottom: 1.5rem;
     }
 
     .job-meta {
         color: rgba(255, 255, 255, 0.4);
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: auto;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(197, 160, 89, 0.1);
+        font-size: 0.75rem;
+
+        span {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+        }
     }
 }
 
 .membership-section {
-    padding: 5rem 0;
+    padding: 10rem 0;
     background: #050505;
     border-top: 1px solid rgba(197, 160, 89, 0.05);
 }
 
 .section-header {
     text-align: center;
-    margin-bottom: 6rem;
+    margin-bottom: 8rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 
     &.align-left {
         text-align: left;
@@ -602,7 +631,7 @@
     p {
         color: rgba(255, 255, 255, 0.5);
         font-size: 1.1rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 3rem;
     }
 
     .underline {
@@ -762,26 +791,32 @@
 
 .news-section {
     background: #050505;
-    padding: 5rem 0;
+    padding: 10rem 0;
 }
 
 .news-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 2.5rem;
-    margin-top: 4rem;
+    gap: 3rem;
+    margin-top: 6rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .events-preview-section {
-    padding: 5rem 0;
+    padding: 10rem 0;
     background: #000;
 }
 
 .events-preview-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 4rem;
+    gap: 2.5rem;
+    margin-top: 6rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .event-mini-card {
@@ -895,9 +930,10 @@
 
 .ec-carousel {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 1.5rem;
-    margin: 3rem 0.25rem 0.25rem 0.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 2rem;
+    margin: 4rem auto 0;
+    max-width: 1000px;
 }
 
 .ec-card {
@@ -1126,6 +1162,32 @@
     .logo-showcase {
         margin-bottom: 2rem;
     }
+
+    .purpose-grid-unified {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        text-align: center;
+    }
+
+    .column-values {
+        padding-left: 0;
+    }
+
+    .values-stack {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .news-grid,
+    .jobs-compact-grid,
+    .events-preview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-footer .btn {
+        width: 100%;
+        min-width: unset;
+    }
 }
 
 .empty-placeholder {
@@ -1185,13 +1247,17 @@
     display: flex;
     justify-content: center;
     width: 100%;
+    margin-top: 5rem;
+    margin-bottom: 2rem;
 
     .btn {
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        min-width: 280px;
 
         &:hover {
             transform: scale(1.05) translateY(-5px);
             letter-spacing: 2px;
+            box-shadow: 0 15px 45px rgba(var(--accent-color-rgb), 0.3);
         }
     }
 }

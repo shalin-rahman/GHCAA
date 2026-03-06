@@ -22,7 +22,7 @@ namespace GHCAA.API.Controllers
         public async Task<ActionResult<SpecialDayTheme>> GetActiveTheme()
         {
             var theme = await _themeService.GetActiveThemeAsync();
-            if (theme == null) return NotFound();
+            if (theme == null) return NoContent();
             return Ok(theme);
         }
 
