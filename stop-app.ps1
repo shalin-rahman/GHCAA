@@ -36,10 +36,10 @@ function Release-Port([int]$port) {
         Where-Object { $_ -match '^\d+$' } |
         Sort-Object -Unique
 
-    foreach ($pid in $pids) {
+    foreach ($p in $pids) {
         try {
-            Stop-Process -Id $pid -Force -ErrorAction Stop
-            Write-Host "  [OK] Released port $port (PID $pid)" -ForegroundColor Green
+            Stop-Process -Id $p -Force -ErrorAction Stop
+            Write-Host "  [OK] Released port $port (PID $p)" -ForegroundColor Green
         } catch {
             # process may have already gone
         }
@@ -62,8 +62,8 @@ if (-not $PortsOnly) {
 
 # ── Release Ports ───────────────────────────────────────────────────────────
 Write-Host "  Releasing application ports..." -ForegroundColor Yellow
-Release-Port 7084   # GHCAA API (HTTPS)
-Release-Port 5000   # GHCAA API (HTTP fallback)
+Release-Port 7214   # GHCAA API (HTTPS)
+Release-Port 5087   # GHCAA API (HTTP fallback)
 Release-Port 4200   # Angular frontend
 
 # ── Done ────────────────────────────────────────────────────────────────────

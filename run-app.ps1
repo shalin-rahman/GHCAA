@@ -24,12 +24,12 @@ if ($DatabaseProvider -ne "") {
 
 # ── Stop Existing Processes ─────────────────────────────────────────────────
 Write-Host "  Stopping any existing GHCAA processes..." -ForegroundColor DarkGray
-Get-Process dotnet -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-Write-Host "  [OK] Workspace cleared" -ForegroundColor Green
+Write-Host "  [OK] Close any existing terminal windows or stop the processes." -ForegroundColor Yellow
+& "$RootPath\stop-app.ps1" -Force
+Write-Host "  [OK] Workspace cleared for new session" -ForegroundColor Green
 Write-Host ""
 
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 1
 
 # ── Resolve Provider ────────────────────────────────────────────────────────
 $activeProvider = $DatabaseProvider
@@ -66,10 +66,10 @@ if (-not $skipAllTests) {
 }
 
 # ── Launch API ──────────────────────────────────────────────────────────────
-Write-Host "  Launching Backend API  (https://localhost:7084)..." -ForegroundColor Yellow
+Write-Host "  Launching Backend API  (https://localhost:7214)..." -ForegroundColor Yellow
 Start-Process dotnet -ArgumentList "run --project GHCAA.API/GHCAA.API.csproj --launch-profile https" -WorkingDirectory $RootPath
 
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 5
 
 # ── Launch Frontend ─────────────────────────────────────────────────────────
 Write-Host "  Launching Frontend    (http://localhost:4200)..." -ForegroundColor Yellow
@@ -80,7 +80,7 @@ Write-Host ""
 Write-Host "  ============================================================" -ForegroundColor DarkCyan
 Write-Host "    Services are starting in separate windows." -ForegroundColor Green
 Write-Host "  ============================================================" -ForegroundColor DarkCyan
-Write-Host "    API      : https://localhost:7084/swagger"
+Write-Host "    API      : https://localhost:7214/swagger"
 Write-Host "    Web      : http://localhost:4200"
 Write-Host "    Admin    : shalin / shalin" -ForegroundColor Yellow
 Write-Host "  ============================================================" -ForegroundColor DarkCyan

@@ -1,11 +1,29 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { LookupService } from '../../../../core/services/lookup.service';
 
 @Component({
     selector: 'landing-cta-banner',
     standalone: true,
-    imports: [RouterLink],
+    imports: [RouterLink, CommonModule],
     templateUrl: './cta-banner.html',
     styleUrl: './cta-banner.scss',
 })
-export class LandingCtaBanner { }
+export class LandingCtaBanner implements OnInit {
+    private lookupService = inject(LookupService);
+    stats = signal<any>(null);
+
+    ngOnInit() {
+        this.lookupService.getStats().subscribe({
+            next: (data) => {
+                this.stats.set({
+                    totalMembers: data.totalMembers || '2500+',
+                    eventsHosted: data.eventsHosted || '50+',
+                    estYear: '2025' // Association establishment year
+                });
+            },
+            error: () => this.stats.set({ totalMembers: '2500+', eventsHosted: '50+', estYear: '2025' })
+        });
+    }
+}

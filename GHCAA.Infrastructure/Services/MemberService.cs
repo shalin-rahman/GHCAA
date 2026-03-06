@@ -630,8 +630,9 @@ namespace GHCAA.Infrastructure.Services
         public async Task<object> GetPublicStatsAsync(CancellationToken cancellationToken = default)
         {
             var count = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Active, cancellationToken);
+            var eventsCount = await _db.AlumniEvents.CountAsync(e => e.IsActive || e.Date < DateTime.UtcNow, cancellationToken);
             // We add 5000 as a base offset to reflect the existing offline legacy while showing actual new signups
-            return new { TotalMembers = count + 5000, Countries = 15, Batches = 68 };
+            return new { TotalMembers = count + 2500, Countries = 15, Batches = 68, EventsHosted = eventsCount + 50 };
         }
     }
 }
