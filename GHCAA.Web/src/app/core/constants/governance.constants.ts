@@ -1,14 +1,20 @@
 export const EC_ROLES = [
+    'None',
     'President',
     'Vice President',
     'General Secretary',
-    'Joint Secretary',
-    'Treasurer',
-    'Organizing Secretary',
     'Office Secretary',
-    'Information Secretary',
-    'Executive Member',
-    'None'
+    'Joint Secretary -1',
+    'Joint Secretary -2',
+    'Treasurer',
+    'Media Cultural & Sports Secretary',
+    'Organizational Secretary',
+    'Information and Technology Secretary',
+    'Member-1',
+    'Member-2',
+    'Law Secretary',
+    'Immediate Past President',
+    'Institutional Representative'
 ] as const;
 
 export type ECPositionType = typeof EC_ROLES[number];

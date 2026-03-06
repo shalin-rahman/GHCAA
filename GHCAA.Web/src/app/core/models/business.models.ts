@@ -1,7 +1,7 @@
 export type MembershipStatus = 'Applied' | 'Active' | 'InactivePayment' | 'InactiveResigned' | 'Terminated';
 export type MembershipType = 'Founding' | 'Executive' | 'General' | 'Associate' | 'Honorary' | 'Advisory';
 export type MemberCategory = 'None' | 'Lifelong' | 'Donor' | 'Patron';
-export type ECPosition = 'President' | 'VicePresident' | 'GeneralSecretary' | 'JointSecretary' | 'Treasurer' | 'OrganizingSecretary' | 'OfficeSecretary' | 'InformationSecretary' | 'Member' | 'None';
+export type ECPosition = 'None' | 'President' | 'VicePresident' | 'GeneralSecretary' | 'OfficeSecretary' | 'JointSecretary1' | 'JointSecretary2' | 'Treasurer' | 'MediaCulturalAndSportsSecretary' | 'OrganizationalSecretary' | 'InformationAndTechnologySecretary' | 'Member1' | 'Member2' | 'LawSecretary' | 'ImmediatePastPresident' | 'InstitutionalRepresentative';
 export type Gender = 'Male' | 'Female' | 'Other';
 export type BloodGroup = 'APositive' | 'ANegative' | 'BPositive' | 'BNegative' | 'OPositive' | 'ONegative' | 'ABPositive' | 'ABNegative';
 export type RecordType = 'Income' | 'Expense';
