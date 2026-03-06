@@ -18,12 +18,12 @@ export class LandingCtaBanner implements OnInit {
         this.lookupService.getStats().subscribe({
             next: (data) => {
                 this.stats.set({
-                    totalMembers: data.totalMembers || '2500+',
-                    eventsHosted: data.eventsHosted || '50+',
-                    estYear: '2025' // Association establishment year
+                    totalMembers: data.totalMembers || 0,
+                    eventsHosted: data.eventsHosted || 0,
+                    estYear: 2025 // Association establishment year
                 });
             },
-            error: () => this.stats.set({ totalMembers: '2500+', eventsHosted: '50+', estYear: '2025' })
+            error: () => this.stats.set({ totalMembers: 0, eventsHosted: 0, estYear: 2025 })
         });
     }
 }

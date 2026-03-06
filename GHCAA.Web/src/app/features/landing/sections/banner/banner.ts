@@ -17,7 +17,7 @@ export class LandingBanner implements OnInit {
     ngOnInit() {
         this.lookupService.getStats().subscribe({
             next: (data) => this.stats.set(data),
-            error: () => this.stats.set({ totalMembers: '500+', batches: 68, countries: 10 })
+            error: () => this.stats.set({ totalMembers: 0, batches: 0, countries: 0 })
         });
     }
 }
