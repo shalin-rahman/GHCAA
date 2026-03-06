@@ -18,10 +18,15 @@ namespace GHCAA.Application.DTOs
         public string EmergencyContactName { get; set; } = null!;
         public string EmergencyContactRelation { get; set; } = null!;
         public string EmergencyContactPhone { get; set; } = null!;
-        public int HSCAdmissionYear { get; set; }
-        public int GHCAdmissionYear { get; set; }
-        public string LastDegreeFromGHC { get; set; } = null!;
-        public string SubjectGroup { get; set; } = null!;
+        public int? HSCAdmissionYear { get; set; }
+        public string HighestCertificate { get; set; } = null!;
+        public string HighestCertificateGroup { get; set; } = null!;
+        public string HighestCertificateSubject { get; set; } = null!;
+        public int HighestCertificatePassingYear { get; set; }
+        public int? GHCAdmissionYear { get; set; }
+        public string GHCLastCertificate { get; set; } = null!;
+        public string GHCLastCertificateGroup { get; set; } = null!;
+        public string GHCLastCertificateSubject { get; set; } = null!;
         public int GHCLastCertificatePassingYear { get; set; }
         public string ProfessionalSector { get; set; } = null!;
         public string Designation { get; set; } = null!;

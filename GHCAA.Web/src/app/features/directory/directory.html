@@ -41,14 +41,9 @@
                 <label>Professional Sector</label>
                 <select [(ngModel)]="filters.sector" (change)="search()">
                     <option value="">All Sectors</option>
-                    <option value="Teaching">Teaching</option>
-                    <option value="Business">Business</option>
-                    <option value="IT">IT</option>
-                    <option value="Medical">Medical</option>
-                    <option value="Govt. Service">Govt. Service</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Law">Law</option>
-                    <option value="Other">Other</option>
+                    @for (s of sectors; track s) {
+                    <option [value]="s">{{ s }}</option>
+                    }
                 </select>
             </div>
         </div>
@@ -152,12 +147,18 @@
                 <div class="v-section">
                     <h4>Academic Background</h4>
                     <div class="v-item">
-                        <span class="v-label">Degree from GHC</span>
-                        <span class="v-value">{{ selectedMember()?.lastCertificateFromGHC }}</span>
+                        <span class="v-label">Highest Degree</span>
+                        <span class="v-value">{{ selectedMember()?.highestCertificate }} ({{
+                            selectedMember()?.highestCertificateSubject }})</span>
                     </div>
                     <div class="v-item">
-                        <span class="v-label">Subject / Group</span>
-                        <span class="v-value">{{ selectedMember()?.subjectGroup }}</span>
+                        <span class="v-label">Degree from GHC</span>
+                        <span class="v-value">{{ selectedMember()?.ghcLastCertificate }}</span>
+                    </div>
+                    <div class="v-item">
+                        <span class="v-label">Subject / Group (GHC)</span>
+                        <span class="v-value">{{ selectedMember()?.ghcLastCertificateSubject }} ({{
+                            selectedMember()?.ghcLastCertificateGroup }})</span>
                     </div>
                 </div>
 

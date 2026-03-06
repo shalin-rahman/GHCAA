@@ -25,11 +25,19 @@ namespace GHCAA.Domain.Models
         public string EmergencyContactPhone { get; set; } = null!;
 
         // B. Academic (2.1 B)
-        public int HSCAdmissionYear { get; set; } // 1950 - Current
-        public int GHCAdmissionYear { get; set; } // Separated from HSC
-        public string LastCertificateFromGHC { get; set; } = "Other"; // Dynamic lookup: HSC, Bachelor, etc.
-        public string SubjectGroup { get; set; } = null!;
-        public int GHCLastCertificatePassingYear { get; set; } // 1950 - Current
+        // Highest Certificate
+        public int? HSCAdmissionYear { get; set; } // 1950 - Current
+        public string HighestCertificate { get; set; } = null!;
+        public string HighestCertificateGroup { get; set; } = null!;
+        public string HighestCertificateSubject { get; set; } = null!;
+        public int HighestCertificatePassingYear { get; set; }
+
+        // GHC Certificate
+        public int? GHCAdmissionYear { get; set; } // 1950 - Current
+        public string GHCLastCertificate { get; set; } = null!;
+        public string GHCLastCertificateGroup { get; set; } = null!;
+        public string GHCLastCertificateSubject { get; set; } = null!;
+        public int GHCLastCertificatePassingYear { get; set; }
 
         // C. Professional (2.1 C)
         public string ProfessionalSector { get; set; } = null!;

@@ -8,8 +8,16 @@ namespace GHCAA.Application.DTOs
         public string Designation { get; set; } = null!;
 
         // Academic
-        public string SubjectGroup { get; set; } = null!;
-        public string LastDegreeFromGHC { get; set; } = null!;
+        public int? HSCAdmissionYear { get; set; }
+        public string HighestCertificate { get; set; } = null!;
+        public string HighestCertificateGroup { get; set; } = null!;
+        public string HighestCertificateSubject { get; set; } = null!;
+        public int HighestCertificatePassingYear { get; set; }
+
+        public int? GHCAdmissionYear { get; set; }
+        public string GHCLastCertificate { get; set; } = null!;
+        public string GHCLastCertificateGroup { get; set; } = null!;
+        public string GHCLastCertificateSubject { get; set; } = null!;
         public int GHCLastCertificatePassingYear { get; set; }
         
         // Privacy Settings

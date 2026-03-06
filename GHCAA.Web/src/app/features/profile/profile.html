@@ -33,8 +33,8 @@
                 <p>{{ profile.ghcLastCertificatePassingYear }}</p>
             </div>
             <div class="grid-item">
-                <small>Degree from GHC</small>
-                <p>{{ getDegreeName(profile.lastCertificateFromGHC) }}</p>
+                <small>Highest Degree</small>
+                <p>{{ profile.highestCertificate }}</p>
             </div>
             <div class="grid-item">
                 <small>Member Since</small>
@@ -79,14 +79,45 @@
                     Academic Credentials</h4>
                 <div class="space-y-6">
                     <div class="form-group">
-                        <label>Passing Year</label>
-                        <input type="number" list="years-list" [(ngModel)]="profile.ghcLastCertificatePassingYear"
-                            name="passYear">
+                        <label>Highest Certificate</label>
+                        <input type="text" list="degree-list" [(ngModel)]="profile.highestCertificate"
+                            name="highestCertificate">
                     </div>
                     <div class="form-group">
-                        <label>Subject Group</label>
-                        <input type="text" [(ngModel)]="profile.subjectGroup" name="subjectGroup"
-                            placeholder="e.g. Science">
+                        <label>Highest Certificate Group</label>
+                        <input type="text" list="group-list" [(ngModel)]="profile.highestCertificateGroup"
+                            name="highestCertificateGroup">
+                    </div>
+                    <div class="form-group" *ngIf="profile.highestCertificate !== 'HSC'">
+                        <label>Highest Certificate Subject</label>
+                        <input type="text" list="subject-list" [(ngModel)]="profile.highestCertificateSubject"
+                            name="highestCertificateSubject">
+                    </div>
+                    <div class="form-group">
+                        <label>Highest Cert. Passing Year</label>
+                        <input type="number" list="years-list" [(ngModel)]="profile.highestCertificatePassingYear"
+                            name="highestYear">
+                    </div>
+
+                    <div class="form-group">
+                        <label>GHC Last Certificate</label>
+                        <input type="text" list="degree-list" [(ngModel)]="profile.ghcLastCertificate"
+                            name="ghcLastCertificate">
+                    </div>
+                    <div class="form-group">
+                        <label>GHC Last Certificate Group</label>
+                        <input type="text" list="group-list" [(ngModel)]="profile.ghcLastCertificateGroup"
+                            name="ghcLastCertificateGroup">
+                    </div>
+                    <div class="form-group" *ngIf="profile.ghcLastCertificate !== 'HSC'">
+                        <label>GHC Last Certificate Subject</label>
+                        <input type="text" list="subject-list" [(ngModel)]="profile.ghcLastCertificateSubject"
+                            name="ghcLastCertificateSubject">
+                    </div>
+                    <div class="form-group">
+                        <label>GHC Last Cert. Passing Year</label>
+                        <input type="number" list="years-list" [(ngModel)]="profile.ghcLastCertificatePassingYear"
+                            name="passYear">
                     </div>
                 </div>
             </div>
@@ -169,6 +200,15 @@
     </datalist>
     <datalist id="sector-list">
         <option *ngFor="let s of sectorOptions" [value]="s"></option>
+    </datalist>
+    <datalist id="group-list">
+        <option *ngFor="let g of groupOptions" [value]="g"></option>
+    </datalist>
+    <datalist id="subject-list">
+        <option *ngFor="let s of subjectOptions" [value]="s"></option>
+    </datalist>
+    <datalist id="degree-list">
+        <option *ngFor="let d of degreeOptions" [value]="d"></option>
     </datalist>
     }
 </div>

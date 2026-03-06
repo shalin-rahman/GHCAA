@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminCommService, EmailTemplate, EmailLog } from '../../core/services/admin-comm.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ActivatedRoute } from '@angular/router';
+import { getAcademicYears } from '../../core/constants/app.constants';
 
 @Component({
     selector: 'app-admin-comm',
@@ -41,7 +42,7 @@ export class AdminComm implements OnInit {
         customBody: ''
     };
 
-    years: number[] = [];
+    years: number[] = getAcademicYears();
     membershipTypes = [
         { value: 'Founding', label: 'Founding Member' },
         { value: 'Executive', label: 'Executive Committee' },
@@ -51,12 +52,7 @@ export class AdminComm implements OnInit {
         { value: 'Advisory', label: 'Advisory Member' }
     ];
 
-    constructor() {
-        const currentYear = new Date().getFullYear();
-        for (let i = currentYear; i >= 1950; i--) {
-            this.years.push(i);
-        }
-    }
+
 
     ngOnInit() {
         this.loadTemplates();

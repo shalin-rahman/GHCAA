@@ -57,7 +57,7 @@ public class EventServiceTests : TestBase
     [Test]
     public async Task ApproveRegistrationAsync_ShouldUpdateStatusAndSendEmail()
     {
-        var member = new Member { FullName = "Test Member", Email = "evtest@example.com", NID = "EVT1", FatherName = "F", MotherName = "M", MobileNo = "EVT1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "P", Designation = "D" };
+        var member = new Member { FullName = "Test Member", Email = "evtest@example.com", NID = "EVT1", FatherName = "F", MotherName = "M", MobileNo = "EVT1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "P", Designation = "D" };
         var ev = new AlumniEvent { Title = "Grand Reunion", Description = "D", Date = DateTime.UtcNow, Location = "Campus" };
         _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RegistrationService } from '../../core/services/registration.service';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
+import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-register',
@@ -20,11 +21,13 @@ export class Register {
   loading = signal(false);
   submitted = signal(false);
   currentStep = signal(1);
-
-  years: number[] = [];
-  subjectOptions = ['Science', 'Arts', 'Commerce', 'NU Subjects'];
-  degreeOptions = ['HSC', 'Bachelor', 'Masters', 'PhD', 'Other'];
-  sectorOptions = ['Govt. Service', 'Corporate', 'Business', 'Education', 'Medical/Health', 'Engineering', 'Law', 'Other'];
+  ACADEMIC = ACADEMIC_DATA;
+  IS_HSC = IS_HSC;
+  years = this.ACADEMIC.getYears();
+  certificateOptions = this.ACADEMIC.certificates;
+  groupOptions = this.ACADEMIC.groups;
+  subjectOptions = this.ACADEMIC.subjects;
+  sectorOptions = this.ACADEMIC.sectors;
 
   model: any = {
     FullName: '',
@@ -39,9 +42,14 @@ export class Register {
     PresentAddress: '',
     PermanentAddress: '',
     HSCAdmissionYear: null,
+    HighestCertificate: 'HSC',
+    HighestCertificateGroup: 'Science',
+    HighestCertificateSubject: 'None',
+    HighestCertificatePassingYear: null,
     GHCAdmissionYear: null,
-    LastDegreeFromGHC: 'Bachelor',
-    SubjectGroup: '',
+    GHCLastCertificate: 'HSC',
+    GHCLastCertificateGroup: 'Science',
+    GHCLastCertificateSubject: 'None',
     GHCLastCertificatePassingYear: null,
     ProfessionalSector: '',
     Designation: '',
@@ -53,12 +61,7 @@ export class Register {
   files: { [key: string]: File } = {};
   otpCode = '';
 
-  constructor() {
-    const currentYear = new Date().getFullYear();
-    for (let i = currentYear; i >= 1950; i--) {
-      this.years.push(i);
-    }
-  }
+
 
   nextStep() {
     if (this.currentStep() < 5) {
@@ -93,6 +96,9 @@ export class Register {
     if (this.files['photo']) formData.append('photo', this.files['photo']);
     if (this.files['certificate']) formData.append('certificate', this.files['certificate']);
     if (this.files['paymentProof']) formData.append('paymentProof', this.files['paymentProof']);
+
+    // Auto-set for HSC logic
+    ensureValidAcademicData(this.model);
 
     this.regService.register(formData).subscribe({
       next: () => {

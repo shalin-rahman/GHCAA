@@ -33,7 +33,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task PostJobAsync_ShouldAddJobAndReturnDto()
         {
-            var member = new Member { FullName = "Recruiter", Email = "jhr@e.com", NID = "JHR1", FatherName = "F", MotherName = "M", MobileNo = "JHR1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" };
+            var member = new Member { FullName = "Recruiter", Email = "jhr@e.com", NID = "JHR1", FatherName = "F", MotherName = "M", MobileNo = "JHR1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" };
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
 
@@ -53,7 +53,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task GetActiveJobsAsync_ShouldReturnOnlyActiveAndUnexpiredJobs()
         {
-            var member = new Member { FullName = "M", Email = "jhm@e.com", NID = "JHM1", MobileNo = "JHM1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+            var member = new Member { FullName = "M", Email = "jhm@e.com", NID = "JHM1", MobileNo = "JHM1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="I", Designation="D" };
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
 
@@ -71,7 +71,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task DeactivateJobAsync_ShouldSetIsActiveToFalse()
         {
-            var member = new Member { FullName = "M", Email = "jhd@e.com", NID = "JHD1", MobileNo = "JHD1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+            var member = new Member { FullName = "M", Email = "jhd@e.com", NID = "JHD1", MobileNo = "JHD1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="I", Designation="D" };
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
 

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { NewsService } from './news.service';
-import { API_ENDPOINTS } from '../constants/api.endpoints';
+import { API_ENDPOINTS } from '../constants/app.constants';
 
 describe('NewsService', () => {
     let service: NewsService;

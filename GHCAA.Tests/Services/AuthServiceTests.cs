@@ -36,7 +36,7 @@ namespace GHCAA.Tests.Services
             var username = "GHC-2007-0001";
             var password = "TestPassword123";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test1@e.com", NID = "123", FatherName="F", MotherName="M", MobileNo="01", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="P", Designation="D" };
+            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test1@e.com", NID = "123", FatherName="F", MotherName="M", MobileNo="01", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
             var memberId = member.Id;
@@ -84,7 +84,7 @@ namespace GHCAA.Tests.Services
             var password = "CorrectPassword";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
-            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test2@e.com", NID = "124", FatherName="F", MotherName="M", MobileNo="01a", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="P", Designation="D" };
+            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test2@e.com", NID = "124", FatherName="F", MotherName="M", MobileNo="01a", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 
@@ -102,7 +102,7 @@ namespace GHCAA.Tests.Services
             var password = "password";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
-            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test3@e.com", NID = "125", FatherName="F", MotherName="M", MobileNo="01b", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="P", Designation="D" };
+            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test3@e.com", NID = "125", FatherName="F", MotherName="M", MobileNo="01b", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 

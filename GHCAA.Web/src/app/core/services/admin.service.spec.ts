@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { AdminService } from './admin.service';
-import { API_ENDPOINTS } from '../constants/api.endpoints';
+import { API_ENDPOINTS } from '../constants/app.constants';
 
 describe('AdminService', () => {
     let service: AdminService;

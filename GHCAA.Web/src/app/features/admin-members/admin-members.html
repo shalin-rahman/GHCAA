@@ -244,15 +244,47 @@
 
                 <!-- Academic -->
                 <div class="detail-item">
-                    <label>Last Degree from GHC</label>
+                    <label>Highest Certificate</label>
                     <input *ngIf="isEditing()" type="text" list="degree-list"
-                        [(ngModel)]="selectedMember().lastCertificateFromGHC">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.lastCertificateFromGHC }}</span>
+                        [(ngModel)]="selectedMember().highestCertificate">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.highestCertificate }}</span>
                 </div>
                 <div class="detail-item">
-                    <label>Subject/Group</label>
-                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().subjectGroup">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.subjectGroup }}</span>
+                    <label>Highest Certificate Group</label>
+                    <input *ngIf="isEditing()" type="text" list="group-list"
+                        [(ngModel)]="selectedMember().highestCertificateGroup">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.highestCertificateGroup }}</span>
+                </div>
+                <div class="detail-item" *ngIf="selectedMember().highestCertificate !== 'HSC'">
+                    <label>Highest Certificate Subject</label>
+                    <input *ngIf="isEditing()" type="text" list="subject-list"
+                        [(ngModel)]="selectedMember().highestCertificateSubject">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.highestCertificateSubject }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Highest Cert. Passing Year</label>
+                    <input *ngIf="isEditing()" type="number" list="years-list"
+                        [(ngModel)]="selectedMember().highestCertificatePassingYear">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.highestCertificatePassingYear }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>GHC Last Certificate</label>
+                    <input *ngIf="isEditing()" type="text" list="degree-list"
+                        [(ngModel)]="selectedMember().ghcLastCertificate">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.ghcLastCertificate }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>GHC Last Cert. Group</label>
+                    <input *ngIf="isEditing()" type="text" list="group-list"
+                        [(ngModel)]="selectedMember().ghcLastCertificateGroup">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.ghcLastCertificateGroup }}</span>
+                </div>
+                <div class="detail-item" *ngIf="selectedMember().ghcLastCertificate !== 'HSC'">
+                    <label>GHC Last Cert. Subject</label>
+                    <input *ngIf="isEditing()" type="text" list="subject-list"
+                        [(ngModel)]="selectedMember().ghcLastCertificateSubject">
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.ghcLastCertificateSubject }}</span>
                 </div>
                 <div class="detail-item">
                     <label>Passing Year</label>
@@ -440,4 +472,17 @@
         </div>
     </div>
 </div>
+
+<datalist id="group-list">
+    <option *ngFor="let g of groupOptions" [value]="g"></option>
+</datalist>
+<datalist id="subject-list">
+    <option *ngFor="let s of subjectOptions" [value]="s"></option>
+</datalist>
+<datalist id="sector-list">
+    <option *ngFor="let sec of sectorOptions" [value]="sec"></option>
+</datalist>
+<datalist id="degree-list">
+    <option *ngFor="let d of degreeOptions" [value]="d"></option>
+</datalist>
 }

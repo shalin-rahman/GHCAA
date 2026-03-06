@@ -108,8 +108,8 @@ public class NetworkingServiceTests : TestBase
             Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive,
             PresentAddress = "Present", PermanentAddress = "Permanent",
             EmergencyContactName = "Emergency", EmergencyContactRelation = "Relation", EmergencyContactPhone = "01111111111",
-            HSCAdmissionYear = 2005, GHCAdmissionYear = 2005, LastCertificateFromGHC = "HSC",
-            SubjectGroup = "Science", GHCLastCertificatePassingYear = 2007,
+            HSCAdmissionYear = 2005, GHCAdmissionYear = 2005,
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None", GHCLastCertificatePassingYear = 2007,
             ProfessionalSector = "IT", Designation = "Software Engineer",
             Status = Enums.MembershipStatus.Active, AppliedDate = DateTime.UtcNow
         };

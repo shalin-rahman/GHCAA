@@ -35,8 +35,7 @@ public class MemberRegistrationValidatorTests
             EmergencyContactPhone = "01812345678",
             HSCAdmissionYear = 2005,
             GHCAdmissionYear = 2005,
-            LastDegreeFromGHC = "HSC",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             GHCLastCertificatePassingYear = 2007,
             ProfessionalSector = "IT",
             Designation = "Developer"

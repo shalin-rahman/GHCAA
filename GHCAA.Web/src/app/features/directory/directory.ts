@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName } from '../../core/constants/governance.constants';
+import { getECPositionName, getAcademicYears, PROFESSIONAL_SECTORS } from '../../core/constants/app.constants';
 
 @Component({
     selector: 'app-directory',
@@ -21,7 +21,8 @@ export class Directory implements OnInit {
 
     members = signal<any[]>([]);
     loading = signal(true);
-    years: number[] = [];
+    years: number[] = getAcademicYears();
+    sectors = PROFESSIONAL_SECTORS;
     selectedMember = signal<any | null>(null);
 
     filters = {
@@ -31,12 +32,7 @@ export class Directory implements OnInit {
         bloodGroup: ''
     };
 
-    constructor() {
-        const currentYear = new Date().getFullYear();
-        for (let i = currentYear; i >= 1950; i--) {
-            this.years.push(i);
-        }
-    }
+
 
     ngOnInit() {
         this.search();

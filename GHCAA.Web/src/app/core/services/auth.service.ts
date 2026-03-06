@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap, map, catchError, of } from 'rxjs';
 import { LoginDto, TokenResponseDto, User } from '../models/auth.models';
 
-import { API_ENDPOINTS } from '../constants/api.endpoints';
+import { API_ENDPOINTS } from '../constants/app.constants';
 
 @Injectable({
     providedIn: 'root'

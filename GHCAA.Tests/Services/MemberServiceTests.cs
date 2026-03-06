@@ -73,8 +73,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactPhone = "01812345678",
             HSCAdmissionYear = 2005,
             GHCAdmissionYear = 2005,
-            LastDegreeFromGHC = "HSC",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             GHCLastCertificatePassingYear = 2007,
             ProfessionalSector = "IT",
             Designation = "Developer"
@@ -131,7 +130,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         });
@@ -161,7 +160,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         });
@@ -191,7 +190,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         });
@@ -332,7 +331,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -369,7 +368,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -408,7 +407,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -461,7 +460,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "EC",
             EmergencyContactRelation = "Brother",
             EmergencyContactPhone = "01812345678",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Software Engineer"
         };
@@ -494,7 +493,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "EC",
             EmergencyContactRelation = "Brother",
             EmergencyContactPhone = "01812345678",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Software Engineer",
             IsMobilePublic = false
@@ -508,8 +507,7 @@ public class MemberServiceTests : TestBase
             PermanentAddress = "Perm Address",
             ProfessionalSector = "New IT",
             Designation = "Senior Dev",
-            SubjectGroup = "Science",
-            LastDegreeFromGHC = "Bachelor",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="Bachelor", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             GHCLastCertificatePassingYear = 2007,
             IsMobilePublic = true,
             IsEmailPublic = true,
@@ -587,7 +585,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -634,7 +632,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -653,7 +651,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -692,7 +690,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -711,7 +709,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -760,7 +758,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -792,7 +790,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -837,7 +835,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            SubjectGroup = "Science",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
             ProfessionalSector = "IT",
             Designation = "Developer"
         };
@@ -857,7 +855,7 @@ public class MemberServiceTests : TestBase
             MobileNo = "01799999999",
             NID = "9999999999",
             DateOfBirth = new DateTime(1991, 1, 1),
-            LastCertificateFromGHC = "Bachelor",
+            GHCLastCertificate = "Bachelor",
             GHCLastCertificatePassingYear = 2007,
             HSCAdmissionYear = 2005,
             GHCAdmissionYear = 2005,
@@ -866,7 +864,9 @@ public class MemberServiceTests : TestBase
             PermanentAddress = "New Perm Address",
             ProfessionalSector = "New Sector",
             Designation = "Senior Dev",
-            SubjectGroup = "Commerce"
+            GHCLastCertificateGroup = "Commerce",
+            GHCLastCertificateSubject = "Accounting",
+            HighestCertificate = "HSC", HighestCertificateGroup = "Science", HighestCertificateSubject = "None"
         };
 
         // Act
@@ -880,6 +880,6 @@ public class MemberServiceTests : TestBase
         updatedMember.Category.Should().Be(Enums.MemberCategory.Lifelong);
         updatedMember.ECPosition.Should().Be(Enums.ECPosition.President);
         updatedMember.MembershipNumber.Should().Be("GHC-2007-9999");
-        updatedMember.SubjectGroup.Should().Be("Commerce");
+        updatedMember.GHCLastCertificateGroup.Should().Be("Commerce");
     }
 }

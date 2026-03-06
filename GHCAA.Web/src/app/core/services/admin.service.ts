@@ -15,10 +15,15 @@ export interface MemberApprovalRequest {
     mobileNo: string;
     presentAddress: string;
     permanentAddress: string;
-    hscAdmissionYear: number;
-    ghcAdmissionYear: number;
-    lastCertificateFromGHC: string;
-    subjectGroup: string;
+    hscAdmissionYear?: number;
+    highestCertificate: string;
+    highestCertificateGroup: string;
+    highestCertificateSubject: string;
+    highestCertificatePassingYear: number;
+    ghcAdmissionYear?: number;
+    ghcLastCertificate: string;
+    ghcLastCertificateGroup: string;
+    ghcLastCertificateSubject: string;
     ghcLastCertificatePassingYear: number;
     professionalSector: string;
     designation: string;
@@ -31,7 +36,7 @@ export interface MemberApprovalRequest {
     certificatePath?: string;
 }
 
-import { API_ENDPOINTS } from '../constants/api.endpoints';
+import { API_ENDPOINTS } from '../constants/app.constants';
 
 @Injectable({
     providedIn: 'root'

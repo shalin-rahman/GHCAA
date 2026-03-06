@@ -249,8 +249,8 @@ namespace GHCAA.Infrastructure.Services
                 { "PresentAddress", member.PresentAddress },
                 { "PermanentAddress", member.PermanentAddress },
                 { "PassingYear", member.GHCLastCertificatePassingYear.ToString() },
-                { "HSCAdmissionYear", member.HSCAdmissionYear.ToString() },
-                { "SubjectGroup", member.SubjectGroup },
+                { "HSCAdmissionYear", member.HSCAdmissionYear?.ToString() ?? "N/A" },
+                { "SubjectGroup", member.GHCLastCertificateSubject },
                 { "ProfessionalSector", member.ProfessionalSector },
                 { "Designation", member.Designation }
             };

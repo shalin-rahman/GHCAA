@@ -24,10 +24,16 @@ export interface Member {
     emergencyContactName: string;
     emergencyContactRelation: string;
     emergencyContactPhone: string;
-    hscAdmissionYear: number;
-    ghcAdmissionYear: number;
-    lastCertificateFromGHC: string;
-    subjectGroup: string;
+    hscAdmissionYear?: number;
+    highestCertificate: string;
+    highestCertificateGroup: string;
+    highestCertificateSubject: string;
+    highestCertificatePassingYear: number;
+
+    ghcAdmissionYear?: number;
+    ghcLastCertificate: string;
+    ghcLastCertificateGroup: string;
+    ghcLastCertificateSubject: string;
     ghcLastCertificatePassingYear: number;
     professionalSector: string;
     designation: string;

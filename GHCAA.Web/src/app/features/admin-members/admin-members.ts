@@ -5,7 +5,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { EC_ROLES, getECPositionName } from '../../core/constants/governance.constants';
+import { EC_ROLES, getECPositionName, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-admin-members',
@@ -60,8 +60,8 @@ export class AdminMembers implements OnInit {
     { value: 'ProfessionalSector', label: 'Sector' },
     { value: 'PresentAddress', label: 'Present Address' },
     { value: 'PermanentAddress', label: 'Permanent Address' },
-    { value: 'SubjectGroup', label: 'Subject/Group' },
-    { value: 'LastCertificateFromGHC', label: 'Last Degree' },
+    { value: 'HighestCertificate', label: 'Highest Certificate' },
+    { value: 'GHCLastCertificate', label: 'GHC Last Certificate' },
     { value: 'HSCAdmissionYear', label: 'HSC Admission Year' },
     { value: 'GHCAdmissionYear', label: 'GHC Admission Year' },
     { value: 'EmergencyContactName', label: 'Emergency Contact Name' },
@@ -90,11 +90,13 @@ export class AdminMembers implements OnInit {
 
   ecPositions = EC_ROLES.map((label, index) => ({ value: index, label }));
 
-  yearsList = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
-
-  degreeOptions = ['HSC', 'Bachelor', 'Masters', 'PhD', 'Other'];
-  sectorOptions = ['Govt. Service', 'Corporate', 'Business', 'Education', 'Medical/Health', 'Engineering', 'Other'];
-
+  ACADEMIC = ACADEMIC_DATA;
+  yearsList = this.ACADEMIC.getYears();
+  IS_HSC = IS_HSC;
+  degreeOptions = this.ACADEMIC.certificates;
+  groupOptions = this.ACADEMIC.groups;
+  subjectOptions = this.ACADEMIC.subjects;
+  sectorOptions = this.ACADEMIC.sectors;
   filteredMembers = computed(() => {
     const q = this.searchQuery().toLowerCase();
     const s = this.statusFilter();
@@ -163,6 +165,8 @@ export class AdminMembers implements OnInit {
     const member = this.selectedMember();
     if (!member) return;
 
+    ensureValidAcademicData(member);
+
     this.adminService.updateMember(member.id, {
       fullName: member.fullName,
       fatherName: member.fatherName,
@@ -174,9 +178,14 @@ export class AdminMembers implements OnInit {
       presentAddress: member.presentAddress,
       permanentAddress: member.permanentAddress,
       hscAdmissionYear: member.hscAdmissionYear,
+      highestCertificate: member.highestCertificate,
+      highestCertificateGroup: member.highestCertificateGroup,
+      highestCertificateSubject: member.highestCertificateSubject,
+      highestCertificatePassingYear: member.highestCertificatePassingYear,
       ghcAdmissionYear: member.ghcAdmissionYear,
-      lastCertificateFromGHC: member.lastCertificateFromGHC,
-      subjectGroup: member.subjectGroup,
+      ghcLastCertificate: member.ghcLastCertificate,
+      ghcLastCertificateGroup: member.ghcLastCertificateGroup,
+      ghcLastCertificateSubject: member.ghcLastCertificateSubject,
       ghcLastCertificatePassingYear: member.ghcLastCertificatePassingYear,
       professionalSector: member.professionalSector,
       designation: member.designation,

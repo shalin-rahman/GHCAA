@@ -127,7 +127,7 @@ namespace GHCAA.Tests.Services
                 EmergencyContactName = "EC",
                 EmergencyContactRelation = "Brother",
                 EmergencyContactPhone = "01800000000",
-                SubjectGroup = "S",
+                HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None",
                 ProfessionalSector = "P",
                 Designation = "D",
                 GHCLastCertificatePassingYear = 2005,

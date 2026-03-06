@@ -1,6 +1,6 @@
 import { Injectable, signal, effect, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { API_ENDPOINTS } from '../constants/api.endpoints';
+import { API_ENDPOINTS } from '../constants/app.constants';
 import { tap } from 'rxjs';
 
 export type Theme = 'light' | 'dark';

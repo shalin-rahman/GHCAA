@@ -53,7 +53,7 @@ namespace GHCAA.Tests.Services
             await _context.SaveChangesAsync();
 
             var updateDto = CreateUpdateDto(member);
-            updateDto.ECPosition = "0"; // President
+            updateDto.ECPosition = "1"; // President
             updateDto.ECChangeReason = "Elected mid-term";
 
             // Act
@@ -86,7 +86,7 @@ namespace GHCAA.Tests.Services
             await _context.SaveChangesAsync();
 
             var updateDto = CreateUpdateDto(member);
-            updateDto.ECPosition = "9"; // None
+            updateDto.ECPosition = "0"; // None
             updateDto.ECChangeReason = "Resigned";
 
             // Act
@@ -109,8 +109,10 @@ namespace GHCAA.Tests.Services
                 FullName = m.FullName, Email = m.Email, MobileNo = m.MobileNo, NID = m.NID,
                 FatherName = m.FatherName, MotherName = m.MotherName, PresentAddress = m.PresentAddress,
                 PermanentAddress = m.PermanentAddress, MembershipType = "General", Category = "None",
-                GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear, LastCertificateFromGHC = m.LastCertificateFromGHC,
-                ProfessionalSector = m.ProfessionalSector, Designation = m.Designation, SubjectGroup = m.SubjectGroup,
+                GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear, GHCLastCertificate = m.GHCLastCertificate,
+                GHCLastCertificateGroup = m.GHCLastCertificateGroup, GHCLastCertificateSubject = m.GHCLastCertificateSubject,
+                HighestCertificate = m.HighestCertificate, HighestCertificateGroup = m.HighestCertificateGroup, HighestCertificateSubject = m.HighestCertificateSubject,
+                ProfessionalSector = m.ProfessionalSector, Designation = m.Designation,
                 ECPosition = "None"
             };
         }
@@ -126,7 +128,7 @@ namespace GHCAA.Tests.Services
                 FatherName = "F", MotherName = "M",
                 PresentAddress = "A", PermanentAddress = "A",
                 EmergencyContactName = "EC", EmergencyContactRelation = "Brother", EmergencyContactPhone = "01800000000",
-                SubjectGroup = "S", ProfessionalSector = "P", Designation = "D",
+                HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "P", Designation = "D",
                 GHCLastCertificatePassingYear = 2005,
                 DateOfBirth = new DateTime(1990,1,1),
                 Gender = Enums.Gender.Male,

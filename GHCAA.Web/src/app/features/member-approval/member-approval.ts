@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
+import { ACADEMIC_CERTIFICATES, ACADEMIC_GROUPS, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getAcademicYears } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-member-approval',
@@ -20,6 +21,11 @@ export class MemberApproval implements OnInit {
   requests = signal<any[]>([]);
   loading = signal(true);
   selectedMember = signal<any | null>(null);
+  years = getAcademicYears();
+  certificateOptions = ACADEMIC_CERTIFICATES;
+  groupOptions = ACADEMIC_GROUPS;
+  subjectOptions = ACADEMIC_SUBJECTS;
+  sectorOptions = PROFESSIONAL_SECTORS;
 
   rejecting = signal(false);
   rejectionReason = '';

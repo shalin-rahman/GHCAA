@@ -37,7 +37,7 @@ public class CommunicationServiceTests : TestBase
         {
             FullName = "John Doe",
             Email = "john@example.com",
-            NID = "123", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D"
+            NID = "123", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D"
         };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
@@ -69,8 +69,8 @@ public class CommunicationServiceTests : TestBase
         // Arrange
         var members = new List<Member>
         {
-            new Member { FullName = "A", Email = "a@e.com", GHCLastCertificatePassingYear = 2005, NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" },
-            new Member { FullName = "B", Email = "b@e.com", GHCLastCertificatePassingYear = 2005, NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" }
+            new Member { FullName = "A", Email = "a@e.com", GHCLastCertificatePassingYear = 2005, NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" },
+            new Member { FullName = "B", Email = "b@e.com", GHCLastCertificatePassingYear = 2005, NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" }
         };
         _context.Members.AddRange(members);
         _context.EmailTemplates.Add(new EmailTemplate { Code = "BATCH", Subject = "S", Body = "B", Description = "Batch test template" });
@@ -89,8 +89,8 @@ public class CommunicationServiceTests : TestBase
         // Arrange
         var members = new List<Member>
         {
-            new Member { FullName = "2005-A", Email = "2005a@e.com", GHCLastCertificatePassingYear = 2005, NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" },
-            new Member { FullName = "2010-B", Email = "2010b@e.com", GHCLastCertificatePassingYear = 2010, NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" }
+            new Member { FullName = "2005-A", Email = "2005a@e.com", GHCLastCertificatePassingYear = 2005, NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" },
+            new Member { FullName = "2010-B", Email = "2010b@e.com", GHCLastCertificatePassingYear = 2010, NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" }
         };
         _context.Members.AddRange(members);
         await _context.SaveChangesAsync();
@@ -109,8 +109,8 @@ public class CommunicationServiceTests : TestBase
         // Arrange
         var members = new List<Member>
         {
-            new Member { FullName = "Exec", Email = "exec@e.com", MembershipType = MembershipType.Executive, NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" },
-            new Member { FullName = "General", Email = "general@e.com", MembershipType = MembershipType.General, NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" }
+            new Member { FullName = "Exec", Email = "exec@e.com", MembershipType = MembershipType.Executive, NID = "1", MobileNo = "0", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" },
+            new Member { FullName = "General", Email = "general@e.com", MembershipType = MembershipType.General, NID = "2", MobileNo = "01", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" }
         };
         _context.Members.AddRange(members);
         await _context.SaveChangesAsync();

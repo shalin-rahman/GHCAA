@@ -28,7 +28,7 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task RecordPaymentAsync_ShouldAddPaymentAndReturnDto()
     {
-        var member = new Member { FullName = "Payer", Email = "fsp@e.com", NID = "FSP1", FatherName = "F", MotherName = "M", MobileNo = "FSP1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" };
+        var member = new Member { FullName = "Payer", Email = "fsp@e.com", NID = "FSP1", FatherName = "F", MotherName = "M", MobileNo = "FSP1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -47,7 +47,7 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task GetMemberPaymentHistoryAsync_ShouldReturnDtoList()
     {
-        var member = new Member { FullName = "History User", Email = "fsh@e.com", NID = "FSH1", FatherName = "F", MotherName = "M", MobileNo = "FSH1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" };
+        var member = new Member { FullName = "History User", Email = "fsh@e.com", NID = "FSH1", FatherName = "F", MotherName = "M", MobileNo = "FSH1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -64,7 +64,7 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task GenerateAnnualDuesAsync_ShouldCreateDuesForActiveMembers()
     {
-        var member = new Member { FullName = "Active User", Status = Enums.MembershipStatus.Active, MembershipType = Enums.MembershipType.General, Email = "fsg@e.com", NID = "FSG1", FatherName = "F", MotherName = "M", MobileNo = "FSG1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", SubjectGroup = "S", ProfessionalSector = "I", Designation = "D" };
+        var member = new Member { FullName = "Active User", Status = Enums.MembershipStatus.Active, MembershipType = Enums.MembershipType.General, Email = "fsg@e.com", NID = "FSG1", FatherName = "F", MotherName = "M", MobileNo = "FSG1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -79,7 +79,7 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task MarkDueAsPaidAsync_ShouldUpdateStatus()
     {
-        var member = new Member { FullName = "M", Email = "fsm@e.com", NID = "FSM1", MobileNo = "FSM1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", SubjectGroup="S", ProfessionalSector="I", Designation="D" };
+        var member = new Member { FullName = "M", Email = "fsm@e.com", NID = "FSM1", MobileNo = "FSM1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="I", Designation="D" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 

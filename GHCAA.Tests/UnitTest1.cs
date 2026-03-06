@@ -1,4 +1,4 @@
-﻿namespace GHCAA.Tests;
+namespace GHCAA.Tests;
 
 public class Tests
 {

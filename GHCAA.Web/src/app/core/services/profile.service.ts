@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { API_ENDPOINTS } from '../constants/api.endpoints';
+import { API_ENDPOINTS } from '../constants/app.constants';
 
 export interface MemberProfile {
     id: number;
@@ -12,10 +12,17 @@ export interface MemberProfile {
     status: number;
     membershipType: number;
 
-    // Academic
+    hscAdmissionYear?: number;
+    highestCertificate: string;
+    highestCertificateGroup: string;
+    highestCertificateSubject: string;
+    highestCertificatePassingYear: number;
+
+    ghcAdmissionYear?: number;
+    ghcLastCertificate: string;
+    ghcLastCertificateGroup: string;
+    ghcLastCertificateSubject: string;
     ghcLastCertificatePassingYear: number;
-    lastCertificateFromGHC: string;
-    subjectGroup: string;
 
     // Professional
     professionalSector: string;

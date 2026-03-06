@@ -67,20 +67,26 @@ namespace GHCAA.Infrastructure.Data
                 .HasIndex(t => t.Code).IsUnique();
 
             // Seed Lookups
-            modelBuilder.Entity<LookupItem>().HasData(
-                new LookupItem { Id = 1, Category = "Degree", Value = "HSC", Label = "HSC", DisplayOrder = 1 },
-                new LookupItem { Id = 2, Category = "Degree", Value = "Bachelor", Label = "Bachelor / Honours", DisplayOrder = 2 },
-                new LookupItem { Id = 3, Category = "Degree", Value = "Masters", Label = "Masters", DisplayOrder = 3 },
-                new LookupItem { Id = 4, Category = "Degree", Value = "PhD", Label = "PhD", DisplayOrder = 4 },
-                new LookupItem { Id = 5, Category = "Degree", Value = "Other", Label = "Other", DisplayOrder = 5 },
+            int lookId = 1;
+            var lookupItems = new List<LookupItem>();
 
-                new LookupItem { Id = 6, Category = "ProfessionalSector", Value = "Teaching", Label = "Teaching / Education", DisplayOrder = 1 },
-                new LookupItem { Id = 7, Category = "ProfessionalSector", Value = "Business", Label = "Business", DisplayOrder = 2 },
-                new LookupItem { Id = 8, Category = "ProfessionalSector", Value = "IT", Label = "Information Technology", DisplayOrder = 3 },
-                new LookupItem { Id = 9, Category = "ProfessionalSector", Value = "Medical", Label = "Medical / Healthcare", DisplayOrder = 4 },
-                new LookupItem { Id = 10, Category = "ProfessionalSector", Value = "Government", Label = "Government Service", DisplayOrder = 5 },
-                new LookupItem { Id = 11, Category = "ProfessionalSector", Value = "Other", Label = "Other", DisplayOrder = 6 }
-            );
+            // Degrees
+            foreach (var d in new[] { "HSC", "Bachelor (Pass)", "Bachelor (Honours)", "Masters", "PGD", "PhD", "Medicine", "Engineering", "Law" })
+                lookupItems.Add(new LookupItem { Id = lookId++, Category = "Degree", Value = d, Label = d, DisplayOrder = lookId });
+
+            // Groups
+            foreach (var g in new[] { "Science", "Arts & Humanities", "Business Studies" })
+                lookupItems.Add(new LookupItem { Id = lookId++, Category = "AcademicGroup", Value = g, Label = g, DisplayOrder = lookId });
+
+            // Subjects
+            foreach (var s in new[] { "None", "Bengali", "English", "History", "Islamic History & Culture", "Philosophy", "Islamic Studies", "Library Science", "Economics", "Political Science", "Sociology", "Social Work", "Anthropology", "Public Administration", "Physics", "Chemistry", "Mathematics", "Statistics", "Botany", "Zoology", "Geography & Environment", "Psychology", "Soil Science", "Accounting", "Management", "Marketing", "Finance & Banking", "Fine Arts", "Physical Education", "Business Administration", "Computer", "Civil", "Mechanical", "Electrical", "Medical", "Dentestry", "Engineering", "Law", "Pharma", "Agriculture", "Textile", "Lather", "Education" })
+                lookupItems.Add(new LookupItem { Id = lookId++, Category = "AcademicSubject", Value = s, Label = s, DisplayOrder = lookId });
+
+            // Professional Sectors
+            foreach (var ps in new[] { "Ready-made Garments (RMG)", "Textiles & Spinning", "Pharmaceuticals", "Banking & Financial Services", "Information Technology (IT) & Software", "Telecommunications", "Agriculture & Crop Production", "Fisheries & Aquaculture", "Livestock & Poultry", "Agro-processing & Food Production", "Leather & Footwear", "Jute & Jute Goods", "Light Engineering", "Electronics & Electrical Appliances", "Real Estate & Housing", "Construction & Infrastructure", "Healthcare & Medical Services", "Education & Research", "Tourism & Hospitality", "Power, Energy & Mineral Resources", "Steel & Re-rolling", "Cement", "Ceramics", "Chemicals & Fertilizers", "Shipbuilding", "Transportation & Logistics", "Fast-Moving Consumer Goods (FMCG)", "Paper & Printing", "Plastic & Rubber Products", "Insurance", "Advertising & Media", "Legal & Consultancy Services", "Public Administration & Defense" })
+                lookupItems.Add(new LookupItem { Id = lookId++, Category = "ProfessionalSector", Value = ps, Label = ps, DisplayOrder = lookId });
+
+            modelBuilder.Entity<LookupItem>().HasData(lookupItems);
 
             // Seed Email Templates
             modelBuilder.Entity<EmailTemplate>().HasData(
@@ -152,9 +158,14 @@ namespace GHCAA.Infrastructure.Data
                 EmergencyContactRelation = "Family",
                 EmergencyContactPhone = "01700000000",
                 HSCAdmissionYear = 2013,
+                HighestCertificate = "HSC",
+                HighestCertificateGroup = "Science",
+                HighestCertificateSubject = "None",
+                HighestCertificatePassingYear = 2015,
                 GHCAdmissionYear = 2013,
-                LastCertificateFromGHC = "HSC",
-                SubjectGroup = "Science",
+                GHCLastCertificate = "HSC",
+                GHCLastCertificateGroup = "Science",
+                GHCLastCertificateSubject = "None",
                 GHCLastCertificatePassingYear = 2015,
                 ProfessionalSector = "Engineering",
                 Designation = "Software Engineer",
@@ -185,9 +196,14 @@ namespace GHCAA.Infrastructure.Data
                 EmergencyContactRelation = "None",
                 EmergencyContactPhone = "01700000003",
                 HSCAdmissionYear = 2014,
+                HighestCertificate = "HSC",
+                HighestCertificateGroup = "Humanities",
+                HighestCertificateSubject = "None",
+                HighestCertificatePassingYear = 2016,
                 GHCAdmissionYear = 2014,
-                LastCertificateFromGHC = "HSC",
-                SubjectGroup = "Humanities",
+                GHCLastCertificate = "HSC",
+                GHCLastCertificateGroup = "Humanities",
+                GHCLastCertificateSubject = "None",
                 GHCLastCertificatePassingYear = 2016,
                 ProfessionalSector = "Corporate",
                 Designation = "Communications Manager",

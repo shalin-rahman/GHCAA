@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProfileService, MemberProfile } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, EC_ROLES } from '../../core/constants/governance.constants';
+import { getECPositionName, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData } from '../../core/constants/app.constants';
 
 @Component({
     selector: 'app-profile',
@@ -21,8 +21,13 @@ export class Profile implements OnInit {
     loading = signal(true);
     saving = signal(false);
     profile: any = {};
-    yearsList = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
-    sectorOptions = ['Govt. Service', 'Corporate', 'Business', 'Education', 'Medical/Health', 'Engineering', 'Law', 'Other'];
+    ACADEMIC = ACADEMIC_DATA;
+    yearsList = this.ACADEMIC.getYears();
+    IS_HSC = IS_HSC;
+    degreeOptions = this.ACADEMIC.certificates;
+    groupOptions = this.ACADEMIC.groups;
+    subjectOptions = this.ACADEMIC.subjects;
+    sectorOptions = this.ACADEMIC.sectors;
 
     ngOnInit() {
         this.profileService.getProfile().subscribe({
@@ -46,13 +51,12 @@ export class Profile implements OnInit {
     }
 
     getDegreeName(degree: any): string {
-        const degrees = ['HSC', 'Bachelor', 'Masters', 'PhD', 'Other'];
-        // Handle both string and numeric types if they exist
-        if (typeof degree === 'number') return degrees[degree] || 'Degree';
         return degree;
     }
 
     updateProfile() {
+        ensureValidAcademicData(this.profile);
+
         this.saving.set(true);
         this.profileService.updateProfile(this.profile).subscribe({
             next: () => {

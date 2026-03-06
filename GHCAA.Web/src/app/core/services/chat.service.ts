@@ -21,7 +21,7 @@ export interface RecentChat {
     isRead: boolean;
 }
 
-import { API_ENDPOINTS } from '../constants/api.endpoints';
+import { API_ENDPOINTS } from '../constants/app.constants';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {

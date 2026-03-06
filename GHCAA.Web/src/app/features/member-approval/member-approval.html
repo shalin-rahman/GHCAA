@@ -46,8 +46,9 @@
                     </td>
                     <td>
                         <div class="academic-info">
-                            <strong>{{ reg.subjectGroup }}</strong>
-                            <small>Class of {{ reg.ghcLastCertificatePassingYear }}</small>
+                            <strong>{{ reg.ghcLastCertificateSubject }} ({{ reg.ghcLastCertificateGroup }})</strong>
+                            <small>{{ reg.ghcLastCertificate }} - Class of {{ reg.ghcLastCertificatePassingYear
+                                }}</small>
                         </div>
                     </td>
                     <td>
@@ -122,12 +123,21 @@
                     Academic Audit</h4>
                 <div class="space-y-4">
                     <div class="input-group">
-                        <label>Group/Subject</label>
-                        <span class="value-display">{{ selectedMember()?.subjectGroup }}</span>
+                        <label>Highest Certificate</label>
+                        <div class="value-display">
+                            {{ selectedMember()?.highestCertificate }} ({{ selectedMember()?.highestCertificateGroup }})
+                            <span *ngIf="selectedMember()?.highestCertificate !== 'HSC'"> - {{
+                                selectedMember()?.highestCertificateSubject }}</span>
+                        </div>
                     </div>
                     <div class="input-group">
-                        <label>GHC Degree</label>
-                        <span class="value-display">{{ selectedMember()?.lastCertificateFromGHC }}</span>
+                        <label>GHC Alumni Status</label>
+                        <div class="value-display">
+                            {{ selectedMember()?.ghcLastCertificate }} in {{ selectedMember()?.ghcLastCertificateGroup
+                            }}
+                            <span *ngIf="selectedMember()?.ghcLastCertificate !== 'HSC'"> - {{
+                                selectedMember()?.ghcLastCertificateSubject }}</span>
+                        </div>
                     </div>
                     <div class="input-group">
                         <label>Passing Year</label>

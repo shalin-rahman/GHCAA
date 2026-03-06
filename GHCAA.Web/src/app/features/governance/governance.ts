@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NetworkingService } from '../../core/services/networking.service';
-import { getECPositionName } from '../../core/constants/governance.constants';
+import { getECPositionName } from '../../core/constants/app.constants';
 
 @Component({
     // ... (rest of metadata)

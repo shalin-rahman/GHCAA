@@ -184,10 +184,12 @@ namespace GHCAA.Infrastructure.Services
                 nameof(Member.EmergencyContactName) => member.EmergencyContactName,
                 nameof(Member.EmergencyContactRelation) => member.EmergencyContactRelation,
                 nameof(Member.EmergencyContactPhone) => member.EmergencyContactPhone,
-                nameof(Member.SubjectGroup) => member.SubjectGroup,
-                nameof(Member.HSCAdmissionYear) => member.HSCAdmissionYear.ToString(),
-                nameof(Member.GHCAdmissionYear) => member.GHCAdmissionYear.ToString(),
-                nameof(Member.LastCertificateFromGHC) => member.LastCertificateFromGHC,
+                nameof(Member.HighestCertificate) => member.HighestCertificate,
+                nameof(Member.HighestCertificateGroup) => member.HighestCertificateGroup,
+                nameof(Member.HighestCertificateSubject) => member.HighestCertificateSubject,
+                nameof(Member.GHCLastCertificate) => member.GHCLastCertificate,
+                nameof(Member.GHCLastCertificateGroup) => member.GHCLastCertificateGroup,
+                nameof(Member.GHCLastCertificateSubject) => member.GHCLastCertificateSubject,
                 _ => null
             };
         }
@@ -217,8 +219,12 @@ namespace GHCAA.Infrastructure.Services
                 case nameof(Member.ProfessionalSector): member.ProfessionalSector = value; break;
                 case nameof(Member.PresentAddress): member.PresentAddress = value; break;
                 case nameof(Member.PermanentAddress): member.PermanentAddress = value; break;
-                case nameof(Member.SubjectGroup): member.SubjectGroup = value; break;
-                case nameof(Member.LastCertificateFromGHC): member.LastCertificateFromGHC = value; break;
+                case nameof(Member.HighestCertificate): member.HighestCertificate = value; break;
+                case nameof(Member.HighestCertificateGroup): member.HighestCertificateGroup = value; break;
+                case nameof(Member.HighestCertificateSubject): member.HighestCertificateSubject = value; break;
+                case nameof(Member.GHCLastCertificate): member.GHCLastCertificate = value; break;
+                case nameof(Member.GHCLastCertificateGroup): member.GHCLastCertificateGroup = value; break;
+                case nameof(Member.GHCLastCertificateSubject): member.GHCLastCertificateSubject = value; break;
                 case nameof(Member.EmergencyContactName): member.EmergencyContactName = value; break;
                 case nameof(Member.EmergencyContactRelation): member.EmergencyContactRelation = value; break;
                 case nameof(Member.EmergencyContactPhone): member.EmergencyContactPhone = value; break;

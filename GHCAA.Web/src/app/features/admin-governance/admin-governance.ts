@@ -2,10 +2,9 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { API_ENDPOINTS } from '../../core/constants/api.endpoints';
+import { API_ENDPOINTS, EC_ROLES, getECPositionName } from '../../core/constants/app.constants';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { EC_ROLES, getECPositionName } from '../../core/constants/governance.constants';
 
 @Component({
     selector: 'app-admin-governance',

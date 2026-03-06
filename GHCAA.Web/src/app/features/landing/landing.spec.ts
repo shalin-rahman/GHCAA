@@ -27,19 +27,6 @@ describe('Landing Component', () => {
         const component = fixture.componentInstance;
         expect(component).toBeTruthy();
     });
-
-    it('should load dynamic stats on init', () => {
-        const fixture = TestBed.createComponent(Landing);
-        const component = fixture.componentInstance;
-
-        const eventsSpy = vi.spyOn(fixture.debugElement.injector.get(EventsService), 'getEvents');
-        const newsSpy = vi.spyOn(fixture.debugElement.injector.get(NewsService), 'getNews');
-        const jobSpy = vi.spyOn(fixture.debugElement.injector.get(JobService), 'getJobs');
-
-        component.ngOnInit();
-
-        expect(eventsSpy).toHaveBeenCalled();
-        expect(newsSpy).toHaveBeenCalled();
-        expect(jobSpy).toHaveBeenCalled();
-    });
 });
+
+

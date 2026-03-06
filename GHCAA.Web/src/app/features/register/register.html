@@ -135,33 +135,64 @@
                     <div class="step-content reveal-text" *ngIf="currentStep() === 3">
                         <div class="step-header">
                             <h2>Academic Credentials</h2>
-                            <p>Verify your degree years and subject groups at GHC.</p>
+                            <p>Highest Certificate Attained</p>
                         </div>
                         <div class="space-y-6">
                             <div class="form-group">
-                                <label>Certificate's Subject *</label>
-                                <input type="text" [(ngModel)]="model.SubjectGroup" name="subjectGroup" required
-                                    list="subject-list" placeholder="Select or type Group/Subject">
+                                <label>HSC Admission Year (Optional)</label>
+                                <input type="number" [(ngModel)]="model.HSCAdmissionYear" name="hscAdmissionYear"
+                                    list="year-list" placeholder="YYYY">
                             </div>
                             <div class="form-group">
-                                <label>Highest Degree at GHC *</label>
-                                <input type="text" [(ngModel)]="model.LastDegreeFromGHC" name="lastDegreeFromGHC"
-                                    required list="degree-list" placeholder="Select or type Degree">
+                                <label>Highest Certificate *</label>
+                                <input type="text" [(ngModel)]="model.HighestCertificate" name="highestCertificate"
+                                    required list="certificate-list">
                             </div>
                             <div class="form-group">
-                                <label>Passing Year *</label>
+                                <label>Highest Certificate Group *</label>
+                                <input type="text" [(ngModel)]="model.HighestCertificateGroup"
+                                    name="highestCertificateGroup" required list="group-list">
+                            </div>
+                            <div class="form-group" *ngIf="model.HighestCertificate !== 'HSC'">
+                                <label>Highest Certificate Subject *</label>
+                                <input type="text" [(ngModel)]="model.HighestCertificateSubject"
+                                    name="highestCertificateSubject" required list="subject-list">
+                            </div>
+                            <div class="form-group">
+                                <label>Highest Certificate Passing Year *</label>
+                                <input type="number" [(ngModel)]="model.HighestCertificatePassingYear"
+                                    name="highestCertificatePassingYear" required list="year-list" placeholder="YYYY">
+                            </div>
+                        </div>
+
+                        <div class="step-header" style="margin-top: 24px;">
+                            <p>Last Certificate From GHC</p>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="form-group">
+                                <label>GHC Admission Year (Optional)</label>
+                                <input type="number" [(ngModel)]="model.GHCAdmissionYear" name="ghcAdmissionYear"
+                                    list="year-list" placeholder="YYYY">
+                            </div>
+                            <div class="form-group">
+                                <label>GHC Last Certificate *</label>
+                                <input type="text" [(ngModel)]="model.GHCLastCertificate" name="ghcLastCertificate"
+                                    required list="certificate-list">
+                            </div>
+                            <div class="form-group">
+                                <label>GHC Last Certificate Group *</label>
+                                <input type="text" [(ngModel)]="model.GHCLastCertificateGroup"
+                                    name="ghcLastCertificateGroup" required list="group-list">
+                            </div>
+                            <div class="form-group" *ngIf="model.GHCLastCertificate !== 'HSC'">
+                                <label>GHC Last Certificate Subject *</label>
+                                <input type="text" [(ngModel)]="model.GHCLastCertificateSubject"
+                                    name="ghcLastCertificateSubject" required list="subject-list">
+                            </div>
+                            <div class="form-group">
+                                <label>GHC Last Certificate Passing Year *</label>
                                 <input type="number" [(ngModel)]="model.GHCLastCertificatePassingYear"
                                     name="ghcLastCertificatePassingYear" required list="year-list" placeholder="YYYY">
-                            </div>
-                            <div class="form-group">
-                                <label>HSC Admission Year</label>
-                                <input type="number" [(ngModel)]="model.HSCAdmissionYear" name="hscAdmissionYear"
-                                    list="year-list" placeholder="YYYY (Optional)">
-                            </div>
-                            <div class="form-group">
-                                <label>GHC Admission Year</label>
-                                <input type="number" [(ngModel)]="model.GHCAdmissionYear" name="ghcAdmissionYear"
-                                    list="year-list" placeholder="YYYY (Optional)">
                             </div>
                         </div>
                     </div>
@@ -273,8 +304,11 @@
                 <datalist id="subject-list">
                     <option *ngFor="let s of subjectOptions" [value]="s"></option>
                 </datalist>
-                <datalist id="degree-list">
-                    <option *ngFor="let d of degreeOptions" [value]="d"></option>
+                <datalist id="certificate-list">
+                    <option *ngFor="let d of certificateOptions" [value]="d"></option>
+                </datalist>
+                <datalist id="group-list">
+                    <option *ngFor="let g of groupOptions" [value]="g"></option>
                 </datalist>
                 <datalist id="sector-list">
                     <option *ngFor="let sec of sectorOptions" [value]="sec"></option>
