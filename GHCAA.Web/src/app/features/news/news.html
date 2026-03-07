@@ -21,7 +21,7 @@
                 <p>{{ post.content | slice:0:180 }}...</p>
                 <div class="footer">
                     <span class="author">By {{ post.authorName }}</span>
-                    <button class="btn-text">Read More →</button>
+                    <button class="btn btn-outline btn-sm">Details ↗</button>
                 </div>
             </div>
         </article>
@@ -33,23 +33,23 @@
     </div>
     }
 
-    <!-- Full Post Modal -->
+    <!-- News Detail Section (Inline) -->
     @if (selectedPost(); as post) {
-    <div class="modal-overlay" (click)="selectedPost.set(null)">
-        <div class="modal-content" (click)="$event.stopPropagation()">
-            <div class="m-header">
-                <button class="close" (click)="selectedPost.set(null)">✕</button>
-                <img [src]="post.imageUrl || '/assets/logo.jpg'" class="m-img" *ngIf="post.imageUrl">
-                <div class="m-meta">
-                    <span class="cat-tag">{{ post.category }}</span>
-                    <span class="date">{{ post.createdAt | date:'fullDate' }}</span>
-                </div>
-                <h2>{{ post.title }}</h2>
-                <div class="author-line">Posted by <strong>{{ post.authorName }}</strong></div>
+    <div id="news-detail" class="news-detail-section glass-card reveal-bottom mt-12">
+        <div class="detail-header">
+            <div class="flex justify-between items-center mb-6">
+                <span class="cat-tag">{{ post.category }}</span>
+                <button class="close-btn" (click)="selectedPost.set(null)">✕ Close</button>
             </div>
-            <div class="m-body">
-                <p>{{ post.content }}</p>
+            <img [src]="post.imageUrl || '/assets/logo.jpg'" class="detail-img mb-8" *ngIf="post.imageUrl">
+            <div class="detail-meta mb-4">
+                <span class="date">{{ post.createdAt | date:'fullDate' }}</span>
+                <span class="author ml-4">By <strong>{{ post.authorName }}</strong></span>
             </div>
+            <h2 class="detail-title mb-6">{{ post.title }}</h2>
+        </div>
+        <div class="detail-content leading-relaxed text-lg opacity-90">
+            <p>{{ post.content }}</p>
         </div>
     </div>
     }

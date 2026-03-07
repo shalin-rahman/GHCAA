@@ -27,7 +27,13 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("members")]
-        public async Task<IActionResult> GetAllMembers([FromQuery] bool includeArchived = false, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetAllMembers(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string searchQuery = "",
+            [FromQuery] string statusFilter = "all",
+            [FromQuery] bool includeArchived = false, 
+            CancellationToken cancellationToken = default)
         {
             // Standard Admins cannot see archived records
             if (includeArchived && !User.IsInRole("SuperAdmin"))
@@ -35,8 +41,8 @@ namespace GHCAA.API.Controllers
                 return Forbid();
             }
 
-            var members = await _memberService.GetAllMembersAsync(includeArchived, cancellationToken);
-            return Ok(members);
+            var result = await _memberService.GetAllMembersAsync(page, pageSize, searchQuery, statusFilter, includeArchived, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("members/{id}")]

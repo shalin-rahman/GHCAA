@@ -63,5 +63,6 @@ namespace GHCAA.Application.DTOs
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string? ChangeReason { get; set; }
+        public bool IsCurrent { get; set; }
     }
 }

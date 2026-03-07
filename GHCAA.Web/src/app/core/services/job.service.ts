@@ -39,4 +39,8 @@ export class JobService {
     createJob(job: Partial<Job>): Observable<Job> {
         return this.http.post<Job>(this.apiUrl, job);
     }
+
+    updateJob(id: number, job: Partial<Job>): Observable<any> {
+        return this.http.put(`${this.apiUrl}/${id}`, job);
+    }
 }

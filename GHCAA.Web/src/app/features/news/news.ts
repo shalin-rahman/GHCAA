@@ -25,4 +25,11 @@ export class News implements OnInit {
       error: () => this.loading.set(false)
     });
   }
+
+  selectPost(post: NewsPost) {
+    this.selectedPost.set(post);
+    setTimeout(() => {
+      document.getElementById('news-detail')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
 }

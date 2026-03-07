@@ -5,7 +5,7 @@
             <h2>Opportunities Hub</h2>
             <p>Careers, Mentorship, and Professional Growth</p>
         </div>
-        <button class="btn btn-primary" (click)="showForm.set(true)" *ngIf="!showForm()">
+        <button class="btn btn-primary" (click)="closeForm(); showForm.set(true)" *ngIf="!showForm()">
             <span class="icon">✨</span> Share Opportunity
         </button>
     </div>
@@ -13,8 +13,8 @@
     @if (showForm()) {
     <div class="glass-card form-box reveal-top">
         <div class="form-header">
-            <h3>Share with Alumni Community</h3>
-            <button class="close-btn" (click)="showForm.set(false)">✕</button>
+            <h3>{{ isEditing() ? 'Update Opportunity' : 'Share with Alumni Community' }}</h3>
+            <button class="close-btn" (click)="closeForm()">✕</button>
         </div>
 
         <form (submit)="postJob()" class="job-form">
@@ -65,9 +65,9 @@
 
             <div class="form-footer">
                 <button type="submit" class="btn btn-primary btn-lg" [disabled]="submitting()">
-                    {{ submitting() ? 'Broadcasting...' : '🚀 Post Opportunity' }}
+                    {{ submitting() ? 'Broadcasting...' : (isEditing() ? '💾 Update Post' : '🚀 Post Opportunity') }}
                 </button>
-                <button type="button" class="btn btn-secondary btn-lg" (click)="showForm.set(false)">Discard</button>
+                <button type="button" class="btn btn-secondary btn-lg" (click)="closeForm()">Discard</button>
             </div>
         </form>
     </div>
@@ -76,7 +76,8 @@
     <div class="controls-bar glass-card reveal-top flex flex-col md:flex-row gap-6 p-6">
         <div class="filter-group">
             <span class="icon">🔍</span>
-            <input type="text" placeholder="Filter by title or company..." (input)="loadJobs()">
+            <input type="text" [(ngModel)]="searchQuery" name="search" placeholder="Filter by title or company..."
+                (input)="onSearch()">
         </div>
         <div class="filter-group">
             <span class="icon">🏷️</span>
@@ -114,10 +115,15 @@
                 </div>
                 <div class="card-footer">
                     <div class="posted-by">
-                        <div class="mini-avatar">{{ job.postedByMemberName[0] }}</div>
-                        <span>By {{ job.postedByMemberName }}</span>
+                        <div class="mini-avatar">{{ (job.postedByMemberName || 'A')[0] }}</div>
+                        <span>By {{ job.postedByMemberName || 'Alumni' }}</span>
                     </div>
-                    <button class="btn btn-outline btn-sm" (click)="viewJob(job)">Details ↗</button>
+                    <div class="actions">
+                        @if (canEdit(job)) {
+                        <button class="btn btn-secondary btn-sm mr-2" (click)="editJob(job)">Edit</button>
+                        }
+                        <button class="btn btn-outline btn-sm" (click)="viewJob(job)">Details ↗</button>
+                    </div>
                 </div>
             </div>
             } @empty {
@@ -184,9 +190,9 @@
                         <h5 class="text-[10px] font-black uppercase tracking-widest text-muted mb-4">Reach Out</h5>
                         <div
                             class="mini-avatar-big mb-4 w-12 h-12 bg-accent text-black rounded-full flex items-center justify-center font-black">
-                            {{ job.postedByMemberName[0] }}
+                            {{ (job.postedByMemberName || 'A')[0] }}
                         </div>
-                        <p class="text-sm font-bold mb-4">Posted by {{ job.postedByMemberName }}</p>
+                        <p class="text-sm font-bold mb-4">Posted by {{ job.postedByMemberName || 'Alumni' }}</p>
 
                         <a [href]="'mailto:' + job.applicationEmail"
                             class="btn btn-accent w-full py-4 h-14 shadow-gold font-black"

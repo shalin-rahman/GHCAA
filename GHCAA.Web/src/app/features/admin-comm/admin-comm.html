@@ -55,14 +55,18 @@
                 <div class="flex justify-between items-center mb-2">
                     <label>Select Batch Years ({{ sendOptions.targetYears.length }} selected)</label>
                     <div class="flex gap-2">
+                        <input type="text" [ngModel]="yearSearch()" (ngModelChange)="yearSearch.set($event)"
+                            placeholder="Filter years..." class="year-filter-input">
                         <button class="btn-link text-xs" (click)="selectAllYears()">Select All</button>
+                        <button class="btn-link text-xs" (click)="selectFilteredYears()" *ngIf="yearSearch()">Select
+                            Filtered</button>
                         <button class="btn-link text-xs" (click)="clearYears()">Clear</button>
                     </div>
                 </div>
                 <div class="checkbox-grid">
-                    @for (year of years; track year) {
+                    @for (year of filteredYears(); track year) {
                     <label class="checkbox-item" [class.checked]="isSelected(year, sendOptions.targetYears)"
-                        (click)="toggleSelection(year, sendOptions.targetYears)">
+                        (click)="toggleSelection(year, 'targetYears')">
                         {{ year }}
                     </label>
                     }
@@ -83,7 +87,7 @@
                 <div class="checkbox-grid types-grid">
                     @for (type of membershipTypes; track type.value) {
                     <label class="checkbox-item" [class.checked]="isSelected(type.value, sendOptions.targetTypes)"
-                        (click)="toggleSelection(type.value, sendOptions.targetTypes)">
+                        (click)="toggleSelection(type.value, 'targetTypes')">
                         {{ type.label }}
                     </label>
                     }
@@ -163,7 +167,7 @@
                         <td>{{ temp.description }}</td>
                         <td><small>{{ temp.subject }}</small></td>
                         <td class="actions-cell">
-                            <button class="icon-btn" (click)="editTemplate(temp)" title="Edit">✏️</button>
+                            <button class="btn btn-outline btn-sm" (click)="editTemplate(temp)">Edit ↗</button>
                             <button class="icon-btn" (click)="deleteTemplate(temp)" title="Delete">🗑️</button>
                         </td>
                     </tr>

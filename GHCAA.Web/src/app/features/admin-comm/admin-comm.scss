@@ -260,6 +260,26 @@
         color: var(--accent-color);
         border-color: rgba(var(--accent-color-rgb, 212, 175, 55), 0.3);
         font-weight: 900;
+        transform: scale(1.05);
+        z-index: 1;
+    }
+}
+
+.year-filter-input {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--text-main);
+    width: 120px;
+    transition: all 0.2s;
+
+    &:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        background: rgba(255, 255, 255, 0.06);
+        width: 160px;
     }
 }
 

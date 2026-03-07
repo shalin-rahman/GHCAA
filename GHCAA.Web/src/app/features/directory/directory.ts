@@ -40,7 +40,14 @@ export class Directory implements OnInit {
 
     search() {
         this.loading.set(true);
-        this.networkService.searchMembers(this.filters).subscribe({
+        // Map frontend filter names to DTO names expected by API
+        const apiFilter = {
+            query: this.filters.query,
+            passingYear: this.filters.year,
+            professionalSector: this.filters.sector,
+            bloodGroup: this.filters.bloodGroup
+        };
+        this.networkService.searchMembers(apiFilter).subscribe({
             next: (data) => {
                 this.members.set(data);
                 this.loading.set(false);

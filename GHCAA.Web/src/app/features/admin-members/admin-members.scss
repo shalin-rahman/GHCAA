@@ -69,6 +69,15 @@
     font-size: 0.9rem;
 }
 
+/* General input/select styling for contrast */
+input,
+select,
+.sys-prop {
+    color: var(--text-main);
+    background: var(--bg-color);
+    border: 1px solid var(--glass-border);
+}
+
 .status-select {
     padding: 0.6rem 1rem;
     border: 1px solid var(--glass-border);
@@ -139,6 +148,8 @@
 .member-name {
     font-weight: 700;
     font-size: 0.9rem;
+    word-break: break-word;
+    /* Prevent long names from breaking layout */
 }
 
 .member-info small {

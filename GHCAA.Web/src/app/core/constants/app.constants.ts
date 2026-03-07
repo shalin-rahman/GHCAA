@@ -17,16 +17,151 @@ export const EC_ROLES = [
     'Institutional Representative'
 ] as const;
 
+export const MEMBERSHIP_STATUS_MAP: Record<string | number, { label: string, class: string }> = {
+    'Applied': { label: 'Pending Audit', class: 'pending' },
+    0: { label: 'Pending Audit', class: 'pending' },
+    'Active': { label: 'Active Member', class: 'active' },
+    1: { label: 'Active Member', class: 'active' },
+    'InactivePayment': { label: 'Inactive (Payment)', class: 'inactive' },
+    2: { label: 'Inactive (Payment)', class: 'inactive' },
+    'InactiveResigned': { label: 'Inactive (Resigned)', class: 'resigned' },
+    3: { label: 'Inactive (Resigned)', class: 'resigned' },
+    'Terminated': { label: 'Terminated', class: 'terminated' },
+    4: { label: 'Terminated', class: 'terminated' }
+};
+
+export const MEMBERSHIP_TYPES = [
+    'Founding',
+    'Executive',
+    'General',
+    'Associate',
+    'Honorary',
+    'Advisory'
+];
+
+// Membership options moved to grouped section below
+
+
+export const MEMBER_CATEGORIES = [
+    'None',
+    'Lifelong',
+    'Donor',
+    'Patron'
+];
+
+export const BLOOD_GROUPS = [
+    'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'
+];
+
+export const BLOOD_GROUP_OPTIONS = [
+    { value: 'APositive', label: 'A+' },
+    { value: 'ANegative', label: 'A-' },
+    { value: 'BPositive', label: 'B+' },
+    { value: 'BNegative', label: 'B-' },
+    { value: 'OPositive', label: 'O+' },
+    { value: 'ONegative', label: 'O-' },
+    { value: 'ABPositive', label: 'AB+' },
+    { value: 'ABNegative', label: 'AB-' }
+];
+
+export const GENDERS = [
+    'Male', 'Female', 'Other'
+];
+
+export const GENDER_OPTIONS = [
+    { value: 'Male', label: 'Male' },
+    { value: 'Female', label: 'Female' },
+    { value: 'Other', label: 'Other' }
+];
+
+export const JOB_CATEGORIES = [
+    { id: 0, name: 'IT & Software Development' },
+    { id: 1, name: 'Finance & Banking' },
+    { id: 2, name: 'Engineering & Construction' },
+    { id: 3, name: 'Marketing & Sales' },
+    { id: 4, name: 'Education & Research' },
+    { id: 5, name: 'Healthcare & Pharma' },
+    { id: 6, name: 'Govt. & Public Sector' },
+    { id: 7, name: 'Mentorship & Career Guidance' },
+    { id: 8, name: 'Other Opportunities' }
+];
+
 export type ECPositionType = typeof EC_ROLES[number];
 
 export function getECPositionName(pos: number | string): string {
+    if (pos === null || pos === undefined || pos === 'None' || pos === '0' || pos === 0) return 'None';
+
     if (typeof pos === 'number') {
         return EC_ROLES[pos] || 'Member';
     }
-    return pos || 'None';
+
+    // Handle numeric string "1", "2" etc
+    if (/^\d+$/.test(pos)) {
+        return EC_ROLES[parseInt(pos)] || 'Member';
+    }
+
+    // If it's a string from the enum name, try to format it with spaces
+    // e.g. MediaCulturalAndSportsSecretary -> Media Cultural And Sports Secretary
+    return pos.replace(/([A-Z])/g, ' $1').trim();
+}
+
+export function getStatusLabel(status: string | number): string {
+    // Try original, then try parsing as number if it's a string digit
+    const res = MEMBERSHIP_STATUS_MAP[status];
+    if (res) return res.label;
+
+    if (typeof status === 'string' && /^\d+$/.test(status)) {
+        return MEMBERSHIP_STATUS_MAP[parseInt(status)]?.label || 'Unknown';
+    }
+    return 'Unknown';
+}
+
+export function getStatusClass(status: string | number): string {
+    const res = MEMBERSHIP_STATUS_MAP[status];
+    if (res) return res.class;
+
+    if (typeof status === 'string' && /^\d+$/.test(status)) {
+        return MEMBERSHIP_STATUS_MAP[parseInt(status)]?.class || '';
+    }
+    return '';
+}
+
+export function getCategoryLabel(cat: string | number): string {
+    if (typeof cat === 'number') return MEMBER_CATEGORIES[cat] || 'None';
+    return cat || 'None';
+}
+
+export function getMembershipTypeLabel(type: string | number): string {
+    if (typeof type === 'number') return MEMBERSHIP_TYPES[type] || 'General';
+    return type || 'General';
 }
 
 export const EC_ROLES_OPTIONS = EC_ROLES.map((label, index) => ({ value: index, label }));
+
+export const MEMBERSHIP_STATUS_OPTIONS = [
+    { value: 'all', label: 'All Statuses' },
+    { value: 'Applied', label: 'Pending Audit' },
+    { value: 'Active', label: 'Active Member' },
+    { value: 'InactivePayment', label: 'Inactive (Payment)' },
+    { value: 'InactiveResigned', label: 'Inactive (Resigned)' },
+    { value: 'Terminated', label: 'Terminated' }
+];
+
+export const MEMBERSHIP_TYPE_OPTIONS = [
+    { value: 'Founding', label: 'Founding Member' },
+    { value: 'Executive', label: 'Executive Committee' },
+    { value: 'General', label: 'General Member' },
+    { value: 'Associate', label: 'Associate Member' },
+    { value: 'Honorary', label: 'Honorary Member' },
+    { value: 'Advisory', label: 'Advisory Member' }
+];
+
+export const MEMBER_CATEGORY_OPTIONS = [
+    { value: 'None', label: 'No Special Status' },
+    { value: 'Lifelong', label: 'Lifelong Member' },
+    { value: 'Donor', label: 'Donor Member' },
+    { value: 'Patron', label: 'Patron Member' }
+];
 
 export const ACADEMIC_CERTIFICATES = [
     'HSC',

@@ -1,6 +1,19 @@
 {
   "/api": {
-    "target": "https://localhost:7214",
+    "target": "http://localhost:5087",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/hubs": {
+    "target": "http://localhost:5087",
+    "secure": false,
+    "ws": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/uploads": {
+    "target": "http://localhost:5087",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

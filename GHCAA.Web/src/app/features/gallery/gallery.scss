@@ -1,6 +1,6 @@
 .gallery-page {
-    background: #000;
-    color: #fff;
+    background: var(--bg-color);
+    color: var(--text-main);
     min-height: 100vh;
     padding: 5rem 2rem;
 }
@@ -12,11 +12,11 @@
         font-size: 2.2rem;
         font-weight: 800;
         letter-spacing: -1px;
-        color: #fff;
+        color: var(--text-main);
     }
 
     p {
-        color: rgba(255, 255, 255, 0.6);
+        color: var(--text-muted);
         font-weight: 500;
     }
 }
@@ -34,11 +34,13 @@
     flex-direction: column;
     transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 16px;
+    background: var(--surface-color);
+    border: 1px solid var(--glass-border);
 
     &:hover {
         transform: translateY(-8px);
-        border-color: var(--primary-color);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        border-color: var(--accent-color);
+        box-shadow: var(--shadow-md);
     }
 }
 
@@ -53,14 +55,14 @@
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
+    background: rgba(var(--primary-rgb), 0.82);
+    color: var(--accent-color);
     padding: 0.4rem 0.8rem;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 800;
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
 }
 
 .card-body {
@@ -72,8 +74,9 @@
 
     h3 {
         font-size: 1.25rem;
-        color: #fff;
+        color: var(--text-main);
         font-weight: 700;
+        margin: 0;
     }
 }
 
@@ -81,7 +84,7 @@
     display: flex;
     gap: 1rem;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
     font-weight: 700;
 
     span {

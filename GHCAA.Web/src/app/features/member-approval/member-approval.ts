@@ -1,10 +1,10 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
-import { ACADEMIC_CERTIFICATES, ACADEMIC_GROUPS, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getAcademicYears } from '../../core/constants/app.constants';
+import { ACADEMIC_CERTIFICATES, ACADEMIC_GROUPS, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getAcademicYears, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-member-approval',
@@ -19,6 +19,9 @@ export class MemberApproval implements OnInit {
   private router = inject(Router);
 
   requests = signal<any[]>([]);
+  pendingRequests = computed(() => {
+    return this.requests().filter(r => r.status === 'Applied' || String(r.status) === '0' || r.status === 0);
+  });
   loading = signal(true);
   selectedMember = signal<any | null>(null);
   years = getAcademicYears();
@@ -40,7 +43,7 @@ export class MemberApproval implements OnInit {
       next: (data) => {
         // Only show applied status (0) in logic if preferred, 
         // though backend might already filter for pending
-        this.requests.set(data);
+        this.requests.set(data.items || []);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
@@ -90,24 +93,10 @@ export class MemberApproval implements OnInit {
   }
 
   getStatusName(status: any): string {
-    const map: Record<string, string> = {
-      'Applied': 'Pending Audit',
-      'Active': 'Active',
-      'InactivePayment': 'Inactive',
-      'InactiveResigned': 'Resigned',
-      'Terminated': 'Terminated'
-    };
-    return map[String(status)] || 'Unknown';
+    return getStatusLabel(status);
   }
 
   getStatusClass(status: any): string {
-    const map: Record<string, string> = {
-      'Applied': 'pending',
-      'Active': 'active',
-      'InactivePayment': 'inactive',
-      'InactiveResigned': 'inactive',
-      'Terminated': 'terminated'
-    };
-    return map[String(status)] || '';
+    return getStatusClass(status);
   }
 }

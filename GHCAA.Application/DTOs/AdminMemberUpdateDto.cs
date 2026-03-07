@@ -12,6 +12,8 @@ namespace GHCAA.Application.DTOs
         public string NID { get; set; } = null!;
         public string MobileNo { get; set; } = null!;
         public string Email { get; set; } = null!;
+        public string Gender { get; set; } = null!; // String to handle enum names or indices
+        public string BloodGroup { get; set; } = null!; // String to handle enum names or indices
 
         // Address
         public string PresentAddress { get; set; } = null!;

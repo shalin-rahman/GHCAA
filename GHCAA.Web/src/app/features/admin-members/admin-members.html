@@ -2,7 +2,7 @@
     <div class="page-header">
         <div class="header-text">
             <h2>Member Registry</h2>
-            <small>{{ filteredMembers().length }} members</small>
+            <small>{{ totalItems() }} members</small>
         </div>
         <div class="header-actions">
             <button class="btn btn-accent btn-md" (click)="openImport()">
@@ -15,10 +15,11 @@
     <div class="filter-bar glass-card">
         <div class="search-wrap">
             <span class="search-icon">🔍</span>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
                 placeholder="Search by name, email, membership no…" class="search-input">
         </div>
-        <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)" class="status-select">
+        <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()"
+            class="status-select">
             @for (s of statusOptions; track s.value) {
             <option [value]="s.value">{{ s.label }}</option>
             }
@@ -29,7 +30,7 @@
     <div class="glass-card table-wrap">
         @if (loading()) {
         <div class="loading-state">Loading members...</div>
-        } @else if (filteredMembers().length === 0) {
+        } @else if (allMembers().length === 0) {
         <div class="empty-state">
             <span>👥</span>
             <p>No members match your filters.</p>
@@ -46,7 +47,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (member of filteredMembers(); track member.id) {
+                @for (member of allMembers(); track member.id) {
                 <tr>
                     <td class="member-cell" (click)="openDetail(member)">
                         <div class="member-avatar">{{ member.fullName?.[0] }}</div>
@@ -63,7 +64,7 @@
                     </td>
                     <td>{{ member.ghcLastCertificatePassingYear || '—' }}</td>
                     <td class="actions-cell">
-                        @if (member.status === 0) {
+                        @if (member.status === 'Applied' || member.status === 0) {
                         <button class="icon-btn approve" (click)="approveMember(member.id, 1)"
                             title="Approve">✅</button>
                         }
@@ -72,12 +73,32 @@
                         }
                         <button class="icon-btn contact" (click)="contactMember(member.email)"
                             title="Contact">📨</button>
-                        <button class="icon-btn detail" (click)="openDetail(member)" title="View">👁️</button>
+                        <button class="btn btn-outline btn-sm" (click)="openDetail(member)">Details ↗</button>
                     </td>
                 </tr>
                 }
             </tbody>
         </table>
+
+        <div class="pagination-bar"
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="page-size">
+                <span style="margin-right: 5px;">Records per page:</span>
+                <select [ngModel]="pageSize()" (ngModelChange)="setPageListOptions($event)">
+                    <option [value]="10">10</option>
+                    <option [value]="25">25</option>
+                    <option [value]="50">50</option>
+                    <option [value]="100">100</option>
+                </select>
+            </div>
+            <div class="page-controls" style="display: flex; align-items: center; gap: 10px;">
+                <button class="btn btn-outline btn-sm" (click)="changePage(-1)"
+                    [disabled]="currentPage() === 1">Previous</button>
+                <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
+                <button class="btn btn-outline btn-sm" (click)="changePage(1)"
+                    [disabled]="currentPage() >= totalPages()">Next</button>
+            </div>
+        </div>
         }
     </div>
 </div>
@@ -88,7 +109,7 @@
     <div class="modal-box glass-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
             @if (selectedMember()?.photoPath) {
-            <img [src]="selectedMember().photoPath" class="modal-avatar photo" alt="Photo">
+            <img [src]="'/' + selectedMember().photoPath" class="modal-avatar photo" alt="Photo">
             } @else {
             <div class="modal-avatar">{{ selectedMember()?.fullName?.[0] }}</div>
             }
@@ -106,10 +127,11 @@
                 <button class="btn btn-secondary btn-sm" (click)="toggleEdit()">
                     {{ isEditing() ? 'Discard Changes' : 'Edit Profile' }}
                 </button>
-                <button class="btn btn-secondary btn-sm" (click)="sendResetLink(selectedMember().id)"
-                    *ngIf="!isEditing()">
+                @if (!isEditing()) {
+                <button class="btn btn-secondary btn-sm" (click)="sendResetLink(selectedMember().id)">
                     🔐 Reset Password
                 </button>
+                }
                 <button class="close-btn" (click)="closeDetail()">✕</button>
             </div>
         </div>
@@ -118,13 +140,19 @@
                 <!-- Personal -->
                 <div class="detail-item">
                     <label>Email</label>
-                    <input *ngIf="isEditing()" type="email" [(ngModel)]="selectedMember().email">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.email }}</span>
+                    @if (isEditing()) {
+                    <input type="email" [(ngModel)]="selectedMember().email">
+                    } @else {
+                    <span>{{ selectedMember()?.email }}</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>Mobile</label>
-                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().mobileNo">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.mobileNo }}</span>
+                    @if (isEditing()) {
+                    <input type="text" [(ngModel)]="selectedMember().mobileNo">
+                    } @else {
+                    <span>{{ selectedMember()?.mobileNo }}</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>Status</label>
@@ -135,35 +163,67 @@
                 <!-- Identity -->
                 <div class="detail-item">
                     <label>Father's Name</label>
-                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().fatherName">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.fatherName }}</span>
+                    @if (isEditing()) {
+                    <input type="text" [(ngModel)]="selectedMember().fatherName">
+                    } @else {
+                    <span>{{ selectedMember()?.fatherName }}</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>Mother's Name</label>
-                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().motherName">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.motherName }}</span>
+                    @if (isEditing()) {
+                    <input type="text" [(ngModel)]="selectedMember().motherName">
+                    } @else {
+                    <span>{{ selectedMember()?.motherName }}</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>Date of Birth</label>
-                    <input *ngIf="isEditing()" type="date" [ngModel]="selectedMember().dateOfBirth | date:'yyyy-MM-dd'"
+                    @if (isEditing()) {
+                    <input type="date" [ngModel]="selectedMember().dateOfBirth | date:'yyyy-MM-dd'"
                         (ngModelChange)="selectedMember().dateOfBirth = $event">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.dateOfBirth | date }}</span>
+                    } @else {
+                    <span>{{ selectedMember()?.dateOfBirth | date }}</span>
+                    }
+                </div>
+                <div class="detail-item">
+                    <label>Gender</label>
+                    <select *ngIf="isEditing()" [(ngModel)]="selectedMember().gender">
+                        <option *ngFor="let g of genderOptions" [value]="g.value">{{ g.label }}</option>
+                    </select>
+                    <span *ngIf="!isEditing()">{{ selectedMember()?.gender }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Blood Group</label>
+                    @if (isEditing()) {
+                    <select [(ngModel)]="selectedMember().bloodGroup">
+                        <option *ngFor="let b of bloodGroupOptions" [value]="b.value">{{ b.label }}</option>
+                    </select>
+                    } @else {
+                    <span>{{ selectedMember()?.bloodGroup }}</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>NID</label>
-                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().nid">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.nid }}</span>
+                    @if (isEditing()) {
+                    <input type="text" [(ngModel)]="selectedMember().nid">
+                    } @else {
+                    <span>{{ selectedMember()?.nid }}</span>
+                    }
                 </div>
 
                 <!-- Membership Settings -->
                 <div class="detail-item">
                     <label>Membership Type</label>
-                    <select *ngIf="isEditing()" [(ngModel)]="selectedMember().membershipType">
+                    @if (isEditing()) {
+                    <select [(ngModel)]="selectedMember().membershipType">
                         @for (t of membershipTypes; track t.value) {
                         <option [value]="t.value">{{ t.label }}</option>
                         }
                     </select>
-                    <span *ngIf="!isEditing()" class="badge info">{{ selectedMember()?.membershipType }}</span>
+                    } @else {
+                    <span class="badge info">{{ selectedMember()?.membershipType }}</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>Special Category</label>
@@ -183,150 +243,194 @@
                         class="text-muted">None</span>
                 </div>
                 <!-- Governance -->
-                <div class="detail-section-title full"
-                    style="margin-top: 1rem; border-top: 1px solid var(--glass-border); padding-top: 1rem; font-weight: 800; color: var(--primary-color);">
-                    Governance Assignment
-                </div>
+
                 <div class="detail-item">
                     <label>EC Position</label>
-                    <select *ngIf="isEditing()" [(ngModel)]="selectedMember().ecPosition">
+                    @if (isEditing()) {
+                    <select [(ngModel)]="selectedMember().ecPosition">
                         @for (p of ecPositions; track p.value) {
                         <option [value]="p.value">{{ p.label }}</option>
                         }
                     </select>
-                    <span
-                        *ngIf="!isEditing() && selectedMember()?.ecPosition !== 'None' && selectedMember()?.ecPosition !== 8"
-                        class="status-badge ec-active">
+                    } @else {
+                    @if (selectedMember()?.ecPosition !== 'None' && selectedMember()?.ecPosition !== 8) {
+                    <span class="status-badge ec-active">
                         {{ getECPositionLabel(selectedMember()?.ecPosition) }}
                     </span>
-                    <span
-                        *ngIf="!isEditing() && (selectedMember()?.ecPosition === 'None' || selectedMember()?.ecPosition === 8)"
-                        class="text-muted">None</span>
+                    } @else {
+                    <span class="text-muted">None</span>
+                    }
+                    }
                 </div>
 
-                <div class="detail-item full" *ngIf="isEditing()">
+                @if (isEditing()) {
+                <div class="detail-item full">
                     <label>EC Change Reason (Optional)</label>
                     <input type="text" [(ngModel)]="selectedMember().ecChangeReason"
                         placeholder="Reason for mid-term promotion/change...">
                 </div>
+                }
 
                 <!-- EC History -->
                 <div class="detail-item full" *ngIf="!isEditing() && selectedMember()?.ecHistory?.length > 0">
                     <label>Executive Committee History</label>
                     <div class="history-list">
-                        <div class="history-item" *ngFor="let h of selectedMember().ecHistory">
+                        @for (h of selectedMember().ecHistory; track h.startDate) {
+                        <div class="history-item">
                             <div class="h-main">
                                 <span class="h-period">{{ h.periodTitle }}</span>
                                 <span class="h-pos">{{ getECPositionLabel(h.position) }}</span>
-                                <span class="h-status" *ngIf="!h.endDate">(Current)</span>
+                                @if (h.isCurrent && !h.endDate) { <span class="h-status">(Current)</span> }
                             </div>
                             <div class="h-meta">
                                 <small class="h-date">{{ h.startDate | date:'MMM yyyy' }} - {{ h.endDate ? (h.endDate |
-                                    date:'MMM yyyy') : 'Now' }}</small>
-                                <span class="h-reason" *ngIf="h.changeReason" [title]="h.changeReason">
+                                    date:'MMM yyyy') : (h.isCurrent ? 'Now' : 'Ended') }}</small>
+                                @if (h.changeReason) {
+                                <span class="h-reason" [title]="h.changeReason">
                                     <i class="reason-icon">ⓘ</i> {{ h.changeReason }}
                                 </span>
+                                }
                             </div>
                         </div>
+                        }
                     </div>
                 </div>
 
                 <div class="detail-item full">
                     <label>Present Address</label>
-                    <textarea *ngIf="isEditing()" [(ngModel)]="selectedMember().presentAddress"></textarea>
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.presentAddress }}</span>
+                    @if (isEditing()) {
+                    <textarea [(ngModel)]="selectedMember().presentAddress"></textarea>
+                    } @else {
+                    <span>{{ selectedMember()?.presentAddress }}</span>
+                    }
                 </div>
                 <div class="detail-item full">
                     <label>Permanent Address</label>
-                    <textarea *ngIf="isEditing()" [(ngModel)]="selectedMember().permanentAddress"></textarea>
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.permanentAddress }}</span>
+                    @if (isEditing()) {
+                    <textarea [(ngModel)]="selectedMember().permanentAddress"></textarea>
+                    } @else {
+                    <span>{{ selectedMember()?.permanentAddress }}</span>
+                    }
                 </div>
 
                 <!-- Academic -->
                 <div class="detail-item">
                     <label>Highest Certificate</label>
-                    <input *ngIf="isEditing()" type="text" list="degree-list"
-                        [(ngModel)]="selectedMember().highestCertificate">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.highestCertificate }}</span>
+                    @if (isEditing()) {
+                    <input type="text" list="degree-list" [(ngModel)]="selectedMember().highestCertificate">
+                    } @else {
+                    <span>{{ selectedMember()?.highestCertificate }}</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>Highest Certificate Group</label>
-                    <input *ngIf="isEditing()" type="text" list="group-list"
-                        [(ngModel)]="selectedMember().highestCertificateGroup">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.highestCertificateGroup }}</span>
+                    @if (isEditing()) {
+                    <input type="text" list="group-list" [(ngModel)]="selectedMember().highestCertificateGroup">
+                    } @else {
+                    <span>{{ selectedMember()?.highestCertificateGroup }}</span>
+                    }
                 </div>
-                <div class="detail-item" *ngIf="selectedMember().highestCertificate !== 'HSC'">
+                @if (selectedMember().highestCertificate !== 'HSC') {
+                <div class="detail-item">
                     <label>Highest Certificate Subject</label>
-                    <input *ngIf="isEditing()" type="text" list="subject-list"
-                        [(ngModel)]="selectedMember().highestCertificateSubject">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.highestCertificateSubject }}</span>
+                    @if (isEditing()) {
+                    <input type="text" list="subject-list" [(ngModel)]="selectedMember().highestCertificateSubject">
+                    } @else {
+                    <span>{{ selectedMember()?.highestCertificateSubject }}</span>
+                    }
                 </div>
+                }
                 <div class="detail-item">
                     <label>Highest Cert. Passing Year</label>
-                    <input *ngIf="isEditing()" type="number" list="years-list"
-                        [(ngModel)]="selectedMember().highestCertificatePassingYear">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.highestCertificatePassingYear }}</span>
+                    @if (isEditing()) {
+                    <input type="number" list="years-list" [(ngModel)]="selectedMember().highestCertificatePassingYear">
+                    } @else {
+                    <span>{{ selectedMember()?.highestCertificatePassingYear }}</span>
+                    }
                 </div>
 
                 <div class="detail-item">
                     <label>GHC Last Certificate</label>
-                    <input *ngIf="isEditing()" type="text" list="degree-list"
-                        [(ngModel)]="selectedMember().ghcLastCertificate">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.ghcLastCertificate }}</span>
+                    @if (isEditing()) {
+                    <input type="text" list="degree-list" [(ngModel)]="selectedMember().ghcLastCertificate">
+                    } @else {
+                    <span>{{ selectedMember()?.ghcLastCertificate }}</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>GHC Last Cert. Group</label>
-                    <input *ngIf="isEditing()" type="text" list="group-list"
-                        [(ngModel)]="selectedMember().ghcLastCertificateGroup">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.ghcLastCertificateGroup }}</span>
+                    @if (isEditing()) {
+                    <input type="text" list="group-list" [(ngModel)]="selectedMember().ghcLastCertificateGroup">
+                    } @else {
+                    <span>{{ selectedMember()?.ghcLastCertificateGroup }}</span>
+                    }
                 </div>
-                <div class="detail-item" *ngIf="selectedMember().ghcLastCertificate !== 'HSC'">
+                @if (selectedMember().ghcLastCertificate !== 'HSC') {
+                <div class="detail-item">
                     <label>GHC Last Cert. Subject</label>
-                    <input *ngIf="isEditing()" type="text" list="subject-list"
-                        [(ngModel)]="selectedMember().ghcLastCertificateSubject">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.ghcLastCertificateSubject }}</span>
+                    @if (isEditing()) {
+                    <input type="text" list="subject-list" [(ngModel)]="selectedMember().ghcLastCertificateSubject">
+                    } @else {
+                    <span>{{ selectedMember()?.ghcLastCertificateSubject }}</span>
+                    }
                 </div>
+                }
                 <div class="detail-item">
                     <label>Passing Year</label>
-                    <input *ngIf="isEditing()" type="number" list="years-list"
-                        [(ngModel)]="selectedMember().ghcLastCertificatePassingYear">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.ghcLastCertificatePassingYear }}</span>
+                    @if (isEditing()) {
+                    <input type="number" list="years-list" [(ngModel)]="selectedMember().ghcLastCertificatePassingYear">
+                    } @else {
+                    <span>{{ selectedMember()?.ghcLastCertificatePassingYear }}</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>HSC Admission Year</label>
-                    <input *ngIf="isEditing()" type="number" list="years-list"
-                        [(ngModel)]="selectedMember().hscAdmissionYear">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.hscAdmissionYear }}</span>
+                    @if (isEditing()) {
+                    <input type="number" list="years-list" [(ngModel)]="selectedMember().hscAdmissionYear">
+                    } @else {
+                    <span>{{ selectedMember()?.hscAdmissionYear }}</span>
+                    }
                 </div>
 
                 <!-- Professional -->
                 <div class="detail-item">
                     <label>Professional Sector</label>
-                    <input *ngIf="isEditing()" type="text" list="sector-list"
-                        [(ngModel)]="selectedMember().professionalSector">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.professionalSector }}</span>
+                    @if (isEditing()) {
+                    <input type="text" list="sector-list" [(ngModel)]="selectedMember().professionalSector">
+                    } @else {
+                    <span>{{ selectedMember()?.professionalSector }}</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>Designation</label>
-                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().designation">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.designation }}</span>
+                    @if (isEditing()) {
+                    <input type="text" [(ngModel)]="selectedMember().designation">
+                    } @else {
+                    <span>{{ selectedMember()?.designation }}</span>
+                    }
                 </div>
 
                 <!-- Emergency -->
                 <div class="detail-item">
                     <label>Emergency Contact</label>
-                    <div *ngIf="isEditing()" class="flex-row">
+                    @if (isEditing()) {
+                    <div class="flex-row">
                         <input type="text" [(ngModel)]="selectedMember().emergencyContactName" placeholder="Name">
                         <input type="text" [(ngModel)]="selectedMember().emergencyContactRelation"
                             placeholder="Relation">
                     </div>
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.emergencyContactName }} ({{
+                    } @else {
+                    <span>{{ selectedMember()?.emergencyContactName }} ({{
                         selectedMember()?.emergencyContactRelation }})</span>
+                    }
                 </div>
                 <div class="detail-item">
                     <label>Emergency Phone</label>
-                    <input *ngIf="isEditing()" type="text" [(ngModel)]="selectedMember().emergencyContactPhone">
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.emergencyContactPhone }}</span>
+                    @if (isEditing()) {
+                    <input type="text" [(ngModel)]="selectedMember().emergencyContactPhone">
+                    } @else {
+                    <span>{{ selectedMember()?.emergencyContactPhone }}</span>
+                    }
                 </div>
 
                 <!-- Privacy Checks -->
@@ -353,8 +457,9 @@
                                 target="_blank" class="doc-link"
                                 style="color: var(--primary-color); text-decoration: none; font-size: 0.85rem; font-weight: 700;">💳
                                 Fee Receipt</a>
-                            <span *ngIf="!selectedMember()?.certificatePath && !selectedMember()?.paymentProofPath"
-                                class="text-muted">No documents uploaded.</span>
+                            @if (!selectedMember()?.certificatePath && !selectedMember()?.paymentProofPath) {
+                            <span class="text-muted">No documents uploaded.</span>
+                            }
                         </div>
                     </div>
                 </div>
@@ -368,13 +473,13 @@
 
     <!-- Datalists for Searchable Dropdowns -->
     <datalist id="years-list">
-        <option *ngFor="let y of yearsList" [value]="y"></option>
+        @for (y of yearsList; track y) { <option [value]="y"></option> }
     </datalist>
     <datalist id="degree-list">
-        <option *ngFor="let d of degreeOptions" [value]="d"></option>
+        @for (d of degreeOptions; track d) { <option [value]="d"></option> }
     </datalist>
     <datalist id="sector-list">
-        <option *ngFor="let s of sectorOptions" [value]="s"></option>
+        @for (s of sectorOptions; track s) { <option [value]="s"></option> }
     </datalist>
 </div>
 }
@@ -399,24 +504,29 @@
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 700;">Excel File
                                 (.xlsx)</label>
                             <input type="file" accept=".xlsx" (change)="onFileSelected($event)">
-                            <p class="file-info" *ngIf="importFile"
+                            @if (importFile()) {
+                            <p class="file-info"
                                 style="margin-top: 0.5rem; color: var(--primary-color); font-size: 0.85rem;">{{
-                                importFile.name }}</p>
+                                importFile()?.name }}</p>
+                            }
                         </div>
                         <div class="upload-zone"
                             style="border: 2px dashed var(--glass-border); padding: 1.5rem; border-radius: 12px; text-align: center;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 700;">Photo Folder (Select
                                 all images)</label>
-                            <input type="file" multiple accept="image/*" (change)="onPhotosSelected($event)">
-                            <p class="file-info" *ngIf="photoFiles.length > 0"
+                            <input type="file" multiple webkitdirectory directory accept="image/*"
+                                (change)="onPhotosSelected($event)">
+                            @if (photoFiles().length > 0) {
+                            <p class="file-info"
                                 style="margin-top: 0.5rem; color: var(--primary-color); font-size: 0.85rem;">{{
-                                photoFiles.length }} images selected</p>
+                                photoFiles().length }} images selected</p>
+                            }
                         </div>
                     </div>
                 </div>
 
                 <!-- Step 2: Mapping & Defaults -->
-                @if (importFile && excelHeaders.length > 0) {
+                @if (importFile() && excelHeaders().length > 0) {
                 <div class="step-card" style="margin-top: 2rem;">
                     <div class="card-header-flex">
                         <h4>Step 2: Map Columns & Set Defaults</h4>
@@ -440,8 +550,8 @@
                             <!-- Mapping Dropdown -->
                             <select [(ngModel)]="columnMapping[prop.value]"
                                 style="padding: 0.4rem; border-radius: 6px; border: 1px solid var(--glass-border); font-size: 0.85rem;">
-                                <option [value]="undefined">-- Select Excel Column --</option>
-                                @for (header of excelHeaders; track header) {
+                                <option [value]="''">-- Select Excel Column --</option>
+                                @for (header of excelHeaders(); track $index) {
                                 <option [value]="header">{{ header }}</option>
                                 }
                             </select>
@@ -461,7 +571,7 @@
             <button class="btn btn-secondary btn-cancel" (click)="showImportModal.set(false)">
                 <span class="icon">❌</span> Cancel
             </button>
-            <button class="btn btn-accent shadow-gold btn-start" [disabled]="!importFile || isImporting()"
+            <button class="btn btn-accent shadow-gold btn-start" [disabled]="!importFile() || isImporting()"
                 (click)="executeImport()">
                 @if (isImporting()) {
                 <span class="spinner">⏳</span> Processing...
@@ -474,15 +584,15 @@
 </div>
 
 <datalist id="group-list">
-    <option *ngFor="let g of groupOptions" [value]="g"></option>
+    @for (g of groupOptions; track g) { <option [value]="g"></option> }
 </datalist>
 <datalist id="subject-list">
-    <option *ngFor="let s of subjectOptions" [value]="s"></option>
+    @for (s of subjectOptions; track s) { <option [value]="s"></option> }
 </datalist>
 <datalist id="sector-list">
-    <option *ngFor="let sec of sectorOptions" [value]="sec"></option>
+    @for (sec of sectorOptions; track sec) { <option [value]="sec"></option> }
 </datalist>
 <datalist id="degree-list">
-    <option *ngFor="let d of degreeOptions" [value]="d"></option>
+    @for (d of degreeOptions; track d) { <option [value]="d"></option> }
 </datalist>
 }

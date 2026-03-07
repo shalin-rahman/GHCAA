@@ -37,8 +37,14 @@ namespace GHCAA.Infrastructure.Services
                 .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(filter.FullName))
-                query = query.Where(m => m.FullName.Contains(filter.FullName));
+            if (!string.IsNullOrEmpty(filter.Query))
+            {
+                var q = filter.Query.ToLower();
+                query = query.Where(m => 
+                    m.FullName.ToLower().Contains(q) || 
+                    (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(q)) ||
+                    (m.Email != null && m.Email.ToLower().Contains(q)));
+            }
 
             if (filter.PassingYear.HasValue)
                 query = query.Where(m => m.GHCLastCertificatePassingYear == filter.PassingYear.Value);
@@ -114,26 +120,48 @@ namespace GHCAA.Infrastructure.Services
                 MobileNo = m.IsMobilePublic ? m.MobileNo : "Confidential",
                 MembershipNumber = m.MembershipNumber,
                 Status = m.Status,
-                GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear,
-                GHCLastCertificateGroup = m.GHCLastCertificateGroup,
-                GHCLastCertificateSubject = m.GHCLastCertificateSubject,
-                GHCLastCertificate = m.GHCLastCertificate,
+                
+                // Personal
+                FatherName = m.FatherName,
+                MotherName = m.MotherName,
+                DateOfBirth = m.DateOfBirth,
+                Gender = m.Gender,
+                BloodGroup = m.BloodGroup,
+                NID = m.NID,
+                EmergencyContactName = m.EmergencyContactName,
+                EmergencyContactRelation = m.EmergencyContactRelation,
+                EmergencyContactPhone = m.EmergencyContactPhone,
+
+                // Academic
+                HSCAdmissionYear = m.HSCAdmissionYear,
                 HighestCertificate = m.HighestCertificate,
                 HighestCertificateGroup = m.HighestCertificateGroup,
                 HighestCertificateSubject = m.HighestCertificateSubject,
                 HighestCertificatePassingYear = m.HighestCertificatePassingYear,
+                
+                GHCAdmissionYear = m.GHCAdmissionYear,
+                GHCLastCertificate = m.GHCLastCertificate,
+                GHCLastCertificateGroup = m.GHCLastCertificateGroup,
+                GHCLastCertificateSubject = m.GHCLastCertificateSubject,
+                GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear,
+                
+                // Professional
                 ProfessionalSector = m.ProfessionalSector,
                 Designation = m.Designation,
+                
+                // Info & Privacy
                 PhotoPath = m.PhotoPath,
+                CertificatePath = m.CertificatePath,
                 PresentAddress = m.IsAddressPublic ? m.PresentAddress : "Confidential",
                 PermanentAddress = m.IsAddressPublic ? m.PermanentAddress : "Confidential",
-                BloodGroup = m.BloodGroup,
+                IsMobilePublic = m.IsMobilePublic,
+                IsEmailPublic = m.IsEmailPublic,
+                IsAddressPublic = m.IsAddressPublic,
+                
                 MembershipType = m.MembershipType,
                 Category = m.Category,
                 ECPosition = m.ECPosition,
-                IsMobilePublic = m.IsMobilePublic,
-                IsEmailPublic = m.IsEmailPublic,
-                IsAddressPublic = m.IsAddressPublic
+                ECHistory = new List<ECHistoryDto>()
             };
 
             if (m.ECMembers != null && m.ECMembers.Any())
@@ -143,7 +171,8 @@ namespace GHCAA.Infrastructure.Services
                     PeriodTitle = em.ECPeriod?.Title ?? "Unknown Period",
                     Position = em.Position,
                     StartDate = em.ECPeriod?.StartDate ?? DateTime.MinValue,
-                    EndDate = em.ECPeriod?.EndDate
+                    EndDate = em.ECPeriod?.EndDate,
+                    ChangeReason = em.ChangeReason
                 }).OrderByDescending(h => h.StartDate).ToList();
             }
 

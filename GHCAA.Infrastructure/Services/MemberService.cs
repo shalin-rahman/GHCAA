@@ -311,7 +311,8 @@ namespace GHCAA.Infrastructure.Services
                     Position = em.Position,
                     StartDate = em.StartDate,
                     EndDate = em.EndDate,
-                    ChangeReason = em.ChangeReason
+                    ChangeReason = em.ChangeReason,
+                    IsCurrent = em.ECPeriod?.IsActive ?? false
                 }).OrderByDescending(h => h.StartDate).ToList();
             }
 
@@ -323,20 +324,31 @@ namespace GHCAA.Infrastructure.Services
             var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) return false;
 
-            member.PresentAddress = dto.PresentAddress;
-            member.PermanentAddress = dto.PermanentAddress;
-            member.ProfessionalSector = dto.ProfessionalSector;
-            member.Designation = dto.Designation;
+            if (!string.IsNullOrWhiteSpace(dto.FullName)) member.FullName = dto.FullName;
+            if (!string.IsNullOrWhiteSpace(dto.FatherName)) member.FatherName = dto.FatherName;
+            if (!string.IsNullOrWhiteSpace(dto.MotherName)) member.MotherName = dto.MotherName;
+            if (dto.DateOfBirth != default) member.DateOfBirth = dto.DateOfBirth;
+            member.Gender = dto.Gender;
+            member.BloodGroup = dto.BloodGroup;
+            if (!string.IsNullOrWhiteSpace(dto.PresentAddress)) member.PresentAddress = dto.PresentAddress;
+            if (!string.IsNullOrWhiteSpace(dto.PermanentAddress)) member.PermanentAddress = dto.PermanentAddress;
+            if (!string.IsNullOrWhiteSpace(dto.ProfessionalSector)) member.ProfessionalSector = dto.ProfessionalSector;
+            if (!string.IsNullOrWhiteSpace(dto.Designation)) member.Designation = dto.Designation;
             member.HSCAdmissionYear = dto.HSCAdmissionYear;
-            member.HighestCertificate = dto.HighestCertificate;
-            member.HighestCertificateGroup = dto.HighestCertificateGroup;
-            member.HighestCertificateSubject = dto.HighestCertificateSubject;
-            member.HighestCertificatePassingYear = dto.HighestCertificatePassingYear;
+            if (!string.IsNullOrWhiteSpace(dto.HighestCertificate)) member.HighestCertificate = dto.HighestCertificate;
+            if (!string.IsNullOrWhiteSpace(dto.HighestCertificateGroup)) member.HighestCertificateGroup = dto.HighestCertificateGroup;
+            if (!string.IsNullOrWhiteSpace(dto.HighestCertificateSubject)) member.HighestCertificateSubject = dto.HighestCertificateSubject;
+            if (dto.HighestCertificatePassingYear > 0) member.HighestCertificatePassingYear = dto.HighestCertificatePassingYear;
             member.GHCAdmissionYear = dto.GHCAdmissionYear;
-            member.GHCLastCertificate = dto.GHCLastCertificate;
-            member.GHCLastCertificateGroup = dto.GHCLastCertificateGroup;
-            member.GHCLastCertificateSubject = dto.GHCLastCertificateSubject;
-            member.GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear;
+            if (!string.IsNullOrWhiteSpace(dto.GHCLastCertificate)) member.GHCLastCertificate = dto.GHCLastCertificate;
+            if (!string.IsNullOrWhiteSpace(dto.GHCLastCertificateGroup)) member.GHCLastCertificateGroup = dto.GHCLastCertificateGroup;
+            if (!string.IsNullOrWhiteSpace(dto.GHCLastCertificateSubject)) member.GHCLastCertificateSubject = dto.GHCLastCertificateSubject;
+            if (dto.GHCLastCertificatePassingYear > 0) member.GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear;
+            
+            if (!string.IsNullOrWhiteSpace(dto.EmergencyContactName)) member.EmergencyContactName = dto.EmergencyContactName;
+            if (!string.IsNullOrWhiteSpace(dto.EmergencyContactRelation)) member.EmergencyContactRelation = dto.EmergencyContactRelation;
+            if (!string.IsNullOrWhiteSpace(dto.EmergencyContactPhone)) member.EmergencyContactPhone = dto.EmergencyContactPhone;
+
             member.IsMobilePublic = dto.IsMobilePublic;
             member.IsEmailPublic = dto.IsEmailPublic;
             member.IsAddressPublic = dto.IsAddressPublic;
@@ -450,7 +462,7 @@ namespace GHCAA.Infrastructure.Services
             };
         }
 
-        public async Task<IEnumerable<MemberProfileDto>> GetAllMembersAsync(bool includeArchived = false, CancellationToken cancellationToken = default)
+        public async Task<object> GetAllMembersAsync(int page = 1, int pageSize = 10, string searchQuery = "", string statusFilter = "all", bool includeArchived = false, CancellationToken cancellationToken = default)
         {
             IQueryable<Member> query = _db.Members
                 .Include(m => m.ECMembers)
@@ -461,8 +473,44 @@ namespace GHCAA.Infrastructure.Services
                 query = query.IgnoreQueryFilters();
             }
 
-            var members = await query.ToListAsync(cancellationToken);
-            return members.Select(member => {
+            // Apply search filter
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                var q = searchQuery.ToLower();
+                query = query.Where(m => 
+                    (m.FullName != null && m.FullName.ToLower().Contains(q)) ||
+                    (m.Email != null && m.Email.ToLower().Contains(q)) ||
+                    (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(q)));
+            }
+            
+            // Apply status filter
+            if (!string.IsNullOrWhiteSpace(statusFilter) && statusFilter != "all")
+            {
+                if (statusFilter == "Applied")
+                {
+                    query = query.Where(m => m.Status == Enums.MembershipStatus.Applied);
+                }
+                else if (Enum.TryParse<Enums.MembershipStatus>(statusFilter, true, out var statusEnum))
+                {
+                    query = query.Where(m => m.Status == statusEnum);
+                }
+                else if (int.TryParse(statusFilter, out var statusInt))
+                {
+                    var casted = (Enums.MembershipStatus)statusInt;
+                    query = query.Where(m => m.Status == casted);
+                }
+            }
+
+            // Get total count
+            var totalItems = await query.CountAsync(cancellationToken);
+
+            // Apply paging
+            var membersQuery = query.OrderByDescending(m => m.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
+
+            var members = await membersQuery.ToListAsync(cancellationToken);
+            var memberDtos = members.Select(member => {
                 var dto = new MemberProfileDto
                 {
                     Id = member.Id,
@@ -512,13 +560,22 @@ namespace GHCAA.Infrastructure.Services
                         Position = em.Position,
                         StartDate = em.StartDate,
                         EndDate = em.EndDate,
-                        ChangeReason = em.ChangeReason
+                        ChangeReason = em.ChangeReason,
+                        IsCurrent = em.ECPeriod?.IsActive ?? false
                     }).OrderByDescending(h => h.StartDate).ToList();
                 }
                 return dto;
             });
-        }
 
+            return new
+            {
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize),
+                CurrentPage = page,
+                PageSize = pageSize,
+                Items = memberDtos
+            };
+        }
         public async Task<bool> AdminUpdateMemberAsync(int id, AdminMemberUpdateDto dto, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members.FindAsync(new object[] { id }, cancellationToken);
@@ -533,6 +590,12 @@ namespace GHCAA.Infrastructure.Services
             member.Email = dto.Email;
             member.PresentAddress = dto.PresentAddress;
             member.PermanentAddress = dto.PermanentAddress;
+
+            if (Enum.TryParse<Enums.Gender>(dto.Gender, true, out var gender))
+                member.Gender = gender;
+            
+            if (Enum.TryParse<Enums.BloodGroup>(dto.BloodGroup, true, out var blood))
+                member.BloodGroup = blood;
             member.HSCAdmissionYear = dto.HSCAdmissionYear;
             member.HighestCertificate = dto.HighestCertificate;
             member.HighestCertificateGroup = dto.HighestCertificateGroup;

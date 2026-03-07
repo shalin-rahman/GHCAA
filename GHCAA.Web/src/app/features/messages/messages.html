@@ -4,11 +4,12 @@
         <div class="sidebar-header">
             <h3>Conversations</h3>
             <div class="search-box">
-                <input type="text" placeholder="Search people...">
+                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                    placeholder="Search people...">
             </div>
         </div>
         <div class="conversation-list">
-            @for (c of chat.recentChats(); track c.userId) {
+            @for (c of filteredRecentChats(); track c.userId) {
             <div class="convo-item" [class.active]="chat.activeThreadId() === c.userId"
                 (click)="selectThread(c.userId)">
                 <div class="avatar-box">

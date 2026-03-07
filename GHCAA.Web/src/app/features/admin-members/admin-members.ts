@@ -5,7 +5,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { EC_ROLES, getECPositionName, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData } from '../../core/constants/app.constants';
+import { EC_ROLES, getECPositionName, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_STATUS_OPTIONS, MEMBERSHIP_TYPE_OPTIONS, MEMBER_CATEGORY_OPTIONS, EC_ROLES_OPTIONS, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS } from '../../core/constants/app.constants';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -28,19 +28,25 @@ export class AdminMembers implements OnInit {
   selectedMember = signal<any>(null);
   isEditing = signal(false);
 
+  // Pagination state
+  currentPage = signal(1);
+  pageSize = signal(10);
+  totalPages = signal(1);
+  totalItems = signal(0);
+
   // Import State
   showImportModal = signal(false);
   isImporting = signal(false);
-  importFile: File | null = null;
-  photoFiles: File[] = [];
-  excelHeaders: string[] = [];
+  importFile = signal<File | null>(null);
+  photoFiles = signal<File[]>([]);
+  excelHeaders = signal<string[]>([]);
   columnMapping: Record<string, string> = {
-    'Full Name': 'FullName',
-    'Email': 'Email',
-    'Mobile': 'MobileNo',
-    'NID': 'NID',
-    'Batch': 'GHCLastCertificatePassingYear',
-    'ID': 'ID' // For photo matching
+    'FullName': '',
+    'Email': '',
+    'MobileNo': '',
+    'NID': '',
+    'GHCLastCertificatePassingYear': '',
+    'ID': ''
   };
 
   defaultValues: Record<string, string> = {};
@@ -80,29 +86,17 @@ export class AdminMembers implements OnInit {
     { value: 'MembershipNumber', label: 'Membership Number' },
     { value: 'MembershipType', label: 'Membership Type' },
     { value: 'Category', label: 'Member Category' },
-    { value: 'ECPosition', label: 'EC Position' },
     // System
     { value: 'ID', label: 'System/External ID (For Photos)' }
   ];
 
   // Constants for dropdowns
-  membershipTypes = [
-    { value: 'Founding', label: 'Founding Member' },
-    { value: 'Executive', label: 'Executive Member' },
-    { value: 'General', label: 'General Member' },
-    { value: 'Associate', label: 'Associate Member' },
-    { value: 'Honorary', label: 'Honorary Member' },
-    { value: 'Advisory', label: 'Advisory Member' }
-  ];
-
-  memberCategories = [
-    { value: 'None', label: 'No Special status' },
-    { value: 'Lifelong', label: 'Lifelong Member' },
-    { value: 'Donor', label: 'Donor Member' },
-    { value: 'Patron', label: 'Patron Member' }
-  ];
-
-  ecPositions = EC_ROLES.map((label, index) => ({ value: index, label }));
+  membershipTypes = MEMBERSHIP_TYPE_OPTIONS;
+  memberCategories = MEMBER_CATEGORY_OPTIONS;
+  statusOptions = MEMBERSHIP_STATUS_OPTIONS;
+  ecPositions = EC_ROLES_OPTIONS;
+  genderOptions = GENDER_OPTIONS;
+  bloodGroupOptions = BLOOD_GROUP_OPTIONS;
 
   ACADEMIC = ACADEMIC_DATA;
   yearsList = this.ACADEMIC.getYears();
@@ -111,37 +105,44 @@ export class AdminMembers implements OnInit {
   groupOptions = this.ACADEMIC.groups;
   subjectOptions = this.ACADEMIC.subjects;
   sectorOptions = this.ACADEMIC.sectors;
-  filteredMembers = computed(() => {
-    const q = this.searchQuery().toLowerCase();
-    const s = this.statusFilter();
-    return this.allMembers().filter(m => {
-      const matchQ = !q ||
-        m.fullName?.toLowerCase().includes(q) ||
-        m.email?.toLowerCase().includes(q) ||
-        m.membershipNumber?.toLowerCase().includes(q);
-      const matchS = s === 'all' || String(m.status) === s;
-      return matchQ && matchS;
-    });
-  });
-
-  statusOptions = [
-    { value: 'all', label: 'All Statuses' },
-    { value: 'Applied', label: 'Applied' },
-    { value: 'Active', label: 'Active' },
-    { value: 'InactivePayment', label: 'Inactive (Payment)' },
-    { value: 'InactiveResigned', label: 'Inactive (Resigned)' },
-  ];
 
   ngOnInit() {
     this.loadMembers();
   }
 
+  onFilterChange() {
+    this.currentPage.set(1);
+    this.loadMembers();
+  }
+
   loadMembers() {
     this.loading.set(true);
-    this.adminService.getMembers().subscribe({
-      next: (data: any[]) => { this.allMembers.set(data); this.loading.set(false); },
-      error: () => this.loading.set(false)
+    this.adminService.getMembers(this.currentPage(), this.pageSize(), this.searchQuery(), this.statusFilter(), false).subscribe({
+      next: (res: any) => {
+        this.allMembers.set(res.items);
+        this.totalPages.set(res.totalPages || 1);
+        this.totalItems.set(res.totalItems || 0);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.allMembers.set([]);
+        this.loading.set(false);
+      }
     });
+  }
+
+  changePage(delta: number) {
+    const dest = this.currentPage() + delta;
+    if (dest >= 1 && dest <= this.totalPages()) {
+      this.currentPage.set(dest);
+      this.loadMembers();
+    }
+  }
+
+  setPageListOptions(size: number) {
+    this.pageSize.set(size);
+    this.currentPage.set(1);
+    this.loadMembers();
   }
 
   approveMember(id: number, adminId: number) {
@@ -189,6 +190,8 @@ export class AdminMembers implements OnInit {
       nid: member.nid,
       mobileNo: member.mobileNo,
       email: member.email,
+      gender: member.gender,
+      bloodGroup: member.bloodGroup,
       presentAddress: member.presentAddress,
       permanentAddress: member.permanentAddress,
       hscAdmissionYear: member.hscAdmissionYear,
@@ -225,23 +228,15 @@ export class AdminMembers implements OnInit {
   }
 
   getStatusLabel(status: any): string {
-    return this.statusOptions.find(s => s.value === String(status))?.label ?? 'Unknown';
+    return getStatusLabel(status);
   }
 
   getStatusClass(status: any): string {
-    const map: Record<string, string> = {
-      'Applied': 'pending',
-      'Active': 'active',
-      'InactivePayment': 'inactive',
-      'InactiveResigned': 'resigned'
-    };
-    return map[String(status)] ?? '';
+    return getStatusClass(status);
   }
 
   getCategoryLabel(cat: any): string {
-    const cats = ['None', 'Lifelong', 'Donor', 'Patron'];
-    if (typeof cat === 'number') return cats[cat] || 'None';
-    return cat || 'None';
+    return getCategoryLabel(cat);
   }
 
   getECPositionLabel(pos: any): string {
@@ -251,21 +246,21 @@ export class AdminMembers implements OnInit {
   // --- Import Actions ---
   openImport() {
     this.showImportModal.set(true);
-    this.importFile = null;
-    this.photoFiles = [];
-    this.excelHeaders = [];
+    this.importFile.set(null);
+    this.photoFiles.set([]);
+    this.excelHeaders.set([]);
   }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      this.importFile = file;
+      this.importFile.set(file);
       this.extractHeaders(file);
     }
   }
 
   onPhotosSelected(event: any) {
-    this.photoFiles = Array.from(event.target.files);
+    this.photoFiles.set(Array.from(event.target.files));
   }
 
   extractHeaders(file: File) {
@@ -279,22 +274,24 @@ export class AdminMembers implements OnInit {
 
         if (jsonData.length > 0) {
           // First row = headers
-          this.excelHeaders = (jsonData[0] as any[]).filter((h: any) => h != null && String(h).trim() !== '').map((h: any) => String(h).trim());
+          const headers = (jsonData[0] as any[]).filter((h: any) => h != null && String(h).trim() !== '').map((h: any) => String(h).trim());
+          this.excelHeaders.set(headers);
 
           // Reset mappings
           this.columnMapping = {};
 
           // Auto-map by fuzzy matching
-          this.excelHeaders.forEach(h => {
+          headers.forEach(h => {
             const lower = h.toLowerCase();
-            if ((lower.includes('full') && lower.includes('name')) || lower === 'name') this.columnMapping['FullName'] = h;
+            if (lower.includes('participant name') || (lower.includes('full') && lower.includes('name')) || lower === 'name') this.columnMapping['FullName'] = h;
             else if (lower.includes('father')) this.columnMapping['FatherName'] = h;
             else if (lower.includes('mother')) this.columnMapping['MotherName'] = h;
             else if (lower.includes('email') || lower.includes('e-mail')) this.columnMapping['Email'] = h;
             else if (lower.includes('mobile') || lower.includes('phone') || lower.includes('cell')) this.columnMapping['MobileNo'] = h;
             else if (lower === 'nid' || lower.includes('national id')) this.columnMapping['NID'] = h;
-            else if (lower.includes('batch') || lower.includes('passing year') || lower.includes('session')) this.columnMapping['GHCLastCertificatePassingYear'] = h;
-            else if (lower.includes('designation') || lower.includes('position')) this.columnMapping['Designation'] = h;
+            else if (lower.includes('batch') || lower.includes('passing year') || lower.includes('session') || lower === 'pass year') this.columnMapping['GHCLastCertificatePassingYear'] = h;
+            else if (lower.includes('batch') || lower.includes('passing year') || lower.includes('session') || lower === 'pass year') this.columnMapping['HighestCertificatePassingYear'] = h;
+            else if (lower.includes('designation') || lower.includes('position') || lower === 'profession') this.columnMapping['Designation'] = h;
             else if (lower.includes('sector') || lower.includes('profession')) this.columnMapping['ProfessionalSector'] = h;
             else if (lower.includes('blood')) this.columnMapping['BloodGroup'] = h;
             else if (lower.includes('gender') || lower.includes('sex')) this.columnMapping['Gender'] = h;
@@ -302,10 +299,13 @@ export class AdminMembers implements OnInit {
             else if (lower.includes('present') && lower.includes('address')) this.columnMapping['PresentAddress'] = h;
             else if (lower.includes('permanent') && lower.includes('address')) this.columnMapping['PermanentAddress'] = h;
             else if (lower.includes('address') && !lower.includes('present') && !lower.includes('permanent')) this.columnMapping['PresentAddress'] = h;
-            else if (lower === 'id' || lower === 'sl' || lower === 'serial') this.columnMapping['ID'] = h;
-            else if (lower.includes('membership') && lower.includes('no')) this.columnMapping['MembershipNumber'] = h;
+            else if (lower.includes('district')) this.columnMapping['PermanentAddress'] = h;
+            else if (lower === 'id' || lower === 'sl' || lower === 'serial' || lower.includes('registration')) this.columnMapping['ID'] = h;
+            else if (lower.includes('membership') || lower.includes('registration')) this.columnMapping['MembershipNumber'] = h;
             else if (lower.includes('membership') && lower.includes('type')) this.columnMapping['MembershipType'] = h;
-            else if (lower.includes('certificate') && lower.includes('highest')) this.columnMapping['HighestCertificate'] = h;
+            else if (lower.includes('highest') || lower === 'last certificate') this.columnMapping['HighestCertificate'] = h;
+            else if (lower.includes('highest') && lower.includes('group') || lower === 'group') this.columnMapping['HighestCertificateGroup'] = h;
+            else if (lower.includes('highest') && lower.includes('subject') || lower === 'department') this.columnMapping['HighestCertificateSubject'] = h;
             else if (lower.includes('certificate') && lower.includes('ghc')) this.columnMapping['GHCLastCertificate'] = h;
             else if (lower.includes('emergency') && lower.includes('name')) this.columnMapping['EmergencyContactName'] = h;
             else if (lower.includes('emergency') && lower.includes('relation')) this.columnMapping['EmergencyContactRelation'] = h;
@@ -314,27 +314,28 @@ export class AdminMembers implements OnInit {
             else if (lower.includes('ghc') && lower.includes('admission')) this.columnMapping['GHCAdmissionYear'] = h;
           });
 
-          this.notify.success(`Found ${this.excelHeaders.length} columns in the Excel file.`);
+          this.notify.success(`Found ${headers.length} columns in the Excel file.`);
         } else {
           this.notify.warning('The Excel file appears to be empty.');
-          this.excelHeaders = [];
+          this.excelHeaders.set([]);
         }
       } catch (err) {
         console.error('Excel parse error:', err);
         this.notify.error('Failed to read Excel file. Please ensure it is a valid .xlsx file.');
-        this.excelHeaders = [];
+        this.excelHeaders.set([]);
       }
     };
     reader.readAsArrayBuffer(file);
   }
 
   executeImport() {
-    if (!this.importFile) return;
+    const file = this.importFile();
+    if (!file) return;
 
     this.isImporting.set(true);
     const formData = new FormData();
-    formData.append('ExcelFile', this.importFile);
-    this.photoFiles.forEach(f => formData.append('Photos', f));
+    formData.append('ExcelFile', file);
+    this.photoFiles().forEach(f => formData.append('Photos', f));
 
     // Invert mapping for backend: ExcelColumnName -> SystemPropertyName
     const invertedMapping: Record<string, string> = {};

@@ -321,25 +321,55 @@
 }
 
 .v-section {
+    background: rgba(var(--primary-rgb), 0.02);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
     h4 {
-        margin: 0 0 1.25rem;
-        font-size: 0.75rem;
+        margin: 0 0 0.5rem;
+        font-size: 0.9rem;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: var(--text-muted);
+        color: var(--primary-color);
         border-bottom: 1px solid var(--glass-border);
-        padding-bottom: 0.5rem;
+        padding-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 800;
+
+        &::before {
+            content: '';
+            width: 4px;
+            height: 1rem;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
     }
 }
 
+.v-divider {
+    height: 1px;
+    background: var(--glass-border);
+    margin: 0.5rem 0;
+}
+
 .v-item {
-    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 
     .v-label {
         display: block;
         font-size: 0.7rem;
         color: var(--text-muted);
-        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
     }
 
     .v-value {
@@ -347,6 +377,7 @@
         font-size: 1rem;
         font-weight: 600;
         color: var(--text-main);
+        word-break: break-word;
 
         a {
             color: var(--primary-color);

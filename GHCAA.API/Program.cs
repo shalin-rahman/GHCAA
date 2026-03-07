@@ -18,6 +18,19 @@ builder.Services.AddInfrastructure(configuration);
 builder.Services.AddJwtAuthentication(configuration);
 builder.Services.AddAppAuthorization();
 
+// Configure Request Limits from Settings
+var maxBodySize = configuration.GetValue<long>("AppSettings:MaxRequestBodySize", 104857600);
+builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options => 
+{
+    options.Limits.MaxRequestBodySize = maxBodySize;
+});
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x =>
+{
+    x.ValueLengthLimit = int.MaxValue;
+    x.MultipartBodyLengthLimit = maxBodySize;
+    x.MemoryBufferThreshold = (int)maxBodySize;
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options => {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
@@ -32,11 +45,13 @@ builder.Services.AddScoped<GHCAA.Application.Interfaces.IRealTimeService, GHCAA.
 
 builder.Services.AddCors(options =>
 {
+    var allowedOrigins = configuration.GetSection("AppSettings:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:4200" };
     options.AddPolicy("AngularApp", policy =>
     {
-        policy.WithOrigins("http://localhost:4200") // Local Angular dev server
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -48,12 +63,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AngularApp");
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<AuditLogMiddleware>();
 
-app.UseCors("AngularApp");
-
-app.UseHttpsRedirection();
+app.UseWebSockets();
 app.UseStaticFiles(); // serve wwwroot/uploads
 app.UseAuthentication();
 app.UseAuthorization();

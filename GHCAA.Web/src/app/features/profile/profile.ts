@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProfileService, MemberProfile } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData } from '../../core/constants/app.constants';
+import { getECPositionName, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS } from '../../core/constants/app.constants';
 
 @Component({
     selector: 'app-profile',
@@ -28,6 +28,8 @@ export class Profile implements OnInit {
     groupOptions = this.ACADEMIC.groups;
     subjectOptions = this.ACADEMIC.subjects;
     sectorOptions = this.ACADEMIC.sectors;
+    genderOptions = GENDER_OPTIONS;
+    bloodGroupOptions = BLOOD_GROUP_OPTIONS;
 
     ngOnInit() {
         this.profileService.getProfile().subscribe({
@@ -40,14 +42,11 @@ export class Profile implements OnInit {
     }
 
     getMembershipType(type: any): string {
-        const types = ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory'];
-        return types[type] || 'General';
+        return getMembershipTypeLabel(type);
     }
 
     getCategoryLabel(cat: any): string {
-        const cats = ['None', 'Lifelong', 'Donor', 'Patron'];
-        if (typeof cat === 'number') return cats[cat] || 'None';
-        return cat || 'None';
+        return getCategoryLabel(cat);
     }
 
     getDegreeName(degree: any): string {
@@ -60,7 +59,7 @@ export class Profile implements OnInit {
         this.saving.set(true);
         this.profileService.updateProfile(this.profile).subscribe({
             next: () => {
-                this.notify.success('Profile updated successfully!');
+                this.notify.success('Information updated');
                 this.saving.set(false);
             },
             error: () => {

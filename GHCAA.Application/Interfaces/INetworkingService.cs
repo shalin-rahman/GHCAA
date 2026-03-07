@@ -16,7 +16,7 @@ namespace GHCAA.Application.Interfaces
 
     public class MemberSearchFilterDto
     {
-        public string? FullName { get; set; }
+        public string? Query { get; set; }
         public int? PassingYear { get; set; }
         public string? BloodGroup { get; set; }
         public string? ProfessionalSector { get; set; }

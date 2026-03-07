@@ -1,10 +1,10 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminCommService, EmailTemplate, EmailLog } from '../../core/services/admin-comm.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ActivatedRoute } from '@angular/router';
-import { getAcademicYears } from '../../core/constants/app.constants';
+import { getAcademicYears, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 
 @Component({
     selector: 'app-admin-comm',
@@ -43,14 +43,13 @@ export class AdminComm implements OnInit {
     };
 
     years: number[] = getAcademicYears();
-    membershipTypes = [
-        { value: 'Founding', label: 'Founding Member' },
-        { value: 'Executive', label: 'Executive Committee' },
-        { value: 'General', label: 'General Member' },
-        { value: 'Associate', label: 'Associate Member' },
-        { value: 'Honorary', label: 'Honorary Member' },
-        { value: 'Advisory', label: 'Advisory Member' }
-    ];
+    membershipTypes = MEMBERSHIP_TYPE_OPTIONS;
+
+    yearSearch = signal('');
+    filteredYears = computed(() => {
+        const q = this.yearSearch().toLowerCase();
+        return this.years.filter(y => y.toString().includes(q));
+    });
 
 
 
@@ -212,6 +211,13 @@ export class AdminComm implements OnInit {
         this.sendOptions.targetYears = [...this.years];
     }
 
+    selectFilteredYears() {
+        const filtered = this.filteredYears();
+        const current = new Set(this.sendOptions.targetYears);
+        filtered.forEach(y => current.add(y));
+        this.sendOptions.targetYears = Array.from(current);
+    }
+
     clearYears() {
         this.sendOptions.targetYears = [];
     }
@@ -236,12 +242,13 @@ export class AdminComm implements OnInit {
         }
     }
 
-    toggleSelection(item: any, list: any[]) {
+    toggleSelection(item: any, listName: 'targetYears' | 'targetTypes') {
+        const list = this.sendOptions[listName] as any[];
         const index = list.indexOf(item);
         if (index > -1) {
-            list.splice(index, 1);
+            this.sendOptions[listName] = list.filter(i => i !== item) as any;
         } else {
-            list.push(item);
+            this.sendOptions[listName] = [...list, item] as any;
         }
     }
 

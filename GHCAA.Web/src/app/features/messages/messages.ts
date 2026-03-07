@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, inject, signal, OnInit, ViewChild, ElementRef, AfterViewChecked, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -20,7 +20,15 @@ export class Messages implements OnInit, AfterViewChecked {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
 
   newMessage = '';
-  myUserId = 0;
+  searchQuery = signal('');
+
+  filteredRecentChats = computed(() => {
+    const q = this.searchQuery().toLowerCase();
+    return this.chat.recentChats().filter(c =>
+      (c.fullName?.toLowerCase().includes(q) || false) ||
+      (c.lastMessage?.toLowerCase().includes(q) || false)
+    );
+  });
 
   ngOnInit() {
     const user = this.auth.currentUser();

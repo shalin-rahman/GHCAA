@@ -24,7 +24,7 @@ namespace GHCAA.Domain
         public enum NewsCategory { News, OrganisationalUpdate, BusinessInformation }
 
         // Job Hub Enums
-        public enum JobCategory { IT, Finance, Engineering, Marketing, Education, Health, Other }
+        public enum JobCategory { IT, Finance, Engineering, Marketing, Education, Health, PublicSector, Mentorship, Other }
 
         // Event Registration Enums
         public enum EventRegistrationStatus { Pending, Approved, Rejected }

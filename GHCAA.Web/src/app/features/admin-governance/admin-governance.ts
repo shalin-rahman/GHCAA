@@ -116,7 +116,7 @@ export class AdminGovernance implements OnInit {
         this.adminService.getMembers().subscribe({
             next: (members) => {
                 const lower = query.toLowerCase();
-                this.memberSearchResults.set(members.filter(m =>
+                this.memberSearchResults.set(members.filter((m: any) =>
                     m.fullName?.toLowerCase().includes(lower) ||
                     m.membershipNumber?.toLowerCase().includes(lower)
                 ).slice(0, 10));

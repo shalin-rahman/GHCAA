@@ -57,8 +57,8 @@
                 </div>
                 <div class="h-meta">
                     <span class="h-dates">{{ h.startDate | date:'MMM yyyy' }} - {{ h.endDate ? (h.endDate | date:'MMM
-                        yyyy') : 'Present' }}</span>
-                    @if (!h.endDate) { <span class="current-badge">Active</span> }
+                        yyyy') : (h.isCurrent ? 'Present' : 'Ended') }}</span>
+                    @if (h.isCurrent && !h.endDate) { <span class="current-badge">Current</span> }
                 </div>
                 @if (h.changeReason) {
                 <p class="h-reason">Note: {{ h.changeReason }}</p>
@@ -73,51 +73,109 @@
 
     <div class="glass-card profile-card">
         <form (submit)="updateProfile()">
-            <!-- Academic Update -->
-            <div class="section-block">
+            <!-- Personal Information -->
+            <div class="section-block mt-4">
                 <h4 class="text-accent uppercase tracking-widest text-xs font-black border-b border-accent pb-2 mb-8">
-                    Academic Credentials</h4>
+                    Personal Identity</h4>
                 <div class="space-y-6">
-                    <div class="form-group">
-                        <label>Highest Certificate</label>
-                        <input type="text" list="degree-list" [(ngModel)]="profile.highestCertificate"
-                            name="highestCertificate">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" [(ngModel)]="profile.fullName" name="fullName">
+                        </div>
+                        <div class="form-group">
+                            <label>National ID (NID)</label>
+                            <input type="text" [value]="profile.nid" name="nid" readonly class="opacity-50"
+                                title="Contact admin to change NID">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Highest Certificate Group</label>
-                        <input type="text" list="group-list" [(ngModel)]="profile.highestCertificateGroup"
-                            name="highestCertificateGroup">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label>Father's Name</label>
+                            <input type="text" [(ngModel)]="profile.fatherName" name="fatherName">
+                        </div>
+                        <div class="form-group">
+                            <label>Mother's Name</label>
+                            <input type="text" [(ngModel)]="profile.motherName" name="motherName">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select [(ngModel)]="profile.gender" name="gender">
+                                <option *ngFor="let g of genderOptions" [value]="g.value">{{ g.label }}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Blood Group</label>
+                            <select [(ngModel)]="profile.bloodGroup" name="bloodGroup">
+                                <option *ngFor="let b of bloodGroupOptions" [value]="b.value">{{ b.label }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Update -->
+            <div class="section-block mt-10">
+                <h4 class="text-accent uppercase tracking-widest text-xs font-black border-b border-accent pb-2 mb-8">
+                    Academic Credentials & Sessions</h4>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label>GHC Last Certificate</label>
+                            <input type="text" list="degree-list" [(ngModel)]="profile.ghcLastCertificate"
+                                name="ghcLastCertificate">
+                        </div>
+                        <div class="form-group">
+                            <label>GHC Admission Year</label>
+                            <input type="number" list="years-list" [(ngModel)]="profile.ghcAdmissionYear"
+                                name="ghcAdmissionYear">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label>GHC Group/Dept</label>
+                            <input type="text" list="group-list" [(ngModel)]="profile.ghcLastCertificateGroup"
+                                name="ghcLastCertificateGroup">
+                        </div>
+                        <div class="form-group">
+                            <label>GHC Passing (Batch)</label>
+                            <input type="number" list="years-list" [(ngModel)]="profile.ghcLastCertificatePassingYear"
+                                name="passYear">
+                        </div>
+                    </div>
+
+                    <hr class="opacity-10">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label>Highest Certificate</label>
+                            <input type="text" list="degree-list" [(ngModel)]="profile.highestCertificate"
+                                name="highestCertificate">
+                        </div>
+                        <div class="form-group">
+                            <label>HSC Admission Year</label>
+                            <input type="number" list="years-list" [(ngModel)]="profile.hscAdmissionYear"
+                                name="hscAdmissionYear">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label>Highest Cert. Group</label>
+                            <input type="text" list="group-list" [(ngModel)]="profile.highestCertificateGroup"
+                                name="highestCertificateGroup">
+                        </div>
+                        <div class="form-group">
+                            <label>Highest Cert. Year</label>
+                            <input type="number" list="years-list" [(ngModel)]="profile.highestCertificatePassingYear"
+                                name="highestYear">
+                        </div>
                     </div>
                     <div class="form-group" *ngIf="profile.highestCertificate !== 'HSC'">
                         <label>Highest Certificate Subject</label>
                         <input type="text" list="subject-list" [(ngModel)]="profile.highestCertificateSubject"
                             name="highestCertificateSubject">
-                    </div>
-                    <div class="form-group">
-                        <label>Highest Cert. Passing Year</label>
-                        <input type="number" list="years-list" [(ngModel)]="profile.highestCertificatePassingYear"
-                            name="highestYear">
-                    </div>
-
-                    <div class="form-group">
-                        <label>GHC Last Certificate</label>
-                        <input type="text" list="degree-list" [(ngModel)]="profile.ghcLastCertificate"
-                            name="ghcLastCertificate">
-                    </div>
-                    <div class="form-group">
-                        <label>GHC Last Certificate Group</label>
-                        <input type="text" list="group-list" [(ngModel)]="profile.ghcLastCertificateGroup"
-                            name="ghcLastCertificateGroup">
-                    </div>
-                    <div class="form-group" *ngIf="profile.ghcLastCertificate !== 'HSC'">
-                        <label>GHC Last Certificate Subject</label>
-                        <input type="text" list="subject-list" [(ngModel)]="profile.ghcLastCertificateSubject"
-                            name="ghcLastCertificateSubject">
-                    </div>
-                    <div class="form-group">
-                        <label>GHC Last Cert. Passing Year</label>
-                        <input type="number" list="years-list" [(ngModel)]="profile.ghcLastCertificatePassingYear"
-                            name="passYear">
                     </div>
                 </div>
             </div>
@@ -135,7 +193,29 @@
                     <div class="form-group">
                         <label>Current Designation</label>
                         <input type="text" [(ngModel)]="profile.designation" name="designation"
-                            placeholder="e.g. Senior Consultant">
+                            placeholder="e.g. Senior Consultant at XYZ Corp">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Contact -->
+            <div class="section-block mt-10">
+                <h4 class="text-accent uppercase tracking-widest text-xs font-black border-b border-accent pb-2 mb-8">
+                    Emergency Contact</h4>
+                <div class="space-y-6">
+                    <div class="form-group">
+                        <label>Contact Person Name</label>
+                        <input type="text" [(ngModel)]="profile.emergencyContactName" name="ecName">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label>Relationship</label>
+                            <input type="text" [(ngModel)]="profile.emergencyContactRelation" name="ecRel">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" [(ngModel)]="profile.emergencyContactPhone" name="ecPhone">
+                        </div>
                     </div>
                 </div>
             </div>

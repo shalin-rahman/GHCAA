@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JobService, Job } from '../../core/services/job.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { AuthService } from '../../core/services/auth.service';
+import { JOB_CATEGORIES } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-jobs',
@@ -20,18 +22,12 @@ export class Jobs implements OnInit {
   showForm = signal(false);
   submitting = signal(false);
   selectedJob = signal<Job | null>(null);
+  searchQuery = '';
+  isEditing = signal(false);
+  editingId = signal<number | null>(null);
+  private auth = inject(AuthService);
 
-  categories = [
-    { id: 0, name: 'IT & Software Development' },
-    { id: 1, name: 'Finance & Banking' },
-    { id: 2, name: 'Engineering & Construction' },
-    { id: 3, name: 'Marketing & Sales' },
-    { id: 4, name: 'Education & Research' },
-    { id: 5, name: 'Healthcare & Pharma' },
-    { id: 6, name: 'Govt. & Public Sector' },
-    { id: 7, name: 'Mentorship & Career Guidance' },
-    { id: 8, name: 'Other Opportunities' }
-  ];
+  categories = JOB_CATEGORIES;
 
   newJob: any = {
     title: '',
@@ -50,13 +46,21 @@ export class Jobs implements OnInit {
 
   loadJobs(category?: number) {
     this.loading.set(true);
-    this.jobService.getJobs(category).subscribe({
+    const params: any = {};
+    if (category !== undefined) params.category = category;
+    if (this.searchQuery) params.query = this.searchQuery;
+
+    this.jobService.getJobs(params).subscribe({
       next: (data) => {
         this.jobs.set(data);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
     });
+  }
+
+  onSearch() {
+    this.loadJobs();
   }
 
   postJob() {
@@ -66,20 +70,46 @@ export class Jobs implements OnInit {
     }
 
     this.submitting.set(true);
-    this.jobService.createJob(this.newJob).subscribe({
+    const obs = this.isEditing() && this.editingId()
+      ? this.jobService.updateJob(this.editingId()!, this.newJob)
+      : this.jobService.createJob(this.newJob);
+
+    obs.subscribe({
       next: () => {
-        this.notify.success('Opportunity shared with the alumni community!');
+        this.notify.success(this.isEditing() ? 'Opportunity updated!' : 'Opportunity shared with the alumni community!');
         this.submitting.set(false);
-        this.showForm.set(false);
+        this.closeForm();
         this.loadJobs();
-        // Reset form
-        this.newJob = { title: '', companyName: '', location: '', category: 0, description: '', requirements: '', deadline: '', applicationEmail: '' };
       },
       error: () => {
         this.submitting.set(false);
         this.notify.error('Failed to post opportunity.');
       }
     });
+  }
+
+  editJob(job: Job) {
+    this.isEditing.set(true);
+    this.editingId.set(job.id);
+    this.newJob = {
+      title: job.title,
+      companyName: job.companyName,
+      location: job.location,
+      category: job.category,
+      description: job.description,
+      requirements: job.requirements,
+      deadline: job.deadline, // Backend usually expects YYYY-MM-DD
+      applicationEmail: job.applicationEmail
+    };
+    this.showForm.set(true);
+    this.selectedJob.set(null);
+  }
+
+  closeForm() {
+    this.showForm.set(false);
+    this.isEditing.set(false);
+    this.editingId.set(null);
+    this.newJob = { title: '', companyName: '', location: '', category: 0, description: '', requirements: '', deadline: '', applicationEmail: '' };
   }
 
   onFilterChange(e: any) {
@@ -93,5 +123,11 @@ export class Jobs implements OnInit {
 
   viewJob(job: Job) {
     this.selectedJob.set(job);
+  }
+
+  canEdit(job: Job): boolean {
+    const user = this.auth.currentUser();
+    if (!user) return false;
+    return user.role === 'Admin' || user.role === 'SuperAdmin' || job.postedByMemberId === user.memberId;
   }
 }

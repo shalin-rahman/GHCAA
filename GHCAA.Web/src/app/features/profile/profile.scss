@@ -12,9 +12,10 @@
 
 .membership-status-card {
     padding: 3rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    background: var(--dark-gradient);
     color: white;
     border: none;
+    box-shadow: var(--shadow-lg);
 }
 
 .status-header {
@@ -173,13 +174,65 @@ input:checked+.slider:before {
     text-align: center;
 }
 
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+
+    label {
+        font-size: 0.92rem;
+        font-weight: 750;
+        color: var(--text-main);
+        text-align: left;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+    }
+
+    input,
+    select,
+    textarea {
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        color: var(--text-main);
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: 0.3s;
+
+        &:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.1);
+        }
+
+        &::placeholder {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+    }
+}
+
+.space-y-6>*+* {
+    margin-top: 1.5rem;
+}
+
+.space-y-4>*+* {
+    margin-top: 1rem;
+}
+
+.mt-10 {
+    margin-top: 2.5rem;
+}
+
 @media (max-width: 768px) {
     .form-grid {
         grid-template-columns: 1fr;
-    }
-
-    .full-width {
-        grid-column: span 1;
     }
 
     .status-grid {
@@ -214,13 +267,16 @@ input:checked+.slider:before {
     .h-main {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
+        gap: 1.5rem;
         margin-bottom: 0.5rem;
 
         .h-pos {
             font-size: 1.1rem;
             font-weight: 700;
             color: var(--text-main);
+            word-break: break-word; // Fix for long position names
+            flex: 1;
         }
 
         .h-period {
@@ -229,6 +285,8 @@ input:checked+.slider:before {
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            text-align: right;
+            min-width: fit-content;
         }
     }
 

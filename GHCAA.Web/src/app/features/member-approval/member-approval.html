@@ -5,7 +5,7 @@
             <p>Review and adjudicate incoming membership applications.</p>
         </div>
         <div class="header-actions">
-            <div class="stat-badge">Pending Verification: {{ requests().length }}</div>
+            <div class="stat-badge">Pending Verification: {{ pendingRequests().length }}</div>
         </div>
     </div>
 
@@ -26,8 +26,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (reg of requests(); track reg.id) {
-                @if (reg.status === 0) {
+                @for (reg of pendingRequests(); track reg.id) {
                 <tr [class.viewing]="selectedMember()?.id === reg.id">
                     <td>
                         <div class="member-cell">
@@ -35,12 +34,12 @@
                                 @if (reg.photoPath) {
                                 <img [src]="reg.photoPath" alt="Profile">
                                 } @else {
-                                <div class="avatar">{{ reg.fullName[0] }}</div>
+                                <div class="avatar">{{ reg.fullName?.[0] || '?' }}</div>
                                 }
                             </div>
                             <div class="info">
-                                <strong>{{ reg.fullName }}</strong>
-                                <small>{{ reg.email }}</small>
+                                <strong>{{ reg.fullName || 'Unknown Applicant' }}</strong>
+                                <small>{{ reg.email || 'No Email' }}</small>
                             </div>
                         </div>
                     </td>
@@ -58,14 +57,13 @@
                     </td>
                     <td>
                         <div class="action-btns">
-                            <button (click)="viewDetails(reg)" class="btn btn-secondary btn-sm">Audit Details</button>
+                            <button (click)="viewDetails(reg)" class="btn btn-outline btn-sm">Details ↗</button>
                             <button (click)="contactMember(reg.email)" class="btn btn-secondary btn-sm"
                                 title="Contact Applicant">📨</button>
                             <button (click)="approve(reg.id)" class="btn btn-primary btn-sm">Direct Verify</button>
                         </div>
                     </td>
                 </tr>
-                }
                 } @empty {
                 <tr class="empty-row">
                     <td colspan="4" style="text-align: center; padding: 4rem; color: var(--text-muted);">No pending
