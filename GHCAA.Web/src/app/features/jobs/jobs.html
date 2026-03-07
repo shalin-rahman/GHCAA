@@ -5,7 +5,7 @@
             <h2>Opportunities Hub</h2>
             <p>Careers, Mentorship, and Professional Growth</p>
         </div>
-        <button class="btn btn-primary" (click)="closeForm(); showForm.set(true)" *ngIf="!showForm()">
+        <button class="btn btn-accent" (click)="closeForm(); showForm.set(true)" *ngIf="!showForm()">
             <span class="icon">✨</span> Share Opportunity
         </button>
     </div>
@@ -64,7 +64,7 @@
             </div>
 
             <div class="form-footer">
-                <button type="submit" class="btn btn-primary btn-lg" [disabled]="submitting()">
+                <button type="submit" class="btn btn-accent btn-lg" [disabled]="submitting()">
                     {{ submitting() ? 'Broadcasting...' : (isEditing() ? '💾 Update Post' : '🚀 Post Opportunity') }}
                 </button>
                 <button type="button" class="btn btn-secondary btn-lg" (click)="closeForm()">Discard</button>
@@ -131,7 +131,7 @@
                 <div class="icon">💼</div>
                 <h3>No Open Opportunities</h3>
                 <p>Be the bridge. If you know of any job openings or want to offer mentorship, share it now!</p>
-                <button class="btn btn-primary" (click)="showForm.set(true)">Post First Opportunity</button>
+                <button class="btn btn-accent" (click)="showForm.set(true)">Post First Opportunity</button>
             </div>
             }
         </div>

@@ -2,7 +2,7 @@
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.82);
+    background: rgba(33, 33, 33, 0.82);
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
     border-bottom: 1.5px solid var(--glass-border);
@@ -24,10 +24,10 @@
 
     .mini-logo {
         height: 42px;
-        max-width: 32px;
+        max-width: 42px;
         object-fit: contain;
         border-radius: 50%;
-        border: 2px solid var(--accent-color);
+        border: 1.5px solid var(--accent-color);
         background: white;
         box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
     }

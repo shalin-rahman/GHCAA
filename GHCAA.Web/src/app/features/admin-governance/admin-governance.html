@@ -41,7 +41,7 @@
                     <h3>{{ selectedPeriod().title }}</h3>
                     <div class="actions">
                         @if (!selectedPeriod().isActive) {
-                        <button class="btn btn-primary btn-sm" (click)="activatePeriod(selectedPeriod().id)">
+                        <button class="btn btn-accent btn-sm" (click)="activatePeriod(selectedPeriod().id)">
                             Activate Period
                         </button>
                         }

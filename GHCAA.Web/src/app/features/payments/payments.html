@@ -4,7 +4,7 @@
             <h2>Fees & Dues</h2>
             <p>Manage your membership contributions and annual fees.</p>
         </div>
-        <button class="btn btn-primary" (click)="openPayModal()">
+        <button class="btn btn-accent" (click)="openPayModal()">
             <span class="icon">➕</span> Record New Payment
         </button>
     </div>
@@ -104,7 +104,7 @@
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" (click)="showPayModal.set(false)">Cancel</button>
-            <button class="btn btn-primary" (click)="submitPayment()" [disabled]="!paymentForm.transactionId">Submit for
+            <button class="btn btn-accent" (click)="submitPayment()" [disabled]="!paymentForm.transactionId">Submit for
                 Verification</button>
         </div>
     </div>

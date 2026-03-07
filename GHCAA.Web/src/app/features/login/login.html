@@ -23,7 +23,7 @@
                 {{ errorMessage }}
             </div>
 
-            <button type="submit" class="btn btn-primary w-full" [disabled]="loginForm.invalid || loading">
+            <button type="submit" class="btn btn-accent w-full" [disabled]="loginForm.invalid || loading">
                 {{ loading ? 'Authenticating...' : 'Login' }}
             </button>
 

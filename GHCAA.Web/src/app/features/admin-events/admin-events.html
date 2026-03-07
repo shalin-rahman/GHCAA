@@ -28,65 +28,71 @@
     <!-- Event Form Section (Inline) -->
     @if (showForm()) {
     <div class="glass-card p-10 reveal-top max-w-4xl mx-auto border-accent/20">
-        <form [formGroup]="eventForm" (ngSubmit)="submitEvent()" class="space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="input-group">
-                    <label>Engagement Title</label>
-                    <input type="text" formControlName="title" placeholder="Annual Reunion 2024">
-                </div>
-                <div class="input-group">
-                    <label>Scheduled Date & Time</label>
-                    <input type="datetime-local" formControlName="date">
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>Venue / Location</label>
-                <input type="text" formControlName="location" placeholder="Main Campus Auditorium">
-            </div>
-
-            <div class="input-group">
-                <label>Project Brief / Description</label>
-                <textarea formControlName="description" rows="5"
-                    placeholder="Describe the purpose and plan for this event..."></textarea>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="input-group">
-                    <label>Participation Deadline</label>
-                    <input type="datetime-local" formControlName="registrationDeadline">
-                </div>
-                <div class="input-group">
-                    <label>Public Secretariat Note</label>
-                    <input type="text" formControlName="adminNote" placeholder="Public instruction or status update...">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="input-group">
-                    <label>Endowment Fee (BDT)</label>
-                    <input type="number" formControlName="registrationFee" placeholder="0.00">
-                </div>
-                <div class="input-group">
-                    <label>Visibility Status</label>
-                    <div class="flex items-center gap-4 py-2">
-                        <input type="checkbox" formControlName="isActive" class="w-6 h-6 border-accent text-accent">
-                        <span class="text-[10px] text-muted font-bold uppercase tracking-widest">Publish asset on public
-                            portal</span>
+        <div class="events-form">
+            <form [formGroup]="eventForm" (ngSubmit)="submitEvent()" class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="input-group">
+                        <label>Engagement Title</label>
+                        <input type="text" formControlName="title" placeholder="Annual Reunion 2024">
+                    </div>
+                    <div class="input-group">
+                        <label>Scheduled Date & Time</label>
+                        <input type="datetime-local" formControlName="date">
                     </div>
                 </div>
-            </div>
 
-            <div class="flex gap-4 pt-4 border-t border-white/5">
-                <button type="button" (click)="showForm.set(false)" class="btn btn-secondary flex-1 py-4 h-14">Discard
-                    Changes</button>
-                <button type="submit" [disabled]="eventForm.invalid || isSubmitting()"
-                    class="btn btn-accent flex-1 py-4 h-14 shadow-gold font-black">
-                    {{ isSubmitting() ? 'Transmitting...' : (editingEventId() ? 'Save Configuration' : 'Launch Asset')
-                    }}
-                </button>
-            </div>
-        </form>
+                <div class="input-group">
+                    <label>Venue / Location</label>
+                    <input type="text" formControlName="location" placeholder="Main Campus Auditorium">
+                </div>
+
+                <div class="input-group">
+                    <label>Project Brief / Description</label>
+                    <textarea formControlName="description" rows="5"
+                        placeholder="Describe the purpose and plan for this event..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="input-group">
+                        <label>Participation Deadline</label>
+                        <input type="datetime-local" formControlName="registrationDeadline">
+                    </div>
+                    <div class="input-group">
+                        <label>Public Secretariat Note</label>
+                        <input type="text" formControlName="adminNote"
+                            placeholder="Public instruction or status update...">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="input-group">
+                        <label>Endowment Fee (BDT)</label>
+                        <input type="number" formControlName="registrationFee" placeholder="0.00">
+                    </div>
+                    <div class="input-group">
+                        <label>Visibility Status</label>
+                        <div class="flex items-center gap-4 py-2">
+                            <input type="checkbox" formControlName="isActive" class="w-6 h-6 border-accent text-accent">
+                            <span class="text-[10px] text-muted font-bold uppercase tracking-widest">Publish asset on
+                                public
+                                portal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-4 border-t border-white/5">
+                    <button type="button" (click)="showForm.set(false)"
+                        class="btn btn-secondary flex-1 py-4 h-14">Discard
+                        Changes</button>
+                    <button type="submit" [disabled]="eventForm.invalid || isSubmitting()"
+                        class="btn btn-accent flex-1 py-4 h-14 shadow-gold font-black">
+                        {{ isSubmitting() ? 'Transmitting...' : (editingEventId() ? 'Save Configuration' : 'Launch
+                        Asset')
+                        }}
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
     }
 

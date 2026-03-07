@@ -2,7 +2,7 @@
     <div class="header">
         <h2>Financial Ledger</h2>
         <div class="header-btns">
-            <button class="btn btn-primary" (click)="showForm.set(!showForm())">
+            <button class="btn btn-accent" (click)="showForm.set(!showForm())">
                 {{ showForm() ? '✕ Close Form' : '+ Add Record' }}
             </button>
         </div>
@@ -63,7 +63,7 @@
                 </div>
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+                <button type="submit" class="btn btn-accent" [disabled]="submitting()">
                     {{ submitting() ? 'Saving...' : 'Save Transaction' }}
                 </button>
                 <button type="button" class="btn btn-secondary" (click)="showForm.set(false)">Cancel</button>

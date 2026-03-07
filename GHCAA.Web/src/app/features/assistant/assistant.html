@@ -62,7 +62,7 @@
         <div class="input-container">
             <input type="text" [(ngModel)]="userInput" (keyup.enter)="ask()"
                 placeholder="Type your question here (e.g. 'Search for alumni in 2015')" [disabled]="typing()">
-            <button (click)="ask()" class="btn btn-primary" [disabled]="!userInput.trim() || typing()">
+            <button (click)="ask()" class="btn btn-accent" [disabled]="!userInput.trim() || typing()">
                 <span class="icon">✨</span> Ask AI
             </button>
         </div>

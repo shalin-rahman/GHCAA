@@ -287,7 +287,7 @@
                                 *ngIf="currentStep() > 1">Back</button>
                         </div>
                         <div class="right-actions">
-                            <button type="button" class="btn btn-primary" (click)="nextStep()"
+                            <button type="button" class="btn btn-accent" (click)="nextStep()"
                                 *ngIf="currentStep() < 5">Continue</button>
                             <button type="submit" class="btn btn-accent" *ngIf="currentStep() === 5"
                                 [disabled]="loading() || regForm.invalid">
@@ -323,7 +323,7 @@
                     <div class="otp-field">
                         <input type="text" [(ngModel)]="otpCode" placeholder="000000" maxlength="6">
                     </div>
-                    <button (click)="verify()" class="btn btn-primary btn-lg w-full" [disabled]="loading()">
+                    <button (click)="verify()" class="btn btn-accent btn-lg w-full" [disabled]="loading()">
                         {{ loading() ? 'Authenticating...' : 'Confirm Identity' }}
                     </button>
                     <small class="text-muted">Problem receiving? <a href="#" (click)="$event.preventDefault()">Resend
