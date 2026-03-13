@@ -87,5 +87,14 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
+        public async Task<bool> RemovePhotoAsync(int photoId, CancellationToken cancellationToken = default)
+        {
+            var photo = await _db.EventPhotos.FindAsync(new object[] { photoId }, cancellationToken);
+            if (photo == null) return false;
+
+            _db.EventPhotos.Remove(photo);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
     }
 }

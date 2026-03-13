@@ -21,6 +21,7 @@ export class Register {
   loading = signal(false);
   submitted = signal(false);
   currentStep = signal(1);
+  maxStepReached = signal(1);
   ACADEMIC = ACADEMIC_DATA;
   IS_HSC = IS_HSC;
   years = this.ACADEMIC.getYears();
@@ -30,6 +31,7 @@ export class Register {
   sectorOptions = this.ACADEMIC.sectors;
   bloodGroupOptions = BLOOD_GROUP_OPTIONS;
   genderOptions = GENDER_OPTIONS;
+  paymentConfigs = signal<any[]>([]);
 
   model: any = {
     FullName: '',
@@ -83,11 +85,29 @@ export class Register {
   files: { [key: string]: File } = {};
   otpCode = '';
 
+  ngOnInit() {
+    this.loadPaymentInfo();
+  }
 
+  loadPaymentInfo() {
+    this.regService.getPublicPaymentConfigs().subscribe({
+      next: (configs: any[]) => this.paymentConfigs.set(configs)
+    });
+  }
 
   nextStep() {
     if (this.currentStep() < 5) {
       this.currentStep.update(s => s + 1);
+      if (this.currentStep() > this.maxStepReached()) {
+        this.maxStepReached.set(this.currentStep());
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  goToStep(step: number) {
+    if (step <= this.maxStepReached()) {
+      this.currentStep.set(step);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
@@ -107,7 +127,11 @@ export class Register {
   }
 
   onSubmit(form: any) {
-    if (form.invalid) return;
+    if (form.invalid) {
+      this.notify.error('Please complete all mandatory fields and provide necessary files.');
+      return;
+    }
+    if (this.loading()) return;
     this.loading.set(true);
 
     const formData = new FormData();

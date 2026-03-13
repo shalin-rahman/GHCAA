@@ -35,7 +35,11 @@
 }
 
 .logo {
-    /* Styles handled in .nav-content grid */
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    cursor: pointer;
+
     .mini-logo {
         height: 42px;
         max-width: 42px;

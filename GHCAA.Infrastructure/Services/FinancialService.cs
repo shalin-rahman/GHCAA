@@ -47,6 +47,7 @@ namespace GHCAA.Infrastructure.Services
                 Amount = dto.Amount,
                 PaidAt = DateTime.SpecifyKind(dto.PaidAt, DateTimeKind.Utc),
                 Status = Enums.PaymentStatus.Pending,
+                Category = dto.Category,
                 Notes = dto.Notes
             };
 
@@ -331,6 +332,7 @@ namespace GHCAA.Infrastructure.Services
                 Amount = p.Amount,
                 PaidAt = p.PaidAt,
                 Status = p.Status,
+                Category = p.Category,
                 Notes = p.Notes
             };
         }

@@ -20,4 +20,8 @@ export class RegistrationService {
     getStatus(id: number): Observable<any> {
         return this.http.get(`${API_ENDPOINTS.AUTH.STATUS}/${id}`);
     }
+
+    getPublicPaymentConfigs(): Observable<any[]> {
+        return this.http.get<any[]>(API_ENDPOINTS.PAYMENT_CONFIG.PUBLIC);
+    }
 }

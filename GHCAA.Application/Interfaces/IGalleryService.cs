@@ -13,5 +13,6 @@ namespace GHCAA.Application.Interfaces
         Task<EventGallery?> GetGalleryByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<EventGallery> UpdateEventGalleryAsync(EventGallery gallery, CancellationToken cancellationToken = default);
         Task<bool> DeleteGalleryAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> RemovePhotoAsync(int photoId, CancellationToken cancellationToken = default);
     }
 }

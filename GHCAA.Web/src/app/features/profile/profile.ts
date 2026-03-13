@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { ProfileService, MemberProfile } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { getECPositionName, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS } from '../../core/constants/app.constants';
@@ -85,20 +86,37 @@ export class Profile implements OnInit {
         return degree;
     }
 
-    updateProfile() {
+    async updateProfile() {
+        if (this.saving()) return;
         ensureValidAcademicData(this.profile);
 
         this.saving.set(true);
-        this.profileService.updateProfile(this.profile).subscribe({
-            next: () => {
-                this.notify.success('Information updated');
-                this.saving.set(false);
-            },
-            error: () => {
-                this.saving.set(false);
-                this.notify.error('Update failed. Please check your connection and try again.');
+        try {
+            // 1. Sync photo if pending
+            if (this.photoFile) {
+                const res = await firstValueFrom(this.profileService.uploadPhoto(this.photoFile));
+                this.profile.photoPath = res.photoPath;
+                this.photoFile = null;
+                this.photoPreview.set(null);
             }
-        });
+
+            // 2. Sync Metadata
+            await firstValueFrom(this.profileService.updateProfile(this.profile));
+            
+            this.notify.success('Profile information updated');
+            
+            // 3. Force re-sync from server to ensure UI is exact
+            this.profileService.getProfile().subscribe(p => {
+                this.profile = { ...p };
+                if (!this.profile.academicHistory) this.profile.academicHistory = [];
+                if (!this.profile.professionalHistory) this.profile.professionalHistory = [];
+            });
+
+        } catch (error: any) {
+            this.notify.error(error?.error?.message || 'Update failed. Please check your network.');
+        } finally {
+            this.saving.set(false);
+        }
     }
 
     onPhotoSelected(event: Event) {

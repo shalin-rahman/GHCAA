@@ -36,14 +36,17 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<ECPeriod> CreatePeriodAsync(string title, DateTime startDate, DateTime? endDate, CancellationToken cancellationToken = default)
         {
+            var utcStart = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+            var utcEnd = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : (DateTime?)null;
+
             // Gap Check: No Overlaps
-            await EnsureNoOverlapAsync(null, startDate, endDate, cancellationToken);
+            await EnsureNoOverlapAsync(null, utcStart, utcEnd, cancellationToken);
 
             var period = new ECPeriod
             {
                 Title = title,
-                StartDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
-                EndDate = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : null,
+                StartDate = utcStart,
+                EndDate = utcEnd,
                 IsActive = false
             };
 
@@ -57,18 +60,21 @@ namespace GHCAA.Infrastructure.Services
             var period = await _db.ECPeriods.FindAsync(new object[] { id }, cancellationToken);
             if (period == null) return false;
 
+            var utcStart = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+            var utcEnd = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : (DateTime?)null;
+
             // Gap Check: No Overlaps (excluding self)
-            await EnsureNoOverlapAsync(id, startDate, endDate, cancellationToken);
+            await EnsureNoOverlapAsync(id, utcStart, utcEnd, cancellationToken);
 
             period.Title = title;
-            period.StartDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
-            period.EndDate = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : null;
+            period.StartDate = utcStart;
+            period.EndDate = utcEnd;
 
             if (isActive && !period.IsActive)
             {
                 // Strict Rule: Active period must cover "Current Dates"
                 var today = DateTime.UtcNow.Date;
-                if (startDate.Date > today || (endDate.HasValue && endDate.Value.Date < today))
+                if (utcStart.Date > today || (utcEnd.HasValue && utcEnd.Value.Date < today))
                 {
                     throw new InvalidOperationException("Only a period covering the current date can be activated.");
                 }

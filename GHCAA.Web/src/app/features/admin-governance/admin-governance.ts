@@ -69,7 +69,18 @@ export class AdminGovernance implements OnInit {
     }
 
     openNewPeriod() {
-        this.editPeriodData.set({ title: '', startDate: '', endDate: '', isActive: false });
+        this.editPeriodData.set({ id: null, title: '', startDate: '', endDate: '', isActive: false });
+        this.showPeriodModal.set(true);
+    }
+
+    editPeriod(period: any) {
+        this.editPeriodData.set({
+            id: period.id,
+            title: period.title,
+            startDate: period.startDate ? period.startDate.split('T')[0] : '', // format for input type="date"
+            endDate: period.endDate ? period.endDate.split('T')[0] : '',
+            isActive: period.isActive
+        });
         this.showPeriodModal.set(true);
     }
 
@@ -81,17 +92,22 @@ export class AdminGovernance implements OnInit {
         }
 
         this.isSavingPeriod.set(true);
-        const api = `${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods`;
+        const isEdit = !!data.id;
+        const api = isEdit ? `${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${data.id}` : `${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods`;
 
-        this.http.post(api, data).subscribe({
+        // Format payload to ensure empty dates are sent as null, avoiding ASP.NET 400 JSON conversion errors
+        const payload = { ...data, endDate: data.endDate ? data.endDate : null };
+        const request = isEdit ? this.http.put(api, payload) : this.http.post(api, payload);
+        
+        request.subscribe({
             next: () => {
-                this.notify.success('EC Period created');
+                this.notify.success(isEdit ? 'EC Period updated' : 'EC Period created');
                 this.showPeriodModal.set(false);
                 this.loadPeriods();
                 this.isSavingPeriod.set(false);
             },
             error: () => {
-                this.notify.error('Failed to create period');
+                this.notify.error(isEdit ? 'Failed to update period' : 'Failed to create period');
                 this.isSavingPeriod.set(false);
             }
         });
@@ -113,15 +129,27 @@ export class AdminGovernance implements OnInit {
             return;
         }
         this.isSearching.set(true);
-        this.adminService.getMembers().subscribe({
-            next: (members) => {
-                const lower = query.toLowerCase();
-                this.memberSearchResults.set(members.filter((m: any) =>
-                    m.fullName?.toLowerCase().includes(lower) ||
-                    m.membershipNumber?.toLowerCase().includes(lower)
-                ).slice(0, 10));
+        this.adminService.getMembers(1, 50, query).subscribe({
+            next: (response: any) => {
+                const searchTerms = query.toLowerCase().split(' ').filter(p => p.trim() !== '');
+                const memberArray = response.items || response || [];
+                
+                this.memberSearchResults.set(memberArray.filter((m: any) => {
+                    const fullName = (m.fullName || '').toLowerCase();
+                    const memberId = (m.membershipNumber || '').toLowerCase();
+                    const mobile = (m.mobileNo || '').toLowerCase();
+
+                    // Every space-separated search term must naturally appear in the person's info
+                    return searchTerms.every(term => 
+                        fullName.includes(term) || 
+                        memberId.includes(term) || 
+                        mobile.includes(term)
+                    );
+                }));
+                
                 this.isSearching.set(false);
-            }
+            },
+            error: () => this.isSearching.set(false)
         });
     }
 
@@ -134,7 +162,11 @@ export class AdminGovernance implements OnInit {
     assignRole() {
         const period = this.selectedPeriod();
         const data = this.assignData();
-        if (!period || !data.memberId) return;
+        if (!period) return;
+        if (!data.memberId) {
+            this.notify.error('Please search and select a member first.');
+            return;
+        }
 
         this.http.post(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${period.id}/members`, data).subscribe({
             next: () => {

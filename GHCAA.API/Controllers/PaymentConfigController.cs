@@ -57,6 +57,19 @@ namespace GHCAA.API.Controllers
             var configs = await _db.PaymentConfigurations
                 .OrderBy(p => p.SortOrder)
                 .ToListAsync(cancellationToken);
+
+            // Obfuscate secrets for non-superadmins
+            if (!User.IsInRole("SuperAdmin"))
+            {
+                foreach (var config in configs)
+                {
+                    if (!string.IsNullOrEmpty(config.GatewaySecretKey))
+                        config.GatewaySecretKey = "********";
+                    if (!string.IsNullOrEmpty(config.GatewayPublicKey))
+                        config.GatewayPublicKey = "********";
+                }
+            }
+            
             return Ok(configs);
         }
 
@@ -90,9 +103,18 @@ namespace GHCAA.API.Controllers
             existing.AccountNumber = config.AccountNumber;
             existing.RoutingNumber = config.RoutingNumber;
             existing.Gateway = config.Gateway;
-            existing.GatewayPublicKey = config.GatewayPublicKey;
-            existing.GatewaySecretKey = config.GatewaySecretKey;
-            existing.GatewayCallbackUrl = config.GatewayCallbackUrl;
+            
+            // Only SuperAdmin can update gateway secrets
+            if (User.IsInRole("SuperAdmin"))
+            {
+                if (config.GatewayPublicKey != "********")
+                    existing.GatewayPublicKey = config.GatewayPublicKey;
+                if (config.GatewaySecretKey != "********")
+                    existing.GatewaySecretKey = config.GatewaySecretKey;
+                
+                existing.GatewayCallbackUrl = config.GatewayCallbackUrl;
+            }
+
             existing.SortOrder = config.SortOrder;
             existing.Instructions = config.Instructions;
             existing.RequiresReceipt = config.RequiresReceipt;

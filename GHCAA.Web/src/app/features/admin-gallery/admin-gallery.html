@@ -17,13 +17,15 @@
         <form (submit)="onSubmit()" class="admin-form">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Album Title</label>
-                    <input type="text" [(ngModel)]="newGallery.title" name="title" required
+                    <label>Album Title <span class="required-star">*</span></label>
+                    <input type="text" [(ngModel)]="newGallery.title" name="title" required #titleInput="ngModel"
+                        [class.border-red-500]="titleInput.invalid && titleInput.touched"
                         placeholder="e.g. Annual Picnic 2024">
                 </div>
                 <div class="form-group">
-                    <label>Event Date</label>
-                    <input type="date" [(ngModel)]="newGallery.eventDate" name="date" required>
+                    <label>Event Date <span class="required-star">*</span></label>
+                    <input type="date" [(ngModel)]="newGallery.eventDate" name="date" required #dateInput="ngModel"
+                        [class.border-red-500]="dateInput.invalid && dateInput.touched">
                 </div>
                 <div class="form-group">
                     <label>Location</label>
@@ -45,67 +47,118 @@
     </div>
     }
 
-    <div class="glass-card table-wrap">
+    <div class="album-grid mt-4">
         @if (loading()) {
-        <div class="loading-state">
-            <span>⌛</span>
-            <p>Loading albums...</p>
+        <div class="loading-state full">
+            <span>⏳</span>
+            <p>Gathering your visual legacy...</p>
         </div>
         } @else if (galleries().length === 0) {
-        <div class="empty-state">
-            <span>📸</span>
-            <p>No albums created yet.</p>
+        <div class="empty-state full">
+            <span>🖼️</span>
+            <p>No albums captured yet. Start by creating a new visual asset.</p>
         </div>
         } @else {
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Album Details</th>
-                    <th>Date & Location</th>
-                    <th>Stats</th>
-                    <th>Visibility</th>
-                    <th>Featured</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (gallery of galleries(); track gallery.id) {
-                <tr>
-                    <td>
-                        <div style="font-weight: 700; color: var(--accent-color);">{{ gallery.title }}</div>
-                        <small
-                            style="color: var(--text-muted); display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            {{ gallery.description || 'No description provided' }}
-                        </small>
-                    </td>
-                    <td>
-                        <div style="font-weight: 600;">{{ gallery.eventDate | date }}</div>
-                        <small style="color: var(--text-muted);">{{ gallery.location || '—' }}</small>
-                    </td>
-                    <td>
-                        <span class="pill">
-                            {{ gallery.photos.length }} Photos
-                        </span>
-                    </td>
-                    <td>
-                        <span class="status-badge" [class.active]="gallery.isActive"
-                            [class.inactive]="!gallery.isActive" (click)="toggleActive(gallery.id)">
-                            {{ gallery.isActive ? 'Public' : 'Hidden' }}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="status-badge" [class.featured]="gallery.isFeatured"
-                            [class.regular]="!gallery.isFeatured" (click)="toggleFeatured(gallery.id)">
-                            {{ gallery.isFeatured ? '★ Featured' : '☆ Regular' }}
-                        </span>
-                    </td>
-                    <td class="actions-cell">
-                        <button class="icon-btn" (click)="deleteGallery(gallery.id)" title="Delete">🗑️</button>
-                    </td>
-                </tr>
+        @for (gallery of galleries(); track gallery.id) {
+        <div class="album-card reveal-top" [style.animation-delay]="($index * 50) + 'ms'">
+            <div class="album-preview" (click)="selectGallery(gallery)">
+                @if (gallery.photos && gallery.photos.length > 0) {
+                <img [src]="'/' + gallery.photos[0].photoPath" alt="Cover">
+                } @else {
+                <div class="flex items-center justify-center h-full bg-primary/5 text-primary/20">
+                    <span class="text-4xl">📸</span>
+                </div>
                 }
-            </tbody>
-        </table>
+                <div class="photo-count">
+                    {{ gallery.photos.length }} Photos
+                </div>
+                <div class="album-badges">
+                    <span class="status-badge" [class.active]="gallery.isActive" (click)="toggleActive(gallery.id); $event.stopPropagation()">
+                        {{ gallery.isActive ? 'Public' : 'Hidden' }}
+                    </span>
+                    @if (gallery.isFeatured) {
+                    <span class="status-badge featured">★ Featured</span>
+                    }
+                </div>
+            </div>
+
+            <div class="album-content" (click)="selectGallery(gallery)">
+                <div class="flex justify-between items-start mb-2">
+                    <h4>{{ gallery.title }}</h4>
+                </div>
+                
+                <div class="album-meta">
+                    <div>📅 {{ gallery.eventDate | date:'mediumDate' }}</div>
+                    @if (gallery.location) {
+                    <div>📍 {{ gallery.location }}</div>
+                    }
+                </div>
+
+                <p>{{ gallery.description || 'No description provided for this visual asset.' }}</p>
+            </div>
+
+            <div class="album-actions">
+                <div class="flex gap-2">
+                    <button class="btn btn-secondary btn-sm" (click)="selectGallery(gallery)">Configure</button>
+                    <button class="btn btn-secondary btn-sm" (click)="toggleFeatured(gallery.id)">
+                        {{ gallery.isFeatured ? 'Unfeature' : 'Feature' }}
+                    </button>
+                </div>
+                <button class="icon-btn" (click)="deleteGallery(gallery.id)" title="Delete Album">🗑️</button>
+            </div>
+        </div>
+        }
         }
     </div>
 </div>
+
+<!-- Gallery Detail Modal -->
+@if (selectedGallery(); as gallery) {
+<div class="modal-overlay" (click)="closeDetail()">
+    <div class="modal-content glass-card p-0 modal-content-lg" (click)="$event.stopPropagation()">
+        <div class="p-8 flex justify-between items-center border-b border-primary/10">
+            <div class="header-info">
+                <h3 class="text-accent">{{ gallery.title }}</h3>
+                <small class="opacity-50">{{ gallery.eventDate | date }} • {{ gallery.location }}</small>
+            </div>
+            <button (click)="closeDetail()" class="text-2xl opacity-50 hover:opacity-100">✕</button>
+        </div>
+
+        <div class="p-10 p-mobile-6">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h4 class="text-sm font-black uppercase tracking-widest text-white/40">Album Photos ({{ (gallery.photos || []).length }})</h4>
+                </div>
+                <div class="flex gap-4">
+                    <label class="btn btn-secondary btn-sm cursor-pointer">
+                        {{ uploadedFiles().length > 0 ? 'Selected: ' + uploadedFiles().length : '📁 Select Photos' }}
+                        <input type="file" multiple (change)="onPhotosSelected($event)" class="hidden" accept="image/*">
+                    </label>
+                    <button class="btn btn-accent btn-sm" [disabled]="uploadedFiles().length === 0 || isUploading()" (click)="uploadSelectedPhotos()">
+                        {{ isUploading() ? '⏳ Uploading...' : '🚀 Upload Now' }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="photo-grid">
+                @for (photo of gallery.photos || []; track photo.id) {
+                <div class="photo-item group">
+                    <img [src]="'/' + photo.photoPath" alt="Gallery photo">
+                    <div class="photo-overlay">
+                        <button (click)="removePhoto(photo.id)" class="remove-btn" title="Remove Photo">
+                            ✕
+                        </button>
+                        <small>{{ photo.uploadedAt | date:'short' }}</small>
+                    </div>
+                </div>
+                } @empty {
+                <div class="full py-20 text-center opacity-30">
+                    <p class="text-4xl mb-4">🖼️</p>
+                    <p>No photos in this album yet. Start uploading!</p>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+}

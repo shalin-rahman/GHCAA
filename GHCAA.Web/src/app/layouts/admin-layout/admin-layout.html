@@ -9,44 +9,18 @@
         </div>
 
         <div class="nav-body">
+            @for (section of nav.adminNavSections(); track section.name) {
             <div class="nav-section">
-                <span class="nav-section-label">Overview</span>
-                @for (item of nav.adminNavItems().slice(0, 1); track item.path) {
-                <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                <span class="nav-section-label">{{ section.name }}</span>
+                @for (item of section.items; track item.path) {
+                <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.path === '/admin/dashboard'}"
                     class="nav-item">
                     <span class="nav-icon">{{ item.icon }}</span>
                     <span class="nav-label">{{ item.label }}</span>
                 </a>
                 }
             </div>
-            <div class="nav-section">
-                <span class="nav-section-label">Membership</span>
-                @for (item of nav.adminNavItems().slice(1, 4); track item.label) {
-                <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-                    class="nav-item">
-                    <span class="nav-icon">{{ item.icon }}</span>
-                    <span class="nav-label">{{ item.label }}</span>
-                </a>
-                }
-            </div>
-            <div class="nav-section">
-                <span class="nav-section-label">Content</span>
-                @for (item of nav.adminNavItems().slice(4, 6); track item.path) {
-                <a [routerLink]="item.path" routerLinkActive="active" class="nav-item">
-                    <span class="nav-icon">{{ item.icon }}</span>
-                    <span class="nav-label">{{ item.label }}</span>
-                </a>
-                }
-            </div>
-            <div class="nav-section">
-                <span class="nav-section-label">Finance & Tools</span>
-                @for (item of nav.adminNavItems().slice(6); track item.path) {
-                <a [routerLink]="item.path" routerLinkActive="active" class="nav-item">
-                    <span class="nav-icon">{{ item.icon }}</span>
-                    <span class="nav-label">{{ item.label }}</span>
-                </a>
-                }
-            </div>
+            }
         </div>
 
         <div class="nav-footer">

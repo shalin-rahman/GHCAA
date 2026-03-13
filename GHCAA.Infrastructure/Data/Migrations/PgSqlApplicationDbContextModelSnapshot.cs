@@ -563,7 +563,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "Gala Evening",
                             EventGalleryId = 1,
                             PhotoPath = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070",
-                            UploadedAt = new DateTime(2026, 3, 12, 23, 9, 44, 682, DateTimeKind.Utc).AddTicks(8723)
+                            UploadedAt = new DateTime(2026, 3, 13, 17, 52, 6, 814, DateTimeKind.Utc).AddTicks(3724)
                         },
                         new
                         {
@@ -571,7 +571,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "Alumni Networking",
                             EventGalleryId = 1,
                             PhotoPath = "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069",
-                            UploadedAt = new DateTime(2026, 3, 12, 23, 9, 44, 683, DateTimeKind.Utc).AddTicks(998)
+                            UploadedAt = new DateTime(2026, 3, 13, 17, 52, 6, 814, DateTimeKind.Utc).AddTicks(5063)
                         },
                         new
                         {
@@ -579,7 +579,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "Main Administrative Building",
                             EventGalleryId = 2,
                             PhotoPath = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986",
-                            UploadedAt = new DateTime(2026, 3, 12, 23, 9, 44, 683, DateTimeKind.Utc).AddTicks(1001)
+                            UploadedAt = new DateTime(2026, 3, 13, 17, 52, 6, 814, DateTimeKind.Utc).AddTicks(5066)
                         },
                         new
                         {
@@ -587,7 +587,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "College Playground",
                             EventGalleryId = 2,
                             PhotoPath = "https://images.unsplash.com/photo-1492538350424-aaee9f201774?q=80&w=2070",
-                            UploadedAt = new DateTime(2026, 3, 12, 23, 9, 44, 683, DateTimeKind.Utc).AddTicks(1004)
+                            UploadedAt = new DateTime(2026, 3, 13, 17, 52, 6, 814, DateTimeKind.Utc).AddTicks(5067)
                         });
                 });
 
@@ -2303,6 +2303,9 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
+
                     b.Property<int>("MemberId")
                         .HasColumnType("integer");
 
@@ -2543,7 +2546,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsArchived = false,
-                            PasswordHash = "$2a$11$PsQ96./aGE/qwhaRF8f/quI32akOnAxuaAXh2Inrvz0CenOsG/Py.",
+                            PasswordHash = "$2a$11$CQ4KnTDZ7qUQMNre86iruOpgOx8fEoMe2G3RF/1U4cCLa5ltYtE1O",
                             Username = "superadmin"
                         },
                         new
@@ -2553,7 +2556,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsActive = true,
                             IsArchived = false,
                             MemberId = 1,
-                            PasswordHash = "$2a$11$1tNxw.gy4OW16EqT0GpN9eFDSYwhoooPkovDBi1KLYP1SQWEaqQaW",
+                            PasswordHash = "$2a$11$J0UJbz.FdyElDw2mV22g1OikjTExwKvZ.c4eP3Wenc1MkmYDrgUme",
                             Username = "shalin"
                         });
                 });

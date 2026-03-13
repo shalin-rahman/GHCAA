@@ -137,13 +137,28 @@ export class AdminMembers implements OnInit {
   handleExport(format: string) {
     this.isExporting.set(true);
     this.adminService.getAllForExport(this.searchQuery(), this.statusFilter()).subscribe({
-      next: (res: any) => {
-        const data = res.items || res;
-        if (format === 'excel') ExportUtil.toExcel(data, 'ghcaa_members');
-        if (format === 'csv') ExportUtil.toCsv(data, 'ghcaa_members');
+      next: async (res: any) => {
+        const rawData = res.items || res;
+        
+        // Flatten the data for Excel/CSV so it doesn't try to parse nested JSON objects which corrupts the file
+        const flatData = rawData.map((m: any) => ({
+          'Membership No': m.membershipNumber || `M-${m.id}`,
+          'Name': m.fullName,
+          'Email': m.email,
+          'Mobile': m.mobileNo,
+          'Batch': m.ghcLastCertificatePassingYear || '—',
+          'Type': getMembershipTypeLabel(m.membershipType),
+          'Status': getStatusLabel(m.status),
+          'Blood Group': m.bloodGroup || '—',
+          'Organization': m.professionalSector || '—',
+          'Designation': m.designation || '—'
+        }));
+
+        if (format === 'excel') ExportUtil.toExcel(flatData, 'ghcaa_members');
+        if (format === 'csv') ExportUtil.toCsv(flatData, 'ghcaa_members');
         if (format === 'pdf') {
-          const pData = data.map(this.pdfMapper);
-          ExportUtil.toPdf(this.pdfHeaders, pData, 'ghcaa_members', 'Member Registry Export');
+          const pData = rawData.map(this.pdfMapper);
+          await ExportUtil.toPdf(this.pdfHeaders, pData, 'ghcaa_members', 'Member Registry Export');
         }
         this.isExporting.set(false);
       },
@@ -243,6 +258,11 @@ export class AdminMembers implements OnInit {
   saveMember() {
     const member = this.selectedMember();
     if (!member) return;
+
+    if (!member.fullName || !member.mobileNo || !member.email) {
+      this.notify.error('Member profile requires at least a Name, Mobile, and Email.');
+      return;
+    }
 
     ensureValidAcademicData(member);
 

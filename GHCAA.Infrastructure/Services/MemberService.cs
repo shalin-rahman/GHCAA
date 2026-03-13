@@ -429,6 +429,9 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(dto.EmergencyContactName)) member.EmergencyContactName = dto.EmergencyContactName;
             if (!string.IsNullOrWhiteSpace(dto.EmergencyContactRelation)) member.EmergencyContactRelation = dto.EmergencyContactRelation;
             if (!string.IsNullOrWhiteSpace(dto.EmergencyContactPhone)) member.EmergencyContactPhone = dto.EmergencyContactPhone;
+            
+            // Photo Path
+            if (!string.IsNullOrWhiteSpace(dto.PhotoPath)) member.PhotoPath = dto.PhotoPath;
 
             member.IsMobilePublic = dto.IsMobilePublic;
             member.IsEmailPublic = dto.IsEmailPublic;
@@ -618,10 +621,15 @@ namespace GHCAA.Infrastructure.Services
                 }
                 else
                 {
-                    query = query.Where(m => 
-                        (m.FullName != null && m.FullName.ToLower().Contains(q)) ||
-                        (m.Email != null && m.Email.ToLower().Contains(q)) ||
-                        (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(q)));
+                    var terms = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var term in terms)
+                    {
+                        query = query.Where(m => 
+                            (m.FullName != null && m.FullName.ToLower().Contains(term)) ||
+                            (m.Email != null && m.Email.ToLower().Contains(term)) ||
+                            (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(term)) ||
+                            (m.MobileNo != null && m.MobileNo.ToLower().Contains(term)));
+                    }
                 }
             }
             
@@ -777,6 +785,7 @@ namespace GHCAA.Infrastructure.Services
             member.ProfessionalSector = dto.ProfessionalSector;
             member.Designation = dto.Designation;
             member.MembershipNumber = dto.MembershipNumber;
+            if (!string.IsNullOrWhiteSpace(dto.PhotoPath)) member.PhotoPath = dto.PhotoPath;
 
             if (Enum.TryParse<Enums.MembershipType>(dto.MembershipType, true, out var mType))
                 member.MembershipType = mType;

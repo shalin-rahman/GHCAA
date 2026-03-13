@@ -10,6 +10,7 @@ export interface PaymentRecord {
     amount: number;
     paidAt: string;
     status: any;
+    category: any;
     notes?: string;
 }
 

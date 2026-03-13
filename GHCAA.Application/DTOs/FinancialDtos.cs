@@ -11,6 +11,7 @@ namespace GHCAA.Application.DTOs
         public decimal Amount { get; set; }
         public DateTime PaidAt { get; set; }
         public Enums.PaymentStatus Status { get; set; }
+        public Enums.FinancialCategory Category { get; set; }
         public string? Notes { get; set; }
     }
 
@@ -19,6 +20,7 @@ namespace GHCAA.Application.DTOs
         public string TransactionId { get; set; } = null!;
         public decimal Amount { get; set; }
         public DateTime PaidAt { get; set; }
+        public Enums.FinancialCategory Category { get; set; }
         public string? Notes { get; set; }
         // Admin might set this, otherwise ignored
         public int? MemberId { get; set; }

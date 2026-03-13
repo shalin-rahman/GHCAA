@@ -5,6 +5,8 @@ import { EventsService, AlumniEvent, EventRegistration } from '../../core/servic
 import { ExportButtonsComponent } from '../../shared/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { ExportUtil } from '../../core/utils/export.util';
+import { NotificationService } from '../../core/services/notification.service';
+
 
 @Component({
     selector: 'app-admin-events',
@@ -16,6 +18,8 @@ import { ExportUtil } from '../../core/utils/export.util';
 export class AdminEvents implements OnInit {
     private eventsService = inject(EventsService);
     private fb = inject(FormBuilder);
+    private notify = inject(NotificationService);
+
 
     events = signal<AlumniEvent[]>([]);
     registrations = signal<any[]>([]);
@@ -30,6 +34,7 @@ export class AdminEvents implements OnInit {
     statusFilter = signal('all');
     searchQuery = signal('');
     selectedEventIdFilter = signal<number | null>(null);
+    selectedEvent = signal<AlumniEvent | null>(null);
 
     // PDF Config
     pdfHeaders = ['ID', 'Event', 'Participant', 'Type', 'Reference', 'Status', 'Date'];
@@ -57,7 +62,8 @@ export class AdminEvents implements OnInit {
         registrationDeadline: [''],
         adminNote: [''],
         isActive: [true],
-        allowNonMembers: [false]
+        allowNonMembers: [false],
+        imageUrl: ['']
     });
 
     ngOnInit() {
@@ -141,10 +147,35 @@ export class AdminEvents implements OnInit {
     }
 
     submitEvent() {
-        if (this.eventForm.invalid) return;
+        if (this.eventForm.invalid) {
+            this.notify.error('Please complete all required fields.');
+            return;
+        }
+
         this.isSubmitting.set(true);
 
-        const evData = this.eventForm.value as Partial<AlumniEvent>;
+        const raw = this.eventForm.value;
+        
+        // Helper to safely convert form dates to ISO strings for backend
+        const toSafeISO = (val: any) => {
+            if (!val) return undefined;
+            const d = new Date(val);
+            return isNaN(d.getTime()) ? undefined : d.toISOString();
+        };
+
+        const evData: Partial<AlumniEvent> = {
+            title: raw.title || '',
+            description: raw.description || '',
+            location: raw.location || '',
+            date: toSafeISO(raw.date)!,
+            registrationDeadline: toSafeISO(raw.registrationDeadline),
+            registrationFee: raw.registrationFee || 0,
+            adminNote: raw.adminNote || undefined,
+            isActive: raw.isActive ?? true,
+            allowNonMembers: raw.allowNonMembers ?? false,
+            imageUrl: raw.imageUrl || undefined
+        };
+
         const id = this.editingEventId();
 
         const request = id
@@ -153,14 +184,14 @@ export class AdminEvents implements OnInit {
 
         request.subscribe({
             next: () => {
-                alert(id ? 'Event updated successfully!' : 'Event created successfully!');
+                this.notify.success(id ? 'Event configuration updated!' : 'New event launched successfully!');
                 this.showForm.set(false);
                 this.isSubmitting.set(false);
                 this.loadAllEvents();
             },
             error: (err) => {
-                console.error(err);
-                alert('Operation failed.');
+                console.error('Event operation failed:', err);
+                this.notify.error(err.error?.message || 'Operation failed. Please ensure all fields are valid.');
                 this.isSubmitting.set(false);
             }
         });
@@ -170,10 +201,11 @@ export class AdminEvents implements OnInit {
         if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
             this.eventsService.deleteEvent(id).subscribe({
                 next: () => {
-                    alert('Event deleted.');
+                    this.notify.success('Event removed from system');
                     this.loadAllEvents();
                 },
-                error: () => alert('Failed to delete event.')
+                error: () => this.notify.error('Failed to delete event')
+
             });
         }
     }
@@ -185,5 +217,13 @@ export class AdminEvents implements OnInit {
                 this.loadAllRegistrations();
             });
         }
+    }
+
+    viewEvent(ev: AlumniEvent) {
+        this.selectedEvent.set(ev);
+    }
+
+    closeDetail() {
+        this.selectedEvent.set(null);
     }
 }

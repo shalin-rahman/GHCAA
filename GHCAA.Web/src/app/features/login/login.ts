@@ -30,7 +30,7 @@ export class Login {
     this.auth.login(this.credentials).subscribe({
       next: (user) => {
         this.loading.set(false);
-        if (user.role === 'Admin') {
+        if (user.role === 'Admin' || user.role === 'SuperAdmin') {
           this.router.navigate(['/admin/approvals']);
         } else {
           this.router.navigate(['/portal/dashboard']);

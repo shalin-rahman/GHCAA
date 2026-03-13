@@ -163,6 +163,14 @@ export const MEMBER_CATEGORY_OPTIONS = [
     { value: 'Patron', label: 'Patron Member' }
 ];
 
+export const FINANCIAL_CATEGORY_OPTIONS = [
+    { value: 'MembershipFee', label: 'Yearly Membership Fee' },
+    { value: 'RegistrationFee', label: 'Registration Fee' },
+    { value: 'Donation', label: 'Donation' },
+    { value: 'Event', label: 'Event Fee' },
+    { value: 'Other', label: 'Other' }
+];
+
 export const ACADEMIC_CERTIFICATES = [
     'HSC',
     'Bachelor (Pass)',
@@ -315,5 +323,9 @@ export const API_ENDPOINTS = {
     LEDGER: '/api/ledger',
     CONTACT: '/api/contact',
     ASSISTANT: '/api/assistant/ask',
-    THEMES: '/api/theme'
+    THEMES: '/api/theme',
+    PAYMENT_CONFIG: {
+        BASE: '/api/payment-config',
+        PUBLIC: '/api/payment-config/active'
+    }
 } as const;

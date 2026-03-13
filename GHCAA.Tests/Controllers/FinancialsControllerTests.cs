@@ -35,9 +35,15 @@ namespace GHCAA.Tests.Controllers
 
             _controller = new FinancialsController(_financialServiceMock.Object, _dbContext);
 
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                new Claim("MemberId", "10")
-            }, "TestAuthentication"));
+        private void SetUserContext(string? memberId = "10", string role = "Admin")
+        {
+            var claims = new List<Claim> {
+                new Claim(ClaimTypes.Role, role)
+            };
+            if (memberId != null) 
+                claims.Add(new Claim("MemberId", memberId));
+
+            var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuthentication"));
 
             _controller.ControllerContext = new ControllerContext
             {
@@ -64,6 +70,16 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        public async Task GetMyPaymentHistory_SuperAdmin_ReturnsEmptyList()
+        {
+            SetUserContext(null, "SuperAdmin");
+            var result = await _controller.GetMyPaymentHistory(CancellationToken.None);
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult.Value, Is.Empty);
+        }
+
+        [Test]
         public async Task RecordPayment_ReturnsOk()
         {
             var dto = new CreatePaymentHistoryDto { Amount = 100 };
@@ -84,6 +100,16 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.GetMyDues(CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task GetMyDues_SuperAdmin_ReturnsEmptyList()
+        {
+            SetUserContext(null, "SuperAdmin");
+            var result = await _controller.GetMyDues(CancellationToken.None);
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult.Value, Is.Empty);
         }
 
         [Test]

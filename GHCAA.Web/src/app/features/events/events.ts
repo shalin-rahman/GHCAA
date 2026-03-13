@@ -5,6 +5,7 @@ import { EventsService, AlumniEvent, EventRegistration } from '../../core/servic
 import { AuthService } from '../../core/services/auth.service';
 import { PaymentMethodSelectorComponent } from '../../shared/payment-method-selector/payment-method-selector.component';
 import { PaymentConfig } from '../../core/services/payment-config.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-events',
@@ -17,6 +18,7 @@ export class Events implements OnInit {
   private eventsService = inject(EventsService);
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
 
   events = signal<AlumniEvent[]>([]);
   activeTab = signal<'upcoming' | 'my-registrations'>('upcoming');
@@ -45,7 +47,19 @@ export class Events implements OnInit {
 
   loadEvents() {
     this.eventsService.getEvents().subscribe({
-      next: data => this.events.set(data),
+      next: data => {
+        this.events.set(data);
+        
+        // Handle deep-link to auto-open a specific event registration
+        const targetEventId = this.route.snapshot.queryParamMap.get('eventId');
+        if (targetEventId) {
+            const ev = data.find(e => e.id.toString() === targetEventId);
+            if (ev) {
+                // Slight delay ensures the UI has fully transitioned before opening the modal
+                setTimeout(() => this.openRegisterModal(ev), 100);
+            }
+        }
+      },
       error: () => this.events.set([])
     });
   }
@@ -61,8 +75,9 @@ export class Events implements OnInit {
 
 
   openRegisterModal(ev: AlumniEvent) {
-    if (!this.auth.isAuthenticated() && !ev.allowNonMembers) {
-      alert('This event is for members only. Please login to register.');
+    if (this.isGuest() && !ev.allowNonMembers) {
+      alert('This event is for members only. Please log in or apply for membership to register.');
+      window.location.href = '/login';
       return;
     }
     
@@ -76,6 +91,11 @@ export class Events implements OnInit {
       this.regForm.get('guestEmail')?.clearValidators();
       this.regForm.get('guestMobile')?.clearValidators();
     }
+    
+    // Explicitly update validity state locally on controls to recalculate status
+    this.regForm.get('guestName')?.updateValueAndValidity();
+    this.regForm.get('guestEmail')?.updateValueAndValidity();
+    this.regForm.get('guestMobile')?.updateValueAndValidity();
     this.regForm.updateValueAndValidity();
 
     this.selectedEvent.set(ev);
@@ -103,6 +123,7 @@ export class Events implements OnInit {
       this.regForm.get('paymentReference')?.clearValidators();
     }
     this.regForm.get('paymentReference')?.updateValueAndValidity();
+    this.regForm.updateValueAndValidity();
   }
 
   submitRegistration() {

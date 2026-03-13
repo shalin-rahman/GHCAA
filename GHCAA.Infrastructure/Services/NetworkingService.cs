@@ -83,7 +83,10 @@ namespace GHCAA.Infrastructure.Services
                 query = query.Where(em => em.ECPeriod!.IsActive);
             }
 
-            var results = await query.ToListAsync(cancellationToken);
+            // Only current active roles in that period
+            query = query.Where(em => em.EndDate == null);
+
+            var results = await query.OrderBy(em => em.Position).ToListAsync(cancellationToken);
             return results.Select(em => {
                 var dto = MapToDto(em.Member!);
                 dto.ECPosition = em.Position; // Use position from history for that period

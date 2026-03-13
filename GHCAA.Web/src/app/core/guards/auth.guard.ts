@@ -24,7 +24,8 @@ export const adminGuard = () => {
     const auth = inject(AuthService);
     const router = inject(Router);
 
-    if (auth.currentUser()?.role === 'Admin') {
+    const role = auth.currentUser()?.role;
+    if (role === 'Admin' || role === 'SuperAdmin') {
         return true;
     }
 

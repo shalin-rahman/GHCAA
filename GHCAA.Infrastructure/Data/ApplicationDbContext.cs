@@ -251,7 +251,7 @@ namespace GHCAA.Infrastructure.Data
             {
                 Id = 1,
                 Username = "superadmin",
-                PasswordHash = "$2a$11$PsQ96./aGE/qwhaRF8f/quI32akOnAxuaAXh2Inrvz0CenOsG/Py.", // hardcoded "SuperAdminPassword123!"
+                PasswordHash = "$2a$11$CQ4KnTDZ7qUQMNre86iruOpgOx8fEoMe2G3RF/1U4cCLa5ltYtE1O", // SuperAdminPassword123!
                 IsActive = true,
                 IsArchived = false,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),

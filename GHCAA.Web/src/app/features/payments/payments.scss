@@ -222,14 +222,30 @@ code {
     }
 
     input,
-    textarea {
+    textarea,
+    select {
         padding: 0.8rem;
         border: 1px solid var(--glass-border);
         border-radius: 8px;
         background: var(--bg-color);
         color: var(--text-main);
         font-family: inherit;
+        
+        &:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
     }
+}
+
+.badge {
+    padding: 0.2rem 0.5rem;
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-color);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
 @media (max-width: 600px) {

@@ -18,7 +18,7 @@ namespace GHCAA.Domain
 
         // Financial Ledger Enums
         public enum FinancialRecordType { Income, Expense }
-        public enum FinancialCategory { MembershipFee, Donation, Event, Maintenance, Salary, Utilities, Other }
+        public enum FinancialCategory { MembershipFee, RegistrationFee, Donation, Event, Maintenance, Salary, Utilities, Other }
 
         // News & Updates Enums
         public enum NewsCategory { News, OrganisationalUpdate, BusinessInformation }

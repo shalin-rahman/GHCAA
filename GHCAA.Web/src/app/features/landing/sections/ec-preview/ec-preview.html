@@ -11,12 +11,13 @@
             <div class="ec-card glass-card">
                 <div class="ec-photo">
                     @if (member.photoPath) {
-                    <img [src]="member.photoPath" [alt]="member.fullName">
+                    <img [src]="'/' + member.photoPath" [alt]="member.fullName">
                     } @else {
                     👤
                     }
                 </div>
                 <h4>{{ member.fullName }}</h4>
+                <div class="ec-role">{{ getRoleName(member.ecPosition ?? member.ECPosition ?? member.position ?? member.Position) }}</div>
                 <small>{{ member.designation }}</small>
             </div>
             } @empty {

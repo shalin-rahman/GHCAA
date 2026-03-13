@@ -19,8 +19,9 @@ export class AdminThemes implements OnInit {
 
     themes = signal<SpecialDayTheme[]>([]);
     loading = signal(true);
-    showModal = signal(false);
+    showForm = signal(false);
     isEditing = signal(false);
+    isSaving = signal(false);
 
     selectedTheme: SpecialDayTheme = this.resetTheme();
 
@@ -44,16 +45,22 @@ export class AdminThemes implements OnInit {
     openCreate() {
         this.isEditing.set(false);
         this.selectedTheme = this.resetTheme();
-        this.showModal.set(true);
+        this.showForm.set(true);
     }
 
     openEdit(theme: SpecialDayTheme) {
         this.isEditing.set(true);
         this.selectedTheme = { ...theme };
-        this.showModal.set(true);
+        this.showForm.set(true);
     }
 
     saveTheme() {
+        if (!this.selectedTheme.title) {
+            this.notify.warning('Please enter a title');
+            return;
+        }
+
+        this.isSaving.set(true);
         const obs = this.isEditing()
             ? this.adminService.updateTheme(this.selectedTheme.id, this.selectedTheme)
             : this.adminService.createTheme(this.selectedTheme);
@@ -61,10 +68,14 @@ export class AdminThemes implements OnInit {
         obs.subscribe({
             next: () => {
                 this.notify.success(this.isEditing() ? 'Theme updated' : 'Theme created');
-                this.showModal.set(false);
+                this.showForm.set(false);
+                this.isSaving.set(false);
                 this.loadThemes();
             },
-            error: () => this.notify.error('Failed to save theme')
+            error: () => {
+                this.notify.error('Failed to save theme');
+                this.isSaving.set(false);
+            }
         });
     }
 

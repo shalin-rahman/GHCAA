@@ -64,4 +64,10 @@ export class NewsService {
     deleteNews(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${id}`);
     }
+
+    uploadImage(file: File): Observable<{ url: string, relativePath: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<{ url: string, relativePath: string }>(`${this.apiUrl}/upload-image`, formData);
+    }
 }

@@ -39,6 +39,9 @@ namespace GHCAA.Application.DTOs
         public bool IsEmailPublic { get; set; }
         public bool IsAddressPublic { get; set; }
 
+        // Attachments
+        public string? PhotoPath { get; set; }
+
         // History
         public List<AcademicRecordDto> AcademicHistory { get; set; } = new();
         public List<ProfessionalRecordDto> ProfessionalHistory { get; set; } = new();

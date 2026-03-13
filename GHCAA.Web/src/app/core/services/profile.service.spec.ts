@@ -2,10 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ProfileService, MemberProfile } from './profile.service';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { AuthService } from './auth.service';
+import { vi } from 'vitest';
 
 describe('ProfileService', () => {
     let service: ProfileService;
     let httpMock: HttpTestingController;
+
+    let authServiceMock: any;
 
     const mockProfile: MemberProfile = {
         id: 1,
@@ -35,9 +39,16 @@ describe('ProfileService', () => {
     };
 
     beforeEach(() => {
+        authServiceMock = {
+            currentUser: vi.fn().mockReturnValue({ role: 'Member' })
+        };
+
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
-            providers: [ProfileService]
+            providers: [
+                ProfileService,
+                { provide: AuthService, useValue: authServiceMock }
+            ]
         });
         service = TestBed.inject(ProfileService);
         httpMock = TestBed.inject(HttpTestingController);
@@ -58,6 +69,15 @@ describe('ProfileService', () => {
         const req = httpMock.expectOne(API_ENDPOINTS.PROFILE);
         expect(req.request.method).toBe('GET');
         req.flush(mockProfile);
+    });
+
+    it('should return mock profile for SuperAdmin', () => {
+        authServiceMock.currentUser.mockReturnValue({ role: 'SuperAdmin' });
+        service.getProfile().subscribe(res => {
+            expect(res.fullName).toBe('System Administrator');
+            expect(res.id).toBe(0);
+        });
+        httpMock.expectNone(API_ENDPOINTS.PROFILE);
     });
 
     it('should update profile', () => {

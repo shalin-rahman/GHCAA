@@ -225,9 +225,12 @@
                                 <label>Institution / University Name</label>
                                 <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" placeholder="e.g. Govt. Haraganga College">
                             </div>
-                            <div class="form-group full checkbox-group py-4 bg-surface/30 px-6 rounded-lg">
-                                <label>Is this from Govt. Haraganga College?</label>
-                                <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'isGHC_' + $index">
+                            <div class="input-group full py-2">
+                                <label class="premium-checkbox-label">
+                                    <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'isGHC_' + $index">
+                                    <span class="checkmark"></span>
+                                    <span class="label-text">Is this from Govt. Haraganga College?</span>
+                                </label>
                             </div>
                             
                             <div class="form-group">
@@ -301,9 +304,12 @@
                                 <input type="date" [(ngModel)]="work.endDate" [name]="'eD_' + $index">
                             </div>
 
-                            <div class="form-group full checkbox-group py-4 bg-surface/30 px-6 rounded-lg">
-                                <label>Active Occupation (Currently serving here)</label>
-                                <input type="checkbox" [(ngModel)]="work.isCurrent" [name]="'isCurr_' + $index">
+                            <div class="input-group full py-2">
+                                <label class="premium-checkbox-label">
+                                    <input type="checkbox" [(ngModel)]="work.isCurrent" [name]="'isCurr_' + $index">
+                                    <span class="checkmark"></span>
+                                    <span class="label-text">Active Occupation (Currently serving here)</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -354,28 +360,22 @@
                 <h4 class="section-label">Directory Privacy Controls</h4>
                 <p class="text-muted text-xs mb-8">Manage which attributes are visible to other verified Haragangians in the member directory.</p>
                 
-                <div class="toggle-list">
-                    <div class="toggle-item">
-                        <label class="switch">
-                            <input type="checkbox" [(ngModel)]="profile.isEmailPublic" name="isEmailPublic">
-                            <span class="slider"></span>
-                        </label>
-                        <span>Expose Email to Alumni Community</span>
-                    </div>
-                    <div class="toggle-item">
-                        <label class="switch">
-                            <input type="checkbox" [(ngModel)]="profile.isMobilePublic" name="isMobilePublic">
-                            <span class="slider"></span>
-                        </label>
-                        <span>Expose Mobile Identity to Alumni Community</span>
-                    </div>
-                    <div class="toggle-item">
-                        <label class="switch">
-                            <input type="checkbox" [(ngModel)]="profile.isAddressPublic" name="isAddressPublic">
-                            <span class="slider"></span>
-                        </label>
-                        <span>Expose Residential Data to Alumni Community</span>
-                    </div>
+                <div class="space-y-6">
+                    <label class="premium-checkbox-label">
+                        <input type="checkbox" [(ngModel)]="profile.isEmailPublic" name="isEmailPublic">
+                        <span class="checkmark"></span>
+                        <span class="label-text">Expose Email to Alumni Community</span>
+                    </label>
+                    <label class="premium-checkbox-label">
+                        <input type="checkbox" [(ngModel)]="profile.isMobilePublic" name="isMobilePublic">
+                        <span class="checkmark"></span>
+                        <span class="label-text">Expose Mobile Identity to Alumni Community</span>
+                    </label>
+                    <label class="premium-checkbox-label">
+                        <input type="checkbox" [(ngModel)]="profile.isAddressPublic" name="isAddressPublic">
+                        <span class="checkmark"></span>
+                        <span class="label-text">Expose Residential Data to Alumni Community</span>
+                    </label>
                 </div>
             </div>
 

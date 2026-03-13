@@ -19,6 +19,9 @@ export interface PaymentConfig {
     requiresReference: boolean;
     isEnabled: boolean;
     gateway?: string;
+    gatewayPublicKey?: string;
+    gatewaySecretKey?: string;
+    gatewayCallbackUrl?: string;
     sortOrder: number;
 }
 

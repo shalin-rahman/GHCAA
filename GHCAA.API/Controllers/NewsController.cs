@@ -2,10 +2,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
-using GHCAA.Domain.Models;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.IO;
+using System;
 
 namespace GHCAA.API.Controllers
 {
@@ -14,10 +17,12 @@ namespace GHCAA.API.Controllers
     public class NewsController : ControllerBase
     {
         private readonly INewsService _newsService;
+        private readonly IFileStorageService _fileStorageService;
 
-        public NewsController(INewsService newsService)
+        public NewsController(INewsService newsService, IFileStorageService fileStorageService)
         {
             _newsService = newsService;
+            _fileStorageService = fileStorageService;
         }
 
         [HttpGet]
@@ -71,6 +76,38 @@ namespace GHCAA.API.Controllers
         {
             var success = await _newsService.DeleteNewsAsync(id, cancellationToken);
             return success ? Ok() : NotFound();
+        }
+
+        [HttpPost("upload-image")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(authorIdClaim, out var authorId))
+            {
+                return Unauthorized();
+            }
+
+            using var stream = file.OpenReadStream();
+            var extension = Path.GetExtension(file.FileName);
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var uniqueFileName = $"news_{timestamp}_{Guid.NewGuid().ToString().Substring(0, 8)}{extension}";
+            
+            var relativePath = await _fileStorageService.SaveFileAsync(
+                stream, 
+                uniqueFileName, 
+                authorId, // using admin's id as a folder categorization since it's an admin upload
+                Enums.FileUploadType.NewsImage, 
+                cancellationToken
+            );
+
+            // Our storage service typically returns local paths, add leading slash for web url
+            var fileUrl = "/" + relativePath.TrimStart('/');
+            
+            return Ok(new { url = fileUrl, relativePath });
         }
     }
 }

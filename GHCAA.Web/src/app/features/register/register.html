@@ -8,23 +8,28 @@
                     <h3>Member<br>Registry</h3>
                 </div>
                 <div class="steps-list">
-                    <div class="step-link" [class.active]="currentStep() === 1" [class.done]="currentStep() > 1">
+                    <div class="step-link" [class.active]="currentStep() === 1" [class.done]="currentStep() > 1"
+                        [class.clickable]="maxStepReached() >= 1" (click)="goToStep(1)">
                         <span class="step-num">{{ currentStep() > 1 ? '✓' : '01' }}</span>
                         <span class="step-txt">Personal</span>
                     </div>
-                    <div class="step-link" [class.active]="currentStep() === 2" [class.done]="currentStep() > 2">
+                    <div class="step-link" [class.active]="currentStep() === 2" [class.done]="currentStep() > 2"
+                        [class.clickable]="maxStepReached() >= 2" (click)="goToStep(2)">
                         <span class="step-num">{{ currentStep() > 2 ? '✓' : '02' }}</span>
                         <span class="step-txt">Reachability</span>
                     </div>
-                    <div class="step-link" [class.active]="currentStep() === 3" [class.done]="currentStep() > 3">
+                    <div class="step-link" [class.active]="currentStep() === 3" [class.done]="currentStep() > 3"
+                        [class.clickable]="maxStepReached() >= 3" (click)="goToStep(3)">
                         <span class="step-num">{{ currentStep() > 3 ? '✓' : '03' }}</span>
                         <span class="step-txt">Academic</span>
                     </div>
-                    <div class="step-link" [class.active]="currentStep() === 4" [class.done]="currentStep() > 4">
+                    <div class="step-link" [class.active]="currentStep() === 4" [class.done]="currentStep() > 4"
+                        [class.clickable]="maxStepReached() >= 4" (click)="goToStep(4)">
                         <span class="step-num">{{ currentStep() > 4 ? '✓' : '04' }}</span>
                         <span class="step-txt">Vocation</span>
                     </div>
-                    <div class="step-link" [class.active]="currentStep() === 5" [class.done]="submitted()">
+                    <div class="step-link" [class.active]="currentStep() === 5" [class.done]="submitted()"
+                        [class.clickable]="maxStepReached() >= 5" (click)="goToStep(5)">
                         <span class="step-num">{{ submitted() ? '✓' : '05' }}</span>
                         <span class="step-txt">Finalize</span>
                     </div>
@@ -50,18 +55,20 @@
                     <!-- Step 1: Personal Details -->
                     <div class="step-content animate-fade-up" *ngIf="currentStep() === 1">
                         <div class="step-header">
-                            <h2>Indentity & Profile</h2>
+                            <h2>Identity & Profile</h2>
                             <p>Induct your primary identity details exactly as documented in academic registers.</p>
                         </div>
                         <div class="form-grid">
                             <div class="form-group full">
-                                <label>Full Legal Name (SSC/HSC Record) *</label>
-                                <input type="text" [(ngModel)]="model.FullName" name="fullName" required
+                                <label>Full Legal Name (SSC/HSC Record) <span class="required-star">*</span></label>
+                                <input type="text" [(ngModel)]="model.FullName" name="fullName" required #nameReg="ngModel"
+                                    [class.border-red-500]="nameReg.invalid && nameReg.touched"
                                     placeholder="Enter full name according to certificates">
                             </div>
                             <div class="form-group">
-                                <label>Father's Name *</label>
-                                <input type="text" [(ngModel)]="model.FatherName" name="fatherName" required
+                                <label>Father's Name <span class="required-star">*</span></label>
+                                <input type="text" [(ngModel)]="model.FatherName" name="fatherName" required #fatherReg="ngModel"
+                                    [class.border-red-500]="fatherReg.invalid && fatherReg.touched"
                                     placeholder="Full Name">
                             </div>
                             <div class="form-group">
@@ -102,13 +109,15 @@
                         </div>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Primary Email (Login) *</label>
-                                <input type="email" [(ngModel)]="model.Email" name="email" required
+                                <label>Primary Email (Login) <span class="required-star">*</span></label>
+                                <input type="email" [(ngModel)]="model.Email" name="email" required #emailReg="ngModel"
+                                    [class.border-red-500]="emailReg.invalid && emailReg.touched"
                                     placeholder="alumni@domain.com">
                             </div>
                             <div class="form-group">
-                                <label>Verified Mobile *</label>
-                                <input type="text" [(ngModel)]="model.MobileNo" name="mobileNo" required
+                                <label>Verified Mobile <span class="required-star">*</span></label>
+                                <input type="text" [(ngModel)]="model.MobileNo" name="mobileNo" required #mobileReg="ngModel"
+                                    [class.border-red-500]="mobileReg.invalid && mobileReg.touched"
                                     placeholder="01XXXXXXXXX">
                             </div>
                             <div class="form-group full">
@@ -144,9 +153,12 @@
                                         <label>Institution / University Name *</label>
                                         <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" required placeholder="Select or type institution">
                                     </div>
-                                    <div class="form-group full checkbox-group py-4 bg-surface/30 px-6 rounded-lg">
-                                        <label>Was this milestone achieved at Govt. Haraganga College?</label>
-                                        <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'ghcCh_' + $index">
+                                    <div class="input-group full py-2">
+                                        <label class="premium-checkbox-label">
+                                            <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'ghcCh_' + $index">
+                                            <span class="checkmark"></span>
+                                            <span class="label-text">Was this achieved at Govt. Haraganga College?</span>
+                                        </label>
                                     </div>
                                     <div class="form-group">
                                         <label>Degree Conferred *</label>
@@ -210,9 +222,12 @@
                                         <label>Relief Date (End)</label>
                                         <input type="date" [(ngModel)]="p.endDate" [name]="'pED_' + $index">
                                     </div>
-                                    <div class="form-group full checkbox-group py-4 bg-surface/30 px-6 rounded-lg">
-                                        <label>I currently serve in this capacity (Active Occupation)</label>
-                                        <input type="checkbox" [(ngModel)]="p.isCurrent" [name]="'isPc_' + $index">
+                                    <div class="input-group full py-2">
+                                        <label class="premium-checkbox-label">
+                                            <input type="checkbox" [(ngModel)]="p.isCurrent" [name]="'isPc_' + $index">
+                                            <span class="checkmark"></span>
+                                            <span class="label-text">I currently serve in this capacity (Active Occupation)</span>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -245,9 +260,44 @@
                     <!-- Step 5: Registry Filing -->
                     <div class="step-content animate-fade-up" *ngIf="currentStep() === 5">
                         <div class="step-header">
-                            <h2>Registry Filing</h2>
-                            <p>Formalize your application by attaching necessary institutional evidence.</p>
+                            <h2>Registry Filing & Subscription</h2>
+                            <p>To finalise your induction, please complete the lifetime membership subscription and attach documentation.</p>
                         </div>
+
+                        <!-- Payment Instructions -->
+                        <div class="glass-card mb-10 border-accent/20 bg-accent/5">
+                            <h4 class="text-accent uppercase tracking-widest text-[10px] font-black mb-6 flex items-center gap-3">
+                                <span>🏦</span> Payment Protocol Instructions
+                            </h4>
+                            <div class="space-y-6">
+                                @for (p of paymentConfigs(); track p.id) {
+                                    <div class="flex justify-between items-start border-b border-white/5 pb-4 last:border-0 last:pb-0">
+                                        <div>
+                                            <span class="block text-sm font-bold">
+                                                <span class="mr-2">{{ p.icon }}</span>{{ p.displayName }}
+                                            </span>
+                                            <small class="text-muted text-[10px] uppercase font-black">
+                                                {{ p.bankName ? p.bankName : (p.walletNumber ? 'Mobile Wallet' : 'Payment Method') }}
+                                            </small>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="block text-accent font-mono font-bold">
+                                                {{ p.walletNumber || p.accountNumber || 'Gateway Integration' }}
+                                            </span>
+                                            <small class="text-muted text-[10px]">Ref: {{ model.MobileNo }}</small>
+                                        </div>
+                                    </div>
+                                } @empty {
+                                    <p class="text-xs italic opacity-60">Loading payment gateways... If none appear, contact association admin.</p>
+                                }
+                            </div>
+                            <div class="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+                                <p class="text-[10px] text-muted leading-relaxed">
+                                    <span class="text-accent">Note:</span> Please pay the prescribed amount using the channels above. Use your <b>Mobile Number</b> as the reference/counter. Capture a screenshot of the transaction completion to upload below.
+                                </p>
+                            </div>
+                        </div>
+
                         <div class="space-y-8">
                             <div class="form-group full">
                                 <label>Formal Profile Photo (Professional/Standard) *</label>
@@ -275,11 +325,11 @@
                             </div>
                             <div class="form-group full">
                                 <div class="consent-box glass-card border-none bg-surface/40">
-                                    <label class="checkbox-container">
+                                    <label class="premium-checkbox-label">
                                         <input type="checkbox" name="agree" required ngModel>
                                         <span class="checkmark"></span>
-                                        I solemnly affirm that the data provided is accurate. I pledge to uphold the
-                                        GHCAA Constitution and maintain association decorum.
+                                        <span class="label-text max-w-lg">I solemnly affirm that the data provided is accurate. I pledge to uphold the
+                                            GHCAA Constitution and maintain association decorum.</span>
                                     </label>
                                 </div>
                             </div>
@@ -288,14 +338,13 @@
 
                     <div class="wizard-actions">
                         <div class="left-actions">
-                            <button type="button" class="btn btn-secondary px-8" (click)="prevStep()"
+                            <button type="button" class="btn btn-secondary px-8 h-14" (click)="prevStep()"
                                 *ngIf="currentStep() > 1">← Previous Step</button>
                         </div>
                         <div class="right-actions">
                             <button type="button" class="btn btn-accent px-10 shadow-gold h-14" (click)="nextStep()"
                                 *ngIf="currentStep() < 5">Continue Assessment →</button>
-                            <button type="submit" class="btn btn-accent px-10 shadow-gold h-14" *ngIf="currentStep() === 5"
-                                [disabled]="loading() || regForm.invalid">
+                            <button type="submit" class="btn btn-accent px-10 shadow-gold h-14" *ngIf="currentStep() === 5">
                                 @if (loading()) { <span class="spinner">⏳</span> Initiating Filing... }
                                 @else { <span class="icon">🚀</span> Finalize Registry }
                             </button>

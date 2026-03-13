@@ -123,5 +123,13 @@ namespace GHCAA.API.Controllers
             var result = await _galleryService.DeleteGalleryAsync(id, cancellationToken);
             return result ? Ok() : NotFound();
         }
+
+        [HttpDelete("admin/photos/{photoId}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> RemovePhoto(int photoId, CancellationToken cancellationToken)
+        {
+            var result = await _galleryService.RemovePhotoAsync(photoId, cancellationToken);
+            return result ? Ok() : NotFound();
+        }
     }
 }

@@ -62,6 +62,39 @@ namespace GHCAA.Infrastructure.Services
             return user;
         }
 
+        public async Task<User> CreateSystemAdminAsync(string username, string password, string roleName, CancellationToken cancellationToken = default)
+        {
+            var usernameExists = await _db.Users.AnyAsync(u => u.Username == username, cancellationToken);
+            if (usernameExists) throw new InvalidOperationException($"Username '{username}' is already taken");
+
+            var role = await _db.Roles.FirstOrDefaultAsync(r => r.Name == roleName, cancellationToken);
+            if (role == null) throw new InvalidOperationException($"Role '{roleName}' does not exist");
+
+            var user = new User
+            {
+                Username = username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+                MemberId = null, // System-level admin
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+
+            user.Roles.Add(role);
+            await _db.Users.AddAsync(user, cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
+            
+            _logger.LogInformation("System {Role} account created: {Username}", roleName, username);
+            return user;
+        }
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken = default)
+        {
+            return await _db.Users
+                .Include(u => u.Roles)
+                .Include(u => u.Member)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword, CancellationToken cancellationToken = default)
         {
             var user = await _db.Users.FindAsync(new object[] { userId }, cancellationToken);

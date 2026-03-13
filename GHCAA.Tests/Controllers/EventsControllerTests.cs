@@ -29,12 +29,16 @@ namespace GHCAA.Tests.Controllers
             SetUserContext(1, 10); // Admin 1, Member 10
         }
 
-        private void SetUserContext(int userId, int memberId)
+        private void SetUserContext(int userId, int? memberId, string role = "Admin")
         {
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
+            var claims = new List<Claim> {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim("MemberId", memberId.ToString())
-            }, "TestAuthentication"));
+                new Claim(ClaimTypes.Role, role)
+            };
+            if (memberId.HasValue) 
+                claims.Add(new Claim("MemberId", memberId.Value.ToString()));
+
+            var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuthentication"));
 
             _controller.ControllerContext = new ControllerContext
             {
@@ -81,6 +85,16 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.GetMyRegistrations(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task GetMyRegistrations_SuperAdmin_ReturnsEmptyList()
+        {
+            SetUserContext(1, null, "SuperAdmin");
+            var result = await _controller.GetMyRegistrations(CancellationToken.None);
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult.Value, Is.Empty);
         }
         
         [Test]

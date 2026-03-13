@@ -42,24 +42,24 @@
             <form [formGroup]="eventForm" (ngSubmit)="submitEvent()" class="space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="input-group">
-                        <label>Engagement Title</label>
-                        <input type="text" formControlName="title" placeholder="Annual Reunion 2024">
+                        <label>Engagement Title <span class="text-red-500">*</span></label>
+                        <input type="text" formControlName="title" placeholder="Annual Reunion 2024" [class.border-red-500]="eventForm.get('title')?.invalid && eventForm.get('title')?.touched">
                     </div>
                     <div class="input-group">
-                        <label>Scheduled Date & Time</label>
-                        <input type="datetime-local" formControlName="date">
+                        <label>Scheduled Date & Time <span class="text-red-500">*</span></label>
+                        <input type="datetime-local" formControlName="date" [class.border-red-500]="eventForm.get('date')?.invalid && eventForm.get('date')?.touched">
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <label>Venue / Location</label>
-                    <input type="text" formControlName="location" placeholder="Main Campus Auditorium">
+                    <label>Venue / Location <span class="text-red-500">*</span></label>
+                    <input type="text" formControlName="location" placeholder="Main Campus Auditorium" [class.border-red-500]="eventForm.get('location')?.invalid && eventForm.get('location')?.touched">
                 </div>
 
                 <div class="input-group">
-                    <label>Project Brief / Description</label>
+                    <label>Project Brief / Description <span class="text-red-500">*</span></label>
                     <textarea formControlName="description" rows="5"
-                        placeholder="Describe the purpose and plan for this event..."></textarea>
+                        placeholder="Describe the purpose and plan for this event..." [class.border-red-500]="eventForm.get('description')?.invalid && eventForm.get('description')?.touched"></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -81,15 +81,17 @@
                     </div>
                     <div class="input-group">
                         <label>Visibility & Access</label>
-                        <div class="flex flex-col gap-3 py-2">
-                            <div class="flex items-center gap-4">
-                                <input type="checkbox" formControlName="isActive" class="w-6 h-6 border-accent text-accent">
-                                <span class="text-[10px] text-muted font-bold uppercase tracking-widest">Publish asset on public portal</span>
-                            </div>
-                            <div class="flex items-center gap-4">
-                                <input type="checkbox" formControlName="allowNonMembers" class="w-6 h-6 border-accent text-accent">
-                                <span class="text-[10px] text-muted font-bold uppercase tracking-widest">Allow Non-Alumni (Guest) Participation</span>
-                            </div>
+                        <div class="flex flex-col gap-4 py-2">
+                            <label class="premium-checkbox-label">
+                                <input type="checkbox" formControlName="isActive">
+                                <span class="checkmark"></span>
+                                <span class="label-text">Publish asset on public portal</span>
+                            </label>
+                            <label class="premium-checkbox-label">
+                                <input type="checkbox" formControlName="allowNonMembers">
+                                <span class="checkmark"></span>
+                                <span class="label-text">Allow Non-Alumni Participation</span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -98,11 +100,9 @@
                     <button type="button" (click)="showForm.set(false)"
                         class="btn btn-secondary flex-1 py-4 h-14">Discard
                         Changes</button>
-                    <button type="submit" [disabled]="eventForm.invalid || isSubmitting()"
+                    <button type="submit" [disabled]="isSubmitting()"
                         class="btn btn-accent flex-1 py-4 h-14 shadow-gold font-black">
-                        {{ isSubmitting() ? 'Transmitting...' : (editingEventId() ? 'Save Configuration' : 'Launch
-                        Asset')
-                        }}
+                        {{ isSubmitting() ? 'Transmitting...' : (editingEventId() ? 'Save Configuration' : 'Launch Asset') }}
                     </button>
                 </div>
             </form>
@@ -150,6 +150,7 @@
                 </div>
 
                 <div class="flex gap-2">
+                    <button (click)="viewEvent(ev)" class="btn btn-outline btn-sm rounded-xl">Details ↗</button>
                     <button (click)="openEditForm(ev)" class="btn btn-secondary btn-sm rounded-xl">Edit Config</button>
                     <button (click)="deleteEvent(ev.id)"
                         class="btn btn-secondary btn-sm border-red-500/20 text-red-500 hover:bg-red-500/10">Purge</button>
@@ -170,11 +171,11 @@
             <div class="search-wrap flex-1 min-w-[200px] relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-40">🔍</span>
                 <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
-                    placeholder="Search participant or reference..." class="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:border-accent outline-none">
+                    placeholder="Search participant or reference..." class="w-full bg-primary/5 border border-primary/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:border-accent outline-none">
             </div>
             
             <select [ngModel]="selectedEventIdFilter()" (ngModelChange)="selectedEventIdFilter.set($event); onFilterChange()"
-                class="bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-sm focus:border-accent outline-none min-w-[150px]">
+                class="bg-primary/5 border border-primary/10 rounded-xl py-2 px-4 text-sm focus:border-accent outline-none min-w-[150px]">
                 <option [value]="null">All Events</option>
                 @for (ev of events(); track ev.id) {
                     <option [value]="ev.id">{{ ev.title }}</option>
@@ -182,7 +183,7 @@
             </select>
 
             <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()"
-                class="bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-sm focus:border-accent outline-none min-w-[120px]">
+                class="bg-primary/5 border border-primary/10 rounded-xl py-2 px-4 text-sm focus:border-accent outline-none min-w-[120px]">
                 <option value="all">All Status</option>
                 <option value="Pending">Pending</option>
                 <option value="Approved">Approved</option>
@@ -201,12 +202,12 @@
                         <th class="px-6 py-4 text-right">Registry Decision</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/5">
+                <tbody class="divide-y divide-primary/5">
                     @for (reg of registrations(); track reg.id) {
-                    <tr class="hover:bg-white/[0.02] transition-colors group">
+                    <tr class="hover:bg-primary/[0.02] transition-colors group">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-black text-xs">
+                                <div class="w-8 h-8 rounded-full bg-accent/10 text-accent flex items-center justify-center font-black text-xs">
                                     {{ (reg.isNonMember ? reg.guestName : reg.memberName)?.[0]?.toUpperCase() }}
                                 </div>
                                 <div>
@@ -262,6 +263,49 @@
             [pageSize]="pageSize()"
             (pageChange)="currentPage.set($event); loadAllRegistrations()">
         </app-pagination>
+    </div>
+    }
+
+    <!-- Event Detail Modal (Popup) -->
+    @if (selectedEvent(); as ev) {
+    <div class="modal-overlay" (click)="closeDetail()">
+        <div class="modal-content glass-card p-0" (click)="$event.stopPropagation()">
+            <div class="p-8 flex justify-between items-start border-b border-primary/10">
+                <div>
+                    <h3 class="text-2xl font-black text-accent uppercase tracking-tighter">{{ ev.title }}</h3>
+                    <p class="text-xs uppercase font-black tracking-widest text-muted mt-2">{{ ev.location }} • {{ ev.date | date:'longDate' }}</p>
+                </div>
+                <button (click)="closeDetail()" class="text-2xl opacity-50 hover:opacity-100">✕</button>
+            </div>
+            <div class="p-10 space-y-8">
+                <section>
+                    <h4 class="text-[10px] font-black uppercase tracking-widest text-accent mb-4">Event Narrative</h4>
+                    <p class="text-lg font-light" style="white-space: pre-wrap;">{{ ev.description }}</p>
+                </section>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="data-field-box">
+                        <h5>Financials Asset</h5>
+                        <p>{{ ((ev?.registrationFee || 0) > 0) ? (ev?.registrationFee | currency:'BDT ':'symbol':'1.0-0') : 'Free Entry Access' }}</p>
+                    </div>
+                    <div class="data-field-box">
+                        <h5>Registry Deadline</h5>
+                        <p>{{ ev.registrationDeadline | date:'medium' }}</p>
+                    </div>
+                </div>
+
+                @if (ev.adminNote) {
+                <section class="bg-accent/5 p-6 rounded-2xl border border-accent/10">
+                    <h4 class="text-[10px] font-black uppercase tracking-widest text-accent mb-2">Secretariat Note</h4>
+                    <p class="text-sm italic opacity-80">{{ ev.adminNote }}</p>
+                </section>
+                }
+            </div>
+            <div class="p-6 bg-primary/5 flex justify-end gap-4">
+                <button (click)="openEditForm(ev); closeDetail()" class="btn btn-secondary">Edit Configuration</button>
+                <button (click)="closeDetail()" class="btn btn-accent px-8">Acknowledge</button>
+            </div>
+        </div>
     </div>
     }
 </div>

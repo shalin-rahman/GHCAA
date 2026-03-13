@@ -80,6 +80,9 @@ namespace GHCAA.API.Controllers
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
+                if (User.IsInRole("SuperAdmin"))
+                    return Ok(new List<object>());
+                
                 return BadRequest("User is not associated with a member account.");
             }
 

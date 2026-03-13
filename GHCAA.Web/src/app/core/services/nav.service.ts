@@ -9,6 +9,7 @@ export interface NavItem {
     exact?: boolean;
     fragment?: string;
     roles?: string[];
+    section?: string;
 }
 
 // All portal navigation items
@@ -29,18 +30,22 @@ const ALL_NAV_ITEMS: NavItem[] = [
 
 // Admin panel navigation items
 const ADMIN_NAV_ITEMS: NavItem[] = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/admin/approvals', label: 'Approvals', icon: '📝' },
-    { path: '/admin/members', label: 'All Members', icon: '👥' },
-    { path: '/admin/members/ec', label: 'Executive Committee', icon: '🎗️' },
-    { path: '/admin/news', label: 'News Posts', icon: '📰' },
-    { path: '/admin/gallery', label: 'Gallery Albums', icon: '🖼️' },
-    { path: '/admin/comm', label: 'Communications', icon: '✉️' },
-    { path: '/admin/ledger', label: 'Financial Ledger', icon: '📖', roles: ['SuperAdmin'] },
-    { path: '/admin/roles', label: 'User Roles', icon: '🛡️', roles: ['SuperAdmin'] },
-    { path: '/admin/audit', label: 'Audit Logs', icon: '📜', roles: ['SuperAdmin'] },
-    { path: '/admin/events', label: 'Manage Events', icon: '🗓️' },
-    { path: '/admin/themes', label: 'Special Themes', icon: '🎨' },
+    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊', section: 'Overview' },
+    
+    { path: '/admin/approvals', label: 'Approvals', icon: '📝', section: 'Membership' },
+    { path: '/admin/members', label: 'All Members', icon: '👥', section: 'Membership' },
+    { path: '/admin/members/ec', label: 'Executive Committee', icon: '🎗️', section: 'Membership' },
+    
+    { path: '/admin/news', label: 'News Posts', icon: '📰', section: 'Content' },
+    { path: '/admin/events', label: 'Manage Events', icon: '🗓️', section: 'Content' },
+    { path: '/admin/gallery', label: 'Gallery Albums', icon: '🖼️', section: 'Content' },
+    { path: '/admin/comm', label: 'Communications', icon: '✉️', section: 'Content' },
+    { path: '/admin/themes', label: 'Special Themes', icon: '🎨', section: 'Content' },
+    
+    { path: '/admin/ledger', label: 'Financial Ledger', icon: '📖', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/payments', label: 'Payment Settings', icon: '💳', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/roles', label: 'User Roles', icon: '🛡️', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/audit', label: 'Audit Logs', icon: '📜', roles: ['SuperAdmin'], section: 'Finance & Tools' }
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -68,6 +73,17 @@ export class NavService {
             if (!item.roles) return true;
             return item.roles.includes(user.role);
         });
+    });
+
+    /** Grouped admin items for safe UI rendering */
+    adminNavSections = computed(() => {
+        const items = this.adminNavItems();
+        return [
+            { name: 'Overview', items: items.filter(i => i.section === 'Overview') },
+            { name: 'Membership', items: items.filter(i => i.section === 'Membership') },
+            { name: 'Content', items: items.filter(i => i.section === 'Content') },
+            { name: 'Finance & Tools', items: items.filter(i => i.section === 'Finance & Tools') }
+        ].filter(s => s.items.length > 0);
     });
 
     /** Whether the current user has admin access */

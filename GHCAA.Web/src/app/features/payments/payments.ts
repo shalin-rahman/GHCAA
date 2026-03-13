@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { FinancialService, PaymentRecord, MembershipDue } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { PaymentMethodSelectorComponent } from '../../shared/payment-method-selector/payment-method-selector.component';
+import { FINANCIAL_CATEGORY_OPTIONS } from '../../core/constants/app.constants';
 import { PaymentConfig } from '../../core/services/payment-config.service';
 
 @Component({
@@ -21,12 +22,14 @@ export class Payments implements OnInit {
     dues = signal<MembershipDue[]>([]);
     loading = signal(true);
     showPayModal = signal(false);
+    categoryOptions = FINANCIAL_CATEGORY_OPTIONS;
 
     paymentForm = {
         amount: 0,
         transactionId: '',
         notes: '',
-        paymentMethod: 'ManualReceipt'
+        paymentMethod: 'ManualReceipt',
+        category: 'MembershipFee'
     };
 
     selectedPaymentMethod = signal<PaymentConfig | null>(null);
@@ -53,7 +56,8 @@ export class Payments implements OnInit {
             amount: due ? due.amount : 0,
             transactionId: '',
             notes: due ? `Annual Dues for ${due.year}` : '',
-            paymentMethod: 'ManualReceipt'
+            paymentMethod: 'ManualReceipt',
+            category: due ? 'MembershipFee' : 'Donation'
         };
         this.showPayModal.set(true);
     }
@@ -90,5 +94,9 @@ export class Payments implements OnInit {
     getStatusLabel(status: any): string {
         const map: Record<string, string> = { '0': 'Pending Audit', '1': 'Verified', '2': 'Rejected' };
         return map[String(status)] || 'Unknown';
+    }
+
+    getCategoryLabel(val: any): string {
+        return this.categoryOptions.find(o => o.value === val)?.label || val;
     }
 }

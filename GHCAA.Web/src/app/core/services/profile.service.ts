@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { AuthService } from './auth.service';
 
 export interface MemberProfile {
     id: number;
@@ -70,9 +71,39 @@ export interface ProfessionalRecord {
 })
 export class ProfileService {
     private http = inject(HttpClient);
+    private authService = inject(AuthService);
     private apiUrl = API_ENDPOINTS.PROFILE;
 
     getProfile(): Observable<MemberProfile> {
+        const user = this.authService.currentUser();
+        if (user && user.role === 'SuperAdmin') {
+            return of({
+                id: 0,
+                fullName: 'System Administrator',
+                email: 'superadmin@ghcaa.com',
+                mobileNo: '00000000000',
+                status: 1, // Active
+                membershipType: 1, // Executive
+                academicHistory: [],
+                professionalHistory: [],
+                presentAddress: 'Backend Server',
+                permanentAddress: 'Backend Server',
+                bloodGroup: 0,
+                highestCertificate: 'Admin',
+                highestCertificateGroup: 'Admin',
+                highestCertificateSubject: 'Admin',
+                highestCertificatePassingYear: 0,
+                ghcLastCertificate: 'Admin',
+                ghcLastCertificateGroup: 'Admin',
+                ghcLastCertificateSubject: 'Admin',
+                ghcLastCertificatePassingYear: 0,
+                professionalSector: 'IT',
+                designation: 'SuperAdmin',
+                isMobilePublic: false,
+                isEmailPublic: false,
+                isAddressPublic: false
+            } as MemberProfile);
+        }
         return this.http.get<MemberProfile>(this.apiUrl);
     }
 

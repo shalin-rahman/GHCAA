@@ -65,4 +65,8 @@ export class GalleryService {
     deleteGallery(id: number): Observable<boolean> {
         return this.http.delete<boolean>(`${this.apiUrl}/admin/${id}`);
     }
+
+    removePhoto(photoId: number): Observable<boolean> {
+        return this.http.delete<boolean>(`${this.apiUrl}/admin/photos/${photoId}`);
+    }
 }

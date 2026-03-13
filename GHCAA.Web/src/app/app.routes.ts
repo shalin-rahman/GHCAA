@@ -29,6 +29,10 @@ export const routes: Routes = [
             {
                 path: 'gallery',
                 loadComponent: () => import('./features/gallery/gallery').then(m => m.Gallery)
+            },
+            {
+                path: 'events',
+                loadComponent: () => import('./features/events/events').then(m => m.Events)
             }
         ]
     },
@@ -133,6 +137,10 @@ export const routes: Routes = [
             {
                 path: 'themes',
                 loadComponent: () => import('./features/admin-themes/admin-themes').then(m => m.AdminThemes)
+            },
+            {
+                path: 'payments',
+                loadComponent: () => import('./features/admin-payment-config/admin-payment-config').then(m => m.AdminPaymentConfig)
             },
             {
                 path: 'roles',

@@ -57,4 +57,15 @@ describe('RegistrationService', () => {
         expect(req.request.method).toBe('GET');
         req.flush({ status: 'Applied' });
     });
+
+    it('should call getPublicPaymentConfigs', () => {
+        service.getPublicPaymentConfigs().subscribe(res => {
+            expect(res.length).toBe(1);
+            expect(res[0].displayName).toBe('bKash');
+        });
+
+        const req = httpMock.expectOne(API_ENDPOINTS.PAYMENT_CONFIG.PUBLIC);
+        expect(req.request.method).toBe('GET');
+        req.flush([{ displayName: 'bKash' }]);
+    });
 });

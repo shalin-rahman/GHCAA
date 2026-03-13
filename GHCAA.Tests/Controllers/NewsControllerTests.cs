@@ -16,13 +16,15 @@ namespace GHCAA.Tests.Controllers
     public class NewsControllerTests
     {
         private Mock<INewsService> _newsServiceMock;
+        private Mock<IFileStorageService> _fileStorageServiceMock;
         private NewsController _controller;
 
         [SetUp]
         public void Setup()
         {
             _newsServiceMock = new Mock<INewsService>();
-            _controller = new NewsController(_newsServiceMock.Object);
+            _fileStorageServiceMock = new Mock<IFileStorageService>();
+            _controller = new NewsController(_newsServiceMock.Object, _fileStorageServiceMock.Object);
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
                 new Claim(ClaimTypes.NameIdentifier, "1")

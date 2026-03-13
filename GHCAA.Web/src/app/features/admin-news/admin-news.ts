@@ -27,6 +27,7 @@ export class AdminNews implements OnInit {
     newsList = signal<NewsPost[]>([]);
     loading = signal(true);
     showForm = signal(false);
+    selectedPost = signal<NewsPost | null>(null);
     saving = signal(false);
     editingId = signal<number | null>(null);
 
@@ -48,6 +49,8 @@ export class AdminNews implements OnInit {
         this.showForm.set(true);
     }
 
+    uploadingImage = signal(false);
+
     editPost(post: NewsPost) {
         this.editingId.set(post.id);
         this.form = {
@@ -61,13 +64,36 @@ export class AdminNews implements OnInit {
         window.scrollTo(0, 0);
     }
 
+    onImageSelect(event: Event) {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+
+        this.uploadingImage.set(true);
+        this.newsService.uploadImage(file).subscribe({
+            next: (res) => {
+                this.form.imageUrl = res.url;
+                this.notify.success('Image uploaded successfully');
+                this.uploadingImage.set(false);
+            },
+            error: () => {
+                this.notify.error('Image upload failed');
+                this.uploadingImage.set(false);
+            }
+        });
+    }
+
     cancelForm() {
         this.showForm.set(false);
         this.editingId.set(null);
     }
 
     saveNews() {
-        if (!this.form.title || !this.form.content) return;
+        if (!this.form.title || !this.form.content) {
+            this.notify.error('Please complete all mandatory fields.');
+            return;
+        }
+        if (this.saving()) return;
+
         this.saving.set(true);
         const id = this.editingId();
         const obs = id ? this.newsService.updateNews(id, this.form) : this.newsService.createNews(this.form);

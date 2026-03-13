@@ -10,11 +10,51 @@ namespace GHCAA.API.Controllers
     public class RolesController : ControllerBase
     {
         private readonly IRoleService _roleService;
+        private readonly IUserService _userService;
 
-        public RolesController(IRoleService roleService)
+        public RolesController(IRoleService roleService, IUserService userService)
         {
             _roleService = roleService;
+            _userService = userService;
         }
+
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
+        {
+            var users = await _userService.GetAllUsersAsync(cancellationToken);
+            return Ok(users.Select(u => new
+            {
+                u.Id,
+                u.Username,
+                u.MemberId,
+                FullName = u.Member?.FullName ?? "System Account",
+                u.IsActive,
+                u.CreatedAt,
+                Roles = u.Roles.Select(r => r.Name)
+            }));
+        }
+
+        [HttpPost("users")]
+        public async Task<IActionResult> CreateAdmin([FromBody] CreateAdminDto dto, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var user = await _userService.CreateSystemAdminAsync(dto.Username, dto.Password, dto.Role, cancellationToken);
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        public class CreateAdminDto
+        {
+            public string Username { get; set; } = null!;
+            public string Password { get; set; } = null!;
+            public string Role { get; set; } = "Admin";
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> GetRoles(CancellationToken cancellationToken)

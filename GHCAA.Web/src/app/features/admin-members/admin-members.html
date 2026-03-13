@@ -114,8 +114,8 @@
 <!-- Member Management Modal -->
 @if (selectedMember()) {
 <div class="modal-overlay" (click)="closeDetail()">
-    <div class="modal-box wide" (click)="$event.stopPropagation()">
-        <div class="modal-header">
+    <div class="modal-content glass-card p-0" (click)="$event.stopPropagation()">
+        <div class="p-8 flex justify-between items-center border-b border-primary/10">
             <div class="flex items-center">
                 <div class="relative group cursor-pointer" (click)="isEditing() && photoInput.click()" [title]="isEditing() ? 'Click to change photo' : ''">
                     @if (photoPreview()) {
@@ -135,7 +135,10 @@
                 }
                 <div class="header-info">
                     @if (isEditing()) {
-                    <input type="text" [(ngModel)]="selectedMember().fullName" class="edit-input title-input w-full">
+                    <input type="text" [(ngModel)]="selectedMember().fullName" #nameInput="ngModel" required
+                        class="edit-input title-input w-full" 
+                        [class.border-red-500]="nameInput.invalid && nameInput.touched"
+                        placeholder="Full Name">
                     <input type="text" [(ngModel)]="selectedMember().membershipNumber" class="edit-input sub-input w-full mt-2"
                         placeholder="Membership Number">
                     } @else {
@@ -144,10 +147,10 @@
                     }
                 </div>
             </div>
-            <button class="close-btn" (click)="closeDetail()">✕</button>
+            <button (click)="closeDetail()" class="text-2xl opacity-50 hover:opacity-100">✕</button>
         </div>
         
-        <div class="modal-body">
+        <div class="p-10 p-mobile-6">
             <!-- Modal Actions Bar -->
             <div class="flex justify-between items-center mb-8 border-b pb-4">
                 <div class="flex gap-4">
@@ -171,12 +174,14 @@
             <div class="form-grid">
                 <!-- Personal Information -->
                 <div class="form-group">
-                    <label>Mobile Number</label>
-                    <input type="text" [(ngModel)]="selectedMember().mobileNo" [readonly]="!isEditing()">
+                    <label>Mobile Number <span class="required-star">*</span></label>
+                    <input type="text" [(ngModel)]="selectedMember().mobileNo" [readonly]="!isEditing()" #mobileInput="ngModel" required
+                        [class.border-red-500]="isEditing() && mobileInput.invalid && mobileInput.touched">
                 </div>
                 <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" [(ngModel)]="selectedMember().email" [readonly]="!isEditing()">
+                    <label>Email Address <span class="required-star">*</span></label>
+                    <input type="email" [(ngModel)]="selectedMember().email" [readonly]="!isEditing()" #emailInput="ngModel" required
+                        [class.border-red-500]="isEditing() && emailInput.invalid && emailInput.touched">
                 </div>
                 
                 <div class="form-group">
@@ -253,13 +258,22 @@
                 <!-- Privacy Checks -->
                 <div class="full privacy-grid bg-surface p-6 rounded-lg">
                     <label class="mb-4 block">Privacy Preferences</label>
-                    <div class="checks">
-                        <label><input type="checkbox" [(ngModel)]="selectedMember().isMobilePublic"
-                                [disabled]="!isEditing()"> Public Mobile</label>
-                        <label><input type="checkbox" [(ngModel)]="selectedMember().isEmailPublic"
-                                [disabled]="!isEditing()"> Public Email</label>
-                        <label><input type="checkbox" [(ngModel)]="selectedMember().isAddressPublic"
-                                [disabled]="!isEditing()"> Public Address</label>
+                    <div class="checks grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isMobilePublic" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Show Mobile Publicly</span>
+                        </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isEmailPublic" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Show Email Publicly</span>
+                        </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isAddressPublic" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Show Address Publicly</span>
+                        </label>
                     </div>
                 </div>
 
@@ -275,7 +289,7 @@
                     <div class="history-list flex flex-col gap-4">
                         @for (acad of selectedMember()?.academicHistory; track $index) {
                         <div class="history-item glass-effect rounded-lg overflow-hidden">
-                            <div class="flex justify-between items-center px-4 py-2 border-b border-white/10">
+                            <div class="flex justify-between items-center px-4 py-2 border-b border-primary/10">
                                 <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold">Record #{{ $index + 1 }}</span>
                                 @if (isEditing()) {
                                 <button class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors" (click)="removeAcademic($index)" type="button">✕ Remove</button>
@@ -327,7 +341,7 @@
                     <div class="history-list flex flex-col gap-4">
                         @for (prof of selectedMember()?.professionalHistory; track $index) {
                         <div class="history-item glass-effect rounded-lg overflow-hidden">
-                            <div class="flex justify-between items-center px-4 py-2 border-b border-white/10">
+                            <div class="flex justify-between items-center px-4 py-2 border-b border-primary/10">
                                 <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold">Job #{{ $index + 1 }}</span>
                                 @if (isEditing()) {
                                 <button class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors" (click)="removeProfessional($index)" type="button">✕ Remove</button>
@@ -352,9 +366,11 @@
                                         <label class="text-[10px]">Start Date</label>
                                         <input type="date" [ngModel]="prof.startDate | date:'yyyy-MM-dd'" (ngModelChange)="prof.startDate = $event" [readonly]="!isEditing()">
                                     </div>
-                                    <div class="form-check flex items-end pb-2">
-                                        <label class="flex items-center gap-2 text-[10px] cursor-pointer">
-                                            <input type="checkbox" [(ngModel)]="prof.isCurrent" [disabled]="!isEditing()"> Currently Working
+                                    <div class="flex items-end flex-1">
+                                        <label class="premium-checkbox-label mb-2">
+                                            <input type="checkbox" [(ngModel)]="prof.isCurrent" [disabled]="!isEditing()">
+                                            <span class="checkmark"></span>
+                                            <span class="label-text">Currently Working</span>
                                         </label>
                                     </div>
                                 </div>
@@ -419,7 +435,7 @@
         </div>
 
         @if (isEditing()) {
-        <div class="modal-footer">
+        <div class="p-6 bg-primary/5 border-t border-primary/10 flex justify-end gap-4 rounded-b-2xl">
             <button class="btn btn-secondary" (click)="toggleEdit()">Discard Changes</button>
             <button class="btn btn-accent" (click)="saveMember()">🚀 Synchronize Information</button>
         </div>
@@ -431,12 +447,12 @@
 <!-- Bulk Import Engine Modal -->
 @if (showImportModal()) {
 <div class="modal-overlay" (click)="showImportModal.set(false)">
-    <div class="modal-box wide" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>Enterprise Alumni Bulk Import</h3>
-            <button class="close-btn" (click)="showImportModal.set(false)">✕</button>
+    <div class="modal-content glass-card p-0" (click)="$event.stopPropagation()">
+        <div class="p-8 flex justify-between items-center border-b border-primary/10">
+            <h3 class="text-xl font-black uppercase tracking-tighter">Enterprise Alumni Bulk Import</h3>
+            <button (click)="showImportModal.set(false)" class="text-2xl opacity-50 hover:opacity-100">✕</button>
         </div>
-        <div class="modal-body">
+        <div class="p-10 p-mobile-6">
             <div class="import-engine animate-fade-in">
                 <!-- Step 1: Asset Selection -->
                 <div class="step-card">
@@ -489,7 +505,7 @@
                 }
             </div>
         </div>
-        <div class="modal-footer">
+        <div class="p-6 bg-primary/5 border-t border-primary/10 flex justify-end gap-4 rounded-b-2xl">
             <button class="btn btn-secondary" (click)="showImportModal.set(false)">Cancel Import</button>
             <button class="btn btn-accent px-10 shadow-gold" [disabled]="!importFile() || isImporting()"
                 (click)="executeImport()">

@@ -73,10 +73,23 @@
     gap: 1.5rem;
     opacity: 0.25;
     transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: default;
+    &.clickable {
+        cursor: pointer;
+        
+        &:hover {
+            opacity: 1;
+            transform: translateX(5px);
+            
+            .step-num {
+                border-color: var(--accent-color);
+                box-shadow: 0 0 15px rgba(var(--accent-color-rgb), 0.3);
+            }
+        }
+    }
 
     &.active {
         opacity: 1;
+        cursor: default;
         transform: translateX(12px);
 
         .step-num {
@@ -88,7 +101,7 @@
     }
 
     &.done {
-        opacity: 0.8;
+        opacity: 1;
         .step-num {
             background: var(--accent-color);
             color: #000;
@@ -136,7 +149,7 @@
 }
 
 .wizard-body {
-    padding: 5rem 6rem;
+    padding: 4rem 5rem;
     background: var(--bg-color);
     display: flex;
     flex-direction: column;

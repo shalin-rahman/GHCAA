@@ -27,6 +27,9 @@ namespace GHCAA.API.Controllers
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
+                if (User.IsInRole("SuperAdmin"))
+                    return Ok(new List<GHCAA.Application.DTOs.PaymentHistoryDto>());
+
                 return BadRequest("Invalid user session");
             }
 
@@ -60,15 +63,15 @@ namespace GHCAA.API.Controllers
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
             int memberId;
-            if (memberIdClaim == null || !int.TryParse(memberIdClaim, out memberId)) // Corrected condition
+            if (memberIdClaim == null || !int.TryParse(memberIdClaim, out memberId))
             {
-                // Fallback or handle null - usually if logged in, MemberId should be there
+                if (User.IsInRole("SuperAdmin"))
+                    return Ok(new List<object>());
+
                 var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
                 var user = await _db.Users.FindAsync(userId);
                 memberId = user?.MemberId ?? 0;
             }
-            // else block is not needed as memberId is already assigned by out var or will be assigned in the if block
-            // if (memberIdClaim != null && int.TryParse(memberIdClaim, out memberId)) { } // This is redundant
 
             var dues = await _financialService.GetMemberDuesAsync(memberId, cancellationToken);
             return Ok(dues);

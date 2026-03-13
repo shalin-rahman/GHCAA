@@ -942,7 +942,8 @@
     text-align: center;
     background: #050505;
     border-radius: 0;
-    border: 1px solid rgba(197, 160, 89, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     transition: 0.4s cubic-bezier(0.2, 0, 0.2, 1);
 
     &:hover {
@@ -979,11 +980,22 @@
     font-weight: 900;
 }
 
-.ec-card small {
+.ec-role {
     color: var(--accent-color);
-    font-weight: 900;
+    font-size: 0.75rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.ec-card small {
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 0.75rem;
+    display: block;
 }
 
 .stat-banner {

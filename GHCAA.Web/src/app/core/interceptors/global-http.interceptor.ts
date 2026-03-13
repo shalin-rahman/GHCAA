@@ -29,9 +29,16 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
                 // Server-side error
                 switch (error.status) {
                     case 401:
+                        // Only auto-logout if this is not the login request itself
+                        if (!req.url.includes('/api/auth/login')) {
+                            errorMessage = 'Session expired. Please login again.';
+                            authService.logout();
+                        } else {
+                            errorMessage = error.error?.message || 'Invalid credentials.';
+                        }
+                        break;
                     case 403:
-                        errorMessage = 'Session expired. Please login again.';
-                        authService.logout();
+                        errorMessage = error.error?.message || 'You do not have permission to view or perform this action.';
                         break;
                     case 404:
                         errorMessage = 'The requested resource was not found.';

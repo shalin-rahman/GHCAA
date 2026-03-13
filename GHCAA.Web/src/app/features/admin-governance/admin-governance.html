@@ -25,9 +25,12 @@
                         <small class="p-dates">{{ p.startDate | date:'mediumDate' }} — {{ p.endDate ? (p.endDate |
                             date:'mediumDate') : 'Present' }}</small>
                     </div>
-                    @if (p.isActive) {
-                    <span class="status-badge active-badge">Active</span>
-                    }
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        @if (p.isActive) {
+                        <span class="status-badge active-badge">Active</span>
+                        }
+                        <button class="icon-btn edit-btn" (click)="$event.stopPropagation(); editPeriod(p)" title="Edit Period" style="background:none; border:none; color: var(--text-muted); cursor: pointer;">✏️</button>
+                    </div>
                 </div>
                 }
             </div>
@@ -105,5 +108,90 @@
     </div>
 </div>
 
-<!-- Modals remain mostly same but structural alignment ensures consistency -->
-...
+<!-- New EC Period Modal -->
+@if (showPeriodModal()) {
+<div class="modal-overlay" (click)="showPeriodModal.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ editPeriodData().id ? 'Edit' : 'Create' }} EC Period</h3>
+            <button class="close-btn" (click)="showPeriodModal.set(false)">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Period Title <span class="required-star">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="editPeriodData().title" #periodTitle="ngModel" required
+                    [class.border-red-500]="periodTitle.invalid && periodTitle.touched"
+                    placeholder="e.g. 2023-2025 Committee">
+            </div>
+            
+            <div class="form-group">
+                <label>Start Date <span class="required-star">*</span></label>
+                <input type="date" class="form-control" [(ngModel)]="editPeriodData().startDate" #periodStart="ngModel" required
+                    [class.border-red-500]="periodStart.invalid && periodStart.touched">
+            </div>
+
+            <div class="form-group">
+                <label>End Date</label>
+                <input type="date" class="form-control" [(ngModel)]="editPeriodData().endDate" placeholder="Leave blank if current">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" (click)="showPeriodModal.set(false)">Cancel</button>
+            <button class="btn btn-accent shadow-gold" (click)="savePeriod()" [disabled]="isSavingPeriod()">
+                {{ isSavingPeriod() ? 'Saving...' : (editPeriodData().id ? 'Update Period' : 'Save Period') }}
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Assign Role Modal -->
+@if (showAssignModal()) {
+<div class="modal-overlay" (click)="showAssignModal.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Assign Role</h3>
+            <button class="close-btn" (click)="showAssignModal.set(false)">✕</button>
+        </div>
+        <div class="modal-body">
+            <!-- Search field for member -->
+            <div class="form-group search-group">
+                <label>Search Member</label>
+                <div class="search-box">
+                    <input type="text" 
+                           class="form-control" 
+                           placeholder="Search by name or member ID..." 
+                           [ngModel]="searchQuery()"
+                           (ngModelChange)="searchQuery.set($event); searchMembers($event)">
+                    @if (isSearching()) {
+                        <span class="loading-icon animate-spin">⏳</span>
+                    }
+                </div>
+                
+                @if (memberSearchResults().length > 0) {
+                <ul class="autocomplete-list">
+                    @for (m of memberSearchResults(); track m.id) {
+                    <li (click)="pickMember(m)">
+                        <strong>{{ m.fullName }}</strong> ({{ m.membershipNumber || 'No ID' }})
+                    </li>
+                    }
+                </ul>
+                }
+            </div>
+
+            <div class="form-group">
+                <label>Position</label>
+                <select class="form-control" [(ngModel)]="assignData().position">
+                    @for (pos of ecPositions; track pos.value) {
+                        <option [value]="pos.value">{{ pos.label }}</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" (click)="showAssignModal.set(false)">Cancel</button>
+            <button class="btn btn-accent shadow-gold" (click)="assignRole()">Assign Role</button>
+        </div>
+    </div>
+</div>
+}
