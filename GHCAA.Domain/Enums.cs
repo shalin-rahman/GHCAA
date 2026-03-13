@@ -28,5 +28,11 @@ namespace GHCAA.Domain
 
         // Event Registration Enums
         public enum EventRegistrationStatus { Pending, Approved, Rejected }
+
+        // Payment Method Enums
+        public enum PaymentMethod { ManualReceipt, BKash, Nagad, Rocket, CreditCard, BankTransfer, CashOnHand }
+
+        // Payment Gateway Enums
+        public enum PaymentGateway { None, Stripe, PayPal, SSLCommerz, BkashGateway, NagadGateway, RocketGateway, BankTransferGateway, Manual }
     }
 }

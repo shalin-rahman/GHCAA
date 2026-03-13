@@ -1,7 +1,19 @@
 <div class="admin-feature">
     <div class="header">
-        <h2>Financial Ledger</h2>
-        <div class="header-btns">
+        <div class="header-text">
+            <h2>Financial Ledger</h2>
+            <small>{{ totalItems() }} records found</small>
+        </div>
+        <div class="header-btns flex items-center gap-3">
+            <app-export-buttons 
+                [data]="transactions()" 
+                fileName="ghcaa_ledger"
+                [pdfHeaders]="pdfHeaders"
+                [pdfDataMapper]="pdfMapper"
+                [exporting]="isExporting()"
+                (exportStart)="handleExport($event)"
+                title="Financial Ledger Export">
+            </app-export-buttons>
             <button class="btn btn-accent" (click)="showForm.set(!showForm())">
                 {{ showForm() ? '✕ Close Form' : '+ Add Record' }}
             </button>
@@ -71,6 +83,22 @@
         </form>
     </div>
 
+    <!-- Filters area -->
+    <div class="filter-bar flex flex-wrap items-center gap-4 mb-6 glass-card p-4" *ngIf="!showForm()">
+        <div class="search-wrap flex-1 min-w-[200px] relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-40">🔍</span>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
+                placeholder="Search description or reference..." class="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:border-accent outline-none">
+        </div>
+        
+        <select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event); onFilterChange()"
+            class="bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-sm focus:border-accent outline-none min-w-[120px]">
+            <option [value]="null">All Types</option>
+            <option [value]="0">Income (Credit)</option>
+            <option [value]="1">Expense (Debit)</option>
+        </select>
+    </div>
+
     <!-- Transaction Table -->
     <div class="glass-card table-section" *ngIf="!showForm()">
         @if (loading()) {
@@ -104,6 +132,14 @@
                 }
             </tbody>
         </table>
+        
+        <app-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            [totalItems]="totalItems()"
+            [pageSize]="pageSize()"
+            (pageChange)="currentPage.set($event); loadData()">
+        </app-pagination>
         }
     </div>
 </div>

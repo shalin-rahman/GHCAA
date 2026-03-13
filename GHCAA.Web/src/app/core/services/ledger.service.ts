@@ -27,8 +27,8 @@ export class LedgerService {
     private http = inject(HttpClient);
     private apiUrl = API_ENDPOINTS.LEDGER;
 
-    getRecords(params: any): Observable<FinancialRecord[]> {
-        return this.http.get<FinancialRecord[]>(this.apiUrl, { params });
+    getRecords(params: any): Observable<any> {
+        return this.http.get<any>(this.apiUrl, { params });
     }
 
     getSummary(year: number): Observable<LedgerSummary> {

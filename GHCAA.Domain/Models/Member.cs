@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Domain.Models
@@ -71,5 +71,7 @@ namespace GHCAA.Domain.Models
         // Navigation
         public User? User { get; set; }
         public ICollection<ECMember> ECMembers { get; set; } = new List<ECMember>();
+        public ICollection<AcademicRecord> AcademicHistory { get; set; } = new List<AcademicRecord>();
+        public ICollection<ProfessionalRecord> ProfessionalHistory { get; set; } = new List<ProfessionalRecord>();
     }
 }

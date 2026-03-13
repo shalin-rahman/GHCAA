@@ -18,14 +18,14 @@ export const EC_ROLES = [
 ] as const;
 
 export const MEMBERSHIP_STATUS_MAP: Record<string | number, { label: string, class: string }> = {
-    'Applied': { label: 'Pending Audit', class: 'pending' },
-    0: { label: 'Pending Audit', class: 'pending' },
-    'Active': { label: 'Active Member', class: 'active' },
-    1: { label: 'Active Member', class: 'active' },
-    'InactivePayment': { label: 'Inactive (Payment)', class: 'inactive' },
-    2: { label: 'Inactive (Payment)', class: 'inactive' },
-    'InactiveResigned': { label: 'Inactive (Resigned)', class: 'resigned' },
-    3: { label: 'Inactive (Resigned)', class: 'resigned' },
+    'Applied': { label: 'Pending', class: 'pending' },
+    0: { label: 'Pending', class: 'pending' },
+    'Active': { label: 'Active', class: 'active' },
+    1: { label: 'Active', class: 'active' },
+    'InactivePayment': { label: 'Inactive', class: 'inactive' },
+    2: { label: 'Inactive', class: 'inactive' },
+    'InactiveResigned': { label: 'Resigned', class: 'resigned' },
+    3: { label: 'Resigned', class: 'resigned' },
     'Terminated': { label: 'Terminated', class: 'terminated' },
     4: { label: 'Terminated', class: 'terminated' }
 };
@@ -247,6 +247,7 @@ export const ACADEMIC_DATA = {
 };
 
 export const ensureValidAcademicData = (member: any) => {
+    // Process flat structure (Legacy/Registration)
     if (IS_HSC(member.highestCertificate) || IS_HSC(member.HighestCertificate)) {
         if (member.highestCertificateSubject) member.highestCertificateSubject = 'None';
         if (member.HighestCertificateSubject) member.HighestCertificateSubject = 'None';
@@ -254,6 +255,22 @@ export const ensureValidAcademicData = (member: any) => {
     if (IS_HSC(member.ghcLastCertificate) || IS_HSC(member.GHCLastCertificate)) {
         if (member.ghcLastCertificateSubject) member.ghcLastCertificateSubject = 'None';
         if (member.GHCLastCertificateSubject) member.GHCLastCertificateSubject = 'None';
+    }
+
+    // Process AcademicHistory array (New LinkedIn style)
+    if (member.academicHistory && Array.isArray(member.academicHistory)) {
+        member.academicHistory.forEach((item: any) => {
+            if (IS_HSC(item.degree)) {
+                item.subject = 'None';
+            }
+        });
+    }
+    if (member.AcademicHistory && Array.isArray(member.AcademicHistory)) {
+        member.AcademicHistory.forEach((item: any) => {
+            if (IS_HSC(item.degree)) {
+                item.subject = 'None';
+            }
+        });
     }
 };
 

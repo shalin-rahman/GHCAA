@@ -42,6 +42,8 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<SpecialDayTheme> CreateThemeAsync(SpecialDayTheme theme)
         {
+            theme.StartDate = DateTime.SpecifyKind(theme.StartDate, DateTimeKind.Utc);
+            theme.EndDate = DateTime.SpecifyKind(theme.EndDate, DateTimeKind.Utc);
             _context.SpecialDayThemes.Add(theme);
             await _context.SaveChangesAsync();
             return theme;
@@ -49,6 +51,8 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task UpdateThemeAsync(SpecialDayTheme theme)
         {
+            theme.StartDate = DateTime.SpecifyKind(theme.StartDate, DateTimeKind.Utc);
+            theme.EndDate = DateTime.SpecifyKind(theme.EndDate, DateTimeKind.Utc);
             _context.Entry(theme).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }

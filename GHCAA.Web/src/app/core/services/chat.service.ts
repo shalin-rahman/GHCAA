@@ -45,6 +45,7 @@ export class ChatService {
             .withUrl(API_ENDPOINTS.HUBS.CHAT, {
                 accessTokenFactory: () => token
             })
+            .configureLogging(signalR.LogLevel.Error)
             .withAutomaticReconnect()
             .build();
 

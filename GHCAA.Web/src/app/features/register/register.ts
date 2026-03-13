@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RegistrationService } from '../../core/services/registration.service';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
-import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData } from '../../core/constants/app.constants';
+import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-register',
@@ -28,6 +28,8 @@ export class Register {
   groupOptions = this.ACADEMIC.groups;
   subjectOptions = this.ACADEMIC.subjects;
   sectorOptions = this.ACADEMIC.sectors;
+  bloodGroupOptions = BLOOD_GROUP_OPTIONS;
+  genderOptions = GENDER_OPTIONS;
 
   model: any = {
     FullName: '',
@@ -55,8 +57,28 @@ export class Register {
     Designation: '',
     EmergencyContactName: '',
     EmergencyContactRelation: '',
-    EmergencyContactPhone: ''
+    EmergencyContactPhone: '',
+    AcademicHistory: [
+      { institutionName: 'Govt. Haraganga College', degree: 'HSC', subject: 'None', passingYear: null, isGHC: true }
+    ],
+    ProfessionalHistory: []
   };
+
+  addAcademic() {
+    this.model.AcademicHistory.push({ institutionName: '', degree: '', subject: '', passingYear: null, isGHC: false });
+  }
+
+  removeAcademic(idx: number) {
+    this.model.AcademicHistory.splice(idx, 1);
+  }
+
+  addProfessional() {
+    this.model.ProfessionalHistory.push({ organizationName: '', designation: '', sector: '', location: '', startDate: '', isCurrent: false });
+  }
+
+  removeProfessional(idx: number) {
+    this.model.ProfessionalHistory.splice(idx, 1);
+  }
 
   files: { [key: string]: File } = {};
   otpCode = '';
@@ -90,7 +112,30 @@ export class Register {
 
     const formData = new FormData();
     Object.keys(this.model).forEach(key => {
-      formData.append(key, this.model[key]);
+      if (key !== 'AcademicHistory' && key !== 'ProfessionalHistory') {
+        formData.append(key, this.model[key]);
+      }
+    });
+
+    // Append Academic History as array
+    this.model.AcademicHistory.forEach((item: any, i: number) => {
+      formData.append(`AcademicHistory[${i}].InstitutionName`, item.institutionName);
+      formData.append(`AcademicHistory[${i}].Degree`, item.degree);
+      formData.append(`AcademicHistory[${i}].Subject`, item.subject);
+      formData.append(`AcademicHistory[${i}].AdmissionYear`, item.admissionYear || '');
+      formData.append(`AcademicHistory[${i}].PassingYear`, item.passingYear || '');
+      formData.append(`AcademicHistory[${i}].IsGHC`, item.isGHC.toString());
+    });
+
+    // Append Professional History as array
+    this.model.ProfessionalHistory.forEach((item: any, i: number) => {
+      formData.append(`ProfessionalHistory[${i}].OrganizationName`, item.organizationName);
+      formData.append(`ProfessionalHistory[${i}].Designation`, item.designation);
+      formData.append(`ProfessionalHistory[${i}].Sector`, item.sector || '');
+      formData.append(`ProfessionalHistory[${i}].Location`, item.location || '');
+      formData.append(`ProfessionalHistory[${i}].StartDate`, item.startDate || '');
+      if (item.endDate) formData.append(`ProfessionalHistory[${i}].EndDate`, item.endDate);
+      formData.append(`ProfessionalHistory[${i}].IsCurrent`, item.isCurrent.toString());
     });
 
     if (this.files['photo']) formData.append('photo', this.files['photo']);

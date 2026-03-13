@@ -2,6 +2,7 @@ using System.Security.Claims;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GHCAA.API.Controllers
@@ -82,6 +83,31 @@ namespace GHCAA.API.Controllers
 
             var dataUri = await _idCardService.GenerateCertificateDataUriAsync(memberId, cancellationToken);
             return Ok(new { DataUri = dataUri });
+        }
+
+        [HttpPost("photo")]
+        public async Task<IActionResult> UploadPhoto(IFormFile photo, CancellationToken cancellationToken)
+        {
+            var memberId = GetMemberId();
+            if (memberId == 0) return Unauthorized();
+            if (photo == null || photo.Length == 0) return BadRequest(new { Message = "No file provided." });
+
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+            if (!allowedTypes.Contains(photo.ContentType.ToLower()))
+                return BadRequest(new { Message = "Only JPG, PNG, or WebP images are allowed." });
+
+            if (photo.Length > 5 * 1024 * 1024)
+                return BadRequest(new { Message = "Photo must be under 5MB." });
+
+            var dto = new UploadedFileDto
+            {
+                FileName = photo.FileName,
+                Length = photo.Length,
+                Content = photo.OpenReadStream()
+            };
+
+            var photoPath = await _memberService.UpdateMemberPhotoAsync(memberId, dto, cancellationToken);
+            return Ok(new { Message = "Photo updated successfully.", PhotoPath = photoPath });
         }
 
         private int GetMemberId()

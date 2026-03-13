@@ -17,9 +17,10 @@ namespace GHCAA.Application.Interfaces
         Task<bool> DeleteEventAsync(int id, CancellationToken cancellationToken = default);
 
         // Event Registration
-        Task<EventRegistration> RegisterForEventAsync(RegisterForEventDto dto, int memberId, UploadedFileDto? receipt = null, CancellationToken cancellationToken = default);
+        Task<EventRegistration> RegisterForEventAsync(RegisterForEventDto dto, int? memberId, UploadedFileDto? receipt = null, CancellationToken cancellationToken = default);
         Task<IEnumerable<EventRegistration>> GetRegistrationsByMemberAsync(int memberId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<EventRegistration>> GetAllRegistrationsForAdminAsync(CancellationToken cancellationToken = default);
+        Task<object> GetAllRegistrationsForAdminAsync(int page = 1, int pageSize = 10, int? eventId = null, string? status = null, string? search = null, CancellationToken cancellationToken = default);
         Task<bool> ApproveRegistrationAsync(int registrationId, int adminId, bool approve, CancellationToken cancellationToken = default);
+        Task<EventRegistration?> GetRegistrationByIdAsync(int id, CancellationToken cancellationToken = default);
     }
 }

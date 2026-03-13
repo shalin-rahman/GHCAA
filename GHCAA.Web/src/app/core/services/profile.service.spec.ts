@@ -1,11 +1,38 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ProfileService } from './profile.service';
+import { ProfileService, MemberProfile } from './profile.service';
 import { API_ENDPOINTS } from '../constants/app.constants';
 
 describe('ProfileService', () => {
     let service: ProfileService;
     let httpMock: HttpTestingController;
+
+    const mockProfile: MemberProfile = {
+        id: 1,
+        fullName: 'Test User',
+        email: 'test@test.com',
+        mobileNo: '0123456789',
+        status: 1,
+        membershipType: 1,
+        highestCertificate: 'BSc',
+        highestCertificateGroup: 'Science',
+        highestCertificateSubject: 'CSE',
+        highestCertificatePassingYear: 2020,
+        ghcLastCertificate: 'HSC',
+        ghcLastCertificateGroup: 'Science',
+        ghcLastCertificateSubject: 'Science',
+        ghcLastCertificatePassingYear: 2016,
+        professionalSector: 'IT',
+        designation: 'Engineer',
+        presentAddress: 'Dhaka',
+        permanentAddress: 'Dhaka',
+        bloodGroup: 1,
+        isMobilePublic: true,
+        isEmailPublic: true,
+        isAddressPublic: true,
+        academicHistory: [],
+        professionalHistory: []
+    };
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -24,10 +51,40 @@ describe('ProfileService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should fetch profile', () => {
-        service.getProfile().subscribe(p => expect(p).toBeTruthy());
+    it('should get profile', () => {
+        service.getProfile().subscribe(res => {
+            expect(res).toEqual(mockProfile);
+        });
         const req = httpMock.expectOne(API_ENDPOINTS.PROFILE);
         expect(req.request.method).toBe('GET');
-        req.flush({});
+        req.flush(mockProfile);
+    });
+
+    it('should update profile', () => {
+        service.updateProfile(mockProfile).subscribe(res => {
+            expect(res.success).toBe(true);
+        });
+        const req = httpMock.expectOne(API_ENDPOINTS.PROFILE);
+        expect(req.request.method).toBe('PUT');
+        expect(req.request.body).toEqual(mockProfile);
+        req.flush({ success: true });
+    });
+
+    it('should get ID card', () => {
+        service.getIDCard().subscribe(res => {
+            expect(res.dataUri).toBe('data:image');
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.PROFILE}/id-card`);
+        expect(req.request.method).toBe('GET');
+        req.flush({ dataUri: 'data:image' });
+    });
+
+    it('should get certificate', () => {
+        service.getCertificate().subscribe(res => {
+            expect(res.dataUri).toBe('data:image');
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.PROFILE}/certificate`);
+        expect(req.request.method).toBe('GET');
+        req.flush({ dataUri: 'data:image' });
     });
 });

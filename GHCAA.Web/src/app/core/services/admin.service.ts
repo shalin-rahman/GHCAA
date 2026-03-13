@@ -57,6 +57,17 @@ export class AdminService {
         return this.http.get<any>(`${this.apiUrl}${params}`);
     }
 
+    getMemberById(id: number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/${id}`);
+    }
+
+    getAllForExport(searchQuery: string = '', statusFilter: string = 'all'): Observable<any[]> {
+        // Fetch a large number or use a specific export endpoint if you add one later
+        let params = `?page=1&pageSize=10000&statusFilter=${statusFilter}`;
+        if (searchQuery) params += `&searchQuery=${encodeURIComponent(searchQuery)}`;
+        return this.http.get<any>(`${this.apiUrl}${params}`);
+    }
+
     approveMember(id: number, adminId: number): Observable<any> {
         return this.http.post(`${this.apiUrl}/${id}/approve`, { approvedByAdminId: adminId });
     }
@@ -81,8 +92,21 @@ export class AdminService {
         return this.http.put(`${this.apiUrl}/${id}`, data);
     }
 
+    updateMemberDocuments(id: number, certificate?: File, paymentProof?: File): Observable<any> {
+        const formData = new FormData();
+        if (certificate) formData.append('certificate', certificate);
+        if (paymentProof) formData.append('paymentProof', paymentProof);
+        return this.http.patch(`${this.apiUrl}/${id}/documents`, formData);
+    }
+
     sendPasswordResetLink(id: number): Observable<any> {
         return this.http.post(`${this.apiUrl}/${id}/reset-password-admin`, {});
+    }
+
+    updateMemberPhoto(id: number, photo: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('photo', photo);
+        return this.http.post<any>(`${this.apiUrl}/${id}/photo`, formData);
     }
 
     importMembers(formData: FormData): Observable<any> {

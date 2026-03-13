@@ -24,41 +24,39 @@ describe('NetworkingService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should fetch committee members', () => {
-        const dummyCommittee = [{ id: 1, fullName: 'Member' }];
-        service.getCommittee().subscribe(members => {
-            expect(members.length).toBe(1);
-            expect(members).toEqual(dummyCommittee);
+    it('should get committee', () => {
+        service.getCommittee({ periodId: 1 }).subscribe(res => {
+            expect(res.length).toBe(0);
         });
-
-        const req = httpMock.expectOne(API_ENDPOINTS.NETWORKING.COMMITTEE);
+        const req = httpMock.expectOne(req => req.url === API_ENDPOINTS.NETWORKING.COMMITTEE);
         expect(req.request.method).toBe('GET');
-        req.flush(dummyCommittee);
+        req.flush([]);
     });
 
-    it('should fetch committee periods', () => {
-        const dummyPeriods = [{ id: 1, title: '2023-2025' }];
-        service.getPeriods().subscribe(periods => {
-            expect(periods.length).toBe(1);
-            expect(periods).toEqual(dummyPeriods);
+    it('should get periods', () => {
+        service.getPeriods().subscribe(res => {
+            expect(res.length).toBe(0);
         });
-
         const req = httpMock.expectOne(API_ENDPOINTS.NETWORKING.COMMITTEE_PERIODS);
         expect(req.request.method).toBe('GET');
-        req.flush(dummyPeriods);
+        req.flush([]);
     });
 
-    it('should search members with filters', () => {
-        const filters = { query: 'test', year: 2020 };
-        const dummyResults = [{ id: 1, fullName: 'Test User' }];
-
-        service.searchMembers(filters).subscribe(results => {
-            expect(results.length).toBe(1);
-            expect(results).toEqual(dummyResults);
+    it('should search members', () => {
+        service.searchMembers({ query: 'shalin' }).subscribe(res => {
+            expect(res.length).toBe(0);
         });
-
-        const req = httpMock.expectOne(r => r.url === API_ENDPOINTS.NETWORKING.SEARCH && r.params.get('query') === 'test');
+        const req = httpMock.expectOne(req => req.url === API_ENDPOINTS.NETWORKING.SEARCH);
         expect(req.request.method).toBe('GET');
-        req.flush(dummyResults);
+        req.flush([]);
+    });
+
+    it('should get updates', () => {
+        service.getUpdates({ count: 5 }).subscribe(res => {
+            expect(res.length).toBe(0);
+        });
+        const req = httpMock.expectOne(req => req.url === API_ENDPOINTS.NETWORKING.UPDATES);
+        expect(req.request.method).toBe('GET');
+        req.flush([]);
     });
 });

@@ -21,6 +21,7 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<EventGallery> CreateEventGalleryAsync(EventGallery gallery, CancellationToken cancellationToken = default)
         {
+            gallery.EventDate = DateTime.SpecifyKind(gallery.EventDate, DateTimeKind.Utc);
             await _db.EventGalleries.AddAsync(gallery, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
             return gallery;
@@ -71,6 +72,7 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<EventGallery> UpdateEventGalleryAsync(EventGallery gallery, CancellationToken cancellationToken = default)
         {
+            gallery.EventDate = DateTime.SpecifyKind(gallery.EventDate, DateTimeKind.Utc);
             _db.EventGalleries.Update(gallery);
             await _db.SaveChangesAsync(cancellationToken);
             return gallery;

@@ -25,9 +25,9 @@ namespace GHCAA.Infrastructure.Services
         public string GetRelativeFilePath(int memberId, Enums.FileUploadType uploadType, string fileName)
         {
             var safeFileName = Path.GetFileName(fileName);
-            var folder = uploadType.ToString().ToLower();
-            var memberFolder = Path.Combine("uploads", "members", memberId.ToString(), folder);
-            return Path.Combine(memberFolder, safeFileName).Replace("\\", "/");
+            var prefix = uploadType.ToString().ToLower();
+            var relativeRoot = _config["FileStorage:UploadsRelativePath"] ?? "uploads/members";
+            return Path.Combine(relativeRoot, $"{prefix}_m{memberId}_{safeFileName}").Replace("\\", "/");
         }
 
         public async Task<string> SaveFileAsync(Stream fileStream, string fileName, int memberId, Enums.FileUploadType uploadType, CancellationToken cancellationToken = default)
@@ -36,17 +36,19 @@ namespace GHCAA.Infrastructure.Services
             if (fileStream.Length > _maxFileSize) throw new InvalidOperationException($"File exceeds maximum size {_maxFileSize} bytes.");
 
             var safeFileName = Path.GetFileName(fileName);
-            var subFolder = uploadType.ToString().ToLower();
-            var targetFolder = Path.Combine(_uploadsRoot, memberId.ToString(), subFolder);
-            Directory.CreateDirectory(targetFolder);
+            var prefix = uploadType.ToString().ToLower();
+            
+            // Create the single root directory if it does not exist
+            Directory.CreateDirectory(_uploadsRoot);
 
-            var uniqueName = $"{Guid.NewGuid():N}_{safeFileName}";
-            var diskPath = Path.Combine(targetFolder, uniqueName);
+            var uniqueName = $"{prefix}_m{memberId}_{Guid.NewGuid():N}_{safeFileName}";
+            var diskPath = Path.Combine(_uploadsRoot, uniqueName);
 
             using var fs = new FileStream(diskPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
             await fileStream.CopyToAsync(fs, cancellationToken);
 
-            var webRelative = Path.Combine("uploads", "members", memberId.ToString(), subFolder, uniqueName).Replace("\\", "/");
+            var relativeRoot = _config["FileStorage:UploadsRelativePath"] ?? "uploads/members";
+            var webRelative = Path.Combine(relativeRoot, uniqueName).Replace("\\", "/");
             _logger.LogInformation("Saved file to {Path}", webRelative);
             return webRelative;
         }

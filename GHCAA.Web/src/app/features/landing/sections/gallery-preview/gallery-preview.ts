@@ -35,4 +35,8 @@ export class LandingGalleryPreview implements OnInit {
         });
         return allPhotos.slice(0, 8);
     }
+
+    viewFull(path: string) {
+        window.open(path, '_blank');
+    }
 }

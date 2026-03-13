@@ -34,7 +34,7 @@ export class Dashboard implements OnInit {
   ngOnInit() {
     this.profileService.getProfile().subscribe({
       next: p => this.profile.set(p),
-      error: () => console.warn('Could not load profile')
+      error: () => {}
     });
     this.alertService.loadNotifications();
     this.loadStats();

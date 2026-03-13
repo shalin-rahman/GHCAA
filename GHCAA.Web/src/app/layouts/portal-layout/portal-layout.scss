@@ -177,7 +177,11 @@
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--glass-border);
-    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+}
+
+.top-bar-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -276,7 +280,6 @@
 
 /* Page Transitions */
 .page-content {
-    padding: 2.5rem 0;
     animation: fadeIn 0.4s ease-out;
 }
 

@@ -121,4 +121,33 @@ public class EventServiceTests : TestBase
         result!.Title.Should().Be("New Title");
         result.AdminNote.Should().Be("Important Update");
     }
+
+    [Test]
+    public async Task RegisterForEventAsync_NonMember_ShouldFail_WhenEventDoesNotAllow()
+    {
+        var ev = new AlumniEvent { Title = "Member Only", Description = "D", Date = DateTime.UtcNow, Location = "L", AllowNonMembers = false };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var dto = new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P", IsNonMember = true, GuestName = "Guest" };
+        Func<Task> act = async () => await _service.RegisterForEventAsync(dto, null, null);
+        
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("This event is for members only.");
+    }
+
+    [Test]
+    public async Task RegisterForEventAsync_NonMember_ShouldSucceed_WhenEventAllows()
+    {
+        var ev = new AlumniEvent { Title = "Open Event", Description = "D", Date = DateTime.UtcNow, Location = "L", AllowNonMembers = true };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var dto = new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P", IsNonMember = true, GuestName = "Guest", GuestEmail = "guest@ex.com" };
+        var result = await _service.RegisterForEventAsync(dto, null, null);
+
+        result.Should().NotBeNull();
+        result.IsNonMember.Should().BeTrue();
+        result.GuestName.Should().Be("Guest");
+        result.MemberId.Should().BeNull();
+    }
 }

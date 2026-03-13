@@ -24,7 +24,10 @@
                     </div>
 
                     <div class="event-details">
-                        <span class="type">{{ ev.type || 'Alumni Gathering' }}</span>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="type">{{ ev.type || 'Alumni Gathering' }}</span>
+                            <span *ngIf="ev.allowNonMembers" class="px-2 py-0.5 bg-accent/20 text-accent rounded text-[10px] uppercase font-black tracking-widest">Guests Welcome</span>
+                        </div>
                         <h3>{{ ev.title }}</h3>
                         <p>{{ ev.description }}</p>
 
@@ -76,12 +79,40 @@
                         </div>
 
                         <form [formGroup]="regForm" (ngSubmit)="submitRegistration()" class="space-y-6">
+                            @if (isGuest()) {
+                            <div class="guest-info-block grid grid-cols-1 md:grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
+                                <div class="input-group">
+                                    <label>Guest Full Name *</label>
+                                    <input type="text" formControlName="guestName" placeholder="Full Name">
+                                </div>
+                                <div class="input-group">
+                                    <label>Guest Email *</label>
+                                    <input type="email" formControlName="guestEmail" placeholder="email@example.com">
+                                </div>
+                                <div class="input-group">
+                                    <label>Guest Mobile *</label>
+                                    <input type="text" formControlName="guestMobile" placeholder="01XXXXXXXXX">
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-muted italic mb-4">You are registering as a non-member. Please provide accurate details for entry.</p>
+                            }
+
+                            <!-- Payment Method Selector -->
+                            <app-payment-method-selector
+                                (methodSelected)="onPaymentMethodSelected($event)">
+                            </app-payment-method-selector>
+
+                            <!-- Transaction Reference (conditionally shown) -->
+                            @if (selectedPaymentMethod()?.requiresReference) {
                             <div class="input-group">
-                                <label>Financial Reference (TrxID / Bank Slip No.)</label>
+                                <label>Financial Reference (TrxID / Bank Slip No.) *</label>
                                 <input type="text" formControlName="paymentReference" class="font-mono text-accent"
                                     placeholder="e.g. BK729XJS01">
                             </div>
+                            }
 
+                            <!-- Receipt Upload (conditionally shown) -->
+                            @if (selectedPaymentMethod()?.requiresReceipt) {
                             <div class="input-group">
                                 <label>Evidence of Transaction (Receipt Photo)</label>
                                 <div
@@ -101,6 +132,7 @@
                                     </div>
                                 </div>
                             </div>
+                            }
 
                             <div class="flex gap-4 pt-2">
                                 <button type="button" (click)="closeModal()"
@@ -148,6 +180,11 @@
                         {{ reg.status }}
                     </div>
 
+                    <button *ngIf="reg.status === 'Approved'" (click)="printInvitation(reg.id)"
+                        class="btn btn-accent btn-sm rounded-full p-2 h-8 w-8 !min-w-0" title="Print Invitation Card">
+                        <span>🖨️</span>
+                    </button>
+
                     <button class="btn btn-secondary btn-sm rounded-full p-2 h-8 w-8 !min-w-0" title="View Details">
                         <span>👁️</span>
                     </button>
@@ -157,5 +194,90 @@
         </div>
     </div>
 
+    <!-- Invitation Card Modal (Printable) -->
+    <div *ngIf="showInvitation() && invitationData()" class="modal-overlay invitation-modal no-print">
+        <div class="modal-box wide invitation-card-preview animate-fade-up">
+            <div class="modal-header">
+                <h3>Invitation Pass</h3>
+                <button class="close-btn" (click)="closeInvitation()">✕</button>
+            </div>
 
+            <div class="modal-body">
+                <div id="invitation-card" class="invitation-card print-target">
+                    <div class="card-glow"></div>
+                    
+                    <div class="card-header">
+                        <div class="card-logo">
+                            <img src="/assets/logo.jpg" alt="Logo">
+                        </div>
+                        <div class="org-info">
+                            <h1 class="text-green-800">Govt. Haraganga College Alumni Association</h1>
+                            <p class="subtitle text-green-700">Connecting Hearts, Building Legacy</p>
+                        </div>
+                    </div>
+
+                    <div class="card-main">
+                        <div class="title-block">
+                            <span class="badge">OFFICIAL ENTRY PASS</span>
+                            <h2>{{ invitationData()?.event?.title }}</h2>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-group">
+                                <label>Participant Name</label>
+                                <p class="val">{{ invitationData()?.memberName || invitationData()?.guestName || 'Valued Guest' }}</p>
+                            </div>
+                            <div class="detail-group">
+                                <label>Reg Number</label>
+                                <p class="val font-mono">REG-{{ invitationData()?.id?.toString()?.padStart(6, '0') }}</p>
+                            </div>
+                        </div>
+
+                        <div class="logistics-row">
+                            <div class="item">
+                                <span class="icon">📍</span>
+                                <div class="meta">
+                                    <label>Venue</label>
+                                    <strong>{{ invitationData()?.event?.location }}</strong>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <span class="icon">📅</span>
+                                <div class="meta">
+                                    <label>Date & Time</label>
+                                    <strong>{{ invitationData()?.event?.date | date:'medium' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="security-row">
+                            <div class="qr-placeholder">
+                                <div class="barcode">
+                                    <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]" class="bar" [style.width.px]="(i % 3 + 1) * 2"></div>
+                                </div>
+                                <span class="text-[8px] font-mono mt-1">E-CERTIFIED PASS</span>
+                            </div>
+                            <div class="approval-seal">
+                                <div class="seal">
+                                    <span class="seal-txt">GHC APPROVED</span>
+                                </div>
+                                <p class="seal-date">Validated on {{ invitationData()?.registeredAt | date:'shortDate' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <p>Present this card (Digital/Printed) at the registration desk for entry.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="closeInvitation()">Close</button>
+                <button class="btn btn-accent shadow-gold" (click)="doPrint()">
+                    <span>🖨️</span> Print Invitation
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

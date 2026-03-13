@@ -21,9 +21,9 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRecords([FromQuery] int? year, [FromQuery] Domain.Enums.FinancialRecordType? type, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetRecords(int page = 1, int pageSize = 10, [FromQuery] int? year = null, [FromQuery] string? search = null, [FromQuery] Domain.Enums.FinancialRecordType? type = null, CancellationToken cancellationToken = default)
         {
-            var records = await _ledgerService.GetRecordsAsync(year, type, cancellationToken);
+            var records = await _ledgerService.GetRecordsAsync(page, pageSize, year, search, type, cancellationToken);
             return Ok(records);
         }
 

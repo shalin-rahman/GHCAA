@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,17 +20,16 @@ export class Login {
   private cdr = inject(ChangeDetectorRef);
 
   credentials: LoginDto = { username: '', password: '' };
-  loading = false;
-  errorMessage = '';
+  loading = signal(false);
+  errorMessage = signal('');
 
   onLogin() {
-    this.loading = true;
-    this.errorMessage = '';
-    this.cdr.detectChanges(); // Stablize for NG0100
+    this.loading.set(true);
+    this.errorMessage.set('');
 
     this.auth.login(this.credentials).subscribe({
       next: (user) => {
-        this.loading = false;
+        this.loading.set(false);
         if (user.role === 'Admin') {
           this.router.navigate(['/admin/approvals']);
         } else {
@@ -38,8 +37,8 @@ export class Login {
         }
       },
       error: (err) => {
-        this.loading = false;
-        this.errorMessage = 'Invalid username or password.';
+        this.loading.set(false);
+        this.errorMessage.set('Invalid username or password.');
       }
     });
   }

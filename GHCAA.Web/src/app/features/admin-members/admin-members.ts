@@ -5,13 +5,16 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { EC_ROLES, getECPositionName, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_STATUS_OPTIONS, MEMBERSHIP_TYPE_OPTIONS, MEMBER_CATEGORY_OPTIONS, EC_ROLES_OPTIONS, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS } from '../../core/constants/app.constants';
+import { EC_ROLES, getECPositionName, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_STATUS_OPTIONS, MEMBERSHIP_TYPE_OPTIONS, MEMBER_CATEGORY_OPTIONS, EC_ROLES_OPTIONS, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS } from '../../core/constants/app.constants';
 import * as XLSX from 'xlsx';
+import { ExportButtonsComponent } from '../../shared/export-buttons/export-buttons.component';
+import { PaginationComponent } from '../../shared/pagination/pagination.component';
+import { ExportUtil } from '../../core/utils/export.util';
 
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'
 })
@@ -23,10 +26,15 @@ export class AdminMembers implements OnInit {
 
   allMembers = signal<any[]>([]);
   loading = signal(true);
+  isExporting = signal(false);
   searchQuery = signal('');
   statusFilter = signal('all');
   selectedMember = signal<any>(null);
   isEditing = signal(false);
+  certToUpload: File | null = null;
+  payToUpload: File | null = null;
+  photoToUpload: File | null = null;
+  photoPreview = signal<string | null>(null);
 
   // Pagination state
   currentPage = signal(1);
@@ -106,6 +114,17 @@ export class AdminMembers implements OnInit {
   subjectOptions = this.ACADEMIC.subjects;
   sectorOptions = this.ACADEMIC.sectors;
 
+  // PDF Export Config
+  pdfHeaders = ['ID', 'Name', 'Email', 'Mobile', 'Batch', 'Status'];
+  pdfMapper = (m: any) => [
+    m.membershipNumber || `M-${m.id}`,
+    m.fullName,
+    m.email,
+    m.mobileNo,
+    m.ghcLastCertificatePassingYear,
+    m.status
+  ];
+
   ngOnInit() {
     this.loadMembers();
   }
@@ -113,6 +132,26 @@ export class AdminMembers implements OnInit {
   onFilterChange() {
     this.currentPage.set(1);
     this.loadMembers();
+  }
+
+  handleExport(format: string) {
+    this.isExporting.set(true);
+    this.adminService.getAllForExport(this.searchQuery(), this.statusFilter()).subscribe({
+      next: (res: any) => {
+        const data = res.items || res;
+        if (format === 'excel') ExportUtil.toExcel(data, 'ghcaa_members');
+        if (format === 'csv') ExportUtil.toCsv(data, 'ghcaa_members');
+        if (format === 'pdf') {
+          const pData = data.map(this.pdfMapper);
+          ExportUtil.toPdf(this.pdfHeaders, pData, 'ghcaa_members', 'Member Registry Export');
+        }
+        this.isExporting.set(false);
+      },
+      error: () => {
+        this.notify.error('Failed to prepare export data');
+        this.isExporting.set(false);
+      }
+    });
   }
 
   loadMembers() {
@@ -171,10 +210,35 @@ export class AdminMembers implements OnInit {
     });
   }
 
-  openDetail(member: any) { this.selectedMember.set({ ...member }); this.isEditing.set(false); }
-  closeDetail() { this.selectedMember.set(null); this.isEditing.set(false); }
+  openDetail(member: any) { this.selectedMember.set({ ...member }); this.isEditing.set(false); this.photoToUpload = null; this.photoPreview.set(null); }
+  closeDetail() { this.selectedMember.set(null); this.isEditing.set(false); this.photoToUpload = null; this.photoPreview.set(null); }
 
   toggleEdit() { this.isEditing.update(v => !v); }
+
+  onAdminPhotoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.photoToUpload = file;
+    const reader = new FileReader();
+    reader.onload = (e) => this.photoPreview.set(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  uploadMemberPhoto() {
+    const member = this.selectedMember();
+    if (!member || !this.photoToUpload) return;
+    this.adminService.updateMemberPhoto(member.id, this.photoToUpload).subscribe({
+      next: (res) => {
+        this.selectedMember.update(m => ({ ...m, photoPath: res.photoPath }));
+        this.photoToUpload = null;
+        this.photoPreview.set(null);
+        this.notify.success('Photo updated successfully!');
+        this.loadMembers();
+      },
+      error: (err) => this.notify.error(err?.error?.message || 'Photo upload failed.')
+    });
+  }
 
   saveMember() {
     const member = this.selectedMember();
@@ -212,36 +276,65 @@ export class AdminMembers implements OnInit {
       membershipNumber: member.membershipNumber,
       isMobilePublic: member.isMobilePublic,
       isEmailPublic: member.isEmailPublic,
-      isAddressPublic: member.isAddressPublic
+      isAddressPublic: member.isAddressPublic,
+      academicHistory: member.academicHistory,
+      professionalHistory: member.professionalHistory
     }).subscribe({
       next: () => {
-        this.notify.success('Member information updated.');
-        this.isEditing.set(false);
-        this.loadMembers();
+        // After data update, if there are files, upload them
+        if (this.certToUpload || this.payToUpload) {
+          this.adminService.updateMemberDocuments(member.id, this.certToUpload || undefined, this.payToUpload || undefined).subscribe({
+            next: () => {
+              this.notify.success('Member information and documents updated.');
+              this.finalizeSave();
+            },
+            error: () => this.notify.error('Data updated, but document upload failed.')
+          });
+        } else {
+          this.notify.success('Member information updated.');
+          this.finalizeSave();
+        }
       },
       error: () => this.notify.error('Update failed.')
     });
+  }
+
+  private finalizeSave() {
+    const memberId = this.selectedMember()?.id;
+    this.isEditing.set(false);
+    this.certToUpload = null;
+    this.payToUpload = null;
+    this.loadMembers();
+    
+    // Refresh selected member details to show new paths/data
+    if (memberId) {
+      this.adminService.getMembers(1, 1, `M-${memberId}`, 'all').subscribe({
+        next: (res: any) => {
+          if (res.items && res.items.length > 0) {
+            this.selectedMember.set(res.items[0]);
+          }
+        }
+      });
+    }
+  }
+
+  onDocSelected(event: any, type: 'cert' | 'pay') {
+    const file = event.target.files[0];
+    if (file) {
+      if (type === 'cert') this.certToUpload = file;
+      else this.payToUpload = file;
+    }
   }
 
   contactMember(email: string) {
     this.router.navigate(['/admin/comm'], { queryParams: { target: email, method: 'custom' } });
   }
 
-  getStatusLabel(status: any): string {
-    return getStatusLabel(status);
-  }
-
-  getStatusClass(status: any): string {
-    return getStatusClass(status);
-  }
-
-  getCategoryLabel(cat: any): string {
-    return getCategoryLabel(cat);
-  }
-
-  getECPositionLabel(pos: any): string {
-    return getECPositionName(pos);
-  }
+  getStatusLabel = getStatusLabel;
+  getStatusClass = getStatusClass;
+  getCategoryLabel = getCategoryLabel;
+  getMembershipTypeLabel = getMembershipTypeLabel;
+  getECPositionLabel = getECPositionName;
 
   // --- Import Actions ---
   openImport() {
@@ -352,8 +445,7 @@ export class AdminMembers implements OnInit {
       next: (res: any) => {
         this.notify.success(`Import Complete! Successfully added ${res.successCount} members.`);
         if (res.failureCount > 0) {
-          this.notify.warning(`${res.failureCount} rows failed. See console for details.`);
-          console.error('Import Errors:', res.errors);
+          this.notify.warning(`${res.failureCount} rows had issues. Please review the import file.`);
         }
         this.isImporting.set(false);
         this.showImportModal.set(false);
@@ -364,5 +456,38 @@ export class AdminMembers implements OnInit {
         this.isImporting.set(false);
       }
     });
+  }
+
+  addAcademic() {
+    if (!this.selectedMember().academicHistory) this.selectedMember().academicHistory = [];
+    this.selectedMember().academicHistory.unshift({
+      institutionName: '',
+      degree: '',
+      subject: '',
+      admissionYear: new Date().getFullYear() - 4,
+      passingYear: new Date().getFullYear(),
+      isGHC: false,
+      result: ''
+    });
+  }
+
+  removeAcademic(index: number) {
+    this.selectedMember().academicHistory.splice(index, 1);
+  }
+
+  addProfessional() {
+    if (!this.selectedMember().professionalHistory) this.selectedMember().professionalHistory = [];
+    this.selectedMember().professionalHistory.unshift({
+      organizationName: '',
+      designation: '',
+      sector: '',
+      location: '',
+      startDate: new Date().toISOString().split('T')[0],
+      isCurrent: true
+    });
+  }
+
+  removeProfessional(index: number) {
+    this.selectedMember().professionalHistory.splice(index, 1);
   }
 }

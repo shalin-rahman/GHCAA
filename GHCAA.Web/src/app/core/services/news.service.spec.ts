@@ -1,11 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { NewsService } from './news.service';
+import { NewsService, NewsPost } from './news.service';
 import { API_ENDPOINTS } from '../constants/app.constants';
 
 describe('NewsService', () => {
     let service: NewsService;
     let httpMock: HttpTestingController;
+
+    const mockPost: NewsPost = {
+        id: 1,
+        title: 'Tech Update',
+        content: 'Latest tech news.',
+        category: 'Technology',
+        isActive: true,
+        authorName: 'Admin',
+        createdAt: '2026-03-08T00:00:00Z'
+    };
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -24,15 +34,61 @@ describe('NewsService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should fetch news', () => {
-        const dummyNews = [{ id: 1, title: 'News 1' }];
-        service.getNews().subscribe(news => {
-            expect(news.length).toBe(1);
-            expect(news).toEqual(dummyNews as any);
+    it('should get active news', () => {
+        service.getNews().subscribe(res => {
+            expect(res.length).toBe(1);
         });
-
         const req = httpMock.expectOne(API_ENDPOINTS.NEWS);
         expect(req.request.method).toBe('GET');
-        req.flush(dummyNews);
+        req.flush([mockPost]);
+    });
+
+    it('should get news by id', () => {
+        service.getNewsById(1).subscribe(res => {
+            expect(res.title).toBe('Tech Update');
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.NEWS}/1`);
+        expect(req.request.method).toBe('GET');
+        req.flush(mockPost);
+    });
+
+    it('should get all news for admin', () => {
+        service.getNewsAdmin().subscribe(res => {
+            expect(res.length).toBe(1);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.NEWS}/admin`);
+        expect(req.request.method).toBe('GET');
+        req.flush([mockPost]);
+    });
+
+    it('should create news', () => {
+        const payload = { title: 'New', content: 'C', category: 'General', isActive: true, authorName: 'A' };
+        service.createNews(payload).subscribe(res => {
+            expect(res.id).toBe(1);
+        });
+        const req = httpMock.expectOne(API_ENDPOINTS.NEWS);
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toEqual(payload);
+        req.flush(mockPost);
+    });
+
+    it('should update news', () => {
+        const payload = { title: 'Updated' };
+        service.updateNews(1, payload).subscribe(res => {
+            expect(res.id).toBe(1);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.NEWS}/1`);
+        expect(req.request.method).toBe('PUT');
+        expect(req.request.body).toEqual(payload);
+        req.flush(mockPost);
+    });
+
+    it('should delete news', () => {
+        service.deleteNews(1).subscribe(res => {
+            expect(res.success).toBe(true);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.NEWS}/1`);
+        expect(req.request.method).toBe('DELETE');
+        req.flush({ success: true });
     });
 });

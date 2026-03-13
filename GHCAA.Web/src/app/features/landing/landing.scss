@@ -1056,8 +1056,8 @@
 
 .gallery-section {
     padding: 7rem 0;
-    background: var(--surface-color);
-    border-top: 1px solid var(--glass-border);
+    background: #000;
+    border-top: 1px solid rgba(197, 160, 89, 0.05);
 
     .gallery-grid {
         display: grid;

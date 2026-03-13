@@ -5,7 +5,7 @@
 }
 
 .admin-sidebar {
-    width: 240px;
+    width: 280px;
     background: var(--surface-color);
     border-right: 1px solid var(--glass-border);
     display: flex;
@@ -168,9 +168,7 @@
 
 .admin-header {
     height: 60px;
-    padding: 0 2rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     background: var(--surface-color);
     border-bottom: 1px solid var(--glass-border);
@@ -178,6 +176,12 @@
     top: 0;
     z-index: 90;
     flex-shrink: 0;
+}
+
+.admin-header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .page-title {
@@ -225,7 +229,6 @@
 }
 
 .admin-content {
-    padding: 2rem;
     flex: 1;
 }
 

@@ -34,10 +34,26 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<EmailLog> EmailLogs { get; set; } = null!;
         public DbSet<ECPeriod> ECPeriods { get; set; } = null!;
         public DbSet<ECMember> ECMembers { get; set; } = null!;
+        public DbSet<AcademicRecord> AcademicRecords { get; set; } = null!;
+        public DbSet<ProfessionalRecord> ProfessionalRecords { get; set; } = null!;
+        public DbSet<PaymentConfiguration> PaymentConfigurations { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Member relationships
+            modelBuilder.Entity<AcademicRecord>()
+                .HasOne(a => a.Member)
+                .WithMany(m => m.AcademicHistory)
+                .HasForeignKey(a => a.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProfessionalRecord>()
+                .HasOne(p => p.Member)
+                .WithMany(m => m.ProfessionalHistory)
+                .HasForeignKey(p => p.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Member <-> User (one-to-one)
             modelBuilder.Entity<User>()
@@ -224,7 +240,7 @@ namespace GHCAA.Infrastructure.Data
             {
                 Id = 2,
                 Username = "shalin",
-                PasswordHash = "$2a$11$1tNxw.gy4OW16EqT0GpN9eFDSYwhoooPkovDBi1KLYP1SQWEaqQaW", // hardcoded "shalin"
+                PasswordHash = "$2a$11$J0UJbz.FdyElDw2mV22g1OikjTExwKvZ.c4eP3Wenc1MkmYDrgUme", // hardcoded "shalin"
                 IsActive = true,
                 IsArchived = false,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -412,6 +428,36 @@ namespace GHCAA.Infrastructure.Data
                 new EventPhoto { Id = 2, EventGalleryId = 1, PhotoPath = "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069", Caption = "Alumni Networking" },
                 new EventPhoto { Id = 3, EventGalleryId = 2, PhotoPath = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986", Caption = "Main Administrative Building" },
                 new EventPhoto { Id = 4, EventGalleryId = 2, PhotoPath = "https://images.unsplash.com/photo-1492538350424-aaee9f201774?q=80&w=2070", Caption = "College Playground" }
+            );
+
+            // Seed Academic Records
+            modelBuilder.Entity<AcademicRecord>().HasData(
+                new AcademicRecord 
+                { 
+                    Id = 1, MemberId = 1, InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", 
+                    AdmissionYear = 2013, PassingYear = 2015, IsGHC = true 
+                },
+                new AcademicRecord 
+                { 
+                    Id = 2, MemberId = 101, InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Humanities", 
+                    AdmissionYear = 2014, PassingYear = 2016, IsGHC = true 
+                }
+            );
+
+            // Seed Professional Records
+            modelBuilder.Entity<ProfessionalRecord>().HasData(
+                new ProfessionalRecord 
+                { 
+                    Id = 1, MemberId = 1, OrganizationName = "GlobalTech Solutions", Designation = "Senior Software Architect", 
+                    Sector = "Information Technology (IT) & Software", Location = "Dhaka", StartDate = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc), 
+                    IsCurrent = true 
+                },
+                new ProfessionalRecord 
+                { 
+                    Id = 2, MemberId = 101, OrganizationName = "Alumni Corp", Designation = "Communications Manager", 
+                    Sector = "Advertising & Media", Location = "Dhaka", StartDate = new DateTime(2021, 6, 1, 0, 0, 0, DateTimeKind.Utc), 
+                    IsCurrent = true 
+                }
             );
         }
     }

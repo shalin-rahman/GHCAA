@@ -5,7 +5,17 @@
             <h2>Event Ecosystem</h2>
             <p>Manage alumni gatherings, institutional projects, and participation approvals.</p>
         </div>
-        <div class="header-actions">
+        <div class="header-actions flex items-center gap-3">
+            <app-export-buttons 
+                *ngIf="activeTab() === 'approvals'"
+                [data]="registrations()" 
+                fileName="event_registrations"
+                [pdfHeaders]="pdfHeaders"
+                [pdfDataMapper]="pdfMapper"
+                [exporting]="isExporting()"
+                (exportStart)="handleExport($event)"
+                title="Event Registrations Export">
+            </app-export-buttons>
             <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
                 <span class="icon">✨</span> Launch New Event
             </button>
@@ -70,12 +80,16 @@
                         <input type="number" formControlName="registrationFee" placeholder="0.00">
                     </div>
                     <div class="input-group">
-                        <label>Visibility Status</label>
-                        <div class="flex items-center gap-4 py-2">
-                            <input type="checkbox" formControlName="isActive" class="w-6 h-6 border-accent text-accent">
-                            <span class="text-[10px] text-muted font-bold uppercase tracking-widest">Publish asset on
-                                public
-                                portal</span>
+                        <label>Visibility & Access</label>
+                        <div class="flex flex-col gap-3 py-2">
+                            <div class="flex items-center gap-4">
+                                <input type="checkbox" formControlName="isActive" class="w-6 h-6 border-accent text-accent">
+                                <span class="text-[10px] text-muted font-bold uppercase tracking-widest">Publish asset on public portal</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <input type="checkbox" formControlName="allowNonMembers" class="w-6 h-6 border-accent text-accent">
+                                <span class="text-[10px] text-muted font-bold uppercase tracking-widest">Allow Non-Alumni (Guest) Participation</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -151,6 +165,31 @@
 
     <!-- Participation Approvals Tab -->
     <div *ngIf="activeTab() === 'approvals'" class="animate-fade-in">
+        <!-- Filters Area -->
+        <div class="filter-bar flex flex-wrap items-center gap-4 mb-6 glass-card p-4">
+            <div class="search-wrap flex-1 min-w-[200px] relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 opacity-40">🔍</span>
+                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
+                    placeholder="Search participant or reference..." class="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:border-accent outline-none">
+            </div>
+            
+            <select [ngModel]="selectedEventIdFilter()" (ngModelChange)="selectedEventIdFilter.set($event); onFilterChange()"
+                class="bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-sm focus:border-accent outline-none min-w-[150px]">
+                <option [value]="null">All Events</option>
+                @for (ev of events(); track ev.id) {
+                    <option [value]="ev.id">{{ ev.title }}</option>
+                }
+            </select>
+
+            <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()"
+                class="bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-sm focus:border-accent outline-none min-w-[120px]">
+                <option value="all">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+        </div>
+
         <div class="glass-card table-container">
             <table class="admin-table">
                 <thead>
@@ -167,14 +206,22 @@
                     <tr class="hover:bg-white/[0.02] transition-colors group">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-black text-xs">
-                                    {{ reg.memberName?.[0]?.toUpperCase() }}
+                                <div class="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-black text-xs">
+                                    {{ (reg.isNonMember ? reg.guestName : reg.memberName)?.[0]?.toUpperCase() }}
                                 </div>
-                                <div class="text-sm font-bold">{{ reg.memberName }}</div>
+                                <div>
+                                    <div class="text-sm font-bold">
+                                        {{ reg.isNonMember ? reg.guestName : reg.memberName }}
+                                        <span *ngIf="reg.isNonMember" class="ml-2 text-[10px] bg-accent/10 px-2 rounded-full uppercase">Guest</span>
+                                    </div>
+                                    <div class="text-[10px] opacity-40">
+                                        {{ reg.isNonMember ? reg.guestEmail : 'Member ID: ' + reg.memberId }}
+                                    </div>
+                                    <div *ngIf="reg.isNonMember" class="text-[10px] opacity-40">{{ reg.guestMobile }}</div>
+                                </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm opacity-80">{{ reg.event?.title }}</td>
+                        <td class="px-6 py-4 text-sm opacity-80">{{ reg.eventTitle }}</td>
                         <td class="px-6 py-4">
                             <code class="text-xs text-accent font-bold">{{ reg.paymentReference }}</code>
                         </td>
@@ -207,6 +254,14 @@
                 </tbody>
             </table>
         </div>
+
+        <app-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            [totalItems]="totalItems()"
+            [pageSize]="pageSize()"
+            (pageChange)="currentPage.set($event); loadAllRegistrations()">
+        </app-pagination>
     </div>
     }
 </div>

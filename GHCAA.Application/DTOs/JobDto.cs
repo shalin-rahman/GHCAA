@@ -14,7 +14,7 @@ namespace GHCAA.Application.DTOs
         public string? ApplicationEmail { get; set; }
         public string? ApplicationLink { get; set; }
         public DateTime PostedDate { get; set; }
-        public DateTime ApplicationDeadline { get; set; }
+        public DateTime? ApplicationDeadline { get; set; }
         public Enums.JobCategory Category { get; set; }
         public bool IsActive { get; set; }
         public int PostedByMemberId { get; set; }
@@ -30,7 +30,7 @@ namespace GHCAA.Application.DTOs
         public string Requirements { get; set; } = null!;
         public string? ApplicationEmail { get; set; }
         public string? ApplicationLink { get; set; }
-        public DateTime ApplicationDeadline { get; set; }
+        public DateTime? ApplicationDeadline { get; set; }
         public Enums.JobCategory Category { get; set; }
     }
 }

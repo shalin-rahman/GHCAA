@@ -61,7 +61,7 @@ namespace GHCAA.Infrastructure.Services
                 FullName = dto.FullName,
                 FatherName = dto.FatherName,
                 MotherName = dto.MotherName,
-                DateOfBirth = dto.DateOfBirth,
+                DateOfBirth = DateTime.SpecifyKind(dto.DateOfBirth, DateTimeKind.Utc),
                 Gender = Enum.Parse<Enums.Gender>(dto.Gender),
                 BloodGroup = Enum.Parse<Enums.BloodGroup>(dto.BloodGroup),
                 NID = dto.NID,
@@ -88,6 +88,61 @@ namespace GHCAA.Infrastructure.Services
                 AppliedDate = DateTime.UtcNow,
                 EmailVerified = false
             };
+
+            // Handle Academic History
+            if (dto.AcademicHistory != null && dto.AcademicHistory.Any())
+            {
+                // Validation: At least one must be from Govt. Haraganga College
+                if (!dto.AcademicHistory.Any(a => a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase)))
+                {
+                    throw new InvalidOperationException("At least one academic record must be from Govt. Haraganga College.");
+                }
+
+                foreach (var a in dto.AcademicHistory)
+                {
+                    member.AcademicHistory.Add(new AcademicRecord
+                    {
+                        InstitutionName = a.InstitutionName,
+                        Degree = a.Degree,
+                        Subject = a.Subject,
+                        AdmissionYear = a.AdmissionYear,
+                        PassingYear = a.PassingYear,
+                        IsGHC = a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase),
+                        Result = a.Result
+                    });
+                }
+            }
+            else
+            {
+                // Fallback to flat fields if history is not provided (legacy)
+                member.AcademicHistory.Add(new AcademicRecord
+                {
+                    InstitutionName = "Govt. Haraganga College",
+                    Degree = dto.GHCLastCertificate,
+                    Subject = dto.GHCLastCertificateSubject,
+                    AdmissionYear = dto.GHCAdmissionYear,
+                    PassingYear = dto.GHCLastCertificatePassingYear,
+                    IsGHC = true
+                });
+            }
+
+            // Handle Professional History
+            if (dto.ProfessionalHistory != null)
+            {
+                foreach (var p in dto.ProfessionalHistory)
+                {
+                    member.ProfessionalHistory.Add(new ProfessionalRecord
+                    {
+                        OrganizationName = p.OrganizationName,
+                        Designation = p.Designation,
+                        Sector = p.Sector,
+                        Location = p.Location,
+                        StartDate = DateTime.SpecifyKind(p.StartDate, DateTimeKind.Utc),
+                        EndDate = p.EndDate.HasValue ? DateTime.SpecifyKind(p.EndDate.Value, DateTimeKind.Utc) : null,
+                        IsCurrent = p.IsCurrent
+                    });
+                }
+            }
 
             // Use synchronous Add to avoid missing extension methods in certain EF versions
             _db.Members.Add(member);
@@ -258,6 +313,8 @@ namespace GHCAA.Infrastructure.Services
             var member = await _db.Members
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
                 .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             
             if (member == null) return null;
@@ -309,12 +366,36 @@ namespace GHCAA.Infrastructure.Services
                 {
                     PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
                     Position = em.Position,
-                    StartDate = em.StartDate,
-                    EndDate = em.EndDate,
+                    StartDate = DateTime.SpecifyKind(em.StartDate, DateTimeKind.Utc),
+                    EndDate = em.EndDate.HasValue ? DateTime.SpecifyKind(em.EndDate.Value, DateTimeKind.Utc) : null,
                     ChangeReason = em.ChangeReason,
                     IsCurrent = em.ECPeriod?.IsActive ?? false
                 }).OrderByDescending(h => h.StartDate).ToList();
             }
+
+            dto.AcademicHistory = member.AcademicHistory?.Select(a => new AcademicRecordDto
+            {
+                Id = a.Id,
+                InstitutionName = a.InstitutionName,
+                Degree = a.Degree,
+                Subject = a.Subject,
+                AdmissionYear = a.AdmissionYear,
+                PassingYear = a.PassingYear,
+                IsGHC = a.IsGHC,
+                Result = a.Result
+            }).OrderByDescending(a => a.PassingYear).ToList() ?? new();
+
+            dto.ProfessionalHistory = member.ProfessionalHistory?.Select(p => new ProfessionalRecordDto
+            {
+                Id = p.Id,
+                OrganizationName = p.OrganizationName,
+                Designation = p.Designation,
+                Sector = p.Sector,
+                Location = p.Location,
+                StartDate = DateTime.SpecifyKind(p.StartDate, DateTimeKind.Utc),
+                EndDate = p.EndDate.HasValue ? DateTime.SpecifyKind(p.EndDate.Value, DateTimeKind.Utc) : null,
+                IsCurrent = p.IsCurrent
+            }).OrderByDescending(p => p.StartDate).ToList() ?? new();
 
             return dto;
         }
@@ -327,7 +408,7 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(dto.FullName)) member.FullName = dto.FullName;
             if (!string.IsNullOrWhiteSpace(dto.FatherName)) member.FatherName = dto.FatherName;
             if (!string.IsNullOrWhiteSpace(dto.MotherName)) member.MotherName = dto.MotherName;
-            if (dto.DateOfBirth != default) member.DateOfBirth = dto.DateOfBirth;
+            if (dto.DateOfBirth != default) member.DateOfBirth = DateTime.SpecifyKind(dto.DateOfBirth, DateTimeKind.Utc);
             member.Gender = dto.Gender;
             member.BloodGroup = dto.BloodGroup;
             if (!string.IsNullOrWhiteSpace(dto.PresentAddress)) member.PresentAddress = dto.PresentAddress;
@@ -352,6 +433,57 @@ namespace GHCAA.Infrastructure.Services
             member.IsMobilePublic = dto.IsMobilePublic;
             member.IsEmailPublic = dto.IsEmailPublic;
             member.IsAddressPublic = dto.IsAddressPublic;
+
+            // Handle Academic History
+            if (dto.AcademicHistory != null && dto.AcademicHistory.Any())
+            {
+                // Validation: At least one must be from Govt. Haraganga College
+                if (!dto.AcademicHistory.Any(a => a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase)))
+                {
+                    throw new InvalidOperationException("At least one academic record must be from Govt. Haraganga College.");
+                }
+
+                // Simple approach: Clear and re-add (for complex logic, use tracking)
+                var existingAcademic = await _db.AcademicRecords.Where(a => a.MemberId == memberId).ToListAsync(cancellationToken);
+                _db.AcademicRecords.RemoveRange(existingAcademic);
+
+                foreach (var a in dto.AcademicHistory)
+                {
+                    _db.AcademicRecords.Add(new AcademicRecord
+                    {
+                        MemberId = memberId,
+                        InstitutionName = a.InstitutionName,
+                        Degree = a.Degree,
+                        Subject = a.Subject,
+                        AdmissionYear = a.AdmissionYear,
+                        PassingYear = a.PassingYear,
+                        IsGHC = a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase),
+                        Result = a.Result
+                    });
+                }
+            }
+
+            // Handle Professional History
+            if (dto.ProfessionalHistory != null)
+            {
+                var existingProfessional = await _db.ProfessionalRecords.Where(p => p.MemberId == memberId).ToListAsync(cancellationToken);
+                _db.ProfessionalRecords.RemoveRange(existingProfessional);
+
+                foreach (var p in dto.ProfessionalHistory)
+                {
+                    _db.ProfessionalRecords.Add(new ProfessionalRecord
+                    {
+                        MemberId = memberId,
+                        OrganizationName = p.OrganizationName,
+                        Designation = p.Designation,
+                        Sector = p.Sector,
+                        Location = p.Location,
+                        StartDate = DateTime.SpecifyKind(p.StartDate, DateTimeKind.Utc),
+                        EndDate = p.EndDate.HasValue ? DateTime.SpecifyKind(p.EndDate.Value, DateTimeKind.Utc) : null,
+                        IsCurrent = p.IsCurrent
+                    });
+                }
+            }
 
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Profile updated for member {MemberId}", memberId);
@@ -466,7 +598,9 @@ namespace GHCAA.Infrastructure.Services
         {
             IQueryable<Member> query = _db.Members
                 .Include(m => m.ECMembers)
-                .ThenInclude(em => em.ECPeriod);
+                .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory);
             
             if (includeArchived)
             {
@@ -477,10 +611,18 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(searchQuery))
             {
                 var q = searchQuery.ToLower();
-                query = query.Where(m => 
-                    (m.FullName != null && m.FullName.ToLower().Contains(q)) ||
-                    (m.Email != null && m.Email.ToLower().Contains(q)) ||
-                    (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(q)));
+                // Special case for M-ID search used in refresh
+                if (q.StartsWith("m-") && int.TryParse(q.Substring(2), out var mid))
+                {
+                    query = query.Where(m => m.Id == mid);
+                }
+                else
+                {
+                    query = query.Where(m => 
+                        (m.FullName != null && m.FullName.ToLower().Contains(q)) ||
+                        (m.Email != null && m.Email.ToLower().Contains(q)) ||
+                        (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(q)));
+                }
             }
             
             // Apply status filter
@@ -538,7 +680,7 @@ namespace GHCAA.Infrastructure.Services
                     ECPosition = member.ECPosition,
                     FatherName = member.FatherName,
                     MotherName = member.MotherName,
-                    DateOfBirth = member.DateOfBirth,
+                    DateOfBirth = DateTime.SpecifyKind(member.DateOfBirth, DateTimeKind.Utc),
                     Gender = member.Gender,
                     NID = member.NID,
                     EmergencyContactName = member.EmergencyContactName,
@@ -547,6 +689,7 @@ namespace GHCAA.Infrastructure.Services
                     HSCAdmissionYear = member.HSCAdmissionYear,
                     GHCAdmissionYear = member.GHCAdmissionYear,
                     CertificatePath = member.CertificatePath,
+                    PaymentProofPath = member.PaymentProofPath,
                     IsMobilePublic = member.IsMobilePublic,
                     IsEmailPublic = member.IsEmailPublic,
                     IsAddressPublic = member.IsAddressPublic
@@ -558,12 +701,37 @@ namespace GHCAA.Infrastructure.Services
                     {
                         PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
                         Position = em.Position,
-                        StartDate = em.StartDate,
-                        EndDate = em.EndDate,
+                        StartDate = DateTime.SpecifyKind(em.StartDate, DateTimeKind.Utc),
+                        EndDate = em.EndDate.HasValue ? DateTime.SpecifyKind(em.EndDate.Value, DateTimeKind.Utc) : null,
                         ChangeReason = em.ChangeReason,
                         IsCurrent = em.ECPeriod?.IsActive ?? false
                     }).OrderByDescending(h => h.StartDate).ToList();
                 }
+
+                dto.AcademicHistory = member.AcademicHistory?.Select(a => new AcademicRecordDto
+                {
+                    Id = a.Id,
+                    InstitutionName = a.InstitutionName,
+                    Degree = a.Degree,
+                    Subject = a.Subject,
+                    AdmissionYear = a.AdmissionYear,
+                    PassingYear = a.PassingYear,
+                    IsGHC = a.IsGHC,
+                    Result = a.Result
+                }).OrderByDescending(a => a.PassingYear).ToList() ?? new();
+
+                dto.ProfessionalHistory = member.ProfessionalHistory?.Select(p => new ProfessionalRecordDto
+                {
+                    Id = p.Id,
+                    OrganizationName = p.OrganizationName,
+                    Designation = p.Designation,
+                    Sector = p.Sector,
+                    Location = p.Location,
+                    StartDate = DateTime.SpecifyKind(p.StartDate, DateTimeKind.Utc),
+                    EndDate = p.EndDate.HasValue ? DateTime.SpecifyKind(p.EndDate.Value, DateTimeKind.Utc) : null,
+                    IsCurrent = p.IsCurrent
+                }).OrderByDescending(p => p.StartDate).ToList() ?? new();
+
                 return dto;
             });
 
@@ -584,7 +752,7 @@ namespace GHCAA.Infrastructure.Services
             member.FullName = dto.FullName;
             member.FatherName = dto.FatherName;
             member.MotherName = dto.MotherName;
-            member.DateOfBirth = dto.DateOfBirth;
+            member.DateOfBirth = DateTime.SpecifyKind(dto.DateOfBirth, DateTimeKind.Utc);
             member.NID = dto.NID;
             member.MobileNo = dto.MobileNo;
             member.Email = dto.Email;
@@ -661,9 +829,96 @@ namespace GHCAA.Infrastructure.Services
             member.IsAddressPublic = dto.IsAddressPublic;
             member.LastUpdateDate = DateTime.UtcNow;
 
+            // Sync Academic History
+            if (dto.AcademicHistory != null)
+            {
+                var existingAcademic = await _db.AcademicRecords.Where(a => a.MemberId == id).ToListAsync(cancellationToken);
+                _db.AcademicRecords.RemoveRange(existingAcademic);
+
+                foreach (var a in dto.AcademicHistory)
+                {
+                    _db.AcademicRecords.Add(new AcademicRecord
+                    {
+                        MemberId = id,
+                        InstitutionName = a.InstitutionName,
+                        Degree = a.Degree,
+                        Subject = a.Subject,
+                        AdmissionYear = a.AdmissionYear,
+                        PassingYear = a.PassingYear,
+                        IsGHC = a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase),
+                        Result = a.Result
+                    });
+                }
+            }
+
+            // Sync Professional History
+            if (dto.ProfessionalHistory != null)
+            {
+                var existingProfessional = await _db.ProfessionalRecords.Where(p => p.MemberId == id).ToListAsync(cancellationToken);
+                _db.ProfessionalRecords.RemoveRange(existingProfessional);
+
+                foreach (var p in dto.ProfessionalHistory)
+                {
+                    _db.ProfessionalRecords.Add(new ProfessionalRecord
+                    {
+                        MemberId = id,
+                        OrganizationName = p.OrganizationName,
+                        Designation = p.Designation,
+                        Sector = p.Sector,
+                        Location = p.Location,
+                        StartDate = DateTime.SpecifyKind(p.StartDate, DateTimeKind.Utc),
+                        EndDate = p.EndDate.HasValue ? DateTime.SpecifyKind(p.EndDate.Value, DateTimeKind.Utc) : null,
+                        IsCurrent = p.IsCurrent
+                    });
+                }
+            }
+
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Member {MemberId} information updated by Admin", id);
             return true;
+        }
+
+        public async Task<bool> UpdateMemberDocumentsAsync(int id, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
+            if (member == null) return false;
+
+            if (certificate != null)
+            {
+                var path = await _storage.SaveFileAsync(certificate.Content, certificate.FileName, id, Enums.FileUploadType.Certificate, cancellationToken);
+                var fu = new FileUpload { MemberId = id, UploadType = Enums.FileUploadType.Certificate, FileName = certificate.FileName, FilePath = path, SizeBytes = certificate.Length };
+                await _fileRepo.AddAsync(fu, cancellationToken);
+                member.CertificatePath = fu.FilePath;
+            }
+
+            if (paymentProof != null)
+            {
+                var path = await _storage.SaveFileAsync(paymentProof.Content, paymentProof.FileName, id, Enums.FileUploadType.PaymentProof, cancellationToken);
+                var fu = new FileUpload { MemberId = id, UploadType = Enums.FileUploadType.PaymentProof, FileName = paymentProof.FileName, FilePath = path, SizeBytes = paymentProof.Length };
+                await _fileRepo.AddAsync(fu, cancellationToken);
+                member.PaymentProofPath = fu.FilePath;
+            }
+
+            member.LastUpdateDate = DateTime.UtcNow;
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<string> UpdateMemberPhotoAsync(int memberId, UploadedFileDto photo, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null) throw new KeyNotFoundException($"Member {memberId} not found.");
+
+            var path = await _storage.SaveFileAsync(photo.Content, photo.FileName, memberId, Enums.FileUploadType.Photo, cancellationToken);
+            var fu = new FileUpload { MemberId = memberId, UploadType = Enums.FileUploadType.Photo, FileName = photo.FileName, FilePath = path, SizeBytes = photo.Length };
+            await _fileRepo.AddAsync(fu, cancellationToken);
+
+            member.PhotoPath = path;
+            member.LastUpdateDate = DateTime.UtcNow;
+            await _db.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Photo updated for member {MemberId}", memberId);
+            return path;
         }
 
         public async Task<bool> SendAdminPasswordResetLinkAsync(int memberId, CancellationToken cancellationToken = default)

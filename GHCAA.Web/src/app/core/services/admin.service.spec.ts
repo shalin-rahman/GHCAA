@@ -25,9 +25,99 @@ describe('AdminService', () => {
     });
 
     it('should fetch pending members', () => {
-        service.getPendingMembers().subscribe(a => expect(a).toBeTruthy());
-        const req = httpMock.expectOne(API_ENDPOINTS.ADMIN.MEMBERS);
+        service.getPendingMembers(1, 10, 'search').subscribe(res => {
+            expect(res).toBeTruthy();
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}?page=1&pageSize=10&statusFilter=Applied&searchQuery=search`);
         expect(req.request.method).toBe('GET');
-        req.flush([]);
+        req.flush({ items: [] });
+    });
+
+    it('should fetch members', () => {
+        service.getMembers(2, 20, 'test', 'Active', true).subscribe(res => {
+            expect(res).toBeTruthy();
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}?page=2&pageSize=20&includeArchived=true&statusFilter=Active&searchQuery=test`);
+        expect(req.request.method).toBe('GET');
+        req.flush({ items: [] });
+    });
+
+    it('should approve member', () => {
+        service.approveMember(1, 100).subscribe(res => {
+            expect(res.success).toBe(true);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}/1/approve`);
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toEqual({ approvedByAdminId: 100 });
+        req.flush({ success: true });
+    });
+
+    it('should reject member', () => {
+        service.rejectMember(2, 100, 'spam').subscribe(res => {
+            expect(res.success).toBe(true);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}/2/reject`);
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toEqual({ rejectedByAdminId: 100, reason: 'spam' });
+        req.flush({ success: true });
+    });
+
+    it('should get stats', () => {
+        service.getStats().subscribe(res => {
+            expect(res.total).toBe(5);
+        });
+        const req = httpMock.expectOne(API_ENDPOINTS.ADMIN.STATS);
+        expect(req.request.method).toBe('GET');
+        req.flush({ total: 5 });
+    });
+
+    it('should archive member', () => {
+        service.archiveMember(5).subscribe(res => {
+            expect(res.success).toBe(true);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}/5`);
+        expect(req.request.method).toBe('DELETE');
+        req.flush({ success: true });
+    });
+
+    it('should reactivate member', () => {
+        service.reactivateMember(5).subscribe(res => {
+            expect(res.success).toBe(true);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}/5/reactivate`);
+        expect(req.request.method).toBe('POST');
+        req.flush({ success: true });
+    });
+
+    it('should update member', () => {
+        const payload = { fullName: 'Updated Name' };
+        service.updateMember(10, payload).subscribe(res => {
+            expect(res.success).toBe(true);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}/10`);
+        expect(req.request.method).toBe('PUT');
+        expect(req.request.body).toEqual(payload);
+        req.flush({ success: true });
+    });
+
+    it('should send password reset link', () => {
+        service.sendPasswordResetLink(15).subscribe(res => {
+            expect(res.success).toBe(true);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}/15/reset-password-admin`);
+        expect(req.request.method).toBe('POST');
+        req.flush({ success: true });
+    });
+
+    it('should import members', () => {
+        const formData = new FormData();
+        formData.append('file', 'test');
+        service.importMembers(formData).subscribe(res => {
+            expect(res.success).toBe(true);
+        });
+        const req = httpMock.expectOne(API_ENDPOINTS.ADMIN.MEMBERS_IMPORT);
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toBe(formData);
+        req.flush({ success: true });
     });
 });

@@ -1,6 +1,7 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GHCAA.API.Controllers
@@ -132,6 +133,45 @@ namespace GHCAA.API.Controllers
             var success = await _memberService.AdminUpdateMemberAsync(id, dto, cancellationToken);
             if (!success) return NotFound();
             return Ok(new { Message = "Member updated by admin successfully" });
+        }
+
+        [HttpPost("members/{id}/photo")]
+        public async Task<IActionResult> UpdateMemberPhoto(int id, IFormFile photo, CancellationToken cancellationToken)
+        {
+            if (photo == null || photo.Length == 0) return BadRequest(new { Message = "No file provided." });
+            var dto = new UploadedFileDto { FileName = photo.FileName, Length = photo.Length, Content = photo.OpenReadStream() };
+            var path = await _memberService.UpdateMemberPhotoAsync(id, dto, cancellationToken);
+            return Ok(new { Message = "Photo updated.", PhotoPath = path });
+        }
+
+        [HttpPatch("members/{id}/documents")]
+        public async Task<IActionResult> UpdateMemberDocuments(int id, IFormFile? certificate, IFormFile? paymentProof, CancellationToken cancellationToken)
+        {
+            UploadedFileDto? certFile = null;
+            if (certificate != null)
+            {
+                certFile = new UploadedFileDto
+                {
+                    FileName = certificate.FileName,
+                    Length = certificate.Length,
+                    Content = certificate.OpenReadStream()
+                };
+            }
+
+            UploadedFileDto? payFile = null;
+            if (paymentProof != null)
+            {
+                payFile = new UploadedFileDto
+                {
+                    FileName = paymentProof.FileName,
+                    Length = paymentProof.Length,
+                    Content = paymentProof.OpenReadStream()
+                };
+            }
+
+            var success = await _memberService.UpdateMemberDocumentsAsync(id, certFile, payFile, cancellationToken);
+            if (!success) return NotFound();
+            return Ok(new { Message = "Documents updated successfully" });
         }
 
         [HttpGet("members/{id}/id-card")]

@@ -16,7 +16,7 @@ namespace GHCAA.Infrastructure.Services
             _db = db;
         }
 
-        public async Task<IEnumerable<FinancialRecord>> GetRecordsAsync(int? year = null, Enums.FinancialRecordType? type = null, CancellationToken cancellationToken = default)
+        public async Task<object> GetRecordsAsync(int page = 1, int pageSize = 10, int? year = null, string? search = null, Enums.FinancialRecordType? type = null, CancellationToken cancellationToken = default)
         {
             var query = _db.FinancialRecords.AsQueryable();
 
@@ -26,11 +26,40 @@ namespace GHCAA.Infrastructure.Services
             if (type.HasValue)
                 query = query.Where(r => r.RecordType == type.Value);
 
+            if (!string.IsNullOrEmpty(search))
+            {
+                var s = search.ToLower();
+                query = query.Where(r => 
+                    (r.Description != null && r.Description.ToLower().Contains(s)) ||
+                    (r.Reference != null && r.Reference.ToLower().Contains(s)));
+            }
+
+            var totalItems = await query.CountAsync(cancellationToken);
+            var items = await query.OrderByDescending(r => r.Date)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return new
+            {
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize),
+                CurrentPage = page,
+                PageSize = pageSize,
+                Items = items
+            };
+        }
+
+        public async Task<IEnumerable<FinancialRecord>> GetAllRecordsForExportAsync(int? year = null, CancellationToken cancellationToken = default)
+        {
+            var query = _db.FinancialRecords.AsQueryable();
+            if (year.HasValue) query = query.Where(r => r.Year == year.Value);
             return await query.OrderByDescending(r => r.Date).ToListAsync(cancellationToken);
         }
 
         public async Task<FinancialRecord> AddRecordAsync(FinancialRecord record, CancellationToken cancellationToken = default)
         {
+            record.Date = DateTime.SpecifyKind(record.Date, DateTimeKind.Utc);
             record.CreatedAt = DateTime.UtcNow;
             await _db.FinancialRecords.AddAsync(record, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
@@ -45,7 +74,7 @@ namespace GHCAA.Infrastructure.Services
             existing.Year = record.Year;
             existing.RecordType = record.RecordType;
             existing.Category = record.Category;
-            existing.Date = record.Date;
+            existing.Date = DateTime.SpecifyKind(record.Date, DateTimeKind.Utc);
             existing.Amount = record.Amount;
             existing.Description = record.Description;
             existing.Reference = record.Reference;
@@ -94,7 +123,7 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<byte[]> ExportRecordsAsync(int? year = null, CancellationToken cancellationToken = default)
         {
-            var records = await GetRecordsAsync(year, null, cancellationToken);
+            var records = await GetAllRecordsForExportAsync(year, cancellationToken);
             
             var csv = new System.Text.StringBuilder();
             csv.AppendLine("Date,Type,Category,Amount,Description,Reference");

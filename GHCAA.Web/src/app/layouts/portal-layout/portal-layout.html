@@ -48,33 +48,35 @@
     <!-- Main Content Area -->
     <main class="main-content">
         <header class="top-bar">
-            <div class="left-section">
-                <button class="toggle-btn" (click)="toggleSidebar()" title="Toggle Sidebar">
-                    <img src="/assets/logo.jpg" alt="GHC" class="mini-logo">
-                </button>
-                <div class="breadcrumbs">
-                    <span class="text-muted">Portal</span>
-                    <span class="separator">/</span>
-                    <span class="current-page">{{ currentPageTitle() }}</span>
+            <div class="top-bar-inner portal-content">
+                <div class="left-section">
+                    <button class="toggle-btn" (click)="toggleSidebar()" title="Toggle Sidebar">
+                        <img src="/assets/logo.jpg" alt="GHC" class="mini-logo">
+                    </button>
+                    <div class="breadcrumbs">
+                        <span class="text-muted">Portal</span>
+                        <span class="separator">/</span>
+                        <span class="current-page">{{ currentPageTitle() }}</span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="right-section">
-                <button class="touch-target btn-icon theme-toggle" (click)="theme.toggleTheme()"
-                    [title]="'Toggle Dark/Light Mode'">
-                    {{ theme.theme() === 'light' ? '🌙' : '☀️' }}
-                </button>
-                <div class="user-profile">
-                    <div class="avatar">{{ auth.currentUser()?.username?.[0]?.toUpperCase() }}</div>
-                    <div class="user-details hide-mobile">
-                        <span class="username">{{ auth.currentUser()?.username }}</span>
-                        <small class="role">{{ nav.isAdmin() ? 'Administrator' : 'Alumni Member' }}</small>
+                <div class="right-section">
+                    <button class="touch-target btn-icon theme-toggle" (click)="theme.toggleTheme()"
+                        [title]="'Toggle Dark/Light Mode'">
+                        {{ theme.theme() === 'light' ? '🌙' : '☀️' }}
+                    </button>
+                    <div class="user-profile">
+                        <div class="avatar">{{ auth.currentUser()?.username?.[0]?.toUpperCase() }}</div>
+                        <div class="user-details hide-mobile">
+                            <span class="username">{{ auth.currentUser()?.username }}</span>
+                            <small class="role">{{ nav.isAdmin() ? 'Administrator' : 'Alumni Member' }}</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </header>
 
-        <section class="page-content container">
+        <section class="page-content portal-content">
             <router-outlet></router-outlet>
         </section>
     </main>

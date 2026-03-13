@@ -67,7 +67,9 @@ namespace GHCAA.Infrastructure.Services
             job.ContactEmail = dto.ApplicationEmail ?? "";
             job.ApplicationLink = dto.ApplicationLink;
             job.Category = dto.Category;
-            job.ExpiryDate = dto.ApplicationDeadline;
+            job.ExpiryDate = dto.ApplicationDeadline.HasValue 
+                ? DateTime.SpecifyKind(dto.ApplicationDeadline.Value, DateTimeKind.Utc) 
+                : null;
             
             _db.JobOpportunities.Update(job);
             await _db.SaveChangesAsync(cancellationToken);
@@ -88,7 +90,9 @@ namespace GHCAA.Infrastructure.Services
                 Category = dto.Category,
                 PostedByMemberId = memberId,
                 PostedDate = DateTime.UtcNow,
-                ExpiryDate = dto.ApplicationDeadline,
+                ExpiryDate = dto.ApplicationDeadline.HasValue 
+                    ? DateTime.SpecifyKind(dto.ApplicationDeadline.Value, DateTimeKind.Utc) 
+                    : null,
                 IsActive = true
             };
 

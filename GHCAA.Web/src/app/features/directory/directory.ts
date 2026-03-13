@@ -41,12 +41,20 @@ export class Directory implements OnInit {
     search() {
         this.loading.set(true);
         // Map frontend filter names to DTO names expected by API
-        const apiFilter = {
+        const apiFilter: any = {
             query: this.filters.query,
             passingYear: this.filters.year,
             professionalSector: this.filters.sector,
             bloodGroup: this.filters.bloodGroup
         };
+
+        // Remove null or empty string values to avoid 400 Bad Request (like passingYear=null)
+        Object.keys(apiFilter).forEach(key => {
+            if (apiFilter[key] === null || apiFilter[key] === '') {
+                delete apiFilter[key];
+            }
+        });
+
         this.networkService.searchMembers(apiFilter).subscribe({
             next: (data) => {
                 this.members.set(data);

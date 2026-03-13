@@ -1,11 +1,11 @@
 <div class="registration-page">
-    <div class="container overflow-hidden">
-        <div class="wizard-container glass-card overflow-hidden">
-            <!-- Wizard Sidebar / Progress -->
+    <div class="container">
+        <div class="wizard-container glass-card">
+            <!-- Desktop Wizard Sidebar -->
             <div class="wizard-sidebar hide-mobile">
                 <div class="brand-box">
                     <img src="/assets/logo.jpg" alt="GHCAA">
-                    <h3>Member Registry</h3>
+                    <h3>Member<br>Registry</h3>
                 </div>
                 <div class="steps-list">
                     <div class="step-link" [class.active]="currentStep() === 1" [class.done]="currentStep() > 1">
@@ -14,7 +14,7 @@
                     </div>
                     <div class="step-link" [class.active]="currentStep() === 2" [class.done]="currentStep() > 2">
                         <span class="step-num">{{ currentStep() > 2 ? '✓' : '02' }}</span>
-                        <span class="step-txt">Contact</span>
+                        <span class="step-txt">Reachability</span>
                     </div>
                     <div class="step-link" [class.active]="currentStep() === 3" [class.done]="currentStep() > 3">
                         <span class="step-num">{{ currentStep() > 3 ? '✓' : '03' }}</span>
@@ -22,7 +22,7 @@
                     </div>
                     <div class="step-link" [class.active]="currentStep() === 4" [class.done]="currentStep() > 4">
                         <span class="step-num">{{ currentStep() > 4 ? '✓' : '04' }}</span>
-                        <span class="step-txt">Professional</span>
+                        <span class="step-txt">Vocation</span>
                     </div>
                     <div class="step-link" [class.active]="currentStep() === 5" [class.done]="submitted()">
                         <span class="step-num">{{ submitted() ? '✓' : '05' }}</span>
@@ -38,7 +38,7 @@
             <!-- Wizard Body -->
             <div class="wizard-body">
                 <div class="mobile-wizard-header show-mobile">
-                    <div class="step-badge">Phase {{ currentStep() }} / 5</div>
+                    <span class="step-badge">Phase {{ currentStep() }} of 5</span>
                     <div class="progress-container">
                         <div class="p-bar" [style.width]="(currentStep() * 20) + '%'"></div>
                     </div>
@@ -48,30 +48,34 @@
                 <form #regForm="ngForm" (submit)="onSubmit(regForm)" class="step-form">
 
                     <!-- Step 1: Personal Details -->
-                    <div class="step-content reveal-text" *ngIf="currentStep() === 1">
+                    <div class="step-content animate-fade-up" *ngIf="currentStep() === 1">
                         <div class="step-header">
-                            <h2>Identity & Profile</h2>
-                            <p>Enter your primary identity details as per academic registers.</p>
+                            <h2>Indentity & Profile</h2>
+                            <p>Induct your primary identity details exactly as documented in academic registers.</p>
                         </div>
-                        <div class="space-y-6">
-                            <div class="form-group">
-                                <label>Full Legal Name *</label>
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label>Full Legal Name (SSC/HSC Record) *</label>
                                 <input type="text" [(ngModel)]="model.FullName" name="fullName" required
-                                    placeholder="Full Name as per SSC Certificate">
+                                    placeholder="Enter full name according to certificates">
                             </div>
                             <div class="form-group">
                                 <label>Father's Name *</label>
                                 <input type="text" [(ngModel)]="model.FatherName" name="fatherName" required
-                                    placeholder="Father's Name">
+                                    placeholder="Full Name">
                             </div>
                             <div class="form-group">
                                 <label>Mother's Name *</label>
                                 <input type="text" [(ngModel)]="model.MotherName" name="motherName" required
-                                    placeholder="Mother's Name">
+                                    placeholder="Full Name">
                             </div>
                             <div class="form-group">
                                 <label>Date of Birth *</label>
                                 <input type="date" [(ngModel)]="model.DateOfBirth" name="dateOfBirth" required>
+                            </div>
+                            <div class="form-group">
+                                <label>National ID (NID) *</label>
+                                <input type="text" [(ngModel)]="model.NID" name="nid" required placeholder="Verification Number">
                             </div>
                             <div class="form-group">
                                 <label>Gender *</label>
@@ -84,47 +88,36 @@
                             <div class="form-group">
                                 <label>Blood Group *</label>
                                 <select [(ngModel)]="model.BloodGroup" name="bloodGroup" required>
-                                    <option value="APositive">A+</option>
-                                    <option value="ANegative">A-</option>
-                                    <option value="BPositive">B+</option>
-                                    <option value="BNegative">B-</option>
-                                    <option value="OPositive">O+</option>
-                                    <option value="ONegative">O-</option>
-                                    <option value="ABPositive">AB+</option>
-                                    <option value="ABNegative">AB-</option>
+                                    @for (b of bloodGroupOptions; track b.value) { <option [value]="b.value">{{ b.label }}</option> }
                                 </select>
-                            </div>
-                            <div class="form-group">
-                                <label>National ID (NID) *</label>
-                                <input type="text" [(ngModel)]="model.NID" name="nid" required placeholder="NID Number">
                             </div>
                         </div>
                     </div>
 
                     <!-- Step 2: Contact Details -->
-                    <div class="step-content reveal-text" *ngIf="currentStep() === 2">
+                    <div class="step-content animate-fade-up" *ngIf="currentStep() === 2">
                         <div class="step-header">
                             <h2>Reachability</h2>
-                            <p>Provide verified communication channels for official correspondence.</p>
+                            <p>Provide verified communication channels for official association correspondence.</p>
                         </div>
-                        <div class="space-y-6">
+                        <div class="form-grid">
                             <div class="form-group">
-                                <label>Primary Email *</label>
+                                <label>Primary Email (Login) *</label>
                                 <input type="email" [(ngModel)]="model.Email" name="email" required
-                                    placeholder="alumni@example.com">
+                                    placeholder="alumni@domain.com">
                             </div>
                             <div class="form-group">
                                 <label>Verified Mobile *</label>
                                 <input type="text" [(ngModel)]="model.MobileNo" name="mobileNo" required
                                     placeholder="01XXXXXXXXX">
                             </div>
-                            <div class="form-group">
-                                <label>Present Address *</label>
+                            <div class="form-group full">
+                                <label>Present Resident Address *</label>
                                 <textarea [(ngModel)]="model.PresentAddress" name="presentAddress" required rows="2"
                                     placeholder="House, Street, Area, District"></textarea>
                             </div>
-                            <div class="form-group">
-                                <label>Permanent Home Address *</label>
+                            <div class="form-group full">
+                                <label>Permanent Family Residence *</label>
                                 <textarea [(ngModel)]="model.PermanentAddress" name="permanentAddress" required rows="2"
                                     placeholder="Village/Area, PO, PS, District"></textarea>
                             </div>
@@ -132,149 +125,161 @@
                     </div>
 
                     <!-- Step 3: Academic History -->
-                    <div class="step-content reveal-text" *ngIf="currentStep() === 3">
+                    <div class="step-content animate-fade-up" *ngIf="currentStep() === 3">
                         <div class="step-header">
                             <h2>Academic Credentials</h2>
-                            <p>Highest Certificate Attained</p>
+                            <p>Declare your educational timeline. <b>Note:</b> At least one benchmark must be from Govt. Haraganga College.</p>
                         </div>
-                        <div class="space-y-6">
-                            <div class="form-group">
-                                <label>HSC Admission Year (Optional)</label>
-                                <input type="number" [(ngModel)]="model.HSCAdmissionYear" name="hscAdmissionYear"
-                                    list="year-list" placeholder="YYYY">
+                        
+                        <div class="history-container mb-10">
+                            @for (item of model.AcademicHistory; track $index) {
+                            <div class="history-item relative p-10 glass-card">
+                                <button type="button" *ngIf="model.AcademicHistory.length > 1" (click)="removeAcademic($index)" 
+                                    class="absolute top-6 right-8 btn btn-secondary btn-sm text-danger-color border-danger-color">
+                                    🗑️ Remove Record
+                                </button>
+                                
+                                <div class="form-grid">
+                                    <div class="form-group full">
+                                        <label>Institution / University Name *</label>
+                                        <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" required placeholder="Select or type institution">
+                                    </div>
+                                    <div class="form-group full checkbox-group py-4 bg-surface/30 px-6 rounded-lg">
+                                        <label>Was this milestone achieved at Govt. Haraganga College?</label>
+                                        <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'ghcCh_' + $index">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Degree Conferred *</label>
+                                        <input type="text" [(ngModel)]="item.degree" [name]="'deg_' + $index" required list="certificate-list">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Major Cluster / Subject *</label>
+                                        <input type="text" [(ngModel)]="item.subject" [name]="'sub_' + $index" required list="group-list">
+                                    </div>
+                                    <div class="form-group full">
+                                        <label>Passing Year (Graduation) *</label>
+                                        <input type="number" [(ngModel)]="item.passingYear" [name]="'pass_' + $index" required list="year-list" placeholder="YYYY">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Highest Certificate *</label>
-                                <input type="text" [(ngModel)]="model.HighestCertificate" name="highestCertificate"
-                                    required list="certificate-list">
-                            </div>
-                            <div class="form-group">
-                                <label>Highest Certificate Group *</label>
-                                <input type="text" [(ngModel)]="model.HighestCertificateGroup"
-                                    name="highestCertificateGroup" required list="group-list">
-                            </div>
-                            <div class="form-group" *ngIf="model.HighestCertificate !== 'HSC'">
-                                <label>Highest Certificate Subject *</label>
-                                <input type="text" [(ngModel)]="model.HighestCertificateSubject"
-                                    name="highestCertificateSubject" required list="subject-list">
-                            </div>
-                            <div class="form-group">
-                                <label>Highest Certificate Passing Year *</label>
-                                <input type="number" [(ngModel)]="model.HighestCertificatePassingYear"
-                                    name="highestCertificatePassingYear" required list="year-list" placeholder="YYYY">
-                            </div>
+                            }
                         </div>
-
-                        <div class="step-header" style="margin-top: 24px;">
-                            <p>Last Certificate From GHC</p>
-                        </div>
-                        <div class="space-y-6">
-                            <div class="form-group">
-                                <label>GHC Admission Year (Optional)</label>
-                                <input type="number" [(ngModel)]="model.GHCAdmissionYear" name="ghcAdmissionYear"
-                                    list="year-list" placeholder="YYYY">
-                            </div>
-                            <div class="form-group">
-                                <label>GHC Last Certificate *</label>
-                                <input type="text" [(ngModel)]="model.GHCLastCertificate" name="ghcLastCertificate"
-                                    required list="certificate-list">
-                            </div>
-                            <div class="form-group">
-                                <label>GHC Last Certificate Group *</label>
-                                <input type="text" [(ngModel)]="model.GHCLastCertificateGroup"
-                                    name="ghcLastCertificateGroup" required list="group-list">
-                            </div>
-                            <div class="form-group" *ngIf="model.GHCLastCertificate !== 'HSC'">
-                                <label>GHC Last Certificate Subject *</label>
-                                <input type="text" [(ngModel)]="model.GHCLastCertificateSubject"
-                                    name="ghcLastCertificateSubject" required list="subject-list">
-                            </div>
-                            <div class="form-group">
-                                <label>GHC Last Certificate Passing Year *</label>
-                                <input type="number" [(ngModel)]="model.GHCLastCertificatePassingYear"
-                                    name="ghcLastCertificatePassingYear" required list="year-list" placeholder="YYYY">
-                            </div>
-                        </div>
+                        
+                        <button type="button" (click)="addAcademic()" class="btn btn-secondary btn-md w-full border-dashed border-2 p-6 flex items-center justify-center gap-4">
+                            <span class="icon text-2xl">+</span> Add Educational Milestone
+                        </button>
                     </div>
 
-                    <!-- Step 4: Professional & Emergency -->
-                    <div class="step-content reveal-text" *ngIf="currentStep() === 4">
+                    <!-- Step 4: Professional History -->
+                    <div class="step-content animate-fade-up" *ngIf="currentStep() === 4">
                         <div class="step-header">
                             <h2>Vocation & Safety</h2>
-                            <p>Current professional status and fallback contact point.</p>
+                            <p>Provide your current and historical professional experiences and emergency contact points.</p>
                         </div>
-                        <div class="space-y-6">
-                            <div class="form-group">
-                                <label>Sector *</label>
-                                <input type="text" [(ngModel)]="model.ProfessionalSector" name="professionalSector"
-                                    required list="sector-list" placeholder="Select or type Sector">
+                        
+                        <div class="history-container mb-12">
+                            @for (p of model.ProfessionalHistory; track $index) {
+                            <div class="history-item relative p-10 glass-card">
+                                <button type="button" (click)="removeProfessional($index)" 
+                                    class="absolute top-6 right-8 btn btn-secondary btn-sm text-danger-color border-danger-color">
+                                    🗑️ Remove Record
+                                </button>
+                                
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>Organisation / Company *</label>
+                                        <input type="text" [(ngModel)]="p.organizationName" [name]="'org_' + $index" required placeholder="Employer Title">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Designation / Role *</label>
+                                        <input type="text" [(ngModel)]="p.designation" [name]="'des_' + $index" required placeholder="e.g. Chief Technologist">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Functional Sector</label>
+                                        <input type="text" [(ngModel)]="p.sector" [name]="'sec_' + $index" list="sector-list">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Work Location</label>
+                                        <input type="text" [(ngModel)]="p.location" [name]="'loc_' + $index" placeholder="City, Country">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Start Date</label>
+                                        <input type="date" [(ngModel)]="p.startDate" [name]="'pSD_' + $index">
+                                    </div>
+                                    <div class="form-group" *ngIf="!p.isCurrent">
+                                        <label>Relief Date (End)</label>
+                                        <input type="date" [(ngModel)]="p.endDate" [name]="'pED_' + $index">
+                                    </div>
+                                    <div class="form-group full checkbox-group py-4 bg-surface/30 px-6 rounded-lg">
+                                        <label>I currently serve in this capacity (Active Occupation)</label>
+                                        <input type="checkbox" [(ngModel)]="p.isCurrent" [name]="'isPc_' + $index">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Job Title/Org *</label>
-                                <input type="text" [(ngModel)]="model.Designation" name="designation" required
-                                    placeholder="e.g. Senior Manager, Google">
-                            </div>
-                            <div class="form-group">
-                                <label>Emergency Name *</label>
-                                <input type="text" [(ngModel)]="model.EmergencyContactName" name="emergencyContactName"
-                                    required placeholder="Person Name">
-                            </div>
-                            <div class="form-group">
-                                <label>Emergency Relation *</label>
-                                <input type="text" [(ngModel)]="model.EmergencyContactRelation"
-                                    name="emergencyContactRelation" required placeholder="e.g. Brother">
-                            </div>
-                            <div class="form-group">
-                                <label>Emergency Phone *</label>
-                                <input type="text" [(ngModel)]="model.EmergencyContactPhone"
-                                    name="emergencyContactPhone" required placeholder="Contact Number">
+                            }
+                            
+                            <button type="button" (click)="addProfessional()" class="btn btn-secondary btn-md w-full border-dashed border-2 p-6 flex items-center justify-center gap-4 mb-4">
+                                <span class="icon text-2xl">+</span> Add Professional Experience
+                            </button>
+                        </div>
+
+                        <div class="border-t pt-10 mt-10">
+                            <h4 class="text-accent uppercase tracking-widest text-xs font-black mb-10">Emergency Protocol Personnel</h4>
+                            <div class="form-grid">
+                                <div class="form-group full">
+                                    <label>Emergency Contact Person Legal Name *</label>
+                                    <input type="text" [(ngModel)]="model.EmergencyContactName" name="emergencyContactName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Consanguinity / Relationship *</label>
+                                    <input type="text" [(ngModel)]="model.EmergencyContactRelation" name="emergencyContactRelation" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Direct Phone Channel *</label>
+                                    <input type="text" [(ngModel)]="model.EmergencyContactPhone" name="emergencyContactPhone" required>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Step 5: Uploads & Agreement -->
-                    <div class="step-content reveal-text" *ngIf="currentStep() === 5">
+                    <!-- Step 5: Registry Filing -->
+                    <div class="step-content animate-fade-up" *ngIf="currentStep() === 5">
                         <div class="step-header">
                             <h2>Registry Filing</h2>
-                            <p>Attach necessary documentation to formalize your registry.</p>
+                            <p>Formalize your application by attaching necessary institutional evidence.</p>
                         </div>
-                        <div class="space-y-6">
-                            <div class="form-group">
-                                <label>Profile Photo *</label>
+                        <div class="space-y-8">
+                            <div class="form-group full">
+                                <label>Formal Profile Photo (Professional/Standard) *</label>
                                 <div class="file-drop" [class.has-file]="files['photo']">
-                                    <input type="file" (change)="onFileSelect($event, 'photo')" accept="image/*"
-                                        required>
-                                    <p>{{ files['photo'] ? files['photo'].name : 'Click to select formal photo' }}</p>
+                                    <input type="file" (change)="onFileSelect($event, 'photo')" accept="image/*" required>
+                                    <p>{{ files['photo'] ? '✅ ' + files['photo'].name : 'Select or Drop Identify Photo' }}</p>
                                     @if (files['photo']) { <span class="file-check">✓</span> }
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>Cert. Proof *</label>
+                            <div class="form-group full">
+                                <label>Academic Certificate Proof (PDF/JPG) *</label>
                                 <div class="file-drop" [class.has-file]="files['certificate']">
-                                    <input type="file" (change)="onFileSelect($event, 'certificate')"
-                                        accept=".pdf,image/*" required>
-                                    <p>{{ files['certificate'] ? files['certificate'].name : 'Upload Transcript/Card' }}
-                                    </p>
+                                    <input type="file" (change)="onFileSelect($event, 'certificate')" accept=".pdf,image/*" required>
+                                    <p>{{ files['certificate'] ? '✅ ' + files['certificate'].name : 'Upload SSC/HSC or GHC Certificate' }}</p>
                                     @if (files['certificate']) { <span class="file-check">✓</span> }
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>Pay Evidence *</label>
+                            <div class="form-group full">
+                                <label>Payment Confirmation / Evidence *</label>
                                 <div class="file-drop" [class.has-file]="files['paymentProof']">
-                                    <input type="file" (change)="onFileSelect($event, 'paymentProof')"
-                                        accept=".pdf,image/*" required>
-                                    <p>{{ files['paymentProof'] ? files['paymentProof'].name : 'Upload Screenshot/PDF'
-                                        }}</p>
+                                    <input type="file" (change)="onFileSelect($event, 'paymentProof')" accept=".pdf,image/*" required>
+                                    <p>{{ files['paymentProof'] ? '✅ ' + files['paymentProof'].name : 'Upload Payment Transaction Screenshot' }}</p>
                                     @if (files['paymentProof']) { <span class="file-check">✓</span> }
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <div class="consent-box glass-card">
+                            <div class="form-group full">
+                                <div class="consent-box glass-card border-none bg-surface/40">
                                     <label class="checkbox-container">
                                         <input type="checkbox" name="agree" required ngModel>
                                         <span class="checkmark"></span>
                                         I solemnly affirm that the data provided is accurate. I pledge to uphold the
-                                        GHCAA Constitution and maintain professional decorum.
+                                        GHCAA Constitution and maintain association decorum.
                                     </label>
                                 </div>
                             </div>
@@ -283,51 +288,45 @@
 
                     <div class="wizard-actions">
                         <div class="left-actions">
-                            <button type="button" class="btn btn-secondary" (click)="prevStep()"
-                                *ngIf="currentStep() > 1">Back</button>
+                            <button type="button" class="btn btn-secondary px-8" (click)="prevStep()"
+                                *ngIf="currentStep() > 1">← Previous Step</button>
                         </div>
                         <div class="right-actions">
-                            <button type="button" class="btn btn-accent" (click)="nextStep()"
-                                *ngIf="currentStep() < 5">Continue</button>
-                            <button type="submit" class="btn btn-accent" *ngIf="currentStep() === 5"
+                            <button type="button" class="btn btn-accent px-10 shadow-gold h-14" (click)="nextStep()"
+                                *ngIf="currentStep() < 5">Continue Assessment →</button>
+                            <button type="submit" class="btn btn-accent px-10 shadow-gold h-14" *ngIf="currentStep() === 5"
                                 [disabled]="loading() || regForm.invalid">
-                                {{ loading() ? 'Processing...' : 'Finalize Registry' }}
+                                @if (loading()) { <span class="spinner">⏳</span> Initiating Filing... }
+                                @else { <span class="icon">🚀</span> Finalize Registry }
                             </button>
                         </div>
                     </div>
                 </form>
 
                 <!-- Datalists -->
-                <datalist id="year-list">
-                    <option *ngFor="let year of years" [value]="year"></option>
-                </datalist>
-                <datalist id="subject-list">
-                    <option *ngFor="let s of subjectOptions" [value]="s"></option>
-                </datalist>
-                <datalist id="certificate-list">
-                    <option *ngFor="let d of certificateOptions" [value]="d"></option>
-                </datalist>
-                <datalist id="group-list">
-                    <option *ngFor="let g of groupOptions" [value]="g"></option>
-                </datalist>
-                <datalist id="sector-list">
-                    <option *ngFor="let sec of sectorOptions" [value]="sec"></option>
-                </datalist>
+                <datalist id="year-list"> <option *ngFor="let year of years" [value]="year"></option> </datalist>
+                <datalist id="subject-list"> <option *ngFor="let s of subjectOptions" [value]="s"></option> </datalist>
+                <datalist id="certificate-list"> <option *ngFor="let d of certificateOptions" [value]="d"></option> </datalist>
+                <datalist id="group-list"> <option *ngFor="let g of groupOptions" [value]="g"></option> </datalist>
+                <datalist id="sector-list"> <option *ngFor="let sec of sectorOptions" [value]="sec"></option> </datalist>
 
                 } @else {
-                <div class="otp-stage reveal-text">
+                <div class="otp-stage animate-fade-up">
                     <div class="icon-box">🏦</div>
-                    <h2>Security Verification</h2>
-                    <p>An authentication code has been transmitted to <strong>{{ model.email }}</strong>. Post
-                        completion, your status will be queued for audit.</p>
+                    <div class="step-header text-center">
+                        <h2>Security Authentication</h2>
+                        <p>A verification code has been transmitted to <strong class="text-accent">{{ model.Email }}</strong>. Enter it below to finalise your induction.</p>
+                    </div>
                     <div class="otp-field">
                         <input type="text" [(ngModel)]="otpCode" placeholder="000000" maxlength="6">
                     </div>
-                    <button (click)="verify()" class="btn btn-accent btn-lg w-full" [disabled]="loading()">
-                        {{ loading() ? 'Authenticating...' : 'Confirm Identity' }}
+                    <button (click)="verify()" class="btn btn-accent btn-lg h-16 shadow-gold w-full text-xl" [disabled]="loading()">
+                        @if (loading()) { <span class="spinner">⏳</span> Authenticating... }
+                        @else { Confirm Security Identity }
                     </button>
-                    <small class="text-muted">Problem receiving? <a href="#" (click)="$event.preventDefault()">Resend
-                            Security Code</a></small>
+                    <div class="mt-4">
+                        <small class="text-muted">Code not received? <a href="#" (click)="$event.preventDefault()" class="text-accent font-bold">Resend Authentication Code</a></small>
+                    </div>
                 </div>
                 }
             </div>

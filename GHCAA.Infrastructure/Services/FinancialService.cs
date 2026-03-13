@@ -45,7 +45,7 @@ namespace GHCAA.Infrastructure.Services
                 MemberId = dto.MemberId.Value,
                 TransactionId = dto.TransactionId,
                 Amount = dto.Amount,
-                PaidAt = dto.PaidAt,
+                PaidAt = DateTime.SpecifyKind(dto.PaidAt, DateTimeKind.Utc),
                 Status = Enums.PaymentStatus.Pending,
                 Notes = dto.Notes
             };
@@ -200,7 +200,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 MembershipType = type,
                 Amount = dto.Amount,
-                EffectiveDate = dto.EffectiveDate,
+                EffectiveDate = DateTime.SpecifyKind(dto.EffectiveDate, DateTimeKind.Utc),
                 Description = dto.Description,
                 CreatedByAdminId = adminMemberId,
                 CreatedAt = DateTime.UtcNow
@@ -225,7 +225,7 @@ namespace GHCAA.Infrastructure.Services
             if (config == null) throw new KeyNotFoundException($"MembershipFeeConfig with ID {dto.Id} not found.");
 
             config.Amount = dto.Amount;
-            config.EffectiveDate = dto.EffectiveDate;
+            config.EffectiveDate = DateTime.SpecifyKind(dto.EffectiveDate, DateTimeKind.Utc);
             config.Description = dto.Description;
             // distinct from "CreatedBy", we might want "UpdatedBy" later, but for now simple update.
 
@@ -254,7 +254,7 @@ namespace GHCAA.Infrastructure.Services
             // Let's Find the config with max EffectiveDate where EffectiveDate <= Now (or generation time).
             // But we generate for a specific year.
             
-            var targetDate = new DateTime(year, 12, 31); // End of the target year
+            var targetDate = new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc); // End of the target year
 
             var config = await _db.MembershipFeeConfigs
                 .Where(c => c.MembershipType == type && c.EffectiveDate <= targetDate)
@@ -298,7 +298,7 @@ namespace GHCAA.Infrastructure.Services
                     MemberId = member.Id,
                     Year = year,
                     Amount = amount,
-                    DueDate = new DateTime(year, 3, 31), // Default due date Mar 31
+                    DueDate = new DateTime(year, 3, 31, 0, 0, 0, DateTimeKind.Utc),
                     IsPaid = false
                 };
                 

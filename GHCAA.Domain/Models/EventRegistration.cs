@@ -11,8 +11,18 @@ namespace GHCAA.Domain.Models
         [Required]
         public int EventId { get; set; }
 
-        [Required]
-        public int MemberId { get; set; }
+        public int? MemberId { get; set; } // Nullable for non-members
+
+        public bool IsNonMember { get; set; } = false;
+
+        [MaxLength(200)]
+        public string? GuestName { get; set; }
+
+        [MaxLength(100)]
+        public string? GuestEmail { get; set; }
+
+        [MaxLength(20)]
+        public string? GuestMobile { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -20,6 +30,8 @@ namespace GHCAA.Domain.Models
 
         [MaxLength(500)]
         public string? ReceiptPath { get; set; }
+
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.ManualReceipt;
 
         [Required]
         public EventRegistrationStatus Status { get; set; } = EventRegistrationStatus.Pending;

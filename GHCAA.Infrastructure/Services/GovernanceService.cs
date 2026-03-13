@@ -42,8 +42,8 @@ namespace GHCAA.Infrastructure.Services
             var period = new ECPeriod
             {
                 Title = title,
-                StartDate = startDate,
-                EndDate = endDate,
+                StartDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
+                EndDate = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : null,
                 IsActive = false
             };
 
@@ -61,8 +61,8 @@ namespace GHCAA.Infrastructure.Services
             await EnsureNoOverlapAsync(id, startDate, endDate, cancellationToken);
 
             period.Title = title;
-            period.StartDate = startDate;
-            period.EndDate = endDate;
+            period.StartDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+            period.EndDate = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : null;
 
             if (isActive && !period.IsActive)
             {

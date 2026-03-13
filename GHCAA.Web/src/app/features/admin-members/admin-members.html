@@ -2,17 +2,26 @@
     <div class="page-header">
         <div class="header-text">
             <h2>Member Registry</h2>
-            <small>{{ totalItems() }} members</small>
+            <small>{{ totalItems() }} total members</small>
         </div>
-        <div class="header-actions">
+        <div class="header-actions flex items-center gap-3">
+            <app-export-buttons 
+                [data]="allMembers()" 
+                fileName="ghcaa_members"
+                [pdfHeaders]="pdfHeaders"
+                [pdfDataMapper]="pdfMapper"
+                [exporting]="isExporting()"
+                (exportStart)="handleExport($event)"
+                title="Member Registry Export">
+            </app-export-buttons>
             <button class="btn btn-accent btn-md" (click)="openImport()">
                 <span class="icon">📥</span> Bulk Import
             </button>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="filter-bar glass-card">
+    <!-- Filters Section -->
+    <div class="filter-bar">
         <div class="search-wrap">
             <span class="search-icon">🔍</span>
             <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
@@ -26,416 +35,224 @@
         </select>
     </div>
 
-    <!-- Table -->
-    <div class="glass-card table-wrap">
+    <!-- Table Container -->
+    <div class="table-wrap">
         @if (loading()) {
-        <div class="loading-state">Loading members...</div>
+        <div class="loading-state">
+            <span class="spinner">⏳</span>
+            <p>Gathering member data...</p>
+        </div>
         } @else if (allMembers().length === 0) {
         <div class="empty-state">
             <span>👥</span>
-            <p>No members match your filters.</p>
+            <h3>No Members Found</h3>
+            <p>We couldn't find any members matching your criteria.</p>
         </div>
         } @else {
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Member</th>
+                    <th>Member Profile</th>
                     <th>Membership No.</th>
+                    <th>Type</th>
                     <th>Status</th>
-                    <th>Joined</th>
-                    <th>Actions</th>
+                    <th>Batch</th>
+                    <th>Administrative Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @for (member of allMembers(); track member.id) {
-                <tr>
+                <tr class="animate-fade-in">
                     <td class="member-cell" (click)="openDetail(member)">
+                        @if (member.photoPath) {
+                        <img [src]="'/' + member.photoPath" class="member-avatar photo" alt="Photo">
+                        } @else {
                         <div class="member-avatar">{{ member.fullName?.[0] }}</div>
+                        }
                         <div class="member-info">
                             <span class="member-name">{{ member.fullName }}</span>
                             <small>{{ member.email }}</small>
                         </div>
                     </td>
-                    <td>{{ member.membershipNumber || '—' }}</td>
+                    <td><code class="text-accent">{{ member.membershipNumber || '—' }}</code></td>
+                    <td><span class="text-xs uppercase font-bold opacity-70">{{ getMembershipTypeLabel(member.membershipType) }}</span></td>
                     <td>
                         <span class="status-badge" [class]="getStatusClass(member.status)">
                             {{ getStatusLabel(member.status) }}
                         </span>
                     </td>
-                    <td>{{ member.ghcLastCertificatePassingYear || '—' }}</td>
+                    <td><span class="font-bold">{{ member.ghcLastCertificatePassingYear || '—' }}</span></td>
                     <td class="actions-cell">
                         @if (member.status === 'Applied' || member.status === 0) {
                         <button class="icon-btn approve" (click)="approveMember(member.id, 1)"
-                            title="Approve">✅</button>
+                            title="Approve Member">✅</button>
                         }
                         @if (nav.isSuperAdmin()) {
-                        <button class="icon-btn archive" (click)="archiveMember(member.id)" title="Archive">🗄️</button>
+                        <button class="icon-btn archive" (click)="archiveMember(member.id)" title="Archive Member">🗄️</button>
                         }
                         <button class="icon-btn contact" (click)="contactMember(member.email)"
-                            title="Contact">📨</button>
-                        <button class="btn btn-outline btn-sm" (click)="openDetail(member)">Details ↗</button>
+                            title="Send Message">📨</button>
+                        <button class="btn btn-outline btn-sm" (click)="openDetail(member)">Manage ↗</button>
                     </td>
                 </tr>
                 }
             </tbody>
         </table>
 
-        <div class="pagination-bar"
-            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-            <div class="page-size">
-                <span style="margin-right: 5px;">Records per page:</span>
-                <select [ngModel]="pageSize()" (ngModelChange)="setPageListOptions($event)">
-                    <option [value]="10">10</option>
-                    <option [value]="25">25</option>
-                    <option [value]="50">50</option>
-                    <option [value]="100">100</option>
-                </select>
-            </div>
-            <div class="page-controls" style="display: flex; align-items: center; gap: 10px;">
-                <button class="btn btn-outline btn-sm" (click)="changePage(-1)"
-                    [disabled]="currentPage() === 1">Previous</button>
-                <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
-                <button class="btn btn-outline btn-sm" (click)="changePage(1)"
-                    [disabled]="currentPage() >= totalPages()">Next</button>
-            </div>
-        </div>
+        <!-- Pagination -->
+        <app-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            [totalItems]="totalItems()"
+            [pageSize]="pageSize()"
+            (pageChange)="currentPage.set($event); loadMembers()">
+        </app-pagination>
         }
     </div>
 </div>
 
-<!-- Member Detail Modal -->
+<!-- Member Management Modal -->
 @if (selectedMember()) {
 <div class="modal-overlay" (click)="closeDetail()">
-    <div class="modal-box glass-card" (click)="$event.stopPropagation()">
+    <div class="modal-box wide" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            @if (selectedMember()?.photoPath) {
-            <img [src]="'/' + selectedMember().photoPath" class="modal-avatar photo" alt="Photo">
-            } @else {
-            <div class="modal-avatar">{{ selectedMember()?.fullName?.[0] }}</div>
-            }
-            <div class="header-info">
-                @if (isEditing()) {
-                <input type="text" [(ngModel)]="selectedMember().fullName" class="edit-input title-input">
-                <input type="text" [(ngModel)]="selectedMember().membershipNumber" class="edit-input sub-input"
-                    placeholder="Membership Number">
-                } @else {
-                <h3>{{ selectedMember()?.fullName }}</h3>
-                <small>{{ selectedMember()?.membershipNumber || 'Pending Membership No.' }}</small>
+            <div class="flex items-center">
+                <div class="relative group cursor-pointer" (click)="isEditing() && photoInput.click()" [title]="isEditing() ? 'Click to change photo' : ''">
+                    @if (photoPreview()) {
+                    <img [src]="photoPreview()" class="modal-avatar photo" alt="Preview">
+                    } @else if (selectedMember()?.photoPath) {
+                    <img [src]="'/' + selectedMember().photoPath" class="modal-avatar photo" alt="Photo">
+                    } @else {
+                    <div class="modal-avatar">{{ selectedMember()?.fullName?.[0] }}</div>
+                    }
+                    @if (isEditing()) {
+                    <div class="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity pointer-events-none">📷</div>
+                    }
+                </div>
+                <input #photoInput type="file" accept="image/jpeg,image/png,image/webp" (change)="onAdminPhotoSelected($event)" class="hidden">
+                @if (isEditing() && photoPreview()) {
+                <button class="btn btn-accent btn-sm ml-3" (click)="uploadMemberPhoto()">💾 Save Photo</button>
                 }
+                <div class="header-info">
+                    @if (isEditing()) {
+                    <input type="text" [(ngModel)]="selectedMember().fullName" class="edit-input title-input w-full">
+                    <input type="text" [(ngModel)]="selectedMember().membershipNumber" class="edit-input sub-input w-full mt-2"
+                        placeholder="Membership Number">
+                    } @else {
+                    <h3>{{ selectedMember()?.fullName }}</h3>
+                    <small>{{ selectedMember()?.membershipNumber || 'Pending Membership ID' }}</small>
+                    }
+                </div>
             </div>
-            <div class="header-actions">
-                <button class="btn btn-secondary btn-sm" (click)="toggleEdit()">
-                    {{ isEditing() ? 'Discard Changes' : 'Edit Profile' }}
-                </button>
-                @if (!isEditing()) {
-                <button class="btn btn-secondary btn-sm" (click)="sendResetLink(selectedMember().id)">
-                    🔐 Reset Password
-                </button>
-                }
-                <button class="close-btn" (click)="closeDetail()">✕</button>
-            </div>
+            <button class="close-btn" (click)="closeDetail()">✕</button>
         </div>
+        
         <div class="modal-body">
-            <div class="detail-grid">
-                <!-- Personal -->
-                <div class="detail-item">
-                    <label>Email</label>
-                    @if (isEditing()) {
-                    <input type="email" [(ngModel)]="selectedMember().email">
-                    } @else {
-                    <span>{{ selectedMember()?.email }}</span>
+            <!-- Modal Actions Bar -->
+            <div class="flex justify-between items-center mb-8 border-b pb-4">
+                <div class="flex gap-4">
+                    <button class="btn btn-secondary btn-sm" (click)="toggleEdit()">
+                        {{ isEditing() ? '❌ Discard Changes' : '✏️ Edit Profile' }}
+                    </button>
+                    @if (!isEditing()) {
+                    <button class="btn btn-secondary btn-sm" (click)="sendResetLink(selectedMember().id)">
+                        🔐 Reset Password
+                    </button>
                     }
                 </div>
-                <div class="detail-item">
-                    <label>Mobile</label>
-                    @if (isEditing()) {
-                    <input type="text" [(ngModel)]="selectedMember().mobileNo">
-                    } @else {
-                    <span>{{ selectedMember()?.mobileNo }}</span>
-                    }
-                </div>
-                <div class="detail-item">
-                    <label>Status</label>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs uppercase font-black opacity-50">Current Status:</span>
                     <span class="status-badge" [class]="getStatusClass(selectedMember()?.status)">
                         {{ getStatusLabel(selectedMember()?.status) }}
                     </span>
                 </div>
-                <!-- Identity -->
-                <div class="detail-item">
+            </div>
+
+            <div class="form-grid">
+                <!-- Personal Information -->
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" [(ngModel)]="selectedMember().mobileNo" [readonly]="!isEditing()">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" [(ngModel)]="selectedMember().email" [readonly]="!isEditing()">
+                </div>
+                
+                <div class="form-group">
                     <label>Father's Name</label>
-                    @if (isEditing()) {
-                    <input type="text" [(ngModel)]="selectedMember().fatherName">
-                    } @else {
-                    <span>{{ selectedMember()?.fatherName }}</span>
-                    }
+                    <input type="text" [(ngModel)]="selectedMember().fatherName" [readonly]="!isEditing()">
                 </div>
-                <div class="detail-item">
+                <div class="form-group">
                     <label>Mother's Name</label>
-                    @if (isEditing()) {
-                    <input type="text" [(ngModel)]="selectedMember().motherName">
-                    } @else {
-                    <span>{{ selectedMember()?.motherName }}</span>
-                    }
+                    <input type="text" [(ngModel)]="selectedMember().motherName" [readonly]="!isEditing()">
                 </div>
-                <div class="detail-item">
+                
+                <div class="form-group">
                     <label>Date of Birth</label>
-                    @if (isEditing()) {
                     <input type="date" [ngModel]="selectedMember().dateOfBirth | date:'yyyy-MM-dd'"
-                        (ngModelChange)="selectedMember().dateOfBirth = $event">
-                    } @else {
-                    <span>{{ selectedMember()?.dateOfBirth | date }}</span>
-                    }
+                        (ngModelChange)="selectedMember().dateOfBirth = $event" [readonly]="!isEditing()">
                 </div>
-                <div class="detail-item">
+                <div class="form-group">
+                    <label>National ID (NID)</label>
+                    <input type="text" [(ngModel)]="selectedMember().nid" [readonly]="!isEditing()">
+                </div>
+
+                <div class="form-group">
                     <label>Gender</label>
-                    <select *ngIf="isEditing()" [(ngModel)]="selectedMember().gender">
-                        <option *ngFor="let g of genderOptions" [value]="g.value">{{ g.label }}</option>
+                    <select [(ngModel)]="selectedMember().gender" [disabled]="!isEditing()">
+                        @for (g of genderOptions; track g.value) { <option [value]="g.value">{{ g.label }}</option> }
                     </select>
-                    <span *ngIf="!isEditing()">{{ selectedMember()?.gender }}</span>
                 </div>
-                <div class="detail-item">
+                <div class="form-group">
                     <label>Blood Group</label>
-                    @if (isEditing()) {
-                    <select [(ngModel)]="selectedMember().bloodGroup">
-                        <option *ngFor="let b of bloodGroupOptions" [value]="b.value">{{ b.label }}</option>
+                    <select [(ngModel)]="selectedMember().bloodGroup" [disabled]="!isEditing()">
+                        @for (b of bloodGroupOptions; track b.value) { <option [value]="b.value">{{ b.label }}</option> }
                     </select>
-                    } @else {
-                    <span>{{ selectedMember()?.bloodGroup }}</span>
-                    }
-                </div>
-                <div class="detail-item">
-                    <label>NID</label>
-                    @if (isEditing()) {
-                    <input type="text" [(ngModel)]="selectedMember().nid">
-                    } @else {
-                    <span>{{ selectedMember()?.nid }}</span>
-                    }
                 </div>
 
-                <!-- Membership Settings -->
-                <div class="detail-item">
-                    <label>Membership Type</label>
-                    @if (isEditing()) {
-                    <select [(ngModel)]="selectedMember().membershipType">
-                        @for (t of membershipTypes; track t.value) {
-                        <option [value]="t.value">{{ t.label }}</option>
-                        }
+                <!-- Governance & Tier -->
+                <div class="form-group">
+                    <label>Membership Tier</label>
+                    <select [(ngModel)]="selectedMember().membershipType" [disabled]="!isEditing()">
+                        @for (t of membershipTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
                     </select>
-                    } @else {
-                    <span class="badge info">{{ selectedMember()?.membershipType }}</span>
-                    }
                 </div>
-                <div class="detail-item">
+                <div class="form-group">
                     <label>Special Category</label>
-                    <select *ngIf="isEditing()" [(ngModel)]="selectedMember().category">
-                        @for (c of memberCategories; track c.value) {
-                        <option [value]="c.value">{{ c.label }}</option>
-                        }
+                    <select [(ngModel)]="selectedMember().category" [disabled]="!isEditing()">
+                        @for (c of memberCategories; track c.value) { <option [value]="c.value">{{ c.label }}</option> }
                     </select>
-                    <span
-                        *ngIf="!isEditing() && selectedMember()?.category !== 'None' && selectedMember()?.category !== 0"
-                        class="badge" [class.lifelong]="getCategoryLabel(selectedMember()?.category) === 'Lifelong'"
-                        [class.donor]="getCategoryLabel(selectedMember()?.category) === 'Donor'"
-                        [class.patron]="getCategoryLabel(selectedMember()?.category) === 'Patron'">{{
-                        getCategoryLabel(selectedMember()?.category) }}</span>
-                    <span
-                        *ngIf="!isEditing() && (selectedMember()?.category === 'None' || selectedMember()?.category === 0)"
-                        class="text-muted">None</span>
                 </div>
-                <!-- Governance -->
 
-                <div class="detail-item">
+                <div class="form-group" [class.full]="isEditing()">
                     <label>EC Position</label>
-                    @if (isEditing()) {
-                    <select [(ngModel)]="selectedMember().ecPosition">
-                        @for (p of ecPositions; track p.value) {
-                        <option [value]="p.value">{{ p.label }}</option>
-                        }
+                    <select [(ngModel)]="selectedMember().ecPosition" [disabled]="!isEditing()">
+                        @for (p of ecPositions; track p.value) { <option [value]="p.value">{{ p.label }}</option> }
                     </select>
-                    } @else {
-                    @if (selectedMember()?.ecPosition !== 'None' && selectedMember()?.ecPosition !== 8) {
-                    <span class="status-badge ec-active">
-                        {{ getECPositionLabel(selectedMember()?.ecPosition) }}
-                    </span>
-                    } @else {
-                    <span class="text-muted">None</span>
-                    }
-                    }
                 </div>
 
                 @if (isEditing()) {
-                <div class="detail-item full">
-                    <label>EC Change Reason (Optional)</label>
+                <div class="form-group full">
+                    <label>Administrative Note (For EC Change)</label>
                     <input type="text" [(ngModel)]="selectedMember().ecChangeReason"
                         placeholder="Reason for mid-term promotion/change...">
                 </div>
                 }
 
-                <!-- EC History -->
-                <div class="detail-item full" *ngIf="!isEditing() && selectedMember()?.ecHistory?.length > 0">
-                    <label>Executive Committee History</label>
-                    <div class="history-list">
-                        @for (h of selectedMember().ecHistory; track h.startDate) {
-                        <div class="history-item">
-                            <div class="h-main">
-                                <span class="h-period">{{ h.periodTitle }}</span>
-                                <span class="h-pos">{{ getECPositionLabel(h.position) }}</span>
-                                @if (h.isCurrent && !h.endDate) { <span class="h-status">(Current)</span> }
-                            </div>
-                            <div class="h-meta">
-                                <small class="h-date">{{ h.startDate | date:'MMM yyyy' }} - {{ h.endDate ? (h.endDate |
-                                    date:'MMM yyyy') : (h.isCurrent ? 'Now' : 'Ended') }}</small>
-                                @if (h.changeReason) {
-                                <span class="h-reason" [title]="h.changeReason">
-                                    <i class="reason-icon">ⓘ</i> {{ h.changeReason }}
-                                </span>
-                                }
-                            </div>
-                        </div>
-                        }
-                    </div>
+                <!-- Dynamic Academic History Section (Placeholder for consistency) -->
+                <div class="full border-b pb-4 mb-4 mt-8">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Academic & Professional Background</h4>
                 </div>
 
-                <div class="detail-item full">
+                <div class="form-group full">
                     <label>Present Address</label>
-                    @if (isEditing()) {
-                    <textarea [(ngModel)]="selectedMember().presentAddress"></textarea>
-                    } @else {
-                    <span>{{ selectedMember()?.presentAddress }}</span>
-                    }
+                    <textarea [(ngModel)]="selectedMember().presentAddress" [readonly]="!isEditing()"></textarea>
                 </div>
-                <div class="detail-item full">
-                    <label>Permanent Address</label>
-                    @if (isEditing()) {
-                    <textarea [(ngModel)]="selectedMember().permanentAddress"></textarea>
-                    } @else {
-                    <span>{{ selectedMember()?.permanentAddress }}</span>
-                    }
-                </div>
-
-                <!-- Academic -->
-                <div class="detail-item">
-                    <label>Highest Certificate</label>
-                    @if (isEditing()) {
-                    <input type="text" list="degree-list" [(ngModel)]="selectedMember().highestCertificate">
-                    } @else {
-                    <span>{{ selectedMember()?.highestCertificate }}</span>
-                    }
-                </div>
-                <div class="detail-item">
-                    <label>Highest Certificate Group</label>
-                    @if (isEditing()) {
-                    <input type="text" list="group-list" [(ngModel)]="selectedMember().highestCertificateGroup">
-                    } @else {
-                    <span>{{ selectedMember()?.highestCertificateGroup }}</span>
-                    }
-                </div>
-                @if (selectedMember().highestCertificate !== 'HSC') {
-                <div class="detail-item">
-                    <label>Highest Certificate Subject</label>
-                    @if (isEditing()) {
-                    <input type="text" list="subject-list" [(ngModel)]="selectedMember().highestCertificateSubject">
-                    } @else {
-                    <span>{{ selectedMember()?.highestCertificateSubject }}</span>
-                    }
-                </div>
-                }
-                <div class="detail-item">
-                    <label>Highest Cert. Passing Year</label>
-                    @if (isEditing()) {
-                    <input type="number" list="years-list" [(ngModel)]="selectedMember().highestCertificatePassingYear">
-                    } @else {
-                    <span>{{ selectedMember()?.highestCertificatePassingYear }}</span>
-                    }
-                </div>
-
-                <div class="detail-item">
-                    <label>GHC Last Certificate</label>
-                    @if (isEditing()) {
-                    <input type="text" list="degree-list" [(ngModel)]="selectedMember().ghcLastCertificate">
-                    } @else {
-                    <span>{{ selectedMember()?.ghcLastCertificate }}</span>
-                    }
-                </div>
-                <div class="detail-item">
-                    <label>GHC Last Cert. Group</label>
-                    @if (isEditing()) {
-                    <input type="text" list="group-list" [(ngModel)]="selectedMember().ghcLastCertificateGroup">
-                    } @else {
-                    <span>{{ selectedMember()?.ghcLastCertificateGroup }}</span>
-                    }
-                </div>
-                @if (selectedMember().ghcLastCertificate !== 'HSC') {
-                <div class="detail-item">
-                    <label>GHC Last Cert. Subject</label>
-                    @if (isEditing()) {
-                    <input type="text" list="subject-list" [(ngModel)]="selectedMember().ghcLastCertificateSubject">
-                    } @else {
-                    <span>{{ selectedMember()?.ghcLastCertificateSubject }}</span>
-                    }
-                </div>
-                }
-                <div class="detail-item">
-                    <label>Passing Year</label>
-                    @if (isEditing()) {
-                    <input type="number" list="years-list" [(ngModel)]="selectedMember().ghcLastCertificatePassingYear">
-                    } @else {
-                    <span>{{ selectedMember()?.ghcLastCertificatePassingYear }}</span>
-                    }
-                </div>
-                <div class="detail-item">
-                    <label>HSC Admission Year</label>
-                    @if (isEditing()) {
-                    <input type="number" list="years-list" [(ngModel)]="selectedMember().hscAdmissionYear">
-                    } @else {
-                    <span>{{ selectedMember()?.hscAdmissionYear }}</span>
-                    }
-                </div>
-
-                <!-- Professional -->
-                <div class="detail-item">
-                    <label>Professional Sector</label>
-                    @if (isEditing()) {
-                    <input type="text" list="sector-list" [(ngModel)]="selectedMember().professionalSector">
-                    } @else {
-                    <span>{{ selectedMember()?.professionalSector }}</span>
-                    }
-                </div>
-                <div class="detail-item">
-                    <label>Designation</label>
-                    @if (isEditing()) {
-                    <input type="text" [(ngModel)]="selectedMember().designation">
-                    } @else {
-                    <span>{{ selectedMember()?.designation }}</span>
-                    }
-                </div>
-
-                <!-- Emergency -->
-                <div class="detail-item">
-                    <label>Emergency Contact</label>
-                    @if (isEditing()) {
-                    <div class="flex-row">
-                        <input type="text" [(ngModel)]="selectedMember().emergencyContactName" placeholder="Name">
-                        <input type="text" [(ngModel)]="selectedMember().emergencyContactRelation"
-                            placeholder="Relation">
-                    </div>
-                    } @else {
-                    <span>{{ selectedMember()?.emergencyContactName }} ({{
-                        selectedMember()?.emergencyContactRelation }})</span>
-                    }
-                </div>
-                <div class="detail-item">
-                    <label>Emergency Phone</label>
-                    @if (isEditing()) {
-                    <input type="text" [(ngModel)]="selectedMember().emergencyContactPhone">
-                    } @else {
-                    <span>{{ selectedMember()?.emergencyContactPhone }}</span>
-                    }
-                </div>
-
+                
                 <!-- Privacy Checks -->
-                <div class="detail-item full privacy-grid">
-                    <label>Privacy Settings</label>
+                <div class="full privacy-grid bg-surface p-6 rounded-lg">
+                    <label class="mb-4 block">Privacy Preferences</label>
                     <div class="checks">
                         <label><input type="checkbox" [(ngModel)]="selectedMember().isMobilePublic"
                                 [disabled]="!isEditing()"> Public Mobile</label>
@@ -444,121 +261,227 @@
                         <label><input type="checkbox" [(ngModel)]="selectedMember().isAddressPublic"
                                 [disabled]="!isEditing()"> Public Address</label>
                     </div>
-                    <!-- Attachments (Read Only) -->
-                    <div class="detail-item full docs-section"
-                        style="margin-top: 1rem; border-top: 1px solid var(--glass-border); padding-top: 1rem;">
-                        <label>Registry Attachments</label>
-                        <div class="doc-links" style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                            <a *ngIf="selectedMember()?.certificatePath" [href]="selectedMember().certificatePath"
-                                target="_blank" class="doc-link"
-                                style="color: var(--primary-color); text-decoration: none; font-size: 0.85rem; font-weight: 700;">📜
-                                Qualification Certificate</a>
-                            <a *ngIf="selectedMember()?.paymentProofPath" [href]="selectedMember().paymentProofPath"
-                                target="_blank" class="doc-link"
-                                style="color: var(--primary-color); text-decoration: none; font-size: 0.85rem; font-weight: 700;">💳
-                                Fee Receipt</a>
-                            @if (!selectedMember()?.certificatePath && !selectedMember()?.paymentProofPath) {
-                            <span class="text-muted">No documents uploaded.</span>
+                </div>
+
+                <!-- Academic History Section -->
+                <div class="full border-t pt-8 mt-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-accent uppercase tracking-widest text-xs font-black">Academic Records</h4>
+                        @if (isEditing()) {
+                        <button class="btn btn-outline btn-sm" (click)="addAcademic()">➕ Add Record</button>
+                        }
+                    </div>
+                    
+                    <div class="history-list flex flex-col gap-4">
+                        @for (acad of selectedMember()?.academicHistory; track $index) {
+                        <div class="history-item glass-effect rounded-lg overflow-hidden">
+                            <div class="flex justify-between items-center px-4 py-2 border-b border-white/10">
+                                <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold">Record #{{ $index + 1 }}</span>
+                                @if (isEditing()) {
+                                <button class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors" (click)="removeAcademic($index)" type="button">✕ Remove</button>
+                                }
+                            </div>
+                            <div class="p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="form-group">
+                                    <label class="text-[10px]">Institution</label>
+                                    <input type="text" [(ngModel)]="acad.institutionName" [readonly]="!isEditing()" placeholder="e.g. Govt. Haraganga College">
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-[10px]">Degree</label>
+                                    <input type="text" [(ngModel)]="acad.degree" [readonly]="!isEditing()" list="degree-list" placeholder="e.g. HSC, BSS">
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-[10px]">Subject/Group</label>
+                                    <input type="text" [(ngModel)]="acad.subject" [readonly]="!isEditing()" list="subject-list" placeholder="e.g. Science, Philosophy">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="form-group">
+                                        <label class="text-[10px]">Pass Year</label>
+                                        <input type="number" [(ngModel)]="acad.passingYear" [readonly]="!isEditing()" list="years-list">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="text-[10px]">Result</label>
+                                        <input type="text" [(ngModel)]="acad.result" [readonly]="!isEditing()" placeholder="e.g. 5.00">
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        }
+                        @if (!selectedMember()?.academicHistory?.length) {
+                        <p class="text-sm opacity-50 italic">No academic history records.</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Professional History Section -->
+                <div class="full border-t pt-8 mt-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-accent uppercase tracking-widest text-xs font-black">Professional Records</h4>
+                        @if (isEditing()) {
+                        <button class="btn btn-outline btn-sm" (click)="addProfessional()">➕ Add Experience</button>
+                        }
+                    </div>
+
+                    <div class="history-list flex flex-col gap-4">
+                        @for (prof of selectedMember()?.professionalHistory; track $index) {
+                        <div class="history-item glass-effect rounded-lg overflow-hidden">
+                            <div class="flex justify-between items-center px-4 py-2 border-b border-white/10">
+                                <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold">Job #{{ $index + 1 }}</span>
+                                @if (isEditing()) {
+                                <button class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors" (click)="removeProfessional($index)" type="button">✕ Remove</button>
+                                }
+                            </div>
+                            <div class="p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="form-group">
+                                    <label class="text-[10px]">Organization</label>
+                                    <input type="text" [(ngModel)]="prof.organizationName" [readonly]="!isEditing()" placeholder="Company Name">
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-[10px]">Designation</label>
+                                    <input type="text" [(ngModel)]="prof.designation" [readonly]="!isEditing()" placeholder="e.g. Manager, Teacher">
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-[10px]">Sector</label>
+                                    <input type="text" [(ngModel)]="prof.sector" [readonly]="!isEditing()" list="sector-list" placeholder="e.g. Gov, Banking">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="form-group">
+                                        <label class="text-[10px]">Start Date</label>
+                                        <input type="date" [ngModel]="prof.startDate | date:'yyyy-MM-dd'" (ngModelChange)="prof.startDate = $event" [readonly]="!isEditing()">
+                                    </div>
+                                    <div class="form-check flex items-end pb-2">
+                                        <label class="flex items-center gap-2 text-[10px] cursor-pointer">
+                                            <input type="checkbox" [(ngModel)]="prof.isCurrent" [disabled]="!isEditing()"> Currently Working
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        }
+                        @if (!selectedMember()?.professionalHistory?.length) {
+                        <p class="text-sm opacity-50 italic">No professional records.</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Documents Section -->
+                <div class="full border-t pt-6 mt-6">
+                    <label class="mb-4 block">Uploaded Qualification Documents</label>
+                    <div class="flex flex-col gap-6">
+                        <div class="flex gap-6 items-center">
+                            @if (selectedMember()?.certificatePath) {
+                            <a [href]="selectedMember().certificatePath" target="_blank" class="btn btn-secondary btn-sm">
+                                📜 View Certificate
+                            </a>
+                            } @else {
+                            <span class="text-xs opacity-50 italic">No Certificate</span>
+                            }
+                            
+                            @if (isEditing()) {
+                            <div class="flex items-center gap-3">
+                                <label class="btn btn-outline btn-sm cursor-pointer !mb-0">
+                                    {{ certToUpload ? '✅ Ready: ' + certToUpload.name : '📤 Replace/Upload Certificate' }}
+                                    <input type="file" (change)="onDocSelected($event, 'cert')" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                </label>
+                            </div>
                             }
                         </div>
+
+                        <div class="flex gap-6 items-center">
+                            @if (selectedMember()?.paymentProofPath) {
+                            <a [href]="selectedMember().paymentProofPath" target="_blank" class="btn btn-secondary btn-sm">
+                                💳 View Payment Receipt
+                            </a>
+                            } @else {
+                            <span class="text-xs opacity-50 italic">No Payment Receipt</span>
+                            }
+
+                            @if (isEditing()) {
+                            <div class="flex items-center gap-3">
+                                <label class="btn btn-outline btn-sm cursor-pointer !mb-0">
+                                    {{ payToUpload ? '✅ Ready: ' + payToUpload.name : '📤 Replace/Upload Receipt' }}
+                                    <input type="file" (change)="onDocSelected($event, 'pay')" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                </label>
+                            </div>
+                            }
+                        </div>
+                        
+                        @if (!selectedMember()?.certificatePath && !selectedMember()?.paymentProofPath && !isEditing()) {
+                        <span class="text-muted italic">No verification documents on record.</span>
+                        }
                     </div>
                 </div>
             </div>
-            <div class="modal-footer" *ngIf="isEditing()">
-                <button class="btn btn-secondary" (click)="toggleEdit()">Discard Changes</button>
-                <button class="btn btn-accent" (click)="saveMember()">Save Inducted Information</button>
-            </div>
         </div>
-    </div>
 
-    <!-- Datalists for Searchable Dropdowns -->
-    <datalist id="years-list">
-        @for (y of yearsList; track y) { <option [value]="y"></option> }
-    </datalist>
-    <datalist id="degree-list">
-        @for (d of degreeOptions; track d) { <option [value]="d"></option> }
-    </datalist>
-    <datalist id="sector-list">
-        @for (s of sectorOptions; track s) { <option [value]="s"></option> }
-    </datalist>
+        @if (isEditing()) {
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="toggleEdit()">Discard Changes</button>
+            <button class="btn btn-accent" (click)="saveMember()">🚀 Synchronize Information</button>
+        </div>
+        }
+    </div>
 </div>
 }
 
-<!-- Bulk Import Modal -->
+<!-- Bulk Import Engine Modal -->
 @if (showImportModal()) {
 <div class="modal-overlay" (click)="showImportModal.set(false)">
-    <div class="modal-box wide glass-card" (click)="$event.stopPropagation()">
+    <div class="modal-box wide" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h3>📥 Bulk Alumni Import</h3>
+            <h3>Enterprise Alumni Bulk Import</h3>
             <button class="close-btn" (click)="showImportModal.set(false)">✕</button>
         </div>
         <div class="modal-body">
-            <div class="import-steps">
-                <!-- Step 1: Files -->
+            <div class="import-engine animate-fade-in">
+                <!-- Step 1: Asset Selection -->
                 <div class="step-card">
-                    <h4>Step 1: Select Files</h4>
-                    <div class="upload-grid"
-                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
-                        <div class="upload-zone"
-                            style="border: 2px dashed var(--glass-border); padding: 1.5rem; border-radius: 12px; text-align: center;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 700;">Excel File
-                                (.xlsx)</label>
-                            <input type="file" accept=".xlsx" (change)="onFileSelected($event)">
-                            @if (importFile()) {
-                            <p class="file-info"
-                                style="margin-top: 0.5rem; color: var(--primary-color); font-size: 0.85rem;">{{
-                                importFile()?.name }}</p>
-                            }
+                    <h4>Step 1: Resource Acquisition</h4>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="upload-zone p-8 border-2 border-dashed border-gold rounded-xl text-center cursor-pointer">
+                            <label class="block mb-4 font-black text-xs uppercase opacity-70">Excel Master Record (.xlsx)</label>
+                            <input type="file" accept=".xlsx" (change)="onFileSelected($event)" class="hidden" id="excelUpload">
+                            <button class="btn btn-secondary w-full" onclick="document.getElementById('excelUpload').click()">
+                                {{ importFile() ? '✅ ' + importFile()?.name : '📄 Select Spreadsheet' }}
+                            </button>
                         </div>
-                        <div class="upload-zone"
-                            style="border: 2px dashed var(--glass-border); padding: 1.5rem; border-radius: 12px; text-align: center;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 700;">Photo Folder (Select
-                                all images)</label>
+                        <div class="upload-zone p-8 border-2 border-dashed border-gold rounded-xl text-center cursor-pointer">
+                            <label class="block mb-4 font-black text-xs uppercase opacity-70">Identity Photo Cluster</label>
                             <input type="file" multiple webkitdirectory directory accept="image/*"
-                                (change)="onPhotosSelected($event)">
-                            @if (photoFiles().length > 0) {
-                            <p class="file-info"
-                                style="margin-top: 0.5rem; color: var(--primary-color); font-size: 0.85rem;">{{
-                                photoFiles().length }} images selected</p>
-                            }
+                                (change)="onPhotosSelected($event)" class="hidden" id="photoUpload">
+                            <button class="btn btn-secondary w-full" onclick="document.getElementById('photoUpload').click()">
+                                {{ photoFiles().length > 0 ? '✅ ' + photoFiles().length + ' Images' : '📸 Select Folder' }}
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 2: Mapping & Defaults -->
+                <!-- Step 2: Protocol Mapping -->
                 @if (importFile() && excelHeaders().length > 0) {
-                <div class="step-card" style="margin-top: 2rem;">
-                    <div class="card-header-flex">
-                        <h4>Step 2: Map Columns & Set Defaults</h4>
-                        <span class="hint">Map your Excel headers or set a fixed default value for fields not in
-                            Excel.</span>
+                <div class="step-card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4>Step 2: Attribute Synchronisation</h4>
+                        <span class="text-xs italic opacity-40">Mapping global fields to Excel columns</span>
                     </div>
 
-                    <div class="mapping-table-header">
-                        <span class="col-name">System Property</span>
-                        <span class="col-excel">Excel Column</span>
-                        <span class="col-default">Default Value (If blank)</span>
-                    </div>
-
-                    <div class="mapping-grid"
-                        style="display: grid; gap: 0.5rem; max-height: 400px; overflow-y: auto; padding-right: 0.5rem;">
+                    <div class="mapping-grid">
                         @for (prop of systemProperties; track prop.value) {
-                        <div class="mapping-row"
-                            style="display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 1rem; align-items: center; padding: 0.6rem 0.75rem; background: var(--glass-bg); border-radius: 8px;">
-                            <span class="sys-prop" style="font-weight: 700; font-size: 0.85rem;">{{ prop.label }}</span>
+                        <div class="mapping-row">
+                            <span class="sys-prop">{{ prop.label }}</span>
 
-                            <!-- Mapping Dropdown -->
-                            <select [(ngModel)]="columnMapping[prop.value]"
-                                style="padding: 0.4rem; border-radius: 6px; border: 1px solid var(--glass-border); font-size: 0.85rem;">
-                                <option [value]="''">-- Select Excel Column --</option>
+                            <select [(ngModel)]="columnMapping[prop.value]" class="w-full">
+                                <option [value]="''">-- Ignore Property --</option>
                                 @for (header of excelHeaders(); track $index) {
                                 <option [value]="header">{{ header }}</option>
                                 }
                             </select>
 
-                            <!-- Default Value Input -->
-                            <input type="text" [(ngModel)]="defaultValues[prop.value]" placeholder="Fixed value..."
-                                style="padding: 0.4rem; border-radius: 6px; border: 1px solid var(--glass-border); font-size: 0.85rem; background: var(--bg-color);">
+                            <input type="text" [(ngModel)]="defaultValues[prop.value]" placeholder="Default Override..."
+                                class="w-full">
                         </div>
                         }
                     </div>
@@ -566,33 +489,24 @@
                 }
             </div>
         </div>
-        <div class="modal-footer"
-            style="padding: 1.5rem; border-top: 1px solid var(--glass-border); display: flex; justify-content: flex-end; gap: 1rem;">
-            <button class="btn btn-secondary btn-cancel" (click)="showImportModal.set(false)">
-                <span class="icon">❌</span> Cancel
-            </button>
-            <button class="btn btn-accent shadow-gold btn-start" [disabled]="!importFile() || isImporting()"
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="showImportModal.set(false)">Cancel Import</button>
+            <button class="btn btn-accent px-10 shadow-gold" [disabled]="!importFile() || isImporting()"
                 (click)="executeImport()">
                 @if (isImporting()) {
-                <span class="spinner">⏳</span> Processing...
+                    <span class="spinner">⏳</span> Optimizing Data...
                 } @else {
-                <span class="icon">🚀</span> Start Import
+                    <span class="icon">🚀</span> Execute Migration
                 }
             </button>
         </div>
     </div>
 </div>
-
-<datalist id="group-list">
-    @for (g of groupOptions; track g) { <option [value]="g"></option> }
-</datalist>
-<datalist id="subject-list">
-    @for (s of subjectOptions; track s) { <option [value]="s"></option> }
-</datalist>
-<datalist id="sector-list">
-    @for (sec of sectorOptions; track sec) { <option [value]="sec"></option> }
-</datalist>
-<datalist id="degree-list">
-    @for (d of degreeOptions; track d) { <option [value]="d"></option> }
-</datalist>
 }
+
+<!-- Shared Datalists -->
+<datalist id="years-list"> @for (y of yearsList; track y) { <option [value]="y"></option> } </datalist>
+<datalist id="degree-list"> @for (d of degreeOptions; track d) { <option [value]="d"></option> } </datalist>
+<datalist id="sector-list"> @for (s of sectorOptions; track s) { <option [value]="s"></option> } </datalist>
+<datalist id="group-list"> @for (g of groupOptions; track g) { <option [value]="g"></option> } </datalist>
+<datalist id="subject-list"> @for (s of subjectOptions; track s) { <option [value]="s"></option> } </datalist>

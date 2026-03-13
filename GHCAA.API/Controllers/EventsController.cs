@@ -36,13 +36,22 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("register")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> RegisterForEvent([FromForm] RegisterForEventDto dto, IFormFile? receipt, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
-            if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
+            int? memberId = null;
+            if (User.Identity?.IsAuthenticated == true)
             {
-                return BadRequest("User is not associated with a member account.");
+                var memberIdClaim = User.FindFirst("MemberId")?.Value;
+                if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var mid))
+                {
+                    memberId = mid;
+                }
+            }
+
+            if (!memberId.HasValue && !dto.IsNonMember)
+            {
+                return Unauthorized("A member account is required for this registration.");
             }
 
             UploadedFileDto? receiptDto = null;
@@ -76,6 +85,32 @@ namespace GHCAA.API.Controllers
 
             var registrations = await _eventService.GetRegistrationsByMemberAsync(memberId, cancellationToken);
             return Ok(registrations);
+        }
+
+        [HttpGet("registration/{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetRegistrationForInvitation(int id, CancellationToken cancellationToken)
+        {
+            var registration = await _eventService.GetRegistrationByIdAsync(id, cancellationToken);
+            if (registration == null) return NotFound();
+
+            bool isAdmin = User.IsInRole("Admin");
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+
+            if (!isAdmin)
+            {
+                if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId) || registration.MemberId != memberId)
+                {
+                    return Forbid();
+                }
+
+                if (registration.Status != GHCAA.Domain.Enums.EventRegistrationStatus.Approved)
+                {
+                    return BadRequest("Invitation is only available for approved registrations.");
+                }
+            }
+
+            return Ok(registration);
         }
 
         // --- ADMIN ENDPOINTS ---
@@ -115,9 +150,9 @@ namespace GHCAA.API.Controllers
 
         [HttpGet("admin/registrations")]
         [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> GetAllRegistrations(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllRegistrations(int page = 1, int pageSize = 10, int? eventId = null, string? status = null, string? search = null, CancellationToken cancellationToken = default)
         {
-            var registrations = await _eventService.GetAllRegistrationsForAdminAsync(cancellationToken);
+            var registrations = await _eventService.GetAllRegistrationsForAdminAsync(page, pageSize, eventId, status, search, cancellationToken);
             return Ok(registrations);
         }
 

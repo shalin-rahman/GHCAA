@@ -116,7 +116,6 @@ export class AdminComm implements OnInit {
     }
 
     editTemplate(template: EmailTemplate) {
-        console.log('Editing template:', template.code, 'Body length:', template.body?.length);
         this.editingTemplate.set({ ...template });
         // Use timeout to ensure DOM is updated before initializing Quill
         setTimeout(() => {

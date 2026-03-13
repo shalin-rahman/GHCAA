@@ -64,13 +64,15 @@
 
     <main class="admin-main">
         <header class="admin-header">
-            <h1 class="page-title">Control Panel</h1>
-            <div class="header-right">
-                <span class="header-role-badge">{{ auth.currentUser()?.role }}</span>
-                <a routerLink="/portal/dashboard" class="header-btn">Exit Admin</a>
+            <div class="admin-header-inner portal-content">
+                <h1 class="page-title">Control Panel</h1>
+                <div class="header-right">
+                    <span class="header-role-badge">{{ auth.currentUser()?.role }}</span>
+                    <a routerLink="/portal/dashboard" class="header-btn">Exit Admin</a>
+                </div>
             </div>
         </header>
-        <div class="admin-content">
+        <div class="admin-content portal-content">
             <router-outlet></router-outlet>
         </div>
     </main>

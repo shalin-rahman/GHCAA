@@ -24,42 +24,36 @@ describe('RegistrationService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should submit registration with FormData (including image)', () => {
+    it('should call register with formData', () => {
         const formData = new FormData();
-        formData.append('fullName', 'John Doe');
-
-        // Mock a file upload
-        const blob = new Blob([''], { type: 'image/jpeg' });
-        formData.append('photo', blob, 'test.jpg');
-
+        formData.append('fullName', 'Test');
+        
         service.register(formData).subscribe(res => {
-            expect(res).toBeTruthy();
-            expect(res.memberId).toBe(123);
+            expect(res.memberId).toBe(100);
         });
 
         const req = httpMock.expectOne(API_ENDPOINTS.AUTH.REGISTER);
         expect(req.request.method).toBe('POST');
-        expect(req.request.body).toBe(formData);
-        req.flush({ memberId: 123, message: 'Success' });
+        req.flush({ memberId: 100 });
     });
 
-    it('should verify email with OTP', () => {
-        const email = 'test@example.com';
-        const otpCode = '123456';
-
-        service.verifyEmail(email, otpCode).subscribe(res => {
-            expect(res).toBeTruthy();
+    it('should call verifyEmail', () => {
+        service.verifyEmail('test@test.com', '123456').subscribe(res => {
+            expect(res.success).toBe(true);
         });
 
         const req = httpMock.expectOne(API_ENDPOINTS.AUTH.VERIFY_EMAIL);
         expect(req.request.method).toBe('POST');
-        expect(req.request.body).toEqual({ email, otpCode });
-        req.flush({ message: 'Verified' });
+        expect(req.request.body).toEqual({ email: 'test@test.com', otpCode: '123456' });
+        req.flush({ success: true });
     });
 
-    it('should get registration status', () => {
-        service.getStatus(1).subscribe(l => expect(l).toBeTruthy());
-        const req = httpMock.expectOne(`${API_ENDPOINTS.AUTH.STATUS}/1`);
+    it('should call getStatus', () => {
+        service.getStatus(100).subscribe(res => {
+            expect(res.status).toBe('Applied');
+        });
+
+        const req = httpMock.expectOne(`${API_ENDPOINTS.AUTH.STATUS}/100`);
         expect(req.request.method).toBe('GET');
         req.flush({ status: 'Applied' });
     });

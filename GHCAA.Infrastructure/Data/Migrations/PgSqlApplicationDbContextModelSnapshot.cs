@@ -22,6 +22,75 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("GHCAA.Domain.Models.AcademicRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AdmissionYear")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Degree")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("InstitutionName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsGHC")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PassingYear")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Result")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("AcademicRecords");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AdmissionYear = 2013,
+                            Degree = "HSC",
+                            InstitutionName = "Govt. Haraganga College",
+                            IsGHC = true,
+                            MemberId = 1,
+                            PassingYear = 2015,
+                            Subject = "Science"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AdmissionYear = 2014,
+                            Degree = "HSC",
+                            InstitutionName = "Govt. Haraganga College",
+                            IsGHC = true,
+                            MemberId = 101,
+                            PassingYear = 2016,
+                            Subject = "Humanities"
+                        });
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.ActivityLog", b =>
                 {
                     b.Property<int>("Id")
@@ -68,6 +137,9 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<string>("AdminNote")
                         .HasColumnType("text");
 
+                    b.Property<bool>("AllowNonMembers")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -109,6 +181,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 1,
+                            AllowNonMembers = false,
                             CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Date = new DateTime(2026, 5, 15, 9, 0, 0, 0, DateTimeKind.Utc),
                             Description = "The biggest gathering of Haragangians across the globe. Join us for a day of nostalgia, networking, and cultural celebrations.",
@@ -440,7 +513,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Description = "Highlights from the 100th-anniversary gala of Haraganga College.",
                             EventDate = new DateTime(2025, 12, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
-                            IsFeatured = false,
+                            IsFeatured = true,
                             Title = "Centennial Celebration"
                         },
                         new
@@ -451,7 +524,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Description = "Scenic views of the historic GHC campus buildings and grounds.",
                             EventDate = new DateTime(2026, 1, 20, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
-                            IsFeatured = false,
+                            IsFeatured = true,
                             Title = "Campus Landscapes"
                         });
                 });
@@ -490,7 +563,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "Gala Evening",
                             EventGalleryId = 1,
                             PhotoPath = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070",
-                            UploadedAt = new DateTime(2026, 3, 6, 6, 56, 42, 778, DateTimeKind.Utc).AddTicks(3853)
+                            UploadedAt = new DateTime(2026, 3, 12, 23, 9, 44, 682, DateTimeKind.Utc).AddTicks(8723)
                         },
                         new
                         {
@@ -498,7 +571,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "Alumni Networking",
                             EventGalleryId = 1,
                             PhotoPath = "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069",
-                            UploadedAt = new DateTime(2026, 3, 6, 6, 56, 42, 778, DateTimeKind.Utc).AddTicks(5249)
+                            UploadedAt = new DateTime(2026, 3, 12, 23, 9, 44, 683, DateTimeKind.Utc).AddTicks(998)
                         },
                         new
                         {
@@ -506,7 +579,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "Main Administrative Building",
                             EventGalleryId = 2,
                             PhotoPath = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986",
-                            UploadedAt = new DateTime(2026, 3, 6, 6, 56, 42, 778, DateTimeKind.Utc).AddTicks(5250)
+                            UploadedAt = new DateTime(2026, 3, 12, 23, 9, 44, 683, DateTimeKind.Utc).AddTicks(1001)
                         },
                         new
                         {
@@ -514,7 +587,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "College Playground",
                             EventGalleryId = 2,
                             PhotoPath = "https://images.unsplash.com/photo-1492538350424-aaee9f201774?q=80&w=2070",
-                            UploadedAt = new DateTime(2026, 3, 6, 6, 56, 42, 778, DateTimeKind.Utc).AddTicks(5252)
+                            UploadedAt = new DateTime(2026, 3, 12, 23, 9, 44, 683, DateTimeKind.Utc).AddTicks(1004)
                         });
                 });
 
@@ -535,7 +608,25 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<int>("EventId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("MemberId")
+                    b.Property<string>("GuestEmail")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("GuestMobile")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("GuestName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsNonMember")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("MemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PaymentMethod")
                         .HasColumnType("integer");
 
                     b.Property<string>("PaymentReference")
@@ -2111,6 +2202,96 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.ToTable("Otps");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.PaymentConfiguration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccountHolderName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("AccountNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("BankName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("BranchName")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Gateway")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("GatewayCallbackUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("GatewayPublicKey")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("GatewaySecretKey")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Instructions")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Method")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("RequiresReceipt")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("RequiresReference")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RoutingNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("WalletNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PaymentConfigurations");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.PaymentHistory", b =>
                 {
                     b.Property<int>("Id")
@@ -2131,6 +2312,13 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<DateTime>("PaidAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ReceiptPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -2143,6 +2331,75 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("MemberId", "TransactionId");
 
                     b.ToTable("PaymentHistories");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.ProfessionalRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Designation")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("OrganizationName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Sector")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("ProfessionalRecords");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Designation = "Senior Software Architect",
+                            IsCurrent = true,
+                            Location = "Dhaka",
+                            MemberId = 1,
+                            OrganizationName = "GlobalTech Solutions",
+                            Sector = "Information Technology (IT) & Software",
+                            StartDate = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Designation = "Communications Manager",
+                            IsCurrent = true,
+                            Location = "Dhaka",
+                            MemberId = 101,
+                            OrganizationName = "Alumni Corp",
+                            Sector = "Advertising & Media",
+                            StartDate = new DateTime(2021, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.Role", b =>
@@ -2224,12 +2481,12 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 1,
-                            AnnouncementText = "Celebrating 55 Years of Victory! Happy Independence Day to all Haragangians.",
-                            BackgroundColor = "#213921",
-                            EndDate = new DateTime(2026, 3, 27, 23, 59, 59, 0, DateTimeKind.Utc),
+                            AnnouncementText = "Happy 55th Independence Day! Celebrating our glorious history.",
+                            BackgroundColor = "#d63031",
+                            EndDate = new DateTime(2026, 3, 30, 23, 59, 59, 0, DateTimeKind.Utc),
                             IsEnabled = true,
-                            StartDate = new DateTime(2026, 3, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            TextColor = "#dc2626",
+                            StartDate = new DateTime(2026, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TextColor = "#ffffff",
                             Title = "Independence Day 2026"
                         });
                 });
@@ -2328,6 +2585,17 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.AcademicRecord", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.Member", "Member")
+                        .WithMany("AcademicHistory")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.ActivityLog", b =>
                 {
                     b.HasOne("GHCAA.Domain.Models.Member", "Member")
@@ -2396,9 +2664,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasOne("GHCAA.Domain.Models.Member", "Member")
                         .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MemberId");
 
                     b.Navigation("Event");
 
@@ -2486,6 +2752,17 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Navigation("Member");
                 });
 
+            modelBuilder.Entity("GHCAA.Domain.Models.ProfessionalRecord", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.Member", "Member")
+                        .WithMany("ProfessionalHistory")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+                });
+
             modelBuilder.Entity("GHCAA.Domain.Models.User", b =>
                 {
                     b.HasOne("GHCAA.Domain.Models.Member", "Member")
@@ -2522,7 +2799,11 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("GHCAA.Domain.Models.Member", b =>
                 {
+                    b.Navigation("AcademicHistory");
+
                     b.Navigation("ECMembers");
+
+                    b.Navigation("ProfessionalHistory");
 
                     b.Navigation("User");
                 });

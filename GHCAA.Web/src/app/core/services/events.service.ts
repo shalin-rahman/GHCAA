@@ -12,6 +12,7 @@ export interface AlumniEvent {
     registrationFee?: number;
     type?: string;
     isActive: boolean;
+    allowNonMembers: boolean;
     imageUrl?: string;
     registrationDeadline?: string;
     adminNote?: string;
@@ -21,8 +22,12 @@ export interface EventRegistration {
     id: number;
     eventId: number;
     event?: AlumniEvent;
-    memberId: number;
+    memberId?: number;
     memberName?: string;
+    isNonMember: boolean;
+    guestName?: string;
+    guestEmail?: string;
+    guestMobile?: string;
     paymentReference: string;
     receiptPath?: string;
     status: 'Pending' | 'Approved' | 'Rejected';
@@ -44,18 +49,43 @@ export class EventsService {
         return this.http.get<AlumniEvent>(`${this.apiUrl}/${id}`);
     }
 
-    registerForEvent(eventId: number, paymentRef: string, receiptFile?: File): Observable<any> {
+    registerForEvent(dto: {
+        eventId: number, 
+        paymentReference: string, 
+        paymentMethod?: string,
+        isNonMember?: boolean,
+        guestName?: string,
+        guestEmail?: string,
+        guestMobile?: string,
+        receiptFile?: File
+    }): Observable<any> {
         const formData = new FormData();
-        formData.append('EventId', eventId.toString());
-        formData.append('PaymentReference', paymentRef);
-        if (receiptFile) {
-            formData.append('receipt', receiptFile);
+        formData.append('EventId', dto.eventId.toString());
+        formData.append('PaymentReference', dto.paymentReference);
+        
+        if (dto.paymentMethod) {
+            formData.append('PaymentMethod', dto.paymentMethod);
+        }
+        
+        if (dto.isNonMember) {
+            formData.append('IsNonMember', 'true');
+            if (dto.guestName) formData.append('GuestName', dto.guestName);
+            if (dto.guestEmail) formData.append('GuestEmail', dto.guestEmail);
+            if (dto.guestMobile) formData.append('GuestMobile', dto.guestMobile);
+        }
+
+        if (dto.receiptFile) {
+            formData.append('receipt', dto.receiptFile);
         }
         return this.http.post(`${this.apiUrl}/register`, formData);
     }
 
     getMyRegistrations(): Observable<EventRegistration[]> {
         return this.http.get<EventRegistration[]>(`${this.apiUrl}/my-registrations`);
+    }
+
+    getRegistrationForInvitation(id: number): Observable<EventRegistration> {
+        return this.http.get<EventRegistration>(`${this.apiUrl}/registration/${id}`);
     }
 
     // Admin Methods
@@ -67,8 +97,12 @@ export class EventsService {
         return this.http.post<AlumniEvent>(`${this.apiUrl}/admin`, ev);
     }
 
-    getAllRegistrations(): Observable<EventRegistration[]> {
-        return this.http.get<EventRegistration[]>(`${this.apiUrl}/admin/registrations`);
+    getAllRegistrations(page: number = 1, pageSize: number = 10, eventId?: number, status?: string, search?: string): Observable<any> {
+        let url = `${this.apiUrl}/admin/registrations?page=${page}&pageSize=${pageSize}`;
+        if (eventId) url += `&eventId=${eventId}`;
+        if (status) url += `&status=${status}`;
+        if (search) url += `&search=${search}`;
+        return this.http.get<any>(url);
     }
 
     approveRegistration(registrationId: number, approve: boolean): Observable<any> {

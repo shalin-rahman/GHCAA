@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -28,6 +28,7 @@
     <ProjectReference Include="..\GHCAA.Application\GHCAA.Application.csproj" />
     <ProjectReference Include="..\GHCAA.Infrastructure\GHCAA.Infrastructure.csproj" />
     <ProjectReference Include="..\GHCAA.Domain\GHCAA.Domain.csproj" />
+    <ProjectReference Include="..\GHCAA.API\GHCAA.API.csproj" />
   </ItemGroup>
 
 </Project>

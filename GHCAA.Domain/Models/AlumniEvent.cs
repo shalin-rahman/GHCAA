@@ -24,6 +24,7 @@ namespace GHCAA.Domain.Models
         public decimal? RegistrationFee { get; set; }
 
         public bool IsActive { get; set; } = true;
+        public bool AllowNonMembers { get; set; } = false;
 
         [MaxLength(500)]
         public string? ImageUrl { get; set; }

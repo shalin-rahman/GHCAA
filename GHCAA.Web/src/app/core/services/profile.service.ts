@@ -38,6 +38,31 @@ export interface MemberProfile {
     isMobilePublic: boolean;
     isEmailPublic: boolean;
     isAddressPublic: boolean;
+
+    academicHistory: AcademicRecord[];
+    professionalHistory: ProfessionalRecord[];
+}
+
+export interface AcademicRecord {
+    id?: number;
+    institutionName: string;
+    degree: string;
+    subject: string;
+    admissionYear?: number;
+    passingYear: number;
+    isGHC: boolean;
+    result?: string;
+}
+
+export interface ProfessionalRecord {
+    id?: number;
+    organizationName: string;
+    designation: string;
+    sector?: string;
+    location?: string;
+    startDate: string;
+    endDate?: string;
+    isCurrent: boolean;
 }
 
 @Injectable({
@@ -57,6 +82,12 @@ export class ProfileService {
 
     getIDCard(): Observable<{ dataUri: string }> {
         return this.http.get<{ dataUri: string }>(`${this.apiUrl}/id-card`);
+    }
+
+    uploadPhoto(file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('photo', file);
+        return this.http.post<any>(`${this.apiUrl}/photo`, formData);
     }
 
     getCertificate(): Observable<{ dataUri: string }> {

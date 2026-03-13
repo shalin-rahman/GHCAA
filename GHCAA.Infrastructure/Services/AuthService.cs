@@ -51,7 +51,7 @@ namespace GHCAA.Infrastructure.Services
 
             if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
             {
-                _logger.LogWarning("Login failed: Invalid password for user {Username}", loginDto.Username);
+                _logger.LogError("Login failed: Invalid password for user {Username}", loginDto.Username);
                 return null;
             }
 

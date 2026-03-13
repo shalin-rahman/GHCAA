@@ -63,7 +63,7 @@ public class LocalFileStorageServiceTests
         var result = _service.GetRelativeFilePath(memberId, uploadType, fileName);
 
         // Assert
-        result.Should().Be("uploads/members/123/photo/test.jpg");
+        result.Should().Be("uploads/members/photo_m123_test.jpg");
     }
 
     [Test]
@@ -75,10 +75,10 @@ public class LocalFileStorageServiceTests
 
         // Act & Assert
         _service.GetRelativeFilePath(memberId, Enums.FileUploadType.Certificate, fileName)
-            .Should().Be("uploads/members/456/certificate/document.pdf");
+            .Should().Be("uploads/members/certificate_m456_document.pdf");
 
         _service.GetRelativeFilePath(memberId, Enums.FileUploadType.PaymentProof, fileName)
-            .Should().Be("uploads/members/456/paymentproof/document.pdf");
+            .Should().Be("uploads/members/paymentproof_m456_document.pdf");
     }
 
     [Test]
@@ -93,7 +93,7 @@ public class LocalFileStorageServiceTests
         var result = _service.GetRelativeFilePath(memberId, uploadType, fileName);
 
         // Assert
-        result.Should().Be("uploads/members/789/photo/file.jpg");
+        result.Should().Be("uploads/members/photo_m789_file.jpg");
     }
 
     [Test]
@@ -111,7 +111,7 @@ public class LocalFileStorageServiceTests
 
         // Assert
         result.Should().NotBeNullOrEmpty();
-        result.Should().StartWith("uploads/members/1/photo/");
+        result.Should().StartWith("uploads/members/photo_m1_");
         result.Should().EndWith("_test.jpg");
 
         // Verify file was actually created
@@ -162,7 +162,7 @@ public class LocalFileStorageServiceTests
         var result = await _service.SaveFileAsync(stream, fileName, memberId, uploadType);
 
         // Assert
-        var directoryPath = Path.Combine("wwwroot", "uploads", "members", "999", "certificate");
+        var directoryPath = Path.Combine("wwwroot", "uploads", "members");
         Directory.Exists(directoryPath).Should().BeTrue();
     }
 
@@ -208,7 +208,7 @@ public class LocalFileStorageServiceTests
     public async Task DeleteFileAsync_WithNonExistentFile_ShouldNotThrowException()
     {
         // Arrange
-        var relativePath = "uploads/members/999/photo/nonexistent.jpg";
+        var relativePath = "uploads/members/photo_m999_nonexistent.jpg";
 
         // Act & Assert
         var act = async () => await _service.DeleteFileAsync(relativePath);
