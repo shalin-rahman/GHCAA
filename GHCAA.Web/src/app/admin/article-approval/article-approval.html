@@ -1,0 +1,99 @@
+<div class="admin-feature">
+    <header class="page-header">
+        <div class="header-text">
+            <h2>Article Submission Approvals</h2>
+            <small>Review and manage articles submitted by members for verification and publication.</small>
+        </div>
+    </header>
+
+    @if (loading()) {
+    <div class="loading-state glass-card py-20 text-center">
+        <div class="spinner mx-auto mb-4"></div>
+        <p>Checking for pending submissions...</p>
+    </div>
+    } @else {
+    <div class="submissions-table glass-card overflow-hidden">
+        <table class="w-full">
+            <thead>
+                <tr>
+                    <th>Submission Info</th>
+                    <th>Category</th>
+                    <th>Author</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (article of pendingArticles(); track article.id) {
+                <tr>
+                    <td>
+                        <div class="article-info">
+                            <div class="thumb" [style.background-image]="'url(' + (article.imageUrl || '/assets/placeholder.jpg') + ')'"></div>
+                            <div class="txt">
+                                <strong>{{ article.title }}</strong>
+                                <p>{{ article.content | slice:0:60 }}...</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge">{{ article.category }}</span></td>
+                    <td>{{ article.authorName }}</td>
+                    <td>{{ article.createdAt | date:'shortTime' }} <br> <small>{{ article.createdAt | date:'mediumDate' }}</small></td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" (click)="viewArticle(article)">Review Article</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="5" class="py-20 text-center italic opacity-50">
+                        No pending submissions found.
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>
+
+<!-- Review Modal -->
+@if (selectedArticle()) {
+<div class="modal-overlay" (click)="selectedArticle.set(null)">
+    <div class="modal-box large reveal-top" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Review Submission</h3>
+            <button class="close-btn" (click)="selectedArticle.set(null)">×</button>
+        </div>
+        <div class="modal-body custom-scrollbar">
+            <div class="article-preview">
+                @if (selectedArticle()?.imageUrl) {
+                <img [src]="selectedArticle()?.imageUrl" alt="Cover" class="preview-hero">
+                }
+                <div class="preview-meta mb-6 flex gap-4">
+                    <span class="badge bg-gold-gradient text-black">{{ selectedArticle()?.category }}</span>
+                    <span class="text-muted">By <strong>{{ selectedArticle()?.authorName }}</strong></span>
+                </div>
+                <h1>{{ selectedArticle()?.title }}</h1>
+                <div class="preview-body mt-8">
+                    {{ selectedArticle()?.content }}
+                </div>
+                
+                <div class="rejection-box mt-10 p-6 glass-card bg-white/5">
+                    <label class="text-xs uppercase font-black mb-4 block">Rejection Note (Only if rejecting)</label>
+                    <textarea [(ngModel)]="rejectReason" placeholder="Explain why this article is being rejected..."></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer flex justify-between">
+            <button class="btn btn-secondary" (click)="selectedArticle.set(null)">Close Review</button>
+            <div class="actions flex gap-4">
+                <button class="btn btn-outline" (click)="reject()" [disabled]="isProcessing()">
+                    {{ isProcessing() ? 'Processing...' : 'Reject Submission' }}
+                </button>
+                <button class="btn btn-accent" (click)="approve()" [disabled]="isProcessing()">
+                    {{ isProcessing() ? 'Approving...' : 'Approve & Publish' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}

@@ -3,6 +3,8 @@ using GHCAA.Application;
 using GHCAA.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 using GHCAA.API.Extensions;
 using GHCAA.API.Middleware;
 using GHCAA.Application.Interfaces;
@@ -17,6 +19,37 @@ builder.Services.AddInfrastructure(configuration);
 // Configure JWT Authentication
 builder.Services.AddJwtAuthentication(configuration);
 builder.Services.AddAppAuthorization();
+
+// 1. Configure Rate Limiting (Fixed Window)
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Login/OTP Policy: Very strict (5 requests per 1 minute)
+    options.AddFixedWindowLimiter("auth", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 5;
+        opt.QueueLimit = 0;
+    });
+
+    // Registration Policy: Moderate (10 requests per 5 minutes)
+    options.AddFixedWindowLimiter("registration", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(5);
+        opt.PermitLimit = 10;
+        opt.QueueLimit = 0;
+    });
+
+    // General API Policy: (100 requests per 1 minute)
+    options.AddFixedWindowLimiter("api", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 100;
+        opt.QueueLimit = 2;
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+});
 
 // Configure Request Limits from Settings
 var maxBodySize = configuration.GetValue<long>("AppSettings:MaxRequestBodySize", 104857600);
@@ -71,7 +104,10 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<AuditLogMiddleware>();
+
+app.UseRateLimiter(); // Apply Rate Limiting
 
 app.UseWebSockets();
 app.UseStaticFiles(); // serve wwwroot/uploads

@@ -17,6 +17,12 @@ export const EC_ROLES = [
     'Institutional Representative'
 ] as const;
 
+export const DEVELOPER_INFO = {
+    name: 'md habibur rahman shalin',
+    email: 'shalin.rahman@gmail.com',
+    link: 'mailto:shalin.rahman@gmail.com'
+};
+
 export const MEMBERSHIP_STATUS_MAP: Record<string | number, { label: string, class: string }> = {
     'Applied': { label: 'Pending', class: 'pending' },
     0: { label: 'Pending', class: 'pending' },
@@ -85,6 +91,26 @@ export const JOB_CATEGORIES = [
     { id: 7, name: 'Mentorship & Career Guidance' },
     { id: 8, name: 'Other Opportunities' }
 ];
+
+export const ARTICLE_CATEGORIES = [
+    { value: 'Event', label: 'Event Highlights' },
+    { value: 'Magazine', label: 'E-Magazine Article' },
+    { value: 'Regular', label: 'Regular Portal Update' }
+];
+
+export const SUBMISSION_STATUS = {
+    DRAFT: 0,
+    PENDING: 1,
+    APPROVED: 2,
+    REJECTED: 3
+};
+
+export const SUBMISSION_STATUS_MAP: Record<number, { label: string, class: string }> = {
+    0: { label: 'Draft', class: 'draft' },
+    1: { label: 'Pending Approval', class: 'pending' },
+    2: { label: 'Approved', class: 'active' },
+    3: { label: 'Rejected', class: 'terminated' }
+};
 
 export type ECPositionType = typeof EC_ROLES[number];
 
@@ -288,7 +314,8 @@ export const API_ENDPOINTS = {
         MEMBERS_IMPORT: '/api/admin/members/import',
         STATS: '/api/admin/stats',
         COMMUNICATION: '/api/admin/comm',
-        GOVERNANCE: '/api/admin/governance'
+        GOVERNANCE: '/api/admin/governance',
+        CONTACT_MESSAGES: '/api/admin/contact-messages'
     },
     AUTH: {
         LOGIN: '/api/auth/login',
@@ -324,6 +351,7 @@ export const API_ENDPOINTS = {
     CONTACT: '/api/contact',
     ASSISTANT: '/api/assistant/ask',
     THEMES: '/api/theme',
+    SECURE_FILES: '/api/secure-files',
     PAYMENT_CONFIG: {
         BASE: '/api/payment-config',
         PUBLIC: '/api/payment-config/active'

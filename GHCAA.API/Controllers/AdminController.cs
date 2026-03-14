@@ -202,5 +202,20 @@ namespace GHCAA.API.Controllers
             var dataUri = await _idCardService.GenerateCertificateDataUriAsync(id, cancellationToken);
             return Ok(new { DataUri = dataUri });
         }
+
+        [HttpGet("contact-messages")]
+        public async Task<IActionResult> GetContactMessages([FromServices] IContactService contactService, CancellationToken cancellationToken)
+        {
+            var messages = await contactService.GetMessagesAsync(cancellationToken);
+            return Ok(messages);
+        }
+
+        [HttpPost("contact-messages/{id}/read")]
+        public async Task<IActionResult> MarkMessageAsRead(int id, [FromServices] IContactService contactService, CancellationToken cancellationToken)
+        {
+            var success = await contactService.MarkAsReadAsync(id, cancellationToken);
+            if (!success) return NotFound();
+            return Ok(new { Message = "Message marked as read." });
+        }
     }
 }

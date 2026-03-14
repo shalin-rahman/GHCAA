@@ -1,6 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { 
+    MembershipStatus, 
+    MembershipType, 
+    Gender, 
+    BloodGroup,
+    AcademicRecord,
+    ProfessionalRecord
+} from '../models/business.models';
+
 
 export interface MemberApprovalRequest {
     id: number;
@@ -8,8 +17,8 @@ export interface MemberApprovalRequest {
     fatherName: string;
     motherName: string;
     dateOfBirth: string;
-    gender: string;
-    bloodGroup: string;
+    gender: Gender;
+    bloodGroup: BloodGroup;
     nid: string;
     email: string;
     mobileNo: string;
@@ -30,11 +39,24 @@ export interface MemberApprovalRequest {
     emergencyContactName: string;
     emergencyContactRelation: string;
     emergencyContactPhone: string;
-    membershipType: number;
-    status: number;
+    membershipType: MembershipType;
+    status: MembershipStatus;
     photoPath?: string;
     certificatePath?: string;
+    academicHistory?: AcademicRecord[];
+    professionalHistory?: ProfessionalRecord[];
 }
+
+
+export interface DashboardStats {
+    totalMembers: number;
+    applied: number;
+    active: number;
+    inactive: number;
+    balance: number;
+    lastUpdated: string;
+}
+
 
 import { API_ENDPOINTS } from '../constants/app.constants';
 
@@ -76,9 +98,10 @@ export class AdminService {
         return this.http.post(`${this.apiUrl}/${id}/reject`, { rejectedByAdminId: adminId, reason });
     }
 
-    getStats(): Observable<any> {
-        return this.http.get(API_ENDPOINTS.ADMIN.STATS);
+    getStats(): Observable<DashboardStats> {
+        return this.http.get<DashboardStats>(API_ENDPOINTS.ADMIN.STATS);
     }
+
 
     archiveMember(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${id}`);

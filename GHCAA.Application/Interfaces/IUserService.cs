@@ -1,3 +1,5 @@
+using GHCAA.Domain.Models;
+
 namespace GHCAA.Application.Interfaces
 {
     public interface IUserService

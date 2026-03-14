@@ -2,37 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { AlumniEvent, EventRegistration } from '../models/business.models';
 
-export interface AlumniEvent {
-    id: number;
-    title: string;
-    description: string;
-    date: string;
-    location: string;
-    registrationFee?: number;
-    type?: string;
-    isActive: boolean;
-    allowNonMembers: boolean;
-    imageUrl?: string;
-    registrationDeadline?: string;
-    adminNote?: string;
-}
-
-export interface EventRegistration {
-    id: number;
-    eventId: number;
-    event?: AlumniEvent;
-    memberId?: number;
-    memberName?: string;
-    isNonMember: boolean;
-    guestName?: string;
-    guestEmail?: string;
-    guestMobile?: string;
-    paymentReference: string;
-    receiptPath?: string;
-    status: 'Pending' | 'Approved' | 'Rejected';
-    registeredAt: string;
-}
 
 @Injectable({
     providedIn: 'root'

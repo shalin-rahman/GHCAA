@@ -34,5 +34,8 @@ namespace GHCAA.Domain
 
         // Payment Gateway Enums
         public enum PaymentGateway { None, Stripe, PayPal, SSLCommerz, BkashGateway, NagadGateway, RocketGateway, BankTransferGateway, Manual }
+
+        public enum SubmissionStatus { Draft, Pending, Approved, Rejected }
+        public enum ArticleCategory { Event, Magazine, Regular }
     }
 }

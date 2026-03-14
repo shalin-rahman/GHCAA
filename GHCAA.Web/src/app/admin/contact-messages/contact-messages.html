@@ -1,0 +1,86 @@
+<div class="admin-feature">
+    <header class="page-header">
+        <div class="header-text">
+            <h2>Portal Enquiries</h2>
+            <small>Manage contact submissions and assistance requests from members and public.</small>
+        </div>
+        <button class="btn btn-secondary btn-sm" (click)="loadMessages()">🔄 Refresh</button>
+    </header>
+
+    @if (loading()) {
+    <div class="loading-state glass-card py-20 text-center">
+        <div class="spinner mx-auto mb-4"></div>
+        <p>Loading enquiries...</p>
+    </div>
+    } @else {
+    <div class="glass-card overflow-x-auto">
+        <table class="admin-table w-full">
+            <thead>
+                <tr>
+                    <th>Sender</th>
+                    <th>Subject</th>
+                    <th>Received on</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (msg of messages(); track msg.id) {
+                <tr [class.unread]="!msg.isRead">
+                    <td>
+                        <div class="sender-info">
+                            <strong>{{ msg.fullName }}</strong>
+                            <small>{{ msg.email }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge" [class.badge-accent]="msg.subject?.includes('Help')">{{ msg.subject }}</span>
+                    </td>
+                    <td>{{ msg.createdAt | date:'short' }}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" (click)="viewMessage(msg)">View Detail</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="4" class="py-20 text-center italic opacity-40">No enquiries found.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>
+
+@if (selectedMessage()) {
+<div class="modal-overlay" (click)="selectedMessage.set(null)">
+    <div class="modal-box reveal-top" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Message Detail</h3>
+            <button class="close-btn" (click)="selectedMessage.set(null)">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="msg-meta mb-6">
+                <div class="row">
+                    <span class="label">From:</span>
+                    <span class="val">{{ selectedMessage().fullName }} ({{ selectedMessage().email }})</span>
+                </div>
+                <div class="row">
+                    <span class="label">Subject:</span>
+                    <span class="val"><strong>{{ selectedMessage().subject }}</strong></span>
+                </div>
+                <div class="row">
+                    <span class="label">Date:</span>
+                    <span class="val">{{ selectedMessage().createdAt | date:'medium' }}</span>
+                </div>
+            </div>
+            <div class="msg-content p-6 glass-card bg-white/5 border border-white/5 whitespace-pre-wrap">
+                {{ selectedMessage().message }}
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="selectedMessage.set(null)">Close</button>
+            <a [href]="'mailto:' + selectedMessage().email" class="btn btn-accent">Reply via Email</a>
+        </div>
+    </div>
+</div>
+}

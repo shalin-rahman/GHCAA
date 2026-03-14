@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ProfileService, MemberProfile } from './profile.service';
+import { ProfileService } from './profile.service';
+import { MemberProfile } from '../models/business.models';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { AuthService } from './auth.service';
 import { vi } from 'vitest';
@@ -16,8 +17,12 @@ describe('ProfileService', () => {
         fullName: 'Test User',
         email: 'test@test.com',
         mobileNo: '0123456789',
-        status: 1,
-        membershipType: 1,
+        status: 'Active',
+        membershipType: 'Executive',
+        category: 'None',
+        ecPosition: 'None',
+        gender: 'Male',
+        bloodGroup: 'APositive',
         highestCertificate: 'BSc',
         highestCertificateGroup: 'Science',
         highestCertificateSubject: 'CSE',
@@ -30,13 +35,13 @@ describe('ProfileService', () => {
         designation: 'Engineer',
         presentAddress: 'Dhaka',
         permanentAddress: 'Dhaka',
-        bloodGroup: 1,
         isMobilePublic: true,
         isEmailPublic: true,
         isAddressPublic: true,
         academicHistory: [],
         professionalHistory: []
     };
+
 
     beforeEach(() => {
         authServiceMock = {

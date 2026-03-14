@@ -78,8 +78,66 @@ namespace GHCAA.API.Controllers
             return success ? Ok() : NotFound();
         }
 
-        [HttpPost("upload-image")]
+        [HttpGet("my-submissions")]
+        [Authorize]
+        public async Task<IActionResult> GetMySubmissions(CancellationToken cancellationToken)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out var userId)) return Unauthorized();
+
+            // We need to find the member ID for this user to call the service
+            // Or we could update the service to accept userId. 
+            // The service already uses user.MemberId if needed, but here it wants memberId.
+            // Actually, I'll update the service to take userId directly or handle it there.
+            // For now, I'll just pass the userId if it's the authorId.
+            
+            // Re-evaluating GetMySubmissionsAsync logic in NewsService:
+            // It searches for user by memberId. 
+            // Let's just bypass and use the authorId directly in a new service method or update it.
+            // I'll update the service method to take userId.
+            
+            var news = await _newsService.GetMySubmissionsAsync(userId, cancellationToken); // I'll fix service next
+            return Ok(news);
+        }
+
+        [HttpPost("submit")]
+        [Authorize]
+        public async Task<IActionResult> SubmitArticle([FromBody] CreateNewsDto dto, CancellationToken cancellationToken)
+        {
+            var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(authorIdClaim, out var authorId)) return Unauthorized();
+
+            // Ensure status is Pending if submitted by member, or Draft if requested
+            if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
+            {
+                if (dto.Status != Enums.SubmissionStatus.Draft)
+                    dto.Status = Enums.SubmissionStatus.Pending;
+                
+                dto.IsActive = false; // Members cannot set active directly
+            }
+
+            var result = await _newsService.CreateNewsAsync(dto, authorId, cancellationToken);
+            return CreatedAtAction(nameof(GetNewsById), new { id = result.Id }, result);
+        }
+
+        [HttpPost("{id}/approve")]
         [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> ApproveArticle(int id, CancellationToken cancellationToken)
+        {
+            var success = await _newsService.ApproveArticleAsync(id, cancellationToken);
+            return success ? Ok(new { Message = "Article approved." }) : NotFound();
+        }
+
+        [HttpPost("{id}/reject")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> RejectArticle(int id, CancellationToken cancellationToken)
+        {
+            var success = await _newsService.RejectArticleAsync(id, cancellationToken);
+            return success ? Ok(new { Message = "Article rejected." }) : NotFound();
+        }
+
+        [HttpPost("upload-image")]
+        [Authorize] // Allow members to upload images for their articles too
         public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
         {
             if (file == null || file.Length == 0)
@@ -99,14 +157,12 @@ namespace GHCAA.API.Controllers
             var relativePath = await _fileStorageService.SaveFileAsync(
                 stream, 
                 uniqueFileName, 
-                authorId, // using admin's id as a folder categorization since it's an admin upload
+                authorId, 
                 Enums.FileUploadType.NewsImage, 
                 cancellationToken
             );
 
-            // Our storage service typically returns local paths, add leading slash for web url
             var fileUrl = "/" + relativePath.TrimStart('/');
-            
             return Ok(new { url = fileUrl, relativePath });
         }
     }

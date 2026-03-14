@@ -8,6 +8,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using GHCAA.Domain;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -23,7 +24,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(CancellationToken cancellationToken = default)
         {
             return await _db.NewsPosts
-                .Where(n => n.IsActive)
+                .Where(n => n.IsActive && n.Status == Enums.SubmissionStatus.Approved)
                 .OrderByDescending(n => n.PublishDate)
                 .Select(n => MapToDto(n))
                 .ToListAsync(cancellationToken);
@@ -37,12 +38,21 @@ namespace GHCAA.Infrastructure.Services
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<IEnumerable<NewsPostDto>> GetMySubmissionsAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            return await _db.NewsPosts
+                .Where(n => n.AuthorId == userId)
+                .OrderByDescending(n => n.PublishDate)
+                .Select(n => MapToDto(n))
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<NewsPostDto?> GetNewsByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var post = await _db.NewsPosts
                 .IgnoreQueryFilters()
                 .Include(n => n.Author)
-                .FirstOrDefaultAsync(n => n.Id == id && n.IsActive, cancellationToken);
+                .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
             
             return post == null ? null : MapToDto(post);
         }
@@ -54,6 +64,7 @@ namespace GHCAA.Infrastructure.Services
                 Title = dto.Title,
                 Content = dto.Content,
                 Category = dto.Category,
+                Status = dto.Status,
                 ImageUrl = dto.ImageUrl,
                 IsActive = dto.IsActive,
                 AuthorId = authorId,
@@ -73,6 +84,7 @@ namespace GHCAA.Infrastructure.Services
             existing.Title = dto.Title;
             existing.Content = dto.Content;
             existing.Category = dto.Category;
+            existing.Status = dto.Status;
             existing.ImageUrl = dto.ImageUrl;
             existing.IsActive = dto.IsActive;
             existing.LastModified = DateTime.UtcNow;
@@ -91,6 +103,31 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
+        public async Task<bool> ApproveArticleAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var post = await _db.NewsPosts.FindAsync(new object[] { id }, cancellationToken);
+            if (post == null) return false;
+
+            post.Status = Enums.SubmissionStatus.Approved;
+            post.IsActive = true;
+            post.PublishDate = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> RejectArticleAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var post = await _db.NewsPosts.FindAsync(new object[] { id }, cancellationToken);
+            if (post == null) return false;
+
+            post.Status = Enums.SubmissionStatus.Rejected;
+            post.IsActive = false;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
         private static NewsPostDto MapToDto(NewsPost post)
         {
             return new NewsPostDto
@@ -99,10 +136,11 @@ namespace GHCAA.Infrastructure.Services
                 Title = post.Title,
                 Content = post.Content,
                 Category = post.Category,
+                Status = post.Status,
                 ImageUrl = post.ImageUrl,
                 IsActive = post.IsActive,
                 CreatedAt = post.PublishDate,
-                AuthorName = post.Author?.Username
+                AuthorName = post.Author?.Member?.FullName ?? post.Author?.Username ?? "Unknown"
             };
         }
     }

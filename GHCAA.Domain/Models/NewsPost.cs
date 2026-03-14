@@ -16,7 +16,9 @@ namespace GHCAA.Domain.Models
         public string Content { get; set; } = null!; // HTML support
 
         [Required]
-        public NewsCategory Category { get; set; }
+        public ArticleCategory Category { get; set; }
+
+        public SubmissionStatus Status { get; set; } = SubmissionStatus.Approved; // Default for existing/admin news
 
         public DateTime PublishDate { get; set; } = DateTime.UtcNow;
 

@@ -34,6 +34,7 @@ namespace GHCAA.Tests.Controllers
             _dbContext = new ApplicationDbContext(options);
 
             _controller = new FinancialsController(_financialServiceMock.Object, _dbContext);
+        }
 
         private void SetUserContext(string? memberId = "10", string role = "Admin")
         {
@@ -61,6 +62,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetMyPaymentHistory_ReturnsOk()
         {
+            SetUserContext();
             _financialServiceMock.Setup(x => x.GetMemberPaymentHistoryAsync(10, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(new List<PaymentHistoryDto>());
 
@@ -82,6 +84,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task RecordPayment_ReturnsOk()
         {
+            SetUserContext();
             var dto = new CreatePaymentHistoryDto { Amount = 100 };
             _financialServiceMock.Setup(x => x.RecordPaymentAsync(dto, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(new PaymentHistoryDto { Id = 1 });
@@ -94,6 +97,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetMyDues_ReturnsOk()
         {
+            SetUserContext();
             _financialServiceMock.Setup(x => x.GetMemberDuesAsync(10, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(new List<MembershipDueDto>());
 

@@ -33,7 +33,7 @@ describe('LedgerService', () => {
     });
 
     it('should fetch ledger summary', () => {
-        const dummySummary = { year: 2024, totalIncome: 1000, totalExpense: 500, balance: 500 };
+        const dummySummary = { year: 2024, totalIncome: 1000, totalExpense: 500, netBalance: 500 };
         service.getSummary(2024).subscribe(summary => {
             expect(summary).toEqual(dummySummary);
         });

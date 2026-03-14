@@ -3,68 +3,22 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { AuthService } from './auth.service';
+import { 
+    MembershipStatus, 
+    MembershipType, 
+    MemberCategory, 
+    ECPosition, 
+    Gender, 
+    BloodGroup,
+    AcademicRecord,
+    ProfessionalRecord,
+    MemberProfile,
+    ECHistoryRecord
+} from '../models/business.models';
 
-export interface MemberProfile {
-    id: number;
-    fullName: string;
-    email: string;
-    mobileNo: string;
-    membershipNumber?: string;
-    status: number;
-    membershipType: number;
 
-    hscAdmissionYear?: number;
-    highestCertificate: string;
-    highestCertificateGroup: string;
-    highestCertificateSubject: string;
-    highestCertificatePassingYear: number;
 
-    ghcAdmissionYear?: number;
-    ghcLastCertificate: string;
-    ghcLastCertificateGroup: string;
-    ghcLastCertificateSubject: string;
-    ghcLastCertificatePassingYear: number;
 
-    // Professional
-    professionalSector: string;
-    designation: string;
-
-    // Info
-    photoPath?: string;
-    presentAddress: string;
-    permanentAddress: string;
-    bloodGroup: number;
-
-    // Privacy
-    isMobilePublic: boolean;
-    isEmailPublic: boolean;
-    isAddressPublic: boolean;
-
-    academicHistory: AcademicRecord[];
-    professionalHistory: ProfessionalRecord[];
-}
-
-export interface AcademicRecord {
-    id?: number;
-    institutionName: string;
-    degree: string;
-    subject: string;
-    admissionYear?: number;
-    passingYear: number;
-    isGHC: boolean;
-    result?: string;
-}
-
-export interface ProfessionalRecord {
-    id?: number;
-    organizationName: string;
-    designation: string;
-    sector?: string;
-    location?: string;
-    startDate: string;
-    endDate?: string;
-    isCurrent: boolean;
-}
 
 @Injectable({
     providedIn: 'root'
@@ -82,13 +36,16 @@ export class ProfileService {
                 fullName: 'System Administrator',
                 email: 'superadmin@ghcaa.com',
                 mobileNo: '00000000000',
-                status: 1, // Active
-                membershipType: 1, // Executive
+                status: 'Active',
+                membershipType: 'Executive',
+                category: 'None',
+                ecPosition: 'None',
                 academicHistory: [],
                 professionalHistory: [],
                 presentAddress: 'Backend Server',
                 permanentAddress: 'Backend Server',
-                bloodGroup: 0,
+                gender: 'Male',
+                bloodGroup: 'APositive',
                 highestCertificate: 'Admin',
                 highestCertificateGroup: 'Admin',
                 highestCertificateSubject: 'Admin',
@@ -103,6 +60,7 @@ export class ProfileService {
                 isEmailPublic: false,
                 isAddressPublic: false
             } as MemberProfile);
+
         }
         return this.http.get<MemberProfile>(this.apiUrl);
     }

@@ -64,12 +64,13 @@ describe('AdminService', () => {
 
     it('should get stats', () => {
         service.getStats().subscribe(res => {
-            expect(res.total).toBe(5);
+            expect(res.totalMembers).toBe(5);
         });
         const req = httpMock.expectOne(API_ENDPOINTS.ADMIN.STATS);
         expect(req.request.method).toBe('GET');
-        req.flush({ total: 5 });
+        req.flush({ totalMembers: 5, applied: 1, active: 4, inactive: 0, balance: 1000, lastUpdated: new Date().toISOString() });
     });
+
 
     it('should archive member', () => {
         service.archiveMember(5).subscribe(res => {

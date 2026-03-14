@@ -1,7 +1,9 @@
 import { Component, inject } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { NavService } from '../../core/services/nav.service';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-admin-layout',
@@ -13,4 +15,18 @@ import { NavService } from '../../core/services/nav.service';
 export class AdminLayout {
   auth = inject(AuthService);
   nav = inject(NavService);
+  private titleService = inject(Title);
+  private router = inject(Router);
+
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      const url = this.router.url;
+      const allAdminItems = this.nav.adminNavItems();
+      const match = allAdminItems.find(x => url.includes(x.path));
+      const title = match?.label ?? 'Control Panel';
+      this.titleService.setTitle(`${title} | Admin Control`);
+    });
+  }
 }

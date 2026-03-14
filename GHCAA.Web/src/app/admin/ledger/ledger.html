@@ -1,0 +1,146 @@
+<div class="admin-feature">
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Financial Ledger</h2>
+            <small>{{ totalItems() }} records found</small>
+        </div>
+        <div class="header-actions flex items-center gap-3">
+            <app-export-buttons 
+                [data]="transactions()" 
+                fileName="ghcaa_ledger"
+                [pdfHeaders]="pdfHeaders"
+                [pdfDataMapper]="pdfMapper"
+                [exporting]="isExporting()"
+                (exportStart)="handleExport($event)"
+                title="Financial Ledger Export">
+            </app-export-buttons>
+            <button class="btn btn-accent" (click)="showForm.set(!showForm())">
+                {{ showForm() ? '✕ Close Form' : '+ Add Record' }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Summary -->
+    <div class="balance-cards" *ngIf="!showForm()">
+        <div class="glass-card balance-card income">
+            <small>Total Income</small>
+            <h3>৳ {{ summary()?.totalIncome | number }}</h3>
+        </div>
+        <div class="glass-card balance-card expense">
+            <small>Total Expense</small>
+            <h3>৳ {{ summary()?.totalExpense | number }}</h3>
+        </div>
+        <div class="glass-card balance-card balance">
+            <small>Current Balance</small>
+            <h3>৳ {{ summary()?.netBalance | number }}</h3>
+        </div>
+    </div>
+
+    <!-- Add Record Form -->
+    <div class="glass-card form-box" *ngIf="showForm()">
+        <h3>Add New Transaction</h3>
+        <form (submit)="addRecord()">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" [(ngModel)]="newRecord.date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label>Amount (৳) *</label>
+                    <input type="number" [(ngModel)]="newRecord.amount" name="amount" required min="1">
+                </div>
+                <div class="form-group">
+                    <label>Type *</label>
+                    <select [(ngModel)]="newRecord.recordType" name="type" required>
+
+                        <option value="Income">Credit (Income)</option>
+                        <option value="Expense">Debit (Expense)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select [(ngModel)]="newRecord.category" name="category" required>
+                        <option value="MembershipFee">Membership Fee</option>
+                        <option value="Donation">Donation</option>
+                        <option value="Event">Event</option>
+                        <option value="Maintenance">Maintenance</option>
+                        <option value="Salary">Salary</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group full">
+                    <label>Description *</label>
+                    <input type="text" [(ngModel)]="newRecord.description" name="desc" required
+                        placeholder="Details about this entry">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-accent" [disabled]="submitting()">
+                    {{ submitting() ? 'Saving...' : 'Save Transaction' }}
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="showForm.set(false)">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filters area -->
+    <div class="filter-bar" *ngIf="!showForm()">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
+                placeholder="Search description or reference...">
+        </div>
+        
+        <select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event); onFilterChange()" class="status-select">
+            <option [value]="null">All Types</option>
+            <option value="Income">Income (Credit)</option>
+            <option value="Expense">Expense (Debit)</option>
+        </select>
+    </div>
+
+    <!-- Transaction Table -->
+    <div class="glass-card table-section" *ngIf="!showForm()">
+        @if (loading()) {
+        <div class="loading">Loading ledger...</div>
+        } @else {
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (tr of transactions(); track tr.id) {
+                <tr>
+                    <td>{{ tr.date | date:'mediumDate' }}</td>
+                    <td>{{ tr.description }}</td>
+                    <td><span class="category-pill">{{ getCategoryName(tr.category) }}</span></td>
+                    <td>
+                        <span class="type-indicator" [ngClass]="tr.recordType === 'Income' ? 'credit' : 'debit'">
+                            {{ tr.recordType === 'Income' ? 'Income' : 'Expense' }}
+                        </span>
+                    </td>
+                    <td [ngClass]="tr.recordType === 'Income' ? 'credit' : 'debit'">
+                        <strong>{{ tr.recordType === 'Expense' ? '-' : '' }}৳{{ tr.amount | number }}</strong>
+                    </td>
+
+                </tr>
+                }
+            </tbody>
+        </table>
+        
+        <app-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            [totalItems]="totalItems()"
+            [pageSize]="pageSize()"
+            (pageChange)="currentPage.set($event); loadData()">
+        </app-pagination>
+        }
+    </div>
+</div>

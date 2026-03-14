@@ -8,31 +8,31 @@ export const routes: Routes = [
         children: [
             {
                 path: '',
-                loadComponent: () => import('./features/landing/landing').then(m => m.Landing)
+                loadComponent: () => import('./public/landing/landing').then(m => m.Landing)
             },
             {
                 path: 'login',
-                loadComponent: () => import('./features/login/login').then(m => m.Login)
+                loadComponent: () => import('./public/login/login').then(m => m.Login)
             },
             {
                 path: 'register',
-                loadComponent: () => import('./features/register/register').then(m => m.Register)
+                loadComponent: () => import('./public/register/register').then(m => m.Register)
             },
             {
                 path: 'about',
-                loadComponent: () => import('./features/about/about').then(m => m.About)
+                loadComponent: () => import('./public/about/about').then(m => m.About)
             },
             {
                 path: 'contact',
-                loadComponent: () => import('./features/contact/contact').then(m => m.Contact)
+                loadComponent: () => import('./public/contact/contact').then(m => m.Contact)
             },
             {
                 path: 'gallery',
-                loadComponent: () => import('./features/gallery/gallery').then(m => m.Gallery)
+                loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery)
             },
             {
                 path: 'events',
-                loadComponent: () => import('./features/events/events').then(m => m.Events)
+                loadComponent: () => import('./common/events/events').then(m => m.Events)
             }
         ]
     },
@@ -44,51 +44,55 @@ export const routes: Routes = [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             {
                 path: 'dashboard',
-                loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard)
+                loadComponent: () => import('./member/dashboard/dashboard').then(m => m.Dashboard)
             },
             {
                 path: 'jobs',
-                loadComponent: () => import('./features/jobs/jobs').then(m => m.Jobs)
+                loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs)
             },
             {
                 path: 'id-card',
-                loadComponent: () => import('./features/digital-id/digital-id').then(m => m.DigitalId)
+                loadComponent: () => import('./member/digital-id/digital-id').then(m => m.DigitalId)
             },
             {
                 path: 'payments',
-                loadComponent: () => import('./features/payments/payments').then(m => m.Payments)
+                loadComponent: () => import('./member/payments/payments').then(m => m.Payments)
             },
             {
                 path: 'profile',
-                loadComponent: () => import('./features/profile/profile').then(m => m.Profile)
+                loadComponent: () => import('./member/profile/profile').then(m => m.Profile)
             },
             {
                 path: 'directory',
-                loadComponent: () => import('./features/directory/directory').then(m => m.Directory)
+                loadComponent: () => import('./common/directory/directory').then(m => m.Directory)
             },
             {
                 path: 'governance',
-                loadComponent: () => import('./features/governance/governance').then(m => m.Governance)
+                loadComponent: () => import('./common/governance/governance').then(m => m.Governance)
             },
             {
                 path: 'messages',
-                loadComponent: () => import('./features/messages/messages').then(m => m.Messages)
+                loadComponent: () => import('./member/messages/messages').then(m => m.Messages)
             },
             {
                 path: 'assistant',
-                loadComponent: () => import('./features/assistant/assistant').then(m => m.Assistant)
+                loadComponent: () => import('./member/assistant/assistant').then(m => m.Assistant)
             },
             {
                 path: 'gallery',
-                loadComponent: () => import('./features/gallery/gallery').then(m => m.Gallery)
+                loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery)
             },
             {
                 path: 'news',
-                loadComponent: () => import('./features/news/news').then(m => m.News)
+                loadComponent: () => import('./common/news/news').then(m => m.News)
             },
             {
                 path: 'events',
-                loadComponent: () => import('./features/events/events').then(m => m.Events)
+                loadComponent: () => import('./common/events/events').then(m => m.Events)
+            },
+            {
+                path: 'articles',
+                loadComponent: () => import('./member/articles/articles').then(m => m.MemberArticles)
             }
         ]
     },
@@ -100,55 +104,63 @@ export const routes: Routes = [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             {
                 path: 'dashboard',
-                loadComponent: () => import('./features/admin-dashboard/admin-dashboard').then(m => m.AdminDashboard)
+                loadComponent: () => import('./admin/dashboard/admin-dashboard').then(m => m.AdminDashboard)
             },
             {
                 path: 'approvals',
-                loadComponent: () => import('./features/member-approval/member-approval').then(m => m.MemberApproval)
+                loadComponent: () => import('./admin/member-approval/member-approval').then(m => m.MemberApproval)
             },
             {
                 path: 'members',
-                loadComponent: () => import('./features/admin-members/admin-members').then(m => m.AdminMembers)
+                loadComponent: () => import('./admin/members/admin-members').then(m => m.AdminMembers)
             },
             {
                 path: 'members/ec',
-                loadComponent: () => import('./features/admin-governance/admin-governance').then(m => m.AdminGovernance)
+                loadComponent: () => import('./admin/governance/admin-governance').then(m => m.AdminGovernance)
             },
             {
                 path: 'news',
-                loadComponent: () => import('./features/admin-news/admin-news').then(m => m.AdminNews)
+                loadComponent: () => import('./admin/news/admin-news').then(m => m.AdminNews)
             },
             {
                 path: 'gallery',
-                loadComponent: () => import('./features/admin-gallery/admin-gallery').then(m => m.AdminGallery)
+                loadComponent: () => import('./admin/gallery/admin-gallery').then(m => m.AdminGallery)
             },
             {
                 path: 'comm',
-                loadComponent: () => import('./features/admin-comm/admin-comm').then(m => m.AdminComm)
+                loadComponent: () => import('./admin/comm/admin-comm').then(m => m.AdminComm)
             },
             {
                 path: 'ledger',
-                loadComponent: () => import('./features/ledger/ledger').then(m => m.Ledger)
+                loadComponent: () => import('./admin/ledger/ledger').then(m => m.Ledger)
             },
             {
                 path: 'events',
-                loadComponent: () => import('./features/admin-events/admin-events').then(m => m.AdminEvents)
+                loadComponent: () => import('./admin/events/admin-events').then(m => m.AdminEvents)
             },
             {
                 path: 'themes',
-                loadComponent: () => import('./features/admin-themes/admin-themes').then(m => m.AdminThemes)
+                loadComponent: () => import('./admin/themes/admin-themes').then(m => m.AdminThemes)
             },
             {
                 path: 'payments',
-                loadComponent: () => import('./features/admin-payment-config/admin-payment-config').then(m => m.AdminPaymentConfig)
+                loadComponent: () => import('./admin/payment-config/admin-payment-config').then(m => m.AdminPaymentConfig)
             },
             {
                 path: 'roles',
-                loadComponent: () => import('./features/admin-roles/admin-roles').then(m => m.AdminRoles)
+                loadComponent: () => import('./admin/roles/admin-roles').then(m => m.AdminRoles)
             },
             {
                 path: 'audit',
-                loadComponent: () => import('./features/admin-audit/admin-audit').then(m => m.AdminAudit)
+                loadComponent: () => import('./admin/audit/admin-audit').then(m => m.AdminAudit)
+            },
+            {
+                path: 'article-approvals',
+                loadComponent: () => import('./admin/article-approval/article-approval').then(m => m.ArticleApproval)
+            },
+            {
+                path: 'contact-messages',
+                loadComponent: () => import('./admin/contact-messages/contact-messages').then(m => m.ContactMessages)
             }
         ]
     }

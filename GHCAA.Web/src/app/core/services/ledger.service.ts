@@ -2,23 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { FinancialRecord, LedgerSummary } from '../models/business.models';
 
-export interface FinancialRecord {
-    id: number;
-    date: string;
-    description: string;
-    category: string;
-    type: number; // 1 for Credit, 2 for Debit (Check Enums)
-    amount: number;
-    year: number;
-}
-
-export interface LedgerSummary {
-    year: number;
-    totalIncome: number;
-    totalExpense: number;
-    balance: number;
-}
 
 @Injectable({
     providedIn: 'root'

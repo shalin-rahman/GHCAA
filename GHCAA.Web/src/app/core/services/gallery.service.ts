@@ -2,23 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { EventGallery } from '../models/business.models';
 
-export interface EventPhoto {
-    id: number;
-    photoPath: string;
-    uploadedAt: string;
-}
-
-export interface EventGallery {
-    id: number;
-    title: string;
-    description: string;
-    eventDate: string;
-    location: string;
-    isActive: boolean;
-    isFeatured: boolean;
-    photos: EventPhoto[];
-}
 
 @Injectable({
     providedIn: 'root'

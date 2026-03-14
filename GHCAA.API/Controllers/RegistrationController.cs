@@ -3,10 +3,13 @@ using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/auth")]
+    [EnableRateLimiting("registration")]
     public class RegistrationController : ControllerBase
     {
         private readonly IMemberService _memberService;
@@ -50,6 +53,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("verify-email")]
+        [EnableRateLimiting("auth")]
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDto dto, CancellationToken cancellationToken)
         {
             var isVerified = await _memberService.VerifyEmailAsync(dto.Email, dto.OtpCode, cancellationToken);

@@ -1,0 +1,60 @@
+.sender-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    strong {
+        color: var(--text-main);
+        font-weight: 800;
+    }
+
+    small {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+    }
+}
+
+tr.unread {
+    background: rgba(var(--accent-color-rgb), 0.03);
+    
+    td {
+        font-weight: 700;
+    }
+}
+
+.msg-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .row {
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        font-size: 0.9rem;
+
+        .label {
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        .val {
+            color: var(--text-main);
+        }
+    }
+}
+
+.msg-content {
+    line-height: 1.7;
+    font-size: 1rem;
+    border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+    .msg-meta .row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+}

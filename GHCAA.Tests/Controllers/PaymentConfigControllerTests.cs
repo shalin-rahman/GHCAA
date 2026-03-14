@@ -160,11 +160,14 @@ namespace GHCAA.Tests.Controllers
             var items = okResult.Value as IEnumerable<object>;
             Assert.That(items, Is.Not.Null);
             
-            // Check mapping
-            foreach (dynamic item in items)
+            // Check mapping by serializing/deserializing to a JObject or just checking properties via reflection if needed
+            // But for simple test, we can just check if we can get the values
+            foreach (var item in items)
             {
-                Assert.That(item.DisplayName, Is.EqualTo("Wallet"));
-                Assert.That(item.WalletNumber, Is.EqualTo("017"));
+                var json = System.Text.Json.JsonSerializer.Serialize(item);
+                var doc = System.Text.Json.JsonDocument.Parse(json);
+                Assert.That(doc.RootElement.GetProperty("DisplayName").GetString(), Is.EqualTo("Wallet"));
+                Assert.That(doc.RootElement.GetProperty("WalletNumber").GetString(), Is.EqualTo("017"));
             }
         }
     }

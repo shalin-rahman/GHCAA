@@ -1,0 +1,115 @@
+<div class="dashboard-grid">
+    <!-- Quick Stats -->
+    <div class="stats-row">
+        <div class="glass-card stat-card profile-summary">
+            <div class="icon-box">🏆</div>
+            <div class="stat-info" *ngIf="profile(); else loadingProf">
+                <div class="val">{{ profile().membershipNumber || 'Pending' }}</div>
+                <small>{{ getMembershipType(profile().membershipType) }} Member</small>
+            </div>
+            <ng-template #loadingProf>
+                <div class="stat-info">
+                    <div class="val text-sm opacity-50">Syncing...</div>
+                    <small>Membership</small>
+                </div>
+            </ng-template>
+        </div>
+
+        <div class="glass-card stat-card">
+            <div class="icon-box">💼</div>
+            <div class="stat-info">
+                <div class="val">{{ jobCount() }}</div>
+                <small>Active Jobs</small>
+            </div>
+        </div>
+
+        <div class="glass-card stat-card">
+            <div class="icon-box">🎟️</div>
+            <div class="stat-info">
+                <div class="val">{{ eventCount() }}</div>
+                <small>Upcoming Events</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Activity & Chat -->
+    <div class="main-row">
+        <div class="glass-card activity-feed">
+            <h3>Recent Activity</h3>
+            <div class="feed-items">
+                @for (act of activities(); track act.id) {
+                <div class="feed-item">
+                    <div class="dot" [style.background]="act.color" [style.color]="act.color"></div>
+                    <div class="text">
+                        <strong>{{ act.title }}</strong>
+                        <p>{{ act.desc }}</p>
+                        <small>{{ act.time }}</small>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        <div class="glass-card alert-widget">
+            <div class="header-row flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black">Notifications</h3>
+                <span class="badge bg-gold-gradient text-black" *ngIf="alertService.unreadCount() > 0">
+                    {{ alertService.unreadCount() }} New
+                </span>
+            </div>
+
+            <div class="alert-list custom-scrollbar">
+                @for (n of alertService.notifications(); track n.id) {
+                <div class="alert-item" [class.unread]="!n.isRead" (click)="alertService.markAsRead(n.id)">
+                    <div class="alert-icon">{{ n.type === 'Approval' ? '✅' : '📢' }}</div>
+                    <div class="alert-body">
+                        <strong>{{ n.title }}</strong>
+                        <p>{{ n.message }}</p>
+                        <small>{{ n.createdAt | date:'shortTime' }} • {{ n.createdAt | date:'mediumDate' }}</small>
+                    </div>
+                </div>
+                } @empty {
+                <div class="empty-alerts py-20 text-center opacity-40 italic">
+                    <p>No new notifications.</p>
+                </div>
+                }
+            </div>
+
+            <div class="alert-footer pt-4 border-t border-white/5 mt-4 text-center">
+                <button class="btn btn-secondary btn-sm" (click)="alertService.markAllAsRead()">
+                    Dismiss All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Networking / Compact Member List -->
+    <div class="glass-card networking-widget mt-6">
+        <div class="flex justify-between items-center mb-6">
+            <h3>Recently Joined Haragangians</h3>
+            <a href="/portal/directory" class="text-accent text-sm font-bold uppercase tracking-widest">View Directory
+                →</a>
+        </div>
+        <div class="members-compact-grid">
+            @for (m of recentMembers(); track m.id) {
+            <div class="compact-member-card">
+                <div class="m-photo">
+                    @if (m.photoPath) {
+                    <img [src]="m.photoPath" [alt]="m.fullName">
+                    } @else {
+                    <div class="m-avatar-ph">{{ m.fullName[0] }}</div>
+                    }
+                </div>
+                <div class="m-info">
+                    <strong>{{ m.fullName }}</strong>
+                    <small>Batch of {{ m.ghcLastCertificatePassingYear }}</small>
+                </div>
+            </div>
+            } @empty {
+            <div class="py-10 text-center opacity-40 italic">
+                <p>Loading member network...</p>
+            </div>
+            }
+        </div>
+    </div>
+</div>

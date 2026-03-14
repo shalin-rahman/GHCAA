@@ -19,4 +19,12 @@ export class ContactService {
     sendMessage(msg: any): Observable<any> {
         return this.http.post(API_ENDPOINTS.CONTACT, msg);
     }
+
+    getMessages(): Observable<any[]> {
+        return this.http.get<any[]>(API_ENDPOINTS.ADMIN.CONTACT_MESSAGES);
+    }
+
+    markAsRead(id: number): Observable<any> {
+        return this.http.post(`${API_ENDPOINTS.ADMIN.CONTACT_MESSAGES}/${id}/read`, {});
+    }
 }

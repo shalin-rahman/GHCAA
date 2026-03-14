@@ -1,11 +1,13 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/auth")]
+    [EnableRateLimiting("auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;

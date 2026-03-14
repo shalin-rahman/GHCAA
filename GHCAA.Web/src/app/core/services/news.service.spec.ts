@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { NewsService, NewsPost } from './news.service';
+import { NewsService } from './news.service';
+import { NewsPost } from '../models/business.models';
 import { API_ENDPOINTS } from '../constants/app.constants';
 
 describe('NewsService', () => {
@@ -11,11 +12,13 @@ describe('NewsService', () => {
         id: 1,
         title: 'Tech Update',
         content: 'Latest tech news.',
-        category: 'Technology',
+        category: 'Regular',
+        status: 'Approved',
         isActive: true,
         authorName: 'Admin',
         createdAt: '2026-03-08T00:00:00Z'
     };
+
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -62,7 +65,7 @@ describe('NewsService', () => {
     });
 
     it('should create news', () => {
-        const payload = { title: 'New', content: 'C', category: 'General', isActive: true, authorName: 'A' };
+        const payload = { title: 'New', content: 'C', category: 'Regular' as any, isActive: true };
         service.createNews(payload).subscribe(res => {
             expect(res.id).toBe(1);
         });
@@ -73,7 +76,7 @@ describe('NewsService', () => {
     });
 
     it('should update news', () => {
-        const payload = { title: 'Updated' };
+        const payload = { id: 1, title: 'Updated' };
         service.updateNews(1, payload).subscribe(res => {
             expect(res.id).toBe(1);
         });

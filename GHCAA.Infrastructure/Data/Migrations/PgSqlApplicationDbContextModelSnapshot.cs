@@ -563,7 +563,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "Gala Evening",
                             EventGalleryId = 1,
                             PhotoPath = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070",
-                            UploadedAt = new DateTime(2026, 3, 13, 17, 52, 6, 814, DateTimeKind.Utc).AddTicks(3724)
+                            UploadedAt = new DateTime(2026, 3, 14, 19, 37, 30, 308, DateTimeKind.Utc).AddTicks(3458)
                         },
                         new
                         {
@@ -571,7 +571,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "Alumni Networking",
                             EventGalleryId = 1,
                             PhotoPath = "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069",
-                            UploadedAt = new DateTime(2026, 3, 13, 17, 52, 6, 814, DateTimeKind.Utc).AddTicks(5063)
+                            UploadedAt = new DateTime(2026, 3, 14, 19, 37, 30, 308, DateTimeKind.Utc).AddTicks(4020)
                         },
                         new
                         {
@@ -579,7 +579,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "Main Administrative Building",
                             EventGalleryId = 2,
                             PhotoPath = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986",
-                            UploadedAt = new DateTime(2026, 3, 13, 17, 52, 6, 814, DateTimeKind.Utc).AddTicks(5066)
+                            UploadedAt = new DateTime(2026, 3, 14, 19, 37, 30, 308, DateTimeKind.Utc).AddTicks(4021)
                         },
                         new
                         {
@@ -587,7 +587,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "College Playground",
                             EventGalleryId = 2,
                             PhotoPath = "https://images.unsplash.com/photo-1492538350424-aaee9f201774?q=80&w=2070",
-                            UploadedAt = new DateTime(2026, 3, 13, 17, 52, 6, 814, DateTimeKind.Utc).AddTicks(5067)
+                            UploadedAt = new DateTime(2026, 3, 14, 19, 37, 30, 308, DateTimeKind.Utc).AddTicks(4022)
                         });
                 });
 
@@ -1731,6 +1731,9 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<int?>("HSCAdmissionYear")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("HasAcceptedTerms")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("HighestCertificate")
                         .IsRequired()
                         .HasColumnType("text");
@@ -1837,6 +1840,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             GHCLastCertificateSubject = "None",
                             Gender = 0,
                             HSCAdmissionYear = 2013,
+                            HasAcceptedTerms = true,
                             HighestCertificate = "HSC",
                             HighestCertificateGroup = "Science",
                             HighestCertificatePassingYear = 2015,
@@ -1879,6 +1883,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             GHCLastCertificateSubject = "None",
                             Gender = 1,
                             HSCAdmissionYear = 2014,
+                            HasAcceptedTerms = true,
                             HighestCertificate = "HSC",
                             HighestCertificateGroup = "Humanities",
                             HighestCertificatePassingYear = 2016,
@@ -2091,6 +2096,9 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<DateTime>("PublishDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -2107,11 +2115,12 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 1,
                             AuthorId = 2,
-                            Category = 1,
+                            Category = 2,
                             Content = "The historic library of Govt. Haraganga College has been fully renovated with modern amenities and digital archiving systems, funded by the 1985 batch alumni.",
                             ImageUrl = "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2070",
                             IsActive = true,
                             PublishDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 2,
                             Title = "College Library Renovation Project Completed"
                         },
                         new
@@ -2123,6 +2132,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             ImageUrl = "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=2070",
                             IsActive = true,
                             PublishDate = new DateTime(2026, 3, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = 2,
                             Title = "Haragangian Global Meet 2026: London Chapter"
                         });
                 });

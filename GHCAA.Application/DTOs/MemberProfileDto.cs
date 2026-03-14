@@ -53,6 +53,7 @@ namespace GHCAA.Application.DTOs
         public bool IsMobilePublic { get; set; }
         public bool IsEmailPublic { get; set; }
         public bool IsAddressPublic { get; set; }
+        public bool HasAcceptedTerms { get; set; }
         
         public List<ECHistoryDto> ECHistory { get; set; } = new();
         public List<AcademicRecordDto> AcademicHistory { get; set; } = new();

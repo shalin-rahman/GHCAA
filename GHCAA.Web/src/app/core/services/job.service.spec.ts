@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { JobService, Job } from './job.service';
+import { JobService } from './job.service';
+import { Job } from '../models/business.models';
 import { API_ENDPOINTS } from '../constants/app.constants';
 
 describe('JobService', () => {
@@ -12,14 +13,14 @@ describe('JobService', () => {
         title: 'Software Engineer',
         companyName: 'Tech Co',
         location: 'Remote',
-        category: 1,
+        category: 'IT',
         description: 'D',
         requirements: 'R',
-        deadline: '2026-12-31',
+        applicationDeadline: '2026-12-31',
+        postedDate: '2026-03-08',
         postedByMemberId: 10,
         postedByMemberName: 'Member',
-        isClosed: false,
-        createdAt: '2026-03-08'
+        isActive: true,
     };
 
     beforeEach(() => {
@@ -67,7 +68,7 @@ describe('JobService', () => {
     });
 
     it('should update job', () => {
-        service.updateJob(1, { title: 'New Title' }).subscribe(res => {
+        service.updateJob(1, { id: 1, title: 'New Title' }).subscribe(res => {
             expect(res.success).toBe(true);
         });
         const req = httpMock.expectOne(`${API_ENDPOINTS.JOBS}/1`);

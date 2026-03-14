@@ -8,7 +8,8 @@ namespace GHCAA.Infrastructure.Services
 {
     public class LocalFileStorageService : IFileStorageService
     {
-        private readonly string _uploadsRoot;
+        private readonly string _publicRoot;
+        private readonly string _secureRoot;
         private readonly long _maxFileSize;
         private readonly IConfiguration _config;
         private readonly ILogger<LocalFileStorageService> _logger;
@@ -17,16 +18,29 @@ namespace GHCAA.Infrastructure.Services
         {
             _config = config;
             _logger = logger;
-            var relativeRoot = _config["FileStorage:UploadsRelativePath"] ?? "uploads/members";
-            _uploadsRoot = Path.Combine("wwwroot", relativeRoot);
-            _maxFileSize = long.TryParse(_config["FileStorage:MaxFileSizeBytes"], out var v) ? v : 1048576;
+            
+            var publicRelative = _config["FileStorage:UploadsRelativePath"] ?? "uploads/members";
+            var secureRelative = _config["FileStorage:SecureRelativePath"] ?? "secure_uploads/members";
+            
+            _publicRoot = Path.Combine("wwwroot", publicRelative);
+            _secureRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, secureRelative);
+            
+            _maxFileSize = long.TryParse(_config["FileStorage:MaxFileSizeBytes"], out var v) ? v : 52428800;
+        }
+
+        private bool IsSecureType(Enums.FileUploadType type)
+        {
+            return type == Enums.FileUploadType.Certificate || type == Enums.FileUploadType.PaymentProof;
         }
 
         public string GetRelativeFilePath(int memberId, Enums.FileUploadType uploadType, string fileName)
         {
             var safeFileName = Path.GetFileName(fileName);
             var prefix = uploadType.ToString().ToLower();
-            var relativeRoot = _config["FileStorage:UploadsRelativePath"] ?? "uploads/members";
+            var relativeRoot = IsSecureType(uploadType) 
+                    ? (_config["FileStorage:SecureRelativePath"] ?? "secure_uploads/members")
+                    : (_config["FileStorage:UploadsRelativePath"] ?? "uploads/members");
+            
             return Path.Combine(relativeRoot, $"{prefix}_m{memberId}_{safeFileName}").Replace("\\", "/");
         }
 
@@ -35,28 +49,45 @@ namespace GHCAA.Infrastructure.Services
             if (fileStream == null) throw new ArgumentNullException(nameof(fileStream));
             if (fileStream.Length > _maxFileSize) throw new InvalidOperationException($"File exceeds maximum size {_maxFileSize} bytes.");
 
+            var isSecure = IsSecureType(uploadType);
+            var rootPath = isSecure ? _secureRoot : _publicRoot;
+            var relativePrefix = isSecure 
+                ? (_config["FileStorage:SecureRelativePath"] ?? "secure_uploads/members")
+                : (_config["FileStorage:UploadsRelativePath"] ?? "uploads/members");
+
             var safeFileName = Path.GetFileName(fileName);
             var prefix = uploadType.ToString().ToLower();
             
-            // Create the single root directory if it does not exist
-            Directory.CreateDirectory(_uploadsRoot);
+            Directory.CreateDirectory(rootPath);
 
             var uniqueName = $"{prefix}_m{memberId}_{Guid.NewGuid():N}_{safeFileName}";
-            var diskPath = Path.Combine(_uploadsRoot, uniqueName);
+            var diskPath = Path.Combine(rootPath, uniqueName);
 
-            using var fs = new FileStream(diskPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            using var fs = new FileStream(diskPath, FileMode.Create, FileAccess.Write, FileShare.None);
             await fileStream.CopyToAsync(fs, cancellationToken);
 
-            var relativeRoot = _config["FileStorage:UploadsRelativePath"] ?? "uploads/members";
-            var webRelative = Path.Combine(relativeRoot, uniqueName).Replace("\\", "/");
-            _logger.LogInformation("Saved file to {Path}", webRelative);
+            var webRelative = Path.Combine(relativePrefix, uniqueName).Replace("\\", "/");
+            _logger.LogInformation("Saved {Type} file to {Path}", isSecure ? "secure" : "public", webRelative);
             return webRelative;
         }
 
         public Task DeleteFileAsync(string relativePath, CancellationToken cancellationToken = default)
         {
-            var full = Path.Combine("wwwroot", relativePath.TrimStart('/', '\\'));
-            if (File.Exists(full)) File.Delete(full);
+            // Try public first
+            var publicPath = Path.Combine("wwwroot", relativePath.TrimStart('/', '\\'));
+            if (File.Exists(publicPath))
+            {
+                File.Delete(publicPath);
+                return Task.CompletedTask;
+            }
+
+            // Try secure
+            var securePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath.TrimStart('/', '\\'));
+            if (File.Exists(securePath))
+            {
+                File.Delete(securePath);
+            }
+            
             return Task.CompletedTask;
         }
     }

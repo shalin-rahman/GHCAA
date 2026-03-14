@@ -8,7 +8,8 @@ namespace GHCAA.Application.DTOs
         public int Id { get; set; }
         public string Title { get; set; } = null!;
         public string Content { get; set; } = null!;
-        public Enums.NewsCategory Category { get; set; }
+        public Enums.ArticleCategory Category { get; set; }
+        public Enums.SubmissionStatus Status { get; set; }
         public string? ImageUrl { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -19,9 +20,10 @@ namespace GHCAA.Application.DTOs
     {
         public string Title { get; set; } = null!;
         public string Content { get; set; } = null!;
-        public Enums.NewsCategory Category { get; set; }
+        public Enums.ArticleCategory Category { get; set; }
+        public Enums.SubmissionStatus Status { get; set; } = Enums.SubmissionStatus.Approved;
         public string? ImageUrl { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 
     public class UpdateNewsDto : CreateNewsDto

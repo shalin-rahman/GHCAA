@@ -24,9 +24,9 @@ public class NewsServiceTests : TestBase
     public async Task GetActiveNewsAsync_ShouldOnlyReturnActivePosts()
     {
         _context.NewsPosts.AddRange(
-            new NewsPost { Title = "Active 1", Content = "C1", IsActive = true, AuthorId = 1, Category = Enums.NewsCategory.News },
-            new NewsPost { Title = "Active 2", Content = "C2", IsActive = true, AuthorId = 1, Category = Enums.NewsCategory.OrganisationalUpdate },
-            new NewsPost { Title = "Inactive", Content = "C3", IsActive = false, AuthorId = 1, Category = Enums.NewsCategory.BusinessInformation }
+            new NewsPost { Title = "Active 1", Content = "C1", IsActive = true, AuthorId = 1, Category = Enums.ArticleCategory.Regular, Status = Enums.SubmissionStatus.Approved },
+            new NewsPost { Title = "Active 2", Content = "C2", IsActive = true, AuthorId = 1, Category = Enums.ArticleCategory.Event, Status = Enums.SubmissionStatus.Approved },
+            new NewsPost { Title = "Inactive", Content = "C3", IsActive = false, AuthorId = 1, Category = Enums.ArticleCategory.Regular, Status = Enums.SubmissionStatus.Approved }
         );
         await _context.SaveChangesAsync();
 

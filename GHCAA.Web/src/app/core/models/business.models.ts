@@ -5,7 +5,14 @@ export type ECPosition = 'None' | 'President' | 'VicePresident' | 'GeneralSecret
 export type Gender = 'Male' | 'Female' | 'Other';
 export type BloodGroup = 'APositive' | 'ANegative' | 'BPositive' | 'BNegative' | 'OPositive' | 'ONegative' | 'ABPositive' | 'ABNegative';
 export type RecordType = 'Income' | 'Expense';
-export type FinancialCategory = 'MembershipFee' | 'Donation' | 'Event' | 'Maintenance' | 'Salary' | 'Utilities' | 'Other';
+export type FinancialCategory = 'MembershipFee' | 'RegistrationFee' | 'Donation' | 'Event' | 'Maintenance' | 'Salary' | 'Utilities' | 'Other';
+export type PaymentStatus = 'Pending' | 'Completed' | 'Failed' | 'Refunded';
+export type EventRegistrationStatus = 'Pending' | 'Approved' | 'Rejected';
+export type PaymentMethod = 'ManualReceipt' | 'BKash' | 'Nagad' | 'Rocket' | 'CreditCard' | 'BankTransfer' | 'CashOnHand';
+export type JobCategory = 'IT' | 'Finance' | 'Engineering' | 'Marketing' | 'Education' | 'Health' | 'PublicSector' | 'Mentorship' | 'Other';
+export type SubmissionStatus = 'Draft' | 'Pending' | 'Approved' | 'Rejected';
+export type ArticleCategory = 'Event' | 'Magazine' | 'Regular';
+
 
 export interface Member {
     id: number;
@@ -90,29 +97,83 @@ export interface FinancialRecord {
     amount: number;
     description: string;
     reference?: string;
-    createdAt: string | Date;
+    createdAt?: string | Date;
 }
+
+export interface LedgerSummary {
+    year: number;
+    totalIncome: number;
+    totalExpense: number;
+    netBalance: number;
+    details?: LedgerCategorySummary[];
+}
+
+export interface LedgerCategorySummary {
+    type: RecordType;
+    category: FinancialCategory;
+    total: number;
+}
+
 
 export interface NewsPost {
     id: number;
     title: string;
     content: string;
-    category: string;
-    publishDate: string | Date;
+    category: ArticleCategory;
+    status: SubmissionStatus;
     imageUrl?: string;
-    isPublished: boolean;
+    isActive: boolean;
+    authorName?: string;
+    createdAt: string | Date;
 }
 
-export interface JobOpportunity {
+export interface CreateNewsDto {
+    title: string;
+    content: string;
+    category: ArticleCategory;
+    status?: SubmissionStatus;
+    imageUrl?: string;
+    isActive?: boolean;
+}
+
+export interface UpdateNewsDto extends Partial<CreateNewsDto> {
+    id: number;
+}
+
+
+export interface Job {
     id: number;
     title: string;
-    company: string;
+    companyName: string;
     location: string;
     description: string;
+    requirements: string;
+    applicationEmail?: string;
+    applicationLink?: string;
     postedDate: string | Date;
-    expiryDate?: string | Date;
-    jobType: string;
+    applicationDeadline?: string | Date;
+    category: JobCategory;
+    isActive: boolean;
+    postedByMemberId: number;
+    postedByMemberName?: string;
 }
+
+export interface CreateJobDto {
+    title: string;
+    companyName: string;
+    location: string;
+    description: string;
+    requirements: string;
+    applicationEmail?: string;
+    applicationLink?: string;
+    applicationDeadline?: string | Date;
+    category: JobCategory;
+}
+
+export interface UpdateJobDto extends Partial<CreateJobDto> {
+    id: number;
+}
+
 
 export interface SpecialDayTheme {
     id: number;
@@ -139,11 +200,16 @@ export interface AlumniEvent {
     id: number;
     title: string;
     description: string;
-    eventDate: string | Date;
+    date: string | Date;
     location: string;
-    registrationFee: number;
-    isRegistrationOpen: boolean;
+    registrationFee?: number | null;
+    isActive: boolean;
+    imageUrl?: string;
+    registrationDeadline?: string | Date;
+    adminNote?: string;
+    allowNonMembers: boolean;
 }
+
 
 export interface ChatMessage {
     id: number;
@@ -177,22 +243,47 @@ export interface EmailLog {
     targetAudience?: string;
 }
 
-export interface EventGallery {
+export interface EventPhoto {
     id: number;
-    eventId?: number;
-    title: string;
-    imagePath: string;
+    eventGalleryId: number;
+    photoPath: string;
+    caption?: string;
     uploadedAt: string | Date;
 }
+
+export interface EventGallery {
+    id: number;
+    title: string;
+    description?: string;
+    eventDate: string | Date;
+    location?: string;
+    createdAt: string | Date;
+    createdByAdminId?: number;
+    isActive: boolean;
+    isFeatured: boolean;
+    photos: EventPhoto[];
+}
+
+
 
 export interface EventRegistration {
     id: number;
     eventId: number;
-    memberId: number;
-    registrationDate: string | Date;
-    paymentStatus: string;
-    transactionId?: string;
+    eventTitle: string;
+    memberId?: number;
+    memberName?: string;
+    isNonMember: boolean;
+    guestName?: string;
+    guestEmail?: string;
+    guestMobile?: string;
+    paymentReference: string;
+    receiptPath?: string;
+    paymentMethod: PaymentMethod;
+    status: EventRegistrationStatus;
+    registeredAt: string | Date;
+    approvedAt?: string | Date;
 }
+
 
 export interface LookupItem {
     id: number;
@@ -227,4 +318,102 @@ export interface User {
     createdAt: string | Date;
     roles?: string[];
 }
+
+
+export interface AcademicRecord {
+    id?: number;
+    institutionName: string;
+    degree: string;
+    subject: string;
+    admissionYear?: number;
+    passingYear: number;
+    isGHC: boolean;
+    result?: string;
+}
+
+export interface ProfessionalRecord {
+    id?: number;
+    organizationName: string;
+    designation: string;
+    sector?: string;
+    location?: string;
+    startDate: string | Date;
+    endDate?: string | Date;
+    isCurrent: boolean;
+}
+
+export interface ECHistoryRecord {
+    periodTitle: string;
+    position: ECPosition;
+    startDate: string | Date;
+    endDate?: string | Date;
+    changeReason?: string;
+    isCurrent: boolean;
+}
+
+export interface MemberProfile {
+    id: number;
+    fullName: string;
+    email: string;
+    mobileNo: string;
+    membershipNumber?: string;
+    status: MembershipStatus;
+    membershipType: MembershipType;
+    category: MemberCategory;
+    ecPosition: ECPosition;
+
+    // Personal
+    fatherName?: string;
+    motherName?: string;
+    dateOfBirth?: string | Date;
+    gender: Gender;
+    bloodGroup: BloodGroup;
+    nid?: string;
+    emergencyContactName?: string;
+    emergencyContactRelation?: string;
+    emergencyContactPhone?: string;
+
+    // Academic
+    hscAdmissionYear?: number;
+    highestCertificate: string;
+    highestCertificateGroup: string;
+    highestCertificateSubject: string;
+    highestCertificatePassingYear: number;
+    ghcAdmissionYear?: number;
+    ghcLastCertificate: string;
+    ghcLastCertificateGroup: string;
+    ghcLastCertificateSubject: string;
+    ghcLastCertificatePassingYear: number;
+
+    // Professional
+    professionalSector: string;
+    designation: string;
+
+    // Info
+    photoPath?: string;
+    certificatePath?: string;
+    paymentProofPath?: string;
+    presentAddress: string;
+    permanentAddress: string;
+
+    // Privacy
+    isMobilePublic: boolean;
+    isEmailPublic: boolean;
+    isAddressPublic: boolean;
+    hasAcceptedTerms?: boolean;
+
+    academicHistory: AcademicRecord[];
+    professionalHistory: ProfessionalRecord[];
+    ecHistory?: ECHistoryRecord[];
+}
+
+export interface MemberSearchFilter {
+    query?: string;
+    passingYear?: number;
+    bloodGroup?: BloodGroup;
+    professionalSector?: string;
+    designation?: string;
+    ecPosition?: ECPosition;
+}
+
 

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { EventsService, AlumniEvent, EventRegistration } from './events.service';
+import { EventsService } from './events.service';
+import { AlumniEvent, EventRegistration } from '../models/business.models';
 import { API_ENDPOINTS } from '../constants/app.constants';
 
 describe('EventsService', () => {
@@ -20,8 +21,10 @@ describe('EventsService', () => {
     const mockRegistration: EventRegistration = {
         id: 1,
         eventId: 1,
+        eventTitle: 'Reunion',
         memberId: 10,
         paymentReference: 'TRX123',
+        paymentMethod: 'BKash',
         status: 'Pending',
         registeredAt: '2026-03-08T00:00:00Z',
         isNonMember: false

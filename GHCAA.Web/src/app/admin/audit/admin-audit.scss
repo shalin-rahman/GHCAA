@@ -1,0 +1,107 @@
+
+
+.audit-container {
+    padding: 2rem;
+    min-height: 600px;
+    border-radius: 12px;
+}
+
+.audit-timeline {
+    position: relative;
+    padding-left: 3rem;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 1.25rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--glass-border);
+        opacity: 0.5;
+    }
+}
+
+.audit-item {
+    position: relative;
+    margin-bottom: 2.5rem;
+    transition: all 0.3s;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    &:hover {
+        .audit-content {
+            background: rgba(var(--accent-color-rgb), 0.02);
+            transform: translateX(5px);
+        }
+    }
+}
+
+.audit-marker {
+    position: absolute;
+    left: -3rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--bg-color);
+    border: 2px solid var(--accent-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.2);
+}
+
+.audit-content {
+    background: var(--surface-color);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1.25rem 1.75rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.audit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+
+    .action-type {
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.72rem;
+        color: var(--accent-color);
+    }
+
+    .timestamp {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        font-weight: 700;
+    }
+}
+
+.description {
+    font-size: 0.95rem;
+    color: var(--text-main);
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.audit-meta {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    border-top: 1px dashed var(--glass-border);
+    padding-top: 0.75rem;
+
+    strong {
+        color: var(--text-main);
+        font-weight: 700;
+    }
+}

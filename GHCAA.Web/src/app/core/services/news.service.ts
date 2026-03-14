@@ -2,36 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { NewsPost, CreateNewsDto, UpdateNewsDto } from '../models/business.models';
 
-export interface NewsPost {
-    id: number;
-    title: string;
-    content: string;
-    category: string;
-    imageUrl?: string;
-    isActive: boolean;
-    authorName: string;
-    createdAt: string;
-}
-
-// Assuming these DTOs are defined elsewhere or will be added
-interface CreateNewsDto {
-    title: string;
-    content: string;
-    category: string;
-    imageUrl?: string;
-    isActive: boolean;
-    authorName: string;
-}
-
-interface UpdateNewsDto {
-    title?: string;
-    content?: string;
-    category?: string;
-    imageUrl?: string;
-    isActive?: boolean;
-    authorName?: string;
-}
 
 @Injectable({
     providedIn: 'root'
@@ -69,5 +41,32 @@ export class NewsService {
         const formData = new FormData();
         formData.append('file', file);
         return this.http.post<{ url: string, relativePath: string }>(`${this.apiUrl}/upload-image`, formData);
+    }
+
+    // Member Submission Methods
+    getMySubmissions(): Observable<NewsPost[]> {
+        return this.http.get<NewsPost[]>(`${this.apiUrl}/my-submissions`);
+    }
+
+    submitArticle(dto: any): Observable<NewsPost> {
+        return this.http.post<NewsPost>(`${this.apiUrl}/submit`, dto);
+    }
+
+    saveDraft(dto: any): Observable<NewsPost> {
+        return this.http.post<NewsPost>(`${this.apiUrl}/submit`, { ...dto, status: 'Draft' });
+    }
+
+
+    // Admin Approval
+    getPendingSubmissions(): Observable<NewsPost[]> {
+        return this.http.get<NewsPost[]>(`${this.apiUrl}/pending`);
+    }
+
+    approveSubmission(id: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${id}/approve`, {});
+    }
+
+    rejectSubmission(id: number, reason: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${id}/reject`, { reason });
     }
 }

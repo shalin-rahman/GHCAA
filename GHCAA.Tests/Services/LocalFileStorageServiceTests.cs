@@ -75,10 +75,10 @@ public class LocalFileStorageServiceTests
 
         // Act & Assert
         _service.GetRelativeFilePath(memberId, Enums.FileUploadType.Certificate, fileName)
-            .Should().Be("uploads/members/certificate_m456_document.pdf");
+            .Should().Be("secure_uploads/members/certificate_m456_document.pdf");
 
         _service.GetRelativeFilePath(memberId, Enums.FileUploadType.PaymentProof, fileName)
-            .Should().Be("uploads/members/paymentproof_m456_document.pdf");
+            .Should().Be("secure_uploads/members/paymentproof_m456_document.pdf");
     }
 
     [Test]
@@ -156,7 +156,7 @@ public class LocalFileStorageServiceTests
         var fileName = "test.jpg";
         var fileContent = new byte[] { 1, 2, 3 };
         var stream = new MemoryStream(fileContent);
-        var uploadType = Enums.FileUploadType.Certificate;
+        var uploadType = Enums.FileUploadType.Photo;
 
         // Act
         var result = await _service.SaveFileAsync(stream, fileName, memberId, uploadType);

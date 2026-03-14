@@ -25,6 +25,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
     { path: '/portal/governance', label: 'Governance', icon: '⚖️' },
     { path: '/portal/id-card', label: 'Digital ID', icon: '🆔' },
     { path: '/portal/payments', label: 'Payments', icon: '💰', mobileVisible: true },
+    { path: '/portal/articles', label: 'My Articles', icon: '✍️' },
     { path: '/portal/profile', label: 'My Profile', icon: '👤', mobileVisible: true },
 ];
 
@@ -40,6 +41,8 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/events', label: 'Manage Events', icon: '🗓️', section: 'Content' },
     { path: '/admin/gallery', label: 'Gallery Albums', icon: '🖼️', section: 'Content' },
     { path: '/admin/comm', label: 'Communications', icon: '✉️', section: 'Content' },
+    { path: '/admin/article-approvals', label: 'Submission Review', icon: '✅', section: 'Content' },
+    { path: '/admin/contact-messages', label: 'Portal Enquiries', icon: '📥', section: 'Content' },
     { path: '/admin/themes', label: 'Special Themes', icon: '🎨', section: 'Content' },
     
     { path: '/admin/ledger', label: 'Financial Ledger', icon: '📖', roles: ['SuperAdmin'], section: 'Finance & Tools' },

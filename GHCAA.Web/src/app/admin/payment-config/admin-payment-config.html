@@ -1,0 +1,185 @@
+<div class="admin-feature reveal-top">
+  @if (!showForm()) {
+  <div class="page-header">
+    <div class="header-text">
+      <h2>Finance Routing Profiles</h2>
+      <small>Manage payment gateways and manual receiving channels for the portal.</small>
+    </div>
+    <div class="header-actions">
+        <button *ngIf="configs().length === 0" (click)="seedDefaults()" class="btn btn-accent shadow-gold">
+            System Seed Defaults
+        </button>
+    </div>
+  </div>
+
+  <div class="glass-card mb-8 p-6" *ngIf="loading()">
+      <p class="opacity-50 text-center animate-pulse">Synchronizing financial logic networks...</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="!loading()">
+      @for (config of configs(); track config.id) {
+          <div class="glass-card p-6 border-accent/10 relative transition-transform hover:-translate-y-1">
+              <div class="flex items-center gap-4 mb-4">
+                  <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-2xl border border-accent/20 text-accent font-black shadow-gold scale-150">
+                      {{ config.icon || '💸' }}
+                  </div>
+                  <div>
+                      <h3 class="font-black text-lg">{{ config.displayName }}</h3>
+                      <p class="text-[10px] uppercase font-bold text-muted tracking-widest">{{ config.method }}</p>
+                  </div>
+              </div>
+
+              <div class="space-y-3 mb-6">
+                  <p class="text-xs opacity-80 border-l border-white/10 pl-3 italic">{{ config.description }}</p>
+                  
+                  <div class="bg-primary/5 p-3 rounded-lg border border-primary/10">
+                      <div class="flex justify-between items-center text-xs">
+                          <span class="opacity-60">Status Routing</span>
+                          <span class="font-black px-2 py-0.5 rounded uppercase" 
+                                [class.bg-green-500]="config.isEnabled" 
+                                [class.text-black]="config.isEnabled"
+                                [class.bg-red-500]="!config.isEnabled">
+                              {{ config.isEnabled ? 'Active' : 'Offline' }}
+                          </span>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="flex gap-2">
+                  <button (click)="openEditForm(config)" class="btn btn-secondary flex-1">Configure Routing</button>
+                  <button (click)="toggleStatus(config.id)" class="btn flex-1" [ngClass]="config.isEnabled ? 'btn-outline border-red-500/20 text-red-500' : 'btn-accent'">
+                      {{ config.isEnabled ? 'Deactivate' : 'Enable' }}
+                  </button>
+              </div>
+          </div>
+      } @empty {
+          <div class="col-span-1 md:col-span-3 text-center py-20 px-4 glass-card">
+              <span class="text-4xl block mb-4 opacity-50">⚠️</span>
+              <p class="italic text-muted opacity-80">No financial routing profiles exist in the system core.</p>
+              <button (click)="seedDefaults()" class="btn btn-accent mt-4">Execute Initial Generation Routine</button>
+          </div>
+      }
+  </div>
+  } @else {
+      <div class="max-w-4xl mx-auto reveal-top">
+          <div class="page-header flex items-center gap-6 mb-8">
+              <button (click)="showForm.set(false)" class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
+                  <span>←</span>
+              </button>
+              <div>
+                  <h2 class="text-2xl font-black text-accent tracking-tighter">Edit Routing Parameters</h2>
+                  <p class="text-xs uppercase font-black tracking-widest text-muted">Configuring network payload and constraints</p>
+              </div>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="submitForm()" class="glass-card p-10 space-y-8">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div class="input-group">
+                      <label>Frontend Display Name *</label>
+                      <input type="text" formControlName="displayName">
+                  </div>
+                  <div class="input-group">
+                      <label>Network Emoji/Icon</label>
+                      <input type="text" formControlName="icon">
+                  </div>
+              </div>
+
+              <div class="input-group">
+                  <label>Abstract / Description</label>
+                  <input type="text" formControlName="description">
+              </div>
+
+              <div class="input-group">
+                  <label>Instructional Output (Client Facing)</label>
+                  <textarea formControlName="instructions" rows="3" placeholder="Exact instructions for the member..."></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-primary/10 pt-8 mt-4">
+                  <!-- Wallet Configuration -->
+                  <div class="space-y-6">
+                      <h4 class="text-xs font-black text-accent uppercase tracking-widest">Mobile Wallet Routing</h4>
+                      <div class="input-group">
+                          <label>Receiving Wallet Number</label>
+                          <input type="text" formControlName="walletNumber" class="font-mono text-accent">
+                      </div>
+                      <div class="input-group">
+                          <label>Holder Label (Wallet/Bank)</label>
+                          <input type="text" formControlName="accountHolderName">
+                      </div>
+                  </div>
+
+                  <!-- Bank Configuration -->
+                  <div class="space-y-6">
+                      <h4 class="text-xs font-black text-accent uppercase tracking-widest">Bank/Wire Routing</h4>
+                      <div class="input-group">
+                          <label>Institution Name</label>
+                          <input type="text" formControlName="bankName">
+                      </div>
+                      <div class="input-group">
+                          <label>Ledger/Account Number</label>
+                          <input type="text" formControlName="accountNumber" class="font-mono text-accent">
+                      </div>
+                      <div class="grid grid-cols-2 gap-4">
+                          <div class="input-group">
+                              <label>Branch Subnet</label>
+                              <input type="text" formControlName="branchName">
+                          </div>
+                          <div class="input-group">
+                              <label>Routing Code</label>
+                              <input type="text" formControlName="routingNumber">
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+              <!-- Gateway Configuration (Only if a gateway is selected) -->
+              <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 space-y-6 mt-8" *ngIf="form.get('gateway')?.value !== 'None'">
+                  <h4 class="text-xs font-black text-accent uppercase tracking-widest">Gateway API Configuration ({{ form.get('gateway')?.value }})</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div class="input-group">
+                          <label>Public/Store Key</label>
+                          <input type="text" formControlName="gatewayPublicKey" class="font-mono text-xs">
+                      </div>
+                      <div class="input-group">
+                          <label>Secret/Signature Key</label>
+                          <input type="password" formControlName="gatewaySecretKey" class="font-mono text-xs">
+                      </div>
+                  </div>
+                  <div class="input-group">
+                      <label>IPN / Callback URL (Return Path)</label>
+                      <input type="text" formControlName="gatewayCallbackUrl" placeholder="https://yourdomain.com/api/payment/callback">
+                  </div>
+              </div>
+
+              <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 space-y-4">
+                  <h4 class="text-xs font-black text-accent uppercase tracking-widest mb-4">Payload Constraints</h4>
+                  
+                  <label class="premium-checkbox-label">
+                      <input type="checkbox" formControlName="requiresReference">
+                      <span class="checkmark"></span>
+                      <span class="label-text">Demand distinct Transaction Reference ID (TrxID) for validation</span>
+                  </label>
+
+                  <label class="premium-checkbox-label">
+                      <input type="checkbox" formControlName="requiresReceipt">
+                      <span class="checkmark"></span>
+                      <span class="label-text">Require physical/digital receipt asset upload</span>
+                  </label>
+                  
+                  <label class="premium-checkbox-label">
+                      <input type="checkbox" formControlName="isEnabled">
+                      <span class="checkmark"></span>
+                      <span class="label-text">Asset is Active & Publicly Available</span>
+                  </label>
+              </div>
+
+              <div class="flex gap-4 pt-4 border-t border-white/5">
+                  <button type="button" (click)="showForm.set(false)" class="btn btn-secondary flex-1 py-4 h-14">Abort Sequence</button>
+                  <button type="submit" [disabled]="submitting() || form.invalid" class="btn btn-accent flex-1 py-4 h-14 shadow-gold font-black">
+                      {{ submitting() ? 'Compiling...' : 'Apply Overrides' }}
+                  </button>
+              </div>
+          </form>
+      </div>
+  }
+</div>

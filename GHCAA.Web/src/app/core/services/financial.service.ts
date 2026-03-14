@@ -2,24 +2,31 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { PaymentStatus, FinancialCategory } from '../models/business.models';
 
+
+/** Matches PaymentHistoryDto.cs */
 export interface PaymentRecord {
     id: number;
     memberId: number;
     transactionId: string;
     amount: number;
     paidAt: string;
-    status: any;
-    category: any;
+    status: PaymentStatus;
+    category: FinancialCategory;
     notes?: string;
 }
 
+
+/** Matches MembershipDueDto.cs */
 export interface MembershipDue {
     id: number;
+    memberId?: number;
     year: number;
     amount: number;
     isPaid: boolean;
     dueDate: string;
+    paidAt?: string;
 }
 
 @Injectable({ providedIn: 'root' })

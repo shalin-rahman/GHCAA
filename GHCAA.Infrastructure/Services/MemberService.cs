@@ -86,7 +86,8 @@ namespace GHCAA.Infrastructure.Services
                 Designation = dto.Designation,
                 Status = Enums.MembershipStatus.Applied,
                 AppliedDate = DateTime.UtcNow,
-                EmailVerified = false
+                EmailVerified = false,
+                HasAcceptedTerms = dto.HasAcceptedTerms
             };
 
             // Handle Academic History
@@ -357,7 +358,8 @@ namespace GHCAA.Infrastructure.Services
                 CertificatePath = member.CertificatePath,
                 IsMobilePublic = member.IsMobilePublic,
                 IsEmailPublic = member.IsEmailPublic,
-                IsAddressPublic = member.IsAddressPublic
+                IsAddressPublic = member.IsAddressPublic,
+                HasAcceptedTerms = member.HasAcceptedTerms
             };
 
             if (member.ECMembers != null && member.ECMembers.Any())
@@ -700,7 +702,8 @@ namespace GHCAA.Infrastructure.Services
                     PaymentProofPath = member.PaymentProofPath,
                     IsMobilePublic = member.IsMobilePublic,
                     IsEmailPublic = member.IsEmailPublic,
-                    IsAddressPublic = member.IsAddressPublic
+                    IsAddressPublic = member.IsAddressPublic,
+                    HasAcceptedTerms = member.HasAcceptedTerms
                 };
 
                 if (member.ECMembers != null && member.ECMembers.Any())

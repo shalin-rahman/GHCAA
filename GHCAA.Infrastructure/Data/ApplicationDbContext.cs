@@ -191,7 +191,8 @@ namespace GHCAA.Infrastructure.Data
                 MembershipType = Domain.Enums.MembershipType.Founding,
                 LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 ECPosition = Domain.Enums.ECPosition.President,
-                EmailVerified = true
+                EmailVerified = true,
+                HasAcceptedTerms = true
             };
 
             var jane = new Member
@@ -229,7 +230,8 @@ namespace GHCAA.Infrastructure.Data
                 MembershipType = Domain.Enums.MembershipType.General,
                 LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 ECPosition = Domain.Enums.ECPosition.GeneralSecretary,
-                EmailVerified = true
+                EmailVerified = true,
+                HasAcceptedTerms = true
             };
 
             modelBuilder.Entity<Member>().HasData(shalin, jane);
@@ -326,7 +328,8 @@ namespace GHCAA.Infrastructure.Data
                     Id = 1, 
                     Title = "College Library Renovation Project Completed", 
                     Content = "The historic library of Govt. Haraganga College has been fully renovated with modern amenities and digital archiving systems, funded by the 1985 batch alumni.", 
-                    Category = Domain.Enums.NewsCategory.OrganisationalUpdate, 
+                    Category = Domain.Enums.ArticleCategory.Regular, 
+                    Status = Domain.Enums.SubmissionStatus.Approved,
                     IsActive = true, 
                     AuthorId = 2, 
                     PublishDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -337,7 +340,8 @@ namespace GHCAA.Infrastructure.Data
                     Id = 2, 
                     Title = "Haragangian Global Meet 2026: London Chapter", 
                     Content = "GHCAA members in the UK gathered at the Royal Museum today to discuss international networking and scholarship opportunities for current students.", 
-                    Category = Domain.Enums.NewsCategory.News, 
+                    Category = Domain.Enums.ArticleCategory.Event,
+                    Status = Domain.Enums.SubmissionStatus.Approved,
                     IsActive = true, 
                     AuthorId = 2, 
                     PublishDate = new DateTime(2026, 3, 4, 0, 0, 0, DateTimeKind.Utc),
