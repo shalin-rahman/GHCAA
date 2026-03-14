@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { JobService, Job } from '../../../../core/services/job.service';
+import { JobService } from '../../../../core/services/job.service';
+import { Job } from '../../../../core/models/business.models';
 
 @Component({
     selector: 'landing-jobs',

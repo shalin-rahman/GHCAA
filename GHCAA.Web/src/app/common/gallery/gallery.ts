@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GalleryService, EventGallery } from '../../core/services/gallery.service';
+import { GalleryService } from '../../core/services/gallery.service';
+import { EventGallery } from '../../core/models/business.models';
 
 @Component({
   selector: 'app-gallery',

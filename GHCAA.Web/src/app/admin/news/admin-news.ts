@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NewsService, NewsPost } from '../../core/services/news.service';
+import { NewsService } from '../../core/services/news.service';
+import { NewsPost } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 
 import { ARTICLE_CATEGORIES } from '../../core/constants/app.constants';

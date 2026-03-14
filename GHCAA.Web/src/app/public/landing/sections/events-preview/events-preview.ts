@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { EventsService, AlumniEvent } from '../../../../core/services/events.service';
+import { EventsService } from '../../../../core/services/events.service';
+import { AlumniEvent } from '../../../../core/models/business.models';
 
 @Component({
     selector: 'landing-events',

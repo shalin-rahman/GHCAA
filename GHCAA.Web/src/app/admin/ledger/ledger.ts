@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LedgerService, FinancialRecord, LedgerSummary } from '../../core/services/ledger.service';
+import { LedgerService } from '../../core/services/ledger.service';
+import { FinancialRecord, LedgerSummary } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
@@ -31,7 +32,7 @@ export class Ledger implements OnInit {
   totalItems = signal(0);
   totalPages = signal(1);
   searchQuery = signal('');
-  typeFilter = signal<number | null>(null);
+  typeFilter = signal<any>(null);
 
   // PDF Export Config
   pdfHeaders = ['Date', 'Type', 'Category', 'Description', 'Amount'];
@@ -55,13 +56,14 @@ export class Ledger implements OnInit {
 
 
   categories = [
-    { id: 0, name: 'Membership Fee' },
-    { id: 1, name: 'Donation' },
-    { id: 2, name: 'Event' },
-    { id: 3, name: 'Maintenance' },
-    { id: 4, name: 'Salary' },
-    { id: 5, name: 'Utilities' },
-    { id: 6, name: 'Other' }
+    { id: 'MembershipFee', name: 'Membership Fee' },
+    { id: 'RegistrationFee', name: 'Registration Fee' },
+    { id: 'Donation', name: 'Donation' },
+    { id: 'Event', name: 'Event' },
+    { id: 'Maintenance', name: 'Maintenance' },
+    { id: 'Salary', name: 'Salary' },
+    { id: 'Utilities', name: 'Utilities' },
+    { id: 'Other', name: 'Other' }
   ];
 
   ngOnInit() {

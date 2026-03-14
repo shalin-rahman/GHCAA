@@ -4,7 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "type-check": "tsc --noEmit -p tsconfig.app.json",
+    "build": "npm run type-check && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

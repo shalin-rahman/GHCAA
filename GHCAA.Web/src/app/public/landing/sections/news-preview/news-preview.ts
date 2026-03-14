@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { NewsService, NewsPost } from '../../../../core/services/news.service';
+import { NewsService } from '../../../../core/services/news.service';
+import { NewsPost } from '../../../../core/models/business.models';
 
 @Component({
     selector: 'landing-news',

@@ -2,7 +2,8 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { GalleryService, EventGallery } from '../../core/services/gallery.service';
+import { GalleryService } from '../../core/services/gallery.service';
+import { EventGallery, EventPhoto } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
@@ -167,9 +168,10 @@ export class AdminGallery implements OnInit {
                 // Instantly update the UI by filtering out the removed photo
                 const currentGallery = this.selectedGallery();
                 if (currentGallery) {
-                    const updatedPhotos = (currentGallery.photos || []).filter(p => p.id !== photoId);
+                    const updatedPhotos = (currentGallery.photos || []).filter((p: EventPhoto) => p.id !== photoId);
                     this.selectedGallery.set({ ...currentGallery, photos: updatedPhotos });
                 }
+
                 // Also refresh the background galleries list
                 this.loadGalleries();
             },

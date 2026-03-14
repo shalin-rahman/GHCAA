@@ -42,8 +42,8 @@
                     </div>
                 </div>
                 <div class="card-footer px-6 py-4 border-t border-white/5 flex gap-2">
-                    <button class="btn btn-secondary btn-sm flex-1" (click)="editArticle(article)" [disabled]="article.status === 2">
-                        {{ article.status === 2 ? 'Published' : 'Edit / Update' }}
+                    <button class="btn btn-secondary btn-sm flex-1" (click)="editArticle(article)" [disabled]="article.status === 'Approved'">
+                        {{ article.status === 'Approved' ? 'Published' : 'Edit / Update' }}
                     </button>
                 </div>
             </div>
@@ -106,10 +106,10 @@
             <div class="editor-footer mt-10 pt-6 border-t border-white/5 flex justify-between items-center">
                 <button class="btn btn-secondary" (click)="showForm.set(false)" [disabled]="isSubmitting()">Cancel</button>
                 <div class="actions flex gap-4">
-                    <button class="btn btn-outline" (click)="save(0)" [disabled]="isSubmitting()">
+                    <button class="btn btn-outline" (click)="save('Draft')" [disabled]="isSubmitting()">
                         {{ isSubmitting() ? 'Saving...' : 'Save Draft' }}
                     </button>
-                    <button class="btn btn-accent" (click)="save(1)" [disabled]="isSubmitting()">
+                    <button class="btn btn-accent" (click)="save('Pending')" [disabled]="isSubmitting()">
                         @if (!isSubmitting()) { <span class="icon">🚀</span> }
                         {{ isSubmitting() ? 'Submitting...' : 'Submit for Approval' }}
                     </button>

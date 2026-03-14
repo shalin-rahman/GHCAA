@@ -1,0 +1,35 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { News } from './news';
+import { NewsService } from '../../core/services/news.service';
+import { of } from 'rxjs';
+
+describe('News Component', () => {
+    let component: News;
+    let fixture: ComponentFixture<News>;
+    let newsServiceMock: any;
+
+    beforeEach(async () => {
+        newsServiceMock = {
+            getNews: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0 }))
+        };
+
+        await TestBed.configureTestingModule({
+            imports: [News],
+            providers: [
+                { provide: NewsService, useValue: newsServiceMock }
+            ]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(News);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
+
+    it('should load news on init', () => {
+        expect(newsServiceMock.getNews).toHaveBeenCalled();
+    });
+});

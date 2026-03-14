@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { EventsService, AlumniEvent, EventRegistration } from '../../core/services/events.service';
+import { EventsService } from '../../core/services/events.service';
+import { AlumniEvent, EventRegistration } from '../../core/models/business.models';
 import { AuthService } from '../../core/services/auth.service';
 import { PaymentMethodSelectorComponent } from '../../common/payment-method-selector/payment-method-selector.component';
 import { PaymentConfig } from '../../core/services/payment-config.service';

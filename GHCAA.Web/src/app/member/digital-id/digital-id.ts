@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProfileService, MemberProfile } from '../../core/services/profile.service';
+import { ProfileService } from '../../core/services/profile.service';
+import { MemberProfile } from '../../core/models/business.models';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 

@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NewsService, NewsPost } from '../../core/services/news.service';
+import { NewsService } from '../../core/services/news.service';
+import { NewsPost } from '../../core/models/business.models';
 
 @Component({
   selector: 'app-news',

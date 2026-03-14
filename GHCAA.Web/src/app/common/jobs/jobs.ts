@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { JobService, Job } from '../../core/services/job.service';
+import { JobService } from '../../core/services/job.service';
+import { Job } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { JOB_CATEGORIES } from '../../core/constants/app.constants';
@@ -44,7 +45,7 @@ export class Jobs implements OnInit {
     this.loadJobs();
   }
 
-  loadJobs(category?: number) {
+  loadJobs(category?: any) {
     this.loading.set(true);
     const params: any = {};
     if (category !== undefined) params.category = category;
@@ -114,14 +115,14 @@ export class Jobs implements OnInit {
 
   onFilterChange(e: any) {
     const val = e.target.value;
-    this.loadJobs(val === '' ? undefined : Number(val));
+    this.loadJobs(val === '' ? undefined : val);
   }
 
   getCategoryName(categoryStr: string): string {
-    // Backend returns string enum names like 'IT', 'Finance', etc.
-    const cat = JOB_CATEGORIES.find(c => c.name.toLowerCase().includes(categoryStr?.toLowerCase()) || c.id.toString() === categoryStr);
+    const cat = JOB_CATEGORIES.find(c => c.id === categoryStr || c.name === categoryStr);
     return cat?.name || categoryStr || 'General';
   }
+
 
   viewJob(job: Job) {
     this.selectedJob.set(job);

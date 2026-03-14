@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NewsService, NewsPost } from '../../core/services/news.service';
+import { NewsService } from '../../core/services/news.service';
+import { NewsPost, SubmissionStatus } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { ARTICLE_CATEGORIES, SUBMISSION_STATUS_MAP, SUBMISSION_STATUS } from '../../core/constants/app.constants';
 
@@ -22,7 +23,14 @@ export class MemberArticles implements OnInit {
   showForm = signal(false);
 
   // Form State
-  articleForm = {
+  articleForm: {
+    id: number;
+    title: string;
+    content: string;
+    category: any;
+    imageUrl: string;
+    status: SubmissionStatus;
+  } = {
     id: 0,
     title: '',
     content: '',
@@ -78,11 +86,12 @@ export class MemberArticles implements OnInit {
       content: article.content,
       category: article.category,
       imageUrl: article.imageUrl || '',
-      status: article.status ?? SUBMISSION_STATUS.DRAFT
+      status: article.status
     };
     this.photoPreview.set(article.imageUrl || null);
     this.showForm.set(true);
   }
+
 
   onPhotoSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -95,7 +104,7 @@ export class MemberArticles implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  async save(status: number) {
+  async save(status: SubmissionStatus) {
     if (!this.articleForm.title || !this.articleForm.content) {
       this.notify.warning('Title and content are required');
       return;
@@ -113,6 +122,7 @@ export class MemberArticles implements OnInit {
       const saveObs = status === SUBMISSION_STATUS.DRAFT 
         ? this.newsService.saveDraft(this.articleForm)
         : this.newsService.submitArticle(this.articleForm);
+
 
       saveObs.subscribe({
         next: () => {
@@ -132,9 +142,10 @@ export class MemberArticles implements OnInit {
     }
   }
 
-  getStatusInfo(status: number) {
+  getStatusInfo(status: any) {
     return SUBMISSION_STATUS_MAP[status] || { label: 'Unknown', class: 'pending' };
   }
+
 
   getCategoryLabel(val: string) {
     return this.categories.find(c => c.value === val)?.label || val;

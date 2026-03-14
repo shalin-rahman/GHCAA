@@ -81,15 +81,15 @@ export const GENDER_OPTIONS = [
 ];
 
 export const JOB_CATEGORIES = [
-    { id: 0, name: 'IT & Software Development' },
-    { id: 1, name: 'Finance & Banking' },
-    { id: 2, name: 'Engineering & Construction' },
-    { id: 3, name: 'Marketing & Sales' },
-    { id: 4, name: 'Education & Research' },
-    { id: 5, name: 'Healthcare & Pharma' },
-    { id: 6, name: 'Govt. & Public Sector' },
-    { id: 7, name: 'Mentorship & Career Guidance' },
-    { id: 8, name: 'Other Opportunities' }
+    { id: 'IT', name: 'IT & Software Development' },
+    { id: 'Finance', name: 'Finance & Banking' },
+    { id: 'Engineering', name: 'Engineering & Construction' },
+    { id: 'Marketing', name: 'Marketing & Sales' },
+    { id: 'Education', name: 'Education & Research' },
+    { id: 'Health', name: 'Healthcare & Pharma' },
+    { id: 'PublicSector', name: 'Govt. & Public Sector' },
+    { id: 'Mentorship', name: 'Mentorship & Career Guidance' },
+    { id: 'Other', name: 'Other Opportunities' }
 ];
 
 export const ARTICLE_CATEGORIES = [
@@ -99,13 +99,17 @@ export const ARTICLE_CATEGORIES = [
 ];
 
 export const SUBMISSION_STATUS = {
-    DRAFT: 0,
-    PENDING: 1,
-    APPROVED: 2,
-    REJECTED: 3
-};
+    DRAFT: 'Draft',
+    PENDING: 'Pending',
+    APPROVED: 'Approved',
+    REJECTED: 'Rejected'
+} as const;
 
-export const SUBMISSION_STATUS_MAP: Record<number, { label: string, class: string }> = {
+export const SUBMISSION_STATUS_MAP: Record<string | number, { label: string, class: string }> = {
+    'Draft': { label: 'Draft', class: 'draft' },
+    'Pending': { label: 'Pending Approval', class: 'pending' },
+    'Approved': { label: 'Approved', class: 'active' },
+    'Rejected': { label: 'Rejected', class: 'terminated' },
     0: { label: 'Draft', class: 'draft' },
     1: { label: 'Pending Approval', class: 'pending' },
     2: { label: 'Approved', class: 'active' },

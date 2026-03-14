@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GalleryService, EventGallery } from '../../../../core/services/gallery.service';
+import { GalleryService } from '../../../../core/services/gallery.service';
+import { EventGallery, EventPhoto } from '../../../../core/models/business.models';
 
 @Component({
     selector: 'landing-gallery-preview',
@@ -26,7 +27,7 @@ export class LandingGalleryPreview implements OnInit {
         const featuredGalleries = this.galleries().filter(g => g.isFeatured);
 
         featuredGalleries.forEach(g => {
-            g.photos.slice(0, 2).forEach(p => {
+            g.photos.slice(0, 2).forEach((p: EventPhoto) => {
                 allPhotos.push({
                     ...p,
                     galleryTitle: g.title
@@ -35,6 +36,7 @@ export class LandingGalleryPreview implements OnInit {
         });
         return allPhotos.slice(0, 8);
     }
+
 
     viewFull(path: string) {
         window.open(path, '_blank');

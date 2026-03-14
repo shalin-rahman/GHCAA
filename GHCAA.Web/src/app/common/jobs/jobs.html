@@ -100,10 +100,10 @@
         } @else {
         <div class="grid">
             @for (job of jobs(); track job.id) {
-            <div class="glass-card job-card reveal-card" [class.mentorship]="job.category === '7' || job.category === 'Mentorship'">
+            <div class="glass-card job-card reveal-card" [class.mentorship]="job.category === 'Mentorship'">
                 <div class="card-badges">
                     <span class="badge cat">{{ getCategoryName(job.category) }}</span>
-                    @if (job.category === '7' || job.category === 'Mentorship') {
+                    @if (job.category === 'Mentorship') {
                     <span class="badge mentor">MENTORSHIP</span>
                     }
                 </div>

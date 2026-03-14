@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NetworkingService } from '../../core/services/networking.service';
+import { MemberProfile } from '../../core/models/business.models';
 import { getECPositionName } from '../../core/constants/app.constants';
 
 @Component({
@@ -15,7 +16,7 @@ import { getECPositionName } from '../../core/constants/app.constants';
 export class Governance implements OnInit {
     private networkService = inject(NetworkingService);
 
-    committee = signal<any[]>([]);
+    committee = signal<MemberProfile[]>([]);
     periods = signal<any[]>([]);
     selectedPeriodId = signal<number | null>(null);
     loading = signal(true);
@@ -40,11 +41,17 @@ export class Governance implements OnInit {
     }
 
     loadCommittee(periodId?: number) {
+        const boardPositions = [
+            'President', 'VicePresident', 'GeneralSecretary', 'OfficeSecretary', 
+            'JointSecretary1', 'JointSecretary2', 'Treasurer', 'MediaCulturalAndSportsSecretary',
+            'OrganizationalSecretary', 'InformationAndTechnologySecretary', 'LawSecretary'
+        ];
+
         this.loading.set(true);
         this.networkService.getCommittee(periodId ? { periodId } : {}).subscribe({
             next: (data) => {
-                const boardMembers = data.filter(m => m.ecPosition < 8);
-                const generalEC = data.filter(m => m.ecPosition >= 8);
+                const boardMembers = data.filter(m => boardPositions.includes(m.ecPosition));
+                const generalEC = data.filter(m => !boardPositions.includes(m.ecPosition) && m.ecPosition !== 'None');
                 this.committee.set([...boardMembers, ...generalEC]);
                 this.loading.set(false);
             },
@@ -52,9 +59,20 @@ export class Governance implements OnInit {
         });
     }
 
+
     getPositionName(pos: any): string {
         return getECPositionName(pos);
     }
+
+    isBoardMember(position: any): boolean {
+        const boardPositions = [
+            'President', 'VicePresident', 'GeneralSecretary', 'OfficeSecretary', 
+            'JointSecretary1', 'JointSecretary2', 'Treasurer', 'MediaCulturalAndSportsSecretary',
+            'OrganizationalSecretary', 'InformationAndTechnologySecretary', 'LawSecretary'
+        ];
+        return boardPositions.includes(position);
+    }
 }
+
 
 
