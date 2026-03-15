@@ -1,0 +1,29 @@
+[
+  {
+    "Id": 2,
+    "Code": "WELCOME_EMAIL",
+    "Subject": "Welcome!",
+    "Body": "...",
+    "Variables": "[\u0027FullName\u0027, \u0027MembershipNumber\u0027]",
+    "LastUpdated": "2024-01-01T00:00:00Z",
+    "Description": "Welcome"
+  },
+  {
+    "Id": 3,
+    "Code": "FEE_REMINDER",
+    "Subject": "Fee Due",
+    "Body": "...",
+    "Variables": "[\u0027FullName\u0027]",
+    "LastUpdated": "2024-01-01T00:00:00Z",
+    "Description": "Reminder"
+  },
+  {
+    "Id": 1,
+    "Code": "OTP_EMAIL",
+    "Subject": "GHCAA Verification Code: {{OtpCode}}",
+    "Body": "...",
+    "Variables": "[\u0027FullName\u0027, \u0027OtpCode\u0027]",
+    "LastUpdated": "2024-01-01T00:00:00Z",
+    "Description": "OTP"
+  }
+]

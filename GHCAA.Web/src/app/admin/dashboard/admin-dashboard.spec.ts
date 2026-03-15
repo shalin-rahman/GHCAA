@@ -10,7 +10,7 @@ describe('AdminDashboard Component', () => {
 
     beforeEach(async () => {
         adminServiceMock = {
-            getAdminStats: vi.fn().mockReturnValue(of({ totalMembers: 0, pendingMembers: 0, totalIncome: 0 })),
+            getStats: vi.fn().mockReturnValue(of({ totalMembers: 0, pendingMembers: 0, totalIncome: 0 })),
             getDailyActivity: vi.fn().mockReturnValue(of([]))
         };
 
@@ -31,6 +31,6 @@ describe('AdminDashboard Component', () => {
     });
 
     it('should load stats on init', () => {
-        expect(adminServiceMock.getAdminStats).toHaveBeenCalled();
+        expect(adminServiceMock.getStats).toHaveBeenCalled();
     });
 });

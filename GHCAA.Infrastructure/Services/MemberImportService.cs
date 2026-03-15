@@ -127,8 +127,8 @@ namespace GHCAA.Infrastructure.Services
                         // Like insert, set default flags to update
                         member.Status = Enums.MembershipStatus.Active;
                         member.EmailVerified = true;
-                        member.ApprovedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                        member.AppliedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                        member.ApprovedDate = DateTime.UtcNow;
+                        member.AppliedDate = DateTime.UtcNow;
                         member.LastUpdateDate = DateTime.UtcNow;
                         if (member.DateOfBirth == default) 
                         {
@@ -147,8 +147,8 @@ namespace GHCAA.Infrastructure.Services
                         {
                             Status        = Enums.MembershipStatus.Active,
                             EmailVerified = true,
-                            AppliedDate   = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                            ApprovedDate  = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                            AppliedDate   = DateTime.UtcNow,
+                            ApprovedDate  = DateTime.UtcNow,
                             LastUpdateDate = DateTime.UtcNow,
                             // PostgreSQL requires Kind=Utc; default(DateTime) is Unspecified
                             DateOfBirth   = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc),
@@ -192,60 +192,90 @@ namespace GHCAA.Infrastructure.Services
                     }
 
                     // ── AUTO-FILL non-nullable string fields with traceable defaults ────────
-                    if (string.IsNullOrWhiteSpace(member.FatherName))          { member.FatherName = $"IMPORT-Father-{row.RowNumber()}";                result.Errors.Add($"{rowTag}: FatherName missing — set to '{member.FatherName}'"); }
-                    if (string.IsNullOrWhiteSpace(member.MotherName))          { member.MotherName = $"IMPORT-Mother-{row.RowNumber()}";                result.Errors.Add($"{rowTag}: MotherName missing — set to '{member.MotherName}'"); }
-                    if (string.IsNullOrWhiteSpace(member.PresentAddress))      { member.PresentAddress = "IMPORT-Unknown";                             result.Errors.Add($"{rowTag}: PresentAddress missing — set to 'IMPORT-Unknown'"); }
+                    if (string.IsNullOrWhiteSpace(member.FatherName))          { member.FatherName = $"{Constants.Defaults.ImportPrefix}-Father-{row.RowNumber()}";                result.Errors.Add($"{rowTag}: FatherName missing — set to '{member.FatherName}'"); }
+                    if (string.IsNullOrWhiteSpace(member.MotherName))          { member.MotherName = $"{Constants.Defaults.ImportPrefix}-Mother-{row.RowNumber()}";                result.Errors.Add($"{rowTag}: MotherName missing — set to '{member.MotherName}'"); }
+                    if (string.IsNullOrWhiteSpace(member.PresentAddress))      { member.PresentAddress = $"{Constants.Defaults.ImportPrefix}-{Constants.Defaults.UnknownValue}";                             result.Errors.Add($"{rowTag}: PresentAddress missing — set to '{member.PresentAddress}'"); }
                     if (string.IsNullOrWhiteSpace(member.PermanentAddress))    { member.PermanentAddress = member.PresentAddress;                      result.Errors.Add($"{rowTag}: PermanentAddress missing — copied from PresentAddress"); }
-                    if (string.IsNullOrWhiteSpace(member.EmergencyContactName)) { member.EmergencyContactName = "IMPORT-Unknown";                      result.Errors.Add($"{rowTag}: EmergencyContactName missing — set to 'IMPORT-Unknown'"); }
-                    if (string.IsNullOrWhiteSpace(member.EmergencyContactRelation)) { member.EmergencyContactRelation = "Unknown";                    result.Errors.Add($"{rowTag}: EmergencyContactRelation missing — set to 'Unknown'"); }
-                    if (string.IsNullOrWhiteSpace(member.EmergencyContactPhone)) { member.EmergencyContactPhone = "IMPORT-Unknown";                   result.Errors.Add($"{rowTag}: EmergencyContactPhone missing — set to 'IMPORT-Unknown'"); }
-                    if (string.IsNullOrWhiteSpace(member.HighestCertificate))  { member.HighestCertificate = "HSC";                                   result.Errors.Add($"{rowTag}: HighestCertificate missing — defaulted to 'HSC'"); }
-                    if (string.IsNullOrWhiteSpace(member.HighestCertificateGroup))   { member.HighestCertificateGroup = "Unknown";                    result.Errors.Add($"{rowTag}: HighestCertificateGroup missing — defaulted to 'Unknown'"); }
+                    if (string.IsNullOrWhiteSpace(member.EmergencyContactName)) { member.EmergencyContactName = $"{Constants.Defaults.ImportPrefix}-{Constants.Defaults.UnknownValue}";                      result.Errors.Add($"{rowTag}: EmergencyContactName missing — set to '{member.EmergencyContactName}'"); }
+                    if (string.IsNullOrWhiteSpace(member.EmergencyContactRelation)) { member.EmergencyContactRelation = Constants.Defaults.UnknownValue;                    result.Errors.Add($"{rowTag}: EmergencyContactRelation missing — set to '{Constants.Defaults.UnknownValue}'"); }
+                    if (string.IsNullOrWhiteSpace(member.EmergencyContactPhone)) { member.EmergencyContactPhone = $"{Constants.Defaults.ImportPrefix}-{Constants.Defaults.UnknownValue}";                   result.Errors.Add($"{rowTag}: EmergencyContactPhone missing — set to '{member.EmergencyContactPhone}'"); }
+                    if (string.IsNullOrWhiteSpace(member.HighestCertificate))  { member.HighestCertificate = Enums.Degree.HSC.ToString();                                   result.Errors.Add($"{rowTag}: HighestCertificate missing — defaulted to '{Enums.Degree.HSC}'"); }
+                    if (string.IsNullOrWhiteSpace(member.HighestCertificateGroup))   { member.HighestCertificateGroup = Constants.Defaults.UnknownValue;                    result.Errors.Add($"{rowTag}: HighestCertificateGroup missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
                     if (string.IsNullOrWhiteSpace(member.HighestCertificateSubject)) { member.HighestCertificateSubject = "None";                     result.Errors.Add($"{rowTag}: HighestCertificateSubject missing — defaulted to 'None'"); }
-                    if (string.IsNullOrWhiteSpace(member.GHCLastCertificate))  { member.GHCLastCertificate = "HSC";                                   result.Errors.Add($"{rowTag}: GHCLastCertificate missing — defaulted to 'HSC'"); }
-                    if (string.IsNullOrWhiteSpace(member.GHCLastCertificateGroup))   { member.GHCLastCertificateGroup = "Unknown";                    result.Errors.Add($"{rowTag}: GHCLastCertificateGroup missing — defaulted to 'Unknown'"); }
+                    if (string.IsNullOrWhiteSpace(member.GHCLastCertificate))  { member.GHCLastCertificate = Enums.Degree.HSC.ToString();                                   result.Errors.Add($"{rowTag}: GHCLastCertificate missing — defaulted to '{Enums.Degree.HSC}'"); }
+                    if (string.IsNullOrWhiteSpace(member.GHCLastCertificateGroup))   { member.GHCLastCertificateGroup = Constants.Defaults.UnknownValue;                    result.Errors.Add($"{rowTag}: GHCLastCertificateGroup missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
                     if (string.IsNullOrWhiteSpace(member.GHCLastCertificateSubject)) { member.GHCLastCertificateSubject = "None";                     result.Errors.Add($"{rowTag}: GHCLastCertificateSubject missing — defaulted to 'None'"); }
-                    if (string.IsNullOrWhiteSpace(member.ProfessionalSector))  { member.ProfessionalSector = "Unknown";                               result.Errors.Add($"{rowTag}: ProfessionalSector missing — defaulted to 'Unknown'"); }
-                    if (string.IsNullOrWhiteSpace(member.Designation))         { member.Designation = "Unknown";                                       result.Errors.Add($"{rowTag}: Designation missing — defaulted to 'Unknown'"); }
-
+                    if (string.IsNullOrWhiteSpace(member.ProfessionalSector))  { member.ProfessionalSector = Constants.Defaults.UnknownValue;                               result.Errors.Add($"{rowTag}: ProfessionalSector missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
+                    if (string.IsNullOrWhiteSpace(member.Designation))         { member.Designation = Constants.Defaults.UnknownValue;                                       result.Errors.Add($"{rowTag}: Designation missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
+ 
                     // ── UNIQUE: Email (auto-generate from NID if missing) ─────────────────
                     if (string.IsNullOrWhiteSpace(member.Email))
                     {
                         var id = !string.IsNullOrWhiteSpace(member.NID) ? member.NID.Trim() : $"row{row.RowNumber()}";
-                        member.Email = $"haragangian+{id}@gmail.com";
+                        member.Email = $"{Constants.Defaults.ImportEmailBase}+{id}@gmail.com";
                         result.Errors.Add($"{rowTag}: Email missing — assigned '{member.Email}'");
                     }
-
+ 
                     // ── UNIQUE: NID (generate traceable placeholder if missing) ───────────
                     if (string.IsNullOrWhiteSpace(member.NID))
                     {
-                        member.NID = $"IMPORT-{row.RowNumber()}-{DateTime.UtcNow.Ticks % 100000}";
+                        member.NID = $"{Constants.Defaults.ImportPrefix}-{row.RowNumber()}-{DateTime.UtcNow.Ticks % 100000}";
                         result.Errors.Add($"{rowTag}: NID missing — assigned placeholder '{member.NID}'");
                     }
-
+ 
                     // ── UNIQUE: MobileNo (generate traceable placeholder if missing) ──────
                     if (string.IsNullOrWhiteSpace(member.MobileNo))
                     {
-                        member.MobileNo = $"IMPORT-{row.RowNumber()}-{DateTime.UtcNow.Ticks % 100000}";
+                        member.MobileNo = $"{Constants.Defaults.ImportPrefix}-{row.RowNumber()}-{DateTime.UtcNow.Ticks % 100000}";
                         result.Errors.Add($"{rowTag}: MobileNo missing — assigned placeholder '{member.MobileNo}'");
                     }
 
-                    // ── DUPLICATE CHECKS (DB + intra-batch) ──────────────────────────────
+                    // ── DUPLICATE RESOLUTION (DB + intra-batch) ──────────────────────────────
                     if (!isUpdate && existingMembersByNID.ContainsKey(member.NID))
-                    { result.Errors.Add($"{rowTag}: Duplicate NID '{member.NID}' — skipped."); result.FailureCount++; continue; }
+                    {
+                        // Match by NID found but wasn't caught earlier? (Shouldn't happen with current logic, but safety first)
+                        member = existingMembersByNID[member.NID];
+                        isUpdate = true;
+                    }
 
-                    bool emailChanged = isUpdate && member.Email != originalEmail;
-                    if ((!isUpdate || emailChanged) && !string.IsNullOrWhiteSpace(member.Email) && (existingEmails.Contains(member.Email) || batchEmails.Contains(member.Email)))
-                    { result.Errors.Add($"{rowTag}: Duplicate Email '{member.Email}' — skipped."); result.FailureCount++; continue; }
+                    if (!string.IsNullOrWhiteSpace(member.Email))
+                    {
+                        string baseEmail = member.Email;
+                        int suffix = 1;
+                        while (existingEmails.Contains(member.Email) || batchEmails.Contains(member.Email))
+                        {
+                            if (isUpdate && member.Email == originalEmail) break; // Existing member keeping their email is fine
 
-                    bool mobileChanged = isUpdate && member.MobileNo != originalMobile;
-                    if ((!isUpdate || mobileChanged) && !string.IsNullOrWhiteSpace(member.MobileNo) && (existingMobiles.Contains(member.MobileNo) || batchMobiles.Contains(member.MobileNo)))
-                    { result.Errors.Add($"{rowTag}: Duplicate MobileNo '{member.MobileNo}' — skipped."); result.FailureCount++; continue; }
+                            var parts = baseEmail.Split('@');
+                            if (parts.Length == 2)
+                            {
+                                member.Email = $"{parts[0]}+{suffix}@{parts[1]}";
+                                suffix++;
+                            }
+                            else
+                            {
+                                member.Email = $"{baseEmail}_{suffix}";
+                                suffix++;
+                            }
+                        }
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(member.MobileNo))
+                    {
+                        string baseMobile = member.MobileNo;
+                        int suffix = 1;
+                        while (existingMobiles.Contains(member.MobileNo) || batchMobiles.Contains(member.MobileNo))
+                        {
+                            if (isUpdate && member.MobileNo == originalMobile) break; // Existing member keeping their mobile is fine
+                            member.MobileNo = $"{baseMobile}{suffix}";
+                            suffix++;
+                        }
+                    }
 
                     // Register in batch-tracking sets
                     if (!isUpdate) batchNIDs.Add(member.NID);
-                    if ((!isUpdate || emailChanged) && !string.IsNullOrWhiteSpace(member.Email)) batchEmails.Add(member.Email);
-                    if ((!isUpdate || mobileChanged) && !string.IsNullOrWhiteSpace(member.MobileNo)) batchMobiles.Add(member.MobileNo);
+                    if (!string.IsNullOrWhiteSpace(member.Email)) batchEmails.Add(member.Email);
+                    if (!string.IsNullOrWhiteSpace(member.MobileNo)) batchMobiles.Add(member.MobileNo);
 
                     batchMembers.Add((member, externalId, row.RowNumber(), isUpdate));
                 }
@@ -286,23 +316,11 @@ namespace GHCAA.Infrastructure.Services
             {
                 try
                 {
-                    // Generate Membership Number if missing
+                    // Generate Membership Number if missing: Format GHC-NID
                     if (string.IsNullOrWhiteSpace(item.Member.MembershipNumber))
                     {
-                        int passingYear = item.Member.GHCLastCertificatePassingYear;
-                        if (passingYear > 0)
-                        {
-                            if (!passingYearCounts.ContainsKey(passingYear))
-                            {
-                                passingYearCounts[passingYear] = await _db.Members
-                                    .Where(m => m.GHCLastCertificatePassingYear == passingYear && m.MembershipNumber != null && m.Id != item.Member.Id)
-                                    .CountAsync(cancellationToken);
-                            }
-                            passingYearCounts[passingYear]++;
-                            var serial = passingYearCounts[passingYear].ToString("D4"); // 4-digit zero-padded
-                            item.Member.MembershipNumber = $"GHC-{passingYear}-{serial}";
-                            _db.Members.Update(item.Member);
-                        }
+                        item.Member.MembershipNumber = $"{Constants.Defaults.MembershipPrefix}{item.Member.NID}";
+                        _db.Members.Update(item.Member);
                     }
 
                     // EC Position is intentionally NOT synced during import
@@ -362,9 +380,9 @@ namespace GHCAA.Infrastructure.Services
                     }
 
                     // Add default Member Role if missing
-                    if (existingUser != null && !existingUser.Roles.Any(r => r.Name == "Member"))
+                    if (existingUser != null && !existingUser.Roles.Any(r => r.Name == Constants.Roles.Member))
                     {
-                        var memberRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Member", cancellationToken);
+                        var memberRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == Constants.Roles.Member, cancellationToken);
                         if (memberRole != null)
                         {
                             existingUser.Roles.Add(memberRole);

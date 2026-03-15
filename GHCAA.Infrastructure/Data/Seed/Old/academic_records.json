@@ -1,0 +1,12 @@
+[
+  {
+    "Id": 1,
+    "MemberId": 1,
+    "InstitutionName": "Govt. Haraganga College",
+    "Degree": "HSC",
+    "Subject": "Science",
+    "AdmissionYear": 2013,
+    "PassingYear": 2015,
+    "IsGHC": true
+  }
+]

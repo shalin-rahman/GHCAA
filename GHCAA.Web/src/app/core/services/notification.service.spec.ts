@@ -5,10 +5,15 @@ describe('NotificationService', () => {
     let service: NotificationService;
 
     beforeEach(() => {
+        vi.useFakeTimers();
         TestBed.configureTestingModule({
             providers: [NotificationService]
         });
         service = TestBed.inject(NotificationService);
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     it('should be created', () => {
@@ -22,12 +27,12 @@ describe('NotificationService', () => {
         expect(service.toasts()[0].type).toBe('success');
     });
 
-    it('should remove a toast after timeout', fakeAsync(() => {
+    it('should remove a toast after timeout', () => {
         service.info('Info message');
         expect(service.toasts().length).toBe(1);
-        tick(5000);
+        vi.advanceTimersByTime(5000);
         expect(service.toasts().length).toBe(0);
-    }));
+    });
 
     it('should remove toast by id', () => {
         service.warning('Warning');

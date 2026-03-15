@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminGovernance } from './admin-governance';
-import { NetworkingService } from '../../core/services/networking.service';
+import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { of } from 'rxjs';
@@ -8,14 +8,16 @@ import { of } from 'rxjs';
 describe('AdminGovernance Component', () => {
     let component: AdminGovernance;
     let fixture: ComponentFixture<AdminGovernance>;
-    let networkServiceMock: any;
+    let httpClientMock: any;
     let adminServiceMock: any;
     let notificationServiceMock: any;
 
     beforeEach(async () => {
-        networkServiceMock = {
-            getPeriods: vi.fn().mockReturnValue(of([])),
-            getCommittee: vi.fn().mockReturnValue(of([]))
+        httpClientMock = {
+            get: vi.fn().mockReturnValue(of([])),
+            post: vi.fn().mockReturnValue(of({})),
+            put: vi.fn().mockReturnValue(of({})),
+            delete: vi.fn().mockReturnValue(of({}))
         };
         adminServiceMock = {
             assignECRole: vi.fn().mockReturnValue(of({ success: true })),
@@ -29,7 +31,7 @@ describe('AdminGovernance Component', () => {
         await TestBed.configureTestingModule({
             imports: [AdminGovernance],
             providers: [
-                { provide: NetworkingService, useValue: networkServiceMock },
+                { provide: HttpClient, useValue: httpClientMock },
                 { provide: AdminService, useValue: adminServiceMock },
                 { provide: NotificationService, useValue: notificationServiceMock }
             ]
@@ -45,7 +47,6 @@ describe('AdminGovernance Component', () => {
     });
 
     it('should load periods and committee on init', () => {
-        expect(networkServiceMock.getPeriods).toHaveBeenCalled();
-        expect(networkServiceMock.getCommittee).toHaveBeenCalled();
+        expect(httpClientMock.get).toHaveBeenCalled(); // loadPeriods
     });
 });

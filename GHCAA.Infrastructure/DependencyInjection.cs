@@ -2,6 +2,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Repositories;
 using GHCAA.Infrastructure.Services;
+using GHCAA.Infrastructure.Gateways;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -88,6 +89,15 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IMemberImportService, MemberImportService>();
             services.AddScoped<IThemeService, ThemeService>();
             services.AddScoped<IGovernanceService, GovernanceService>();
+
+            // Payment Gateways
+            services.AddHttpClient<SSLCommerzGateway>();
+            services.AddHttpClient<BkashGateway>();
+            services.AddHttpClient<NagadGateway>();
+            services.AddScoped<IPaymentGatewayService, SSLCommerzGateway>();
+            services.AddScoped<IPaymentGatewayService, BkashGateway>();
+            services.AddScoped<IPaymentGatewayService, NagadGateway>();
+            services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
             
             return services;
         }

@@ -13,6 +13,7 @@ namespace GHCAA.Tests
         [SetUp]
         public void BaseSetup()
         {
+            ApplicationDbContext.IsSeedDisabled = true;
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 

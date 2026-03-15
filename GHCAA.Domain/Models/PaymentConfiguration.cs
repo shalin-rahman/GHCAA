@@ -54,6 +54,8 @@ namespace GHCAA.Domain.Models
         [MaxLength(500)]
         public string? GatewayCallbackUrl { get; set; }
 
+        public bool IsSandbox { get; set; } = true;
+
         // UI ordering
         public int SortOrder { get; set; } = 0;
 

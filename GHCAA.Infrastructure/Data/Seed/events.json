@@ -1,0 +1,58 @@
+[
+  {
+    "Id": 2,
+    "Title": "Iftar 2026",
+    "Description": "Iftar 2026",
+    "Date": "2026-03-14T07:21:00Z",
+    "Location": "Darbar Party Center",
+    "RegistrationFee": 0,
+    "IsActive": true,
+    "ImageUrl": null,
+    "CreatedAt": "2026-03-13T07:22:03.166572Z",
+    "AdminNote": null,
+    "RegistrationDeadline": "2026-03-08T07:21:00Z",
+    "AllowNonMembers": true
+  },
+  {
+    "Id": 3,
+    "Title": "Annual Tour",
+    "Description": "Recreational ",
+    "Date": "2026-06-30T01:38:00Z",
+    "Location": "Savar",
+    "RegistrationFee": 2000,
+    "IsActive": true,
+    "ImageUrl": null,
+    "CreatedAt": "2026-03-13T08:38:59.79431Z",
+    "AdminNote": null,
+    "RegistrationDeadline": "2026-05-31T08:38:00Z",
+    "AllowNonMembers": false
+  },
+  {
+    "Id": 4,
+    "Title": "Flood fund collection",
+    "Description": "FF",
+    "Date": "2026-04-28T09:40:00Z",
+    "Location": "BD",
+    "RegistrationFee": 0,
+    "IsActive": true,
+    "ImageUrl": null,
+    "CreatedAt": "2026-03-13T09:41:12.013108Z",
+    "AdminNote": null,
+    "RegistrationDeadline": "2026-03-31T09:40:00Z",
+    "AllowNonMembers": true
+  },
+  {
+    "Id": 1,
+    "Title": "Grand Reunion",
+    "Description": "...",
+    "Date": "2026-05-15T09:00:00Z",
+    "Location": "College Ground",
+    "RegistrationFee": 1500.0,
+    "IsActive": true,
+    "ImageUrl": "...",
+    "CreatedAt": "2026-03-01T00:00:00Z",
+    "AdminNote": null,
+    "RegistrationDeadline": "2026-04-30T23:59:59Z",
+    "AllowNonMembers": false
+  }
+]

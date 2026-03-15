@@ -113,6 +113,7 @@ namespace GHCAA.API.Controllers
                     existing.GatewaySecretKey = config.GatewaySecretKey;
                 
                 existing.GatewayCallbackUrl = config.GatewayCallbackUrl;
+                existing.IsSandbox = config.IsSandbox;
             }
 
             existing.SortOrder = config.SortOrder;

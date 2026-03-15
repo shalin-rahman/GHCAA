@@ -9,6 +9,7 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace GHCAA.Infrastructure.Services
@@ -25,6 +26,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly ILogger<MemberService> _logger;
         private readonly IActivityService _activityService;
         private readonly INotificationService _notificationService;
+        private readonly IConfiguration _config;
 
         public MemberService(
             ApplicationDbContext db,
@@ -36,7 +38,8 @@ namespace GHCAA.Infrastructure.Services
             ICommunicationService communicationService,
             ILogger<MemberService> logger,
             IActivityService activityService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IConfiguration config)
         {
             _db = db;
             _storage = storage;
@@ -48,6 +51,7 @@ namespace GHCAA.Infrastructure.Services
             _logger = logger;
             _activityService = activityService;
             _notificationService = notificationService;
+            _config = config;
         }
 
         public async Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default)
@@ -948,11 +952,12 @@ namespace GHCAA.Infrastructure.Services
 
             // Log activity
             await _activityService.LogActivityAsync(memberId, "Password Reset", "Admin initiated password reset email.", cancellationToken: cancellationToken);
-
-            var resetUrl = $"http://localhost:4200/reset-password?email={member.Email}&token={token}";
+ 
+            var clientUrl = _config[Constants.ConfigKeys.ClientUrl] ?? "http://localhost:4200";
+            var resetUrl = $"{clientUrl}/reset-password?email={member.Email}&token={token}";
             
             // Try fetching PASSWORD_RESET template from DB first (database-first strategy)
-            var dbTemplate = await _communicationService.GetTemplateByCodeAsync("PASSWORD_RESET", cancellationToken);
+            var dbTemplate = await _communicationService.GetTemplateByCodeAsync(Constants.TemplateCodes.PasswordReset, cancellationToken);
 
             string subject, body;
             if (dbTemplate != null)
@@ -967,12 +972,12 @@ namespace GHCAA.Infrastructure.Services
             else
             {
                 // Fallback to hardcoded HTML
-                subject = "GHCAA Account Password Reset";
+                subject = Constants.EmailSubjects.PasswordReset;
                 body = $@"
                 <div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;'>
                     <h2 style='color: #c5a059;'>Password Reset Initiated</h2>
                     <p>Hello <strong>{member.FullName}</strong>,</p>
-                    <p>An administrator has initiated a password reset for your GHCAA account.</p>
+                    <p>An administrator has initiated a password reset for your {Constants.Branding.AppName} account.</p>
                     <p>Please click the button below to set a new password. This link is valid for 24 hours.</p>
                     <div style='text-align: center; margin: 30px 0;'>
                         <a href='{resetUrl}' style='background: #111; color: #c5a059; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; border: 1px solid #c5a059;'>Reset My Password</a>

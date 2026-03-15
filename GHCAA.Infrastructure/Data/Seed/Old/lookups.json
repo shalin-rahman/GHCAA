@@ -1,0 +1,618 @@
+[
+  {
+    "Id": 1,
+    "Category": "Degree",
+    "Value": "HSC",
+    "Label": "HSC",
+    "DisplayOrder": 2
+  },
+  {
+    "Id": 2,
+    "Category": "Degree",
+    "Value": "Bachelor (Pass)",
+    "Label": "Bachelor (Pass)",
+    "DisplayOrder": 3
+  },
+  {
+    "Id": 3,
+    "Category": "Degree",
+    "Value": "Bachelor (Honours)",
+    "Label": "Bachelor (Honours)",
+    "DisplayOrder": 4
+  },
+  {
+    "Id": 4,
+    "Category": "Degree",
+    "Value": "Masters",
+    "Label": "Masters",
+    "DisplayOrder": 5
+  },
+  {
+    "Id": 5,
+    "Category": "Degree",
+    "Value": "PGD",
+    "Label": "PGD",
+    "DisplayOrder": 6
+  },
+  {
+    "Id": 6,
+    "Category": "Degree",
+    "Value": "PhD",
+    "Label": "PhD",
+    "DisplayOrder": 7
+  },
+  {
+    "Id": 7,
+    "Category": "Degree",
+    "Value": "Medicine",
+    "Label": "Medicine",
+    "DisplayOrder": 8
+  },
+  {
+    "Id": 8,
+    "Category": "Degree",
+    "Value": "Engineering",
+    "Label": "Engineering",
+    "DisplayOrder": 9
+  },
+  {
+    "Id": 9,
+    "Category": "Degree",
+    "Value": "Law",
+    "Label": "Law",
+    "DisplayOrder": 10
+  },
+  {
+    "Id": 10,
+    "Category": "AcademicGroup",
+    "Value": "Science",
+    "Label": "Science",
+    "DisplayOrder": 11
+  },
+  {
+    "Id": 11,
+    "Category": "AcademicGroup",
+    "Value": "Arts \u0026 Humanities",
+    "Label": "Arts \u0026 Humanities",
+    "DisplayOrder": 12
+  },
+  {
+    "Id": 12,
+    "Category": "AcademicGroup",
+    "Value": "Business Studies",
+    "Label": "Business Studies",
+    "DisplayOrder": 13
+  },
+  {
+    "Id": 13,
+    "Category": "AcademicSubject",
+    "Value": "None",
+    "Label": "None",
+    "DisplayOrder": 14
+  },
+  {
+    "Id": 14,
+    "Category": "AcademicSubject",
+    "Value": "Bengali",
+    "Label": "Bengali",
+    "DisplayOrder": 15
+  },
+  {
+    "Id": 15,
+    "Category": "AcademicSubject",
+    "Value": "English",
+    "Label": "English",
+    "DisplayOrder": 16
+  },
+  {
+    "Id": 16,
+    "Category": "AcademicSubject",
+    "Value": "History",
+    "Label": "History",
+    "DisplayOrder": 17
+  },
+  {
+    "Id": 17,
+    "Category": "AcademicSubject",
+    "Value": "Islamic History \u0026 Culture",
+    "Label": "Islamic History \u0026 Culture",
+    "DisplayOrder": 18
+  },
+  {
+    "Id": 18,
+    "Category": "AcademicSubject",
+    "Value": "Philosophy",
+    "Label": "Philosophy",
+    "DisplayOrder": 19
+  },
+  {
+    "Id": 19,
+    "Category": "AcademicSubject",
+    "Value": "Islamic Studies",
+    "Label": "Islamic Studies",
+    "DisplayOrder": 20
+  },
+  {
+    "Id": 20,
+    "Category": "AcademicSubject",
+    "Value": "Library Science",
+    "Label": "Library Science",
+    "DisplayOrder": 21
+  },
+  {
+    "Id": 21,
+    "Category": "AcademicSubject",
+    "Value": "Economics",
+    "Label": "Economics",
+    "DisplayOrder": 22
+  },
+  {
+    "Id": 22,
+    "Category": "AcademicSubject",
+    "Value": "Political Science",
+    "Label": "Political Science",
+    "DisplayOrder": 23
+  },
+  {
+    "Id": 23,
+    "Category": "AcademicSubject",
+    "Value": "Sociology",
+    "Label": "Sociology",
+    "DisplayOrder": 24
+  },
+  {
+    "Id": 24,
+    "Category": "AcademicSubject",
+    "Value": "Social Work",
+    "Label": "Social Work",
+    "DisplayOrder": 25
+  },
+  {
+    "Id": 25,
+    "Category": "AcademicSubject",
+    "Value": "Anthropology",
+    "Label": "Anthropology",
+    "DisplayOrder": 26
+  },
+  {
+    "Id": 26,
+    "Category": "AcademicSubject",
+    "Value": "Public Administration",
+    "Label": "Public Administration",
+    "DisplayOrder": 27
+  },
+  {
+    "Id": 27,
+    "Category": "AcademicSubject",
+    "Value": "Physics",
+    "Label": "Physics",
+    "DisplayOrder": 28
+  },
+  {
+    "Id": 28,
+    "Category": "AcademicSubject",
+    "Value": "Chemistry",
+    "Label": "Chemistry",
+    "DisplayOrder": 29
+  },
+  {
+    "Id": 29,
+    "Category": "AcademicSubject",
+    "Value": "Mathematics",
+    "Label": "Mathematics",
+    "DisplayOrder": 30
+  },
+  {
+    "Id": 30,
+    "Category": "AcademicSubject",
+    "Value": "Statistics",
+    "Label": "Statistics",
+    "DisplayOrder": 31
+  },
+  {
+    "Id": 31,
+    "Category": "AcademicSubject",
+    "Value": "Botany",
+    "Label": "Botany",
+    "DisplayOrder": 32
+  },
+  {
+    "Id": 32,
+    "Category": "AcademicSubject",
+    "Value": "Zoology",
+    "Label": "Zoology",
+    "DisplayOrder": 33
+  },
+  {
+    "Id": 33,
+    "Category": "AcademicSubject",
+    "Value": "Geography \u0026 Environment",
+    "Label": "Geography \u0026 Environment",
+    "DisplayOrder": 34
+  },
+  {
+    "Id": 34,
+    "Category": "AcademicSubject",
+    "Value": "Psychology",
+    "Label": "Psychology",
+    "DisplayOrder": 35
+  },
+  {
+    "Id": 35,
+    "Category": "AcademicSubject",
+    "Value": "Soil Science",
+    "Label": "Soil Science",
+    "DisplayOrder": 36
+  },
+  {
+    "Id": 36,
+    "Category": "AcademicSubject",
+    "Value": "Accounting",
+    "Label": "Accounting",
+    "DisplayOrder": 37
+  },
+  {
+    "Id": 37,
+    "Category": "AcademicSubject",
+    "Value": "Management",
+    "Label": "Management",
+    "DisplayOrder": 38
+  },
+  {
+    "Id": 38,
+    "Category": "AcademicSubject",
+    "Value": "Marketing",
+    "Label": "Marketing",
+    "DisplayOrder": 39
+  },
+  {
+    "Id": 39,
+    "Category": "AcademicSubject",
+    "Value": "Finance \u0026 Banking",
+    "Label": "Finance \u0026 Banking",
+    "DisplayOrder": 40
+  },
+  {
+    "Id": 40,
+    "Category": "AcademicSubject",
+    "Value": "Fine Arts",
+    "Label": "Fine Arts",
+    "DisplayOrder": 41
+  },
+  {
+    "Id": 41,
+    "Category": "AcademicSubject",
+    "Value": "Physical Education",
+    "Label": "Physical Education",
+    "DisplayOrder": 42
+  },
+  {
+    "Id": 42,
+    "Category": "AcademicSubject",
+    "Value": "Business Administration",
+    "Label": "Business Administration",
+    "DisplayOrder": 43
+  },
+  {
+    "Id": 43,
+    "Category": "AcademicSubject",
+    "Value": "Computer",
+    "Label": "Computer",
+    "DisplayOrder": 44
+  },
+  {
+    "Id": 44,
+    "Category": "AcademicSubject",
+    "Value": "Civil",
+    "Label": "Civil",
+    "DisplayOrder": 45
+  },
+  {
+    "Id": 45,
+    "Category": "AcademicSubject",
+    "Value": "Mechanical",
+    "Label": "Mechanical",
+    "DisplayOrder": 46
+  },
+  {
+    "Id": 46,
+    "Category": "AcademicSubject",
+    "Value": "Electrical",
+    "Label": "Electrical",
+    "DisplayOrder": 47
+  },
+  {
+    "Id": 47,
+    "Category": "AcademicSubject",
+    "Value": "Medical",
+    "Label": "Medical",
+    "DisplayOrder": 48
+  },
+  {
+    "Id": 48,
+    "Category": "AcademicSubject",
+    "Value": "Dentestry",
+    "Label": "Dentestry",
+    "DisplayOrder": 49
+  },
+  {
+    "Id": 49,
+    "Category": "AcademicSubject",
+    "Value": "Engineering",
+    "Label": "Engineering",
+    "DisplayOrder": 50
+  },
+  {
+    "Id": 50,
+    "Category": "AcademicSubject",
+    "Value": "Law",
+    "Label": "Law",
+    "DisplayOrder": 51
+  },
+  {
+    "Id": 51,
+    "Category": "AcademicSubject",
+    "Value": "Pharma",
+    "Label": "Pharma",
+    "DisplayOrder": 52
+  },
+  {
+    "Id": 52,
+    "Category": "AcademicSubject",
+    "Value": "Agriculture",
+    "Label": "Agriculture",
+    "DisplayOrder": 53
+  },
+  {
+    "Id": 53,
+    "Category": "AcademicSubject",
+    "Value": "Textile",
+    "Label": "Textile",
+    "DisplayOrder": 54
+  },
+  {
+    "Id": 54,
+    "Category": "AcademicSubject",
+    "Value": "Lather",
+    "Label": "Lather",
+    "DisplayOrder": 55
+  },
+  {
+    "Id": 55,
+    "Category": "AcademicSubject",
+    "Value": "Education",
+    "Label": "Education",
+    "DisplayOrder": 56
+  },
+  {
+    "Id": 56,
+    "Category": "ProfessionalSector",
+    "Value": "Ready-made Garments (RMG)",
+    "Label": "Ready-made Garments (RMG)",
+    "DisplayOrder": 57
+  },
+  {
+    "Id": 57,
+    "Category": "ProfessionalSector",
+    "Value": "Textiles \u0026 Spinning",
+    "Label": "Textiles \u0026 Spinning",
+    "DisplayOrder": 58
+  },
+  {
+    "Id": 58,
+    "Category": "ProfessionalSector",
+    "Value": "Pharmaceuticals",
+    "Label": "Pharmaceuticals",
+    "DisplayOrder": 59
+  },
+  {
+    "Id": 59,
+    "Category": "ProfessionalSector",
+    "Value": "Banking \u0026 Financial Services",
+    "Label": "Banking \u0026 Financial Services",
+    "DisplayOrder": 60
+  },
+  {
+    "Id": 60,
+    "Category": "ProfessionalSector",
+    "Value": "Information Technology (IT) \u0026 Software",
+    "Label": "Information Technology (IT) \u0026 Software",
+    "DisplayOrder": 61
+  },
+  {
+    "Id": 61,
+    "Category": "ProfessionalSector",
+    "Value": "Telecommunications",
+    "Label": "Telecommunications",
+    "DisplayOrder": 62
+  },
+  {
+    "Id": 62,
+    "Category": "ProfessionalSector",
+    "Value": "Agriculture \u0026 Crop Production",
+    "Label": "Agriculture \u0026 Crop Production",
+    "DisplayOrder": 63
+  },
+  {
+    "Id": 63,
+    "Category": "ProfessionalSector",
+    "Value": "Fisheries \u0026 Aquaculture",
+    "Label": "Fisheries \u0026 Aquaculture",
+    "DisplayOrder": 64
+  },
+  {
+    "Id": 64,
+    "Category": "ProfessionalSector",
+    "Value": "Livestock \u0026 Poultry",
+    "Label": "Livestock \u0026 Poultry",
+    "DisplayOrder": 65
+  },
+  {
+    "Id": 65,
+    "Category": "ProfessionalSector",
+    "Value": "Agro-processing \u0026 Food Production",
+    "Label": "Agro-processing \u0026 Food Production",
+    "DisplayOrder": 66
+  },
+  {
+    "Id": 66,
+    "Category": "ProfessionalSector",
+    "Value": "Leather \u0026 Footwear",
+    "Label": "Leather \u0026 Footwear",
+    "DisplayOrder": 67
+  },
+  {
+    "Id": 67,
+    "Category": "ProfessionalSector",
+    "Value": "Jute \u0026 Jute Goods",
+    "Label": "Jute \u0026 Jute Goods",
+    "DisplayOrder": 68
+  },
+  {
+    "Id": 68,
+    "Category": "ProfessionalSector",
+    "Value": "Light Engineering",
+    "Label": "Light Engineering",
+    "DisplayOrder": 69
+  },
+  {
+    "Id": 69,
+    "Category": "ProfessionalSector",
+    "Value": "Electronics \u0026 Electrical Appliances",
+    "Label": "Electronics \u0026 Electrical Appliances",
+    "DisplayOrder": 70
+  },
+  {
+    "Id": 70,
+    "Category": "ProfessionalSector",
+    "Value": "Real Estate \u0026 Housing",
+    "Label": "Real Estate \u0026 Housing",
+    "DisplayOrder": 71
+  },
+  {
+    "Id": 71,
+    "Category": "ProfessionalSector",
+    "Value": "Construction \u0026 Infrastructure",
+    "Label": "Construction \u0026 Infrastructure",
+    "DisplayOrder": 72
+  },
+  {
+    "Id": 72,
+    "Category": "ProfessionalSector",
+    "Value": "Healthcare \u0026 Medical Services",
+    "Label": "Healthcare \u0026 Medical Services",
+    "DisplayOrder": 73
+  },
+  {
+    "Id": 73,
+    "Category": "ProfessionalSector",
+    "Value": "Education \u0026 Research",
+    "Label": "Education \u0026 Research",
+    "DisplayOrder": 74
+  },
+  {
+    "Id": 74,
+    "Category": "ProfessionalSector",
+    "Value": "Tourism \u0026 Hospitality",
+    "Label": "Tourism \u0026 Hospitality",
+    "DisplayOrder": 75
+  },
+  {
+    "Id": 75,
+    "Category": "ProfessionalSector",
+    "Value": "Power, Energy \u0026 Mineral Resources",
+    "Label": "Power, Energy \u0026 Mineral Resources",
+    "DisplayOrder": 76
+  },
+  {
+    "Id": 76,
+    "Category": "ProfessionalSector",
+    "Value": "Steel \u0026 Re-rolling",
+    "Label": "Steel \u0026 Re-rolling",
+    "DisplayOrder": 77
+  },
+  {
+    "Id": 77,
+    "Category": "ProfessionalSector",
+    "Value": "Cement",
+    "Label": "Cement",
+    "DisplayOrder": 78
+  },
+  {
+    "Id": 78,
+    "Category": "ProfessionalSector",
+    "Value": "Ceramics",
+    "Label": "Ceramics",
+    "DisplayOrder": 79
+  },
+  {
+    "Id": 79,
+    "Category": "ProfessionalSector",
+    "Value": "Chemicals \u0026 Fertilizers",
+    "Label": "Chemicals \u0026 Fertilizers",
+    "DisplayOrder": 80
+  },
+  {
+    "Id": 80,
+    "Category": "ProfessionalSector",
+    "Value": "Shipbuilding",
+    "Label": "Shipbuilding",
+    "DisplayOrder": 81
+  },
+  {
+    "Id": 81,
+    "Category": "ProfessionalSector",
+    "Value": "Transportation \u0026 Logistics",
+    "Label": "Transportation \u0026 Logistics",
+    "DisplayOrder": 82
+  },
+  {
+    "Id": 82,
+    "Category": "ProfessionalSector",
+    "Value": "Fast-Moving Consumer Goods (FMCG)",
+    "Label": "Fast-Moving Consumer Goods (FMCG)",
+    "DisplayOrder": 83
+  },
+  {
+    "Id": 83,
+    "Category": "ProfessionalSector",
+    "Value": "Paper \u0026 Printing",
+    "Label": "Paper \u0026 Printing",
+    "DisplayOrder": 84
+  },
+  {
+    "Id": 84,
+    "Category": "ProfessionalSector",
+    "Value": "Plastic \u0026 Rubber Products",
+    "Label": "Plastic \u0026 Rubber Products",
+    "DisplayOrder": 85
+  },
+  {
+    "Id": 85,
+    "Category": "ProfessionalSector",
+    "Value": "Insurance",
+    "Label": "Insurance",
+    "DisplayOrder": 86
+  },
+  {
+    "Id": 86,
+    "Category": "ProfessionalSector",
+    "Value": "Advertising \u0026 Media",
+    "Label": "Advertising \u0026 Media",
+    "DisplayOrder": 87
+  },
+  {
+    "Id": 87,
+    "Category": "ProfessionalSector",
+    "Value": "Legal \u0026 Consultancy Services",
+    "Label": "Legal \u0026 Consultancy Services",
+    "DisplayOrder": 88
+  },
+  {
+    "Id": 88,
+    "Category": "ProfessionalSector",
+    "Value": "Public Administration \u0026 Defense",
+    "Label": "Public Administration \u0026 Defense",
+    "DisplayOrder": 89
+  }
+]

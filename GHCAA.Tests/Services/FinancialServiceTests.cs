@@ -18,11 +18,17 @@ public class FinancialServiceTests : TestBase
     private Mock<INotificationService> _notificationMock = null!;
 
     [SetUp]
-    public void Setup()
+    public async Task Setup()
     {
         _communicationMock = new Mock<ICommunicationService>();
         _notificationMock = new Mock<INotificationService>();
         _service = new FinancialService(_context, _communicationMock.Object, _notificationMock.Object);
+
+        if (!await _context.MembershipFeeConfigs.AnyAsync())
+        {
+            _context.MembershipFeeConfigs.Add(new MembershipFeeConfig { MembershipType = Enums.MembershipType.General, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1), Description = "Base Fee" });
+            await _context.SaveChangesAsync();
+        }
     }
 
     [Test]

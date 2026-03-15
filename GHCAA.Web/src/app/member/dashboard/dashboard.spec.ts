@@ -1,34 +1,53 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Dashboard } from './dashboard';
 import { ProfileService } from '../../core/services/profile.service';
-import { NewsService } from '../../core/services/news.service';
+import { JobService } from '../../core/services/job.service';
 import { EventsService } from '../../core/services/events.service';
+import { NetworkingService } from '../../core/services/networking.service';
+import { AlertService } from '../../core/services/alert.service';
+import { AuthService } from '../../core/services/auth.service';
 import { of } from 'rxjs';
 
 describe('Dashboard Component', () => {
     let component: Dashboard;
     let fixture: ComponentFixture<Dashboard>;
     let profileServiceMock: any;
-    let newsServiceMock: any;
+    let jobServiceMock: any;
     let eventsServiceMock: any;
+    let networkingServiceMock: any;
+    let alertServiceMock: any;
+    let authServiceMock: any;
 
     beforeEach(async () => {
         profileServiceMock = {
             getProfile: vi.fn().mockReturnValue(of({ fullName: 'Test' }))
         };
-        newsServiceMock = {
-            getLatestNews: vi.fn().mockReturnValue(of([]))
+        jobServiceMock = {
+            getJobs: vi.fn().mockReturnValue(of([]))
         };
         eventsServiceMock = {
+            getEvents: vi.fn().mockReturnValue(of([])),
             getUpcomingEvents: vi.fn().mockReturnValue(of([]))
+        };
+        networkingServiceMock = {
+            getRecentlyJoined: vi.fn().mockReturnValue(of([]))
+        };
+        alertServiceMock = {
+            loadNotifications: vi.fn()
+        };
+        authServiceMock = {
+            logout: vi.fn()
         };
 
         await TestBed.configureTestingModule({
             imports: [Dashboard],
             providers: [
                 { provide: ProfileService, useValue: profileServiceMock },
-                { provide: NewsService, useValue: newsServiceMock },
-                { provide: EventsService, useValue: eventsServiceMock }
+                { provide: JobService, useValue: jobServiceMock },
+                { provide: EventsService, useValue: eventsServiceMock },
+                { provide: NetworkingService, useValue: networkingServiceMock },
+                { provide: AlertService, useValue: alertServiceMock },
+                { provide: AuthService, useValue: authServiceMock }
             ]
         }).compileComponents();
 
@@ -43,7 +62,8 @@ describe('Dashboard Component', () => {
 
     it('should load overview data on init', () => {
         expect(profileServiceMock.getProfile).toHaveBeenCalled();
-        expect(newsServiceMock.getLatestNews).toHaveBeenCalled();
-        expect(eventsServiceMock.getUpcomingEvents).toHaveBeenCalled();
+        expect(jobServiceMock.getJobs).toHaveBeenCalled();
+        expect(eventsServiceMock.getEvents).toHaveBeenCalled();
+        expect(networkingServiceMock.getRecentlyJoined).toHaveBeenCalled();
     });
 });

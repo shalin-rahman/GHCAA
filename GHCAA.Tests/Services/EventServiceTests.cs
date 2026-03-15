@@ -42,11 +42,13 @@ public class EventServiceTests : TestBase
     [Test]
     public async Task RegisterForEventAsync_ShouldCreateRegistration()
     {
+        var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", FatherName = "F", MotherName = "M", MobileNo = "12", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
         var ev = new AlumniEvent { Title = "Event 1", Description = "D", Date = DateTime.UtcNow, Location = "L" };
+        _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
-        var result = await _service.RegisterForEventAsync(new RegisterForEventDto { EventId = ev.Id, PaymentReference = "REF123" }, 1, null);
+        var result = await _service.RegisterForEventAsync(new RegisterForEventDto { EventId = ev.Id, PaymentReference = "REF123" }, member.Id, null);
 
         result.Should().NotBeNull();
         result.EventId.Should().Be(ev.Id);
@@ -85,14 +87,16 @@ public class EventServiceTests : TestBase
     [Test]
     public async Task RegisterForEventAsync_ShouldIncludeReceiptPath_WhenFileProvided()
     {
+        var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", FatherName = "F", MotherName = "M", MobileNo = "123", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
         var ev = new AlumniEvent { Title = "E", Description = "D", Date = DateTime.UtcNow, Location = "L" };
+        _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
         var receiptDto = new UploadedFileDto { FileName = "r.jpg", Content = new MemoryStream() };
         _fileStorageMock.Setup(f => f.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<FileUploadType>(), It.IsAny<CancellationToken>())).ReturnsAsync("/uploads/r.jpg");
 
-        var result = await _service.RegisterForEventAsync(new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P" }, 1, receiptDto);
+        var result = await _service.RegisterForEventAsync(new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P" }, member.Id, receiptDto);
 
         result.ReceiptPath.Should().Be("/uploads/r.jpg");
     }

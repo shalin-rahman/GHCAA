@@ -6,6 +6,7 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -22,6 +23,7 @@ public class MemberServiceTests : TestBase
     private Mock<ILogger<MemberService>> _mockLogger = null!;
     private Mock<IActivityService> _mockActivityService = null!;
     private Mock<INotificationService> _mockNotificationService = null!;
+    private Mock<IConfiguration> _mockConfig = null!;
     private MemberService _service = null!;
 
     private Mock<ICommunicationService> _mockCommunication = null!;
@@ -38,6 +40,7 @@ public class MemberServiceTests : TestBase
         _mockActivityService = new Mock<IActivityService>();
         _mockCommunication = new Mock<ICommunicationService>();
         _mockNotificationService = new Mock<INotificationService>();
+        _mockConfig = new Mock<IConfiguration>();
 
         _service = new MemberService(
             _context,
@@ -49,7 +52,8 @@ public class MemberServiceTests : TestBase
             _mockCommunication.Object,
             _mockLogger.Object,
             _mockActivityService.Object,
-            _mockNotificationService.Object
+            _mockNotificationService.Object,
+            _mockConfig.Object
         );
     }
 

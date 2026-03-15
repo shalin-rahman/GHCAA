@@ -4,15 +4,19 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { of } from 'rxjs';
 
+import { ActivatedRoute, Router } from '@angular/router';
+
 describe('AdminMembers Component', () => {
     let component: AdminMembers;
     let fixture: ComponentFixture<AdminMembers>;
     let adminServiceMock: any;
     let notificationServiceMock: any;
+    let routerMock: any;
+    let activatedRouteMock: any;
 
     beforeEach(async () => {
         adminServiceMock = {
-            getMembersAdmin: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0 })),
+            getMembers: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0 })),
             exportMembers: vi.fn().mockReturnValue(of(new Blob()))
         };
 
@@ -21,11 +25,20 @@ describe('AdminMembers Component', () => {
             error: vi.fn()
         };
 
+        routerMock = {
+            navigate: vi.fn()
+        };
+        activatedRouteMock = {
+            snapshot: {}
+        };
+
         await TestBed.configureTestingModule({
             imports: [AdminMembers],
             providers: [
                 { provide: AdminService, useValue: adminServiceMock },
-                { provide: NotificationService, useValue: notificationServiceMock }
+                { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: Router, useValue: routerMock },
+                { provide: ActivatedRoute, useValue: activatedRouteMock }
             ]
         }).compileComponents();
 
@@ -39,6 +52,6 @@ describe('AdminMembers Component', () => {
     });
 
     it('should load members on init', () => {
-        expect(adminServiceMock.getMembersAdmin).toHaveBeenCalled();
+        expect(adminServiceMock.getMembers).toHaveBeenCalled();
     });
 });

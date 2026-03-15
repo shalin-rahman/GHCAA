@@ -8,6 +8,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -43,6 +44,8 @@ namespace GHCAA.Tests.Workflows
 
             var loggerMock = new Mock<ILogger<MemberService>>();
 
+            var configMock = new Mock<IConfiguration>();
+
             _memberService = new MemberService(
                 _context, 
                 _storageMock.Object,
@@ -53,7 +56,8 @@ namespace GHCAA.Tests.Workflows
                 _commMock.Object, 
                 loggerMock.Object,
                 _activityMock.Object,
-                _notificationMock.Object);
+                _notificationMock.Object,
+                configMock.Object);
 
             _eventService = new EventService(_context, _commMock.Object, _storageMock.Object);
             _financialService = new FinancialService(_context, _commMock.Object, _notificationMock.Object);

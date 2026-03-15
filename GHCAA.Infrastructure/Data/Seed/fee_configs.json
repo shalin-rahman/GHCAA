@@ -1,0 +1,29 @@
+[
+  {
+    "Id": 1,
+    "MembershipType": 3,
+    "Amount": 5000.0,
+    "EffectiveDate": "2023-01-01T00:00:00Z",
+    "Description": "Founding",
+    "CreatedAt": "2024-01-01T00:00:00Z",
+    "CreatedByAdminId": null
+  },
+  {
+    "Id": 2,
+    "MembershipType": 4,
+    "Amount": 2000.0,
+    "EffectiveDate": "2023-01-01T00:00:00Z",
+    "Description": "Executive",
+    "CreatedAt": "2024-01-01T00:00:00Z",
+    "CreatedByAdminId": null
+  },
+  {
+    "Id": 3,
+    "MembershipType": 2,
+    "Amount": 1000.0,
+    "EffectiveDate": "2023-01-01T00:00:00Z",
+    "Description": "General",
+    "CreatedAt": "2024-01-01T00:00:00Z",
+    "CreatedByAdminId": null
+  }
+]

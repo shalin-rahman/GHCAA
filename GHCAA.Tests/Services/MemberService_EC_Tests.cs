@@ -6,6 +6,7 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -35,8 +36,15 @@ namespace GHCAA.Tests.Services
             var logger = new Mock<ILogger<MemberService>>();
             var activity = new Mock<IActivityService>();
             var notify = new Mock<INotificationService>();
+            var config = new Mock<IConfiguration>();
 
-            _service = new MemberService(_context, storage.Object, fileRepo.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object);
+            _service = new MemberService(_context, storage.Object, fileRepo.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object);
+        
+            if (!_context.ECPeriods.Any())
+            {
+                _context.ECPeriods.Add(new ECPeriod { Title = "Test Period", StartDate = DateTime.UtcNow, IsActive = true });
+                _context.SaveChanges();
+            }
         }
 
         [Test]

@@ -5,6 +5,52 @@ namespace GHCAA.Infrastructure.Data
 {
     public class ApplicationDbContext : DbContext
     {
+        public static bool IsSeedDisabled { get; set; }
+
+        private static string GetSeedPath(string fileName) 
+            => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Seed", fileName);
+
+        private List<T> LoadSeed<T>(string fileName)
+        {
+            // 1. Try local publish/output directory
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Seed", fileName);
+            
+            // 2. Fallback to solution-relative path (for dev/migrations)
+            if (!File.Exists(path))
+            {
+                var current = Directory.GetCurrentDirectory();
+                path = Path.Combine(current, "GHCAA.Infrastructure", "Data", "Seed", fileName);
+                
+                // 3. Fallback if running from within Infrastructure project
+                if (!File.Exists(path))
+                    path = Path.Combine(current, "Data", "Seed", fileName);
+            }
+
+            if (!File.Exists(path)) return new List<T>();
+            
+            var json = File.ReadAllText(path);
+            var items = System.Text.Json.JsonSerializer.Deserialize<List<T>>(json) ?? new List<T>();
+
+            // Strip collections to avoid EF Core HasData navigation errors
+            var collectionProps = typeof(T).GetProperties()
+                .Where(p => p.PropertyType != typeof(string) && 
+                            typeof(System.Collections.IEnumerable).IsAssignableFrom(p.PropertyType))
+                .ToList();
+
+            if (collectionProps.Any())
+            {
+                foreach (var item in items)
+                {
+                    foreach (var prop in collectionProps)
+                    {
+                        if (prop.CanWrite) prop.SetValue(item, null);
+                    }
+                }
+            }
+
+            return items;
+        }
+
         public ApplicationDbContext(DbContextOptions options)
             : base(options) { }
 
@@ -82,61 +128,16 @@ namespace GHCAA.Infrastructure.Data
             modelBuilder.Entity<EmailTemplate>()
                 .HasIndex(t => t.Code).IsUnique();
 
-            // Seed Lookups
-            int lookId = 1;
-            var lookupItems = new List<LookupItem>();
+            // Seed Lookups from JSON
+            if (IsSeedDisabled) return;
 
-            // Degrees
-            foreach (var d in new[] { "HSC", "Bachelor (Pass)", "Bachelor (Honours)", "Masters", "PGD", "PhD", "Medicine", "Engineering", "Law" })
-                lookupItems.Add(new LookupItem { Id = lookId++, Category = "Degree", Value = d, Label = d, DisplayOrder = lookId });
-
-            // Groups
-            foreach (var g in new[] { "Science", "Arts & Humanities", "Business Studies" })
-                lookupItems.Add(new LookupItem { Id = lookId++, Category = "AcademicGroup", Value = g, Label = g, DisplayOrder = lookId });
-
-            // Subjects
-            foreach (var s in new[] { "None", "Bengali", "English", "History", "Islamic History & Culture", "Philosophy", "Islamic Studies", "Library Science", "Economics", "Political Science", "Sociology", "Social Work", "Anthropology", "Public Administration", "Physics", "Chemistry", "Mathematics", "Statistics", "Botany", "Zoology", "Geography & Environment", "Psychology", "Soil Science", "Accounting", "Management", "Marketing", "Finance & Banking", "Fine Arts", "Physical Education", "Business Administration", "Computer", "Civil", "Mechanical", "Electrical", "Medical", "Dentestry", "Engineering", "Law", "Pharma", "Agriculture", "Textile", "Lather", "Education" })
-                lookupItems.Add(new LookupItem { Id = lookId++, Category = "AcademicSubject", Value = s, Label = s, DisplayOrder = lookId });
-
-            // Professional Sectors
-            foreach (var ps in new[] { "Ready-made Garments (RMG)", "Textiles & Spinning", "Pharmaceuticals", "Banking & Financial Services", "Information Technology (IT) & Software", "Telecommunications", "Agriculture & Crop Production", "Fisheries & Aquaculture", "Livestock & Poultry", "Agro-processing & Food Production", "Leather & Footwear", "Jute & Jute Goods", "Light Engineering", "Electronics & Electrical Appliances", "Real Estate & Housing", "Construction & Infrastructure", "Healthcare & Medical Services", "Education & Research", "Tourism & Hospitality", "Power, Energy & Mineral Resources", "Steel & Re-rolling", "Cement", "Ceramics", "Chemicals & Fertilizers", "Shipbuilding", "Transportation & Logistics", "Fast-Moving Consumer Goods (FMCG)", "Paper & Printing", "Plastic & Rubber Products", "Insurance", "Advertising & Media", "Legal & Consultancy Services", "Public Administration & Defense" })
-                lookupItems.Add(new LookupItem { Id = lookId++, Category = "ProfessionalSector", Value = ps, Label = ps, DisplayOrder = lookId });
-
-            modelBuilder.Entity<LookupItem>().HasData(lookupItems);
+            var lookupItems = LoadSeed<LookupItem>("lookups.json");
+            if (lookupItems.Any()) modelBuilder.Entity<LookupItem>().HasData(lookupItems);
 
             // Seed Email Templates
-            modelBuilder.Entity<EmailTemplate>().HasData(
-                new EmailTemplate 
-                { 
-                    Id = 1, 
-                    Code = "OTP_EMAIL", 
-                    Subject = "GHCAA Verification Code: {{OtpCode}}", 
-                    Description = "Security code for login/registration",
-                    Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Verification Code</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>Your security code is:</p><div style='font-size: 24px; font-weight: bold; background: #f8f9fa; padding: 15px; text-align: center; border-radius: 5px; color: #3498db;'>{{OtpCode}}</div><p>Valid for 10 minutes. Do not share this code.</p></div>",
-                    Variables = "['FullName', 'OtpCode']",
-                    LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                },
-                new EmailTemplate 
-                { 
-                    Id = 2, 
-                    Code = "WELCOME_EMAIL", 
-                    Subject = "Welcome to GHC Alumni Association!", 
-                    Description = "Official induction message",
-                    Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Welcome to GHCAA</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your membership has been approved! We are excited to have you as part of our community.</p><div style='background: #e8f4fd; padding: 15px; border-radius: 5px;'><p><strong>Membership No:</strong> {{MembershipNumber}}</p><p><strong>Default Password:</strong> <code style='background:#fff; padding:2px 5px;'>{{DefaultPassword}}</code></p></div><p>Please log in and change your password immediately.</p></div>",
-                    Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']",
-                    LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                },
-                new EmailTemplate 
-                { 
-                    Id = 3, 
-                    Code = "FEE_REMINDER", 
-                    Subject = "Annual Membership Subscription Due", 
-                    Description = "Friendly reminder for yearly dues",
-                    Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Subscription Reminder</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>This is a reminder that your annual membership subscription is now due.</p><p>Maintaining an active status ensures you continue to receive all alumni benefits and voting rights.</p><p>Thank you for your continued support!</p></div>",
-                    Variables = "['FullName']",
-                    LastUpdated = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                }
-            );
+            // Seed Email Templates from JSON
+            var emailTemplates = LoadSeed<EmailTemplate>("email_templates.json");
+            if (emailTemplates.Any()) modelBuilder.Entity<EmailTemplate>().HasData(emailTemplates);
 
             // Soft Delete Filters
             modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsArchived);
@@ -149,122 +150,27 @@ namespace GHCAA.Infrastructure.Data
             modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
             
             // Seed Roles
-            modelBuilder.Entity<Role>().HasData(
-                new Role { Id = 1, Name = "SuperAdmin" },
-                new Role { Id = 2, Name = "Admin" },
-                new Role { Id = 3, Name = "Member" }
-            );
+            // Seed Roles from JSON
+            var roles = LoadSeed<Role>("roles.json");
+            if (roles.Any()) modelBuilder.Entity<Role>().HasData(roles);
 
-            // Seed Members
-            var shalin = new Member
+            // Seed Members from JSON
+            var members = LoadSeed<Member>("members.json");
+            if (members.Any()) modelBuilder.Entity<Member>().HasData(members);
+
+            // Seed Users from JSON
+            var users = LoadSeed<User>("users.json");
+            if (users.Any()) modelBuilder.Entity<User>().HasData(users);
+
+            // Seed many-to-many Roles for Users (UserRoles junction table)
+            var userRoles = LoadSeed<Dictionary<string, object>>("user_roles.json");
+            if (userRoles.Any())
             {
-                Id = 1,
-                FullName = "Habibur Rahman Shalin",
-                FatherName = "Father",
-                MotherName = "Mother",
-                DateOfBirth = new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                Gender = Domain.Enums.Gender.Male,
-                BloodGroup = Domain.Enums.BloodGroup.APositive,
-                NID = "0000000001",
-                MobileNo = "01700000001",
-                Email = "shalin.rahman@gmail.com",
-                PresentAddress = "Munshiganj",
-                PermanentAddress = "Munshiganj",
-                EmergencyContactName = "Emergency",
-                EmergencyContactRelation = "Family",
-                EmergencyContactPhone = "01700000000",
-                HSCAdmissionYear = 2013,
-                HighestCertificate = "HSC",
-                HighestCertificateGroup = "Science",
-                HighestCertificateSubject = "None",
-                HighestCertificatePassingYear = 2015,
-                GHCAdmissionYear = 2013,
-                GHCLastCertificate = "HSC",
-                GHCLastCertificateGroup = "Science",
-                GHCLastCertificateSubject = "None",
-                GHCLastCertificatePassingYear = 2015,
-                ProfessionalSector = "Engineering",
-                Designation = "Software Engineer",
-                Status = Domain.Enums.MembershipStatus.Active,
-                AppliedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                MembershipNumber = "GHC-2015-0001",
-                MembershipType = Domain.Enums.MembershipType.Founding,
-                LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                ECPosition = Domain.Enums.ECPosition.President,
-                EmailVerified = true,
-                HasAcceptedTerms = true
-            };
-
-            var jane = new Member
-            {
-                Id = 101, // Use a distinct ID
-                FullName = "Jane Doe",
-                FatherName = "James Doe",
-                MotherName = "Mary Doe",
-                DateOfBirth = new DateTime(1992, 5, 10, 0, 0, 0, DateTimeKind.Utc),
-                Gender = Domain.Enums.Gender.Female,
-                BloodGroup = Domain.Enums.BloodGroup.OPositive,
-                NID = "0000000002",
-                MobileNo = "01700000002",
-                Email = "jane@example.com",
-                PresentAddress = "Dhaka",
-                PermanentAddress = "Dhaka",
-                EmergencyContactName = "Friend",
-                EmergencyContactRelation = "None",
-                EmergencyContactPhone = "01700000003",
-                HSCAdmissionYear = 2014,
-                HighestCertificate = "HSC",
-                HighestCertificateGroup = "Humanities",
-                HighestCertificateSubject = "None",
-                HighestCertificatePassingYear = 2016,
-                GHCAdmissionYear = 2014,
-                GHCLastCertificate = "HSC",
-                GHCLastCertificateGroup = "Humanities",
-                GHCLastCertificateSubject = "None",
-                GHCLastCertificatePassingYear = 2016,
-                ProfessionalSector = "Corporate",
-                Designation = "Communications Manager",
-                Status = Domain.Enums.MembershipStatus.Active,
-                AppliedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                MembershipNumber = "GHC-2016-0001",
-                MembershipType = Domain.Enums.MembershipType.General,
-                LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                ECPosition = Domain.Enums.ECPosition.GeneralSecretary,
-                EmailVerified = true,
-                HasAcceptedTerms = true
-            };
-
-            modelBuilder.Entity<Member>().HasData(shalin, jane);
-
-            // Seed Admin User: shalin
-            // Password: shalin (hashed)
-            var shalinUser = new User
-            {
-                Id = 2,
-                Username = "shalin",
-                PasswordHash = "$2a$11$J0UJbz.FdyElDw2mV22g1OikjTExwKvZ.c4eP3Wenc1MkmYDrgUme", // hardcoded "shalin"
-                IsActive = true,
-                IsArchived = false,
-                CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                MemberId = 1 // Linked to shalin member
-            };
-
-            modelBuilder.Entity<User>().HasData(new User
-            {
-                Id = 1,
-                Username = "superadmin",
-                PasswordHash = "$2a$11$CQ4KnTDZ7qUQMNre86iruOpgOx8fEoMe2G3RF/1U4cCLa5ltYtE1O", // SuperAdminPassword123!
-                IsActive = true,
-                IsArchived = false,
-                CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                MemberId = null 
-            }, shalinUser);
-
-            // Seed many-to-many Roles for Users
-            modelBuilder.Entity("UserRoles").HasData(
-                new { RolesId = 1, UsersId = 1 }, // SuperAdmin -> SuperAdmin Role
-                new { RolesId = 2, UsersId = 2 }  // shalin -> Admin Role
-            );
+                modelBuilder.Entity("UserRoles").HasData(userRoles.Select(ur => new { 
+                    RolesId = int.Parse(ur["RolesId"].ToString()), 
+                    UsersId = int.Parse(ur["UsersId"].ToString()) 
+                }).ToList());
+            }
 
             modelBuilder.Entity<FileUpload>()
                 .HasIndex(f => new { f.MemberId, f.UploadType });
@@ -300,169 +206,71 @@ namespace GHCAA.Infrastructure.Data
                 .HasForeignKey(p => p.EventGalleryId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Seed Initial Membership Fees
-            modelBuilder.Entity<MembershipFeeConfig>().HasData(
-                new MembershipFeeConfig { Id = 1, MembershipType = Domain.Enums.MembershipType.Founding, Amount = 5000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Founding Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-                new MembershipFeeConfig { Id = 2, MembershipType = Domain.Enums.MembershipType.Executive, Amount = 2000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Executive Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-                new MembershipFeeConfig { Id = 3, MembershipType = Domain.Enums.MembershipType.General, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "General Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-                new MembershipFeeConfig { Id = 4, MembershipType = Domain.Enums.MembershipType.Associate, Amount = 1000, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Associate Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-                new MembershipFeeConfig { Id = 5, MembershipType = Domain.Enums.MembershipType.Honorary, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Honorary Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-                new MembershipFeeConfig { Id = 6, MembershipType = Domain.Enums.MembershipType.Advisory, Amount = 0, EffectiveDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "Advisory Member Fee", CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
-            );
+            // Seed Membership Fees from JSON
+            var feeConfigs = LoadSeed<MembershipFeeConfig>("fee_configs.json");
+            if (feeConfigs.Any()) modelBuilder.Entity<MembershipFeeConfig>().HasData(feeConfigs);
 
-            // Seed initial EC Period
-            modelBuilder.Entity<ECPeriod>().HasData(
-                new ECPeriod { Id = 1, Title = "Current Executive Committee", StartDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc), IsActive = true }
-            );
+            // Seed Payment Configurations from JSON
+            var paymentConfigs = LoadSeed<PaymentConfiguration>("payment_configurations.json");
+            if (paymentConfigs.Any()) modelBuilder.Entity<PaymentConfiguration>().HasData(paymentConfigs);
 
-            // Link existing members to EC if applicable
-            modelBuilder.Entity<ECMember>().HasData(
-                new ECMember { Id = 1, ECPeriodId = 1, MemberId = 1, Position = Domain.Enums.ECPosition.President, StartDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-                new ECMember { Id = 2, ECPeriodId = 1, MemberId = 101, Position = Domain.Enums.ECPosition.GeneralSecretary, StartDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
-            );
+            // Seed EC Period and Members from JSON
+            var ecPeriods = LoadSeed<ECPeriod>("ec_periods.json");
+            if (ecPeriods.Any()) modelBuilder.Entity<ECPeriod>().HasData(ecPeriods);
 
-            // Seed News
-            modelBuilder.Entity<NewsPost>().HasData(
-                new NewsPost 
-                { 
-                    Id = 1, 
-                    Title = "College Library Renovation Project Completed", 
-                    Content = "The historic library of Govt. Haraganga College has been fully renovated with modern amenities and digital archiving systems, funded by the 1985 batch alumni.", 
-                    Category = Domain.Enums.ArticleCategory.Regular, 
-                    Status = Domain.Enums.SubmissionStatus.Approved,
-                    IsActive = true, 
-                    AuthorId = 2, 
-                    PublishDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
-                    ImageUrl = "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2070"
-                },
-                new NewsPost 
-                { 
-                    Id = 2, 
-                    Title = "Haragangian Global Meet 2026: London Chapter", 
-                    Content = "GHCAA members in the UK gathered at the Royal Museum today to discuss international networking and scholarship opportunities for current students.", 
-                    Category = Domain.Enums.ArticleCategory.Event,
-                    Status = Domain.Enums.SubmissionStatus.Approved,
-                    IsActive = true, 
-                    AuthorId = 2, 
-                    PublishDate = new DateTime(2026, 3, 4, 0, 0, 0, DateTimeKind.Utc),
-                    ImageUrl = "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=2070"
-                }
-            );
+            var ecMembers = LoadSeed<ECMember>("ec_members.json");
+            if (ecMembers.Any()) modelBuilder.Entity<ECMember>().HasData(ecMembers);
 
-            // Seed Events
-            modelBuilder.Entity<AlumniEvent>().HasData(
-                new AlumniEvent 
-                { 
-                    Id = 1, 
-                    Title = "Grand Reunion 2026", 
-                    Description = "The biggest gathering of Haragangians across the globe. Join us for a day of nostalgia, networking, and cultural celebrations.", 
-                    Date = new DateTime(2026, 5, 15, 9, 0, 0, DateTimeKind.Utc), 
-                    Location = "College Ground, Munshiganj", 
-                    RegistrationFee = 1500, 
-                    IsActive = true, 
-                    RegistrationDeadline = new DateTime(2026, 4, 30, 23, 59, 59, DateTimeKind.Utc),
-                    CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
-                    ImageUrl = "https://images.unsplash.com/photo-1511578334221-d748ef50b502?q=80&w=2070"
-                }
-            );
+            // Seed News from JSON
+            var news = LoadSeed<NewsPost>("news.json");
+            if (news.Any()) modelBuilder.Entity<NewsPost>().HasData(news);
 
-            // Seed Jobs
-            modelBuilder.Entity<JobOpportunity>().HasData(
-                new JobOpportunity 
-                { 
-                    Id = 1, 
-                    Title = "Senior Software Architect", 
-                    Company = "GlobalTech Solutions", 
-                    Location = "Dhaka, Bangladesh", 
-                    Description = "Looking for an experienced architect to lead our fintech transition. Great benefits and remote flexibility.", 
-                    Requirements = "10+ years of experience, C# Experts only.", 
-                    ContactEmail = "careers@globaltech.com", 
-                    Category = Domain.Enums.JobCategory.IT, 
-                    PostedByMemberId = 1, 
-                    PostedDate = new DateTime(2026, 2, 24, 0, 0, 0, DateTimeKind.Utc),
-                    ExpiryDate = new DateTime(2026, 4, 30, 23, 59, 59, DateTimeKind.Utc),
-                    IsActive = true 
-                }
-            );
+            // Seed Events from JSON
+            var events = LoadSeed<AlumniEvent>("events.json");
+            if (events.Any()) modelBuilder.Entity<AlumniEvent>().HasData(events);
 
-            // Seed Themes (Independence Day)
-            modelBuilder.Entity<SpecialDayTheme>().HasData(
-                new SpecialDayTheme 
-                { 
-                    Id = 1, 
-                    Title = "Independence Day 2026", 
-                    StartDate = new DateTime(2026, 3, 5, 0, 0, 0, DateTimeKind.Utc),
-                    EndDate = new DateTime(2026, 3, 30, 23, 59, 59, DateTimeKind.Utc),
-                    BackgroundColor = "#d63031", // Deep Red
-                    TextColor = "#ffffff",
-                    AnnouncementText = "Happy 55th Independence Day! Celebrating our glorious history.",
-                    IsEnabled = true
-                }
-            );
+            // Seed Jobs from JSON
+            var jobs = LoadSeed<JobOpportunity>("jobs.json");
+            if (jobs.Any()) modelBuilder.Entity<JobOpportunity>().HasData(jobs);
 
-            // Seed Gallery
-            modelBuilder.Entity<EventGallery>().HasData(
-                new EventGallery 
-                { 
-                    Id = 1, 
-                    Title = "Centennial Celebration", 
-                    Description = "Highlights from the 100th-anniversary gala of Haraganga College.", 
-                    EventDate = new DateTime(2025, 12, 10, 0, 0, 0, DateTimeKind.Utc),
-                    CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    CreatedByAdminId = 1,
-                    IsActive = true,
-                    IsFeatured = true
-                },
-                new EventGallery 
-                { 
-                    Id = 2, 
-                    Title = "Campus Landscapes", 
-                    Description = "Scenic views of the historic GHC campus buildings and grounds.", 
-                    EventDate = new DateTime(2026, 1, 20, 0, 0, 0, DateTimeKind.Utc),
-                    CreatedAt = new DateTime(2026, 1, 20, 0, 0, 0, DateTimeKind.Utc),
-                    CreatedByAdminId = 1,
-                    IsActive = true,
-                    IsFeatured = true
-                }
-            );
+            // Seed Themes from JSON
+            var themes = LoadSeed<SpecialDayTheme>("themes.json");
+            if (themes.Any()) modelBuilder.Entity<SpecialDayTheme>().HasData(themes);
 
-            // Seed Photos
-            modelBuilder.Entity<EventPhoto>().HasData(
-                new EventPhoto { Id = 1, EventGalleryId = 1, PhotoPath = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070", Caption = "Gala Evening" },
-                new EventPhoto { Id = 2, EventGalleryId = 1, PhotoPath = "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069", Caption = "Alumni Networking" },
-                new EventPhoto { Id = 3, EventGalleryId = 2, PhotoPath = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986", Caption = "Main Administrative Building" },
-                new EventPhoto { Id = 4, EventGalleryId = 2, PhotoPath = "https://images.unsplash.com/photo-1492538350424-aaee9f201774?q=80&w=2070", Caption = "College Playground" }
-            );
+            // Seed Gallery and Photos from JSON
+            var galleries = LoadSeed<EventGallery>("galleries.json");
+            if (galleries.Any()) modelBuilder.Entity<EventGallery>().HasData(galleries);
 
-            // Seed Academic Records
-            modelBuilder.Entity<AcademicRecord>().HasData(
-                new AcademicRecord 
-                { 
-                    Id = 1, MemberId = 1, InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", 
-                    AdmissionYear = 2013, PassingYear = 2015, IsGHC = true 
-                },
-                new AcademicRecord 
-                { 
-                    Id = 2, MemberId = 101, InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Humanities", 
-                    AdmissionYear = 2014, PassingYear = 2016, IsGHC = true 
-                }
-            );
+            var photos = LoadSeed<EventPhoto>("photos.json");
+            if (photos.Any()) modelBuilder.Entity<EventPhoto>().HasData(photos);
 
-            // Seed Professional Records
-            modelBuilder.Entity<ProfessionalRecord>().HasData(
-                new ProfessionalRecord 
-                { 
-                    Id = 1, MemberId = 1, OrganizationName = "GlobalTech Solutions", Designation = "Senior Software Architect", 
-                    Sector = "Information Technology (IT) & Software", Location = "Dhaka", StartDate = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc), 
-                    IsCurrent = true 
-                },
-                new ProfessionalRecord 
-                { 
-                    Id = 2, MemberId = 101, OrganizationName = "Alumni Corp", Designation = "Communications Manager", 
-                    Sector = "Advertising & Media", Location = "Dhaka", StartDate = new DateTime(2021, 6, 1, 0, 0, 0, DateTimeKind.Utc), 
-                    IsCurrent = true 
-                }
-            );
+            // Seed Academic Records from JSON
+            var academic = LoadSeed<AcademicRecord>("academic_records.json");
+            if (academic.Any()) modelBuilder.Entity<AcademicRecord>().HasData(academic);
+
+            // Seed Professional Records from JSON
+            var professional = LoadSeed<ProfessionalRecord>("professional_records.json");
+            if (professional.Any()) modelBuilder.Entity<ProfessionalRecord>().HasData(professional);
+
+            // Seed Membership Histories from JSON
+            var histories = LoadSeed<MembershipHistory>("membership_histories.json");
+            if (histories.Any()) modelBuilder.Entity<MembershipHistory>().HasData(histories);
+
+            // Seed Membership Dues from JSON
+            var dues = LoadSeed<MembershipDue>("membership_dues.json");
+            if (dues.Any()) modelBuilder.Entity<MembershipDue>().HasData(dues);
+
+            // Seed Payment Histories from JSON
+            var payments = LoadSeed<PaymentHistory>("payment_histories.json");
+            if (payments.Any()) modelBuilder.Entity<PaymentHistory>().HasData(payments);
+
+            // Seed Financial Records from JSON
+            var financial = LoadSeed<FinancialRecord>("financial_records.json");
+            if (financial.Any()) modelBuilder.Entity<FinancialRecord>().HasData(financial);
+
+            // Seed File Uploads from JSON
+            var uploads = LoadSeed<FileUpload>("file_uploads.json");
+            if (uploads.Any()) modelBuilder.Entity<FileUpload>().HasData(uploads);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -306,23 +307,23 @@ namespace GHCAA.Infrastructure.Services
 
         private string GetEmailFooter()
         {
-            return @"
+            return $@"
                 <div style='margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5c15e; font-family: sans-serif; color: #666;'>
                     <table width='100%' cellpadding='0' cellspacing='0'>
                         <tr>
                             <td style='vertical-align: middle; width: 60px;'>
-                                <img src='https://www.haragangacollege.edu.bd/assets/logo.png' alt='GHCAA Logo' style='width: 50px; height: 50px; border-radius: 50%;' />
+                                <img src='{Constants.Defaults.LogoUrl}' alt='GHCAA Logo' style='width: 50px; height: 50px; border-radius: 50%;' />
                             </td>
                             <td style='vertical-align: middle; padding-left: 15px;'>
-                                <div style='font-size: 16px; font-weight: 800; color: #111;'>Govt. Haraganga College Alumni Association</div>
-                                <div style='font-size: 12px; color: #c5a059;'>Sharing Heritage, Aligning Lives, Integrating Networks</div>
+                                <div style='font-size: 16px; font-weight: 800; color: #111;'>{Constants.Branding.OrganizationName}</div>
+                                <div style='font-size: 12px; color: #c5a059;'>{Constants.Branding.Tagline}</div>
                             </td>
                         </tr>
                     </table>
                     <div style='margin-top: 15px; font-size: 11px;'>
-                        <p>Registered Office: Govt. Haraganga College Campus, Munshiganj, Bangladesh.</p>
-                        <p>Enquiries: <a href='mailto:haragangian@gmail.com' style='color: #c5a059; text-decoration: none;'>haragangian@gmail.com</a></p>
-                        <p style='color: #999; margin-top: 20px;'>&copy; 2025 HARAGANGIAN. All rights reserved.</p>
+                        <p>Registered Office: {Constants.Branding.RegisteredOffice}</p>
+                        <p>Enquiries: <a href='mailto:{Constants.Defaults.SupportEmail}' style='color: #c5a059; text-decoration: none;'>{Constants.Defaults.SupportEmail}</a></p>
+                        <p style='color: #999; margin-top: 20px;'>&copy; {DateTime.UtcNow.Year} HARAGANGIAN. All rights reserved.</p>
                     </div>
                 </div>";
         }

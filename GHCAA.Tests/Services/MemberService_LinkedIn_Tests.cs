@@ -6,6 +6,7 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -24,6 +25,7 @@ public class MemberService_LinkedIn_Tests : TestBase
     private Mock<IActivityService> _mockActivityService = null!;
     private Mock<INotificationService> _mockNotificationService = null!;
     private Mock<ICommunicationService> _mockCommunication = null!;
+    private Mock<IConfiguration> _mockConfig = null!;
     private MemberService _service = null!;
 
     [SetUp]
@@ -38,6 +40,7 @@ public class MemberService_LinkedIn_Tests : TestBase
         _mockActivityService = new Mock<IActivityService>();
         _mockCommunication = new Mock<ICommunicationService>();
         _mockNotificationService = new Mock<INotificationService>();
+        _mockConfig = new Mock<IConfiguration>();
 
         _service = new MemberService(
             _context,
@@ -49,7 +52,8 @@ public class MemberService_LinkedIn_Tests : TestBase
             _mockCommunication.Object,
             _mockLogger.Object,
             _mockActivityService.Object,
-            _mockNotificationService.Object
+            _mockNotificationService.Object,
+            _mockConfig.Object
         );
     }
 

@@ -10,7 +10,7 @@ namespace GHCAA.Tests.Services;
 [TestFixture]
 public class LocalFileStorageServiceTests
 {
-    private Mock<IConfiguration> _mockConfig = null!;
+    private IConfiguration _config = null!;
     private Mock<ILogger<LocalFileStorageService>> _mockLogger = null!;
     private LocalFileStorageService _service = null!;
     private string _testDirectory = null!;
@@ -18,14 +18,21 @@ public class LocalFileStorageServiceTests
     [SetUp]
     public void Setup()
     {
-        _mockConfig = new Mock<IConfiguration>();
         _mockLogger = new Mock<ILogger<LocalFileStorageService>>();
 
         _testDirectory = Path.Combine(Path.GetTempPath(), "GHCAATests", Guid.NewGuid().ToString());
-        _mockConfig.Setup(x => x["FileStorage:UploadsRelativePath"]).Returns("uploads/members");
-        _mockConfig.Setup(x => x["FileStorage:MaxFileSizeBytes"]).Returns("1048576");
 
-        _service = new LocalFileStorageService(_mockConfig.Object, _mockLogger.Object);
+        var inMemorySettings = new Dictionary<string, string> {
+            {"FileStorage:UploadsRelativePath", "uploads/members"},
+            {"FileStorage:MaxFileSizeBytes", "1048576"},
+            {"Storage:EnableCompression", "false"} // Explicitly pass false/true so GetValue doesn't throw if section missing mocking
+        };
+
+        _config = new ConfigurationBuilder()
+            .AddInMemoryCollection(inMemorySettings!)
+            .Build();
+
+        _service = new LocalFileStorageService(_config, _mockLogger.Object);
     }
 
     [TearDown]
@@ -241,8 +248,11 @@ public class LocalFileStorageServiceTests
     public void Constructor_WithCustomMaxFileSize_ShouldUseCustomValue()
     {
         // Arrange
-        _mockConfig.Setup(x => x["FileStorage:MaxFileSizeBytes"]).Returns("500000");
-        var service = new LocalFileStorageService(_mockConfig.Object, _mockLogger.Object);
+        var inMemorySettings = new Dictionary<string, string> {
+            {"FileStorage:MaxFileSizeBytes", "500000"}
+        };
+        var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
+        var service = new LocalFileStorageService(testConfig, _mockLogger.Object);
         var fileContent = new byte[600000]; // 600KB
         var stream = new MemoryStream(fileContent);
 
@@ -255,8 +265,11 @@ public class LocalFileStorageServiceTests
     public void Constructor_WithInvalidMaxFileSize_ShouldUseDefaultValue()
     {
         // Arrange
-        _mockConfig.Setup(x => x["FileStorage:MaxFileSizeBytes"]).Returns("invalid");
-        var service = new LocalFileStorageService(_mockConfig.Object, _mockLogger.Object);
+        var inMemorySettings = new Dictionary<string, string> {
+            {"FileStorage:MaxFileSizeBytes", "invalid"}
+        };
+        var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
+        var service = new LocalFileStorageService(testConfig, _mockLogger.Object);
 
         // Act
         var result = service;
