@@ -12,8 +12,10 @@ export class NewsService {
     private http = inject(HttpClient);
     private apiUrl = API_ENDPOINTS.NEWS;
 
-    getNews(): Observable<NewsPost[]> {
-        return this.http.get<NewsPost[]>(this.apiUrl);
+    getNews(category?: string): Observable<NewsPost[]> {
+        let url = this.apiUrl;
+        if (category) url += `?category=${category}`;
+        return this.http.get<NewsPost[]>(url);
     }
 
     getNewsById(id: number): Observable<NewsPost> {

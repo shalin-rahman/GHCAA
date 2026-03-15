@@ -1,7 +1,7 @@
-<div class="directory-page">
+<div class="directory-page" [class.compact]="isCompact">
     <div class="header">
-        <h2>Member Directory</h2>
-        <p>Find and connect with fellow Haragangians</p>
+        <h2 *ngIf="!isCompact">Member Directory</h2>
+        <p *ngIf="!isCompact">Find and connect with fellow Haragangians</p>
     </div>
 
     <!-- Search & Filters -->
@@ -96,7 +96,7 @@
                         <a [href]="'mailto:' + m.email">{{ m.email }}</a>
                     </div>
                 </div>
-                <div class="card-footer">
+                <div class="card-footer" *ngIf="!disableProfile">
                     <button class="btn btn-outline btn-sm" (click)="viewProfile(m.id)">Profile Details ↗</button>
                 </div>
             </div>
@@ -112,7 +112,7 @@
 </div>
 
 <!-- Profile Detail Modal -->
-@if (selectedMember()) {
+@if (selectedMember() && !disableProfile) {
 <div class="modal-overlay" (click)="selectedMember.set(null)">
     <div class="modal-content glass-card reveal-top" (click)="$event.stopPropagation()">
         <div class="modal-header">

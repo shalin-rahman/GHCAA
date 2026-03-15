@@ -21,10 +21,17 @@ namespace GHCAA.Infrastructure.Services
             _db = db;
         }
 
-        public async Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(Enums.ArticleCategory? category = null, CancellationToken cancellationToken = default)
         {
-            return await _db.NewsPosts
-                .Where(n => n.IsActive && n.Status == Enums.SubmissionStatus.Approved)
+            var query = _db.NewsPosts
+                .Where(n => n.IsActive && n.Status == Enums.SubmissionStatus.Approved);
+
+            if (category.HasValue)
+            {
+                query = query.Where(n => n.Category == category.Value);
+            }
+
+            return await query
                 .OrderByDescending(n => n.PublishDate)
                 .Select(n => MapToDto(n))
                 .ToListAsync(cancellationToken);
@@ -33,6 +40,15 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<NewsPostDto>> GetAllNewsForAdminAsync(CancellationToken cancellationToken = default)
         {
             return await _db.NewsPosts
+                .OrderByDescending(n => n.PublishDate)
+                .Select(n => MapToDto(n))
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IEnumerable<NewsPostDto>> GetPendingSubmissionsAsync(CancellationToken cancellationToken = default)
+        {
+            return await _db.NewsPosts
+                .Where(n => n.Status == Enums.SubmissionStatus.Pending)
                 .OrderByDescending(n => n.PublishDate)
                 .Select(n => MapToDto(n))
                 .ToListAsync(cancellationToken);

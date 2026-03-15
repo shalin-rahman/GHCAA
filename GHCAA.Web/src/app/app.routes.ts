@@ -31,8 +31,24 @@ export const routes: Routes = [
                 loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery)
             },
             {
+                path: 'magazine',
+                loadComponent: () => import('./public/magazine/magazine').then(m => m.Magazine)
+            },
+            {
+                path: 'directory',
+                loadComponent: () => import('./public/directory/public-directory').then(m => m.PublicDirectory)
+            },
+            {
                 path: 'events',
                 loadComponent: () => import('./common/events/events').then(m => m.Events)
+            },
+            {
+                path: 'news',
+                loadComponent: () => import('./common/news/news').then(m => m.News)
+            },
+            {
+                path: 'jobs',
+                loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs)
             }
         ]
     },

@@ -92,6 +92,9 @@
 
 main {
     min-height: calc(100vh - 400px);
+    padding: 0 4%;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 @media (max-width: 600px) {

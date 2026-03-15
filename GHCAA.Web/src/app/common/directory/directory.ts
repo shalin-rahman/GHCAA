@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -14,6 +14,8 @@ import { getECPositionName, getAcademicYears, PROFESSIONAL_SECTORS } from '../..
     styleUrl: './directory.scss'
 })
 export class Directory implements OnInit {
+    @Input() isCompact: boolean = false;
+    @Input() disableProfile: boolean = false;
     getECPositionName = getECPositionName;
     private networkService = inject(NetworkingService);
     private notify = inject(NotificationService);

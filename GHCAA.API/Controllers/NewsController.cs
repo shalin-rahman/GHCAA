@@ -26,13 +26,13 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetActiveNews(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetActiveNews([FromQuery] Enums.ArticleCategory? category, CancellationToken cancellationToken)
         {
-            var news = await _newsService.GetActiveNewsAsync(cancellationToken);
+            var news = await _newsService.GetActiveNewsAsync(category, cancellationToken);
             return Ok(news);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetNewsById(int id, CancellationToken cancellationToken)
         {
             var post = await _newsService.GetNewsByIdAsync(id, cancellationToken);
@@ -44,6 +44,14 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> GetAllNewsForAdmin(CancellationToken cancellationToken)
         {
             var news = await _newsService.GetAllNewsForAdminAsync(cancellationToken);
+            return Ok(news);
+        }
+
+        [HttpGet("pending")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetPendingSubmissions(CancellationToken cancellationToken)
+        {
+            var news = await _newsService.GetPendingSubmissionsAsync(cancellationToken);
             return Ok(news);
         }
 
@@ -61,7 +69,7 @@ namespace GHCAA.API.Controllers
             return CreatedAtAction(nameof(GetNewsById), new { id = result.Id }, result);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> UpdateNews(int id, [FromBody] UpdateNewsDto dto, CancellationToken cancellationToken)
         {
@@ -70,7 +78,7 @@ namespace GHCAA.API.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> DeleteNews(int id, CancellationToken cancellationToken)
         {
@@ -120,7 +128,7 @@ namespace GHCAA.API.Controllers
             return CreatedAtAction(nameof(GetNewsById), new { id = result.Id }, result);
         }
 
-        [HttpPost("{id}/approve")]
+        [HttpPost("{id:int}/approve")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> ApproveArticle(int id, CancellationToken cancellationToken)
         {
@@ -128,7 +136,7 @@ namespace GHCAA.API.Controllers
             return success ? Ok(new { Message = "Article approved." }) : NotFound();
         }
 
-        [HttpPost("{id}/reject")]
+        [HttpPost("{id:int}/reject")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> RejectArticle(int id, CancellationToken cancellationToken)
         {

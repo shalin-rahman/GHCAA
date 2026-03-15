@@ -1,5 +1,14 @@
 .directory-page {
     padding-bottom: 4rem;
+
+    &.compact {
+        .header { display: none; }
+        .filters { padding: 1rem; margin-bottom: 1.5rem; }
+        .member-card { padding: 1.25rem; gap: 1rem; }
+        .grid-container { gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        .avatar-container { width: 45px; height: 45px; }
+        .name-info h4 { font-size: 1rem; }
+    }
 }
 
 .header {

@@ -1,0 +1,101 @@
+<div class="magazine-page">
+    <div class="magazine-header reveal-top">
+        <span class="eyebrow">The Haragangian</span>
+        <h1>Alumni Magazine</h1>
+        <p>Featured stories, memories, and insights from our community</p>
+    </div>
+
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Curating your magazine...</p>
+    </div>
+    } @else {
+    
+    @if (articles().length > 0) {
+        <div class="magazine-layout">
+            <!-- Featured Article (First one) -->
+            @if (!selectedArticle()) {
+                <div class="featured-section reveal-in">
+                    <div class="magazine-card primary" (click)="selectArticle(articles()[0])">
+                        <div class="card-image">
+                            <img [src]="articles()[0].imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070'" alt="Cover">
+                            <span class="category-badge">Featured Story</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="meta">
+                                <span>{{ articles()[0].createdAt | date:'longDate' }}</span>
+                                <span class="dot"></span>
+                                <span>By {{ articles()[0].authorName }}</span>
+                            </div>
+                            <h2>{{ articles()[0].title }}</h2>
+                            <p class="excerpt">{{ articles()[0].content | slice:0:250 }}...</p>
+                            <button class="read-more">Read Full Story ↗</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary Articles -->
+                <div class="articles-grid">
+                    @for (article of articles(); track article.id; let i = $index) {
+                        @if (i > 0) {
+                            <div class="magazine-card secondary reveal-card" (click)="selectArticle(article)">
+                                <div class="card-image">
+                                    <img [src]="article.imageUrl || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2069'" alt="Article">
+                                </div>
+                                <div class="card-content">
+                                    <div class="meta">
+                                        <span>{{ article.createdAt | date:'MMM d, yyyy' }}</span>
+                                    </div>
+                                    <h3>{{ article.title }}</h3>
+                                    <p>{{ article.content | slice:0:120 }}...</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+
+            <!-- Detail View -->
+            @if (selectedArticle()) {
+                <div id="article-detail" class="article-detail reveal-in">
+                    <button class="back-btn" (click)="selectedArticle.set(null)">← Back to Magazine</button>
+                    
+                    <div class="detail-header">
+                        <div class="meta-large">
+                            <span class="category">{{ selectedArticle()?.category }}</span>
+                            <span class="dot"></span>
+                            <span>{{ selectedArticle()?.createdAt | date:'fullDate' }}</span>
+                        </div>
+                        <h1>{{ selectedArticle()?.title }}</h1>
+                        <div class="author-info">
+                            <div class="author-avatar">{{ selectedArticle()?.authorName?.[0] }}</div>
+                            <div class="author-name">
+                                <span>Written By</span>
+                                <strong>{{ selectedArticle()?.authorName }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-hero" *ngIf="selectedArticle()?.imageUrl">
+                        <img [src]="selectedArticle()?.imageUrl" alt="Hero">
+                    </div>
+
+                    <div class="detail-content" [innerHTML]="selectedArticle()?.content"></div>
+
+                    <div class="detail-footer">
+                        <hr>
+                        <button class="btn btn-accent" (click)="selectedArticle.set(null)">Back to Gallery</button>
+                    </div>
+                </div>
+            }
+        </div>
+    } @else {
+        <div class="empty-state glass-card">
+            <span class="icon">📖</span>
+            <h3>No Magazine Features Yet</h3>
+            <p>Our editorial team is currently curating stories. Check back soon!</p>
+        </div>
+    }
+    }
+</div>

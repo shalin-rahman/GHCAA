@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
+using GHCAA.Domain;
 
 namespace GHCAA.Tests.Controllers
 {
@@ -39,10 +40,10 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetActiveNews_ReturnsOk()
         {
-            _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<CancellationToken>()))
+            _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync(new List<NewsPostDto>());
-
-            var result = await _controller.GetActiveNews(CancellationToken.None);
+ 
+            var result = await _controller.GetActiveNews(null, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
