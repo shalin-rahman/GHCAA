@@ -86,7 +86,8 @@ public class LocalFileStorageServiceTests
     {
         // Arrange
         var memberId = 789;
-        var fileName = @"C:\Users\Test\file.jpg";
+        // Use a cross-platform path that works on both Windows and Linux
+        var fileName = Path.Combine("Users", "Test", "file.jpg");
         var uploadType = Enums.FileUploadType.Photo;
 
         // Act
@@ -114,8 +115,8 @@ public class LocalFileStorageServiceTests
         result.Should().StartWith("uploads/members/photo_m1_");
         result.Should().EndWith("_test.jpg");
 
-        // Verify file was actually created
-        var fullPath = Path.Combine("wwwroot", result.Replace("/", "\\"));
+        // Verify file was actually created (cross-platform path)
+        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", result.Replace("/", Path.DirectorySeparatorChar.ToString()));
         File.Exists(fullPath).Should().BeTrue();
     }
 
@@ -194,7 +195,7 @@ public class LocalFileStorageServiceTests
         var uploadType = Enums.FileUploadType.Photo;
 
         var relativePath = await _service.SaveFileAsync(stream, fileName, memberId, uploadType);
-        var fullPath = Path.Combine("wwwroot", relativePath.Replace("/", "\\"));
+        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
         File.Exists(fullPath).Should().BeTrue();
 
         // Act
@@ -232,7 +233,7 @@ public class LocalFileStorageServiceTests
         await _service.DeleteFileAsync(pathWithLeadingSlash);
 
         // Assert
-        var fullPath = Path.Combine("wwwroot", relativePath.Replace("/", "\\"));
+        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
         File.Exists(fullPath).Should().BeFalse();
     }
 
