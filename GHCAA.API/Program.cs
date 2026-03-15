@@ -9,7 +9,11 @@ using GHCAA.API.Extensions;
 using GHCAA.API.Middleware;
 using GHCAA.Application.Interfaces;
 
+// Load environment variables from .env file (useful for local overrides)
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
 var configuration = builder.Configuration;
 
 // Register layers
