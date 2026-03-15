@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using GHCAA.API.Extensions;
 using GHCAA.API.Middleware;
 using GHCAA.Application.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 // Load environment variables from .env file (useful for local overrides)
 DotNetEnv.Env.Load();
@@ -93,6 +94,25 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Auto-apply Entity Framework migrations at startup for deployments like Render
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
+        if (context.Database.IsRelational())
+        {
+            context.Database.Migrate();
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating or initializing the database.");
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {
