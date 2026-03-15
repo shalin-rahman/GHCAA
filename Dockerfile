@@ -1,4 +1,4 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# See https://aka.ms/customizecontainer for more info on Docker customization.
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
@@ -9,32 +9,33 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy project files indicating architecture dependencies
+# Copy all .csproj files first (for layer caching)
 COPY ["GHCAA.API/GHCAA.API.csproj", "GHCAA.API/"]
 COPY ["GHCAA.Application/GHCAA.Application.csproj", "GHCAA.Application/"]
 COPY ["GHCAA.Domain/GHCAA.Domain.csproj", "GHCAA.Domain/"]
 COPY ["GHCAA.Infrastructure/GHCAA.Infrastructure.csproj", "GHCAA.Infrastructure/"]
 COPY ["GHCAA.Tests/GHCAA.Tests.csproj", "GHCAA.Tests/"]
 
-# Restore everything
+# Restore all projects
 RUN dotnet restore "GHCAA.API/GHCAA.API.csproj"
 RUN dotnet restore "GHCAA.Tests/GHCAA.Tests.csproj"
 
-# Copy all the source code
+# Copy all source code
 COPY . .
 
-# --- UNIT TEST STAGE ---
-# Run tests first, breaking the build early if tests fail.
-WORKDIR "/src/GHCAA.Tests"
-RUN dotnet test "GHCAA.Tests.csproj" -c $BUILD_CONFIGURATION --no-restore
+# --- BUILD ENTIRE SOLUTION first (so all project references are compiled) ---
+WORKDIR "/src"
+RUN dotnet build "GHCAA.API/GHCAA.API.csproj" -c $BUILD_CONFIGURATION --no-restore
+RUN dotnet build "GHCAA.Tests/GHCAA.Tests.csproj" -c $BUILD_CONFIGURATION --no-restore
 
-# --- BUILD STAGE ---
-WORKDIR "/src/GHCAA.API"
-RUN dotnet build "GHCAA.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+# --- UNIT TEST STAGE (run tests after build so all assemblies exist) ---
+RUN dotnet test "GHCAA.Tests/GHCAA.Tests.csproj" -c $BUILD_CONFIGURATION --no-restore --no-build
 
+# --- PUBLISH STAGE ---
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "GHCAA.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+WORKDIR "/src"
+RUN dotnet publish "GHCAA.API/GHCAA.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
