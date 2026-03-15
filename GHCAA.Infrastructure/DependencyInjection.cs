@@ -42,8 +42,18 @@ namespace GHCAA.Infrastructure
             {
                 services.AddDbContext<ApplicationDbContext, PgSqlApplicationDbContext>(options =>
                 {
-                    var conn = configuration.GetConnectionString("PgSqlConnection")
-                        ?? throw new InvalidOperationException("PgSqlConnection string is missing in configuration.");
+                    var conn = configuration.GetConnectionString("PgSqlConnection");
+                    var envUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+                    
+                    if (!string.IsNullOrEmpty(envUrl) && envUrl.StartsWith("postgres://"))
+                    {
+                        var uri = new Uri(envUrl);
+                        var userInfo = uri.UserInfo.Split(':');
+                        conn = $"Host={uri.Host};Port={(uri.Port > 0 ? uri.Port : 5432)};Database={uri.LocalPath.TrimStart('/')};Username={(userInfo.Length > 0 ? userInfo[0] : "")};Password={(userInfo.Length > 1 ? userInfo[1] : "")};SslMode=Prefer;Trust Server Certificate=True;";
+                    }
+
+                    if (string.IsNullOrEmpty(conn)) throw new InvalidOperationException("PostgreSQL connection string or DATABASE_URL is missing.");
+
                     options.UseNpgsql(conn,
                         o => o.MigrationsAssembly("GHCAA.Infrastructure"));
                     options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
