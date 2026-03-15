@@ -8,7 +8,7 @@ namespace GHCAA.Application.Interfaces
     public interface INetworkingService
     {
         Task<MemberProfileDto?> GetMemberProfileAsync(int memberId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<MemberProfileDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default);
+        Task<PagedResult<MemberProfileDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default);
         Task<IEnumerable<MemberProfileDto>> GetExecutiveCommitteeAsync(int? periodId = null, CancellationToken cancellationToken = default);
         Task<IEnumerable<object>> GetECPeriodsAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<MemberProfileDto>> GetLatestAlumniUpdatesAsync(int count = 10, CancellationToken cancellationToken = default);
@@ -22,5 +22,17 @@ namespace GHCAA.Application.Interfaces
         public string? ProfessionalSector { get; set; }
         public string? Designation { get; set; }
         public string? ECPosition { get; set; }
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+    }
+
+    public class PagedResult<T>
+    {
+        public IEnumerable<T> Items { get; set; } = Enumerable.Empty<T>();
+        public int TotalItems { get; set; }
+        public int TotalPages { get; set; }
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public bool HasNextPage => Page < TotalPages;
     }
 }

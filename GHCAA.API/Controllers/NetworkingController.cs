@@ -24,8 +24,8 @@ namespace GHCAA.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Search([FromQuery] MemberSearchFilterDto filter, CancellationToken cancellationToken)
         {
-            var results = await _networkingService.SearchMembersAsync(filter, cancellationToken);
-            return Ok(results);
+            var result = await _networkingService.SearchMembersAsync(filter, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("member/{id}")]

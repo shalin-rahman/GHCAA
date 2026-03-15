@@ -28,7 +28,7 @@ namespace GHCAA.Tests.Controllers
         {
             var filter = new MemberSearchFilterDto();
             _networkingServiceMock.Setup(x => x.SearchMembersAsync(filter, It.IsAny<CancellationToken>()))
-                                  .ReturnsAsync(new List<MemberProfileDto>());
+                                  .ReturnsAsync(new PagedResult<MemberProfileDto> { Items = new List<MemberProfileDto>(), TotalItems = 0, TotalPages = 0, Page = 1, PageSize = 20 });
 
             var result = await _controller.Search(filter, CancellationToken.None);
 

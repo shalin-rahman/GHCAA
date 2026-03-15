@@ -39,7 +39,7 @@ public class NetworkingServiceTests : TestBase
         _context.Members.AddRange(publicMember, privateMember);
         await _context.SaveChangesAsync();
 
-        var results = (await _service.SearchMembersAsync(new MemberSearchFilterDto())).ToList();
+        var results = (await _service.SearchMembersAsync(new MemberSearchFilterDto())).Items.ToList();
 
         var publicResult = results.First(r => r.FullName == "Public Jane");
         publicResult.Email.Should().Be("public@nttest.com");
@@ -91,11 +91,11 @@ public class NetworkingServiceTests : TestBase
         _context.Members.AddRange(inactive, archived, active);
         await _context.SaveChangesAsync();
 
-        var results = await _service.SearchMembersAsync(new MemberSearchFilterDto());
+        var result = await _service.SearchMembersAsync(new MemberSearchFilterDto());
 
-        results.Should().Contain(r => r.FullName == "Active Member");
-        results.Should().NotContain(r => r.FullName == "Inactive Member");
-        results.Should().NotContain(r => r.FullName == "Archived Member");
+        result.Items.Should().Contain(r => r.FullName == "Active Member");
+        result.Items.Should().NotContain(r => r.FullName == "Inactive Member");
+        result.Items.Should().NotContain(r => r.FullName == "Archived Member");
     }
 
     private Member CreateValidMember(string name, string email, string phone, string nid)

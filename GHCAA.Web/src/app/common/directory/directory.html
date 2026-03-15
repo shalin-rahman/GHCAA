@@ -47,6 +47,9 @@
                 </select>
             </div>
         </div>
+        <div class="results-summary" *ngIf="!loading() && totalItems() > 0">
+            <span>Showing <strong>{{ members().length }}</strong> of <strong>{{ totalItems() }}</strong> members</span>
+        </div>
     </div>
 
     <!-- Results -->
@@ -104,6 +107,22 @@
             <div class="empty-state glass-card full-width">
                 <span class="icon">🔍</span>
                 <p>No members found matching your search. Try different filters.</p>
+            </div>
+            }
+        </div>
+
+        <!-- Infinite Scroll Sentinel -->
+        <div #sentinel class="scroll-sentinel">
+            @if (loadingMore()) {
+            <div class="load-more-spinner">
+                <div class="spinner-sm"></div>
+                <span>Loading more members...</span>
+            </div>
+            } @else if (!hasMore() && members().length > 0) {
+            <div class="all-loaded">
+                <span class="divider-line"></span>
+                <span class="all-loaded-text">✓ All {{ totalItems() }} members loaded</span>
+                <span class="divider-line"></span>
             </div>
             }
         </div>

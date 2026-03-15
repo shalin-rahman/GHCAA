@@ -31,7 +31,7 @@ namespace GHCAA.Infrastructure.Services
             return member == null ? null : MapToDto(member);
         }
 
-        public async Task<IEnumerable<MemberProfileDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<MemberProfileDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default)
         {
             var query = _db.Members
                 .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
@@ -61,9 +61,25 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrEmpty(filter.ECPosition) && System.Enum.TryParse<Enums.ECPosition>(filter.ECPosition, true, out var pos))
                 query = query.Where(m => m.ECPosition == pos);
 
-            var members = await query.ToListAsync(cancellationToken);
+            var totalItems = await query.CountAsync(cancellationToken);
+            var pageSize = Math.Clamp(filter.PageSize, 1, 100);
+            var page = Math.Max(filter.Page, 1);
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-            return members.Select(MapToDto);
+            var members = await query
+                .OrderBy(m => m.FullName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return new PagedResult<MemberProfileDto>
+            {
+                Items = members.Select(MapToDto),
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Page = page,
+                PageSize = pageSize
+            };
         }
 
         public async Task<IEnumerable<MemberProfileDto>> GetExecutiveCommitteeAsync(int? periodId = null, CancellationToken cancellationToken = default)

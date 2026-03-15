@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, Input } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, Input, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,19 +13,30 @@ import { getECPositionName, getAcademicYears, PROFESSIONAL_SECTORS } from '../..
     templateUrl: './directory.html',
     styleUrl: './directory.scss'
 })
-export class Directory implements OnInit {
+export class Directory implements OnInit, AfterViewInit, OnDestroy {
     @Input() isCompact: boolean = false;
     @Input() disableProfile: boolean = false;
+    @ViewChild('sentinel') sentinelRef!: ElementRef<HTMLElement>;
+
     getECPositionName = getECPositionName;
     private networkService = inject(NetworkingService);
     private notify = inject(NotificationService);
     private router = inject(Router);
 
     members = signal<any[]>([]);
-    loading = signal(true);
+    loading = signal(true);      // initial/search load
+    loadingMore = signal(false); // scroll-triggered load
+    hasMore = signal(true);
+    totalItems = signal(0);
+
     years: number[] = getAcademicYears();
     sectors = PROFESSIONAL_SECTORS;
     selectedMember = signal<any | null>(null);
+
+    private currentPage = 1;
+    private readonly PAGE_SIZE = 20;
+    private searchDebounce: any;
+    private observer!: IntersectionObserver;
 
     filters = {
         query: '',
@@ -34,36 +45,98 @@ export class Directory implements OnInit {
         bloodGroup: ''
     };
 
-
-
     ngOnInit() {
         this.search();
     }
 
-    search() {
-        this.loading.set(true);
-        // Map frontend filter names to DTO names expected by API
-        const apiFilter: any = {
-            query: this.filters.query,
-            passingYear: this.filters.year,
-            professionalSector: this.filters.sector,
-            bloodGroup: this.filters.bloodGroup
-        };
+    ngAfterViewInit() {
+        this.setupIntersectionObserver();
+    }
 
-        // Remove null or empty string values to avoid 400 Bad Request (like passingYear=null)
-        Object.keys(apiFilter).forEach(key => {
-            if (apiFilter[key] === null || apiFilter[key] === '') {
-                delete apiFilter[key];
-            }
-        });
+    ngOnDestroy() {
+        if (this.observer) this.observer.disconnect();
+        if (this.searchDebounce) clearTimeout(this.searchDebounce);
+    }
 
-        this.networkService.searchMembers(apiFilter).subscribe({
-            next: (data) => {
-                this.members.set(data);
-                this.loading.set(false);
+    private setupIntersectionObserver() {
+        this.observer = new IntersectionObserver(
+            (entries) => {
+                const entry = entries[0];
+                if (entry.isIntersecting && this.hasMore() && !this.loading() && !this.loadingMore()) {
+                    this.loadNextPage();
+                }
             },
-            error: () => this.loading.set(false)
+            { rootMargin: '200px' } // trigger 200px before sentinel reaches viewport
+        );
+
+        if (this.sentinelRef?.nativeElement) {
+            this.observer.observe(this.sentinelRef.nativeElement);
+        }
+    }
+
+    /** Called when filters change — resets to page 1 */
+    search() {
+        if (this.searchDebounce) clearTimeout(this.searchDebounce);
+        this.searchDebounce = setTimeout(() => this.doSearch(), 300);
+    }
+
+    private doSearch() {
+        this.currentPage = 1;
+        this.members.set([]);
+        this.hasMore.set(true);
+        this.loading.set(true);
+        this.fetchPage(1).then(done => {
+            this.loading.set(false);
+            if (done) this.reobserve();
         });
+    }
+
+    private loadNextPage() {
+        if (!this.hasMore() || this.loadingMore()) return;
+        this.loadingMore.set(true);
+        const nextPage = this.currentPage + 1;
+        this.fetchPage(nextPage).then(() => {
+            this.loadingMore.set(false);
+        });
+    }
+
+    private fetchPage(page: number): Promise<boolean> {
+        return new Promise(resolve => {
+            const apiFilter: any = {
+                query: this.filters.query || undefined,
+                passingYear: this.filters.year || undefined,
+                professionalSector: this.filters.sector || undefined,
+                bloodGroup: this.filters.bloodGroup || undefined,
+                page,
+                pageSize: this.PAGE_SIZE
+            };
+
+            // Remove undefined values
+            Object.keys(apiFilter).forEach(k => { if (apiFilter[k] === undefined) delete apiFilter[k]; });
+
+            this.networkService.searchMembers(apiFilter).subscribe({
+                next: (result) => {
+                    this.currentPage = result.page;
+                    this.totalItems.set(result.totalItems);
+                    this.hasMore.set(result.hasNextPage);
+                    // Append new items
+                    this.members.update(prev => [...prev, ...result.items]);
+                    resolve(true);
+                },
+                error: () => {
+                    this.hasMore.set(false);
+                    resolve(false);
+                }
+            });
+        });
+    }
+
+    /** Re-observe sentinel after DOM update */
+    private reobserve() {
+        if (this.observer && this.sentinelRef?.nativeElement) {
+            this.observer.unobserve(this.sentinelRef.nativeElement);
+            this.observer.observe(this.sentinelRef.nativeElement);
+        }
     }
 
     viewProfile(id: number) {
@@ -78,5 +151,3 @@ export class Directory implements OnInit {
         this.selectedMember.set(null);
     }
 }
-
-
