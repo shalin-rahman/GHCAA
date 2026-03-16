@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -44,6 +44,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 column: "RequiresPayment",
                 value: true);
 
+            migrationBuilder.DeleteData(table: "AlumniEvents", keyColumn: "Id", keyValue: 2);
+            migrationBuilder.DeleteData(table: "AlumniEvents", keyColumn: "Id", keyValue: 3);
+            migrationBuilder.DeleteData(table: "AlumniEvents", keyColumn: "Id", keyValue: 4);
+
             migrationBuilder.InsertData(
                 table: "AlumniEvents",
                 columns: new[] { "Id", "AdminNote", "AllowNonMembers", "CreatedAt", "Date", "Description", "ImageUrl", "IsActive", "Location", "RegistrationDeadline", "RegistrationFee", "RequiresPayment", "Title" },
@@ -67,6 +71,8 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 keyValue: 1,
                 column: "UploadedAt",
                 value: new DateTime(2026, 3, 15, 10, 17, 45, 660, DateTimeKind.Utc).AddTicks(9570));
+
+            migrationBuilder.DeleteData(table: "JobOpportunities", keyColumn: "Id", keyValue: 2);
 
             migrationBuilder.InsertData(
                 table: "JobOpportunities",
@@ -4146,6 +4152,8 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 keyValue: 781,
                 columns: new[] { "AppliedDate", "LastUpdateDate", "PhotoPath" },
                 values: new object[] { new DateTime(2026, 3, 15, 16, 15, 58, 633, DateTimeKind.Utc).AddTicks(7340), new DateTime(2026, 3, 15, 16, 15, 58, 633, DateTimeKind.Utc).AddTicks(7350), "uploads/members/seed/2512740.jpg" });
+
+            for (int i = 1; i <= 6; i++) migrationBuilder.DeleteData(table: "PaymentConfigurations", keyColumn: "Id", keyValue: i);
 
             migrationBuilder.InsertData(
                 table: "PaymentConfigurations",
@@ -15575,6 +15583,9 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 keyValue: 781,
                 column: "CreatedAt",
                 value: new DateTime(2026, 3, 15, 16, 15, 58, 633, DateTimeKind.Utc).AddTicks(7379));
+
+            migrationBuilder.DeleteData(table: "UserRoles", keyColumns: new[] { "RolesId", "UsersId" }, keyValues: new object[] { 1, 1 });
+            migrationBuilder.DeleteData(table: "Users", keyColumn: "Id", keyValue: 1);
 
             migrationBuilder.InsertData(
                 table: "Users",

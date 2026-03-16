@@ -5,7 +5,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { EC_ROLES, getECPositionName, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_STATUS_OPTIONS, MEMBERSHIP_TYPE_OPTIONS, MEMBER_CATEGORY_OPTIONS, EC_ROLES_OPTIONS, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS } from '../../core/constants/app.constants';
+import { EC_ROLES, getECPositionName, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_STATUS_OPTIONS, MEMBERSHIP_TYPE_OPTIONS, MEMBER_CATEGORY_OPTIONS, EC_ROLES_OPTIONS, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName } from '../../core/constants/app.constants';
 import * as XLSX from 'xlsx';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
@@ -149,7 +149,7 @@ export class AdminMembers implements OnInit {
           'Batch': m.ghcLastCertificatePassingYear || '—',
           'Type': getMembershipTypeLabel(m.membershipType),
           'Status': getStatusLabel(m.status),
-          'Blood Group': m.bloodGroup || '—',
+          'Blood Group': getBloodGroupName(m.bloodGroup) || '—',
           'Organization': m.professionalSector || '—',
           'Designation': m.designation || '—'
         }));
@@ -355,6 +355,7 @@ export class AdminMembers implements OnInit {
   getCategoryLabel = getCategoryLabel;
   getMembershipTypeLabel = getMembershipTypeLabel;
   getECPositionLabel = getECPositionName;
+  getBloodGroupName = getBloodGroupName;
 
   // --- Import Actions ---
   openImport() {

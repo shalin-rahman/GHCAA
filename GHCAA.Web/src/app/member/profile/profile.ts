@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS } from '../../core/constants/app.constants';
+import { getECPositionName, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName } from '../../core/constants/app.constants';
 
 @Component({
     selector: 'app-profile',
@@ -16,6 +16,7 @@ import { getECPositionName, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademic
 })
 export class Profile implements OnInit {
     getECPositionName = getECPositionName;
+    getBloodGroupName = getBloodGroupName;
     ecRoles = EC_ROLES;
     private profileService = inject(ProfileService);
     private notify = inject(NotificationService);
