@@ -165,12 +165,13 @@
         &::after {
             content: "";
             position: absolute;
-            bottom: 10px;
+            top: 100%;
             left: 0;
             width: 100%;
             height: 2px;
             background: var(--gold-gradient);
             box-shadow: 0 0 25px var(--accent-color);
+            margin-top: 4px; /* Always below the baseline */
         }
     }
 }
@@ -888,6 +889,17 @@
             transform: scale(1.05);
         }
     }
+
+    .btn-secondary[disabled] {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(197, 160, 89, 0.3);
+        color: var(--accent-color);
+        opacity: 0.9;
+        cursor: not-allowed;
+        min-width: 140px; /* Ensure enough space for text */
+        white-space: normal; /* Allow wrap if very narrow */
+        line-height: 1.2;
+    }
 }
 
 .event-mini-date {
@@ -1247,6 +1259,10 @@
         font-size: clamp(1.4rem, 6vw, 2.2rem);
         line-height: 1.2;
         padding: 0 1rem;
+
+        .highlight::after {
+            margin-top: 2px; /* Slightly tighter on mobile */
+        }
     }
 
     .reveal-subtitle {

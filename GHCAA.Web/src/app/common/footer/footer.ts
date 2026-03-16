@@ -8,4 +8,6 @@ import { RouterLink } from '@angular/router';
   templateUrl: './footer.html',
   styleUrl: './footer.scss'
 })
-export class AppFooter { }
+export class AppFooter {
+  currentYear = new Date().getFullYear();
+}

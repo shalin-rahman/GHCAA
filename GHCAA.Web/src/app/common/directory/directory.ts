@@ -39,6 +39,12 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     private searchDebounce: any;
     private observer!: IntersectionObserver;
 
+    @ViewChild('sentinel') set sentinel(element: ElementRef<HTMLElement>) {
+        if (element) {
+            this.setupIntersectionObserver(element.nativeElement);
+        }
+    }
+
     filters = {
         query: '',
         year: null as number | null,
@@ -47,11 +53,11 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     };
 
     ngOnInit() {
-        this.search();
+        this.doSearch(); // Initial load
     }
 
     ngAfterViewInit() {
-        this.setupIntersectionObserver();
+        // Observer setup handled by ViewChild setter
     }
 
     ngOnDestroy() {
@@ -59,7 +65,9 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
         if (this.searchDebounce) clearTimeout(this.searchDebounce);
     }
 
-    private setupIntersectionObserver() {
+    private setupIntersectionObserver(element: HTMLElement) {
+        if (this.observer) this.observer.disconnect();
+        
         this.observer = new IntersectionObserver(
             (entries) => {
                 const entry = entries[0];
@@ -67,12 +75,14 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
                     this.loadNextPage();
                 }
             },
-            { rootMargin: '200px' } // trigger 200px before sentinel reaches viewport
+            { 
+                root: null, // use viewport
+                rootMargin: '600px', // Trigger even earlier
+                threshold: 0.1
+            }
         );
 
-        if (this.sentinelRef?.nativeElement) {
-            this.observer.observe(this.sentinelRef.nativeElement);
-        }
+        this.observer.observe(element);
     }
 
     /** Called when filters change — resets to page 1 */
@@ -86,13 +96,12 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
         this.members.set([]);
         this.hasMore.set(true);
         this.loading.set(true);
-        this.fetchPage(1).then(done => {
+        this.fetchPage(1).then(() => {
             this.loading.set(false);
-            if (done) this.reobserve();
         });
     }
 
-    private loadNextPage() {
+    loadNextPage() {
         if (!this.hasMore() || this.loadingMore()) return;
         this.loadingMore.set(true);
         const nextPage = this.currentPage + 1;

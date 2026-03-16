@@ -87,6 +87,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
+    @media (min-width: 768px) {
+        display: none !important;
+    }
 }
 
 .hamburger-box {
@@ -145,7 +149,7 @@
         animation: slideDownNav 0.3s ease-out;
     }
 
-    @media (min-width: 769px) {
+    @media (min-width: 768px) {
         display: flex !important;
         position: static;
         flex-direction: row;
@@ -171,7 +175,7 @@
     border-bottom: 1px solid rgba(255,255,255,0.05);
     transition: 0.3s;
 
-    @media (min-width: 769px) {
+    @media (min-width: 768px) {
         width: auto;
         font-size: 0.85rem;
         border-bottom: none;

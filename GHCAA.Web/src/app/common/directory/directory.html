@@ -111,14 +111,19 @@
             }
         </div>
 
-        <!-- Infinite Scroll Sentinel -->
+        <!-- Infinite Scroll Sentinel & Fallbacks -->
         <div #sentinel class="scroll-sentinel">
             @if (loadingMore()) {
             <div class="load-more-spinner">
                 <div class="spinner-sm"></div>
-                <span>Loading more members...</span>
+                <span>Syncing Haragangian records...</span>
             </div>
-            } @else if (!hasMore() && members().length > 0) {
+            } @else if (hasMore()) {
+            <div class="manual-load">
+                <p class="scroll-instruction">Scroll down for all {{ totalItems() }} members</p>
+                <button class="btn btn-outline btn-sm" (click)="loadNextPage()">Load More Members ↓</button>
+            </div>
+            } @else if (members().length > 0) {
             <div class="all-loaded">
                 <span class="divider-line"></span>
                 <span class="all-loaded-text">✓ All {{ totalItems() }} members loaded</span>
