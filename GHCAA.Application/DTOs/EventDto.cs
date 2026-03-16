@@ -49,9 +49,9 @@ namespace GHCAA.Application.DTOs
         public string? GuestName { get; set; }
         public string? GuestEmail { get; set; }
         public string? GuestMobile { get; set; }
-        public string PaymentReference { get; set; } = null!;
+        public string? PaymentReference { get; set; }
         public string? ReceiptPath { get; set; }
-        public PaymentMethod PaymentMethod { get; set; }
+        public PaymentMethod? PaymentMethod { get; set; }
         public EventRegistrationStatus Status { get; set; }
         public DateTime RegisteredAt { get; set; }
         public DateTime? ApprovedAt { get; set; }
@@ -64,9 +64,9 @@ namespace GHCAA.Application.DTOs
         public string? GuestName { get; set; }
         public string? GuestEmail { get; set; }
         public string? GuestMobile { get; set; }
-        public string PaymentReference { get; set; } = null!;
+        public string? PaymentReference { get; set; }
         public string? ReceiptPath { get; set; } // Path received after actual upload
-        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.ManualReceipt;
+        public PaymentMethod? PaymentMethod { get; set; } = GHCAA.Domain.Enums.PaymentMethod.ManualReceipt;
     }
 
     public class ApproveRegistrationDto

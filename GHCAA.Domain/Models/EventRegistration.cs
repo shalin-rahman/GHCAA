@@ -24,9 +24,8 @@ namespace GHCAA.Domain.Models
         [MaxLength(20)]
         public string? GuestMobile { get; set; }
 
-        [Required]
         [MaxLength(100)]
-        public string PaymentReference { get; set; } = null!;
+        public string? PaymentReference { get; set; }
 
         [MaxLength(500)]
         public string? ReceiptPath { get; set; }
