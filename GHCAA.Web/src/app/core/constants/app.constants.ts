@@ -52,7 +52,8 @@ export const MEMBER_CATEGORIES = [
     'None',
     'Lifelong',
     'Donor',
-    'Patron'
+    'Patron',
+    'Guest'
 ];
 
 export const BLOOD_GROUPS = [
@@ -196,7 +197,8 @@ export const MEMBER_CATEGORY_OPTIONS = [
     { value: 'None', label: 'No Special Status' },
     { value: 'Lifelong', label: 'Lifelong Member' },
     { value: 'Donor', label: 'Donor Member' },
-    { value: 'Patron', label: 'Patron Member' }
+    { value: 'Patron', label: 'Patron Member' },
+    { value: 'Guest', label: 'Guest Member' }
 ];
 
 export const FINANCIAL_CATEGORY_OPTIONS = [

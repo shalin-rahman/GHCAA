@@ -37,22 +37,22 @@ export class LandingMembership {
                 'Priority seating at all constitutional events.'
             ]
         },
-        {
-            id: 'life',
-            name: 'Life Member',
-            shortDesc: 'Dedicated alumni committed to the lifelong support of Haraganga College.',
-            color: '#B8860B',
-            criteria: [
-                'Full payment of Life Membership endowment fee.',
-                'Certified alumni with minimum 10 years post-HSC experience.',
-                'Professional bachelor degree or equivalent.'
-            ],
-            rights: [
-                'Voter status for life without annual renewal.',
-                'Access to "Elite Alumni" networking lounge and events.',
-                'Exemption from regular annual administrative dues.'
-            ]
-        },
+        // {
+        //     id: 'life',
+        //     name: 'Life Member',
+        //     shortDesc: 'Dedicated alumni committed to the lifelong support of Haraganga College.',
+        //     color: '#B8860B',
+        //     criteria: [
+        //         'Full payment of Life Membership endowment fee.',
+        //         'Certified alumni with minimum 10 years post-HSC experience.',
+        //         'Professional bachelor degree or equivalent.'
+        //     ],
+        //     rights: [
+        //         'Voter status for life without annual renewal.',
+        //         'Access to "Elite Alumni" networking lounge and events.',
+        //         'Exemption from regular annual administrative dues.'
+        //     ]
+        // },
         {
             id: 'honorary',
             name: 'Honorary Member',

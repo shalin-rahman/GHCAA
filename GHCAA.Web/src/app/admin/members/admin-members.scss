@@ -120,6 +120,7 @@
     &.lifelong { background: rgba(var(--success-color), 0.1); color: var(--success-color); border: 1px solid rgba(var(--success-color), 0.2); }
     &.donor { background: rgba(var(--accent-color-rgb), 0.1); color: var(--accent-color); border: 1px solid rgba(var(--accent-color-rgb), 0.2); }
     &.patron { background: #6366f11a; color: #6366f1; border: 1px solid #6366f133; }
+    &.guest { background: rgba(var(--primary-color), 0.1); color: var(--primary-color); border: 1px solid rgba(var(--primary-color), 0.2); }
 }
 
 /* Modal Specific Overrides */
