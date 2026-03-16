@@ -111,5 +111,36 @@ namespace GHCAA.Infrastructure.Services
                 Role = user.Roles?.FirstOrDefault()?.Name ?? Constants.Roles.Member
             };
         }
+        public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(m => m.Email == email.Trim().ToLower(), cancellationToken);
+
+            if (member == null) return false;
+
+            var user = await _db.Users
+                .FirstOrDefaultAsync(u => u.MemberId == member.Id && u.ResetToken == token, cancellationToken);
+            
+            if (user == null) return false;
+
+            if (!user.ResetTokenExpiry.HasValue || user.ResetTokenExpiry.Value < DateTime.UtcNow)
+            {
+                _logger.LogWarning("Password reset failed: Token expired for user {Username}", user.Username);
+                return false;
+            }
+
+            // Update password and clear token
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.ResetToken = null;
+            user.ResetTokenExpiry = null;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Password reset successful for user {Username}", user.Username);
+            
+            await _activityService.LogActivityAsync(member.Id, "Password Reset", "User reset their password via email link.", cancellationToken: cancellationToken);
+            
+            return true;
+        }
     }
 }

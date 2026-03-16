@@ -87,4 +87,10 @@ export class EventsService {
     deleteEvent(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/admin/${id}`);
     }
+
+    uploadEventLogo(id: number, file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('logo', file);
+        return this.http.post(`${this.apiUrl}/admin/${id}/logo`, formData);
+    }
 }

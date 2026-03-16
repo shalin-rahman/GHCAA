@@ -20,6 +20,10 @@
             @for (ev of events(); track ev.id) {
             <div class="event-card-wrapper">
                 <div class="event-card glass-card">
+                    <div class="event-banner" *ngIf="ev.imageUrl">
+                        <img [src]="ev.imageUrl" alt="Event Image" class="banner-img">
+                    </div>
+
                     <div class="date-badge">
                         <span class="day">{{ ev.date | date:'dd' }}</span>
                         <span class="month">{{ ev.date | date:'MMM' }}</span>

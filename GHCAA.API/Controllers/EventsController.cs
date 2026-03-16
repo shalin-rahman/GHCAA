@@ -151,6 +151,28 @@ namespace GHCAA.API.Controllers
             return success ? Ok() : NotFound();
         }
 
+        [HttpPost("admin/{id}/logo")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UploadEventLogo(int id, IFormFile logo, CancellationToken cancellationToken)
+        {
+            if (logo == null || logo.Length == 0) return BadRequest("No file uploaded");
+
+            using var ms = new MemoryStream();
+            await logo.CopyToAsync(ms, cancellationToken);
+            ms.Position = 0;
+
+            var uploadedFile = new UploadedFileDto
+            {
+                Content = ms,
+                FileName = logo.FileName,
+                ContentType = logo.ContentType,
+                Length = logo.Length
+            };
+
+            var logoUrl = await _eventService.UpdateEventLogoAsync(id, uploadedFile, cancellationToken);
+            return Ok(new { ImageUrl = logoUrl });
+        }
+
         [HttpGet("admin/registrations")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetAllRegistrations(int page = 1, int pageSize = 10, int? eventId = null, string? status = null, string? search = null, CancellationToken cancellationToken = default)

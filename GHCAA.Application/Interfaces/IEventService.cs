@@ -15,6 +15,7 @@ namespace GHCAA.Application.Interfaces
         Task<AlumniEvent> CreateEventAsync(CreateEventDto dto, CancellationToken cancellationToken = default);
         Task<AlumniEvent?> UpdateEventAsync(UpdateEventDto dto, CancellationToken cancellationToken = default);
         Task<bool> DeleteEventAsync(int id, CancellationToken cancellationToken = default);
+        Task<string> UpdateEventLogoAsync(int eventId, UploadedFileDto logo, CancellationToken cancellationToken = default);
 
         // Event Registration
         Task<EventRegistration> RegisterForEventAsync(RegisterForEventDto dto, int? memberId, UploadedFileDto? receipt = null, CancellationToken cancellationToken = default);

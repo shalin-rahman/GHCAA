@@ -29,5 +29,17 @@ namespace GHCAA.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto, CancellationToken cancellationToken)
+        {
+            var success = await _authService.ResetPasswordAsync(dto.Email, dto.Token, dto.NewPassword, cancellationToken);
+            if (!success)
+            {
+                return BadRequest(new { Message = "Invalid or expired reset token." });
+            }
+
+            return Ok(new { Message = "Password has been reset successfully. You can now login." });
+        }
     }
 }

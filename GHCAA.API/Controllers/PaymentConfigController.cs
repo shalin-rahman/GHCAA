@@ -1,4 +1,5 @@
 using GHCAA.Domain.Models;
+using GHCAA.Domain;
 using GHCAA.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -42,7 +43,8 @@ namespace GHCAA.API.Controllers
                     p.RequiresReceipt,
                     p.RequiresReference,
                     p.SortOrder,
-                    p.Gateway
+                    p.Gateway,
+                    IsOnline = p.Gateway != Enums.PaymentGateway.None
                 })
                 .ToListAsync(cancellationToken);
 

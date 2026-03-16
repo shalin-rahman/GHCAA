@@ -154,4 +154,22 @@ public class EventServiceTests : TestBase
         result.GuestName.Should().Be("Guest");
         result.MemberId.Should().BeNull();
     }
+
+    [Test]
+    public async Task UpdateEventLogoAsync_ShouldUpdateImageUrl()
+    {
+        var ev = new AlumniEvent { Title = "Event", Description = "D", Date = DateTime.UtcNow, Location = "L" };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var logoDto = new UploadedFileDto { FileName = "logo.png", Content = new MemoryStream() };
+        _fileStorageMock.Setup(f => f.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<FileUploadType>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("/uploads/logo.png");
+
+        var result = await _service.UpdateEventLogoAsync(ev.Id, logoDto);
+
+        result.Should().NotBeNullOrEmpty();
+        var updated = await _context.AlumniEvents.FindAsync(ev.Id);
+        updated!.ImageUrl.Should().Be("/uploads/logo.png");
+    }
 }

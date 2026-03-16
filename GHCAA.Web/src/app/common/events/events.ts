@@ -5,7 +5,8 @@ import { EventsService } from '../../core/services/events.service';
 import { AlumniEvent, EventRegistration } from '../../core/models/business.models';
 import { AuthService } from '../../core/services/auth.service';
 import { PaymentMethodSelectorComponent } from '../../common/payment-method-selector/payment-method-selector.component';
-import { PaymentConfig } from '../../core/services/payment-config.service';
+import { PaymentConfig, PaymentConfigService } from '../../core/services/payment-config.service';
+import { GatewaysService, PaymentGateway } from '../../core/services/gateways.service';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -20,6 +21,7 @@ export class Events implements OnInit {
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
+  private gatewaysService = inject(GatewaysService);
 
   events = signal<AlumniEvent[]>([]);
   activeTab = signal<'upcoming' | 'my-registrations'>('upcoming');
@@ -165,14 +167,42 @@ export class Events implements OnInit {
 
     this.eventsService.registerForEvent(registrationDto).subscribe({
       next: () => {
-        alert('Registration submitted successfully! Wait for admin approval.');
-        this.isSubmitting.set(false);
-        this.closeModal();
-        this.loadMyRegistrations();
+        if (this.selectedPaymentMethod()?.isOnline) {
+          this.initiateGateway(ev, ref);
+        } else {
+          alert('Registration submitted successfully! Wait for admin approval.');
+          this.isSubmitting.set(false);
+          this.closeModal();
+          this.loadMyRegistrations();
+        }
       },
       error: (err) => {
         console.error(err);
         alert(err.error?.message || 'Registration failed. Please check your inputs.');
+        this.isSubmitting.set(false);
+      }
+    });
+  }
+
+  private initiateGateway(ev: AlumniEvent, ref: string) {
+    const gateway = this.selectedPaymentMethod()?.method === 'SSLCommerz' ? PaymentGateway.SSLCommerz : PaymentGateway.Bkash;
+    
+    this.gatewaysService.initiatePayment({
+      amount: ev.registrationFee || 0,
+      gateway: gateway,
+      reference: `EVT-REG-${ref}`,
+      baseUrl: window.location.origin
+    }).subscribe({
+      next: (res) => {
+        if (res.success && res.gatewayUrl) {
+          window.location.href = res.gatewayUrl;
+        } else {
+          alert('Gateway initiation failed: ' + res.message);
+          this.isSubmitting.set(false);
+        }
+      },
+      error: () => {
+        alert('Could not initiate online payment. Please try manual receipt upload.');
         this.isSubmitting.set(false);
       }
     });

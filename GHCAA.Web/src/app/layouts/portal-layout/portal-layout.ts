@@ -38,7 +38,7 @@ export class PortalLayout {
       const match = this.nav.portalNavItems().find(x => url.includes(x.path.replace('/portal/', '')));
       const title = match?.label ?? 'Dashboard';
       this.currentPageTitle.set(title);
-      this.titleService.setTitle(`${title} | GHCAA Portal`);
+      this.titleService.setTitle(`${title} | Member Portal`);
 
       // Auto-collapse on mobile after navigation
       if (typeof window !== 'undefined' && window.innerWidth <= 768) {

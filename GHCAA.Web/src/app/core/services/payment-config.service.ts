@@ -23,6 +23,7 @@ export interface PaymentConfig {
     gatewaySecretKey?: string;
     gatewayCallbackUrl?: string;
     sortOrder: number;
+    isOnline?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

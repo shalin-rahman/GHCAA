@@ -4,6 +4,7 @@ import { EventsService } from '../../core/services/events.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { GatewaysService } from '../../core/services/gateways.service';
 
 import { ActivatedRoute, provideRouter } from '@angular/router';
 
@@ -13,6 +14,7 @@ describe('Events Component', () => {
     let eventsServiceMock: any;
     let notificationServiceMock: any;
     let activatedRouteMock: any;
+    let gatewaysServiceMock: any;
 
     beforeEach(async () => {
         eventsServiceMock = {
@@ -21,6 +23,10 @@ describe('Events Component', () => {
             getMyRegistrations: vi.fn().mockReturnValue(of([])),
             registerForEvent: vi.fn().mockReturnValue(of({ success: true })),
             getRegistrationForInvitation: vi.fn().mockReturnValue(of({}))
+        };
+
+        gatewaysServiceMock = {
+            initiatePayment: vi.fn().mockReturnValue(of({ success: true, gatewayUrl: 'http://pay.com' }))
         };
 
         notificationServiceMock = {
@@ -45,6 +51,7 @@ describe('Events Component', () => {
                 { provide: NotificationService, useValue: notificationServiceMock },
                 { provide: ActivatedRoute, useValue: activatedRouteMock },
                 { provide: AuthService, useValue: authServiceMock },
+                { provide: GatewaysService, useValue: gatewaysServiceMock },
                 provideRouter([])
             ]
         }).compileComponents();

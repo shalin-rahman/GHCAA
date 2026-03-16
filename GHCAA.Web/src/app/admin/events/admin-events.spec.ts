@@ -43,4 +43,29 @@ describe('AdminEvents Component', () => {
         expect(eventsServiceMock.getAllEventsForAdmin).toHaveBeenCalled();
         expect(eventsServiceMock.getAllRegistrations).toHaveBeenCalled();
     });
+
+    it('should handle logo selection and set preview', async () => {
+        const file = new File([''], 'logo.png', { type: 'image/png' });
+        const event = { target: { files: [file] } } as any;
+        
+        // Mock FileReader
+        const dummyDataUrl = 'data:image/png;base64,...';
+        const readerMock = {
+            readAsDataURL: vi.fn(),
+            onload: null as any,
+            result: null as any
+        };
+        vi.stubGlobal('FileReader', vi.fn().mockImplementation(function() { return readerMock; }));
+
+        component.onLogoSelected(event);
+        
+        expect(component.selectedLogo()).toBe(file);
+        
+        // Simulate reader onload
+        if (readerMock.onload) {
+            readerMock.result = dummyDataUrl;
+            readerMock.onload({ target: { result: dummyDataUrl } } as any);
+            expect(component.logoPreview()).toBe(dummyDataUrl);
+        }
+    });
 });

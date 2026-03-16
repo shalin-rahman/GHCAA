@@ -162,6 +162,18 @@
         border: 1px solid var(--glass-border);
         text-transform: uppercase;
         letter-spacing: 0.5px;
+
+        &.badge-type {
+            background: rgba(var(--primary-rgb), 0.1);
+            border-color: rgba(var(--primary-rgb), 0.2);
+            color: var(--primary-color);
+        }
+
+        &.badge-category {
+            background: rgba(var(--secondary-rgb, 128, 128, 128), 0.1);
+            border-color: rgba(var(--secondary-rgb, 128, 128, 128), 0.2);
+            color: var(--secondary-color, var(--text-muted));
+        }
     }
 }
 

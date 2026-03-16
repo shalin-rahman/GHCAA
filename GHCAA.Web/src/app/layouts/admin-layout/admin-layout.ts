@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
@@ -18,6 +18,8 @@ export class AdminLayout {
   private titleService = inject(Title);
   private router = inject(Router);
 
+  currentPageTitle = signal('Control Panel');
+  
   constructor() {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -26,7 +28,8 @@ export class AdminLayout {
       const allAdminItems = this.nav.adminNavItems();
       const match = allAdminItems.find(x => url.includes(x.path));
       const title = match?.label ?? 'Control Panel';
-      this.titleService.setTitle(`${title} | Admin Control`);
+      this.currentPageTitle.set(title);
+      this.titleService.setTitle(`${title} | Admin Portal`);
     });
   }
 }

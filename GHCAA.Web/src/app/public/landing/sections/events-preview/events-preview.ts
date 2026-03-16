@@ -17,7 +17,19 @@ export class LandingEventsPreview implements OnInit {
 
     ngOnInit() {
         this.eventsService.getEvents().subscribe({
-            next: (data) => this.events.set(data.slice(0, 3)),
+            next: (data) => {
+                const now = new Date();
+                const active = data.filter(e => !e.registrationDeadline || new Date(e.registrationDeadline) >= now);
+                const closed = data.filter(e => e.registrationDeadline && new Date(e.registrationDeadline) < now);
+                
+                // Get most recent closed event
+                const latestClosed = closed.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 1);
+                
+                // Combine and sort by date
+                const combined = [...active, ...latestClosed].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                
+                this.events.set(combined);
+            },
             error: () => this.events.set([])
         });
     }

@@ -149,5 +149,19 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.ApproveRegistration(dto, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkResult>());
         }
+
+        [Test]
+        public async Task UploadEventLogo_ReturnsOk()
+        {
+            var logo = new Mock<IFormFile>();
+            logo.Setup(x => x.Length).Returns(100);
+            logo.Setup(x => x.FileName).Returns("logo.png");
+            logo.Setup(x => x.ContentType).Returns("image/png");
+            _eventServiceMock.Setup(x => x.UpdateEventLogoAsync(1, It.IsAny<UploadedFileDto>(), It.IsAny<CancellationToken>()))
+                             .ReturnsAsync("/uploads/logo.png");
+
+            var result = await _controller.UploadEventLogo(1, logo.Object, CancellationToken.None);
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
     }
 }

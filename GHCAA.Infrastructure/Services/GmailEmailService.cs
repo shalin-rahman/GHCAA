@@ -27,20 +27,31 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task SendEmailAsync(string to, string subject, string htmlBody, CancellationToken cancellationToken = default)
         {
-            var message = new MimeMessage();
-            message.From.Add(MailboxAddress.Parse(_email));
-            message.To.Add(MailboxAddress.Parse(to));
-            message.Subject = subject;
-            var body = new BodyBuilder { HtmlBody = htmlBody };
-            message.Body = body.ToMessageBody();
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(MailboxAddress.Parse(_email));
+                message.To.Add(MailboxAddress.Parse(to));
+                message.Subject = subject;
+                var body = new BodyBuilder { HtmlBody = htmlBody };
+                message.Body = body.ToMessageBody();
 
-            using var client = new SmtpClient();
-            await client.ConnectAsync(_host, _port, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
-            await client.AuthenticateAsync(_email, _appPassword, cancellationToken);
-            await client.SendAsync(message, cancellationToken);
-            await client.DisconnectAsync(true, cancellationToken);
+                using var client = new SmtpClient();
+                // Set a reasonable timeout (10 seconds)
+                client.Timeout = 10000;
+                
+                await client.ConnectAsync(_host, _port, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
+                await client.AuthenticateAsync(_email, _appPassword, cancellationToken);
+                await client.SendAsync(message, cancellationToken);
+                await client.DisconnectAsync(true, cancellationToken);
 
-            _logger.LogInformation("Email sent to {To} with subject {Subject}", to, subject);
+                _logger.LogInformation("Email sent successfully to {To}", to);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "System failed to send email to {To}. Error: {Message}", to, ex.Message);
+                throw new InvalidOperationException($"Email service error: {ex.Message}");
+            }
         }
     }
 }

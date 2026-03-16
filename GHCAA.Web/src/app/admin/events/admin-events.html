@@ -40,7 +40,35 @@
     @if (showForm()) {
     <div class="glass-card p-10 reveal-top max-w-4xl mx-auto border-accent/20">
         <div class="events-form">
-            <form [formGroup]="eventForm" (ngSubmit)="submitEvent()" class="space-y-8">
+            <form [formGroup]="eventForm" (ngSubmit)="submitEvent()">
+                <!-- Image Upload Section -->
+                <div class="logo-upload-section mb-10">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-accent mb-4">Event Banner / Logo</label>
+                    <div class="flex items-start gap-8">
+                        <div class="logo-preview-box w-48 h-32 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex items-center justify-center bg-surface relative group">
+                            @if (logoPreview()) {
+                                <img [src]="logoPreview()" alt="Preview" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                                    <span class="text-[10px] font-black uppercase text-white">Replace Asset</span>
+                                </div>
+                            } @else {
+                                <div class="text-center p-4">
+                                    <span class="text-2xl mb-1 block">🖼️</span>
+                                    <span class="text-[8px] uppercase font-black text-muted tracking-widest">No Banner</span>
+                                </div>
+                            }
+                            <input type="file" (change)="onLogoSelected($event)" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                        </div>
+                        <div class="flex-1 pt-2">
+                            <p class="text-xs text-muted mb-4 max-w-sm">Upload a high-resolution banner for this event. This image will be displayed on the public landing page and member portal.</p>
+                            <button type="button" class="btn btn-secondary btn-sm" (click)="logoInput.click()">
+                                {{ logoPreview() ? 'Change Image' : 'Select Image' }}
+                            </button>
+                            <input #logoInput type="file" (change)="onLogoSelected($event)" accept="image/*" class="hidden">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="input-group">
                         <label>Engagement Title <span class="text-red-500">*</span></label>
@@ -289,6 +317,11 @@
         <div class="modal-box" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <div>
+                    @if (ev.imageUrl) {
+                        <div class="mb-4 rounded-xl overflow-hidden border border-white/10">
+                            <img [src]="ev.imageUrl" class="w-full h-40 object-cover" alt="Event Banner">
+                        </div>
+                    }
                     <h3 class="text-accent">{{ ev.title }}</h3>
                     <p class="text-xs uppercase font-black tracking-widest text-muted mt-1">{{ ev.location }} • {{ ev.date | date:'longDate' }}</p>
                 </div>

@@ -3,7 +3,7 @@
         <div class="admin-brand">
             <img src="/assets/logo.jpg" alt="GHC" class="logo">
             <div class="brand-text">
-                <span class="brand-name">GHCAA</span>
+                <span class="brand-name">GHCAA Admin Portal</span>
                 <span class="brand-sub">Admin Control</span>
             </div>
         </div>
@@ -39,7 +39,11 @@
     <main class="admin-main">
         <header class="admin-header">
             <div class="admin-header-inner portal-content">
-                <h1 class="page-title">Control Panel</h1>
+                <div class="admin-breadcrumbs">
+                    <span class="text-muted">GHCAA Admin Portal</span>
+                    <span class="separator">/</span>
+                    <span class="current-page">{{ currentPageTitle() }}</span>
+                </div>
                 <div class="header-right">
                     <span class="header-role-badge">{{ auth.currentUser()?.role }}</span>
                     <a routerLink="/portal/dashboard" class="header-btn">Exit Admin</a>

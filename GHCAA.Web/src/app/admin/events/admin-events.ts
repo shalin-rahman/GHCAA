@@ -53,6 +53,8 @@ export class AdminEvents implements OnInit {
     showForm = signal<boolean>(false);
     editingEventId = signal<number | null>(null);
     isSubmitting = signal<boolean>(false);
+    selectedLogo = signal<File | null>(null);
+    logoPreview = signal<string | null>(null);
 
     eventForm = this.fb.group({
         title: ['', Validators.required],
@@ -129,6 +131,8 @@ export class AdminEvents implements OnInit {
     openCreateForm() {
         this.editingEventId.set(null);
         this.eventForm.reset({ isActive: true, requiresPayment: true, registrationFee: 0 });
+        this.selectedLogo.set(null);
+        this.logoPreview.set(null);
         this.showForm.set(true);
     }
 
@@ -146,7 +150,19 @@ export class AdminEvents implements OnInit {
             isActive: ev.isActive,
             allowNonMembers: ev.allowNonMembers
         });
+        this.selectedLogo.set(null);
+        this.logoPreview.set(ev.imageUrl || null);
         this.showForm.set(true);
+    }
+
+    onLogoSelected(event: any) {
+        const file = event.target.files[0];
+        if (file) {
+            this.selectedLogo.set(file);
+            const reader = new FileReader();
+            reader.onload = () => this.logoPreview.set(reader.result as string);
+            reader.readAsDataURL(file);
+        }
     }
 
     submitEvent() {
@@ -187,18 +203,29 @@ export class AdminEvents implements OnInit {
             : this.eventsService.createEvent(evData);
 
         request.subscribe({
-            next: () => {
-                this.notify.success(id ? 'Event configuration updated!' : 'New event launched successfully!');
-                this.showForm.set(false);
-                this.isSubmitting.set(false);
-                this.loadAllEvents();
+            next: (savedEvent) => {
+                const logo = this.selectedLogo();
+                if (logo) {
+                    this.eventsService.uploadEventLogo(savedEvent.id, logo).subscribe(() => {
+                        this.finishSubmission(id ? 'Event updated!' : 'Event created!');
+                    });
+                } else {
+                    this.finishSubmission(id ? 'Event updated!' : 'Event created!');
+                }
             },
             error: (err) => {
                 console.error('Event operation failed:', err);
-                this.notify.error(err.error?.message || 'Operation failed. Please ensure all fields are valid.');
+                this.notify.error(err.error?.message || 'Operation failed.');
                 this.isSubmitting.set(false);
             }
         });
+    }
+
+    private finishSubmission(msg: string) {
+        this.notify.success(msg);
+        this.showForm.set(false);
+        this.isSubmitting.set(false);
+        this.loadAllEvents();
     }
 
     deleteEvent(id: number) {

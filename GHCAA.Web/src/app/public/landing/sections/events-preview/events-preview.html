@@ -13,6 +13,9 @@
                     <span class="day">{{ ev.date | date:'dd' }}</span>
                     <span class="month">{{ ev.date | date:'MMM' }}</span>
                 </div>
+                <div class="event-mini-thumb" *ngIf="ev.imageUrl">
+                    <img [src]="'/' + ev.imageUrl" alt="Logo">
+                </div>
                 <div class="event-mini-info">
                     <h4>{{ ev.title }}</h4>
                     <p><span class="icon">📍</span> {{ ev.location }}</p>

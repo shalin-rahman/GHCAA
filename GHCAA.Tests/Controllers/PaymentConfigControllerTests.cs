@@ -168,6 +168,7 @@ namespace GHCAA.Tests.Controllers
                 var doc = System.Text.Json.JsonDocument.Parse(json);
                 Assert.That(doc.RootElement.GetProperty("DisplayName").GetString(), Is.EqualTo("Wallet"));
                 Assert.That(doc.RootElement.GetProperty("WalletNumber").GetString(), Is.EqualTo("017"));
+                Assert.That(doc.RootElement.GetProperty("IsOnline").GetBoolean(), Is.False);
             }
         }
     }

@@ -269,5 +269,18 @@ namespace GHCAA.Infrastructure.Services
                 .Include(r => r.Member)
                 .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
         }
+        public async Task<string> UpdateEventLogoAsync(int eventId, UploadedFileDto logo, CancellationToken cancellationToken = default)
+        {
+            var alumniEvent = await _context.AlumniEvents.FindAsync(eventId);
+            if (alumniEvent == null) throw new ArgumentException("Event not found");
+
+            // Save the file. Use eventId for organization.
+            string logoPath = await _fileStorageService.SaveFileAsync(logo.Content, logo.FileName, eventId, FileUploadType.NewsImage, cancellationToken); // Reusing NewsImage type as it's generic public image
+            
+            alumniEvent.ImageUrl = logoPath;
+            await _context.SaveChangesAsync(cancellationToken);
+            
+            return logoPath;
+        }
     }
 }
