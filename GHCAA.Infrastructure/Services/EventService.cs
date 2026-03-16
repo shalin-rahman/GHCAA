@@ -134,8 +134,10 @@ namespace GHCAA.Infrastructure.Services
                 GuestName = dto.GuestName,
                 GuestEmail = dto.GuestEmail,
                 GuestMobile = dto.GuestMobile,
-                PaymentReference = alumniEvent.RequiresPayment ? dto.PaymentReference : "FREE-ENTRY",
-                PaymentMethod = alumniEvent.RequiresPayment ? dto.PaymentMethod : GHCAA.Domain.Enums.PaymentMethod.ManualReceipt,
+                PaymentReference = alumniEvent.RequiresPayment ? (dto.PaymentReference ?? "PENDING") : "FREE-ENTRY",
+                PaymentMethod = alumniEvent.RequiresPayment 
+                    ? (dto.PaymentMethod ?? GHCAA.Domain.Enums.PaymentMethod.ManualReceipt) 
+                    : GHCAA.Domain.Enums.PaymentMethod.ManualReceipt,
                 ReceiptPath = receiptPath,
                 Status = EventRegistrationStatus.Pending,
                 RegisteredAt = DateTime.UtcNow
