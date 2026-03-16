@@ -1,5 +1,6 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NotificationService } from '../../core/services/notification.service';
 import { LandingBanner } from './sections/banner/banner';
 import { LandingPurpose } from './sections/purpose/purpose';
 import { LandingJobsPreview } from './sections/jobs-preview/jobs-preview';
@@ -29,5 +30,11 @@ import { LandingCtaBanner } from './sections/cta-banner/cta-banner';
   styleUrl: './landing.scss',
   encapsulation: ViewEncapsulation.None
 })
-export class Landing { }
+export class Landing implements OnInit {
+  private notify = inject(NotificationService);
+
+  ngOnInit() {
+    this.notify.show('Welcome to Govt. Haraganga College Alumni Association Official Portal!', 'success');
+  }
+}
 

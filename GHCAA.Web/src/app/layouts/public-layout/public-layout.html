@@ -1,3 +1,4 @@
+<div class="dark-theme public-wrapper">
 @let activeTheme = themeService.activeSpecialTheme();
 
 @if (activeTheme) {
@@ -19,22 +20,22 @@
             </div>
         </div>
 
-        <button class="mobile-toggle block md:hidden z-50 p-2" (click)="toggleMobileMenu()">
-            <span class="block w-6 h-0.5 bg-white mb-1.5 transition-transform" [class.rotate-45]="isMobileMenuOpen" [class.translate-y-2]="isMobileMenuOpen"></span>
-            <span class="block w-6 h-0.5 bg-white mb-1.5 transition-opacity" [class.opacity-0]="isMobileMenuOpen"></span>
-            <span class="block w-6 h-0.5 bg-white transition-transform" [class.-rotate-45]="isMobileMenuOpen" [class.-translate-y-2]="isMobileMenuOpen"></span>
+        <button class="mobile-toggle block md:hidden z-50 p-2" (click)="toggleMobileMenu()" aria-label="Toggle Menu">
+            <div class="hamburger-box">
+                <span class="hamburger-inner" [class.active]="isMobileMenuOpen"></span>
+            </div>
         </button>
 
-        <div class="nav-links flex-col md:flex-row absolute md:relative top-full left-0 w-full md:w-auto bg-black/95 md:bg-transparent p-6 md:p-0 border-b md:border-0 border-white/10 transition-all duration-300 md:flex items-center gap-4 lg:gap-8" 
-             [class.hidden]="!isMobileMenuOpen" [class.flex]="isMobileMenuOpen">
-            <a routerLink="/" class="nav-link block py-2 md:py-0 w-full md:w-auto text-center md:text-left">Home</a>
-            <a routerLink="/about" class="nav-link block py-2 md:py-0 w-full md:w-auto text-center md:text-left">About</a>
-            <a routerLink="/events" class="nav-link block py-2 md:py-0 w-full md:w-auto text-center md:text-left">Events</a>
-            <a routerLink="/news" class="nav-link block py-2 md:py-0 w-full md:w-auto text-center md:text-left" title="Latest News">News</a>
-            <a routerLink="/register" class="nav-link block py-2 md:py-0 w-full md:w-auto text-center md:text-left">Join</a>
-            <a routerLink="/gallery" class="nav-link block py-2 md:py-0 w-full md:w-auto text-center md:text-left">Gallery</a>
-            <a routerLink="/contact" class="nav-link block py-2 md:py-0 w-full md:w-auto text-center md:text-left">Contact</a>
-            <a routerLink="/login" class="btn btn-accent block w-full md:w-auto text-center mt-4 md:mt-0">Login</a>
+        <div class="nav-links" 
+             [class.active]="isMobileMenuOpen">
+            <a routerLink="/" class="nav-link">Home</a>
+            <a routerLink="/about" class="nav-link">About</a>
+            <a routerLink="/events" class="nav-link">Events</a>
+            <a routerLink="/news" class="nav-link" title="Latest News">News</a>
+            <a routerLink="/register" class="nav-link">Join</a>
+            <a routerLink="/gallery" class="nav-link">Gallery</a>
+            <a routerLink="/contact" class="nav-link">Contact</a>
+            <a routerLink="/login" class="nav-link">Login</a>
         </div>
     </div>
 </nav>
@@ -44,3 +45,4 @@
 </main>
 
 <app-footer></app-footer>
+</div>
