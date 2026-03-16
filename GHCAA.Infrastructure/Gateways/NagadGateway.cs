@@ -22,20 +22,20 @@ namespace GHCAA.Infrastructure.Gateways
 
         public Enums.PaymentGateway GatewayType => Enums.PaymentGateway.NagadGateway;
 
-        public async Task<PaymentGatewayResponseDto> InitiatePaymentAsync(PaymentGatewayInitiationDto dto, CancellationToken cancellationToken = default)
+        public Task<PaymentGatewayResponseDto> InitiatePaymentAsync(PaymentGatewayInitiationDto dto, CancellationToken cancellationToken = default)
         {
             // Nagad integration is multi-step (sensitive data encryption, order creation).
             // Placeholder implementation.
-            return new PaymentGatewayResponseDto 
+            return Task.FromResult(new PaymentGatewayResponseDto 
             { 
                 Success = false, 
                 Message = "Nagad automatic gateway integration is coming soon. Please use manual method for now." 
-            };
+            });
         }
 
-        public async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
+        public Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
-            return false;
+            return Task.FromResult(false);
         }
     }
 }

@@ -84,15 +84,15 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
-        public async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
+        public Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
-            if (!callbackData.ContainsKey("status") || callbackData["status"] != "VALID") return false;
+            if (!callbackData.ContainsKey("status") || callbackData["status"] != "VALID") return Task.FromResult(false);
             
             // Logic to verify with SSLCommerz server if needed (IPN or Validation API)
             // For now, checking the hash or status is a basic start.
             // Ideally call: https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id={val_id}&store_id={store_id}&store_passwd={store_passwd}
             
-            return true;
+            return Task.FromResult(true);
         }
 
         private class SSLCommerzInitResponse

@@ -6,13 +6,14 @@ A state-of-the-art, enterprise-grade alumni management system designed for Govt.
 
 | Layer              | Technology Stack                                                                 |
 |--------------------|---------------------------------------------------------------------------------|
-| **Backend**        | .NET 8 (Web API), Entity Framework Core                                          |
-| **Database**       | PostgreSQL 16+                                                                  |
+| **Backend**        | .NET 9 (Web API), Entity Framework Core                                          |
+| **Database**       | PostgreSQL 16+ (Dockerized in Prod)                                             |
 | **Frontend**       | Angular 18 (Signals, Standalone Components)                                    |
 | **Styling**        | Vanilla SCSS (Custom Design System), Glassmorphism                             |
 | **Security**       | JWT, BCrypt.Net-Next, ASP.NET Core Identity (Custom Implementation)             |
 | **DevOps**         | Docker, GitHub Actions, PowerShell Automation                                   |
 | **Reporting**      | ClosedXML (Excel Integration)                                                   |
+| **Payment**        | SSLCommerz, Nagad (Integration Ready)                                           |
 
 ---
 
@@ -171,7 +172,7 @@ The project maintains a rigorous quality standard organized into three distinct 
 ## 🛠️ Getting Started
 
 ### 1. Prerequisites
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [Node.js v20+](https://nodejs.org/)
 - [PostgreSQL 16+](https://www.postgresql.org/)
 
