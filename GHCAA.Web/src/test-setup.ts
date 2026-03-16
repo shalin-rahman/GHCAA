@@ -25,3 +25,12 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: () => {},
   }),
 });
+
+// Mock IntersectionObserver for JSDOM (used by infinite scroll)
+(globalThis as any).IntersectionObserver = class MockIntersectionObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  constructor(public callback: IntersectionObserverCallback, public options?: IntersectionObserverInit) {}
+};
+
