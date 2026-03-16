@@ -34,7 +34,7 @@ export class Landing implements OnInit {
   private notify = inject(NotificationService);
 
   ngOnInit() {
-    this.notify.show('Welcome to Govt. Haraganga College Alumni Association Official Portal!', 'success');
+    // Welcome toast removed from public landing as per request
   }
 }
 
