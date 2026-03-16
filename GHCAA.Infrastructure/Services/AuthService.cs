@@ -26,15 +26,38 @@ namespace GHCAA.Infrastructure.Services
         public async Task<TokenResponseDto?> LoginAsync(LoginDto loginDto, CancellationToken cancellationToken = default)
         {
             // Trim whitespace to prevent subtle login failures from copy-paste or autocomplete
-            var username = loginDto.Username?.Trim() ?? string.Empty;
+            var input = loginDto.Username?.Trim() ?? string.Empty;
 
+            // 1. Try finding user directly by Username (exact match)
             var user = await _db.Users
                 .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
+                .FirstOrDefaultAsync(u => u.Username == input, cancellationToken);
+
+            // 2. Fallback: If not found, try finding user via Member properties (Email, NID, MembershipNumber)
+            if (user == null)
+            {
+                _logger.LogInformation("Direct username lookup failed for '{Username}', trying member fallbacks...", input);
+                
+                var member = await _db.Members
+                    .IgnoreQueryFilters() // Just for lookup, we'll check status/archived later
+                    .FirstOrDefaultAsync(m => m.Email == input || m.NID == input || m.MembershipNumber == input, cancellationToken);
+
+                if (member != null)
+                {
+                    user = await _db.Users
+                        .Include(u => u.Roles)
+                        .FirstOrDefaultAsync(u => u.MemberId == member.Id, cancellationToken);
+                    
+                    if (user == null)
+                    {
+                        _logger.LogWarning("Member found for '{Username}' but has no associated user account", input);
+                    }
+                }
+            }
 
             if (user == null)
             {
-                _logger.LogWarning("Login failed: User {Username} not found", username);
+                _logger.LogWarning("Login failed: User {Username} not found after checking all identifiers", input);
                 return null;
             }
 
@@ -66,18 +89,18 @@ namespace GHCAA.Infrastructure.Services
                 }
                 else 
                 {
-                    _logger.LogError("Login failed: Invalid password for user {Username}", username);
+                    _logger.LogError("Login failed: Invalid password for user {Username}", user.Username);
                     return null;
                 }
             }
 
             var token = _tokenService.CreateToken(user);
 
-            _logger.LogInformation("User {Username} logged in successfully", username);
+            _logger.LogInformation("User {Username} logged in successfully", user.Username);
 
             if (user.MemberId.HasValue)
             {
-                await _activityService.LogActivityAsync(user.MemberId.Value, "Login", $"User {username} logged in.", cancellationToken: default);
+                await _activityService.LogActivityAsync(user.MemberId.Value, "Login", $"User {user.Username} logged in.", cancellationToken: default);
             }
 
             return new TokenResponseDto

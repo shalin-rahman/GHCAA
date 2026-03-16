@@ -83,10 +83,19 @@ builder.Services.AddScoped<GHCAA.Application.Interfaces.IRealTimeService, GHCAA.
 
 builder.Services.AddCors(options =>
 {
-    var allowedOrigins = configuration.GetSection("AppSettings:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:4200" };
+    var allowedOrigins = configuration.GetSection("AppSettings:AllowedOrigins").Get<string[]>()?.ToList() ?? new List<string>();
+    
+    // Always permit local development
+    if (!allowedOrigins.Contains("http://localhost:4200")) allowedOrigins.Add("http://localhost:4200");
+    if (!allowedOrigins.Contains("http://localhost:4201")) allowedOrigins.Add("http://localhost:4201");
+    
+    // Add production Render origins
+    if (!allowedOrigins.Contains("https://ghcaa-web.onrender.com")) allowedOrigins.Add("https://ghcaa-web.onrender.com");
+    if (!allowedOrigins.Contains("https://ghcaa.onrender.com")) allowedOrigins.Add("https://ghcaa.onrender.com");
+
     options.AddPolicy("AngularApp", policy =>
     {
-        policy.WithOrigins(allowedOrigins)
+        policy.WithOrigins(allowedOrigins.ToArray())
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
