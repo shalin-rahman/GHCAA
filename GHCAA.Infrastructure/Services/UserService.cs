@@ -25,6 +25,9 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<User> CreateUserAccountAsync(int memberId, string username, string password, CancellationToken cancellationToken = default)
         {
+            username = username.Replace(" ", "");
+            password = password.Replace(" ", "");
+            
             // Check if user already exists for this member
             var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
             if (existingUser != null)

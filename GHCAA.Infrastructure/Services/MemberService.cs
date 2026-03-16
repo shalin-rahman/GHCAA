@@ -68,9 +68,9 @@ namespace GHCAA.Infrastructure.Services
                 DateOfBirth = DateTime.SpecifyKind(dto.DateOfBirth, DateTimeKind.Utc),
                 Gender = Enum.Parse<Enums.Gender>(dto.Gender),
                 BloodGroup = Enum.Parse<Enums.BloodGroup>(dto.BloodGroup),
-                NID = dto.NID,
-                MobileNo = dto.MobileNo,
-                Email = dto.Email,
+                NID = dto.NID?.Replace(" ", ""),
+                MobileNo = dto.MobileNo?.Replace(" ", ""),
+                Email = dto.Email?.Trim().ToLower(),
                 PresentAddress = dto.PresentAddress,
                 PermanentAddress = dto.PermanentAddress,
                 EmergencyContactName = dto.EmergencyContactName,
@@ -265,9 +265,10 @@ namespace GHCAA.Infrastructure.Services
             _logger.LogInformation("Member {MemberId} approved by Admin {AdminId}. Membership Number: {MembershipNumber}", 
                 memberId, approvedByAdminId, membershipNumber);
 
-            // Create user account
-            var defaultPassword = _userService.GenerateDefaultPassword();
-            await _userService.CreateUserAccountAsync(memberId, membershipNumber, defaultPassword, cancellationToken);
+            // Create user account using NID (without spaces) as both username and password
+            var cleanNid = member.NID.Replace(" ", "");
+            await _userService.CreateUserAccountAsync(memberId, cleanNid, cleanNid, cancellationToken);
+            var defaultPassword = cleanNid; // Use NID as the default password display
 
             // Send Welcome Email
             try

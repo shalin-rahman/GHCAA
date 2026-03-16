@@ -136,6 +136,10 @@ export class Register {
     if (this.loading()) return;
     this.loading.set(true);
 
+    // Clean data before submission
+    if (this.model.NID) this.model.NID = this.model.NID.replace(/\s/g, '');
+    if (this.model.Email) this.model.Email = this.model.Email.trim().toLowerCase();
+
     const formData = new FormData();
     Object.keys(this.model).forEach(key => {
       if (key !== 'AcademicHistory' && key !== 'ProfessionalHistory') {

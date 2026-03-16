@@ -142,6 +142,18 @@ namespace GHCAA.Infrastructure.Data
             // Soft Delete Filters
             modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsArchived);
             modelBuilder.Entity<Member>().HasQueryFilter(m => !m.IsArchived);
+            
+            // Apply matching filters to related entities to resolve CS8602-related architecture warnings
+            modelBuilder.Entity<AcademicRecord>().HasQueryFilter(a => a.Member != null && !a.Member.IsArchived);
+            modelBuilder.Entity<ProfessionalRecord>().HasQueryFilter(p => p.Member != null && !p.Member.IsArchived);
+            modelBuilder.Entity<FileUpload>().HasQueryFilter(f => f.Member != null && !f.Member.IsArchived);
+            modelBuilder.Entity<MembershipDue>().HasQueryFilter(d => d.Member != null && !d.Member.IsArchived);
+            modelBuilder.Entity<MembershipHistory>().HasQueryFilter(h => h.Member != null && !h.Member.IsArchived);
+            modelBuilder.Entity<Notification>().HasQueryFilter(n => n.Member != null && !n.Member.IsArchived);
+            modelBuilder.Entity<PaymentHistory>().HasQueryFilter(ph => ph.Member != null && !ph.Member.IsArchived);
+            modelBuilder.Entity<ECMember>().HasQueryFilter(em => em.Member != null && !em.Member.IsArchived);
+            modelBuilder.Entity<NewsPost>().HasQueryFilter(np => np.Author != null && !np.Author.IsArchived);
+            modelBuilder.Entity<ChatMessage>().HasQueryFilter(cm => (cm.Sender != null && !cm.Sender.IsArchived) && (cm.Receiver != null && !cm.Receiver.IsArchived));
 
             // Unique constraints
             modelBuilder.Entity<Member>().HasIndex(m => m.Email).IsUnique();
