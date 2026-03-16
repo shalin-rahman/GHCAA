@@ -92,7 +92,7 @@
                     </div>
                     <div class="info-item" *ngIf="m.bloodGroup">
                         <span class="icon">🩸</span>
-                        <span>Blood Group: <strong>{{ m.bloodGroup }}</strong></span>
+                        <span>Blood Group: <strong>{{ getBloodGroupName(m.bloodGroup) }}</strong></span>
                     </div>
                     <div class="info-item" *ngIf="m.isEmailPublic && m.email">
                         <span class="icon">📧</span>
@@ -157,7 +157,7 @@
                     </p>
                     <div class="social-tags">
                         <span class="tag">🎓 Batch of {{ selectedMember()?.ghcLastCertificatePassingYear }}</span>
-                        <span class="tag">🩸 {{ selectedMember()?.bloodGroup }}</span>
+                        <span class="tag">🩸 {{ getBloodGroupName(selectedMember()?.bloodGroup) }}</span>
                     </div>
                 </div>
             </div>

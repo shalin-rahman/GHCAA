@@ -166,6 +166,12 @@ export function getMembershipTypeLabel(type: string | number): string {
     return type || 'General';
 }
 
+export function getBloodGroupName(bg: string | undefined | null): string {
+    if (!bg) return '';
+    const option = BLOOD_GROUP_OPTIONS.find(o => o.value === bg);
+    return option ? option.label : bg;
+}
+
 export const EC_ROLES_OPTIONS = EC_ROLES.map((label, index) => ({ value: index, label }));
 
 export const MEMBERSHIP_STATUS_OPTIONS = [

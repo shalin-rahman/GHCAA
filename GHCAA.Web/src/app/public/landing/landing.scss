@@ -275,54 +275,57 @@
     }
 
     .values-stack {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
     .v-card {
         display: flex;
-        flex-direction: row;
+        gap: 1.25rem;
         align-items: center;
-        justify-content: flex-start;
-        padding: 0.75rem 1.5rem;
-        gap: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
         background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        transition: 0.3s;
-        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-height: 72px; /* Ensure same fixed height */
 
         .v-icon {
-            font-size: 1.2rem;
-            margin-bottom: 0;
-        }
-
-        strong {
-            font-size: 0.75rem;
-            color: var(--accent-color);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(197, 160, 89, 0.25);
+            border-radius: 14px;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
         }
 
         @media (max-width: 480px) {
-            flex-direction: column;
-            text-align: center;
-            padding: 1rem 0.5rem;
+            padding: 1rem;
             
             .v-icon {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-            }
-
-            strong {
-                font-size: 0.8rem;
+                width: 42px;
+                height: 42px;
+                font-size: 1.4rem;
             }
         }
 
         &:hover {
+            background: rgba(197, 160, 89, 0.08);
             border-color: var(--accent-color);
-            transform: translateY(-5px);
-            background: rgba(197, 160, 89, 0.05);
+            transform: translateX(8px);
+            
+            .v-icon {
+                background: var(--accent-color);
+                color: #000;
+                transform: scale(1.1);
+                border-color: var(--accent-color);
+            }
         }
     }
 
@@ -371,6 +374,7 @@
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 72px; /* Ensure same fixed height */
 
             @media (max-width: 1024px) {
                 max-width: 480px;

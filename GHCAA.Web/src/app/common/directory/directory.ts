@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, getAcademicYears, PROFESSIONAL_SECTORS } from '../../core/constants/app.constants';
+import { getECPositionName, getAcademicYears, PROFESSIONAL_SECTORS, getBloodGroupName } from '../../core/constants/app.constants';
 
 @Component({
     selector: 'app-directory',
@@ -19,6 +19,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('sentinel') sentinelRef!: ElementRef<HTMLElement>;
 
     getECPositionName = getECPositionName;
+    getBloodGroupName = getBloodGroupName;
     private networkService = inject(NetworkingService);
     private notify = inject(NotificationService);
     private router = inject(Router);
