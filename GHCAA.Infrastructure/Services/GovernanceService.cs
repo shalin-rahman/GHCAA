@@ -80,6 +80,11 @@ namespace GHCAA.Infrastructure.Services
                 }
                 await ActivatePeriodInternalAsync(id, cancellationToken);
             }
+            else if (isActive && period.IsActive)
+            {
+                // Already active? Re-sync to ensure everything is matched (Immediate Effect)
+                await ActivatePeriodInternalAsync(id, cancellationToken);
+            }
             else if (!isActive && period.IsActive)
             {
                 period.IsActive = false;
