@@ -17,7 +17,11 @@
                     <h4>{{ ev.title }}</h4>
                     <p><span class="icon">📍</span> {{ ev.location }}</p>
                 </div>
-                <a routerLink="/events" class="btn btn-accent btn-sm">Register</a>
+                @if (isRegistrationClosed(ev.registrationDeadline)) {
+                    <button class="btn btn-secondary btn-sm" disabled>Registration Closed</button>
+                } @else {
+                    <a routerLink="/events" class="btn btn-accent btn-sm">Register</a>
+                }
             </div>
             } @empty {
             <div class="empty-placeholder">

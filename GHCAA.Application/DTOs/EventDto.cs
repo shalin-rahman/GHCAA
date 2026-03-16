@@ -11,6 +11,7 @@ namespace GHCAA.Application.DTOs
         public DateTime Date { get; set; }
         public string Location { get; set; } = null!;
         public decimal? RegistrationFee { get; set; }
+        public bool RequiresPayment { get; set; }
         public bool IsActive { get; set; }
         public string? ImageUrl { get; set; }
         public DateTime? RegistrationDeadline { get; set; }
@@ -24,6 +25,7 @@ namespace GHCAA.Application.DTOs
         public DateTime Date { get; set; }
         public string Location { get; set; } = null!;
         public decimal? RegistrationFee { get; set; }
+        public bool RequiresPayment { get; set; } = true;
         public bool IsActive { get; set; } = true;
         public bool AllowNonMembers { get; set; } = false;
         public string? ImageUrl { get; set; }

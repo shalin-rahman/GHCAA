@@ -80,6 +80,12 @@ namespace GHCAA.Infrastructure.Services
                 }
                 await ActivatePeriodInternalAsync(id, cancellationToken);
             }
+            else if (!isActive && period.IsActive)
+            {
+                period.IsActive = false;
+                var membersWithRole = await _db.Members.Where(m => m.ECPosition != ECPosition.None).ToListAsync(cancellationToken);
+                foreach (var m in membersWithRole) m.ECPosition = ECPosition.None;
+            }
             else
             {
                 period.IsActive = isActive;
@@ -160,7 +166,7 @@ namespace GHCAA.Infrastructure.Services
         {
             return await _db.ECMembers
                 .Include(em => em.Member)
-                .Where(em => em.ECPeriodId == periodId)
+                .Where(em => em.ECPeriodId == periodId && em.EndDate == null)
                 .OrderBy(em => em.Position)
                 .ToListAsync(cancellationToken);
         }
@@ -196,9 +202,12 @@ namespace GHCAA.Infrastructure.Services
             // Remove existing active role for this member in THIS period (if any)
             var existing = await _db.ECMembers
                 .Where(em => em.ECPeriodId == periodId && em.MemberId == memberId && em.EndDate == null)
-                .ToListAsync(cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken);
             
-            foreach (var ex in existing) ex.EndDate = DateTime.UtcNow;
+            if (existing != null)
+            {
+                throw new InvalidOperationException("This member already holds a role in this EC Period. Please remove the existing role first.");
+            }
 
             var newAssignment = new ECMember
             {

@@ -81,8 +81,13 @@
                         <input type="number" formControlName="registrationFee" placeholder="0.00">
                     </div>
                     <div class="input-group">
-                        <label>Visibility & Access</label>
+                        <label>Visibility & Asset Access</label>
                         <div class="flex flex-col gap-4 py-2">
+                            <label class="premium-checkbox-label">
+                                <input type="checkbox" formControlName="requiresPayment">
+                                <span class="checkmark"></span>
+                                <span class="label-text">Require Financial Processing (Payment)</span>
+                            </label>
                             <label class="premium-checkbox-label">
                                 <input type="checkbox" formControlName="isActive">
                                 <span class="checkmark"></span>

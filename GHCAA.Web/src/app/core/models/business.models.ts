@@ -203,6 +203,7 @@ export interface AlumniEvent {
     date: string | Date;
     location: string;
     registrationFee?: number | null;
+    requiresPayment: boolean;
     isActive: boolean;
     imageUrl?: string;
     registrationDeadline?: string | Date;

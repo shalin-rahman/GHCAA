@@ -97,6 +97,12 @@ export class Events implements OnInit {
     this.regForm.get('guestName')?.updateValueAndValidity();
     this.regForm.get('guestEmail')?.updateValueAndValidity();
     this.regForm.get('guestMobile')?.updateValueAndValidity();
+
+    if (!ev.requiresPayment) {
+       this.regForm.get('paymentReference')?.clearValidators();
+       this.regForm.get('paymentReference')?.updateValueAndValidity();
+    }
+
     this.regForm.updateValueAndValidity();
 
     this.selectedEvent.set(ev);
@@ -135,8 +141,12 @@ export class Events implements OnInit {
     const isGuest = !this.auth.isAuthenticated();
     
     let ref = this.regForm.value.paymentReference || '';
-    if (!this.selectedPaymentMethod()?.requiresReference && !ref) {
-        ref = `NA-${Date.now().toString().slice(-6)}`;
+    if (ev.requiresPayment) {
+        if (!this.selectedPaymentMethod()?.requiresReference && !ref) {
+            ref = `NA-${Date.now().toString().slice(-6)}`;
+        }
+    } else {
+        ref = 'FREE-ENTRY';
     }
 
     const registrationDto: any = {

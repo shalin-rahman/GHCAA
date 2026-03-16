@@ -23,6 +23,8 @@ namespace GHCAA.Domain.Models
 
         public decimal? RegistrationFee { get; set; }
 
+        public bool RequiresPayment { get; set; } = true;
+
         public bool IsActive { get; set; } = true;
         public bool AllowNonMembers { get; set; } = false;
 

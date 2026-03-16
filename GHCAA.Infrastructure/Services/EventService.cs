@@ -54,6 +54,7 @@ namespace GHCAA.Infrastructure.Services
                 Date = DateTime.SpecifyKind(dto.Date, DateTimeKind.Utc),
                 Location = dto.Location,
                 RegistrationFee = dto.RegistrationFee,
+                RequiresPayment = dto.RequiresPayment,
                 IsActive = dto.IsActive,
                 ImageUrl = dto.ImageUrl,
                 RegistrationDeadline = dto.RegistrationDeadline.HasValue 
@@ -79,6 +80,7 @@ namespace GHCAA.Infrastructure.Services
             alumniEvent.Date = DateTime.SpecifyKind(dto.Date, DateTimeKind.Utc);
             alumniEvent.Location = dto.Location;
             alumniEvent.RegistrationFee = dto.RegistrationFee;
+            alumniEvent.RequiresPayment = dto.RequiresPayment;
             alumniEvent.IsActive = dto.IsActive;
             alumniEvent.ImageUrl = dto.ImageUrl;
             alumniEvent.RegistrationDeadline = dto.RegistrationDeadline.HasValue 
@@ -132,8 +134,8 @@ namespace GHCAA.Infrastructure.Services
                 GuestName = dto.GuestName,
                 GuestEmail = dto.GuestEmail,
                 GuestMobile = dto.GuestMobile,
-                PaymentReference = dto.PaymentReference,
-                PaymentMethod = dto.PaymentMethod,
+                PaymentReference = alumniEvent.RequiresPayment ? dto.PaymentReference : "FREE-ENTRY",
+                PaymentMethod = alumniEvent.RequiresPayment ? dto.PaymentMethod : GHCAA.Domain.Enums.PaymentMethod.ManualReceipt,
                 ReceiptPath = receiptPath,
                 Status = EventRegistrationStatus.Pending,
                 RegisteredAt = DateTime.UtcNow

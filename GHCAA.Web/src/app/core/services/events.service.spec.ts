@@ -15,6 +15,7 @@ describe('EventsService', () => {
         date: '2026-03-08T00:00:00Z',
         location: 'Dhaka',
         isActive: true,
+        requiresPayment: true,
         allowNonMembers: false
     };
 

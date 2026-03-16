@@ -17,11 +17,22 @@ export class PublicLayout {
   themeService = inject(ThemeService);
   private titleService = inject(Title);
   private router = inject(Router);
+  
+  isMobileMenuOpen = false;
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen = false;
+  }
 
   constructor() {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
+      this.closeMobileMenu();
       const url = this.router.url;
       let title = 'Home';
       if (url.includes('login')) title = 'Members Login';

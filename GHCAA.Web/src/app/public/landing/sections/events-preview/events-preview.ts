@@ -21,6 +21,11 @@ export class LandingEventsPreview implements OnInit {
             error: () => this.events.set([])
         });
     }
+
+    isRegistrationClosed(deadline: string | Date | undefined): boolean {
+        if (!deadline) return false;
+        return new Date(deadline).getTime() < new Date().getTime();
+    }
 }
 
 

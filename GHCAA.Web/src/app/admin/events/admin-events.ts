@@ -60,6 +60,7 @@ export class AdminEvents implements OnInit {
         date: ['', Validators.required],
         location: ['', Validators.required],
         registrationFee: [0],
+        requiresPayment: [true],
         registrationDeadline: [''],
         adminNote: [''],
         isActive: [true],
@@ -127,7 +128,7 @@ export class AdminEvents implements OnInit {
 
     openCreateForm() {
         this.editingEventId.set(null);
-        this.eventForm.reset({ isActive: true, registrationFee: 0 });
+        this.eventForm.reset({ isActive: true, requiresPayment: true, registrationFee: 0 });
         this.showForm.set(true);
     }
 
@@ -139,6 +140,7 @@ export class AdminEvents implements OnInit {
             date: ev.date ? new Date(ev.date).toISOString().slice(0, 16) : '',
             location: ev.location,
             registrationFee: ev.registrationFee,
+            requiresPayment: ev.requiresPayment,
             registrationDeadline: ev.registrationDeadline ? new Date(ev.registrationDeadline).toISOString().slice(0, 16) : '',
             adminNote: ev.adminNote,
             isActive: ev.isActive,
@@ -171,6 +173,7 @@ export class AdminEvents implements OnInit {
             date: toSafeISO(raw.date)!,
             registrationDeadline: toSafeISO(raw.registrationDeadline),
             registrationFee: raw.registrationFee || 0,
+            requiresPayment: raw.requiresPayment ?? true,
             adminNote: raw.adminNote || undefined,
             isActive: raw.isActive ?? true,
             allowNonMembers: raw.allowNonMembers ?? false,

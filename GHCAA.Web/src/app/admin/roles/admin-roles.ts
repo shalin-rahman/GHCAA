@@ -28,6 +28,9 @@ export class AdminRoles implements OnInit {
         role: ['Admin', Validators.required]
     });
 
+    customRoleName = signal('');
+    creatingRole = signal(false);
+
     ngOnInit() {
         this.loadData();
     }
@@ -63,6 +66,29 @@ export class AdminRoles implements OnInit {
             error: (err) => {
                 this.notify.error(err.error?.message || 'Failed to create user');
                 this.submitting.set(false);
+            }
+        });
+    }
+
+    createCustomRole() {
+        const role = this.customRoleName().trim();
+        if (!role) {
+            this.notify.error('Role name cannot be empty');
+            return;
+        }
+        this.creatingRole.set(true);
+        this.http.post('/api/roles', JSON.stringify(role), {
+            headers: { 'Content-Type': 'application/json' }
+        }).subscribe({
+            next: () => {
+                this.notify.success(`Custom role '${role}' created successfully`);
+                this.customRoleName.set('');
+                this.creatingRole.set(false);
+                this.loadData();
+            },
+            error: (err) => {
+                this.notify.error(err.error?.message || 'Failed to create role');
+                this.creatingRole.set(false);
             }
         });
     }

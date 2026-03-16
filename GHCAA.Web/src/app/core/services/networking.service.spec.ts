@@ -44,11 +44,11 @@ describe('NetworkingService', () => {
 
     it('should search members', () => {
         service.searchMembers({ query: 'shalin' }).subscribe(res => {
-            expect(res.length).toBe(0);
+            expect(res.items.length).toBe(0);
         });
         const req = httpMock.expectOne(req => req.url === API_ENDPOINTS.NETWORKING.SEARCH);
         expect(req.request.method).toBe('GET');
-        req.flush([]);
+        req.flush({ items: [], totalItems: 0, totalPages: 0, currentPage: 1, pageSize: 12 });
     });
 
     it('should get updates', () => {
