@@ -179,8 +179,8 @@ namespace GHCAA.Infrastructure.Data
             if (userRoles.Any())
             {
                 modelBuilder.Entity("UserRoles").HasData(userRoles.Select(ur => new { 
-                    RolesId = int.Parse(ur["RolesId"].ToString()), 
-                    UsersId = int.Parse(ur["UsersId"].ToString()) 
+                    RolesId = int.Parse(ur["RolesId"]?.ToString() ?? "0"), 
+                    UsersId = int.Parse(ur["UsersId"]?.ToString() ?? "0") 
                 }).ToList());
             }
 

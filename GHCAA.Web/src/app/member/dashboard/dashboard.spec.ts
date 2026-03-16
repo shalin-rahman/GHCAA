@@ -7,6 +7,7 @@ import { NetworkingService } from '../../core/services/networking.service';
 import { AlertService } from '../../core/services/alert.service';
 import { AuthService } from '../../core/services/auth.service';
 import { of } from 'rxjs';
+import { provideRouter } from '@angular/router';
 
 describe('Dashboard Component', () => {
     let component: Dashboard;
@@ -33,7 +34,9 @@ describe('Dashboard Component', () => {
             getRecentlyJoined: vi.fn().mockReturnValue(of([]))
         };
         alertServiceMock = {
-            loadNotifications: vi.fn()
+            loadNotifications: vi.fn(),
+            unreadCount: vi.fn().mockReturnValue(0),
+            notifications: vi.fn().mockReturnValue([])
         };
         authServiceMock = {
             logout: vi.fn()
@@ -47,7 +50,8 @@ describe('Dashboard Component', () => {
                 { provide: EventsService, useValue: eventsServiceMock },
                 { provide: NetworkingService, useValue: networkingServiceMock },
                 { provide: AlertService, useValue: alertServiceMock },
-                { provide: AuthService, useValue: authServiceMock }
+                { provide: AuthService, useValue: authServiceMock },
+                provideRouter([])
             ]
         }).compileComponents();
 

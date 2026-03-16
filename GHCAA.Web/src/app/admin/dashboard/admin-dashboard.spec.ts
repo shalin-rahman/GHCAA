@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminDashboard } from './admin-dashboard';
 import { AdminService } from '../../core/services/admin.service';
 import { of } from 'rxjs';
+import { provideRouter } from '@angular/router';
 
 describe('AdminDashboard Component', () => {
     let component: AdminDashboard;
@@ -17,7 +18,8 @@ describe('AdminDashboard Component', () => {
         await TestBed.configureTestingModule({
             imports: [AdminDashboard],
             providers: [
-                { provide: AdminService, useValue: adminServiceMock }
+                { provide: AdminService, useValue: adminServiceMock },
+                provideRouter([])
             ]
         }).compileComponents();
 

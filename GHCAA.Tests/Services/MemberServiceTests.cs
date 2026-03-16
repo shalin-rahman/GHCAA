@@ -608,13 +608,13 @@ public class MemberServiceTests : TestBase
 
         // Assert
         result.MembershipNumber.Should().Be("GHC-2007-0001");
-        result.DefaultPassword.Should().Be(defaultPassword);
+        result.DefaultPassword.Should().Be(member.NID);
         var updatedMember = await _context.Members.FindAsync(member.Id);
         updatedMember!.Status.Should().Be(Enums.MembershipStatus.Active);
         updatedMember.MembershipNumber.Should().Be("GHC-2007-0001");
         updatedMember.ApprovedDate.Should().NotBeNull();
         updatedMember.ApprovedBy.Should().Be(adminId);
-        _mockUserService.Verify(x => x.CreateUserAccountAsync(member.Id, "GHC-2007-0001", defaultPassword, It.IsAny<CancellationToken>()), Times.Once);
+        _mockUserService.Verify(x => x.CreateUserAccountAsync(member.Id, member.NID, member.NID, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]

@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Gallery } from './gallery';
 import { GalleryService } from '../../core/services/gallery.service';
 import { of } from 'rxjs';
+import { provideRouter } from '@angular/router';
 
 describe('Gallery Component', () => {
     let component: Gallery;
@@ -10,13 +11,14 @@ describe('Gallery Component', () => {
 
     beforeEach(async () => {
         galleryServiceMock = {
-            getGalleries: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0 }))
+            getGalleries: vi.fn().mockReturnValue(of([]))
         };
 
         await TestBed.configureTestingModule({
             imports: [Gallery],
             providers: [
-                { provide: GalleryService, useValue: galleryServiceMock }
+                { provide: GalleryService, useValue: galleryServiceMock },
+                provideRouter([])
             ]
         }).compileComponents();
 

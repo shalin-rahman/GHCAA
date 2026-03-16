@@ -20,7 +20,7 @@ namespace GHCAA.Infrastructure.Services
         {
             var notification = new Notification
             {
-                UserId = userId,
+                MemberId = userId,
                 Title = title,
                 Message = message,
                 Type = type,
@@ -39,7 +39,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(int userId, CancellationToken cancellationToken = default)
         {
             return await _db.Notifications
-                .Where(n => n.UserId == userId)
+                .Where(n => n.MemberId == userId)
                 .OrderByDescending(n => n.CreatedAt)
                 .Take(50)
                 .ToListAsync(cancellationToken);
@@ -58,7 +58,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task MarkAllAsReadAsync(int userId, CancellationToken cancellationToken = default)
         {
             var notifications = await _db.Notifications
-                .Where(n => n.UserId == userId && !n.IsRead)
+                .Where(n => n.MemberId == userId && !n.IsRead)
                 .ToListAsync(cancellationToken);
             
             foreach (var n in notifications) n.IsRead = true;

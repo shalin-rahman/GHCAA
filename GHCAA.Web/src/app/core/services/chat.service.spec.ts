@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ChatService } from './chat.service';
+import { AuthService } from './auth.service';
 import { API_ENDPOINTS } from '../constants/app.constants';
 
 describe('ChatService', () => {
@@ -8,9 +9,18 @@ describe('ChatService', () => {
     let httpMock: HttpTestingController;
 
     beforeEach(() => {
+        const authServiceMock = {
+            getToken: () => null,
+            isAuthenticated: () => false,
+            currentUser: () => null
+        };
+
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
-            providers: [ChatService]
+            providers: [
+                ChatService,
+                { provide: AuthService, useValue: authServiceMock }
+            ]
         });
         service = TestBed.inject(ChatService);
         httpMock = TestBed.inject(HttpTestingController);

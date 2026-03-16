@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { News } from './news';
 import { NewsService } from '../../core/services/news.service';
 import { of } from 'rxjs';
+import { provideRouter } from '@angular/router';
 
 describe('News Component', () => {
     let component: News;
@@ -10,13 +11,14 @@ describe('News Component', () => {
 
     beforeEach(async () => {
         newsServiceMock = {
-            getNews: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0 }))
+            getNews: vi.fn().mockReturnValue(of([]))
         };
 
         await TestBed.configureTestingModule({
             imports: [News],
             providers: [
-                { provide: NewsService, useValue: newsServiceMock }
+                { provide: NewsService, useValue: newsServiceMock },
+                provideRouter([])
             ]
         }).compileComponents();
 

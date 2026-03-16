@@ -68,9 +68,9 @@ namespace GHCAA.Infrastructure.Services
                 DateOfBirth = DateTime.SpecifyKind(dto.DateOfBirth, DateTimeKind.Utc),
                 Gender = Enum.Parse<Enums.Gender>(dto.Gender),
                 BloodGroup = Enum.Parse<Enums.BloodGroup>(dto.BloodGroup),
-                NID = dto.NID?.Replace(" ", ""),
-                MobileNo = dto.MobileNo?.Replace(" ", ""),
-                Email = dto.Email?.Trim().ToLower(),
+                NID = dto.NID.Replace(" ", ""),
+                MobileNo = dto.MobileNo.Replace(" ", ""),
+                Email = dto.Email.Trim().ToLower(),
                 PresentAddress = dto.PresentAddress,
                 PermanentAddress = dto.PermanentAddress,
                 EmergencyContactName = dto.EmergencyContactName,
@@ -183,7 +183,7 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             // Generate & send OTP
-            await _otp.GenerateAndSendOtpAsync(member.Email, cancellationToken);
+            await _otp.GenerateAndSendOtpAsync(member.Email ?? string.Empty, cancellationToken);
 
             _logger.LogInformation("Registered application for MemberId {MemberId}", member.Id);
             return member.Id;

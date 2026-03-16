@@ -77,11 +77,11 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
-        public async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
+        public Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
             // bKash callback usually involves an "Execute" call after the user pays.
             // This would be handled in the controller.
-            return true;
+            return Task.FromResult(true);
         }
 
         private async Task<string?> GetTokenAsync(Domain.Models.PaymentConfiguration config, CancellationToken cancellationToken)

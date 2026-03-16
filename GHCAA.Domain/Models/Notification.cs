@@ -5,7 +5,7 @@ namespace GHCAA.Domain.Models
     public class Notification
     {
         public int Id { get; set; }
-        public int UserId { get; set; }
+        public int MemberId { get; set; }
         public string Title { get; set; } = null!;
         public string Message { get; set; } = null!;
         public string? TargetUrl { get; set; }
@@ -13,6 +13,6 @@ namespace GHCAA.Domain.Models
         public bool IsRead { get; set; } = false;
         public string Type { get; set; } = "General"; // Approval, Job, Payment, etc.
         
-        public Member? User { get; set; }
+        public Member? Member { get; set; }
     }
 }
