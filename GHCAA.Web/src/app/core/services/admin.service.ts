@@ -166,4 +166,8 @@ export class AdminService {
     deletePayment(id: number): Observable<any> {
         return this.http.delete(`${API_ENDPOINTS.FINANCIALS}/payment/${id}`);
     }
+
+    getPeriods(): Observable<any[]> {
+        return this.http.get<any[]>(API_ENDPOINTS.NETWORKING.COMMITTEE_PERIODS);
+    }
 }

@@ -77,9 +77,6 @@ namespace GHCAA.Tests.Services
             await _service.AssignMemberToRoleAsync(period.Id, member.Id, (int)Enums.ECPosition.President, "Voted");
 
             // Assert
-            var updatedMember = await _context.Members.FindAsync(member.Id);
-            updatedMember!.ECPosition.Should().Be(Enums.ECPosition.President);
-
             var ecMember = await _context.ECMembers.FirstOrDefaultAsync(em => em.MemberId == member.Id && em.ECPeriodId == period.Id);
             ecMember.Should().NotBeNull();
             ecMember!.Position.Should().Be(Enums.ECPosition.President);
@@ -91,7 +88,6 @@ namespace GHCAA.Tests.Services
         {
             // Arrange
             var member = CreateMinimalMember("Test User 2");
-            member.ECPosition = Enums.ECPosition.President;
             _context.Members.Add(member);
             
             var period = await _service.CreatePeriodAsync("Active Period", DateTime.UtcNow.AddDays(-1), null);
@@ -105,9 +101,6 @@ namespace GHCAA.Tests.Services
             await _service.RemoveMemberFromCommitteeAsync(ecMember.Id);
 
             // Assert
-            var updatedMember = await _context.Members.FindAsync(member.Id);
-            updatedMember!.ECPosition.Should().Be(Enums.ECPosition.None);
-
             var updatedECMember = await _context.ECMembers.FindAsync(ecMember.Id);
             updatedECMember!.EndDate.Should().NotBeNull();
         }

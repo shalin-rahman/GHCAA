@@ -88,8 +88,6 @@ namespace GHCAA.Infrastructure.Services
             else if (!isActive && period.IsActive)
             {
                 period.IsActive = false;
-                var membersWithRole = await _db.Members.Where(m => m.ECPosition != ECPosition.None).ToListAsync(cancellationToken);
-                foreach (var m in membersWithRole) m.ECPosition = ECPosition.None;
             }
             else
             {
@@ -146,23 +144,8 @@ namespace GHCAA.Infrastructure.Services
             var activePeriods = await _db.ECPeriods.Where(p => p.IsActive).ToListAsync(cancellationToken);
             foreach (var p in activePeriods) p.IsActive = false;
 
-            // 2. Reset ALL members current EC positions on the main Member table
-            // using ExecuteUpdate for performance if possible, or simple loop
-            var membersWithRole = await _db.Members.Where(m => m.ECPosition != ECPosition.None).ToListAsync(cancellationToken);
-            foreach (var m in membersWithRole) m.ECPosition = ECPosition.None;
-
-            // 3. Set the new period as active
+            // 2. Set the new period as active
             period.IsActive = true;
-
-            // 4. Sync positions from the new period into the Member table
-            foreach (var em in period.ECMembers.Where(em => em.EndDate == null))
-            {
-                var member = await _db.Members.FindAsync(new object[] { em.MemberId }, cancellationToken);
-                if (member != null)
-                {
-                    member.ECPosition = em.Position;
-                }
-            }
 
             return true;
         }
@@ -225,12 +208,6 @@ namespace GHCAA.Infrastructure.Services
 
             _db.ECMembers.Add(newAssignment);
 
-            // If this is the active period, sync the member's current position
-            if (period.IsActive)
-            {
-                member.ECPosition = (ECPosition)position;
-            }
-
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
@@ -246,12 +223,6 @@ namespace GHCAA.Infrastructure.Services
 
             ecMember.EndDate = DateTime.UtcNow;
 
-            // If active period, reset member's position
-            if (ecMember.ECPeriod != null && ecMember.ECPeriod.IsActive && ecMember.Member != null)
-            {
-                ecMember.Member.ECPosition = ECPosition.None;
-            }
-
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
@@ -264,12 +235,6 @@ namespace GHCAA.Infrastructure.Services
                 .FirstOrDefaultAsync(em => em.Id == id, cancellationToken);
 
             if (ecMember == null) return false;
-
-            // If it was an active position in the active period, reset member's position
-            if (ecMember.ECPeriod != null && ecMember.ECPeriod.IsActive && ecMember.EndDate == null && ecMember.Member != null)
-            {
-                ecMember.Member.ECPosition = ECPosition.None;
-            }
 
             _db.ECMembers.Remove(ecMember);
             await _db.SaveChangesAsync(cancellationToken);

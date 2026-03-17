@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NetworkingService } from '../../../../core/services/networking.service';
-import { getECPositionName } from '../../../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition } from '../../../../core/constants/app.constants';
 
 @Component({
     selector: 'landing-ec-preview',
@@ -17,9 +17,9 @@ export class LandingEcPreview implements OnInit {
     ngOnInit() {
         this.networking.getCommittee().subscribe({
             next: (data) => {
-                // Filter out any members that have 'None' position (0) or no position at all
+                // Filter out any members that have 'None' position or no position at all
                 const validCommittee = (data || []).filter((m: any) => {
-                    const p = m.ecPosition ?? m.ECPosition ?? m.position ?? m.Position;
+                    const p = getCurrentECPosition(m.ecHistory);
                     return p !== null && p !== undefined && p !== 0 && p !== '0' && p !== 'None';
                 });
                 this.committee.set(validCommittee);
@@ -28,8 +28,8 @@ export class LandingEcPreview implements OnInit {
         });
     }
 
-    getRoleName(pos: number | string) {
-        return getECPositionName(pos);
+    getRoleName(member: any) {
+        return getECPositionName(getCurrentECPosition(member.ecHistory));
     }
 }
 

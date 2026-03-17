@@ -5,7 +5,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { EC_ROLES, getECPositionName, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_STATUS_OPTIONS, MEMBERSHIP_TYPE_OPTIONS, MEMBER_CATEGORY_OPTIONS, EC_ROLES_OPTIONS, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName } from '../../core/constants/app.constants';
+import { EC_ROLES, getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_STATUS_OPTIONS, MEMBERSHIP_TYPE_OPTIONS, MEMBER_CATEGORY_OPTIONS, EC_ROLES_OPTIONS, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName } from '../../core/constants/app.constants';
 import * as XLSX from 'xlsx';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
@@ -136,10 +136,11 @@ export class AdminMembers implements OnInit {
 
   loadECPeriods() {
     this.adminService.getPeriods().subscribe({
-      next: (periods) => this.ecPeriods.set(periods),
+      next: (periods: any[]) => this.ecPeriods.set(periods),
       error: () => this.ecPeriods.set([])
     });
   }
+
 
   onFilterChange() {
     this.currentPage.set(1);
@@ -318,7 +319,6 @@ export class AdminMembers implements OnInit {
       designation: member.designation,
       membershipType: member.membershipType,
       category: member.category,
-      ecPosition: member.ecPosition,
       membershipNumber: member.membershipNumber,
       isMobilePublic: member.isMobilePublic,
       isEmailPublic: member.isEmailPublic,
@@ -380,7 +380,15 @@ export class AdminMembers implements OnInit {
   getStatusClass = getStatusClass;
   getCategoryLabel = getCategoryLabel;
   getMembershipTypeLabel = getMembershipTypeLabel;
-  getECPositionLabel = getECPositionName;
+  getECPositionName = getECPositionName;
+  getCurrentPosition(member: any) {
+    const pos = getCurrentECPosition(member.ecHistory);
+    return getECPositionName(pos);
+  }
+
+  getCurrentPeriod(member: any) {
+    return getCurrentECPeriod(member.ecHistory);
+  }
   getBloodGroupName = getBloodGroupName;
 
   // --- Import Actions ---

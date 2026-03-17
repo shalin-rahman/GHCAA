@@ -349,7 +349,6 @@ namespace GHCAA.Infrastructure.Services
                 BloodGroup = member.BloodGroup,
                 MembershipType = member.MembershipType,
                 Category = member.Category,
-                ECPosition = member.ECPosition,
                 FatherName = member.FatherName,
                 MotherName = member.MotherName,
                 DateOfBirth = member.DateOfBirth,
@@ -526,7 +525,6 @@ namespace GHCAA.Infrastructure.Services
                 role.EndDate = DateTime.UtcNow;
                 role.ChangeReason = "Member archived";
             }
-            member.ECPosition = Enums.ECPosition.None;
 
             await _db.SaveChangesAsync(cancellationToken);
             await _activityService.LogActivityAsync(memberId, "Archived", "Member archived (soft deleted).", cancellationToken: cancellationToken);
@@ -693,7 +691,6 @@ namespace GHCAA.Infrastructure.Services
                     BloodGroup = member.BloodGroup,
                     MembershipType = member.MembershipType,
                     Category = member.Category,
-                    ECPosition = member.ECPosition,
                     FatherName = member.FatherName,
                     MotherName = member.MotherName,
                     DateOfBirth = DateTime.SpecifyKind(member.DateOfBirth, DateTimeKind.Utc),
@@ -717,6 +714,7 @@ namespace GHCAA.Infrastructure.Services
                     dto.ECHistory = member.ECMembers.Select(em => new ECHistoryDto
                     {
                         Id = em.Id,
+                        PeriodId = em.ECPeriodId,
                         PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
                         Position = em.Position,
                         StartDate = DateTime.SpecifyKind(em.StartDate, DateTimeKind.Utc),
@@ -823,18 +821,6 @@ namespace GHCAA.Infrastructure.Services
                         EndDate = ec.EndDate.HasValue ? DateTime.SpecifyKind(ec.EndDate.Value, DateTimeKind.Utc) : null,
                         ChangeReason = ec.ChangeReason
                     });
-
-                    // Maintain the 'Current' cache on Member if this is an active period and currently active record
-                    if (ec.IsCurrent && !ec.EndDate.HasValue)
-                    {
-                        member.ECPosition = ec.Position;
-                    }
-                }
-                
-                // If no current records in the provided list, clear the cache
-                if (!dto.ECHistory.Any(ec => ec.IsCurrent && !ec.EndDate.HasValue))
-                {
-                    member.ECPosition = Enums.ECPosition.None;
                 }
             }
 

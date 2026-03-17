@@ -20,11 +20,11 @@
         } @else {
         <div class="committee-grid">
             @for (member of committee(); track member.id) {
-            <div class="glass-card committee-card" [ngClass]="{'executive-head': isBoardMember(member.ecPosition)}">
+            <div class="glass-card committee-card" [ngClass]="{'executive-head': isBoardMember(member)}">
                 <div class="card-content">
                     <div class="avatar-large">{{ member.fullName[0] }}</div>
                     <div class="member-details">
-                        <span class="position-badge">{{ getPositionName(member.ecPosition) }}</span>
+                        <span class="position-badge">{{ getPositionName(member) }}</span>
                         <h3>{{ member.fullName }}</h3>
                         <p class="batch">Batch of {{ member.ghcLastCertificatePassingYear }}</p>
                         <div class="professional" *ngIf="member.designation">

@@ -55,25 +55,30 @@ namespace GHCAA.Tests.Services
             period.Should().NotBeNull();
 
             var member = CreateMinimalMember("Tester");
-            member.ECPosition = Enums.ECPosition.None;
             
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
 
             var updateDto = CreateUpdateDto(member);
-            updateDto.ECPosition = "1"; // President
-            updateDto.ECChangeReason = "Elected mid-term";
+            updateDto.ECHistory = new List<ECHistoryDto>
+            {
+                new ECHistoryDto
+                {
+                    PeriodTitle = "Test Period",
+                    Position = Enums.ECPosition.President,
+                    StartDate = DateTime.UtcNow,
+                    IsCurrent = true
+                }
+            };
 
             // Act
             await _service.AdminUpdateMemberAsync(member.Id, updateDto);
 
             // Assert
-            var ecMember = await _context.ECMembers.FirstOrDefaultAsync(em => em.MemberId == member.Id);
+            var ecMember = await _context.ECMembers.Include(em => em.ECPeriod).FirstOrDefaultAsync(em => em.MemberId == member.Id);
             ecMember.Should().NotBeNull();
             ecMember!.Position.Should().Be(Enums.ECPosition.President);
-            
-            var updatedMember = await _context.Members.FindAsync(member.Id);
-            updatedMember!.ECPosition.Should().Be(Enums.ECPosition.President);
+            ecMember.ECPeriod!.Title.Should().Be("Test Period");
         }
 
         [Test]
@@ -84,7 +89,6 @@ namespace GHCAA.Tests.Services
             period.Should().NotBeNull();
 
             var member = CreateMinimalMember("Tester");
-            member.ECPosition = Enums.ECPosition.President;
             
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
@@ -94,8 +98,19 @@ namespace GHCAA.Tests.Services
             await _context.SaveChangesAsync();
 
             var updateDto = CreateUpdateDto(member);
-            updateDto.ECPosition = "0"; // None
-            updateDto.ECChangeReason = "Resigned";
+            updateDto.ECHistory = new List<ECHistoryDto>(); // EMPTY history essentially removes current role if the logic wipes and replaces.
+            // Wait, MemberService.cs:807-808 removes ALL existing.
+            // So if I send an empty list, it wipes history. 
+            // If I want to "End" it but keep it in history, I should send it with an EndDate.
+
+            updateDto.ECHistory.Add(new ECHistoryDto 
+            {
+                PeriodTitle = "Test Period",
+                Position = Enums.ECPosition.President,
+                StartDate = DateTime.UtcNow.AddMonths(-2),
+                EndDate = DateTime.UtcNow,
+                ChangeReason = "Resigned"
+            });
 
             // Act
             await _service.AdminUpdateMemberAsync(member.Id, updateDto);
@@ -105,9 +120,6 @@ namespace GHCAA.Tests.Services
             records.Should().HaveCount(1);
             records[0].EndDate.Should().NotBeNull();
             records[0].ChangeReason.Should().Be("Resigned");
-            
-            var updatedMember = await _context.Members.FindAsync(member.Id);
-            updatedMember!.ECPosition.Should().Be(Enums.ECPosition.None);
         }
 
         private AdminMemberUpdateDto CreateUpdateDto(Member m)
@@ -120,8 +132,8 @@ namespace GHCAA.Tests.Services
                 GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear, GHCLastCertificate = m.GHCLastCertificate,
                 GHCLastCertificateGroup = m.GHCLastCertificateGroup, GHCLastCertificateSubject = m.GHCLastCertificateSubject,
                 HighestCertificate = m.HighestCertificate, HighestCertificateGroup = m.HighestCertificateGroup, HighestCertificateSubject = m.HighestCertificateSubject,
-                ProfessionalSector = m.ProfessionalSector, Designation = m.Designation,
-                ECPosition = "None"
+                ProfessionalSector = m.ProfessionalSector,
+                Designation = m.Designation
             };
         }
 

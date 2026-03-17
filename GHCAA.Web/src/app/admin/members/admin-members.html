@@ -230,20 +230,6 @@
                     </select>
                 </div>
 
-                <div class="form-group" [class.full]="isEditing()">
-                    <label>EC Position</label>
-                    <select [(ngModel)]="selectedMember().ecPosition" [disabled]="!isEditing()">
-                        @for (p of ecPositions; track p.value) { <option [value]="p.value">{{ p.label }}</option> }
-                    </select>
-                </div>
-
-                @if (isEditing()) {
-                <div class="form-group full">
-                    <label>Administrative Note (For EC Change)</label>
-                    <input type="text" [(ngModel)]="selectedMember().ecChangeReason"
-                        placeholder="Reason for mid-term promotion/change...">
-                </div>
-                }
 
                 <!-- Dynamic Academic History Section (Placeholder for consistency) -->
                 <div class="full border-b pb-4 mb-4 mt-8">
@@ -399,7 +385,7 @@
                         <div class="history-item glass-effect rounded-lg p-4 flex justify-between items-center">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="font-bold text-sm">{{ getECPositionLabel(h.position) }}</span>
+                                    <span class="font-bold text-sm">{{ getECPositionName(h.position) }}</span>
                                     <span class="text-[10px] bg-primary/10 px-2 py-0.5 rounded opacity-70">{{ h.periodTitle }}</span>
                                     @if (h.isCurrent) {
                                     <span class="text-[8px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Active</span>

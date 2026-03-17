@@ -20,7 +20,6 @@ describe('ProfileService', () => {
         status: 'Active',
         membershipType: 'Executive',
         category: 'None',
-        ecPosition: 'None',
         gender: 'Male',
         bloodGroup: 'APositive',
         highestCertificate: 'BSc',

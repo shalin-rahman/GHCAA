@@ -59,7 +59,7 @@ namespace GHCAA.Infrastructure.Services
                 query = query.Where(m => m.Designation.Contains(filter.Designation));
 
             if (!string.IsNullOrEmpty(filter.ECPosition) && System.Enum.TryParse<Enums.ECPosition>(filter.ECPosition, true, out var pos))
-                query = query.Where(m => m.ECPosition == pos);
+                query = query.Where(m => m.ECMembers.Any(em => em.Position == pos && em.EndDate == null));
 
             var totalItems = await query.CountAsync(cancellationToken);
             var pageSize = Math.Clamp(filter.PageSize, 1, 100);
@@ -67,6 +67,8 @@ namespace GHCAA.Infrastructure.Services
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
             var members = await query
+                .Include(m => m.ECMembers)
+                .ThenInclude(em => em.ECPeriod)
                 .OrderBy(m => m.FullName)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -105,7 +107,6 @@ namespace GHCAA.Infrastructure.Services
             var results = await query.OrderBy(em => em.Position).ToListAsync(cancellationToken);
             return results.Select(em => {
                 var dto = MapToDto(em.Member!);
-                dto.ECPosition = em.Position; // Use position from history for that period
                 return dto;
             });
         }
@@ -179,7 +180,6 @@ namespace GHCAA.Infrastructure.Services
                 
                 MembershipType = m.MembershipType,
                 Category = m.Category,
-                ECPosition = m.ECPosition,
                 ECHistory = new List<ECHistoryDto>()
             };
 
@@ -187,11 +187,14 @@ namespace GHCAA.Infrastructure.Services
             {
                 dto.ECHistory = m.ECMembers.Select(em => new ECHistoryDto
                 {
+                    Id = em.Id,
+                    PeriodId = em.ECPeriodId,
                     PeriodTitle = em.ECPeriod?.Title ?? "Unknown Period",
                     Position = em.Position,
                     StartDate = em.ECPeriod?.StartDate ?? DateTime.MinValue,
                     EndDate = em.ECPeriod?.EndDate,
-                    ChangeReason = em.ChangeReason
+                    ChangeReason = em.ChangeReason,
+                    IsCurrent = em.ECPeriod?.IsActive ?? false
                 }).OrderByDescending(h => h.StartDate).ToList();
             }
 

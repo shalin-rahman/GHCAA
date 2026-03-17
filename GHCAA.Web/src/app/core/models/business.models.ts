@@ -53,7 +53,6 @@ export interface Member {
     membershipNumber?: string;
     membershipType: MembershipType;
     category: MemberCategory;
-    ecPosition: ECPosition;
     ecHistory?: ECMember[];
 }
 
@@ -361,7 +360,6 @@ export interface MemberProfile {
     status: MembershipStatus;
     membershipType: MembershipType;
     category: MemberCategory;
-    ecPosition: ECPosition;
 
     // Personal
     fatherName?: string;
@@ -414,7 +412,6 @@ export interface MemberSearchFilter {
     bloodGroup?: BloodGroup;
     professionalSector?: string;
     designation?: string;
-    ecPosition?: ECPosition;
 }
 
 

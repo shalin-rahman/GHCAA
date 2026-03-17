@@ -482,8 +482,6 @@ namespace GHCAA.Infrastructure.Services
                     if (Enum.TryParse<Enums.BloodGroup>(value, true, out var bg)) member.BloodGroup = bg; break;
                 case nameof(Member.MembershipType):
                     if (Enum.TryParse<Enums.MembershipType>(value, true, out var mt)) member.MembershipType = mt; break;
-                case nameof(Member.ECPosition):
-                    if (Enum.TryParse<Enums.ECPosition>(value, true, out var pos)) member.ECPosition = pos; break;
                 case nameof(Member.Category):
                     if (Enum.TryParse<Enums.MemberCategory>(value, true, out var cat)) member.Category = cat; break;
             }

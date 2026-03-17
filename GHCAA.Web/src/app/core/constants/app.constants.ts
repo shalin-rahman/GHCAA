@@ -136,6 +136,36 @@ export function getECPositionName(pos: number | string): string {
     return pos.replace(/([A-Z])/g, ' $1').trim();
 }
 
+export function getCurrentECPosition(ecHistory: any[] | undefined): any {
+    if (!ecHistory || !Array.isArray(ecHistory) || ecHistory.length === 0) return 'None';
+    // Try to find the active one
+    const current = ecHistory.find(h => h.isCurrent && !h.endDate);
+    if (current) return current.position;
+    
+    // Fallback to the latest one if no active found
+    return ecHistory[0].position;
+}
+
+export function getCurrentECPeriod(ecHistory: any[] | undefined): string {
+    if (!ecHistory || !Array.isArray(ecHistory) || ecHistory.length === 0) return '';
+    const current = ecHistory.find(h => h.isCurrent && !h.endDate);
+    if (current) return current.periodTitle;
+    return ecHistory[0].periodTitle;
+}
+
+export function getECPositionForPeriod(ecHistory: any[] | undefined, periodId: number | null): any {
+    if (!ecHistory || !Array.isArray(ecHistory) || ecHistory.length === 0) return 'None';
+    if (!periodId) return getCurrentECPosition(ecHistory);
+    
+    // In our ECHistoryDto, we don't have periodId, we have periodTitle.
+    // Wait, the ECMember interface HAS ecPeriodId.
+    // Let's check what's in the DTO.
+    const record = ecHistory.find(h => h.periodId === periodId);
+    if (record) return record.position;
+    
+    return 'None';
+}
+
 export function getStatusLabel(status: string | number): string {
     // Try original, then try parsing as number if it's a string digit
     const res = MEMBERSHIP_STATUS_MAP[status];

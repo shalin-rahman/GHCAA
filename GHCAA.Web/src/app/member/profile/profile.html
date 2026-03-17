@@ -22,8 +22,8 @@
                         class="badge" [class]="getCategoryLabel(profile.category).toLowerCase()">
                         {{ getCategoryLabel(profile.category) }}
                     </span>
-                    <span class="ec-pos text-accent font-black text-xs uppercase tracking-widest" *ngIf="profile.ecPosition && profile.ecPosition !== 'None'">{{
-                        getECPositionName(profile.ecPosition) }}</span>
+                    <span class="ec-pos text-accent font-black text-xs uppercase tracking-widest" *ngIf="getCurrentECPosition(profile.ecHistory) !== 'None'">{{
+                        getECPositionName(getCurrentECPosition(profile.ecHistory)) }}</span>
                 </div>
             </div>
             <div class="badge-icon" [ngClass]="profile.status === 1 ? 'active' : 'pending'">
@@ -341,7 +341,10 @@
                     <div class="empty-placeholder dark">
                         <p>No educational history provided. At least one record from GHC is required for verification.</p>
                     </div>
-                    }
+                    </div>
+                </div>
+            </div>
+
             <!-- Professional History Management -->
             <div class="section-block mt-14">
                 <h4 class="section-label">Professional Snapshot</h4>

@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName } from '../../core/constants/app.constants';
 
 @Component({
     selector: 'app-profile',
@@ -16,6 +16,7 @@ import { getECPositionName, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademic
 })
 export class Profile implements OnInit {
     getECPositionName = getECPositionName;
+    getCurrentECPosition = getCurrentECPosition;
     getBloodGroupName = getBloodGroupName;
     ecRoles = EC_ROLES;
     private profileService = inject(ProfileService);
@@ -62,6 +63,18 @@ export class Profile implements OnInit {
     removeAcademicRecord(index: number) {
         if (!confirm('Remove this academic record?')) return;
         this.profile.academicHistory.splice(index, 1);
+    }
+
+    addProfessionalRecord() {
+        if (!this.profile.professionalHistory) this.profile.professionalHistory = [];
+        this.profile.professionalHistory.push({
+            organizationName: '',
+            designation: '',
+            sector: 'Other',
+            location: '',
+            startDate: new Date().toISOString().split('T')[0],
+            isCurrent: true
+        });
     }
 
 

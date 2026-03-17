@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NetworkingService } from '../../core/services/networking.service';
 import { MemberProfile } from '../../core/models/business.models';
-import { getECPositionName } from '../../core/constants/app.constants';
+import { getECPositionName, getECPositionForPeriod } from '../../core/constants/app.constants';
 
 @Component({
     // ... (rest of metadata)
@@ -47,11 +47,19 @@ export class Governance implements OnInit {
             'OrganizationalSecretary', 'InformationAndTechnologySecretary', 'LawSecretary'
         ];
 
+        const targetPeriodId = periodId || this.selectedPeriodId();
+
         this.loading.set(true);
-        this.networkService.getCommittee(periodId ? { periodId } : {}).subscribe({
+        this.networkService.getCommittee(targetPeriodId ? { periodId: targetPeriodId } : {}).subscribe({
             next: (data) => {
-                const boardMembers = data.filter(m => boardPositions.includes(m.ecPosition));
-                const generalEC = data.filter(m => !boardPositions.includes(m.ecPosition) && m.ecPosition !== 'None');
+                const boardMembers = data.filter(m => {
+                    const pos = getECPositionForPeriod(m.ecHistory, targetPeriodId);
+                    return boardPositions.includes(pos);
+                });
+                const generalEC = data.filter(m => {
+                    const pos = getECPositionForPeriod(m.ecHistory, targetPeriodId);
+                    return !boardPositions.includes(pos) && pos !== 'None';
+                });
                 this.committee.set([...boardMembers, ...generalEC]);
                 this.loading.set(false);
             },
@@ -59,18 +67,19 @@ export class Governance implements OnInit {
         });
     }
 
-
-    getPositionName(pos: any): string {
+    getPositionName(member: any): string {
+        const pos = getECPositionForPeriod(member.ecHistory, this.selectedPeriodId());
         return getECPositionName(pos);
     }
 
-    isBoardMember(position: any): boolean {
+    isBoardMember(member: any): boolean {
         const boardPositions = [
             'President', 'VicePresident', 'GeneralSecretary', 'OfficeSecretary', 
             'JointSecretary1', 'JointSecretary2', 'Treasurer', 'MediaCulturalAndSportsSecretary',
             'OrganizationalSecretary', 'InformationAndTechnologySecretary', 'LawSecretary'
         ];
-        return boardPositions.includes(position);
+        const pos = getECPositionForPeriod(member.ecHistory, this.selectedPeriodId());
+        return boardPositions.includes(pos);
     }
 }
 

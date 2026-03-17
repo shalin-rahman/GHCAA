@@ -17,7 +17,7 @@
                     }
                 </div>
                 <h4>{{ member.fullName }}</h4>
-                <div class="ec-role">{{ getRoleName(member.ecPosition ?? member.ECPosition ?? member.position ?? member.Position) }}</div>
+                <div class="ec-role">{{ getRoleName(member) }}</div>
                 <small>{{ member.designation }}</small>
             </div>
             } @empty {

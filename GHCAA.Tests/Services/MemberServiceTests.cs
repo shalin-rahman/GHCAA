@@ -851,7 +851,6 @@ public class MemberServiceTests : TestBase
             FullName = "Updated Name",
             MembershipType = "Executive",
             Category = "Lifelong",
-            ECPosition = "President",
             MembershipNumber = "GHC-2007-9999",
             FatherName = "Updated Father",
             MotherName = "Updated Mother",
@@ -882,7 +881,6 @@ public class MemberServiceTests : TestBase
         updatedMember!.FullName.Should().Be("Updated Name");
         updatedMember.MembershipType.Should().Be(Enums.MembershipType.Executive);
         updatedMember.Category.Should().Be(Enums.MemberCategory.Lifelong);
-        updatedMember.ECPosition.Should().Be(Enums.ECPosition.President);
         updatedMember.MembershipNumber.Should().Be("GHC-2007-9999");
         updatedMember.GHCLastCertificateGroup.Should().Be("Commerce");
     }

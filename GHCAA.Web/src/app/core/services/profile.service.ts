@@ -6,8 +6,7 @@ import { AuthService } from './auth.service';
 import { 
     MembershipStatus, 
     MembershipType, 
-    MemberCategory, 
-    ECPosition, 
+    MemberCategory,
     Gender, 
     BloodGroup,
     AcademicRecord,
@@ -39,7 +38,6 @@ export class ProfileService {
                 status: 'Active',
                 membershipType: 'Executive',
                 category: 'None',
-                ecPosition: 'None',
                 academicHistory: [],
                 professionalHistory: [],
                 presentAddress: 'Backend Server',

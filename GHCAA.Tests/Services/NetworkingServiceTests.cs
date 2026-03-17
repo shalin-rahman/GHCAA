@@ -55,10 +55,8 @@ public class NetworkingServiceTests : TestBase
     public async Task GetExecutiveCommitteeAsync_ShouldReturnMembersWithECPosition()
     {
         var president = CreateValidMember("EC President", "ep@nttest.com", "01722223333", "NTST3333");
-        president.ECPosition = Enums.ECPosition.President;
 
         var normal = CreateValidMember("Normal Member", "nm@nttest.com", "01733334444", "NTST4444");
-        normal.ECPosition = Enums.ECPosition.None;
 
         _context.Members.AddRange(president, normal);
         await _context.SaveChangesAsync();

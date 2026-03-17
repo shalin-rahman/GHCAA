@@ -82,10 +82,10 @@
                                 <span class="m-cat-label">{{ m.category }}</span>
                             }
                         </div>
-                        @if (m.ecPosition && m.ecPosition !== 'None') {
+                        @if (getCurrentECPosition(m.ecHistory) !== 'None') {
                         <div class="ec-position-tag">
                             <span class="icon">🎗️</span>
-                            {{ getECPositionName(m.ecPosition) }}
+                            {{ getECPositionName(getCurrentECPosition(m.ecHistory)) }}
                         </div>
                         }
                     </div>
