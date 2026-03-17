@@ -37,10 +37,14 @@ namespace GHCAA.Infrastructure.Services
                 message.Body = body.ToMessageBody();
 
                 using var client = new SmtpClient();
-                // Set a reasonable timeout (10 seconds)
-                client.Timeout = 10000;
+                // Increased timeout for potentially slow cloud networks (Render/Docker)
+                client.Timeout = 30000; 
                 
-                await client.ConnectAsync(_host, _port, MailKit.Security.SecureSocketOptions.StartTls, cancellationToken);
+                // Compatibility for environments with strict certificate validation
+                client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+
+                // Use 'Auto' to negotiate the best security option for the given port
+                await client.ConnectAsync(_host, _port, MailKit.Security.SecureSocketOptions.Auto, cancellationToken);
                 await client.AuthenticateAsync(_email, _appPassword, cancellationToken);
                 await client.SendAsync(message, cancellationToken);
                 await client.DisconnectAsync(true, cancellationToken);

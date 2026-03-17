@@ -36,6 +36,8 @@ export class AdminEvents implements OnInit {
     searchQuery = signal('');
     selectedEventIdFilter = signal<number | null>(null);
     selectedEvent = signal<AlumniEvent | null>(null);
+    showInvitation = signal<boolean>(false);
+    invitationData = signal<any | null>(null);
 
     // PDF Config
     pdfHeaders = ['ID', 'Event', 'Participant', 'Type', 'Reference', 'Status', 'Date'];
@@ -256,6 +258,25 @@ export class AdminEvents implements OnInit {
 
     closeDetail() {
         this.selectedEvent.set(null);
+    }
+
+    fetchInvitation(regId: number) {
+        this.eventsService.getRegistrationForInvitation(regId).subscribe({
+            next: (data) => {
+                this.invitationData.set(data);
+                this.showInvitation.set(true);
+            },
+            error: () => this.notify.error('Could not load invitation data.')
+        });
+    }
+
+    doPrint() {
+        window.print();
+    }
+
+    closeInvitation() {
+        this.showInvitation.set(false);
+        this.invitationData.set(null);
     }
 }
 

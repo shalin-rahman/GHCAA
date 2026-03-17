@@ -73,24 +73,27 @@
                     </div>
                     <div class="name-info">
                         <h4>{{ m.fullName }}</h4>
-                        <div class="badges">
-                            <span class="badge">{{ m.membershipNumber || 'Alumni' }}</span>
+                        <div class="membership-meta">
+                            <span class="m-no">{{ m.membershipNumber || 'REG-PENDING' }}</span>
                             @if (m.membershipType) {
-                                <span class="badge badge-type">{{ m.membershipType }}</span>
+                                <span class="m-type-label">{{ m.membershipType }}</span>
                             }
-                            @if (m.category) {
-                                <span class="badge badge-category">{{ m.category }}</span>
-                            }
-                            @if (m.ecPosition && m.ecPosition !== 'None') {
-                            <span class="badge badge-ec">{{ getECPositionName(m.ecPosition) }}</span>
+                            @if (m.category && m.category !== 'None') {
+                                <span class="m-cat-label">{{ m.category }}</span>
                             }
                         </div>
+                        @if (m.ecPosition && m.ecPosition !== 'None') {
+                        <div class="ec-position-tag">
+                            <span class="icon">🎗️</span>
+                            {{ getECPositionName(m.ecPosition) }}
+                        </div>
+                        }
                     </div>
                 </div>
                 <div class="member-body">
-                    <div class="info-item">
+                    <div class="info-item academic-batch">
                         <span class="icon">🎓</span>
-                        <span>Batch of {{ m.ghcLastCertificate }} {{ m.ghcLastCertificatePassingYear }}</span>
+                        <span class="batch-text">Batch of <strong>{{ m.ghcLastCertificate }}</strong> {{ m.ghcLastCertificatePassingYear }}</span>
                     </div>
                     <div class="info-item" *ngIf="m.professionalSector">
                         <span class="icon">💼</span>
@@ -148,13 +151,15 @@
         <div class="modal-header">
             <div class="header-info">
                 <h3>Member Profile</h3>
-                <span class="badge">{{ selectedMember()?.membershipNumber || 'Alumni' }}</span>
-                @if (selectedMember()?.membershipType) {
-                    <span class="badge badge-type">{{ selectedMember()?.membershipType }}</span>
-                }
-                @if (selectedMember()?.category) {
-                    <span class="badge badge-category">{{ selectedMember()?.category }}</span>
-                }
+                <div class="membership-meta ml-4">
+                    <span class="m-no">{{ selectedMember()?.membershipNumber || 'REG-PENDING' }}</span>
+                    @if (selectedMember()?.membershipType) {
+                        <span class="m-type-label">{{ selectedMember()?.membershipType }}</span>
+                    }
+                    @if (selectedMember()?.category && selectedMember()?.category !== 'None') {
+                        <span class="m-cat-label">{{ selectedMember()?.category }}</span>
+                    }
+                </div>
             </div>
             <button class="close-btn" (click)="selectedMember.set(null)">×</button>
         </div>

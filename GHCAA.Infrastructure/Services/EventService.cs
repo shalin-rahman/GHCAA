@@ -253,9 +253,14 @@ namespace GHCAA.Infrastructure.Services
                     }
                     else
                     {
-                        // TODO: Implement direct email for non-members if template supports it, 
-                        // or just use basic EmailService for now.
-                        // For now I'll assume we can use the member-less overload if I add it.
+                        // Use SendCustomEmailAsync for non-members (guests)
+                        await _communicationService.SendCustomEmailAsync(
+                            new List<string> { email }, 
+                            "EVENT_REGISTRATION_CONFIRMATION", 
+                            $"Confirmation: {registration.Event.Title}", 
+                            null, 
+                            customVars, 
+                            cancellationToken);
                     }
                 }
             }

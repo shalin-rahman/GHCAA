@@ -278,6 +278,11 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                @if (reg.status === 'Approved') {
+                                    <button (click)="fetchInvitation(reg.id)"
+                                        class="p-2 rounded-lg bg-accent/10 text-accent hover:bg-accent hover:text-white transition-all" title="Print Invitation">🖨️
+                                    </button>
+                                }
                                 @if (reg.status === 'Pending') {
                                     <button (click)="approveReg(reg.id, true)"
                                         class="p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all">✅
@@ -358,4 +363,91 @@
         </div>
     </div>
     }
+
+    <!-- Invitation Card Modal (Printable) -->
+    <div *ngIf="showInvitation() && invitationData()" class="modal-overlay invitation-modal no-print">
+        <div class="modal-box wide invitation-card-preview animate-fade-up">
+            <div class="modal-header">
+                <h3>Invitation Pass</h3>
+                <button class="close-btn" (click)="closeInvitation()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div id="invitation-card" class="invitation-card print-target">
+                    <div class="card-glow"></div>
+                    
+                    <div class="card-header">
+                        <div class="card-logo">
+                            <img src="/assets/logo.jpg" alt="Logo">
+                        </div>
+                        <div class="org-info">
+                            <h1 class="text-green-800">Govt. Haraganga College Alumni Association</h1>
+                            <p class="subtitle text-green-700">Connecting Hearts, Building Legacy</p>
+                        </div>
+                    </div>
+
+                    <div class="card-main">
+                        <div class="title-block">
+                            <span class="badge">OFFICIAL ENTRY PASS</span>
+                            <h2>{{ invitationData()?.eventTitle }}</h2>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-group">
+                                <label>Participant Name</label>
+                                <p class="val">{{ invitationData()?.memberName || invitationData()?.guestName || 'Valued Guest' }}</p>
+                            </div>
+                            <div class="detail-group">
+                                <label>Reg Number</label>
+                                <p class="val font-mono">REG-{{ invitationData()?.id?.toString()?.padStart(6, '0') }}</p>
+                            </div>
+                        </div>
+
+                        <div class="logistics-row">
+                            <div class="item">
+                                <span class="icon">📍</span>
+                                <div class="meta">
+                                    <label>Venue</label>
+                                    <strong>{{ invitationData()?.eventTitle }}</strong>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <span class="icon">📅</span>
+                                <div class="meta">
+                                    <label>Date & Time</label>
+                                    <strong>{{ invitationData()?.registeredAt | date:'medium' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="security-row">
+                            <div class="qr-placeholder">
+                                <div class="barcode">
+                                    <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]" class="bar" [style.width.px]="(i % 3 + 1) * 2"></div>
+                                </div>
+                                <span class="text-[8px] font-mono mt-1">E-CERTIFIED PASS</span>
+                            </div>
+                            <div class="approval-seal">
+                                <div class="seal">
+                                    <span class="seal-txt">GHC APPROVED</span>
+                                </div>
+                                <p class="seal-date">Validated on {{ invitationData()?.registeredAt | date:'shortDate' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <p>Present this card (Digital/Printed) at the registration desk for entry.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="closeInvitation()">Close</button>
+                <button class="btn btn-accent shadow-gold" (click)="doPrint()">
+                    <span>🖨️</span> Print Invitation
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
