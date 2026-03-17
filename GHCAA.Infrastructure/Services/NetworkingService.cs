@@ -31,7 +31,7 @@ namespace GHCAA.Infrastructure.Services
             return member == null ? null : MapToDto(member);
         }
 
-        public async Task<PagedResult<MemberProfileDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<MemberSummaryDto>> SearchMembersAsync(MemberSearchFilterDto filter, CancellationToken cancellationToken = default)
         {
             var query = _db.Members
                 .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
@@ -74,9 +74,9 @@ namespace GHCAA.Infrastructure.Services
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);
 
-            return new PagedResult<MemberProfileDto>
+            return new PagedResult<MemberSummaryDto>
             {
-                Items = members.Select(MapToDto),
+                Items = members.Select(MapToSummary),
                 TotalItems = totalItems,
                 TotalPages = totalPages,
                 Page = page,
@@ -84,7 +84,7 @@ namespace GHCAA.Infrastructure.Services
             };
         }
 
-        public async Task<IEnumerable<MemberProfileDto>> GetExecutiveCommitteeAsync(int? periodId = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<MemberSummaryDto>> GetExecutiveCommitteeAsync(int? periodId = null, CancellationToken cancellationToken = default)
         {
             // If no period specified, get current active one
             var query = _db.ECMembers
@@ -105,10 +105,7 @@ namespace GHCAA.Infrastructure.Services
             query = query.Where(em => em.EndDate == null);
 
             var results = await query.OrderBy(em => em.Position).ToListAsync(cancellationToken);
-            return results.Select(em => {
-                var dto = MapToDto(em.Member!);
-                return dto;
-            });
+            return results.Select(em => MapToSummary(em.Member!));
         }
 
         public async Task<IEnumerable<object>> GetECPeriodsAsync(CancellationToken cancellationToken = default)
@@ -119,15 +116,17 @@ namespace GHCAA.Infrastructure.Services
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<MemberProfileDto>> GetLatestAlumniUpdatesAsync(int count = 10, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<MemberSummaryDto>> GetLatestAlumniUpdatesAsync(int count = 10, CancellationToken cancellationToken = default)
         {
             var members = await _db.Members
+                .Include(m => m.ECMembers)
+                .ThenInclude(em => em.ECPeriod)
                 .Where(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
                 .OrderByDescending(m => m.LastUpdateDate)
                 .Take(count)
                 .ToListAsync(cancellationToken);
 
-            return members.Select(MapToDto);
+            return members.Select(MapToSummary);
         }
 
         private MemberProfileDto MapToDto(Member m)
@@ -198,6 +197,41 @@ namespace GHCAA.Infrastructure.Services
                 }).OrderByDescending(h => h.StartDate).ToList();
             }
 
+            return dto;
+        }
+
+        private MemberSummaryDto MapToSummary(Member m)
+        {
+            var dto = new MemberSummaryDto
+            {
+                Id = m.Id,
+                FullName = m.FullName,
+                MembershipNumber = m.MembershipNumber,
+                PhotoPath = m.PhotoPath,
+                PassingYear = m.GHCLastCertificatePassingYear,
+                GhcLastCertificatePassingYear = m.GHCLastCertificatePassingYear,
+                GhcLastCertificate = m.GHCLastCertificate,
+                ProfessionalSector = m.ProfessionalSector,
+                Designation = m.Designation,
+                BloodGroup = m.BloodGroup,
+                Email = m.IsEmailPublic ? m.Email : "Confidential",
+                IsEmailPublic = m.IsEmailPublic,
+                MobileNo = m.IsMobilePublic ? m.MobileNo : "Confidential",
+                IsMobilePublic = m.IsMobilePublic,
+                MembershipType = m.MembershipType,
+                Category = m.Category,
+                ECHistory = m.ECMembers?.Select(em => new ECHistoryDto
+                {
+                    Id = em.Id,
+                    PeriodId = em.ECPeriodId,
+                    PeriodTitle = em.ECPeriod?.Title ?? "Unknown Period",
+                    Position = em.Position,
+                    StartDate = em.ECPeriod?.StartDate ?? DateTime.MinValue,
+                    EndDate = em.EndDate,
+                    ChangeReason = em.ChangeReason,
+                    IsCurrent = em.ECPeriod?.IsActive ?? false
+                }).OrderByDescending(h => h.StartDate).ToList() ?? new()
+            };
             return dto;
         }
     }

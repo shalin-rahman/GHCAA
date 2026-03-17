@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy, Input, ElementRef, ViewCh
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NetworkingService } from '../../core/services/networking.service';
+import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { getECPositionName, getCurrentECPosition, getAcademicYears, PROFESSIONAL_SECTORS, getBloodGroupName } from '../../core/constants/app.constants';
 
@@ -25,7 +25,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     private notify = inject(NotificationService);
     private router = inject(Router);
 
-    members = signal<any[]>([]);
+    members = signal<MemberSummary[]>([]);
     loading = signal(true);      // initial/search load
     loadingMore = signal(false); // scroll-triggered load
     hasMore = signal(true);
@@ -151,10 +151,10 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     }
 
     viewProfile(id: number) {
-        const m = this.members().find(x => x.id === id);
-        if (m) {
-            this.selectedMember.set(m);
-        }
+        this.networkService.getMemberProfile(id).subscribe({
+            next: (p) => this.selectedMember.set(p),
+            error: () => this.notify.error('Failed to load profile details')
+        });
     }
 
     sendMessage(id: number) {

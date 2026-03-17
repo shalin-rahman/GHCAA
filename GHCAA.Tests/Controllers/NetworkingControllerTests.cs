@@ -28,7 +28,7 @@ namespace GHCAA.Tests.Controllers
         {
             var filter = new MemberSearchFilterDto();
             _networkingServiceMock.Setup(x => x.SearchMembersAsync(filter, It.IsAny<CancellationToken>()))
-                                  .ReturnsAsync(new PagedResult<MemberProfileDto> { Items = new List<MemberProfileDto>(), TotalItems = 0, TotalPages = 0, Page = 1, PageSize = 20 });
+                                  .ReturnsAsync(new PagedResult<MemberSummaryDto> { Items = new List<MemberSummaryDto>(), TotalItems = 0, TotalPages = 0, Page = 1, PageSize = 20 });
 
             var result = await _controller.Search(filter, CancellationToken.None);
 
@@ -50,7 +50,7 @@ namespace GHCAA.Tests.Controllers
         public async Task GetCommittee_ReturnsOk()
         {
             _networkingServiceMock.Setup(x => x.GetExecutiveCommitteeAsync(null, It.IsAny<CancellationToken>()))
-                                  .ReturnsAsync(new List<MemberProfileDto>());
+                                  .ReturnsAsync(new List<MemberSummaryDto>());
 
             var result = await _controller.GetExecutiveCommittee(null, CancellationToken.None);
 
@@ -72,7 +72,7 @@ namespace GHCAA.Tests.Controllers
         public async Task GetLatestUpdates_ReturnsOk()
         {
             _networkingServiceMock.Setup(x => x.GetLatestAlumniUpdatesAsync(10, It.IsAny<CancellationToken>()))
-                                  .ReturnsAsync(new List<MemberProfileDto>());
+                                  .ReturnsAsync(new List<MemberSummaryDto>());
 
             var result = await _controller.GetLatestUpdates(10, CancellationToken.None);
 

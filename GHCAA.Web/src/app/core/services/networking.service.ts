@@ -13,33 +13,54 @@ export interface PagedResult<T> {
     hasNextPage: boolean;
 }
 
+export interface MemberSummary {
+    id: number;
+    fullName: string;
+    membershipNumber?: string;
+    photoPath?: string;
+    passingYear: number;
+    ghcLastCertificate?: string;
+    ghcLastCertificatePassingYear?: number;
+    professionalSector?: string;
+    designation?: string;
+    bloodGroup?: string;
+    email?: string;
+    isEmailPublic?: boolean;
+    mobileNo?: string;
+    isMobilePublic?: boolean;
+    membershipType?: string;
+    category?: string;
+    ecHistory: any[];
+}
+
 @Injectable({
     providedIn: 'root'
 })
 export class NetworkingService {
     private http = inject(HttpClient);
 
-    getCommittee(params: any = {}): Observable<MemberProfile[]> {
-        return this.http.get<MemberProfile[]>(API_ENDPOINTS.NETWORKING.COMMITTEE, { params });
+    getCommittee(params: any = {}): Observable<MemberSummary[]> {
+        return this.http.get<MemberSummary[]>(API_ENDPOINTS.NETWORKING.COMMITTEE, { params });
     }
-
 
     getPeriods(): Observable<any[]> {
         return this.http.get<any[]>(API_ENDPOINTS.NETWORKING.COMMITTEE_PERIODS);
     }
 
-    searchMembers(filter: MemberSearchFilter & { page?: number; pageSize?: number }): Observable<PagedResult<MemberProfile>> {
-        return this.http.get<PagedResult<MemberProfile>>(API_ENDPOINTS.NETWORKING.SEARCH, { params: filter as any });
+    searchMembers(filter: MemberSearchFilter & { page?: number; pageSize?: number }): Observable<PagedResult<MemberSummary>> {
+        return this.http.get<PagedResult<MemberSummary>>(API_ENDPOINTS.NETWORKING.SEARCH, { params: filter as any });
     }
 
-
-
-    getUpdates(params: any): Observable<any[]> {
-        return this.http.get<any[]>(API_ENDPOINTS.NETWORKING.UPDATES, { params });
+    getMemberProfile(id: number): Observable<any> {
+        return this.http.get<any>(`${API_ENDPOINTS.NETWORKING.BASE}/member/${id}`);
     }
 
-    getRecentlyJoined(limit: number = 8): Observable<PagedResult<MemberProfile>> {
-        return this.http.get<PagedResult<MemberProfile>>(API_ENDPOINTS.NETWORKING.SEARCH, { params: { pageSize: limit, sortBy: 'joinDate', sortDesc: true } });
+    getUpdates(params: any): Observable<MemberSummary[]> {
+        return this.http.get<MemberSummary[]>(API_ENDPOINTS.NETWORKING.UPDATES, { params });
+    }
+
+    getRecentlyJoined(limit: number = 8): Observable<PagedResult<MemberSummary>> {
+        return this.http.get<PagedResult<MemberSummary>>(API_ENDPOINTS.NETWORKING.SEARCH, { params: { pageSize: limit, sortBy: 'joinDate', sortDesc: true } });
     }
 
 }

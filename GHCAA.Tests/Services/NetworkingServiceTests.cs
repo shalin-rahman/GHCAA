@@ -48,7 +48,6 @@ public class NetworkingServiceTests : TestBase
         var privateResult = results.First(r => r.FullName == "Private John");
         privateResult.Email.Should().Be("Confidential");
         privateResult.MobileNo.Should().Be("Confidential");
-        privateResult.PresentAddress.Should().Be("Confidential");
     }
 
     [Test]

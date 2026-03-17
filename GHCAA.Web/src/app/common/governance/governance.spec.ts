@@ -35,7 +35,9 @@ describe('Governance Component', () => {
     });
 
     it('should identify board members correctly', () => {
-        expect(component.isBoardMember('President')).toBe(true);
-        expect(component.isBoardMember('Member1')).toBe(false);
+        const president = { ecHistory: [{ position: 'President', isCurrent: true }] };
+        const member = { ecHistory: [{ position: 'Member1', isCurrent: true }] };
+        expect(component.isBoardMember(president)).toBe(true);
+        expect(component.isBoardMember(member)).toBe(false);
     });
 });

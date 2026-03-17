@@ -17,6 +17,7 @@ describe('AdminMembers Component', () => {
     beforeEach(async () => {
         adminServiceMock = {
             getMembers: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0 })),
+            getPeriods: vi.fn().mockReturnValue(of([])),
             exportMembers: vi.fn().mockReturnValue(of(new Blob())),
             sendPasswordResetLink: vi.fn().mockReturnValue(of({ message: 'Success' }))
         };

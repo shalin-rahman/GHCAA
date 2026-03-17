@@ -383,6 +383,7 @@ export const API_ENDPOINTS = {
         READ_ALL: '/api/notifications/read-all'
     },
     NETWORKING: {
+        BASE: '/api/networking',
         COMMITTEE: '/api/networking/committee',
         COMMITTEE_PERIODS: '/api/networking/periods',
         SEARCH: '/api/networking/search',

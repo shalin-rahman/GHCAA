@@ -1,8 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { NetworkingService } from '../../core/services/networking.service';
-import { MemberProfile } from '../../core/models/business.models';
+import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { getECPositionName, getECPositionForPeriod } from '../../core/constants/app.constants';
 
 @Component({
@@ -16,7 +15,7 @@ import { getECPositionName, getECPositionForPeriod } from '../../core/constants/
 export class Governance implements OnInit {
     private networkService = inject(NetworkingService);
 
-    committee = signal<MemberProfile[]>([]);
+    committee = signal<MemberSummary[]>([]);
     periods = signal<any[]>([]);
     selectedPeriodId = signal<number | null>(null);
     loading = signal(true);
@@ -58,9 +57,9 @@ export class Governance implements OnInit {
                 });
                 const generalEC = data.filter(m => {
                     const pos = getECPositionForPeriod(m.ecHistory, targetPeriodId);
-                    return !boardPositions.includes(pos) && pos !== 'None';
+                    return !boardPositions.includes(pos) && pos !== 'None' && pos !== 0;
                 });
-                this.committee.set([...boardMembers, ...generalEC]);
+                this.committee.set([...boardMembers, ...generalEC] as MemberSummary[]);
                 this.loading.set(false);
             },
             error: () => this.loading.set(false)

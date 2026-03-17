@@ -82,18 +82,28 @@ namespace GHCAA.Infrastructure.Services
                 }
             }
 
-            // Pre-fetch all members for O(1) lookup and to support updates
-            var allExistingMembers = await _db.Members.ToListAsync(cancellationToken);
-            var existingMembersByNID = new Dictionary<string, Member>(StringComparer.OrdinalIgnoreCase);
-            var existingEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var existingMobiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            // Extract all search keys from Excel first to avoid full table scan
+            var nidsInFile = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var emailsInFile = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var columnNid = mapping.FirstOrDefault(m => m.Value == nameof(Member.NID)).Key;
+            var columnEmail = mapping.FirstOrDefault(m => m.Value == nameof(Member.Email)).Key;
 
-            foreach (var m in allExistingMembers)
+            foreach (var row in rows)
             {
-                if (!string.IsNullOrWhiteSpace(m.NID)) existingMembersByNID[m.NID] = m;
-                if (!string.IsNullOrWhiteSpace(m.Email)) existingEmails.Add(m.Email);
-                if (!string.IsNullOrWhiteSpace(m.MobileNo)) existingMobiles.Add(m.MobileNo);
+                if (!string.IsNullOrEmpty(columnNid) && headers.TryGetValue(columnNid, out var colNid))
+                    nidsInFile.Add(row.Cell(colNid).Value.ToString().Trim());
+                if (!string.IsNullOrEmpty(columnEmail) && headers.TryGetValue(columnEmail, out var colEmail))
+                    emailsInFile.Add(row.Cell(colEmail).Value.ToString().Trim());
             }
+
+            // Pre-fetch ONLY relevant members for lookup
+            var existingMembers = await _db.Members
+                .Where(m => nidsInFile.Contains(m.NID) || emailsInFile.Contains(m.Email))
+                .ToListAsync(cancellationToken);
+
+            var existingMembersByNID = existingMembers.Where(m => !string.IsNullOrEmpty(m.NID)).ToDictionary(m => m.NID, m => m, StringComparer.OrdinalIgnoreCase);
+            var existingEmails = new HashSet<string>(existingMembers.Select(m => m.Email).Where(e => !string.IsNullOrEmpty(e)), StringComparer.OrdinalIgnoreCase);
+            var existingMobiles = new HashSet<string>(existingMembers.Select(m => m.MobileNo).Where(mb => !string.IsNullOrEmpty(mb)), StringComparer.OrdinalIgnoreCase);
 
             // Also track within-batch to catch intra-batch duplicates
             var batchEmails  = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -230,6 +240,12 @@ namespace GHCAA.Infrastructure.Services
                         result.Errors.Add($"{rowTag}: MobileNo missing — assigned placeholder '{member.MobileNo}'");
                     }
 
+                    // Pre-generate Membership Number to avoid second DB save
+                    if (string.IsNullOrWhiteSpace(member.MembershipNumber))
+                    {
+                        member.MembershipNumber = $"{Constants.Defaults.MembershipPrefix}{member.NID}";
+                    }
+
                     // ── DUPLICATE RESOLUTION (DB + intra-batch) ──────────────────────────────
                     if (!isUpdate && existingMembersByNID.ContainsKey(member.NID))
                     {
@@ -316,15 +332,6 @@ namespace GHCAA.Infrastructure.Services
             {
                 try
                 {
-                    // Generate Membership Number if missing: Format GHC-NID
-                    if (string.IsNullOrWhiteSpace(item.Member.MembershipNumber))
-                    {
-                        item.Member.MembershipNumber = $"{Constants.Defaults.MembershipPrefix}{item.Member.NID}";
-                        _db.Members.Update(item.Member);
-                    }
-
-                    // EC Position is intentionally NOT synced during import
-
                     // Handle Photo: match by ExternalId (Registration ID), NID, or MobileNo
                     var validPhotoNames = new[] { item.ExternalId, item.Member.NID, item.Member.MobileNo }
                         .Where(n => !string.IsNullOrWhiteSpace(n))

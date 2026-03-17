@@ -94,4 +94,25 @@ namespace GHCAA.Application.DTOs
         public string? ChangeReason { get; set; }
         public bool IsCurrent { get; set; }
     }
+
+    public class MemberSummaryDto
+    {
+        public int Id { get; set; }
+        public string FullName { get; set; } = null!;
+        public string? MembershipNumber { get; set; }
+        public string? PhotoPath { get; set; }
+        public int PassingYear { get; set; }
+        public int GhcLastCertificatePassingYear { get; set; }
+        public string? GhcLastCertificate { get; set; }
+        public string? ProfessionalSector { get; set; }
+        public string? Designation { get; set; }
+        public BloodGroup BloodGroup { get; set; }
+        public string? Email { get; set; }
+        public bool IsEmailPublic { get; set; }
+        public string? MobileNo { get; set; }
+        public bool IsMobilePublic { get; set; }
+        public MembershipType MembershipType { get; set; }
+        public MemberCategory Category { get; set; }
+        public List<ECHistoryDto> ECHistory { get; set; } = new();
+    }
 }
