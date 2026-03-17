@@ -78,10 +78,27 @@
     <!-- Education History Section -->
     <div class="glass-card mb-8 p-10">
         <h4 class="section-label">Educational Timeline</h4>
-        @if (profile.academicHistory && profile.academicHistory.length > 0) {
+        @if ((profile.academicHistory && profile.academicHistory.length > 0) || profile.ghcLastCertificate) {
         <div class="history-container">
+            <!-- Primary Overview (from Main Profile) -->
+            @if (profile.ghcLastCertificate) {
+            <div class="history-card primary relative">
+                <div class="h-header">
+                    <span class="h-title">{{ profile.ghcLastCertificate }} in {{ profile.ghcLastCertificateSubject }}</span>
+                    <span class="h-badge">Primary College Archive</span>
+                </div>
+                <div class="h-sub">
+                    <span class="h-subtitle">Govt. Haraganga College</span>
+                    <span class="h-period">{{ profile.ghcAdmissionYear ? profile.ghcAdmissionYear + ' - ' : '' }}{{ profile.ghcLastCertificatePassingYear }}</span>
+                </div>
+            </div>
+            }
+
             @for (h of profile.academicHistory; track $index) {
-            <div class="history-card">
+            <div class="history-card relative">
+                <button type="button" (click)="removeAcademicRecord($index)" class="absolute top-4 right-4 btn btn-secondary btn-sm text-danger-color border-danger-color">
+                    Remove 🗑️
+                </button>
                 <div class="h-header">
                     <span class="h-title">{{ h.degree }} in {{ h.subject }}</span>
                     <span class="h-badge" *ngIf="h.isGHC">Primary Institution</span>
@@ -104,10 +121,28 @@
     <!-- Career History Section -->
     <div class="glass-card mb-8 p-10">
         <h4 class="section-label">Professional Experience</h4>
-        @if (profile.professionalHistory && profile.professionalHistory.length > 0) {
+        @if ((profile.professionalHistory && profile.professionalHistory.length > 0) || profile.designation) {
         <div class="history-container">
+            <!-- Professional Snapshot (from Main Profile) -->
+            @if (profile.designation) {
+                <div class="history-card primary relative current">
+                    <div class="h-header">
+                        <span class="h-title">{{ profile.designation }}</span>
+                        <span class="h-badge">Primary Occupation</span>
+                    </div>
+                    @if (profile.professionalSector) {
+                    <div class="h-sub">
+                        <span class="h-subtitle">Sector: {{ profile.professionalSector }}</span>
+                    </div>
+                    }
+                </div>
+            }
+
             @for (w of profile.professionalHistory; track $index) {
-            <div class="history-card" [class.current]="w.isCurrent">
+            <div class="history-card relative" [class.current]="w.isCurrent">
+                <button type="button" (click)="removeProfessionalRecord($index)" class="absolute top-4 right-4 btn btn-secondary btn-sm text-danger-color border-danger-color">
+                    Remove 🗑️
+                </button>
                 <div class="h-header">
                     <span class="h-title">{{ w.designation }}</span>
                     @if (w.isCurrent) { <span class="h-badge">Current Position</span> }
@@ -149,6 +184,12 @@
                 <div class="photo-placeholder rounded-2xl flex items-center justify-center text-4xl">
                     {{ profile.fullName?.[0] || '?' }}
                 </div>
+                }
+                
+                @if (profile.photoPath || photoPreview()) {
+                    <button type="button" (click)="removePhoto()" class="remove-photo-btn" title="Remove Photo">
+                        🗑️
+                    </button>
                 }
             </div>
             <div class="flex flex-col gap-4">
@@ -207,9 +248,53 @@
             <!-- Academic History Management -->
             <div class="section-block mt-14">
                 <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Manage Education Records</h4>
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Overall Highest Academic Achievement</h4>
+                </div>
+                <div class="form-grid mb-10">
+                    <div class="form-group">
+                        <label>Highest Degree Title</label>
+                        <input type="text" [(ngModel)]="profile.highestCertificate" name="highDeg" placeholder="e.g. Masters in Physics">
+                    </div>
+                    <div class="form-group">
+                        <label>Major / Subject</label>
+                        <input type="text" [(ngModel)]="profile.highestCertificateSubject" name="highSub" placeholder="e.g. Physics / MBA">
+                    </div>
+                    <div class="form-group">
+                        <label>Passing Year</label>
+                        <input type="number" [(ngModel)]="profile.highestCertificatePassingYear" name="highPass">
+                    </div>
+                    <div class="form-group">
+                        <label>HSC Admission Year</label>
+                        <input type="number" [(ngModel)]="profile.hscAdmissionYear" name="hscAdm">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Member Registration Summary (GHC)</h4>
+                </div>
+                <div class="form-grid mb-10">
+                    <div class="form-group">
+                        <label>Last GHC Degree</label>
+                        <input type="text" [(ngModel)]="profile.ghcLastCertificate" name="ghcDeg" placeholder="e.g. HSC / BA / B.Sc">
+                    </div>
+                    <div class="form-group">
+                        <label>GHC Subject / Group</label>
+                        <input type="text" [(ngModel)]="profile.ghcLastCertificateSubject" name="ghcSub" placeholder="e.g. Science / Arts / Physics">
+                    </div>
+                    <div class="form-group">
+                        <label>GHC Admission Year</label>
+                        <input type="number" [(ngModel)]="profile.ghcAdmissionYear" name="ghcAdm">
+                    </div>
+                    <div class="form-group">
+                        <label>GHC Passing Year</label>
+                        <input type="number" [(ngModel)]="profile.ghcLastCertificatePassingYear" name="ghcPass">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Detailed Academic Milestones</h4>
                     <button type="button" (click)="addAcademicRecord()" class="btn btn-secondary btn-sm">
-                        + Add Milestone
+                        + Add Education
                     </button>
                 </div>
                 
@@ -257,13 +342,22 @@
                         <p>No educational history provided. At least one record from GHC is required for verification.</p>
                     </div>
                     }
-                </div>
-            </div>
-
             <!-- Professional History Management -->
             <div class="section-block mt-14">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Professional Career Tracker</h4>
+                <h4 class="section-label">Professional Snapshot</h4>
+                <div class="form-grid mb-10">
+                    <div class="form-group full">
+                        <label>Primary Designation & Organization</label>
+                        <input type="text" [(ngModel)]="profile.designation" name="profileDesignation" placeholder="e.g. Lead Architect at BuildRight">
+                    </div>
+                    <div class="form-group">
+                        <label>Industry Sector</label>
+                        <input type="text" list="sector-list" [(ngModel)]="profile.professionalSector" name="profileSector">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mb-6">
+                    <h4 class="section-label !mb-0">Detailed Career Timeline</h4>
                     <button type="button" (click)="addProfessionalRecord()" class="btn btn-secondary btn-sm">
                         + Add Experience
                     </button>

@@ -46,5 +46,6 @@ namespace GHCAA.Application.DTOs
         // History
         public List<AcademicRecordDto> AcademicHistory { get; set; } = new();
         public List<ProfessionalRecordDto> ProfessionalHistory { get; set; } = new();
+        public List<ECHistoryDto> ECHistory { get; set; } = new();
     }
 }

@@ -112,5 +112,66 @@ namespace GHCAA.Tests.Services
             var result = await _service.LoginAsync(new LoginDto { Username = username, Password = password });
             result.Should().BeNull();
         }
+
+        [Test]
+        public async Task ResetPasswordAsync_WithValidToken_ShouldChangePassword()
+        {
+            // Arrange
+            var email = "User@Example.com";
+            var token = "token123";
+            var member = new Member { FullName = "Test", Email = email, NID = "333", MobileNo = "333", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
+            await _context.Members.AddAsync(member);
+            await _context.SaveChangesAsync();
+
+            var user = new User
+            {
+                Username = "testuser_reset",
+                MemberId = member.Id,
+                PasswordHash = "old_hash",
+                ResetToken = token,
+                ResetTokenExpiry = DateTime.UtcNow.AddHours(1),
+                IsActive = true
+            };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            // Act - Test case-insensitive email (passing lowercase instead of MixedCase)
+            var result = await _service.ResetPasswordAsync("user@example.com", token, "NewPassword123");
+
+            // Assert
+            result.Should().BeTrue();
+            var updatedUser = await _context.Users.FindAsync(user.Id);
+            BCrypt.Net.BCrypt.Verify("NewPassword123", updatedUser!.PasswordHash).Should().BeTrue();
+            updatedUser.ResetToken.Should().BeNull();
+        }
+
+        [Test]
+        public async Task ResetPasswordAsync_WithExpiredToken_ShouldReturnFalse()
+        {
+            // Arrange
+            var email = "expired@example.com";
+            var token = "expired_token";
+            var member = new Member { FullName = "Test", Email = email, NID = "444", MobileNo = "444", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
+            await _context.Members.AddAsync(member);
+            await _context.SaveChangesAsync();
+
+            var user = new User
+            {
+                Username = "expired_user",
+                MemberId = member.Id,
+                PasswordHash = "old_hash",
+                ResetToken = token,
+                ResetTokenExpiry = DateTime.UtcNow.AddHours(-1),
+                IsActive = true
+            };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _service.ResetPasswordAsync(email, token, "NewPassword123");
+
+            // Assert
+            result.Should().BeFalse();
+        }
     }
 }

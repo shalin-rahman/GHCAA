@@ -17,5 +17,6 @@ namespace GHCAA.Application.Interfaces
         Task<IEnumerable<ECMember>> GetCommitteeMembersAsync(int periodId, CancellationToken cancellationToken = default);
         Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, CancellationToken cancellationToken = default);
         Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, CancellationToken cancellationToken = default);
+        Task<bool> DeleteECMemberAsync(int id, CancellationToken cancellationToken = default);
     }
 }

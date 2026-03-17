@@ -35,12 +35,16 @@ export class AdminMembers implements OnInit {
   payToUpload: File | null = null;
   photoToUpload: File | null = null;
   photoPreview = signal<string | null>(null);
+  memberPayments = signal<any[]>([]);
 
   // Pagination state
   currentPage = signal(1);
   pageSize = signal(10);
   totalPages = signal(1);
   totalItems = signal(0);
+
+  // Governance
+  ecPeriods = signal<any[]>([]);
 
   // Import State
   showImportModal = signal(false);
@@ -127,6 +131,14 @@ export class AdminMembers implements OnInit {
 
   ngOnInit() {
     this.loadMembers();
+    this.loadECPeriods();
+  }
+
+  loadECPeriods() {
+    this.adminService.getPeriods().subscribe({
+      next: (periods) => this.ecPeriods.set(periods),
+      error: () => this.ecPeriods.set([])
+    });
   }
 
   onFilterChange() {
@@ -225,8 +237,22 @@ export class AdminMembers implements OnInit {
     });
   }
 
-  openDetail(member: any) { this.selectedMember.set({ ...member }); this.isEditing.set(false); this.photoToUpload = null; this.photoPreview.set(null); }
-  closeDetail() { this.selectedMember.set(null); this.isEditing.set(false); this.photoToUpload = null; this.photoPreview.set(null); }
+  openDetail(member: any) { 
+    this.selectedMember.set({ ...member }); 
+    this.isEditing.set(false); 
+    this.photoToUpload = null; 
+    this.photoPreview.set(null); 
+    this.loadPayments(member.id);
+  }
+
+  loadPayments(memberId: number) {
+    this.adminService.getMemberPayments(memberId).subscribe({
+      next: (res) => this.memberPayments.set(res),
+      error: () => this.memberPayments.set([])
+    });
+  }
+
+  closeDetail() { this.selectedMember.set(null); this.isEditing.set(false); this.photoToUpload = null; this.photoPreview.set(null); this.memberPayments.set([]); }
 
   toggleEdit() { this.isEditing.update(v => !v); }
 
@@ -510,6 +536,40 @@ export class AdminMembers implements OnInit {
 
   removeProfessional(index: number) {
     this.selectedMember().professionalHistory.splice(index, 1);
+  }
+
+  addECHistory() {
+    if (!this.selectedMember().ecHistory) this.selectedMember().ecHistory = [];
+    const activePeriod = this.ecPeriods().find(p => p.isActive);
+    this.selectedMember().ecHistory.unshift({
+      periodTitle: activePeriod ? activePeriod.title : '',
+      position: 0, // None
+      startDate: new Date().toISOString().split('T')[0],
+      isCurrent: true,
+      changeReason: ''
+    });
+  }
+
+  deletePayment(paymentId: number) {
+    if (!confirm('Permanently delete this payment record? This will also mark linked dues as unpaid.')) return;
+    this.adminService.deletePayment(paymentId).subscribe({
+      next: () => {
+        this.notify.success('Payment deleted.');
+        this.loadPayments(this.selectedMember().id);
+      },
+      error: () => this.notify.error('Failed to delete payment.')
+    });
+  }
+
+  deleteECHistory(id: number) {
+    if (!confirm('Permanently delete this EC role history record?')) return;
+    this.adminService.deleteECMember(id).subscribe({
+      next: () => {
+        this.notify.success('EC History deleted.');
+        this.finalizeSave(); // Refresh data
+      },
+      error: () => this.notify.error('Failed to delete history.')
+    });
   }
 }
 

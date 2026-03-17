@@ -115,7 +115,7 @@ namespace GHCAA.Infrastructure.Services
         {
             var member = await _db.Members
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(m => m.Email == email.Trim().ToLower(), cancellationToken);
+                .FirstOrDefaultAsync(m => m.Email.ToLower() == email.Trim().ToLower(), cancellationToken);
 
             if (member == null) return false;
 

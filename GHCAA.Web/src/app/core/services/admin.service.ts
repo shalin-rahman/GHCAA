@@ -152,4 +152,18 @@ export class AdminService {
     deleteTheme(id: number): Observable<any> {
         return this.http.delete(`${API_ENDPOINTS.THEMES}/${id}`);
     }
+
+    // Governance - EC Roles
+    deleteECMember(id: number): Observable<any> {
+        return this.http.delete(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/members/${id}/hard-delete`);
+    }
+
+    // Finances - Payments
+    getMemberPayments(memberId: number): Observable<any[]> {
+        return this.http.get<any[]>(`${API_ENDPOINTS.FINANCIALS}/member/${memberId}/history`);
+    }
+
+    deletePayment(id: number): Observable<any> {
+        return this.http.delete(`${API_ENDPOINTS.FINANCIALS}/payment/${id}`);
+    }
 }

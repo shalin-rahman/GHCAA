@@ -60,20 +60,21 @@ export class Profile implements OnInit {
     }
 
     removeAcademicRecord(index: number) {
+        if (!confirm('Remove this academic record?')) return;
         this.profile.academicHistory.splice(index, 1);
     }
 
-    addProfessionalRecord() {
-        this.profile.professionalHistory.push({
-            organizationName: '',
-            designation: '',
-            startDate: new Date().toISOString().split('T')[0],
-            isCurrent: false
-        });
-    }
 
     removeProfessionalRecord(index: number) {
+        if (!confirm('Remove this professional record?')) return;
         this.profile.professionalHistory.splice(index, 1);
+    }
+
+    removePhoto() {
+        if (!confirm('Remove your profile photo?')) return;
+        this.profile.photoPath = null;
+        this.photoFile = null;
+        this.photoPreview.set(null);
     }
 
     getMembershipType(type: any): string {
@@ -149,5 +150,3 @@ export class Profile implements OnInit {
         });
     }
 }
-
-

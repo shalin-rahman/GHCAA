@@ -446,7 +446,7 @@ namespace GHCAA.Infrastructure.Services
             switch (propName)
             {
                 case nameof(Member.FullName): member.FullName = value; break;
-                case nameof(Member.Email): member.Email = value; break;
+                case nameof(Member.Email): member.Email = value.Trim().ToLower(); break;
                 case nameof(Member.MobileNo): member.MobileNo = value; break;
                 case nameof(Member.NID): member.NID = value; break;
                 case nameof(Member.FatherName): member.FatherName = value; break;

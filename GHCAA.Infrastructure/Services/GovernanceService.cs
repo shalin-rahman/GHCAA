@@ -255,5 +255,25 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
+
+        public async Task<bool> DeleteECMemberAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var ecMember = await _db.ECMembers
+                .Include(em => em.Member)
+                .Include(em => em.ECPeriod)
+                .FirstOrDefaultAsync(em => em.Id == id, cancellationToken);
+
+            if (ecMember == null) return false;
+
+            // If it was an active position in the active period, reset member's position
+            if (ecMember.ECPeriod != null && ecMember.ECPeriod.IsActive && ecMember.EndDate == null && ecMember.Member != null)
+            {
+                ecMember.Member.ECPosition = ECPosition.None;
+            }
+
+            _db.ECMembers.Remove(ecMember);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
     }
 }

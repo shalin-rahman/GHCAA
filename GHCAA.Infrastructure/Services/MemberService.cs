@@ -371,6 +371,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 dto.ECHistory = member.ECMembers.Select(em => new ECHistoryDto
                 {
+                    Id = em.Id,
                     PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
                     Position = em.Position,
                     StartDate = DateTime.SpecifyKind(em.StartDate, DateTimeKind.Utc),
@@ -715,6 +716,7 @@ namespace GHCAA.Infrastructure.Services
                 {
                     dto.ECHistory = member.ECMembers.Select(em => new ECHistoryDto
                     {
+                        Id = em.Id,
                         PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
                         Position = em.Position,
                         StartDate = DateTime.SpecifyKind(em.StartDate, DateTimeKind.Utc),
@@ -801,43 +803,38 @@ namespace GHCAA.Infrastructure.Services
             if (Enum.TryParse<Enums.MemberCategory>(dto.Category, true, out var mCat))
                 member.Category = mCat;
             
-            // Robust enum parsing (handles names or numeric indices)
-            if (Enum.TryParse<Enums.ECPosition>(dto.ECPosition, true, out var ecPos))
+            // Sync EC History
+            if (dto.ECHistory != null)
             {
-                if (member.ECPosition != ecPos)
+                var existingEC = await _db.ECMembers.Where(ec => ec.MemberId == id).ToListAsync(cancellationToken);
+                _db.ECMembers.RemoveRange(existingEC);
+
+                foreach (var ec in dto.ECHistory)
                 {
-                    var oldPos = member.ECPosition;
-                    member.ECPosition = ecPos;
-                    
-                    var activePeriod = await _db.ECPeriods.FirstOrDefaultAsync(p => p.IsActive, cancellationToken);
-                    if (activePeriod != null)
+                    var period = await _db.ECPeriods.FirstOrDefaultAsync(p => p.Title == ec.PeriodTitle, cancellationToken);
+                    if (period == null) continue;
+
+                    _db.ECMembers.Add(new ECMember
                     {
-                        var now = DateTime.UtcNow;
-                        
-                        // 1. End all currently active EC records for this member in this period
-                        var currentECRecords = await _db.ECMembers
-                            .Where(em => em.MemberId == id && em.ECPeriodId == activePeriod.Id && em.EndDate == null)
-                            .ToListAsync(cancellationToken);
-                        
-                        foreach (var record in currentECRecords)
-                        {
-                            record.EndDate = now;
-                            record.ChangeReason = dto.ECChangeReason ?? $"Position changed from {oldPos} to {ecPos}.";
-                        }
-                        
-                        // 2. Start the new position if it's not 'None'
-                        if (ecPos != Enums.ECPosition.None)
-                        {
-                            _db.ECMembers.Add(new ECMember 
-                            { 
-                                MemberId = id, 
-                                ECPeriodId = activePeriod.Id, 
-                                Position = ecPos,
-                                StartDate = now,
-                                ChangeReason = dto.ECChangeReason
-                            });
-                        }
+                        MemberId = id,
+                        ECPeriodId = period.Id,
+                        Position = ec.Position,
+                        StartDate = DateTime.SpecifyKind(ec.StartDate, DateTimeKind.Utc),
+                        EndDate = ec.EndDate.HasValue ? DateTime.SpecifyKind(ec.EndDate.Value, DateTimeKind.Utc) : null,
+                        ChangeReason = ec.ChangeReason
+                    });
+
+                    // Maintain the 'Current' cache on Member if this is an active period and currently active record
+                    if (ec.IsCurrent && !ec.EndDate.HasValue)
+                    {
+                        member.ECPosition = ec.Position;
                     }
+                }
+                
+                // If no current records in the provided list, clear the cache
+                if (!dto.ECHistory.Any(ec => ec.IsCurrent && !ec.EndDate.HasValue))
+                {
+                    member.ECPosition = Enums.ECPosition.None;
                 }
             }
 
@@ -955,7 +952,7 @@ namespace GHCAA.Infrastructure.Services
             await _activityService.LogActivityAsync(memberId, "Password Reset", "Admin initiated password reset email.", cancellationToken: cancellationToken);
  
             var clientUrl = _config[Constants.ConfigKeys.ClientUrl] ?? "http://localhost:4200";
-            var resetUrl = $"{clientUrl}/reset-password?email={member.Email}&token={token}";
+            var resetUrl = $"{clientUrl}/reset-password?email={Uri.EscapeDataString(member.Email)}&token={token}";
             
             // Try fetching PASSWORD_RESET template from DB first (database-first strategy)
             var dbTemplate = await _communicationService.GetTemplateByCodeAsync(Constants.TemplateCodes.PasswordReset, cancellationToken);

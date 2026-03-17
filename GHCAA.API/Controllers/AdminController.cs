@@ -187,8 +187,8 @@ namespace GHCAA.API.Controllers
             try
             {
                 var success = await _memberService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
-                if (!success) return NotFound();
-                return Ok(new { Message = "Password reset link sent to member's secondary/primary email." });
+                if (!success) return NotFound(new { Message = "Member or user account not found. Please ensure the member is approved and active." });
+                return Ok(new { Message = "Password reset link sent to the member's registered email." });
             }
             catch (Exception ex)
             {

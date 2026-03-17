@@ -17,7 +17,8 @@ describe('AdminMembers Component', () => {
     beforeEach(async () => {
         adminServiceMock = {
             getMembers: vi.fn().mockReturnValue(of({ items: [], totalItems: 0, totalPages: 0 })),
-            exportMembers: vi.fn().mockReturnValue(of(new Blob()))
+            exportMembers: vi.fn().mockReturnValue(of(new Blob())),
+            sendPasswordResetLink: vi.fn().mockReturnValue(of({ message: 'Success' }))
         };
 
         notificationServiceMock = {
@@ -53,5 +54,19 @@ describe('AdminMembers Component', () => {
 
     it('should load members on init', () => {
         expect(adminServiceMock.getMembers).toHaveBeenCalled();
+    });
+    
+    it('should call sendPasswordResetLink and notify success', () => {
+        // Mock a selected member
+        const member = { id: 100, fullName: 'Test User' };
+        component.selectedMember.set(member);
+        
+        // Mock confirmation
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        
+        component.sendResetLink(member.id);
+        
+        expect(adminServiceMock.sendPasswordResetLink).toHaveBeenCalledWith(member.id);
+        expect(notificationServiceMock.success).toHaveBeenCalledWith('Password reset link sent.');
     });
 });

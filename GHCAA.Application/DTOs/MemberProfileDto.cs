@@ -86,6 +86,7 @@ namespace GHCAA.Application.DTOs
 
     public class ECHistoryDto
     {
+        public int Id { get; set; }
         public string PeriodTitle { get; set; } = null!;
         public ECPosition Position { get; set; }
         public DateTime StartDate { get; set; }

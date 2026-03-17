@@ -322,6 +322,28 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
+        public async Task<bool> DeletePaymentAsync(int paymentId, CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories.FindAsync(new object[] { paymentId }, cancellationToken);
+            if (payment == null) return false;
+
+            // Find any dues linked to this payment and reset them
+            var linkedDues = await _db.MembershipDues
+                .Where(d => d.PaymentHistoryId == paymentId)
+                .ToListAsync(cancellationToken);
+
+            foreach (var due in linkedDues)
+            {
+                due.IsPaid = false;
+                due.PaymentDate = null;
+                due.PaymentHistoryId = null;
+            }
+
+            _db.PaymentHistories.Remove(payment);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
         private static PaymentHistoryDto MapToPaymentDto(PaymentHistory p)
         {
             return new PaymentHistoryDto

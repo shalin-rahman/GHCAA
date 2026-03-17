@@ -134,5 +134,21 @@ namespace GHCAA.API.Controllers
             var history = await _financialService.GetMemberMembershipHistoryAsync(memberId, cancellationToken);
             return Ok(history);
         }
+
+        [HttpDelete("payment/{id}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> DeletePayment(int id, CancellationToken cancellationToken)
+        {
+            var success = await _financialService.DeletePaymentAsync(id, cancellationToken);
+            return success ? Ok() : NotFound();
+        }
+
+        [HttpGet("member/{memberId}/history")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetMemberPaymentHistory(int memberId, CancellationToken cancellationToken)
+        {
+            var history = await _financialService.GetMemberPaymentHistoryAsync(memberId, cancellationToken);
+            return Ok(history);
+        }
     }
 }

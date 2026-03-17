@@ -71,6 +71,14 @@ namespace GHCAA.API.Controllers
             if (!success) return NotFound();
             return Ok(new { Message = "Member removed from committee" });
         }
+
+        [HttpDelete("members/{ecMemberId}/hard-delete")]
+        public async Task<IActionResult> DeleteECMember(int ecMemberId, CancellationToken cancellationToken)
+        {
+            var success = await _governanceService.DeleteECMemberAsync(ecMemberId, cancellationToken);
+            if (!success) return NotFound();
+            return Ok(new { Message = "Member role history permanently deleted" });
+        }
     }
 
     public class CreatePeriodRequest

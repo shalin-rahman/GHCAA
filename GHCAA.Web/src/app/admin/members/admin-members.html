@@ -315,6 +315,10 @@
                                         <input type="number" [(ngModel)]="acad.passingYear" [readonly]="!isEditing()" list="years-list">
                                     </div>
                                     <div class="form-group">
+                                        <label class="text-[10px]">Adm. Year</label>
+                                        <input type="number" [(ngModel)]="acad.admissionYear" [readonly]="!isEditing()" list="years-list">
+                                    </div>
+                                    <div class="form-group">
                                         <label class="text-[10px]">Result</label>
                                         <input type="text" [(ngModel)]="acad.result" [readonly]="!isEditing()" placeholder="e.g. 5.00">
                                     </div>
@@ -380,6 +384,70 @@
                         }
                         @if (!selectedMember()?.professionalHistory?.length) {
                         <p class="text-sm opacity-50 italic">No professional records.</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- EC Position History Section -->
+                <div class="full border-t pt-8 mt-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-accent uppercase tracking-widest text-xs font-black">EC Position History</h4>
+                    </div>
+
+                    <div class="history-list flex flex-col gap-3">
+                        @for (h of selectedMember()?.ecHistory; track h.id) {
+                        <div class="history-item glass-effect rounded-lg p-4 flex justify-between items-center">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-sm">{{ getECPositionLabel(h.position) }}</span>
+                                    <span class="text-[10px] bg-primary/10 px-2 py-0.5 rounded opacity-70">{{ h.periodTitle }}</span>
+                                    @if (h.isCurrent) {
+                                    <span class="text-[8px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Active</span>
+                                    }
+                                </div>
+                                <div class="text-[10px] opacity-50 mt-1">
+                                    {{ h.startDate | date:'mediumDate' }} — {{ h.endDate ? (h.endDate | date:'mediumDate') : 'Present' }}
+                                    @if (h.changeReason) {
+                                    <span class="ml-2 italic text-gray-400">({{ h.changeReason }})</span>
+                                    }
+                                </div>
+                            </div>
+                            <button class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors" (click)="deleteECHistory(h.id)">✕ Delete</button>
+                        </div>
+                        }
+                        @if (!selectedMember()?.ecHistory?.length) {
+                        <p class="text-sm opacity-50 italic">No historical EC positions found.</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Payment History Section -->
+                <div class="full border-t pt-8 mt-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-accent uppercase tracking-widest text-xs font-black">Payment History</h4>
+                    </div>
+
+                    <div class="history-list flex flex-col gap-3">
+                        @for (p of memberPayments(); track p.id) {
+                        <div class="history-item glass-effect rounded-lg p-4 flex justify-between items-center">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-sm">{{ p.amount | currency:'BDT ' }}</span>
+                                    <span class="text-[10px] bg-primary/10 px-2 py-0.5 rounded opacity-70">{{ p.category }}</span>
+                                    <span class="status-badge text-[8px] px-1.5 py-0.5" [class]="p.status.toLowerCase()">{{ p.status }}</span>
+                                </div>
+                                <div class="text-[10px] opacity-50 mt-1">
+                                    TrxID: <code class="text-accent">{{ p.transactionId }}</code> • {{ p.paidAt | date:'mediumDate' }}
+                                    @if (p.notes) {
+                                    <div class="mt-1 italic text-gray-400">Note: {{ p.notes }}</div>
+                                    }
+                                </div>
+                            </div>
+                            <button class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors" (click)="deletePayment(p.id)">✕ Delete</button>
+                        </div>
+                        }
+                        @if (!memberPayments().length) {
+                        <p class="text-sm opacity-50 italic">No payment records found.</p>
                         }
                     </div>
                 </div>
