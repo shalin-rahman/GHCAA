@@ -27,7 +27,11 @@ export class AuthService {
                     username: response.username,
                     memberId: response.memberId,
                     token: response.token,
-                    role: response.role ?? 'Member'
+                    role: response.role ?? 'Member',
+                    fullName: response.fullName,
+                    email: response.email,
+                    mobileNo: response.mobileNo,
+                    mustChangePassword: response.mustChangePassword
                 };
                 this.setSession(user);
                 return user;

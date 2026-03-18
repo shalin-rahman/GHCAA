@@ -155,7 +155,7 @@ export class Events implements OnInit {
   }
 
   submitRegistration() {
-    if (this.regForm.invalid) {
+    if (this.regForm.invalid || !this.selectedEvent()) {
       this.regForm.markAllAsTouched();
       this.formError.set('Please provide all required information marked in red.');
       return;
@@ -165,7 +165,7 @@ export class Events implements OnInit {
     
     const ev = this.selectedEvent();
     if (!ev) return;
-
+    
     if (ev.requiresPayment && !this.selectedPaymentMethod()) {
       this.formError.set('Please select a payment method.');
       return;
@@ -175,7 +175,10 @@ export class Events implements OnInit {
     
     let ref = this.regForm.value.paymentReference || '';
     if (ev.requiresPayment) {
-        if (!this.selectedPaymentMethod()?.requiresReference && !ref) {
+        if (this.selectedPaymentMethod()?.gateway !== 'None') {
+            // Online Gateway uses a distinct verifiable reference
+            ref = `EVT-REG-${Date.now().toString().slice(-8)}`;
+        } else if (!this.selectedPaymentMethod()?.requiresReference && !ref) {
             ref = `NA-${Date.now().toString().slice(-6)}`;
         }
     } else {
@@ -216,15 +219,19 @@ export class Events implements OnInit {
     });
   }
 
-  private initiateGateway(ev: AlumniEvent, ref: string) {
+  public initiateGateway(ev: AlumniEvent, ref: string) {
     const gateway = this.selectedPaymentMethod()?.method === 'SSLCommerz' ? PaymentGateway.SSLCommerz : PaymentGateway.Bkash;
     const amountToCharge = ev.registrationFee || this.regForm.value.contributionAmount || 0;
 
+    const user = this.auth.currentUser();
     this.gatewaysService.initiatePayment({
       amount: amountToCharge,
       gateway: gateway,
-      reference: `EVT-REG-${ref}`,
-      baseUrl: window.location.origin
+      reference: ref, // Now contains prefix from earlier logic
+      baseUrl: window.location.origin,
+      customerName: user?.fullName || this.regForm.value.guestName || 'Guest',
+      customerEmail: user?.email || this.regForm.value.guestEmail || '',
+      customerPhone: user?.mobileNo || this.regForm.value.guestMobile || ''
     }).subscribe({
       next: (res) => {
         if (res.success && res.gatewayUrl) {

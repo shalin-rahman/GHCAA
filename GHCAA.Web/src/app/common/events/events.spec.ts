@@ -68,4 +68,65 @@ describe('Events Component', () => {
     it('should load events on init', () => {
         expect(eventsServiceMock.getEvents).toHaveBeenCalled();
     });
+
+    it('should correctly prefix online gateway references', () => {
+        const mockEvent = { id: 1, title: 'Test', requiresPayment: true, registrationFee: 500 };
+        const mockMethod = { id: 1, method: 'SSLCommerz', gateway: 'SSLCommerz', isOnline: true };
+        
+        component.selectedEvent.set(mockEvent as any);
+        component.selectedPaymentMethod.set(mockMethod as any);
+        component.regForm.patchValue({ paymentReference: 'MY_REF' });
+        
+        component.submitRegistration();
+        
+        // Check that registerForEvent was called with EVT-REG- prefix if it's an online gateway
+        const callArgs = eventsServiceMock.registerForEvent.mock.calls[0][0];
+        expect(callArgs.paymentReference).toContain('EVT-REG-');
+    });
+
+    it('should initiate gateway for online payments', () => {
+        const mockEvent = { id: 1, title: 'Test', requiresPayment: true, registrationFee: 500 };
+        const mockMethod = { id: 1, method: 'SSLCommerz', gateway: 'SSLCommerz', isOnline: true };
+        
+        component.selectedEvent.set(mockEvent as any);
+        component.selectedPaymentMethod.set(mockMethod as any);
+        component.regForm.patchValue({
+            guestName: 'Guest User',
+            guestEmail: 'guest@test.com',
+            guestMobile: '01700000000',
+            contributionAmount: 500,
+            paymentReference: 'TEST-REF'
+        });
+        
+        fixture.detectChanges();
+        component.submitRegistration();
+        
+        expect(gatewaysServiceMock.initiatePayment).toHaveBeenCalled();
+    });
+
+    it('should not initiate gateway for manual payments', () => {
+        const mockEvent = { id: 1, title: 'Test', requiresPayment: true, registrationFee: 500 };
+        const mockMethod = { id: 1, method: 'BKash', gateway: 'None', isOnline: false };
+        
+        component.selectedEvent.set(mockEvent as any);
+        component.selectedPaymentMethod.set(mockMethod as any);
+        component.regForm.patchValue({ paymentReference: '123456' });
+        
+        component.submitRegistration();
+        
+        expect(gatewaysServiceMock.initiatePayment).not.toHaveBeenCalled();
+        expect(notificationServiceMock.success).toHaveBeenCalled();
+    });
+
+    it('should update validators when manual method is selected', () => {
+       const mockMethod = { id: 1, requiresReference: true };
+       component.onPaymentMethodSelected(mockMethod as any);
+       
+       const refControl = component.regForm.get('paymentReference');
+       expect(refControl?.validator).toBeTruthy();
+       
+       const mockFreeMethod = { id: 2, requiresReference: false };
+       component.onPaymentMethodSelected(mockFreeMethod as any);
+       expect(refControl?.validator).toBeFalsy();
+    });
 });

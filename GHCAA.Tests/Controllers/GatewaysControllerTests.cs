@@ -155,5 +155,41 @@ namespace GHCAA.Tests.Controllers
             
             _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(It.IsAny<int>(), Enums.PaymentStatus.Completed, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
         }
+
+        [Test]
+        public async Task Callback_ShouldAutoApproveRegistration_EvenWithComplexNotes()
+        {
+            var txnId = "TXN456";
+            var ev = new AlumniEvent { Title = "Event Complex", Description = "D", Location = "L" };
+            _dbContext.AlumniEvents.Add(ev);
+            await _dbContext.SaveChangesAsync();
+            
+            var reg = new EventRegistration 
+            { 
+                EventId = ev.Id, 
+                PaymentReference = "EVT-REG-COMPLEX-99", 
+                Status = Enums.EventRegistrationStatus.Pending 
+            };
+            _dbContext.EventRegistrations.Add(reg);
+            
+            // Note the space and extra text after the unique prefix
+            var payment = new PaymentHistory
+            {
+                MemberId = 10,
+                Amount = 500,
+                TransactionId = txnId,
+                Status = Enums.PaymentStatus.Pending,
+                Notes = "Initiated via BkashGateway. Ref: EVT-REG-COMPLEX-99 (Optional extra text here)"
+            };
+            _dbContext.PaymentHistories.Add(payment);
+            await _dbContext.SaveChangesAsync();
+
+            // Simulate a callback that triggers HandleSuccessfulPayment
+            var callbackData = new Dictionary<string, string> { { "status", "VALID" }, { "tran_id", txnId } };
+            await _controller.SSLCommerzCallback(callbackData, CancellationToken.None);
+
+            var updatedReg = await _dbContext.EventRegistrations.FirstOrDefaultAsync(r => r.PaymentReference == "EVT-REG-COMPLEX-99");
+            Assert.That(updatedReg.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
+        }
     }
 }

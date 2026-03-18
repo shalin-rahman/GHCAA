@@ -39,15 +39,7 @@ import { PaymentConfigService, PaymentConfig } from '../../core/services/payment
               
               <div class="method-icon-status">
                 <div class="method-brand-icon">
-                    @if (isBrand(method, 'bkash')) {
-                        <svg viewBox="0 0 24 24" class="svg-brand"><path fill="#D12053" d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10,10-4.48,10-10S17.52,2,12,2Zm0,18c-4.41,0-8-3.59-8-8s3.59-8,8-8,8,3.59,8,8-3.59,8-8,8Zm-1-13h2v6h-2Zm0,8h2v2h-2Z"/></svg>
-                    } @else if (isBrand(method, 'nagad')) {
-                        <svg viewBox="0 0 24 24" class="svg-brand"><path fill="#f7941d" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><circle fill="#f7941d" cx="12" cy="12" r="5"/></svg>
-                    } @else if (isBrand(method, 'rocket')) {
-                        <svg viewBox="0 0 24 24" class="svg-brand"><path fill="#8c3494" d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
-                    } @else {
-                        <span class="emoji-icon">{{ method.icon || '💰' }}</span>
-                    }
+                    <img [src]="getLogoUrl(method)" [alt]="method.displayName" class="brand-logo-img">
                 </div>
                 <div class="check-mark-wrapper" *ngIf="selectedMethodId === method.id">
                     <div class="check-mark">✓</div>
@@ -86,15 +78,7 @@ import { PaymentConfigService, PaymentConfig } from '../../core/services/payment
                          [class.nagad]="isBrand(selectedMethod, 'nagad')"
                          [class.rocket]="isBrand(selectedMethod, 'rocket')">
                         <div class="brand-svg-lg">
-                            @if (isBrand(selectedMethod, 'bkash')) {
-                                <svg viewBox="0 0 24 24"><path fill="#D12053" d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10,10-4.48,10-10S17.52,2,12,2Zm0,18c-4.41,0-8-3.59-8-8s3.59-8,8-8,8,3.59,8,8-3.59,8-8,8Zm-1-13h2v6h-2Zm0,8h2v2h-2Z"/></svg>
-                            } @else if (isBrand(selectedMethod, 'nagad')) {
-                                <svg viewBox="0 0 24 24"><path fill="#f7941d" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><circle fill="#f7941d" cx="12" cy="12" r="5"/></svg>
-                            } @else if (isBrand(selectedMethod, 'rocket')) {
-                                <svg viewBox="0 0 24 24"><path fill="#8c3494" d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
-                            } @else {
-                                <span class="big-icon">{{ selectedMethod.icon }}</span>
-                            }
+                             <img [src]="getLogoUrl(selectedMethod)" [alt]="selectedMethod.displayName" class="brand-logo-img-lg">
                         </div>
                     </div>
                     <div>
@@ -220,8 +204,7 @@ import { PaymentConfigService, PaymentConfig } from '../../core/services/payment
     .method-brand-icon {
         width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
         background: rgba(255,255,255,0.05); border-radius: 12px;
-        .svg-brand { width: 28px; height: 28px; }
-        .emoji-icon { font-size: 1.75rem; }
+        .brand-logo-img { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
     }
 
     .check-mark-wrapper {
@@ -264,8 +247,8 @@ import { PaymentConfigService, PaymentConfig } from '../../core/services/payment
         &.bkash { background: rgba(209, 32, 83, 0.1); border-color: rgba(209, 32, 83, 0.2); }
         &.nagad { background: rgba(247, 148, 29, 0.1); border-color: rgba(247, 148, 29, 0.2); }
         &.rocket { background: rgba(140, 52, 148, 0.1); border-color: rgba(140, 52, 148, 0.2); }
-        .brand-svg-lg { width: 40px; height: 40px; }
-        .big-icon { font-size: 2.5rem; }
+        .brand-svg-lg { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+        .brand-logo-img-lg { width: 100%; height: 100%; object-fit: contain; }
     }
 
     .wallet-label { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.4; }
@@ -344,5 +327,18 @@ export class PaymentMethodSelectorComponent implements OnInit {
     if (brand === 'gateway') return !!method.gateway && method.gateway !== 'None';
     
     return false;
+  }
+
+  getLogoUrl(method: PaymentConfig): string {
+    const name = method.displayName.toLowerCase();
+    if (this.isBrand(method, 'bkash')) return 'assets/images/payment/bkash.svg';
+    if (this.isBrand(method, 'nagad')) return 'assets/images/payment/nagad.svg';
+    if (this.isBrand(method, 'rocket')) return 'assets/images/payment/rocket.svg';
+    if (this.isBrand(method, 'card')) return 'assets/images/payment/card.svg';
+    if (method.gateway === 'SSLCommerz') return 'assets/images/payment/sslcommerz.svg';
+    if (name.includes('bank')) return 'assets/images/payment/bank.svg';
+    
+    // Fallback to a data URI for the emoji if no SVG exists
+    return `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${method.icon || '💰'}</text></svg>`;
   }
 }

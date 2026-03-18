@@ -171,5 +171,20 @@ namespace GHCAA.Tests.Controllers
                 Assert.That(doc.RootElement.GetProperty("IsOnline").GetBoolean(), Is.False);
             }
         }
+
+        [Test]
+        public async Task SeedDefaults_ShouldCreateInitialConfigs()
+        {
+            SetUserRole("Admin");
+            var result = await _controller.SeedDefaults(CancellationToken.None);
+            
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var items = await _dbContext.PaymentConfigurations.CountAsync();
+            Assert.That(items, Is.GreaterThan(0));
+            
+            var bkash = await _dbContext.PaymentConfigurations.FirstOrDefaultAsync(p => p.DisplayName == "bKash");
+            Assert.That(bkash, Is.Not.Null);
+            Assert.That(bkash!.RequiresReceipt, Is.True);
+        }
     }
 }

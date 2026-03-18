@@ -172,4 +172,31 @@ public class EventServiceTests : TestBase
         var updated = await _context.AlumniEvents.FindAsync(ev.Id);
         updated!.ImageUrl.Should().Be("/uploads/logo.png");
     }
+
+    [Test]
+    public async Task GetAllRegistrationsForAdminAsync_ShouldIncludeReceiptPath()
+    {
+        var ev = new AlumniEvent { Title = "Event 1", Description = "D", Date = DateTime.UtcNow, Location = "L" };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var reg = new EventRegistration 
+        { 
+            EventId = ev.Id, 
+            PaymentReference = "P1", 
+            ReceiptPath = "/uploads/receipt.pdf",
+            Status = EventRegistrationStatus.Pending 
+        };
+        _context.EventRegistrations.Add(reg);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetAllRegistrationsForAdminAsync(1, 10);
+        
+        // Dynamic dynamic check or reflection if result is anonymous
+        var items = (System.Collections.IEnumerable)result.GetType().GetProperty("Items")!.GetValue(result, null)!;
+        var firstItem = items.Cast<object>().First();
+        var path = firstItem.GetType().GetProperty("ReceiptPath")!.GetValue(firstItem, null);
+        
+        path.Should().Be("/uploads/receipt.pdf");
+    }
 }

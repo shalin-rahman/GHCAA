@@ -5,6 +5,7 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 
 namespace GHCAA.Infrastructure.Gateways
@@ -14,12 +15,14 @@ namespace GHCAA.Infrastructure.Gateways
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _db;
         private readonly ILogger<SSLCommerzGateway> _logger;
+        private readonly IConfiguration _config;
 
-        public SSLCommerzGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<SSLCommerzGateway> logger)
+        public SSLCommerzGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<SSLCommerzGateway> logger, IConfiguration config)
         {
             _httpClient = httpClient;
             _db = db;
             _logger = logger;
+            _config = config;
         }
 
         public Enums.PaymentGateway GatewayType => Enums.PaymentGateway.SSLCommerz;
@@ -48,13 +51,13 @@ namespace GHCAA.Infrastructure.Gateways
                 { "success_url", dto.CallbackUrl },
                 { "fail_url", dto.CallbackUrl },
                 { "cancel_url", dto.CallbackUrl },
-                { "cus_name", "Member " + dto.MemberId },
-                { "cus_email", "member_" + dto.MemberId + "@ghcaa.org" }, // Fallback
+                { "cus_name", dto.CustomerName ?? ("Member " + dto.MemberId) },
+                { "cus_email", dto.CustomerEmail ?? ("member_" + dto.MemberId + "@" + (_config["GeneralSettings:EmailDomain"] ?? "ghcaa.org")) },
                 { "cus_add1", "Not Provided" },
                 { "cus_city", "Dhaka" },
                 { "cus_postcode", "1000" },
                 { "cus_country", "Bangladesh" },
-                { "cus_phone", "01700000000" },
+                { "cus_phone", dto.CustomerPhone ?? "01700000000" },
                 { "product_name", "GHCAA " + dto.Reference },
                 { "product_category", "Membership" },
                 { "product_profile", "general" }
@@ -84,15 +87,40 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
-        public Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
+        public async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
-            if (!callbackData.ContainsKey("status") || callbackData["status"] != "VALID") return Task.FromResult(false);
+            if (!callbackData.ContainsKey("status") || callbackData["status"] != "VALID") return false;
             
-            // Logic to verify with SSLCommerz server if needed (IPN or Validation API)
-            // For now, checking the hash or status is a basic start.
-            // Ideally call: https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id={val_id}&store_id={store_id}&store_passwd={store_passwd}
+            var valId = callbackData.TryGetValue("val_id", out var v) ? v : "";
+            if (string.IsNullOrEmpty(valId)) return false;
+
+            var config = await _db.PaymentConfigurations
+                .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled, cancellationToken);
             
-            return Task.FromResult(true);
+            if (config == null) return false;
+
+            var isSandbox = config.IsSandbox;
+            var validationUrl = isSandbox 
+                ? $"https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id={valId}&store_id={config.GatewayPublicKey}&store_passwd={config.GatewaySecretKey}&format=json"
+                : $"https://securepay.sslcommerz.com/validator/api/validationserverAPI.php?val_id={valId}&store_id={config.GatewayPublicKey}&store_passwd={config.GatewaySecretKey}&format=json";
+
+            try
+            {
+                var response = await _httpClient.GetAsync(validationUrl, cancellationToken);
+                var result = await response.Content.ReadFromJsonAsync<SSLCommerzValidationResponse>(cancellationToken: cancellationToken);
+
+                return result?.status == "VALID" || result?.status == "AUTHENTICATED";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SSLCommerz Verification Failed");
+                return false;
+            }
+        }
+
+        private class SSLCommerzValidationResponse
+        {
+            public string? status { get; set; }
         }
 
         private class SSLCommerzInitResponse

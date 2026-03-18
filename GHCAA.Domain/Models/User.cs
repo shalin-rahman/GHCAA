@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace GHCAA.Domain.Models
 {
@@ -19,6 +19,7 @@ namespace GHCAA.Domain.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
         public bool IsArchived { get; set; } = false;
+        public bool MustChangePassword { get; set; } = false;
 
         // Security
         public string? ResetToken { get; set; }

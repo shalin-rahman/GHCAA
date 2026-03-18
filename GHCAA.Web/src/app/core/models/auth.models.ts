@@ -8,6 +8,10 @@ export interface TokenResponseDto {
   username: string;
   memberId?: number;
   role: string;
+  fullName?: string;
+  email?: string;
+  mobileNo?: string;
+  mustChangePassword?: boolean;
 }
 
 export interface User {
@@ -15,4 +19,8 @@ export interface User {
   memberId?: number;
   token: string;
   role: string;
+  fullName?: string;
+  email?: string;
+  mobileNo?: string;
+  mustChangePassword?: boolean;
 }

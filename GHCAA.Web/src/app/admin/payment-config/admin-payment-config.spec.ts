@@ -46,4 +46,23 @@ describe('AdminPaymentConfig Component', () => {
     it('should load configs on init', () => {
         expect(paymentConfigServiceMock.getAllConfigs).toHaveBeenCalled();
     });
+
+    it('should call seedDefaults when confirmed', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        component.seedDefaults();
+        expect(paymentConfigServiceMock.seedDefaults).toHaveBeenCalled();
+        expect(notificationServiceMock.success).toHaveBeenCalled();
+    });
+
+    it('should call deleteConfig when confirmed', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        component.deleteConfig(101);
+        expect(paymentConfigServiceMock.deleteConfig).toHaveBeenCalledWith(101);
+        expect(notificationServiceMock.success).toHaveBeenCalled();
+    });
+
+    it('should toggle status', () => {
+        component.toggleStatus(202);
+        expect(paymentConfigServiceMock.toggleConfig).toHaveBeenCalledWith(202);
+    });
 });

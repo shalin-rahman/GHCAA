@@ -161,6 +161,23 @@ namespace GHCAA.Infrastructure.Data
             modelBuilder.Entity<Member>().HasIndex(m => m.MobileNo).IsUnique();
             modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
             
+            // Event Registration unique constraint (Member can only register once for an event)
+            modelBuilder.Entity<EventRegistration>()
+                .HasIndex(r => new { r.EventId, r.MemberId })
+                .IsUnique()
+                .HasFilter("\"MemberId\" IS NOT NULL");
+
+            // Guest registration unique constraint
+            modelBuilder.Entity<EventRegistration>()
+                .HasIndex(r => new { r.EventId, r.GuestEmail })
+                .IsUnique()
+                .HasFilter("\"GuestEmail\" IS NOT NULL");
+
+            // Payment uniqueness
+            modelBuilder.Entity<PaymentHistory>()
+                .HasIndex(p => p.TransactionId)
+                .IsUnique();
+            
             // Seed Roles
             // Seed Roles from JSON
             var roles = LoadSeed<Role>("roles.json");

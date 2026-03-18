@@ -103,12 +103,31 @@ namespace GHCAA.Infrastructure.Services
                 await _activityService.LogActivityAsync(user.MemberId.Value, "Login", $"User {user.Username} logged in.", cancellationToken: default);
             }
 
+            string? fullName = null;
+            string? email = null;
+            string? mobileNo = null;
+
+            if (user.MemberId.HasValue)
+            {
+                var member = await _db.Members.FindAsync(user.MemberId.Value);
+                if (member != null)
+                {
+                    fullName = member.FullName;
+                    email = member.Email;
+                    mobileNo = member.MobileNo;
+                }
+            }
+
             return new TokenResponseDto
             {
                 Token = token,
                 Username = user.Username,
                 MemberId = user.MemberId,
-                Role = user.Roles?.FirstOrDefault()?.Name ?? Constants.Roles.Member
+                Role = user.Roles?.FirstOrDefault()?.Name ?? "Member",
+                FullName = fullName,
+                Email = email,
+                MobileNo = mobileNo,
+                MustChangePassword = user.MustChangePassword
             };
         }
         public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)

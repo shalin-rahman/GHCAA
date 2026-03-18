@@ -54,7 +54,8 @@ namespace GHCAA.Infrastructure.Services
                 PasswordHash = passwordHash,
                 MemberId = memberId,
                 CreatedAt = DateTime.UtcNow,
-                IsActive = true
+                IsActive = true,
+                MustChangePassword = true // Force change on first login
             };
 
             await _db.Users.AddAsync(user, cancellationToken);
@@ -109,6 +110,7 @@ namespace GHCAA.Infrastructure.Services
             }
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.MustChangePassword = false; // Successfully changed
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }

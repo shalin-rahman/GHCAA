@@ -39,6 +39,10 @@ export class AdminEvents implements OnInit {
     showInvitation = signal<boolean>(false);
     invitationData = signal<any | null>(null);
     formError = signal<string | null>(null);
+    
+    // Receipt Preview
+    showReceiptModal = signal<boolean>(false);
+    activeReceiptUrl = signal<string | null>(null);
 
     // PDF Config
     pdfHeaders = ['ID', 'Event', 'Participant', 'Type', 'Amount', 'Reference', 'Status', 'Date'];
@@ -294,6 +298,19 @@ export class AdminEvents implements OnInit {
                 error: () => this.notify.error('Failed to send email.')
             });
         }
+    }
+
+    openReceipt(path: string) {
+        if (!path) return;
+        // Prefix with / if not absolute
+        const url = path.startsWith('http') || path.startsWith('data:') ? path : '/' + path;
+        this.activeReceiptUrl.set(url);
+        this.showReceiptModal.set(true);
+    }
+
+    closeReceipt() {
+        this.showReceiptModal.set(false);
+        this.activeReceiptUrl.set(null);
     }
 }
 

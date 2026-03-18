@@ -13,6 +13,9 @@ export interface InitiatePaymentRequest {
     gateway: PaymentGateway;
     reference: string;
     baseUrl: string;
+    customerName?: string;
+    customerEmail?: string;
+    customerPhone?: string;
 }
 
 export interface InitiatePaymentResponse {
