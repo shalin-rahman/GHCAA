@@ -12,6 +12,8 @@ namespace GHCAA.Application.DTOs
         public MembershipStatus Status { get; set; }
         public MembershipType MembershipType { get; set; }
         public MemberCategory Category { get; set; }
+        public DateTime AppliedDate { get; set; }
+        public DateTime? ApprovedDate { get; set; }
         
         // Personal
         public string FatherName { get; set; } = null!;
@@ -104,6 +106,8 @@ namespace GHCAA.Application.DTOs
         public int PassingYear { get; set; }
         public int GhcLastCertificatePassingYear { get; set; }
         public string? GhcLastCertificate { get; set; }
+        public string? GhcLastCertificateGroup { get; set; }
+        public string? GhcLastCertificateSubject { get; set; }
         public string? ProfessionalSector { get; set; }
         public string? Designation { get; set; }
         public BloodGroup BloodGroup { get; set; }

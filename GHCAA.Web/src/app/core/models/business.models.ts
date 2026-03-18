@@ -208,6 +208,7 @@ export interface AlumniEvent {
     registrationDeadline?: string | Date;
     adminNote?: string;
     allowNonMembers: boolean;
+    participantCount?: number;
 }
 
 

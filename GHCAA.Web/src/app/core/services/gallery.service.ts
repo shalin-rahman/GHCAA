@@ -43,6 +43,10 @@ export class GalleryService {
         return this.http.post<EventGallery>(`${this.apiUrl}/admin`, gallery);
     }
 
+    updateGallery(id: number, gallery: any): Observable<EventGallery> {
+        return this.http.put<EventGallery>(`${this.apiUrl}/admin/${id}`, gallery);
+    }
+
     addPhotos(galleryId: number, photoPaths: string[]): Observable<void> {
         return this.http.post<void>(`${this.apiUrl}/admin/${galleryId}/photos`, photoPaths);
     }

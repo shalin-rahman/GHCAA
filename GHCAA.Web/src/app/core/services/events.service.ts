@@ -20,6 +20,10 @@ export class EventsService {
         return this.http.get<AlumniEvent>(`${this.apiUrl}/${id}`);
     }
 
+    getPublicParticipants(eventId: number): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/${eventId}/participants`);
+    }
+
     registerForEvent(dto: {
         eventId: number, 
         paymentReference: string, 
@@ -28,11 +32,16 @@ export class EventsService {
         guestName?: string,
         guestEmail?: string,
         guestMobile?: string,
+        contributionAmount?: number,
         receiptFile?: File
     }): Observable<any> {
         const formData = new FormData();
         formData.append('EventId', dto.eventId.toString());
         formData.append('PaymentReference', dto.paymentReference);
+        
+        if (dto.contributionAmount) {
+            formData.append('ContributionAmount', dto.contributionAmount.toString());
+        }
         
         if (dto.paymentMethod) {
             formData.append('PaymentMethod', dto.paymentMethod);
@@ -92,5 +101,9 @@ export class EventsService {
         const formData = new FormData();
         formData.append('logo', file);
         return this.http.post(`${this.apiUrl}/admin/${id}/logo`, formData);
+    }
+
+    sendInvitationEmail(registrationId: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/registrations/${registrationId}/send-invitation`, {});
     }
 }

@@ -6,19 +6,37 @@
             <div class="underline"></div>
         </div>
 
-        <div class="jobs-compact-grid">
+        <div class="jobs-list-container">
             @for (job of jobs(); track job.id) {
             <div class="job-mini-card glass-card">
-                <div class="job-badge bg-accent text-primary-dark">Hiring</div>
-                <h3>{{ job.title }}</h3>
-                <p class="company text-accent font-bold">{{ job.companyName }}</p>
-                <div class="job-meta flex gap-4 text-xs opacity-60 mt-2">
-                    <span>📍 {{ job.location }}</span>
-                    <span>📅 Deadline: {{ job.applicationDeadline | date:'shortDate' }}</span>
+                <div class="job-status-col">
+                    <div class="status-pill">Hiring</div>
+                </div>
+                
+                <div class="job-main-col">
+                    <h3>{{ job.title }}</h3>
+                    <p class="company">{{ job.companyName }}</p>
+                </div>
+
+                <div class="job-meta-col">
+                    <div class="meta-item">
+                        <span class="icon">📍</span>
+                        <span class="val">{{ job.location }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="icon">🕒</span>
+                        <span class="val">Ends: {{ job.applicationDeadline | date:'MMM d' }}</span>
+                    </div>
+                </div>
+
+                <div class="job-action-col">
+                    <a routerLink="/login" class="btn-view">Login to View →</a>
                 </div>
             </div>
             } @empty {
-            <div class="full-width opacity-30 text-center py-6 text-sm italic">New career opportunities coming soon.
+            <div class="empty-placeholder dark">
+                <div class="pulse-dot gold"></div>
+                <p>Curating exclusive career pathways. New opportunities arriving shortly.</p>
             </div>
             }
         </div>

@@ -48,6 +48,20 @@ namespace GHCAA.Infrastructure.Services
                 Subject = "GHCAA Account Password Reset",
                 Description = "Admin-initiated secure password reset link",
                 Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;'><h2 style='color: #c5a059;'>Password Reset</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>An administrator has initiated a password reset for your GHCAA account. Click below to set a new password — the link is valid for 24 hours.</p><div style='text-align: center; margin: 30px 0;'><a href='{{ResetUrl}}' style='background: #111; color: #c5a059; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; border: 1px solid #c5a059;'>Reset My Password</a></div><p style='color: #666; font-size: 0.9rem;'>If you did not request this, please ignore this email.</p></div>",
+            },
+            new EmailTemplate 
+            { 
+                Code = "EVENT_PARTICIPATION_RECEIVED", 
+                Subject = "Participation Received: {{EventTitle}}", 
+                Description = "Initial acknowledgement for event registration",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;'><h2 style='color: #2c3e50;'>Registration Received</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>We have received your registration for <strong>{{EventTitle}}</strong>.</p><div style='background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px dashed #c5a059;'><p><strong>Status:</strong> Pending Approval</p><p><strong>Reference:</strong> {{PassId}}</p></div><p>Our team will review your details/payment and send a final confirmation soon.</p></div>",
+            },
+            new EmailTemplate 
+            { 
+                Code = "EVENT_PARTICIPATION_APPROVED", 
+                Subject = "Participation Approved: {{EventTitle}}", 
+                Description = "Final confirmation with entry pass details",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto; background: #fff;'><h2 style='color: #27ae60;'>Registration Confirmed!</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your participation in <strong>{{EventTitle}}</strong> has been officially approved.</p><div style='background: #111; color: #fff; padding: 25px; border-radius: 12px; margin: 25px 0; border: 2px solid #c5a059; text-align: center;'><h3 style='color: #c5a059; margin-top: 0; font-size: 1.2rem;'>ENTRY PASS</h3><div style='font-size: 1.1rem; font-weight: bold;'>{{FullName}}</div><div style='font-size: 0.8rem; margin: 10px 0; opacity: 0.7;'>Pass ID: {{PassId}}</div><div style='border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0; padding-top: 15px;'><p style='margin: 5px 0;'>📍 {{EventLocation}}</p><p style='margin: 5px 0;'>⏰ {{EventDate}}</p></div></div><p>Please present this email or your pass at the registration desk. We look forward to seeing you!</p></div>",
             }
         };
 
@@ -173,15 +187,7 @@ namespace GHCAA.Infrastructure.Services
                 foreach (var email in emails)
                 {
                     var member = await _db.Members.FirstOrDefaultAsync(m => m.Email == email, cancellationToken);
-                    if (member != null)
-                    {
-                        await SendTemplatedEmailAsync(email, member, templateCode, customVars, cancellationToken);
-                    }
-                    else
-                    {
-                        // Fallback for non-members if template permits or just log
-                        _logger.LogWarning("Member with email {Email} not found for templated broadcast. Skipping.", email);
-                    }
+                    await SendTemplatedEmailAsync(email, member, templateCode, customVars, cancellationToken);
                 }
             }
             else
@@ -225,7 +231,7 @@ namespace GHCAA.Infrastructure.Services
             await SendAndLogEmailAsync(member.Email, subject, htmlBody, null, "Single Member", cancellationToken);
         }
 
-        private async Task SendTemplatedEmailAsync(string to, Member member, string templateCode, Dictionary<string, string>? customVars, CancellationToken cancellationToken)
+        private async Task SendTemplatedEmailAsync(string to, Member? member, string templateCode, Dictionary<string, string>? customVars, CancellationToken cancellationToken)
         {
             var template = await GetTemplateByCodeAsync(templateCode, cancellationToken);
             if (template == null)
@@ -234,27 +240,29 @@ namespace GHCAA.Infrastructure.Services
                 return;
             }
 
-            var vars = new Dictionary<string, string>
+            var vars = new Dictionary<string, string>();
+            
+            if (member != null)
             {
-                { "FullName", member.FullName },
-                { "FatherName", member.FatherName },
-                { "MotherName", member.MotherName },
-                { "DateOfBirth", member.DateOfBirth.ToString("dd MMM yyyy") },
-                { "Gender", member.Gender.ToString() },
-                { "BloodGroup", member.BloodGroup.ToString() },
-                { "NID", member.NID },
-                { "MembershipNumber", member.MembershipNumber ?? "Pending" },
-                { "MembershipType", member.MembershipType.ToString() },
-                { "Email", member.Email },
-                { "MobileNo", member.MobileNo },
-                { "PresentAddress", member.PresentAddress },
-                { "PermanentAddress", member.PermanentAddress },
-                { "PassingYear", member.GHCLastCertificatePassingYear.ToString() },
-                { "HSCAdmissionYear", member.HSCAdmissionYear?.ToString() ?? "N/A" },
-                { "SubjectGroup", member.GHCLastCertificateSubject },
-                { "ProfessionalSector", member.ProfessionalSector },
-                { "Designation", member.Designation }
-            };
+                vars["FullName"] = member.FullName;
+                vars["FatherName"] = member.FatherName;
+                vars["MotherName"] = member.MotherName;
+                vars["DateOfBirth"] = member.DateOfBirth.ToString("dd MMM yyyy");
+                vars["Gender"] = member.Gender.ToString();
+                vars["BloodGroup"] = member.BloodGroup.ToString();
+                vars["NID"] = member.NID;
+                vars["MembershipNumber"] = member.MembershipNumber ?? "Pending";
+                vars["MembershipType"] = member.MembershipType.ToString();
+                vars["Email"] = member.Email;
+                vars["MobileNo"] = member.MobileNo;
+                vars["PresentAddress"] = member.PresentAddress;
+                vars["PermanentAddress"] = member.PermanentAddress;
+                vars["PassingYear"] = member.GHCLastCertificatePassingYear.ToString();
+                vars["HSCAdmissionYear"] = member.HSCAdmissionYear?.ToString() ?? "N/A";
+                vars["SubjectGroup"] = member.GHCLastCertificateSubject;
+                vars["ProfessionalSector"] = member.ProfessionalSector;
+                vars["Designation"] = member.Designation;
+            }
 
             if (customVars != null)
             {

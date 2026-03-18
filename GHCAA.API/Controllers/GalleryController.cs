@@ -108,6 +108,24 @@ namespace GHCAA.API.Controllers
             return CreatedAtAction(nameof(GetGallery), new { id = result.Id }, result);
         }
 
+        [HttpPut("admin/{id}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UpdateGallery(int id, [FromBody] EventGallery updatedGallery, CancellationToken cancellationToken)
+        {
+            var existingGallery = await _galleryService.GetGalleryByIdAsync(id, cancellationToken);
+            if (existingGallery == null) return NotFound();
+
+            existingGallery.Title = updatedGallery.Title;
+            existingGallery.Description = updatedGallery.Description;
+            existingGallery.EventDate = updatedGallery.EventDate;
+            existingGallery.Location = updatedGallery.Location;
+            existingGallery.IsActive = updatedGallery.IsActive;
+            existingGallery.IsFeatured = updatedGallery.IsFeatured;
+
+            var result = await _galleryService.UpdateEventGalleryAsync(existingGallery, cancellationToken);
+            return Ok(result);
+        }
+
         [HttpPost("admin/{id}/photos")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> AddPhotos(int id, [FromBody] List<string> photoPaths, CancellationToken cancellationToken)

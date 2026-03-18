@@ -66,6 +66,12 @@ export class Governance implements OnInit {
         });
     }
 
+    getMajorDisplay(degree: string | undefined, group: string | undefined, subject: string | undefined): string {
+        if (!degree) return '';
+        const major = degree === 'HSC' ? (group || 'None') : (subject || 'None');
+        return major && major !== 'None' ? `in ${major}` : '';
+    }
+
     getPositionName(member: any): string {
         const pos = getECPositionForPeriod(member.ecHistory, this.selectedPeriodId());
         return getECPositionName(pos);

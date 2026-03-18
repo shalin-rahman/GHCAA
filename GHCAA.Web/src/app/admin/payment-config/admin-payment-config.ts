@@ -93,6 +93,18 @@ export class AdminPaymentConfig implements OnInit {
     }
   }
 
+  openCreateForm() {
+    this.editingId.set(null);
+    this.form.reset({
+      gateway: 'None',
+      sortOrder: 0,
+      requiresReceipt: true,
+      requiresReference: true,
+      isEnabled: true
+    });
+    this.showForm.set(true);
+  }
+
   openEditForm(config: any) {
     this.editingId.set(config.id);
     this.form.patchValue(config);
@@ -108,22 +120,20 @@ export class AdminPaymentConfig implements OnInit {
 
     const req = id 
         ? this.paymentService.updateConfig(id, data)
-        : null; // Creating new from UI might require the backend "Method" enum, limiting to edit for now or handling it. Let's just do update since seed covers creation in this app.
+        : this.paymentService.createConfig({ ...data, method: 'ManualReceipt' }); // Default to Manual if creating new
 
-    if (req) {
-      req.subscribe({
-        next: () => {
-          this.notify.success('Payment configuration updated');
-          this.showForm.set(false);
-          this.submitting.set(false);
-          this.loadConfigs();
-        },
-        error: () => {
-          this.notify.error('Failed to update configuration');
-          this.submitting.set(false);
-        }
-      });
-    }
+    req.subscribe({
+      next: () => {
+        this.notify.success(id ? 'Payment configuration updated' : 'New payment method created');
+        this.showForm.set(false);
+        this.submitting.set(false);
+        this.loadConfigs();
+      },
+      error: (err) => {
+        this.notify.error(err.error?.message || 'Failed to save configuration');
+        this.submitting.set(false);
+      }
+    });
   }
 }
 

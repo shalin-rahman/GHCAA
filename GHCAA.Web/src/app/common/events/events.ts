@@ -8,6 +8,7 @@ import { PaymentMethodSelectorComponent } from '../../common/payment-method-sele
 import { PaymentConfig, PaymentConfigService } from '../../core/services/payment-config.service';
 import { GatewaysService, PaymentGateway } from '../../core/services/gateways.service';
 import { ActivatedRoute } from '@angular/router';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-events',
@@ -22,6 +23,7 @@ export class Events implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private gatewaysService = inject(GatewaysService);
+  private notify = inject(NotificationService);
 
   events = signal<AlumniEvent[]>([]);
   activeTab = signal<'upcoming' | 'my-registrations'>('upcoming');
@@ -35,12 +37,20 @@ export class Events implements OnInit {
   selectedFile: File | null = null;
   isSubmitting = signal<boolean>(false);
   selectedPaymentMethod = signal<PaymentConfig | null>(null);
+  
+  // Public Participants State
+  participants = signal<any[]>([]);
+  showParticipants = signal<boolean>(false);
+  activeParticipantEventId = signal<number | null>(null);
+  loadingParticipants = signal<boolean>(false);
+  formError = signal<string | null>(null);
 
   regForm = this.fb.group({
     paymentReference: ['', [Validators.required, Validators.minLength(4)]],
     guestName: [''],
     guestEmail: ['', [Validators.email]],
-    guestMobile: ['']
+    guestMobile: [''],
+    contributionAmount: [null as number | null]
   });
 
   ngOnInit() {
@@ -54,12 +64,14 @@ export class Events implements OnInit {
         this.events.set(data);
         
         // Handle deep-link to auto-open a specific event registration
-        const targetEventId = this.route.snapshot.queryParamMap.get('eventId');
+        // Check both query param (legacy) and route param (new /events/:id context)
+        const targetEventId = this.route.snapshot.paramMap.get('id') || this.route.snapshot.queryParamMap.get('eventId');
+        
         if (targetEventId) {
             const ev = data.find(e => e.id.toString() === targetEventId);
             if (ev) {
                 // Slight delay ensures the UI has fully transitioned before opening the modal
-                setTimeout(() => this.openRegisterModal(ev), 100);
+                setTimeout(() => this.openRegisterModal(ev), 150);
             }
         }
       },
@@ -79,7 +91,7 @@ export class Events implements OnInit {
 
   openRegisterModal(ev: AlumniEvent) {
     if (this.isGuest() && !ev.allowNonMembers) {
-      alert('This event is for members only. Please log in or apply for membership to register.');
+      this.notify.warning('This event is for members only. Please log in to register.');
       window.location.href = '/login';
       return;
     }
@@ -103,8 +115,14 @@ export class Events implements OnInit {
     if (!ev.requiresPayment) {
        this.regForm.get('paymentReference')?.clearValidators();
        this.regForm.get('paymentReference')?.updateValueAndValidity();
+       this.regForm.get('contributionAmount')?.clearValidators();
+    } else if (!ev.registrationFee) {
+       this.regForm.get('contributionAmount')?.setValidators([Validators.required, Validators.min(10)]); // Min 10 BDT
+    } else {
+       this.regForm.get('contributionAmount')?.clearValidators();
     }
-
+    
+    this.regForm.get('contributionAmount')?.updateValueAndValidity();
     this.regForm.updateValueAndValidity();
 
     this.selectedEvent.set(ev);
@@ -115,6 +133,7 @@ export class Events implements OnInit {
     this.showModal.set(false);
     this.regForm.reset();
     this.selectedFile = null;
+    this.formError.set(null);
   }
 
   onFileSelected(event: any) {
@@ -136,11 +155,23 @@ export class Events implements OnInit {
   }
 
   submitRegistration() {
-    if (this.regForm.invalid || !this.selectedEvent()) return;
+    if (this.regForm.invalid) {
+      this.regForm.markAllAsTouched();
+      this.formError.set('Please provide all required information marked in red.');
+      return;
+    }
+    
+    this.formError.set(null);
+    
+    const ev = this.selectedEvent();
+    if (!ev) return;
+
+    if (ev.requiresPayment && !this.selectedPaymentMethod()) {
+      this.formError.set('Please select a payment method.');
+      return;
+    }
 
     this.isSubmitting.set(true);
-    const ev = this.selectedEvent()!;
-    const isGuest = !this.auth.isAuthenticated();
     
     let ref = this.regForm.value.paymentReference || '';
     if (ev.requiresPayment) {
@@ -155,11 +186,12 @@ export class Events implements OnInit {
       eventId: ev.id,
       paymentReference: ref,
       paymentMethod: this.selectedPaymentMethod()?.method || 'ManualReceipt',
-      isNonMember: isGuest,
+      contributionAmount: this.regForm.value.contributionAmount || undefined,
+      isNonMember: this.isGuest(),
       receiptFile: this.selectedFile || undefined
     };
 
-    if (isGuest) {
+    if (this.isGuest()) {
       registrationDto.guestName = this.regForm.value.guestName!;
       registrationDto.guestEmail = this.regForm.value.guestEmail!;
       registrationDto.guestMobile = this.regForm.value.guestMobile!;
@@ -170,7 +202,7 @@ export class Events implements OnInit {
         if (this.selectedPaymentMethod()?.isOnline) {
           this.initiateGateway(ev, ref);
         } else {
-          alert('Registration submitted successfully! Wait for admin approval.');
+          this.notify.success('Project participation received! Wait for registry approval.');
           this.isSubmitting.set(false);
           this.closeModal();
           this.loadMyRegistrations();
@@ -178,7 +210,7 @@ export class Events implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        alert(err.error?.message || 'Registration failed. Please check your inputs.');
+        this.formError.set(err.error?.message || 'Registration failed. Please check your inputs.');
         this.isSubmitting.set(false);
       }
     });
@@ -186,9 +218,10 @@ export class Events implements OnInit {
 
   private initiateGateway(ev: AlumniEvent, ref: string) {
     const gateway = this.selectedPaymentMethod()?.method === 'SSLCommerz' ? PaymentGateway.SSLCommerz : PaymentGateway.Bkash;
-    
+    const amountToCharge = ev.registrationFee || this.regForm.value.contributionAmount || 0;
+
     this.gatewaysService.initiatePayment({
-      amount: ev.registrationFee || 0,
+      amount: amountToCharge,
       gateway: gateway,
       reference: `EVT-REG-${ref}`,
       baseUrl: window.location.origin
@@ -197,12 +230,12 @@ export class Events implements OnInit {
         if (res.success && res.gatewayUrl) {
           window.location.href = res.gatewayUrl;
         } else {
-          alert('Gateway initiation failed: ' + res.message);
+          this.formError.set('Gateway initiation failed: ' + res.message);
           this.isSubmitting.set(false);
         }
       },
       error: () => {
-        alert('Could not initiate online payment. Please try manual receipt upload.');
+        this.formError.set('Could not initiate online payment. Please try manual receipt upload.');
         this.isSubmitting.set(false);
       }
     });
@@ -234,7 +267,7 @@ export class Events implements OnInit {
         // or just let the user click print in the modal.
       },
       error: (err) => {
-        alert('Could not load invitation data.');
+        this.notify.error('Could not load invitation data.');
       }
     });
   }
@@ -243,9 +276,37 @@ export class Events implements OnInit {
     window.print();
   }
 
+  getCalendarLink(ev: AlumniEvent): string {
+    const start = new Date(ev.date).toISOString().replace(/-|:|\.\d+/g, '');
+    const end = new Date(new Date(ev.date).getTime() + 7200000).toISOString().replace(/-|:|\.\d+/g, ''); // 2h default
+    return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.title)}&dates=${start}/${end}&details=${encodeURIComponent(ev.description)}&location=${encodeURIComponent(ev.location)}`;
+  }
+
   closeInvitation() {
     this.showInvitation.set(false);
     this.invitationData.set(null);
+  }
+
+  toggleParticipants(eventId: number) {
+    if (this.activeParticipantEventId() === eventId && this.showParticipants()) {
+      this.showParticipants.set(false);
+      this.activeParticipantEventId.set(null);
+      return;
+    }
+
+    this.activeParticipantEventId.set(eventId);
+    this.loadingParticipants.set(true);
+    this.eventsService.getPublicParticipants(eventId).subscribe({
+      next: data => {
+        this.participants.set(data);
+        this.showParticipants.set(true);
+        this.loadingParticipants.set(false);
+      },
+      error: () => {
+        this.participants.set([]);
+        this.loadingParticipants.set(false);
+      }
+    });
   }
 }
 

@@ -26,6 +26,7 @@ export class AdminGallery implements OnInit {
 
     // Form State
     showForm = signal(false);
+    editingId = signal<number | null>(null);
     newGallery = {
         title: '',
         description: '',
@@ -45,7 +46,7 @@ export class AdminGallery implements OnInit {
                 this.loading.set(false);
             },
             error: () => {
-                alert('Failed to load galleries');
+                this.notify.error('Failed to load galleries');
                 this.loading.set(false);
             }
         });
@@ -53,6 +54,31 @@ export class AdminGallery implements OnInit {
 
     toggleForm() {
         this.showForm.set(!this.showForm());
+        if (!this.showForm()) {
+            this.resetForm();
+        }
+    }
+
+    openEditForm(gallery: EventGallery) {
+        this.editingId.set(gallery.id);
+        this.newGallery = {
+            title: gallery.title,
+            description: gallery.description || '',
+            eventDate: gallery.eventDate ? new Date(gallery.eventDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            location: gallery.location || ''
+        };
+        this.showForm.set(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    resetForm() {
+        this.editingId.set(null);
+        this.newGallery = {
+            title: '',
+            description: '',
+            eventDate: new Date().toISOString().split('T')[0],
+            location: ''
+        };
     }
 
     onSubmit() {
@@ -61,23 +87,23 @@ export class AdminGallery implements OnInit {
             return;
         }
 
+        const editId = this.editingId();
         this.isSubmitting.set(true);
-        this.galleryService.createGallery(this.newGallery).subscribe({
+
+        const request = editId 
+            ? this.galleryService.updateGallery(editId, this.newGallery)
+            : this.galleryService.createGallery(this.newGallery);
+
+        request.subscribe({
             next: () => {
-                alert('Gallery created successfully');
+                this.notify.success(editId ? 'Gallery updated successfully' : 'Gallery created successfully');
                 this.showForm.set(false);
                 this.isSubmitting.set(false);
                 this.loadGalleries();
-                // Reset form
-                this.newGallery = {
-                    title: '',
-                    description: '',
-                    eventDate: new Date().toISOString().split('T')[0],
-                    location: ''
-                };
+                this.resetForm();
             },
             error: () => {
-                alert('Failed to create gallery');
+                this.notify.error(editId ? 'Failed to update gallery' : 'Failed to create gallery');
                 this.isSubmitting.set(false);
             }
         });

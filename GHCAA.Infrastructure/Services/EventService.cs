@@ -25,24 +25,71 @@ namespace GHCAA.Infrastructure.Services
             _fileStorageService = fileStorageService;
         }
 
-        public async Task<IEnumerable<AlumniEvent>> GetActiveEventsAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<EventDto>> GetActiveEventsAsync(CancellationToken cancellationToken = default)
         {
             return await _context.AlumniEvents
                 .Where(e => e.IsActive)
                 .OrderBy(e => e.Date)
+                .Select(e => new EventDto
+                {
+                    Id = e.Id,
+                    Title = e.Title,
+                    Description = e.Description,
+                    Date = e.Date,
+                    Location = e.Location,
+                    RegistrationFee = e.RegistrationFee,
+                    RequiresPayment = e.RequiresPayment,
+                    IsActive = e.IsActive,
+                    ImageUrl = e.ImageUrl,
+                    RegistrationDeadline = e.RegistrationDeadline,
+                    AdminNote = e.AdminNote,
+                    ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
+                })
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<AlumniEvent>> GetAllEventsForAdminAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<EventDto>> GetAllEventsForAdminAsync(CancellationToken cancellationToken = default)
         {
             return await _context.AlumniEvents
                 .OrderByDescending(e => e.CreatedAt)
+                .Select(e => new EventDto
+                {
+                    Id = e.Id,
+                    Title = e.Title,
+                    Description = e.Description,
+                    Date = e.Date,
+                    Location = e.Location,
+                    RegistrationFee = e.RegistrationFee,
+                    RequiresPayment = e.RequiresPayment,
+                    IsActive = e.IsActive,
+                    ImageUrl = e.ImageUrl,
+                    RegistrationDeadline = e.RegistrationDeadline,
+                    AdminNote = e.AdminNote,
+                    ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
+                })
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<AlumniEvent?> GetEventByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<EventDto?> GetEventByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            return await _context.AlumniEvents.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+            var e = await _context.AlumniEvents.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+            if (e == null) return null;
+
+            return new EventDto
+            {
+                Id = e.Id,
+                Title = e.Title,
+                Description = e.Description,
+                Date = e.Date,
+                Location = e.Location,
+                RegistrationFee = e.RegistrationFee,
+                RequiresPayment = e.RequiresPayment,
+                IsActive = e.IsActive,
+                ImageUrl = e.ImageUrl,
+                RegistrationDeadline = e.RegistrationDeadline,
+                AdminNote = e.AdminNote,
+                ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
+            };
         }
 
         public async Task<AlumniEvent> CreateEventAsync(CreateEventDto dto, CancellationToken cancellationToken = default)
@@ -105,12 +152,28 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<EventRegistration> RegisterForEventAsync(RegisterForEventDto dto, int? memberId, UploadedFileDto? receipt = null, CancellationToken cancellationToken = default)
         {
-            var alumniEvent = await _context.AlumniEvents.FirstOrDefaultAsync(e => e.Id == dto.EventId, cancellationToken);
+            var alumniEvent = await _context.AlumniEvents.FindAsync(new object[] { dto.EventId }, cancellationToken);
             if (alumniEvent == null) throw new ArgumentException("Event not found");
 
             if (!alumniEvent.IsActive || (alumniEvent.RegistrationDeadline.HasValue && alumniEvent.RegistrationDeadline.Value < DateTime.UtcNow))
             {
                 throw new InvalidOperationException("Registration is closed for this event.");
+            }
+
+            // Check for existing registration for this event
+            bool alreadyRegistered = false;
+            if (memberId.HasValue)
+            {
+                alreadyRegistered = await _context.EventRegistrations.AnyAsync(r => r.EventId == dto.EventId && r.MemberId == memberId.Value && r.Status != EventRegistrationStatus.Rejected, cancellationToken);
+            }
+            else if (!string.IsNullOrEmpty(dto.GuestEmail))
+            {
+                alreadyRegistered = await _context.EventRegistrations.AnyAsync(r => r.EventId == dto.EventId && r.GuestEmail == dto.GuestEmail && r.Status != EventRegistrationStatus.Rejected, cancellationToken);
+            }
+
+            if (alreadyRegistered)
+            {
+                throw new InvalidOperationException("You are already registered for this event.");
             }
 
             if (!memberId.HasValue && !alumniEvent.AllowNonMembers)
@@ -139,12 +202,19 @@ namespace GHCAA.Infrastructure.Services
                     ? (dto.PaymentMethod ?? GHCAA.Domain.Enums.PaymentMethod.ManualReceipt) 
                     : GHCAA.Domain.Enums.PaymentMethod.ManualReceipt,
                 ReceiptPath = receiptPath,
+                ContributionAmount = dto.ContributionAmount,
                 Status = EventRegistrationStatus.Pending,
                 RegisteredAt = DateTime.UtcNow
             };
 
             _context.EventRegistrations.Add(registration);
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Send "Participation Received" email
+            try {
+                await SendEventEmailAsync(registration, "EVENT_PARTICIPATION_RECEIVED", cancellationToken);
+            } catch { /* Suppress email errors to ensure registration succeeds */ }
+
             return registration;
         }
 
@@ -209,9 +279,64 @@ namespace GHCAA.Infrastructure.Services
                     r.Status,
                     r.RegisteredAt,
                     r.ApprovedAt,
-                    r.ReceiptPath
+                    r.ReceiptPath,
+                    r.ContributionAmount,
+                    EventFee = r.Event != null ? r.Event.RegistrationFee : 0
                 })
             };
+        }
+
+        public async Task<bool> SendInvitationEmailAsync(int registrationId, CancellationToken cancellationToken = default)
+        {
+            var registration = await _context.EventRegistrations
+                .Include(r => r.Event)
+                .Include(r => r.Member)
+                .FirstOrDefaultAsync(r => r.Id == registrationId, cancellationToken);
+
+            if (registration == null || registration.Status != EventRegistrationStatus.Approved) return false;
+
+            return await SendEventEmailAsync(registration, "EVENT_PARTICIPATION_APPROVED", cancellationToken);
+        }
+
+        private async Task<bool> SendEventEmailAsync(EventRegistration registration, string templateCode, CancellationToken cancellationToken)
+        {
+            if (registration.Event == null) return false;
+
+            var email = registration.Member?.Email ?? registration.GuestEmail;
+            var name = registration.Member?.FullName ?? registration.GuestName ?? "Guest";
+
+            if (string.IsNullOrEmpty(email)) return false;
+
+            var customVars = new Dictionary<string, string>
+            {
+                { "EventTitle", registration.Event.Title },
+                { "EventDate", registration.Event.Date.ToString("f") },
+                { "EventLocation", registration.Event.Location },
+                { "FullName", name },
+                { "Status", registration.Status.ToString() },
+                { "PassId", $"REG-{registration.Id.ToString().PadLeft(6, '0')}" }
+            };
+
+            string subject = templateCode.Contains("RECEIVED") 
+                ? $"Participation Received: {registration.Event.Title}" 
+                : $"Participation Approved: {registration.Event.Title}";
+
+            if (registration.MemberId.HasValue)
+            {
+                await _communicationService.SendIndividualEmailAsync(registration.MemberId.Value, templateCode, customVars, cancellationToken);
+            }
+            else
+            {
+                await _communicationService.SendCustomEmailAsync(
+                    new List<string> { email }, 
+                    templateCode, 
+                    subject, 
+                    null, 
+                    customVars, 
+                    cancellationToken);
+            }
+
+            return true;
         }
 
         public async Task<bool> ApproveRegistrationAsync(int registrationId, int adminId, bool approve, CancellationToken cancellationToken = default)
@@ -229,40 +354,9 @@ namespace GHCAA.Infrastructure.Services
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            if (approve && registration.Event != null)
+            if (approve)
             {
-                var email = registration.Member?.Email ?? registration.GuestEmail;
-                var name = registration.Member?.FullName ?? registration.GuestName ?? "Guest";
-
-                if (!string.IsNullOrEmpty(email))
-                {
-                    // Send confirmation email
-                    var customVars = new Dictionary<string, string>
-                    {
-                        { "EventTitle", registration.Event.Title },
-                        { "EventDate", registration.Event.Date.ToString("f") },
-                        { "EventLocation", registration.Event.Location },
-                        { "FullName", name }
-                    };
-
-                    // Note: communicationService.SendIndividualEmailAsync usually expects memberId.
-                    // If it's a non-member, we might need a direct email send method.
-                    if (registration.MemberId.HasValue)
-                    {
-                        await _communicationService.SendIndividualEmailAsync(registration.MemberId.Value, "EVENT_REGISTRATION_CONFIRMATION", customVars, cancellationToken);
-                    }
-                    else
-                    {
-                        // Use SendCustomEmailAsync for non-members (guests)
-                        await _communicationService.SendCustomEmailAsync(
-                            new List<string> { email }, 
-                            "EVENT_REGISTRATION_CONFIRMATION", 
-                            $"Confirmation: {registration.Event.Title}", 
-                            null, 
-                            customVars, 
-                            cancellationToken);
-                    }
-                }
+                await SendEventEmailAsync(registration, "EVENT_PARTICIPATION_APPROVED", cancellationToken);
             }
             return true;
         }
@@ -286,6 +380,21 @@ namespace GHCAA.Infrastructure.Services
             await _context.SaveChangesAsync(cancellationToken);
             
             return logoPath;
+        }
+
+        public async Task<IEnumerable<PublicParticipantDto>> GetPublicParticipantsAsync(int eventId, CancellationToken cancellationToken = default)
+        {
+            return await _context.EventRegistrations
+                .Include(r => r.Member)
+                .Where(r => r.EventId == eventId)
+                .OrderBy(r => r.RegisteredAt)
+                .Select(r => new PublicParticipantDto
+                {
+                    Name = r.IsNonMember ? r.GuestName! : r.Member!.FullName,
+                    Status = r.Status.ToString(),
+                    RegisteredAt = r.RegisteredAt
+                })
+                .ToListAsync(cancellationToken);
         }
     }
 }

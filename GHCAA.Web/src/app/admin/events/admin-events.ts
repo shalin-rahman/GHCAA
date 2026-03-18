@@ -38,14 +38,16 @@ export class AdminEvents implements OnInit {
     selectedEvent = signal<AlumniEvent | null>(null);
     showInvitation = signal<boolean>(false);
     invitationData = signal<any | null>(null);
+    formError = signal<string | null>(null);
 
     // PDF Config
-    pdfHeaders = ['ID', 'Event', 'Participant', 'Type', 'Reference', 'Status', 'Date'];
+    pdfHeaders = ['ID', 'Event', 'Participant', 'Type', 'Amount', 'Reference', 'Status', 'Date'];
     pdfMapper = (r: any) => [
         r.id,
         r.eventTitle,
         r.memberName || r.guestName || 'Guest',
         r.isNonMember ? 'Guest' : 'Member',
+        (r.contributionAmount || r.eventFee || 0).toFixed(2),
         r.paymentReference,
         r.status,
         new Date(r.registeredAt).toLocaleDateString()
@@ -135,6 +137,7 @@ export class AdminEvents implements OnInit {
         this.eventForm.reset({ isActive: true, requiresPayment: true, registrationFee: 0 });
         this.selectedLogo.set(null);
         this.logoPreview.set(null);
+        this.formError.set(null);
         this.showForm.set(true);
     }
 
@@ -154,6 +157,7 @@ export class AdminEvents implements OnInit {
         });
         this.selectedLogo.set(null);
         this.logoPreview.set(ev.imageUrl || null);
+        this.formError.set(null);
         this.showForm.set(true);
     }
 
@@ -217,7 +221,7 @@ export class AdminEvents implements OnInit {
             },
             error: (err) => {
                 console.error('Event operation failed:', err);
-                this.notify.error(err.error?.message || 'Operation failed.');
+                this.formError.set(err.error?.message || 'Operation failed.');
                 this.isSubmitting.set(false);
             }
         });
@@ -244,10 +248,14 @@ export class AdminEvents implements OnInit {
     }
 
     approveReg(regId: number, approve: boolean) {
-        const action = approve ? 'approve' : 'reject';
+        const action = approve ? 'approved' : 'rejected';
         if (confirm(`Are you sure you want to ${action} this registration?`)) {
-            this.eventsService.approveRegistration(regId, approve).subscribe(() => {
-                this.loadAllRegistrations();
+            this.eventsService.approveRegistration(regId, approve).subscribe({
+                next: () => {
+                    this.notify.success(`Registration successfully ${action}`);
+                    this.loadAllRegistrations();
+                },
+                error: (err) => this.notify.error(err.error?.message || 'Action failed')
             });
         }
     }
@@ -277,6 +285,15 @@ export class AdminEvents implements OnInit {
     closeInvitation() {
         this.showInvitation.set(false);
         this.invitationData.set(null);
+    }
+
+    sendEmail(regId: number) {
+        if (confirm('Send invitation email to this participant?')) {
+            this.eventsService.sendInvitationEmail(regId).subscribe({
+                next: () => this.notify.success('Invitation email sent!'),
+                error: () => this.notify.error('Failed to send email.')
+            });
+        }
     }
 }
 

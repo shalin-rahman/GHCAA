@@ -30,6 +30,8 @@ namespace GHCAA.Domain.Models
         [MaxLength(500)]
         public string? ReceiptPath { get; set; }
 
+        public decimal? ContributionAmount { get; set; }
+
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.ManualReceipt;
 
         [Required]

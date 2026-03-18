@@ -11,13 +11,21 @@
     </div>
     } @else {
     <!-- Membership Card (Read Only) -->
-    <div class="glass-card membership-status-card mb-8">
+    <div class="glass-card membership-status-card mb-12 p-12">
         <div class="status-header">
             <div class="main-info">
-                <span class="m-number">{{ profile.membershipNumber || 'PENDING REGISTRY AUDIT' }}</span>
-                <h3>{{ profile.fullName }}</h3>
-                <p class="m-type">{{ getMembershipType(profile.membershipType) }} Member</p>
-                <div class="special-labels flex gap-2 mt-4">
+                <div class="identity-line">
+                    <span class="m-number">{{ profile.membershipNumber || 'REGISTRY PENDING' }}</span>
+                    <span class="separator">/</span>
+                    <h3 class="display-name">{{ profile.fullName }}</h3>
+                    <span class="separator">/</span>
+                    <span class="m-type">{{ getMembershipType(profile.membershipType) }}</span>
+                    @if (profile.bloodGroup) {
+                        <span class="separator">/</span>
+                        <span class="badge badge-blood !text-[10px] !bg-red-50 !text-red-700 !border-red-100">{{ getBloodGroupName(profile.bloodGroup) }}</span>
+                    }
+                </div>
+                <div class="special-labels flex gap-2 mt-2">
                     <span *ngIf="profile.category && profile.category !== 'None' && profile.category !== 0"
                         class="badge" [class]="getCategoryLabel(profile.category).toLowerCase()">
                         {{ getCategoryLabel(profile.category) }}
@@ -26,44 +34,53 @@
                         getECPositionName(getCurrentECPosition(profile.ecHistory)) }}</span>
                 </div>
             </div>
-            <div class="badge-icon" [ngClass]="profile.status === 1 ? 'active' : 'pending'">
-                {{ profile.status === 1 ? 'Verified ✅' : 'Review ⏳' }}
+            <div class="badge-icon flex flex-col items-end gap-1" [ngClass]="profile.status === 1 ? 'active' : 'pending'">
+                <span class="text-sm font-bold">{{ profile.status === 1 ? 'Verified ✅' : 'Audit Pending ⏳' }}</span>
+                <span class="text-[9px] opacity-60 uppercase tracking-tighter">{{ profile.status === 1 ? 'Legacy Active' : 'Waiting for Admin Signature' }}</span>
             </div>
         </div>
         <div class="status-grid">
             <div class="grid-item">
-                <small>Batch/Passing Year</small>
-                <p>{{ profile.ghcLastCertificatePassingYear }}</p>
+                <small>Associated Batch</small>
+                <p><strong>{{ profile.ghcLastCertificatePassingYear }}</strong></p>
+                <span class="text-[10px] opacity-60 uppercase">{{ profile.ghcLastCertificate }} {{ getMajorDisplay(profile.ghcLastCertificate, profile.ghcLastCertificateGroup, profile.ghcLastCertificateSubject) }}</span>
             </div>
             <div class="grid-item">
                 <small>Highest Degree</small>
-                <p>{{ profile.highestCertificate }}</p>
+                <p><strong>{{ profile.highestCertificate }}</strong></p>
+                <span class="text-[10px] opacity-60 uppercase truncate block max-w-[150px]">{{ getMajorDisplay(profile.highestCertificate, profile.highestCertificateGroup, profile.highestCertificateSubject).replace('in ', '') || 'General' }}</span>
             </div>
             <div class="grid-item">
                 <small>Member Since</small>
-                <p>{{ (profile.approvedDate || profile.appliedDate) | date:'MMM yyyy' }}</p>
+                <p><strong>{{ ((profile.approvedDate || profile.appliedDate) | date:'MMM yyyy') || 'PENDING' }}</strong></p>
+                <span class="text-[10px] opacity-60 uppercase">Registry Active</span>
             </div>
         </div>
     </div>
 
     <!-- EC History Section -->
-    <div class="glass-card mb-8 p-10">
-        <h4 class="section-label">Association Governance History</h4>
+    <div class="glass-card mb-12 p-12">
+        <div class="flex justify-between items-center mb-6">
+            <h4 class="section-label !mb-0">Association Governance History</h4>
+            <span class="badge-info">Archive Record</span>
+        </div>
         @if (profile.ecHistory && profile.ecHistory.length > 0) {
-        <div class="history-container">
+        <div class="history-list">
             @for (h of profile.ecHistory; track h.startDate) {
-            <div class="history-card">
-                <div class="h-header">
-                    <span class="h-title">{{ getECPositionName(h.position) }}</span>
-                    <span class="h-badge">{{ h.periodTitle }}</span>
+            <div class="history-row" [class.current]="h.isCurrent && !h.endDate">
+                <div class="row-main">
+                    <span class="row-title">{{ getECPositionName(h.position) }}</span>
+                    <div class="row-sub">
+                        <span>{{ h.periodTitle }}</span>
+                        @if (h.changeReason) {
+                            <span class="separator">|</span>
+                            <span class="italic opacity-60">"{{ h.changeReason }}"</span>
+                        }
+                    </div>
                 </div>
-                <div class="h-sub">
-                    <span class="h-subtitle">{{ h.startDate | date:'MMM yyyy' }} - {{ h.endDate ? (h.endDate | date:'MMM yyyy') : (h.isCurrent ? 'Present' : 'Ended') }}</span>
-                    @if (h.isCurrent && !h.endDate) { <span class="h-period">Active Position</span> }
+                <div class="row-period">
+                    {{ h.startDate | date:'MMM yyyy' }} - {{ h.endDate ? (h.endDate | date:'MMM yyyy') : (h.isCurrent ? 'Present' : 'Ended') }}
                 </div>
-                @if (h.changeReason) {
-                <p class="h-desc italic">"{{ h.changeReason }}"</p>
-                }
             </div>
             }
         </div>
@@ -76,36 +93,44 @@
     </div>
 
     <!-- Education History Section -->
-    <div class="glass-card mb-8 p-10">
+    <div class="glass-card mb-12 p-12">
         <h4 class="section-label">Educational Timeline</h4>
         @if ((profile.academicHistory && profile.academicHistory.length > 0) || profile.ghcLastCertificate) {
-        <div class="history-container">
+        <div class="history-list">
             <!-- Primary Overview (from Main Profile) -->
             @if (profile.ghcLastCertificate) {
-            <div class="history-card primary relative">
-                <div class="h-header">
-                    <span class="h-title">{{ profile.ghcLastCertificate }} in {{ profile.ghcLastCertificateSubject }}</span>
-                    <span class="h-badge">Primary College Archive</span>
+            <div class="history-row primary">
+                <div class="row-main">
+                    <span class="row-title">
+                        {{ profile.ghcLastCertificate }} {{ getMajorDisplay(profile.ghcLastCertificate, profile.ghcLastCertificateGroup, profile.ghcLastCertificateSubject) }}
+                    </span>
+                    <div class="row-sub">
+                        <span>Govt. Haraganga College</span>
+                        <span class="badge-info !text-[9px]">Primary Registry</span>
+                    </div>
                 </div>
-                <div class="h-sub">
-                    <span class="h-subtitle">Govt. Haraganga College</span>
-                    <span class="h-period">{{ profile.ghcAdmissionYear ? profile.ghcAdmissionYear + ' - ' : '' }}{{ profile.ghcLastCertificatePassingYear }}</span>
+                <div class="row-period">
+                    {{ profile.ghcAdmissionYear ? profile.ghcAdmissionYear + ' - ' : '' }}{{ profile.ghcLastCertificatePassingYear }}
                 </div>
             </div>
             }
 
             @for (h of profile.academicHistory; track $index) {
-            <div class="history-card relative">
-                <button type="button" (click)="removeAcademicRecord($index)" class="absolute top-4 right-4 btn btn-secondary btn-sm text-danger-color border-danger-color">
-                    Remove 🗑️
-                </button>
-                <div class="h-header">
-                    <span class="h-title">{{ h.degree }} in {{ h.subject }}</span>
-                    <span class="h-badge" *ngIf="h.isGHC">Primary Institution</span>
+            <div class="history-row">
+                <div class="row-main">
+                    <span class="row-title">{{ h.degree }} {{ getMajorDisplay(h.degree, 'None', h.subject) }}</span>
+                    <div class="row-sub">
+                        <span>{{ h.institutionName }}</span>
+                        @if (h.isGHC) { <span class="badge-info !text-[9px]">Haragangian Record</span> }
+                    </div>
                 </div>
-                <div class="h-sub">
-                    <span class="h-subtitle">{{ h.institutionName }}</span>
-                    <span class="h-period">{{ h.admissionYear ? h.admissionYear + ' - ' : '' }}{{ h.passingYear }}</span>
+                <div class="row-period">
+                    {{ h.admissionYear ? h.admissionYear + ' - ' : '' }}{{ h.passingYear }}
+                </div>
+                <div class="row-actions">
+                    <button type="button" (click)="removeAcademicRecord($index)" class="btn btn-secondary btn-sm text-danger-color !border-none !bg-transparent" title="Remove Record">
+                        🗑️
+                    </button>
                 </div>
             </div>
             }
@@ -119,47 +144,39 @@
     </div>
 
     <!-- Career History Section -->
-    <div class="glass-card mb-8 p-10">
+    <div class="glass-card mb-12 p-12">
         <h4 class="section-label">Professional Experience</h4>
         @if ((profile.professionalHistory && profile.professionalHistory.length > 0) || profile.designation) {
-        <div class="history-container">
+        <div class="history-list">
             <!-- Professional Snapshot (from Main Profile) -->
-            @if (profile.designation) {
-                <div class="history-card primary relative current">
-                    <div class="h-header">
-                        <span class="h-title">{{ profile.designation }}</span>
-                        <span class="h-badge">Primary Occupation</span>
+                <div class="history-row primary current">
+                    <div class="row-main">
+                        <span class="row-title">{{ profile.designation }}</span>
+                        <div class="row-sub">
+                            @if (profile.professionalSector) { <span>{{ profile.professionalSector }}</span> }
+                            <span class="badge-info !text-[9px]">Primary Occupation</span>
+                        </div>
                     </div>
-                    @if (profile.professionalSector) {
-                    <div class="h-sub">
-                        <span class="h-subtitle">Sector: {{ profile.professionalSector }}</span>
-                    </div>
-                    }
+                    <div class="row-period">Verified Active</div>
                 </div>
-            }
 
             @for (w of profile.professionalHistory; track $index) {
-            <div class="history-card relative" [class.current]="w.isCurrent">
-                <button type="button" (click)="removeProfessionalRecord($index)" class="absolute top-4 right-4 btn btn-secondary btn-sm text-danger-color border-danger-color">
-                    Remove 🗑️
-                </button>
-                <div class="h-header">
-                    <span class="h-title">{{ w.designation }}</span>
-                    @if (w.isCurrent) { <span class="h-badge">Current Position</span> }
+            <div class="history-row" [class.current]="w.isCurrent">
+                <div class="row-main">
+                    <span class="row-title">{{ w.designation }}</span>
+                    <div class="row-sub">
+                        <span>{{ w.organizationName }}</span>
+                        @if (w.location) { <span class="separator">|</span> <span class="opacity-60">📍 {{ w.location }}</span> }
+                    </div>
                 </div>
-                <div class="h-sub">
-                    <span class="h-subtitle">{{ w.organizationName }}</span>
-                    <span class="h-period">
-                        {{ w.startDate | date:'MMM yyyy' }} - 
-                        {{ w.isCurrent ? 'Present' : (w.endDate | date:'MMM yyyy') }}
-                    </span>
+                <div class="row-period">
+                    {{ w.startDate | date:'MMM yyyy' }} - {{ w.isCurrent ? 'Present' : (w.endDate | date:'MMM yyyy') }}
                 </div>
-                @if (w.location || w.sector) {
-                <div class="h-desc flex gap-4">
-                    <span *ngIf="w.location">📍 {{ w.location }}</span>
-                    <span *ngIf="w.sector">💼 {{ w.sector }}</span>
+                <div class="row-actions">
+                    <button type="button" (click)="removeProfessionalRecord($index)" class="btn btn-secondary btn-sm text-danger-color !border-none !bg-transparent" title="Remove Experience">
+                        🗑️
+                    </button>
                 </div>
-                }
             </div>
             }
         </div>
@@ -172,7 +189,7 @@
     </div>
 
     <!-- Photo Upload Card -->
-    <div class="glass-card mb-8 p-8">
+    <div class="glass-card mb-12 p-12">
         <h4 class="section-label mb-6">Profile Photo</h4>
         <div class="flex items-center gap-8">
             <div class="photo-preview-wrap relative">
@@ -207,12 +224,15 @@
         </div>
     </div>
 
-    <div class="glass-card profile-card p-14">
+    <!-- Main Profile Edit Form -->
+    <div class="glass-card profile-card p-12">
         <form (submit)="updateProfile()">
-            <!-- Personal Information -->
+            <!-- Section 1: Personal Details -->
             <div class="section-block">
-                <h4 class="section-label">Secure Identity Details</h4>
-                <div class="form-grid">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Secure Identity Details</h4>
+                </div>
+                <div class="form-grid mb-12">
                     <div class="form-group">
                         <label>Full Name</label>
                         <input type="text" [(ngModel)]="profile.fullName" name="fullName">
@@ -245,52 +265,96 @@
                 </div>
             </div>
 
-            <!-- Academic History Management -->
-            <div class="section-block mt-14">
+            <!-- Section 2: Academic Achievements -->
+            <div class="section-block mt-12">
                 <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
                     <h4 class="text-accent uppercase tracking-widest text-xs font-black">Overall Highest Academic Achievement</h4>
                 </div>
-                <div class="form-grid mb-10">
+                <div class="form-grid mb-12">
                     <div class="form-group">
                         <label>Highest Degree Title</label>
-                        <input type="text" [(ngModel)]="profile.highestCertificate" name="highDeg" placeholder="e.g. Masters in Physics">
+                        <select [(ngModel)]="profile.highestCertificate" name="highDeg">
+                            <option value="">Choose Degree...</option>
+                            @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label>Major / Subject</label>
-                        <input type="text" [(ngModel)]="profile.highestCertificateSubject" name="highSub" placeholder="e.g. Physics / MBA">
+                        <label>Major / Group / Subject</label>
+                        @if (profile.highestCertificate === 'HSC') {
+                            <select [(ngModel)]="profile.highestCertificateGroup" name="highGrp">
+                                <option value="None">None / General</option>
+                                @for (g of groupOptions; track g) { <option [value]="g">{{ g }}</option> }
+                            </select>
+                        } @else {
+                            <select [(ngModel)]="profile.highestCertificateSubject" name="highSub">
+                                <option value="None">None / General</option>
+                                @for (s of subjectOptions; track s) { <option [value]="s">{{ s }}</option> }
+                            </select>
+                        }
                     </div>
                     <div class="form-group">
                         <label>Passing Year</label>
-                        <input type="number" [(ngModel)]="profile.highestCertificatePassingYear" name="highPass">
+                        <select [(ngModel)]="profile.highestCertificatePassingYear" name="highPass">
+                            <option [value]="null">Select Year...</option>
+                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label>HSC Admission Year</label>
-                        <input type="number" [(ngModel)]="profile.hscAdmissionYear" name="hscAdm">
+                        <label>HSC Admission Year (Reference)</label>
+                        <select [(ngModel)]="profile.hscAdmissionYear" name="hscAdm">
+                            <option [value]="null">Select Year...</option>
+                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
+                        </select>
                     </div>
                 </div>
+            </div>
 
+            <!-- Section 3: Registration Summary -->
+            <div class="section-block mt-12">
                 <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
                     <h4 class="text-accent uppercase tracking-widest text-xs font-black">Member Registration Summary (GHC)</h4>
                 </div>
-                <div class="form-grid mb-10">
+                <div class="form-grid mb-12">
                     <div class="form-group">
                         <label>Last GHC Degree</label>
-                        <input type="text" [(ngModel)]="profile.ghcLastCertificate" name="ghcDeg" placeholder="e.g. HSC / BA / B.Sc">
+                        <select [(ngModel)]="profile.ghcLastCertificate" name="ghcDeg">
+                            <option value="">Select Certificate...</option>
+                            @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>GHC Subject / Group</label>
-                        <input type="text" [(ngModel)]="profile.ghcLastCertificateSubject" name="ghcSub" placeholder="e.g. Science / Arts / Physics">
+                        @if (profile.ghcLastCertificate === 'HSC') {
+                            <select [(ngModel)]="profile.ghcLastCertificateGroup" name="ghcGrp">
+                                <option value="None">None / General</option>
+                                @for (g of groupOptions; track g) { <option [value]="g">{{ g }}</option> }
+                            </select>
+                        } @else {
+                            <select [(ngModel)]="profile.ghcLastCertificateSubject" name="ghcSub">
+                                <option value="None">None / General</option>
+                                @for (s of subjectOptions; track s) { <option [value]="s">{{ s }}</option> }
+                            </select>
+                        }
                     </div>
                     <div class="form-group">
                         <label>GHC Admission Year</label>
-                        <input type="number" [(ngModel)]="profile.ghcAdmissionYear" name="ghcAdm">
+                        <select [(ngModel)]="profile.ghcAdmissionYear" name="ghcAdm">
+                            <option [value]="null">Select Year...</option>
+                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>GHC Passing Year</label>
-                        <input type="number" [(ngModel)]="profile.ghcLastCertificatePassingYear" name="ghcPass">
+                        <select [(ngModel)]="profile.ghcLastCertificatePassingYear" name="ghcPass">
+                            <option [value]="null">Select Year...</option>
+                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
+                        </select>
                     </div>
                 </div>
+            </div>
 
+            <!-- Section 4: Academic History -->
+            <div class="section-block mt-12">
                 <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
                     <h4 class="text-accent uppercase tracking-widest text-xs font-black">Detailed Academic Milestones</h4>
                     <button type="button" (click)="addAcademicRecord()" class="btn btn-secondary btn-sm">
@@ -300,7 +364,7 @@
                 
                 <div class="history-container">
                     @for (item of profile.academicHistory; track $index) {
-                    <div class="history-item relative p-10 glass-card">
+                    <div class="history-item relative p-10 glass-card mb-4">
                         <button type="button" (click)="removeAcademicRecord($index)" class="absolute top-6 right-6 btn btn-secondary btn-sm text-danger-color border-danger-color">
                              Remove 🗑️
                         </button>
@@ -320,20 +384,32 @@
                             
                             <div class="form-group">
                                 <label>Degree Type</label>
-                                <input type="text" list="degree-list" [(ngModel)]="item.degree" [name]="'deg_' + $index">
+                                <select [(ngModel)]="item.degree" [name]="'deg_' + $index">
+                                    <option value="">Select...</option>
+                                    @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Major / Group / Subject</label>
-                                <input type="text" list="subject-list" [(ngModel)]="item.subject" [name]="'sub_' + $index">
+                                <select [(ngModel)]="item.subject" [name]="'sub_' + $index">
+                                    <option value="None">None</option>
+                                    @for (sub of getAvailableSubjects(item.degree); track sub) { <option [value]="sub">{{ sub }}</option> }
+                                </select>
                             </div>
 
                             <div class="form-group">
                                 <label>Admission Year</label>
-                                <input type="number" list="years-list" [(ngModel)]="item.admissionYear" [name]="'admY_' + $index">
+                                <select [(ngModel)]="item.admissionYear" [name]="'admY_' + $index">
+                                    <option [value]="null">Select...</option>
+                                    @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Passing Year (Graduation)</label>
-                                <input type="number" list="years-list" [(ngModel)]="item.passingYear" [name]="'passY_' + $index">
+                                <select [(ngModel)]="item.passingYear" [name]="'passY_' + $index">
+                                    <option [value]="null">Select...</option>
+                                    @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -345,10 +421,13 @@
                 </div>
             </div>
 
-            <!-- Professional History Management -->
-            <div class="section-block mt-14">
-                <h4 class="section-label">Professional Snapshot</h4>
-                <div class="form-grid mb-10">
+            <!-- Section 5: Professional Legacy -->
+            <div class="section-block mt-12">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Professional Legacy & Snapshot</h4>
+                </div>
+                
+                <div class="form-grid mb-12">
                     <div class="form-group full">
                         <label>Primary Designation & Organization</label>
                         <input type="text" [(ngModel)]="profile.designation" name="profileDesignation" placeholder="e.g. Lead Architect at BuildRight">
@@ -358,9 +437,12 @@
                         <input type="text" list="sector-list" [(ngModel)]="profile.professionalSector" name="profileSector">
                     </div>
                 </div>
+            </div>
 
-                <div class="flex justify-between items-center mb-6">
-                    <h4 class="section-label !mb-0">Detailed Career Timeline</h4>
+            <!-- Section 6: Career Timeline -->
+            <div class="section-block mt-12">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Detailed Career Timeline</h4>
                     <button type="button" (click)="addProfessionalRecord()" class="btn btn-secondary btn-sm">
                         + Add Experience
                     </button>
@@ -368,7 +450,7 @@
 
                 <div class="history-container">
                     @for (work of profile.professionalHistory; track $index) {
-                    <div class="history-item relative p-10 glass-card">
+                    <div class="history-item relative p-10 glass-card mb-4">
                         <button type="button" (click)="removeProfessionalRecord($index)" class="absolute top-6 right-6 btn btn-secondary btn-sm text-danger-color border-danger-color">
                              Remove 🗑️
                         </button>
@@ -418,10 +500,12 @@
                 </div>
             </div>
 
-            <!-- Emergency Contact -->
-            <div class="section-block mt-14">
-                <h4 class="section-label">Emergency Protocol Contact</h4>
-                <div class="form-grid">
+            <!-- Section 7: Emergency -->
+            <div class="section-block mt-12">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Emergency Protocol Contact</h4>
+                </div>
+                <div class="form-grid mb-4">
                     <div class="form-group full">
                         <label>Contact Person Legal Name</label>
                         <input type="text" [(ngModel)]="profile.emergencyContactName" name="ecName">
@@ -437,10 +521,12 @@
                 </div>
             </div>
 
-            <!-- Contact Details -->
-            <div class="section-block mt-14">
-                <h4 class="section-label">Correspondence Address</h4>
-                <div class="form-grid">
+            <!-- Section 8: Address -->
+            <div class="section-block mt-12">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Correspondence Identity</h4>
+                </div>
+                <div class="form-grid mb-4">
                     <div class="form-group full">
                         <label>Present Primary Address</label>
                         <textarea [(ngModel)]="profile.presentAddress" name="presentAddress" rows="2"></textarea>
@@ -452,10 +538,12 @@
                 </div>
             </div>
 
-            <!-- Privacy Settings -->
-            <div class="section-block mt-14">
-                <h4 class="section-label">Directory Privacy Controls</h4>
-                <p class="text-muted text-xs mb-8">Manage which attributes are visible to other verified Haragangians in the member directory.</p>
+            <!-- Section 9: Privacy -->
+            <div class="section-block mt-12">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Directory Privacy Controls</h4>
+                </div>
+                <p class="text-muted text-xs mb-12">Manage which attributes are visible to other verified Haragangians in the member directory.</p>
                 
                 <div class="space-y-6">
                     <label class="premium-checkbox-label">

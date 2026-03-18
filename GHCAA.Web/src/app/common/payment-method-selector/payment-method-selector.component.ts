@@ -12,53 +12,100 @@ import { PaymentConfigService, PaymentConfig } from '../../core/services/payment
       <label class="section-label">Select Payment Method</label>
       
       @if (loading()) {
-        <div class="loading-shimmer">Loading available payment methods...</div>
+        <div class="loading-shimmer">
+            <div class="shimmer-line mb-4 w-1/2"></div>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="shimmer-box h-24"></div>
+                <div class="shimmer-box h-24"></div>
+                <div class="shimmer-box h-24"></div>
+            </div>
+        </div>
       } @else if (methods().length === 0) {
-        <div class="no-methods">
-          <span class="opacity-50">⚠️ No payment methods configured. Please contact admin.</span>
+        <div class="no-methods glass-card p-10 border-dashed">
+          <span class="text-2xl mb-2 block">⚠️</span>
+          <span class="opacity-50 text-[10px] uppercase font-black">Central Finance Offline</span>
+          <p class="text-xs italic mt-2">Please contact the secretariat to configure payment routing.</p>
         </div>
       } @else {
         <div class="methods-grid">
           @for (method of methods(); track method.id) {
             <div class="method-card" 
               [class.selected]="selectedMethodId === method.id"
-              [class.method-bkash]="method.displayName.toLowerCase().includes('bkash')"
-              [class.method-nagad]="method.displayName.toLowerCase().includes('nagad')"
-              [class.method-card]="method.method === 'CreditCard' || method.displayName.toLowerCase().includes('card')"
+              [class.method-bkash]="isBrand(method, 'bkash')"
+              [class.method-nagad]="isBrand(method, 'nagad')"
+              [class.method-rocket]="isBrand(method, 'rocket')"
+              [class.method-card-alt]="method.method === 'CreditCard' || isBrand(method, 'card') || isBrand(method, 'gateway')"
               (click)="selectMethod(method)">
+              
               <div class="method-icon-status">
-                <div class="method-icon">{{ method.icon || '💰' }}</div>
-                <div class="check-mark" *ngIf="selectedMethodId === method.id">✓</div>
+                <div class="method-brand-icon">
+                    @if (isBrand(method, 'bkash')) {
+                        <svg viewBox="0 0 24 24" class="svg-brand"><path fill="#D12053" d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10,10-4.48,10-10S17.52,2,12,2Zm0,18c-4.41,0-8-3.59-8-8s3.59-8,8-8,8,3.59,8,8-3.59,8-8,8Zm-1-13h2v6h-2Zm0,8h2v2h-2Z"/></svg>
+                    } @else if (isBrand(method, 'nagad')) {
+                        <svg viewBox="0 0 24 24" class="svg-brand"><path fill="#f7941d" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><circle fill="#f7941d" cx="12" cy="12" r="5"/></svg>
+                    } @else if (isBrand(method, 'rocket')) {
+                        <svg viewBox="0 0 24 24" class="svg-brand"><path fill="#8c3494" d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+                    } @else {
+                        <span class="emoji-icon">{{ method.icon || '💰' }}</span>
+                    }
+                </div>
+                <div class="check-mark-wrapper" *ngIf="selectedMethodId === method.id">
+                    <div class="check-mark">✓</div>
+                </div>
               </div>
+
               <div class="method-info">
                 <span class="method-name">{{ method.displayName }}</span>
                 <small class="method-desc">{{ method.description }}</small>
               </div>
+
+              <div class="selection-indicator"></div>
             </div>
           }
         </div>
 
         <!-- Dynamic Payment Details -->
         @if (selectedMethod) {
-          <div class="method-details-wrapper animate-fade-in">
-            <div class="detail-accent-bar" [class.bkash]="selectedMethod.displayName.toLowerCase().includes('bkash')" [class.nagad]="selectedMethod.displayName.toLowerCase().includes('nagad')"></div>
-            <div class="method-details glass-card">
+          <div class="method-details-wrapper animate-fade-in-up">
+            <div class="detail-accent-bar" 
+                 [class.bkash]="isBrand(selectedMethod, 'bkash')" 
+                 [class.nagad]="isBrand(selectedMethod, 'nagad')"
+                 [class.rocket]="isBrand(selectedMethod, 'rocket')"></div>
+            <div class="method-details glass-card overflow-hidden">
+              <div class="brand-bg-glow" 
+                   [class.bkash]="isBrand(selectedMethod, 'bkash')" 
+                   [class.nagad]="isBrand(selectedMethod, 'nagad')"
+                   [class.rocket]="isBrand(selectedMethod, 'rocket')"></div>
+
               <!-- Mobile Wallet Details -->
               @if (selectedMethod.walletNumber) {
                 <div class="detail-block wallet-block">
                   <div class="wallet-header">
-                    <div class="wallet-icon-ring" [class.bkash]="selectedMethod.displayName.toLowerCase().includes('bkash')" [class.nagad]="selectedMethod.displayName.toLowerCase().includes('nagad')">
-                       <span class="big-icon">{{ selectedMethod.icon }}</span>
+                    <div class="wallet-icon-ring" 
+                         [class.bkash]="isBrand(selectedMethod, 'bkash')" 
+                         [class.nagad]="isBrand(selectedMethod, 'nagad')"
+                         [class.rocket]="isBrand(selectedMethod, 'rocket')">
+                        <div class="brand-svg-lg">
+                            @if (isBrand(selectedMethod, 'bkash')) {
+                                <svg viewBox="0 0 24 24"><path fill="#D12053" d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10,10-4.48,10-10S17.52,2,12,2Zm0,18c-4.41,0-8-3.59-8-8s3.59-8,8-8,8,3.59,8,8-3.59,8-8,8Zm-1-13h2v6h-2Zm0,8h2v2h-2Z"/></svg>
+                            } @else if (isBrand(selectedMethod, 'nagad')) {
+                                <svg viewBox="0 0 24 24"><path fill="#f7941d" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><circle fill="#f7941d" cx="12" cy="12" r="5"/></svg>
+                            } @else if (isBrand(selectedMethod, 'rocket')) {
+                                <svg viewBox="0 0 24 24"><path fill="#8c3494" d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+                            } @else {
+                                <span class="big-icon">{{ selectedMethod.icon }}</span>
+                            }
+                        </div>
                     </div>
                     <div>
-                      <div class="wallet-label">Send money to {{ selectedMethod.displayName }}</div>
+                      <div class="wallet-label">Official Receive Channel</div>
                       <div class="wallet-number">{{ selectedMethod.walletNumber }}</div>
                     </div>
                   </div>
                   @if (selectedMethod.accountHolderName) {
-                    <div class="holder-name">
-                        <span class="opacity-50 text-[10px] uppercase font-bold mr-2">A/C Holder</span>
-                        {{ selectedMethod.accountHolderName }}
+                    <div class="holder-pill">
+                        <span class="opacity-40 uppercase text-[8px] font-black mr-2 tracking-tighter">Verified Label</span>
+                        <span class="font-bold">{{ selectedMethod.accountHolderName }}</span>
                     </div>
                   }
                 </div>
@@ -117,58 +164,126 @@ import { PaymentConfigService, PaymentConfig } from '../../core/services/payment
     </div>
   `,
   styles: [`
-    .payment-methods-container { margin-bottom: 1rem; }
-    .section-label { display: block; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.5; margin-bottom: 1.25rem; }
-    .loading-shimmer { padding: 2rem; text-align: center; opacity: 0.5; font-size: 0.85rem; }
-    .no-methods { padding: 1.5rem; text-align: center; }
+    .payment-methods-container { margin-bottom: 2rem; }
+    .section-label { display: block; font-size: 0.7rem; font-weight: 950; text-transform: uppercase; letter-spacing: 0.3em; color: var(--text-muted); margin-bottom: 1.5rem; padding-left: 0.5rem; }
+    
+    .loading-shimmer {
+        .shimmer-box { background: rgba(255,255,255,0.03); border-radius: 20px; animation: pulse 2s infinite; }
+    }
 
-    .methods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .methods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
     
     .method-card {
       display: flex; flex-direction: column; align-items: flex-start; gap: 1rem;
-      padding: 1.25rem; border-radius: 20px; cursor: pointer; position: relative;
+      padding: 1.5rem; border-radius: 24px; cursor: pointer; position: relative;
       background: rgba(255,255,255,0.02); border: 2px solid rgba(255,255,255,0.05);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       overflow: hidden;
+      
+      &:hover {
+        transform: translateY(-8px);
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.1);
+      }
     }
-    .method-card:hover { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); transform: translateY(-4px); }
-    .method-card.selected { border-width: 2px; }
 
-    /* Brand Specific Card Styling */
-    .method-bkash.selected { border-color: #d12053; background: rgba(209, 32, 83, 0.1); box-shadow: 0 10px 30px rgba(209, 32, 83, 0.15); }
-    .method-nagad.selected { border-color: #f7941d; background: rgba(247, 148, 29, 0.1); box-shadow: 0 10px 30px rgba(247, 148, 29, 0.15); }
-    .method-card.selected { border-color: #6366f1; background: rgba(99, 102, 241, 0.1); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15); }
-    
-    .method-info { text-align: left; }
-    .method-name { display: block; font-weight: 900; font-size: 0.9rem; letter-spacing: -0.02em; }
-    .method-desc { display: block; font-size: 0.6rem; opacity: 0.6; margin-top: 4px; line-height: 1.3; }
+    .selection-indicator {
+        position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+        background: var(--accent-color); transform: scaleX(0);
+        transition: transform 0.3s;
+    }
 
-    .method-icon-status { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-    .method-icon { font-size: 2.5rem; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
-    
-    .check-mark { background: var(--accent-color, #c5a059); color: black; font-size: 0.7rem; font-weight: 900; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-    .method-bkash .check-mark { background: #d12053; color: white; }
-    .method-nagad .check-mark { background: #f7941d; color: white; }
-    .method-card .check-mark { background: #6366f1; color: white; }
+    .method-card.selected {
+        border-width: 2px;
+        .selection-indicator { transform: scaleX(1); }
+    }
 
-    .method-details-wrapper { position: relative; margin-top: 1rem; }
-    .detail-accent-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; z-index: 10; background: var(--accent-color, #c5a059); }
-    .detail-accent-bar.bkash { background: #d12053; }
+    /* Brand Identities */
+    .method-bkash {
+        &.selected { border-color: #D12053; background: rgba(209, 32, 83, 0.08); box-shadow: 0 20px 40px rgba(209, 32, 83, 0.15); }
+        .selection-indicator { background: #D12053; }
+    }
+    .method-nagad {
+        &.selected { border-color: #f7941d; background: rgba(247, 148, 29, 0.08); box-shadow: 0 20px 40px rgba(247, 148, 29, 0.15); }
+        .selection-indicator { background: #f7941d; }
+    }
+    .method-rocket {
+        &.selected { border-color: #8c3494; background: rgba(140, 52, 148, 0.08); box-shadow: 0 20px 40px rgba(140, 52, 148, 0.15); }
+        .selection-indicator { background: #8c3494; }
+    }
+    .method-card-alt {
+        &.selected { border-color: #6366f1; background: rgba(99, 102, 241, 0.08); box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15); }
+        .selection-indicator { background: #6366f1; }
+    }
+
+    .method-icon-status { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
+    .method-brand-icon {
+        width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+        background: rgba(255,255,255,0.05); border-radius: 12px;
+        .svg-brand { width: 28px; height: 28px; }
+        .emoji-icon { font-size: 1.75rem; }
+    }
+
+    .check-mark-wrapper {
+        .check-mark {
+            width: 20px; height: 20px; border-radius: 50%; background: var(--accent-color);
+            color: black; font-size: 10px; font-weight: 900;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+    }
+
+    .method-info { margin-top: 0.5rem; }
+    .method-name { display: block; font-weight: 900; font-size: 1rem; letter-spacing: -0.01em; color: white; }
+    .method-desc { display: block; font-size: 0.65rem; opacity: 0.5; margin-top: 2px; line-height: 1.4; font-weight: 500; }
+
+    .method-details-wrapper { position: relative; margin-top: 1.5rem; }
+    .detail-accent-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; z-index: 2; background: var(--accent-color); }
+    .detail-accent-bar.bkash { background: #D12053; }
     .detail-accent-bar.nagad { background: #f7941d; }
+    .detail-accent-bar.rocket { background: #8c3494; }
 
-    .method-details { padding: 1.5rem; border-radius: 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); }
+    .method-details {
+        padding: 2rem; border-radius: 24px; position: relative;
+        background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
+        .brand-bg-glow {
+            position: absolute; top: -50%; right: -20%; width: 300px; height: 300px;
+            filter: blur(80px); opacity: 0.05; z-index: 0; pointer-events: none;
+            &.bkash { background: #D12053; }
+            &.nagad { background: #f7941d; }
+            &.rocket { background: #8c3494; }
+        }
+    }
 
-    .wallet-block .wallet-header { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1rem; }
-    .wallet-icon-ring { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
-    .wallet-icon-ring.bkash { background: rgba(209, 32, 83, 0.1); border-color: rgba(209, 32, 83, 0.2); }
-    .wallet-icon-ring.nagad { background: rgba(247, 148, 29, 0.1); border-color: rgba(247, 148, 29, 0.2); }
-    .wallet-block .big-icon { font-size: 2.2rem; }
-    
-    .wallet-block .wallet-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; }
-    .wallet-block .wallet-number { font-size: 1.75rem; font-weight: 900; font-family: 'Outfit', sans-serif; letter-spacing: 0.05em; color: var(--accent-color, #c5a059); }
+    .wallet-block { position: relative; z-index: 1; }
+    .wallet-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.25rem; }
+    .wallet-icon-ring {
+        width: 70px; height: 70px; border-radius: 20px; display: flex; align-items: center; justify-content: center;
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        &.bkash { background: rgba(209, 32, 83, 0.1); border-color: rgba(209, 32, 83, 0.2); }
+        &.nagad { background: rgba(247, 148, 29, 0.1); border-color: rgba(247, 148, 29, 0.2); }
+        &.rocket { background: rgba(140, 52, 148, 0.1); border-color: rgba(140, 52, 148, 0.2); }
+        .brand-svg-lg { width: 40px; height: 40px; }
+        .big-icon { font-size: 2.5rem; }
+    }
+
+    .wallet-label { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.4; }
+    .wallet-number { font-size: 2.25rem; font-weight: 950; letter-spacing: 0.05em; color: var(--accent-color); font-family: 'Outfit', sans-serif; }
     .method-details:has(.bkash) .wallet-number { color: #fe4d82; }
     .method-details:has(.nagad) .wallet-number { color: #f7941d; }
-    .wallet-block .holder-name { font-size: 0.85rem; font-weight: 600; padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); border-radius: 10px; display: inline-block; }
+    .method-details:has(.rocket) .wallet-number { color: #bf56c9; }
+
+    .holder-pill { display: inline-flex; align-items: center; padding: 0.6rem 1.25rem; background: rgba(255,255,255,0.04); border-radius: 100px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.05); }
+
+    .instructions-box { display: flex; gap: 1rem; padding: 1.5rem; margin-top: 1.5rem; border-radius: 20px; background: rgba(255,255,255,0.01); border: 1px dashed rgba(255,255,255,0.1); p { font-size: 0.85rem; opacity: 0.6; line-height: 1.6; margin: 0; font-style: italic; } }
+    
+    @keyframes bounceIn {
+        from { opacity: 0; transform: scale(0.3); }
+        50% { opacity: 1; transform: scale(1.05); }
+        70% { transform: scale(0.9); }
+        to { transform: scale(1); }
+    }
 
     .bank-block .bank-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .bank-field { display: flex; flex-direction: column; gap: 4px; }
@@ -216,5 +331,18 @@ export class PaymentMethodSelectorComponent implements OnInit {
     this.selectedMethodId = method.id;
     this.selectedMethod = method;
     this.methodSelected.emit(method);
+  }
+
+  isBrand(method: PaymentConfig, brand: string): boolean {
+    const name = method.displayName.toLowerCase();
+    const type = (method as any).method?.toLowerCase() || '';
+    
+    if (brand === 'bkash') return name.includes('bkash');
+    if (brand === 'nagad') return name.includes('nagad');
+    if (brand === 'rocket') return name.includes('rocket');
+    if (brand === 'card') return name.includes('card') || name.includes('visa') || name.includes('master');
+    if (brand === 'gateway') return !!method.gateway && method.gateway !== 'None';
+    
+    return false;
   }
 }

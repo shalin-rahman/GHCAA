@@ -363,7 +363,9 @@ namespace GHCAA.Infrastructure.Services
                 IsMobilePublic = member.IsMobilePublic,
                 IsEmailPublic = member.IsEmailPublic,
                 IsAddressPublic = member.IsAddressPublic,
-                HasAcceptedTerms = member.HasAcceptedTerms
+                HasAcceptedTerms = member.HasAcceptedTerms,
+                AppliedDate = DateTime.SpecifyKind(member.AppliedDate, DateTimeKind.Utc),
+                ApprovedDate = member.ApprovedDate.HasValue ? DateTime.SpecifyKind(member.ApprovedDate.Value, DateTimeKind.Utc) : null
             };
 
             if (member.ECMembers != null && member.ECMembers.Any())

@@ -13,7 +13,7 @@
 
     @if (showForm()) {
     <div class="admin-card glass-card animate-fade mb-8">
-        <h3>Create New Album</h3>
+        <h3>{{ editingId() ? 'Update Album Metadata' : 'Launch New Album' }}</h3>
         <form (submit)="onSubmit()" class="admin-form">
             <div class="form-grid">
                 <div class="form-group">
@@ -37,10 +37,13 @@
                 <label>Description (Optional)</label>
                 <textarea [(ngModel)]="newGallery.description" name="description" rows="3"></textarea>
             </div>
-            <div class="mt-8 flex justify-end">
+            <div class="mt-8 flex justify-end gap-3">
+                @if (editingId()) {
+                    <button type="button" (click)="toggleForm()" class="btn btn-secondary">Cancel</button>
+                }
                 <button type="submit" class="btn btn-accent" [disabled]="isSubmitting()">
-                    @if (isSubmitting()) { <span>⏳ Creating...</span> }
-                    @else { <span>Create Album</span> }
+                    @if (isSubmitting()) { <span>⏳ Transmitting...</span> }
+                    @else { <span>{{ editingId() ? 'Save Configuration' : 'Create Album' }}</span> }
                 </button>
             </div>
         </form>
@@ -100,6 +103,7 @@
             <div class="album-actions">
                 <div class="flex gap-2">
                     <button class="btn btn-secondary btn-sm" (click)="selectGallery(gallery)">Configure</button>
+                    <button class="btn btn-secondary btn-sm" (click)="openEditForm(gallery)">Edit Info</button>
                     <button class="btn btn-secondary btn-sm" (click)="toggleFeatured(gallery.id)">
                         {{ gallery.isFeatured ? 'Unfeature' : 'Feature' }}
                     </button>

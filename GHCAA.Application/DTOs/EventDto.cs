@@ -16,6 +16,7 @@ namespace GHCAA.Application.DTOs
         public string? ImageUrl { get; set; }
         public DateTime? RegistrationDeadline { get; set; }
         public string? AdminNote { get; set; }
+        public int ParticipantCount { get; set; }
     }
 
     public class CreateEventDto
@@ -51,6 +52,7 @@ namespace GHCAA.Application.DTOs
         public string? GuestMobile { get; set; }
         public string? PaymentReference { get; set; }
         public string? ReceiptPath { get; set; }
+        public decimal? ContributionAmount { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
         public EventRegistrationStatus Status { get; set; }
         public DateTime RegisteredAt { get; set; }
@@ -66,6 +68,7 @@ namespace GHCAA.Application.DTOs
         public string? GuestMobile { get; set; }
         public string? PaymentReference { get; set; }
         public string? ReceiptPath { get; set; } // Path received after actual upload
+        public decimal? ContributionAmount { get; set; }
         public PaymentMethod? PaymentMethod { get; set; } = GHCAA.Domain.Enums.PaymentMethod.ManualReceipt;
     }
 
@@ -73,5 +76,12 @@ namespace GHCAA.Application.DTOs
     {
         public int RegistrationId { get; set; }
         public bool Approve { get; set; } // True for approve, false for reject
+    }
+
+    public class PublicParticipantDto
+    {
+        public string Name { get; set; } = null!;
+        public string Status { get; set; } = null!;
+        public DateTime RegisteredAt { get; set; }
     }
 }

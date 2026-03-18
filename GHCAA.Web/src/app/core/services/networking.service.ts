@@ -20,6 +20,8 @@ export interface MemberSummary {
     photoPath?: string;
     passingYear: number;
     ghcLastCertificate?: string;
+    ghcLastCertificateGroup?: string;
+    ghcLastCertificateSubject?: string;
     ghcLastCertificatePassingYear?: number;
     professionalSector?: string;
     designation?: string;

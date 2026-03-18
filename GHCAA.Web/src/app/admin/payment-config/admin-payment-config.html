@@ -5,8 +5,11 @@
       <h2>Finance Routing Profiles</h2>
       <small>Manage payment gateways and manual receiving channels for the portal.</small>
     </div>
-    <div class="header-actions">
-        <button *ngIf="configs().length === 0" (click)="seedDefaults()" class="btn btn-accent shadow-gold">
+    <div class="header-actions flex gap-4">
+        <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
+            New Routing Asset
+        </button>
+        <button *ngIf="configs().length === 0" (click)="seedDefaults()" class="btn btn-secondary">
             System Seed Defaults
         </button>
     </div>
@@ -89,9 +92,21 @@
                   <input type="text" formControlName="description">
               </div>
 
-              <div class="input-group">
-                  <label>Instructional Output (Client Facing)</label>
-                  <textarea formControlName="instructions" rows="3" placeholder="Exact instructions for the member..."></textarea>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div class="input-group">
+                      <label>Instructional Output (Client Facing)</label>
+                      <textarea formControlName="instructions" rows="3" placeholder="Exact instructions for the member..."></textarea>
+                  </div>
+                  <div class="input-group">
+                      <label>Automated Gateway Hub</label>
+                      <select formControlName="gateway" class="bg-primary/5 p-4 rounded-xl border border-white/10 text-white font-black text-xs uppercase tracking-widest ring-accent/10 focus:ring-4 focus:border-accent outline-none">
+                          <option value="None">None (Manual Channels)</option>
+                          <option value="SSLCommerz">SSLCommerz (Local Cards/MFS)</option>
+                          <option value="BkashGateway">bKash (Direct Tokenized)</option>
+                          <option value="NagadGateway">Nagad (Direct Gateway)</option>
+                      </select>
+                      <p class="text-[9px] text-muted uppercase font-black px-2 mt-1">Assigning a gateway enables real-time synchronization.</p>
+                  </div>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-primary/10 pt-8 mt-4">

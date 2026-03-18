@@ -682,6 +682,18 @@ select.border-red-500 {
 .text-danger-color { color: var(--danger-color) !important; }
 .border-danger-color { border-color: var(--danger-color) !important; }
 
+.badge-info {
+  font-size: 10px;
+  background: rgba(var(--accent-color-rgb), 0.1);
+  color: var(--accent-color);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
 @media (min-width: 768px) {
   .md\:flex-row {
     flex-direction: row;
@@ -1807,4 +1819,4 @@ select.border-red-500 {
     }
     .no-print { display: none !important; }
 }
-
+

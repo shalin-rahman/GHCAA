@@ -44,7 +44,10 @@ export const routes: Routes = [
             },
             {
                 path: 'events',
-                loadComponent: () => import('./common/events/events').then(m => m.Events)
+                children: [
+                    { path: '', loadComponent: () => import('./common/events/events').then(m => m.Events) },
+                    { path: ':id', loadComponent: () => import('./common/events/events').then(m => m.Events) }
+                ]
             },
             {
                 path: 'news',
@@ -53,6 +56,13 @@ export const routes: Routes = [
             {
                 path: 'jobs',
                 loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs)
+            },
+            {
+                path: 'payment',
+                children: [
+                    { path: 'success', loadComponent: () => import('./common/payment-status/payment-status').then(m => m.PaymentStatus) },
+                    { path: 'failed', loadComponent: () => import('./common/payment-status/payment-status').then(m => m.PaymentStatus) }
+                ]
             }
         ]
     },
@@ -108,7 +118,10 @@ export const routes: Routes = [
             },
             {
                 path: 'events',
-                loadComponent: () => import('./common/events/events').then(m => m.Events)
+                children: [
+                    { path: '', loadComponent: () => import('./common/events/events').then(m => m.Events) },
+                    { path: ':id', loadComponent: () => import('./common/events/events').then(m => m.Events) }
+                ]
             },
             {
                 path: 'articles',

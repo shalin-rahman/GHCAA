@@ -98,12 +98,45 @@ export class Profile implements OnInit {
         return getCategoryLabel(cat);
     }
 
+    getAvailableSubjects(degree: string): string[] {
+        if (!degree) return this.subjectOptions;
+        if (degree === 'HSC') return this.groupOptions;
+        return this.subjectOptions;
+    }
+
+    getMajor(degree: string, group: string, subject: string): string {
+        if (degree === 'HSC') return group || 'None';
+        return subject || 'None';
+    }
+
+    getMajorDisplay(degree: string, group: string, subject: string): string {
+        const major = this.getMajor(degree, group, subject);
+        return major && major !== 'None' ? `in ${major}` : '';
+    }
+
+    private syncAcademicFields() {
+        // Sync Highest Certificate
+        if (this.profile.highestCertificate === 'HSC') {
+            this.profile.highestCertificateSubject = 'None';
+        } else if (this.profile.highestCertificate) {
+            this.profile.highestCertificateGroup = 'None';
+        }
+
+        // Sync GHC Last Certificate
+        if (this.profile.ghcLastCertificate === 'HSC') {
+            this.profile.ghcLastCertificateSubject = 'None';
+        } else if (this.profile.ghcLastCertificate) {
+            this.profile.ghcLastCertificateGroup = 'None';
+        }
+    }
+
     getDegreeName(degree: any): string {
         return degree;
     }
 
     async updateProfile() {
         if (this.saving()) return;
+        this.syncAcademicFields();
         ensureValidAcademicData(this.profile);
 
         this.saving.set(true);

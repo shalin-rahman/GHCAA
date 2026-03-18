@@ -20,64 +20,138 @@
             @for (ev of events(); track ev.id) {
             <div class="event-card-wrapper">
                 <div class="event-card glass-card">
-                    <div class="event-banner" *ngIf="ev.imageUrl">
-                        <img [src]="ev.imageUrl" alt="Event Image" class="banner-img">
+                    <!-- Column 1: Asset & Date -->
+                    <div class="event-banner">
+                        <img [src]="ev.imageUrl || '/assets/images/event-placeholder.jpg'" alt="Event Image" class="banner-img">
+                        <div class="date-badge">
+                            <span class="day">{{ ev.date | date:'dd' }}</span>
+                            <span class="month">{{ ev.date | date:'MMM' }}</span>
+                        </div>
                     </div>
 
-                    <div class="date-badge">
-                        <span class="day">{{ ev.date | date:'dd' }}</span>
-                        <span class="month">{{ ev.date | date:'MMM' }}</span>
-                    </div>
-
+                    <!-- Column 2: Narrative -->
                     <div class="event-details">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="type">Alumni Gathering</span>
-                            <span *ngIf="ev.allowNonMembers" class="px-2 py-0.5 bg-accent/20 text-accent rounded text-[10px] uppercase font-black tracking-widest">Guests Welcome</span>
-                            <span *ngIf="!ev.allowNonMembers" class="px-2 py-0.5 bg-primary/20 text-muted rounded text-[10px] uppercase font-black tracking-widest border border-white/5">Members Only</span>
+                        <div class="type-pill">
+                            {{ ev.allowNonMembers ? 'Guests Welcome' : 'Members Only' }}
                         </div>
                         <h3>{{ ev.title }}</h3>
                         <p>{{ ev.description }}</p>
+                    </div>
 
-                        <div class="meta-info">
-                            <span>📍 {{ ev.location }}</span>
-                            <span>⏰ {{ ev.date | date:'shortTime' }}</span>
-                            <span *ngIf="ev.requiresPayment && ev.registrationFee">💰 {{ ev.registrationFee | currency:'BDT ':'code' }}</span>
-                            <span *ngIf="!ev.requiresPayment">✨ Free Entry</span>
+                    <!-- Column 3: Logistics (Split into 2 sub-cols for better density) -->
+                    <div class="meta-col-split grid grid-cols-2 gap-8 px-8 border-l border-white/5">
+                        <!-- Sub-col 1: Location & Time -->
+                        <div class="meta-sub">
+                            <div class="meta-item mb-4">
+                                <span class="icon">📍</span>
+                                <div class="val text-xs">
+                                    <strong>{{ ev.location }}</strong>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <span class="icon">⏰</span>
+                                <div class="val text-xs">
+                                    <strong>{{ ev.date | date:'shortTime' }}</strong>
+                                </div>
+                            </div>
                         </div>
 
-                        <div *ngIf="ev.registrationDeadline" class="deadline-info"
-                            [class.urgent]="!isRegistrationOpen(ev)">
-                            <span>⏳ Registration Deadline:</span>
-                            <span class="deadline-date">{{ ev.registrationDeadline | date:'MMM d, y, h:mm a' }}</span>
-                            <span *ngIf="!isRegistrationOpen(ev)"
-                                class="ml-2 px-2 py-0.5 bg-red-500/10 text-red-500 rounded text-[10px] uppercase">Closed</span>
+                        <!-- Sub-col 2: Financial & Status -->
+                        <div class="meta-sub">
+                            <div class="meta-item mb-4">
+                                <span class="icon">💰</span>
+                                <div class="val text-xs">
+                                    <strong>
+                                        @if (ev.requiresPayment && ev.registrationFee) {
+                                            {{ ev.registrationFee | currency:'BDT ':'symbol':'1.0-0' }}
+                                        } @else if (ev.requiresPayment) {
+                                            Contrib. Amount
+                                        } @else {
+                                            Free Admission
+                                        }
+                                    </strong>
+                                </div>
+                            </div>
+                            @if (ev.registrationDeadline) {
+                            <div class="meta-item" [class.urgent]="!isRegistrationOpen(ev)">
+                                <span class="icon">⏳</span>
+                                <div class="val text-xs">
+                                    <strong>Ends: {{ isRegistrationOpen(ev) ? (ev.registrationDeadline | date:'MMM d') : 'Closed' }}</strong>
+                                </div>
+                            </div>
+                            }
                         </div>
                     </div>
 
-                    <div class="actions">
-                        <button *ngIf="isRegistrationOpen(ev)" (click)="openRegisterModal(ev)"
-                            class="btn w-full justify-center" [ngClass]="isGuest() && !ev.allowNonMembers ? 'btn-secondary opacity-70 border-white/10' : 'btn-accent'">
-                            {{ isGuest() && !ev.allowNonMembers ? 'Login to Register' : 'Register Now' }}
-                        </button>
+                    <!-- Column 4: Engagement & Actions -->
+                    <div class="actions-col px-8 border-l border-white/5 self-stretch flex flex-col justify-center">
+                        @if (ev.adminNote) {
+                        <div class="admin-notice-pill mb-4">
+                            <span class="lbl">Admin Memo</span>
+                            <p>{{ ev.adminNote }}</p>
+                        </div>
+                        }
 
-                        <button *ngIf="!isRegistrationOpen(ev)" disabled
-                            class="btn btn-secondary w-full justify-center opacity-50 cursor-not-allowed">Closed</button>
+                        @if (ev.participantCount) {
+                            <div class="participant-count-pill mb-4">
+                                <button (click)="toggleParticipants(ev.id)" class="count-btn">
+                                    <span class="text-accent font-black">👥 {{ ev.participantCount }} Joined</span>
+                                    <span class="arrow">{{ showParticipants() && activeParticipantEventId() === ev.id ? '▲' : '▼' }}</span>
+                                </button>
+                            </div>
+                        }
 
-                        <button (click)="askAdmin(ev)"
-                            class="btn btn-outline border-white/20 w-full justify-center text-xs">Ask Admin</button>
+                        <div class="grid gap-2">
+                            @if (isRegistrationOpen(ev)) {
+                                <button (click)="openRegisterModal(ev)" class="btn btn-accent shadow-gold w-full">{{ ev.requiresPayment ? 'Secure Pass' : 'Join Event' }}</button>
+                            } @else {
+                                <button disabled class="btn btn-secondary opacity-50 w-full">Closed</button>
+                            }
+                            <div class="flex gap-2">
+                                <a [href]="getCalendarLink(ev)" target="_blank" class="btn btn-outline btn-xs flex-1">📅 Sync</a>
+                                <button (click)="askAdmin(ev)" class="btn btn-outline btn-xs flex-1">Query</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div *ngIf="ev.adminNote" class="admin-note-box animate-fade-in">
-                    <span class="font-black mr-2 opacity-50">NOTICE:</span> {{ ev.adminNote }}
+                <!-- Participant List Section (Expanded) -->
+                <div *ngIf="showParticipants() && activeParticipantEventId() === ev.id" class="participants-section animate-slide-down">
+                    <div class="section-title">
+                        <span>Participants</span>
+                        <div class="h-[1px] flex-1 bg-white/5"></div>
+                    </div>
+                    
+                    <div *ngIf="loadingParticipants()" class="text-center py-4">
+                        <span class="text-xs font-black uppercase text-accent animate-pulse tracking-widest">Loading attendees...</span>
+                    </div>
+
+                    <div *ngIf="!loadingParticipants() && participants().length === 0" class="text-center py-4 text-muted text-xs italic">
+                        No visible participants yet.
+                    </div>
+
+                    <div *ngIf="!loadingParticipants() && participants().length > 0" class="participants-grid">
+                        <div *ngFor="let p of participants()" class="participant-pill">
+                            <span class="name">{{ p.name }}</span>
+                            <span class="status-badge" [ngClass]="p.status.toLowerCase()">{{ p.status }}</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Inline Registration Form -->
                 <div *ngIf="showModal() && selectedEvent()?.id === ev.id" class="inline-reg-form animate-fade-in mt-4">
                     <div class="glass-card p-8 border-accent/30 bg-accent/5">
                         <div class="flex justify-between items-center mb-6">
-                            <h4 class="text-xl font-black text-accent uppercase tracking-tighter">Registration Form</h4>
+                            <h4 class="text-xl font-black text-accent uppercase tracking-tighter">Event Registration</h4>
                             <button (click)="closeModal()" class="text-muted hover:text-white">✕ Close</button>
+                        </div>
+
+                        <!-- In-page Error Messaging -->
+                        <div *ngIf="formError()" class="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-shake">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">⚠️</span>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-red-500">{{ formError() }}</p>
+                            </div>
                         </div>
 
                         <div class="mb-6 p-4 bg-white/5 rounded-xl border border-white/10"
@@ -90,24 +164,44 @@
 
                         <form [formGroup]="regForm" (ngSubmit)="submitRegistration()" class="space-y-6">
                             @if (isGuest()) {
-                            <div class="guest-info-block grid grid-cols-1 md:grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
-                                <div class="input-group">
-                                    <label>Guest Full Name *</label>
-                                    <input type="text" formControlName="guestName" placeholder="Full Name">
+                                <div class="guest-info-block grid grid-cols-1 md:grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
+                                    <div class="input-group">
+                                        <label>Guest Full Name *</label>
+                                        <input type="text" formControlName="guestName" placeholder="Full Name"
+                                            [class.border-red-500]="regForm.get('guestName')?.invalid && regForm.get('guestName')?.touched">
+                                        <div *ngIf="regForm.get('guestName')?.invalid && regForm.get('guestName')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1 tracking-widest">
+                                            Identity Verification Required
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Guest Email *</label>
+                                        <input type="email" formControlName="guestEmail" placeholder="email@example.com"
+                                            [class.border-red-500]="regForm.get('guestEmail')?.invalid && regForm.get('guestEmail')?.touched">
+                                        <div *ngIf="regForm.get('guestEmail')?.invalid && regForm.get('guestEmail')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1 tracking-widest">
+                                            Valid Email Required
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Guest Mobile *</label>
+                                        <input type="text" formControlName="guestMobile" placeholder="01XXXXXXXXX"
+                                            [class.border-red-500]="regForm.get('guestMobile')?.invalid && regForm.get('guestMobile')?.touched">
+                                        <div *ngIf="regForm.get('guestMobile')?.invalid && regForm.get('guestMobile')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1 tracking-widest">
+                                            Mobile Number Required
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="input-group">
-                                    <label>Guest Email *</label>
-                                    <input type="email" formControlName="guestEmail" placeholder="email@example.com">
-                                </div>
-                                <div class="input-group">
-                                    <label>Guest Mobile *</label>
-                                    <input type="text" formControlName="guestMobile" placeholder="01XXXXXXXXX">
-                                </div>
-                            </div>
-                            <p class="text-[10px] text-muted italic mb-4">You are registering as a non-member. Please provide accurate details for entry.</p>
+                            <p class="text-[10px] text-muted italic mb-4">Registering as a non-member requires valid contact info for verification.</p>
                             }
 
                             @if (selectedEvent()?.requiresPayment) {
+                                <div *ngIf="!(selectedEvent()?.registrationFee)" class="input-group bg-accent/5 p-4 rounded-xl border border-accent/10 mb-4">
+                                    <label class="text-accent underline">Contribution Amount (Minimum Support) *</label>
+                                    <input type="number" formControlName="contributionAmount" placeholder="Enter amount to contribute" class="text-xl font-black text-accent">
+                                    <div *ngIf="regForm.get('contributionAmount')?.invalid && regForm.get('contributionAmount')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">
+                                        Amount Must Be Defined
+                                    </div>
+                                </div>
+
                                 <!-- Payment Method Selector -->
                                 <app-payment-method-selector
                                     (methodSelected)="onPaymentMethodSelected($event)">
@@ -116,9 +210,13 @@
                                 <!-- Transaction Reference (conditionally shown) -->
                                 @if (selectedPaymentMethod()?.requiresReference) {
                                 <div class="input-group">
-                                    <label>Financial Reference (TrxID / Bank Slip No.) *</label>
+                                    <label>Reference (TrxID / Bank Slip No.) *</label>
                                     <input type="text" formControlName="paymentReference" class="font-mono text-accent"
-                                        placeholder="e.g. BK729XJS01">
+                                        placeholder="e.g. BK729XJS01"
+                                        [class.border-red-500]="regForm.get('paymentReference')?.invalid && regForm.get('paymentReference')?.touched">
+                                    <div *ngIf="regForm.get('paymentReference')?.invalid && regForm.get('paymentReference')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1 tracking-widest">
+                                        Payment Reference Required
+                                    </div>
                                 </div>
                                 }
 
@@ -149,7 +247,7 @@
                             <div class="flex gap-4 pt-2">
                                 <button type="button" (click)="closeModal()"
                                     class="btn btn-secondary flex-1 h-12">Cancel</button>
-                                <button type="submit" [disabled]="regForm.invalid || isSubmitting()"
+                                <button type="submit" [disabled]="isSubmitting()"
                                     class="btn btn-accent flex-1 h-12 shadow-gold font-black">
                                     {{ isSubmitting() ? 'Submitting...' : 'Confirm My Spot' }}
                                 </button>

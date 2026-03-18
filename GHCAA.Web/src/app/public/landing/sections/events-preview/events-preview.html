@@ -1,30 +1,53 @@
 <section id="events" class="events-preview-section">
     <div class="container">
         <div class="section-header">
-            <h2>Upcoming Events</h2>
-            <p>Join the movement - Participate in our upcoming gatherings.</p>
+            <h2>Upcoming Gatherings</h2>
+            <p>Don't miss out - connect with fellow Haragangians at our upcoming events.</p>
             <div class="underline"></div>
         </div>
 
-        <div class="events-preview-grid">
+        <div class="events-list-container">
             @for (ev of events(); track ev.id) {
             <div class="event-mini-card glass-card">
+                <!-- Column 1: Photo -->
+                <div class="event-mini-thumb">
+                    @if (ev.imageUrl) {
+                        <img [src]="'/' + ev.imageUrl" alt="Event Image">
+                    } @else {
+                        <div class="thumb-placeholder">
+                            <span>📅</span>
+                        </div>
+                    }
+                </div>
+
+                <!-- Column 2: Date -->
                 <div class="event-mini-date">
                     <span class="day">{{ ev.date | date:'dd' }}</span>
                     <span class="month">{{ ev.date | date:'MMM' }}</span>
                 </div>
-                <div class="event-mini-thumb" *ngIf="ev.imageUrl">
-                    <img [src]="'/' + ev.imageUrl" alt="Logo">
-                </div>
+
+                <!-- Column 3: Info -->
                 <div class="event-mini-info">
                     <h4>{{ ev.title }}</h4>
-                    <p><span class="icon">📍</span> {{ ev.location }}</p>
+                    <div class="info-meta">
+                        <span class="location"><span class="icon">📍</span> {{ ev.location }}</span>
+                        <span class="participants" *ngIf="ev.participantCount > 0">
+                            <span class="icon">👥</span> {{ ev.participantCount }} Joined
+                        </span>
+                        <span class="participants" *ngIf="ev.participantCount === 0">
+                            <span class="icon">👥</span> Be the first to join
+                        </span>
+                    </div>
                 </div>
-                @if (isRegistrationClosed(ev.registrationDeadline)) {
-                    <button class="btn btn-secondary btn-sm" disabled>Registration Closed</button>
-                } @else {
-                    <a routerLink="/events" class="btn btn-accent btn-sm">Register</a>
-                }
+
+                <!-- Column 4: Action -->
+                <div class="event-mini-action">
+                    @if (isRegistrationClosed(ev.registrationDeadline)) {
+                        <button class="btn btn-secondary btn-sm" disabled>Closed</button>
+                    } @else {
+                        <a [routerLink]="['/events', ev.id]" class="btn btn-accent btn-sm px-6">Register Now</a>
+                    }
+                </div>
             </div>
             } @empty {
             <div class="empty-placeholder">
@@ -33,9 +56,9 @@
             </div>
             }
         </div>
+
         <div class="section-footer text-center mt-12">
-            <a routerLink="/events" class="btn btn-accent px-12 py-3 rounded-full font-bold shadow-gold">View All
-                Events</a>
+            <a routerLink="/events" class="btn btn-accent px-12 py-3 rounded-full font-bold shadow-gold">Explore All Events</a>
         </div>
     </div>
 </section>

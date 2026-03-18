@@ -28,6 +28,14 @@ namespace GHCAA.API.Controllers
             return Ok(events);
         }
 
+        [HttpGet("{id}/participants")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPublicParticipants(int id, CancellationToken cancellationToken)
+        {
+            var participants = await _eventService.GetPublicParticipantsAsync(id, cancellationToken);
+            return Ok(participants);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEventById(int id, CancellationToken cancellationToken)
         {
@@ -49,7 +57,10 @@ namespace GHCAA.API.Controllers
                 }
             }
 
-            if (!memberId.HasValue && !dto.IsNonMember)
+            // If unauthenticated, check if non-member registration is requested
+            bool isGuestFullfilled = dto.IsNonMember || (!string.IsNullOrEmpty(dto.GuestEmail) && !string.IsNullOrEmpty(dto.GuestName));
+            
+            if (!memberId.HasValue && !isGuestFullfilled)
             {
                 return Unauthorized("A member account is required for this registration.");
             }
@@ -193,6 +204,14 @@ namespace GHCAA.API.Controllers
 
             var success = await _eventService.ApproveRegistrationAsync(dto.RegistrationId, adminUserId, dto.Approve, cancellationToken);
             return success ? Ok() : NotFound();
+        }
+
+        [HttpPost("admin/registrations/{id}/send-invitation")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> SendInvitation(int id, CancellationToken cancellationToken)
+        {
+            var success = await _eventService.SendInvitationEmailAsync(id, cancellationToken);
+            return success ? Ok() : BadRequest("Failed to send invitation or registration not approved.");
         }
     }
 }

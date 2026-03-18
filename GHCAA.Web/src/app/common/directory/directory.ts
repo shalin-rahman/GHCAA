@@ -35,6 +35,12 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     sectors = PROFESSIONAL_SECTORS;
     selectedMember = signal<any | null>(null);
 
+    getMajorDisplay(degree: string | undefined, group: string | undefined, subject: string | undefined): string {
+        if (!degree) return '';
+        const major = degree === 'HSC' ? (group || 'None') : (subject || 'None');
+        return major && major !== 'None' ? `in ${major}` : '';
+    }
+
     private currentPage = 1;
     private readonly PAGE_SIZE = 20;
     private searchDebounce: any;
