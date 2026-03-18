@@ -91,6 +91,10 @@ namespace GHCAA.Infrastructure.Services
                 Status = Enums.MembershipStatus.Applied,
                 AppliedDate = DateTime.UtcNow,
                 EmailVerified = false,
+                IsMobilePublic = dto.IsMobilePublic,
+                IsEmailPublic = dto.IsEmailPublic,
+                IsAddressPublic = dto.IsAddressPublic,
+                IsNIDPublic = dto.IsNIDPublic,
                 HasAcceptedTerms = dto.HasAcceptedTerms
             };
 
@@ -228,42 +232,58 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<ApproveMemberResultDto> ApproveMemberAsync(int memberId, int approvedByAdminId, CancellationToken cancellationToken = default)
         {
-            // Find member
-            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
-            if (member == null)
+            Member? member;
+            string membershipNumber;
+
+            // Use a transaction to prevent race conditions during membership Serial generation
+            using (var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken))
             {
-                _logger.LogWarning("Approval failed: Member {MemberId} not found", memberId);
-                throw new KeyNotFoundException($"Member with ID {memberId} not found");
+                try
+                {
+                    // Find member
+                    member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+                    if (member == null)
+                    {
+                        _logger.LogWarning("Approval failed: Member {MemberId} not found", memberId);
+                        throw new KeyNotFoundException($"Member with ID {memberId} not found");
+                    }
+
+                    // Validate status
+                    if (member.Status != Enums.MembershipStatus.Applied)
+                    {
+                        _logger.LogWarning("Approval failed: Member {MemberId} has status {Status}, expected Applied", memberId, member.Status);
+                        throw new InvalidOperationException($"Member must have 'Applied' status to be approved. Current status: {member.Status}");
+                    }
+
+                    // Generate membership number: GHC-{PassingYear}-{Serial}
+                    var passingYear = member.GHCLastCertificatePassingYear;
+                    var existingMembersCount = await _db.Members
+                        .Where(m => m.GHCLastCertificatePassingYear == passingYear && m.MembershipNumber != null)
+                        .CountAsync(cancellationToken);
+                    
+                    var serial = (existingMembersCount + 1).ToString("D4"); // 4-digit zero-padded
+                    membershipNumber = $"GHC-{passingYear}-{serial}";
+
+                    // Update member
+                    member.Status = Enums.MembershipStatus.Active;
+                    member.MembershipNumber = membershipNumber;
+                    member.ApprovedDate = DateTime.UtcNow;
+                    member.ApprovedBy = approvedByAdminId;
+
+                    await _db.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+
+                    await _activityService.LogActivityAsync(memberId, "Approved", $"Member approved by Admin {approvedByAdminId}. Membership Number: {membershipNumber}", approvedByAdminId, cancellationToken: cancellationToken);
+
+                    _logger.LogInformation("Member {MemberId} approved by Admin {AdminId}. Membership Number: {MembershipNumber}", 
+                        memberId, approvedByAdminId, membershipNumber);
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
             }
-
-            // Validate status
-            if (member.Status != Enums.MembershipStatus.Applied)
-            {
-                _logger.LogWarning("Approval failed: Member {MemberId} has status {Status}, expected Applied", memberId, member.Status);
-                throw new InvalidOperationException($"Member must have 'Applied' status to be approved. Current status: {member.Status}");
-            }
-
-            // Generate membership number: GHC-{PassingYear}-{Serial}
-            var passingYear = member.GHCLastCertificatePassingYear;
-            var existingMembersCount = await _db.Members
-                .Where(m => m.GHCLastCertificatePassingYear == passingYear && m.MembershipNumber != null)
-                .CountAsync(cancellationToken);
-            
-            var serial = (existingMembersCount + 1).ToString("D4"); // 4-digit zero-padded
-            var membershipNumber = $"GHC-{passingYear}-{serial}";
-
-            // Update member
-            member.Status = Enums.MembershipStatus.Active;
-            member.MembershipNumber = membershipNumber;
-            member.ApprovedDate = DateTime.UtcNow;
-            member.ApprovedBy = approvedByAdminId;
-
-            await _db.SaveChangesAsync(cancellationToken);
-
-            await _activityService.LogActivityAsync(memberId, "Approved", $"Member approved by Admin {approvedByAdminId}. Membership Number: {membershipNumber}", approvedByAdminId, cancellationToken: cancellationToken);
-
-            _logger.LogInformation("Member {MemberId} approved by Admin {AdminId}. Membership Number: {MembershipNumber}", 
-                memberId, approvedByAdminId, membershipNumber);
 
             // Create user account using NID (without spaces) as both username and password
             var cleanNid = member.NID.Replace(" ", "");
@@ -314,7 +334,7 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
-        public async Task<MemberProfileDto?> GetProfileAsync(int memberId, CancellationToken cancellationToken = default)
+        public async Task<MemberProfileDto?> GetProfileAsync(int memberId, bool isPrivileged = false, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members
                 .Include(m => m.ECMembers)
@@ -353,7 +373,8 @@ namespace GHCAA.Infrastructure.Services
                 MotherName = member.MotherName,
                 DateOfBirth = member.DateOfBirth,
                 Gender = member.Gender,
-                NID = member.NID,
+                NID = (isPrivileged || member.IsNIDPublic) ? member.NID : MaskPii(member.NID, 3, 2),
+                IsNIDPublic = member.IsNIDPublic,
                 EmergencyContactName = member.EmergencyContactName,
                 EmergencyContactRelation = member.EmergencyContactRelation,
                 EmergencyContactPhone = member.EmergencyContactPhone,
@@ -439,12 +460,21 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(dto.EmergencyContactRelation)) member.EmergencyContactRelation = dto.EmergencyContactRelation;
             if (!string.IsNullOrWhiteSpace(dto.EmergencyContactPhone)) member.EmergencyContactPhone = dto.EmergencyContactPhone;
             
-            // Photo Path
-            if (!string.IsNullOrWhiteSpace(dto.PhotoPath)) member.PhotoPath = dto.PhotoPath;
+            // Photo Path: Delete old file if path changes
+            if (!string.IsNullOrWhiteSpace(dto.PhotoPath) && member.PhotoPath != dto.PhotoPath)
+            {
+                if (!string.IsNullOrEmpty(member.PhotoPath))
+                {
+                    try { await _storage.DeleteFileAsync(member.PhotoPath, cancellationToken); }
+                    catch (Exception ex) { _logger.LogWarning(ex, "Failed to delete old photo {Path}", member.PhotoPath); }
+                }
+                member.PhotoPath = dto.PhotoPath;
+            }
 
             member.IsMobilePublic = dto.IsMobilePublic;
             member.IsEmailPublic = dto.IsEmailPublic;
             member.IsAddressPublic = dto.IsAddressPublic;
+            member.IsNIDPublic = dto.IsNIDPublic;
 
             // Handle Academic History
             if (dto.AcademicHistory != null && dto.AcademicHistory.Any())
@@ -605,7 +635,7 @@ namespace GHCAA.Infrastructure.Services
             };
         }
 
-        public async Task<object> GetAllMembersAsync(int page = 1, int pageSize = 10, string searchQuery = "", string statusFilter = "all", bool includeArchived = false, CancellationToken cancellationToken = default)
+        public async Task<object> GetAllMembersAsync(int page = 1, int pageSize = 10, string searchQuery = "", string statusFilter = "all", bool includeArchived = false, bool isPrivileged = false, CancellationToken cancellationToken = default)
         {
             IQueryable<Member> query = _db.Members
                 .Include(m => m.ECMembers)
@@ -669,46 +699,33 @@ namespace GHCAA.Infrastructure.Services
 
             var members = await membersQuery.ToListAsync(cancellationToken);
             var memberDtos = members.Select(member => {
-                var dto = new MemberProfileDto
+                var dto = new MemberSummaryDto
                 {
                     Id = member.Id,
                     FullName = member.FullName,
-                    Email = member.Email,
-                    MobileNo = member.MobileNo,
-                    MembershipNumber = member.MembershipNumber,
                     Status = member.Status,
-                    GHCLastCertificatePassingYear = member.GHCLastCertificatePassingYear,
-                    GHCLastCertificateGroup = member.GHCLastCertificateGroup,
-                    GHCLastCertificateSubject = member.GHCLastCertificateSubject,
-                    GHCLastCertificate = member.GHCLastCertificate,
-                    HighestCertificate = member.HighestCertificate,
-                    HighestCertificateGroup = member.HighestCertificateGroup,
-                    HighestCertificateSubject = member.HighestCertificateSubject,
-                    HighestCertificatePassingYear = member.HighestCertificatePassingYear,
+                    AppliedDate = member.AppliedDate,
+                    MembershipNumber = member.MembershipNumber,
+                    PhotoPath = member.PhotoPath,
+                    PassingYear = member.GHCLastCertificatePassingYear,
+                    GhcLastCertificatePassingYear = member.GHCLastCertificatePassingYear,
+                    GhcLastCertificate = member.GHCLastCertificate,
+                    GhcLastCertificateGroup = member.GHCLastCertificateGroup,
+                    GhcLastCertificateSubject = member.GHCLastCertificateSubject,
                     ProfessionalSector = member.ProfessionalSector,
                     Designation = member.Designation,
-                    PhotoPath = member.PhotoPath,
-                    PresentAddress = member.PresentAddress,
-                    PermanentAddress = member.PermanentAddress,
                     BloodGroup = member.BloodGroup,
                     MembershipType = member.MembershipType,
                     Category = member.Category,
-                    FatherName = member.FatherName,
-                    MotherName = member.MotherName,
-                    DateOfBirth = DateTime.SpecifyKind(member.DateOfBirth, DateTimeKind.Utc),
-                    Gender = member.Gender,
-                    NID = member.NID,
-                    EmergencyContactName = member.EmergencyContactName,
-                    EmergencyContactRelation = member.EmergencyContactRelation,
-                    EmergencyContactPhone = member.EmergencyContactPhone,
-                    HSCAdmissionYear = member.HSCAdmissionYear,
-                    GHCAdmissionYear = member.GHCAdmissionYear,
-                    CertificatePath = member.CertificatePath,
-                    PaymentProofPath = member.PaymentProofPath,
-                    IsMobilePublic = member.IsMobilePublic,
                     IsEmailPublic = member.IsEmailPublic,
+                    IsMobilePublic = member.IsMobilePublic,
                     IsAddressPublic = member.IsAddressPublic,
-                    HasAcceptedTerms = member.HasAcceptedTerms
+                    IsNIDPublic = member.IsNIDPublic,
+                    
+                    // Mask PII if not privileged (SuperAdmin or self) AND not public
+                    Email = (isPrivileged || member.IsEmailPublic) ? member.Email : MaskPii(member.Email, 3, 3),
+                    MobileNo = (isPrivileged || member.IsMobilePublic) ? member.MobileNo : MaskPii(member.MobileNo, 4, 3),
+                    NID = (isPrivileged || member.IsNIDPublic) ? member.NID : MaskPii(member.NID, 3, 2)
                 };
 
                 if (member.ECMembers != null && member.ECMembers.Any())
@@ -725,30 +742,6 @@ namespace GHCAA.Infrastructure.Services
                         IsCurrent = em.ECPeriod?.IsActive ?? false
                     }).OrderByDescending(h => h.StartDate).ToList();
                 }
-
-                dto.AcademicHistory = member.AcademicHistory?.Select(a => new AcademicRecordDto
-                {
-                    Id = a.Id,
-                    InstitutionName = a.InstitutionName,
-                    Degree = a.Degree,
-                    Subject = a.Subject,
-                    AdmissionYear = a.AdmissionYear,
-                    PassingYear = a.PassingYear,
-                    IsGHC = a.IsGHC,
-                    Result = a.Result
-                }).OrderByDescending(a => a.PassingYear).ToList() ?? new();
-
-                dto.ProfessionalHistory = member.ProfessionalHistory?.Select(p => new ProfessionalRecordDto
-                {
-                    Id = p.Id,
-                    OrganizationName = p.OrganizationName,
-                    Designation = p.Designation,
-                    Sector = p.Sector,
-                    Location = p.Location,
-                    StartDate = DateTime.SpecifyKind(p.StartDate, DateTimeKind.Utc),
-                    EndDate = p.EndDate.HasValue ? DateTime.SpecifyKind(p.EndDate.Value, DateTimeKind.Utc) : null,
-                    IsCurrent = p.IsCurrent
-                }).OrderByDescending(p => p.StartDate).ToList() ?? new();
 
                 return dto;
             });
@@ -911,6 +904,13 @@ namespace GHCAA.Infrastructure.Services
             var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) throw new KeyNotFoundException($"Member {memberId} not found.");
 
+            // Delete old file if exists
+            if (!string.IsNullOrEmpty(member.PhotoPath))
+            {
+                try { await _storage.DeleteFileAsync(member.PhotoPath, cancellationToken); }
+                catch (Exception ex) { _logger.LogWarning(ex, "Failed to delete old photo {Path}", member.PhotoPath); }
+            }
+
             var path = await _storage.SaveFileAsync(photo.Content, photo.FileName, memberId, Enums.FileUploadType.Photo, cancellationToken);
             var fu = new FileUpload { MemberId = memberId, UploadType = Enums.FileUploadType.Photo, FileName = photo.FileName, FilePath = path, SizeBytes = photo.Length };
             await _fileRepo.AddAsync(fu, cancellationToken);
@@ -981,6 +981,17 @@ namespace GHCAA.Infrastructure.Services
             var eventsCount = await _db.AlumniEvents.CountAsync(e => e.IsActive || e.Date < DateTime.UtcNow, cancellationToken);
             
             return new { TotalMembers = count, Countries = 15, Batches = 68, EventsHosted = eventsCount };
+        }
+
+        private string? MaskPii(string? value, int visibleStart = 4, int visibleEnd = 2)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            if (value.Length <= (visibleStart + visibleEnd)) return new string('*', Math.Max(value.Length, 6));
+            
+            var start = value.Substring(0, visibleStart);
+            var end = value.Substring(value.Length - visibleEnd);
+            var middle = new string('*', value.Length - (visibleStart + visibleEnd));
+            return $"{start}{middle}{end}";
         }
     }
 }

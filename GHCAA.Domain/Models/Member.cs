@@ -59,6 +59,7 @@ namespace GHCAA.Domain.Models
         public bool IsMobilePublic { get; set; } = false;
         public bool IsEmailPublic { get; set; } = false;
         public bool IsAddressPublic { get; set; } = false;
+        public bool IsNIDPublic { get; set; } = false;
         public bool HasAcceptedTerms { get; set; } = false;
 
         public bool IsArchived { get; set; } = false;

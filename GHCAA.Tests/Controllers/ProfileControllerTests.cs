@@ -48,7 +48,7 @@ namespace GHCAA.Tests.Controllers
         public async Task GetProfile_ReturnsOk_WhenValidMember()
         {
             var profile = new MemberProfileDto { FullName = "Test Member" };
-            _memberServiceMock.Setup(x => x.GetProfileAsync(10, It.IsAny<CancellationToken>()))
+            _memberServiceMock.Setup(x => x.GetProfileAsync(10, true, It.IsAny<CancellationToken>()))
                               .ReturnsAsync(profile);
 
             var result = await _controller.GetProfile(CancellationToken.None);

@@ -54,6 +54,7 @@ namespace GHCAA.Application.DTOs
         public bool IsMobilePublic { get; set; }
         public bool IsEmailPublic { get; set; }
         public bool IsAddressPublic { get; set; }
+        public bool IsNIDPublic { get; set; }
         public bool HasAcceptedTerms { get; set; }
         
         public List<ECHistoryDto> ECHistory { get; set; } = new();
@@ -103,6 +104,8 @@ namespace GHCAA.Application.DTOs
         public string FullName { get; set; } = null!;
         public string? MembershipNumber { get; set; }
         public string? PhotoPath { get; set; }
+        public MembershipStatus Status { get; set; }
+        public DateTime AppliedDate { get; set; }
         public int PassingYear { get; set; }
         public int GhcLastCertificatePassingYear { get; set; }
         public string? GhcLastCertificate { get; set; }
@@ -115,6 +118,9 @@ namespace GHCAA.Application.DTOs
         public bool IsEmailPublic { get; set; }
         public string? MobileNo { get; set; }
         public bool IsMobilePublic { get; set; }
+        public bool IsAddressPublic { get; set; }
+        public string? NID { get; set; }
+        public bool IsNIDPublic { get; set; }
         public MembershipType MembershipType { get; set; }
         public MemberCategory Category { get; set; }
         public List<ECHistoryDto> ECHistory { get; set; } = new();

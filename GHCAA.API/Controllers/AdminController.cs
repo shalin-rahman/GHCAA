@@ -42,14 +42,16 @@ namespace GHCAA.API.Controllers
                 return Forbid();
             }
 
-            var result = await _memberService.GetAllMembersAsync(page, pageSize, searchQuery, statusFilter, includeArchived, cancellationToken);
+            var isPrivileged = User.IsInRole("SuperAdmin");
+            var result = await _memberService.GetAllMembersAsync(page, pageSize, searchQuery, statusFilter, includeArchived, isPrivileged, cancellationToken);
             return Ok(result);
         }
 
         [HttpGet("members/{id}")]
         public async Task<IActionResult> GetMemberById(int id, CancellationToken cancellationToken)
         {
-            var profile = await _memberService.GetProfileAsync(id, cancellationToken);
+            var isPrivileged = User.IsInRole("SuperAdmin");
+            var profile = await _memberService.GetProfileAsync(id, isPrivileged: true, cancellationToken);
             if (profile == null) return NotFound();
             return Ok(profile);
         }

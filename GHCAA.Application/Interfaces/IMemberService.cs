@@ -11,7 +11,7 @@ namespace GHCAA.Application.Interfaces
         Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default);
         Task<bool> VerifyEmailAsync(string email, string code, CancellationToken cancellationToken = default);
         Task<ApproveMemberResultDto> ApproveMemberAsync(int memberId, int approvedByAdminId, CancellationToken cancellationToken = default);
-        Task<MemberProfileDto?> GetProfileAsync(int memberId, CancellationToken cancellationToken = default);
+        Task<MemberProfileDto?> GetProfileAsync(int memberId, bool isPrivileged = false, CancellationToken cancellationToken = default);
         Task<bool> UpdateProfileAsync(int memberId, UpdateProfileDto dto, CancellationToken cancellationToken = default);
         Task<object> GetDashboardStatsAsync(CancellationToken cancellationToken = default);
         Task<MemberRegistrationResultDto> GetStatusAsync(int id, CancellationToken cancellationToken = default);
@@ -20,7 +20,7 @@ namespace GHCAA.Application.Interfaces
         Task<bool> ArchiveMemberAsync(int memberId, CancellationToken cancellationToken = default);
         Task<bool> RestoreMemberAsync(int memberId, CancellationToken cancellationToken = default);
         Task<bool> ReactivateMemberAsync(int memberId, CancellationToken cancellationToken = default);
-        Task<object> GetAllMembersAsync(int page = 1, int pageSize = 10, string searchQuery = "", string statusFilter = "all", bool includeArchived = false, CancellationToken cancellationToken = default);
+        Task<object> GetAllMembersAsync(int page = 1, int pageSize = 10, string searchQuery = "", string statusFilter = "all", bool includeArchived = false, bool isSuperAdmin = false, CancellationToken cancellationToken = default);
         Task<bool> AdminUpdateMemberAsync(int id, AdminMemberUpdateDto dto, CancellationToken cancellationToken = default);
         Task<bool> RejectMemberAsync(int id, int adminId, string reason, CancellationToken cancellationToken = default);
         Task<bool> SendAdminPasswordResetLinkAsync(int memberId, CancellationToken cancellationToken = default);

@@ -31,12 +31,15 @@
                     <h4>{{ ev.title }}</h4>
                     <div class="info-meta">
                         <span class="location"><span class="icon">📍</span> {{ ev.location }}</span>
-                        <span class="participants" *ngIf="ev.participantCount > 0">
-                            <span class="icon">👥</span> {{ ev.participantCount }} Joined
-                        </span>
-                        <span class="participants" *ngIf="ev.participantCount === 0">
-                            <span class="icon">👥</span> Be the first to join
-                        </span>
+                        @if ((ev.participantCount ?? 0) > 0) {
+                            <span class="participants">
+                                <span class="icon">👥</span> {{ ev.participantCount }} Joined
+                            </span>
+                        } @else {
+                            <span class="participants">
+                                <span class="icon">👥</span> Be the first to join
+                            </span>
+                        }
                     </div>
                 </div>
 

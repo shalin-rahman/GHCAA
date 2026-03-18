@@ -29,7 +29,7 @@ namespace GHCAA.API.Controllers
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
 
-            var profile = await _memberService.GetProfileAsync(memberId, cancellationToken);
+            var profile = await _memberService.GetProfileAsync(memberId, isPrivileged: true, cancellationToken);
             if (profile == null) return NotFound();
 
             return Ok(profile);

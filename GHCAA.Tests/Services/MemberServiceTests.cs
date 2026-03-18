@@ -448,7 +448,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Test]
-    public async Task GetProfileAsync_WithValidMember_ShouldReturnProfile()
+    public async Task GetProfileAsync_WithPrivilegedAccess_ShouldReturnFullProfile()
     {
         // Arrange
         var member = new Member
@@ -472,12 +472,47 @@ public class MemberServiceTests : TestBase
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetProfileAsync(member.Id);
+        var result = await _service.GetProfileAsync(member.Id, isPrivileged: true);
 
         // Assert
         result.Should().NotBeNull();
         result!.FullName.Should().Be(member.FullName);
         result.Email.Should().Be(member.Email);
+        result.NID.Should().Be("1234567890");
+    }
+
+    [Test]
+    public async Task GetProfileAsync_WithNonPrivilegedAccess_ShouldReturnMaskedProfile()
+    {
+        // Arrange
+        var member = new Member
+        {
+            FullName = "Test Member",
+            Email = "test@example.com",
+            MobileNo = "01712345678",
+            FatherName = "Father",
+            MotherName = "Mother",
+            NID = "1234567890",
+            PresentAddress = "Present",
+            PermanentAddress = "Permanent",
+            EmergencyContactName = "EC",
+            EmergencyContactRelation = "Brother",
+            EmergencyContactPhone = "01812345678",
+            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
+            ProfessionalSector = "IT",
+            Designation = "Software Engineer",
+            IsNIDPublic = false
+        };
+        await _context.Members.AddAsync(member);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetProfileAsync(member.Id, isPrivileged: false);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.NID.Should().NotBe("1234567890");
+        result.NID.Should().Contain("*");
     }
 
     [Test]
