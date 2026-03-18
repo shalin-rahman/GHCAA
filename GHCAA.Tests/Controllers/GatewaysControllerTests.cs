@@ -12,6 +12,7 @@ using GHCAA.Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -41,13 +42,15 @@ namespace GHCAA.Tests.Controllers
             _financialServiceMock = new Mock<IFinancialService>();
             _memberServiceMock = new Mock<IMemberService>();
             _loggerMock = new Mock<ILogger<GatewaysController>>();
+            var configMock = new Mock<IConfiguration>();
 
             _controller = new GatewaysController(
                 _gatewayFactoryMock.Object,
                 _financialServiceMock.Object,
                 _memberServiceMock.Object,
                 _dbContext,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                configMock.Object);
 
             SetUserContext(10); // Member 10
             

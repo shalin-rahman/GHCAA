@@ -49,8 +49,8 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetActiveEvents_ReturnsOk()
         {
-            _eventServiceMock.Setup(x => x.GetActiveEventsAsync(It.IsAny<CancellationToken>()))
-                             .ReturnsAsync(new List<AlumniEvent>());
+             _eventServiceMock.Setup(x => x.GetActiveEventsAsync(It.IsAny<CancellationToken>()))
+                              .ReturnsAsync(new List<EventDto>());
 
             var result = await _controller.GetActiveEvents(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
@@ -59,8 +59,8 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetEventById_ReturnsOk_IfFound()
         {
-            _eventServiceMock.Setup(x => x.GetEventByIdAsync(1, It.IsAny<CancellationToken>()))
-                             .ReturnsAsync(new AlumniEvent { Id = 1 });
+             _eventServiceMock.Setup(x => x.GetEventByIdAsync(1, It.IsAny<CancellationToken>()))
+                              .ReturnsAsync(new EventDto { Id = 1 });
 
             var result = await _controller.GetEventById(1, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
@@ -100,8 +100,8 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetAllEventsForAdmin_ReturnsOk()
         {
-            _eventServiceMock.Setup(x => x.GetAllEventsForAdminAsync(It.IsAny<CancellationToken>()))
-                             .ReturnsAsync(new List<AlumniEvent>());
+             _eventServiceMock.Setup(x => x.GetAllEventsForAdminAsync(It.IsAny<CancellationToken>()))
+                              .ReturnsAsync(new List<EventDto>());
 
             var result = await _controller.GetAllEventsForAdmin(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
