@@ -122,7 +122,7 @@ namespace GHCAA.Tests.Controllers
         public async Task SSLCommerzCallback_AutoApprovesRegistration_WhenValid()
         {
             var txnId = "TXN123";
-            var ev = new AlumniEvent { Title = "Event", Description = "Desc", Location = "Loc" };
+            var ev = new AlumniEvent { Title = "Event", Description = "Desc", Location = "Loc", RegistrationFee = 100 };
             _dbContext.AlumniEvents.Add(ev);
             await _dbContext.SaveChangesAsync();
             var eventId = ev.Id;
@@ -168,7 +168,7 @@ namespace GHCAA.Tests.Controllers
         public async Task Callback_ShouldAutoApproveRegistration_EvenWithComplexNotes()
         {
             var txnId = "TXN456";
-            var ev = new AlumniEvent { Title = "Event Complex", Description = "D", Location = "L" };
+            var ev = new AlumniEvent { Title = "Event Complex", Description = "D", Location = "L", RegistrationFee = 500 };
             _dbContext.AlumniEvents.Add(ev);
             await _dbContext.SaveChangesAsync();
             
