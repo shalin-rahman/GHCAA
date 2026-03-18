@@ -74,7 +74,7 @@ public class EventServiceTests : TestBase
         result.Should().BeTrue();
         var updated = await _context.EventRegistrations.FindAsync(reg.Id);
         updated!.Status.Should().Be(EventRegistrationStatus.Approved);
-        _communicationMock.Verify(c => c.SendIndividualEmailAsync(member.Id, "EVENT_REGISTRATION_CONFIRMATION", It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()), Times.Once);
+        _communicationMock.Verify(c => c.SendIndividualEmailAsync(member.Id, "EVENT_PARTICIPATION_APPROVED", It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]

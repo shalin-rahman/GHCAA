@@ -13,11 +13,15 @@ import { EventGallery, EventPhoto } from '../../../../core/models/business.model
 export class LandingGalleryPreview implements OnInit {
     private galleryService = inject(GalleryService);
     galleries = signal<EventGallery[]>([]);
+    isVisible = signal(true);
 
     ngOnInit() {
-        this.galleryService.getGalleries().subscribe({
+        this.galleryService.getGalleries(true).subscribe({
             next: (data) => this.galleries.set(data),
-            error: () => this.galleries.set([])
+            error: () => {
+                this.galleries.set([]);
+                this.isVisible.set(false);
+            }
         });
     }
 

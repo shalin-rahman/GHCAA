@@ -49,6 +49,13 @@ describe('JobService', () => {
         req.flush([mockJob]);
     });
 
+    it('should get jobs silently with special header', () => {
+        service.getJobs(undefined, true).subscribe();
+        const req = httpMock.expectOne(req => req.url === API_ENDPOINTS.JOBS);
+        expect(req.request.headers.get('X-Skip-Error-Notify')).toBe('true');
+        req.flush([]);
+    });
+
     it('should get job by id', () => {
         service.getJobById(1).subscribe(res => {
             expect(res.title).toBe('Software Engineer');

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { AlumniEvent, EventRegistration } from '../models/business.models';
@@ -12,8 +12,9 @@ export class EventsService {
     private http = inject(HttpClient);
     private apiUrl = API_ENDPOINTS.EVENTS;
 
-    getEvents(): Observable<AlumniEvent[]> {
-        return this.http.get<AlumniEvent[]>(this.apiUrl);
+    getEvents(silent: boolean = false): Observable<AlumniEvent[]> {
+        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
+        return this.http.get<AlumniEvent[]>(this.apiUrl, { headers });
     }
 
     getEventById(id: number): Observable<AlumniEvent> {

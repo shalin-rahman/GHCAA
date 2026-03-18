@@ -21,6 +21,7 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
     return next(authReq).pipe(
         catchError((error: HttpErrorResponse) => {
             let errorMessage = 'An unexpected error occurred';
+            const skipNotify = req.headers.has('X-Skip-Error-Notify');
 
             if (error.error instanceof ErrorEvent) {
                 // Client-side error
@@ -29,7 +30,6 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
                 // Server-side error
                 switch (error.status) {
                     case 401:
-                        // Only auto-logout if this is not the login request itself
                         if (!req.url.includes('/api/auth/login')) {
                             errorMessage = 'Session expired. Please login again.';
                             authService.logout();
@@ -38,7 +38,7 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
                         }
                         break;
                     case 403:
-                        errorMessage = error.error?.message || 'You do not have permission to view or perform this action.';
+                        errorMessage = error.error?.message || 'You do not have permission.';
                         break;
                     case 404:
                         errorMessage = 'The requested resource was not found.';
@@ -51,7 +51,11 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
                 }
             }
 
-            notify.error(errorMessage);
+            if (!skipNotify) {
+                notify.error(errorMessage);
+            } else {
+                console.error(`Status: ${error.status} | URL: ${req.url} | Message: ${errorMessage}`, error);
+            }
             return throwError(() => error);
         })
     );

@@ -46,6 +46,13 @@ describe('NewsService', () => {
         req.flush([mockPost]);
     });
 
+    it('should get news silently with special header', () => {
+        service.getNews(undefined, true).subscribe();
+        const req = httpMock.expectOne(API_ENDPOINTS.NEWS);
+        expect(req.request.headers.get('X-Skip-Error-Notify')).toBe('true');
+        req.flush([]);
+    });
+
     it('should get news by id', () => {
         service.getNewsById(1).subscribe(res => {
             expect(res.title).toBe('Tech Update');

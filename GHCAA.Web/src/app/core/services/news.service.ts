@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { NewsPost, CreateNewsDto, UpdateNewsDto } from '../models/business.models';
@@ -12,10 +12,11 @@ export class NewsService {
     private http = inject(HttpClient);
     private apiUrl = API_ENDPOINTS.NEWS;
 
-    getNews(category?: string): Observable<NewsPost[]> {
+    getNews(category?: string, silent: boolean = false): Observable<NewsPost[]> {
         let url = this.apiUrl;
         if (category) url += `?category=${category}`;
-        return this.http.get<NewsPost[]>(url);
+        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
+        return this.http.get<NewsPost[]>(url, { headers });
     }
 
     getNewsById(id: number): Observable<NewsPost> {

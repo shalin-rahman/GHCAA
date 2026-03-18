@@ -14,9 +14,10 @@ import { AlumniEvent } from '../../../../core/models/business.models';
 export class LandingEventsPreview implements OnInit {
     private eventsService = inject(EventsService);
     events = signal<AlumniEvent[]>([]);
+    isVisible = signal(true);
 
     ngOnInit() {
-        this.eventsService.getEvents().subscribe({
+        this.eventsService.getEvents(true).subscribe({
             next: (data) => {
                 const now = new Date();
                 const active = data.filter(e => !e.registrationDeadline || new Date(e.registrationDeadline) >= now);
@@ -30,7 +31,10 @@ export class LandingEventsPreview implements OnInit {
                 
                 this.events.set(combined);
             },
-            error: () => this.events.set([])
+            error: () => {
+                this.events.set([]);
+                this.isVisible.set(false);
+            }
         });
     }
 

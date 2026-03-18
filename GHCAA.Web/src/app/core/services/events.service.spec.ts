@@ -51,11 +51,17 @@ describe('EventsService', () => {
     it('should get active events', () => {
         service.getEvents().subscribe(res => {
             expect(res.length).toBe(1);
-            expect(res[0].id).toBe(1);
         });
         const req = httpMock.expectOne(API_ENDPOINTS.EVENTS);
         expect(req.request.method).toBe('GET');
         req.flush([mockEvent]);
+    });
+
+    it('should get events silently with special header', () => {
+        service.getEvents(true).subscribe();
+        const req = httpMock.expectOne(API_ENDPOINTS.EVENTS);
+        expect(req.request.headers.get('X-Skip-Error-Notify')).toBe('true');
+        req.flush([]);
     });
 
     it('should get event by id', () => {

@@ -13,9 +13,10 @@ import { getECPositionName, getCurrentECPosition } from '../../../../core/consta
 export class LandingEcPreview implements OnInit {
     private networking = inject(NetworkingService);
     committee = signal<any[]>([]);
+    isVisible = signal(true);
 
     ngOnInit() {
-        this.networking.getCommittee().subscribe({
+        this.networking.getCommittee({}, true).subscribe({
             next: (data) => {
                 // Filter out any members that have 'None' position or no position at all
                 const validCommittee = (data || []).filter((m: any) => {
@@ -24,7 +25,10 @@ export class LandingEcPreview implements OnInit {
                 });
                 this.committee.set(validCommittee);
             },
-            error: () => this.committee.set([]) // Silently fail - no committee set up yet
+            error: () => {
+                this.committee.set([]);
+                this.isVisible.set(false);
+            }
         });
     }
 

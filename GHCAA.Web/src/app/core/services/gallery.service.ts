@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { EventGallery } from '../models/business.models';
@@ -12,8 +12,9 @@ export class GalleryService {
     private http = inject(HttpClient);
     private apiUrl = API_ENDPOINTS.GALLERY;
 
-    getGalleries(): Observable<EventGallery[]> {
-        return this.http.get<EventGallery[]>(this.apiUrl);
+    getGalleries(silent: boolean = false): Observable<EventGallery[]> {
+        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
+        return this.http.get<EventGallery[]>(this.apiUrl, { headers });
     }
 
     getAllGalleries(): Observable<EventGallery[]> {

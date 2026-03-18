@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { MemberProfile, MemberSearchFilter } from '../models/business.models';
@@ -41,8 +41,9 @@ export interface MemberSummary {
 export class NetworkingService {
     private http = inject(HttpClient);
 
-    getCommittee(params: any = {}): Observable<MemberSummary[]> {
-        return this.http.get<MemberSummary[]>(API_ENDPOINTS.NETWORKING.COMMITTEE, { params });
+    getCommittee(params: any = {}, silent: boolean = false): Observable<MemberSummary[]> {
+        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
+        return this.http.get<MemberSummary[]>(API_ENDPOINTS.NETWORKING.COMMITTEE, { params, headers });
     }
 
     getPeriods(): Observable<any[]> {

@@ -33,6 +33,13 @@ describe('NetworkingService', () => {
         req.flush([]);
     });
 
+    it('should get committee silently with special header', () => {
+        service.getCommittee({}, true).subscribe();
+        const req = httpMock.expectOne(req => req.url === API_ENDPOINTS.NETWORKING.COMMITTEE);
+        expect(req.request.headers.get('X-Skip-Error-Notify')).toBe('true');
+        req.flush([]);
+    });
+
     it('should get periods', () => {
         service.getPeriods().subscribe(res => {
             expect(res.length).toBe(0);

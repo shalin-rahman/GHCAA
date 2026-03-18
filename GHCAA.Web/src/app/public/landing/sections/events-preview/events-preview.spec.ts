@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LandingEventsPreview } from './events-preview';
 import { EventsService } from '../../../../core/services/events.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AlumniEvent } from '../../../../core/models/business.models';
 
@@ -52,5 +52,21 @@ describe('LandingEventsPreview Component', () => {
 
         expect(component.isRegistrationClosed(past)).toBe(true);
         expect(component.isRegistrationClosed(future)).toBe(false);
+    });
+
+    it('should hide section and set isVisible to false on error', () => {
+        // Setup mock to return error
+        eventsServiceMock.getEvents.mockReturnValue(throwError(() => new Error('Server error')));
+        
+        // Re-initialize to trigger ngOnInit
+        component.ngOnInit();
+        
+        expect(component.isVisible()).toBe(false);
+        expect(component.events()).toEqual([]);
+    });
+
+    it('should call getEvents with silent flag true', () => {
+        component.ngOnInit();
+        expect(eventsServiceMock.getEvents).toHaveBeenCalledWith(true);
     });
 });

@@ -24,6 +24,20 @@ describe('GalleryService', () => {
         expect(service).toBeTruthy();
     });
 
+    it('should get public galleries', () => {
+        service.getGalleries().subscribe(g => expect(g).toBeTruthy());
+        const req = httpMock.expectOne(API_ENDPOINTS.GALLERY);
+        expect(req.request.method).toBe('GET');
+        req.flush([]);
+    });
+
+    it('should get public galleries silently with special header', () => {
+        service.getGalleries(true).subscribe();
+        const req = httpMock.expectOne(API_ENDPOINTS.GALLERY);
+        expect(req.request.headers.get('X-Skip-Error-Notify')).toBe('true');
+        req.flush([]);
+    });
+
     it('should get all galleries for admin', () => {
         service.getAllGalleries().subscribe(g => expect(g).toBeTruthy());
         const req = httpMock.expectOne(`${API_ENDPOINTS.GALLERY}/all`);

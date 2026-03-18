@@ -44,6 +44,11 @@ namespace GHCAA.Tests.Controllers
             _loggerMock = new Mock<ILogger<GatewaysController>>();
             var configMock = new Mock<IConfiguration>();
 
+            var defaultGatewayMock = new Mock<IPaymentGatewayService>();
+            defaultGatewayMock.Setup(x => x.VerifyCallbackAsync(It.IsAny<IDictionary<string, string>>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+            _gatewayFactoryMock.Setup(x => x.GetGateway(It.IsAny<Enums.PaymentGateway>())).Returns(defaultGatewayMock.Object);
+
             _controller = new GatewaysController(
                 _gatewayFactoryMock.Object,
                 _financialServiceMock.Object,

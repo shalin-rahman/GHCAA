@@ -41,4 +41,11 @@ describe('LookupService', () => {
         expect(req.request.method).toBe('GET');
         req.flush({});
     });
+
+    it('should get stats silently with special header', () => {
+        service.getStats(true).subscribe();
+        const req = httpMock.expectOne(`${API_ENDPOINTS.LOOKUPS}/stats`);
+        expect(req.request.headers.get('X-Skip-Error-Notify')).toBe('true');
+        req.flush({});
+    });
 });

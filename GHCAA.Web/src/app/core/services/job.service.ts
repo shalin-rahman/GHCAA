@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { Job, CreateJobDto, UpdateJobDto } from '../models/business.models';
@@ -12,8 +12,9 @@ export class JobService {
     private http = inject(HttpClient);
     private apiUrl = API_ENDPOINTS.JOBS;
 
-    getJobs(params?: any): Observable<Job[]> {
-        return this.http.get<Job[]>(this.apiUrl, { params });
+    getJobs(params?: any, silent: boolean = false): Observable<Job[]> {
+        const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
+        return this.http.get<Job[]>(this.apiUrl, { params, headers });
     }
 
     getJobById(id: number): Observable<Job> {

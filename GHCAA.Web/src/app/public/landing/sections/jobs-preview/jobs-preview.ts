@@ -14,11 +14,15 @@ import { Job } from '../../../../core/models/business.models';
 export class LandingJobsPreview implements OnInit {
     private jobService = inject(JobService);
     jobs = signal<Job[]>([]);
+    isVisible = signal(true);
 
     ngOnInit() {
-        this.jobService.getJobs().subscribe({
+        this.jobService.getJobs(undefined, true).subscribe({
             next: (data) => this.jobs.set(data.slice(0, 2)),
-            error: () => this.jobs.set([])
+            error: () => {
+                this.jobs.set([]);
+                this.isVisible.set(false);
+            }
         });
     }
 }

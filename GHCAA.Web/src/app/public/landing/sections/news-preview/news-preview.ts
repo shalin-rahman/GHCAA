@@ -14,11 +14,15 @@ import { NewsPost } from '../../../../core/models/business.models';
 export class LandingNewsPreview implements OnInit {
     private newsService = inject(NewsService);
     news = signal<NewsPost[]>([]);
+    isVisible = signal(true);
 
     ngOnInit() {
-        this.newsService.getNews().subscribe({
+        this.newsService.getNews(undefined, true).subscribe({
             next: (data) => this.news.set(data.slice(0, 3)),
-            error: () => this.news.set([])
+            error: () => {
+                this.news.set([]);
+                this.isVisible.set(false);
+            }
         });
     }
 }
