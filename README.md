@@ -15,36 +15,67 @@ Welcome to the GHCAA Platform. This project is a comprehensive digital ecosystem
 
 ---
 
-## 📋 Functional Requirements (FR) Framework
-*This project follows a professional technical framework. Detailed field-level constraints and state logic are documented in the **[Formal SRS](file:///c:/Users/HabiburRahmanShalin/.gemini/antigravity/brain/bce7f8da-1836-4cec-9dcf-8854cca6d702/srs_document.md)**.*
+## 📋 Project Development Brief
 
-### 1. Identity & Profile Lifecycle
-- **Multi-Step Registration**: Structured data sections for Personal, Academic, and Professional info.
-- **Affiliation Logic**: Strict separation of HSC vs GHC Admission years to track students specifically joining GHC for Higher Ed.
-- **Workflow State**: **Applied** → **Active** (Post-Admin Approval with Auto-ID generation) → **Archived**.
-- **Login Auth**: Seamless transition where **Membership Number** becomes the primary **Login ID** post-approval.
+This project serves as a highly structured digital ecosystem. The following outlines the Core Modules (Functional Requirements) and System Constraints (Non-Functional Requirements) that dictate its architecture.
 
-### 2. Events & Networking
-- **Intelligent Activity Feed**: Real-time tracking of member engagement and profile updates.
-- **Targeted Directory**: Infinite-scroll search filtered by Batch, Profession, and Blood Group.
-- **Professional Job Hub**: Alumni-exclusive board for jobs and career mentorship.
-- **P2P Messaging**: Secure, SignalR-powered direct messaging with unread tracking.
+### Functional Requirements (FRs) by Module
 
-### 3. Financial & Admin Governance
-- **Dynamic Ledger**: Tracking Income/Expenses with categorized financial entries.
-- **Annual Dues Engine**: Automated notification and fee generation for active members.
-- **Communication Center**: Bulk Email/SMS engine targeting by Batch or Membership Type.
-- **Audit Logging**: Comprehensive trace of all administrative "Approve/Reject/Archive" actions.
+**A. Membership & Identity Management**
+- **Registration Wizard:** A 5-step form capturing Personal, Academic, and Professional data, separating college vs higher-degree admission years to verify institutional affiliation.
+- **Approval Workflow:** Users start as "Applied". Admins review documents. Upon approval, the system auto-generates a unique `MembershipNumber` (the Login ID). Includes **Member Verification "Blue Tick"** capabilities.
+- **Profile Control & Family Add-ons:** Granular privacy toggles to hide Phone/Email. System handles standard members with future support for Family/Spouse linkings.
+- **Digital ID:** Auto-generates a downloadable SVG/PDF ID card with a scannable QR code.
+
+**B. Events & Participation**
+- **Catalog & Registration:** A secure hub for event discovery. Members can pay and register.
+- **Waitlist & Caps:** Events enforce maximum capacities and handle waitlisted statuses automatically.
+- **Attendance Tracking:** Coordinators can scan a member's QR ID card at the venue to mark them as "Attended".
+
+**C. Financial & Admin Governance**
+- **Automated Payments:** Webhook-driven integration with local gateways (SSLCommerz, bKash). Successful callbacks auto-approve memberships or registrations.
+- **Ledger & Dues:** Immutable ledger of all income/expenses. Auto-generation and tracking of "Annual Membership Dues".
+- **Tax Receipts:** Auto-generation of PDF receipts for recognized donations.
+- **EC Management & Import:** SuperAdmin tools to manage Executive Committee terms and a bulk Excel importer for legacy member migration.
+
+**D. Networking, Social, & Support**
+- **Smart Directory:** Infinite-scroll member directory heavily governed by privacy toggles.
+- **Job & Mentorship Hub:** Job board with a dedicated workflow to request/offer career mentorship.
+- **Haraganga AI & Communications:** Gemini-powered chat agent for queries. Bulk email and **SMS Gateway** capabilities for administrators to message specific batches.
 
 ---
 
-## 🛡️ Non-Functional Requirements (NFR)
-Specifically tuned for performance and institutional integrity:
+## 🛡️ System Constraints & Non-Functional Requirements (NFRs)
 
-- **Security**: BCrypt password encryption, JWT stateless auth, and global NID/Email deduplication.
-- **Performance**: Server-side image optimization (350KB target quality) and quick-load directory queries.
-- **Privacy**: Granular field-level visibility controls (Masking Mobile/Address/NID).
-- **Resilience**: "Silent load" frontend interceptors to handle partial API failures gracefully.
+- **NFR 1: Zero "Ghost Data" (Soft Delete Architecture)**: The database context (EF Core) MUST use Global Query Filters to automatically hide `IsArchived` records from ALL standard queries. Never explicitly `DELETE` a user. Includes cascading archiver jobs.
+- **NFR 2: Strict Deduplication**: NID, Mobile Number, and Email must have unique database indexes. The API auto-sanitizes strings before validation.
+- **NFR 3: Security & Authorization**: Completely stateless JWT authentication. Passwords hashed with BCrypt. Granular Role-Based Access Control (Public, Member, Admin, SuperAdmin).
+- **NFR 4: Performance & Resiliency**: Server-side image optimization (< 350KB). Frontend "silent interceptors" gracefully handle partial API failures without crashing the UI.
+
+## 🚀 Development Roadmap & Identified Gaps
+
+The following features and integrations have been prioritized for the next phase of development:
+
+**1. Membership & Identity Lifecycle**
+- **Family/Spouse Add-ons**: Extend the `Member` model to support linking family members or associate spouse accounts.
+- **Member Verification "Blue Tick"**: Implement a visual distinction for highly verified members in the public directory.
+- **IsArchived Cascading**: Create a dedicated background worker for bulk-archiving inactive users and natively cascading the soft-delete property.
+- **Social Auth (OAuth2)**: Allow "Link with LinkedIn/Google" for streamlined login sessions after initial NID-based manual registration.
+
+**2. Events & Participation**
+- **Waitlist Management**: Explicitly handle "Waitlist" status for `AlumniEvent` registrations when capacity caps are reached.
+- **QR Attendance Tracking**: Add a scanner endpoint to mark an `EventRegistration` as "Attended" via the digital ID card's QR code.
+
+**3. Financial & Admin Governance**
+- **Automated Tax Receipts**: Auto-generate PDF receipts for recognized donations and integrate them into the `PaymentHistory`.
+
+**4. Networking & Engagement**
+- **Granular Privacy Strictness**: Tightly bind the `NetworkingController` Search endpoint to privacy toggles, ensuring DTOs never leak masked fields.
+- **Job Hub Mentorship Flow**: Introduce a structured "Mentorship Request" workflow extending the job posting capabilities.
+
+**5. Deployment & Security Integrations**
+- **SMS Gateway**: Implement an SMS provider (e.g., Twilio, SSLWireless/Banglalink) for OTP verification and time-sensitive notifications.
+- **Automatic Session Termination**: Real-time invalidation of all JWT tokens for a user if their status changes to "Terminated" or "Inactive".
 
 ---
 
@@ -135,14 +166,13 @@ graph LR
 
 ## 🏛️ Comprehensive Feature List (SRS/FR)
 
-The following provides a full, structured breakdown of system features, user roles, and functional dependencies.
+The following provides a full, structured breakdown of system features, user roles, and functional dependencies based on the complete SRS.
 
 ### 1. Membership & Identity Management
-
 #### 1.1 Automated Member Registration
 - **Business Description**: Allows alumni to apply for association membership through a guided, multi-step process.
 - **User Roles**: Public (Alumni).
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/register` (5-step wizard).
     - **API**: `POST /api/auth/register`, `GET /api/auth/status/:id`.
     - **Key Fields**: Full Name, NID (Cleaned), Mobile, Batch, Degree, Email (OTP Verified).
@@ -155,7 +185,7 @@ The following provides a full, structured breakdown of system features, user rol
 #### 1.2 Secure Authentication & Authorization
 - **Business Description**: Provides secure access to the portal based on identity and role.
 - **User Roles**: Public, Member, Admin, SuperAdmin.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/login`, `/verify-email`.
     - **API**: `POST /api/auth/login`, `POST /api/auth/verify-email`.
     - **Key Fields**: NID/Mobile/Email as Identifier, Password (BCrypt hashed), OTP Code.
@@ -167,7 +197,7 @@ The following provides a full, structured breakdown of system features, user rol
 #### 1.3 Personal Profile & Privacy Control
 - **Business Description**: Members can manage their personal, academic, and professional information with granular privacy toggles.
 - **User Roles**: Member.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/portal/profile`.
     - **API**: `GET /api/profile`, `PUT /api/profile/update`.
     - **Key Fields**: Privacy Toggles (Mask NID, Email, Mobile, Address).
@@ -178,7 +208,7 @@ The following provides a full, structured breakdown of system features, user rol
 #### 1.4 Digital ID Card Generation
 - **Business Description**: Automatically generates a secure, downloadable digital ID card for verified members.
 - **User Roles**: Approved Member.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/portal/id-card`.
     - **API**: `GET /api/idcard/generate`.
     - **Key Fields**: QR Code, Membership ID.
@@ -188,11 +218,10 @@ The following provides a full, structured breakdown of system features, user rol
 - **Dependencies**: ID Card Generation Service.
 
 ### 2. Events & Participation
-
 #### 2.1 Event Listings & Catalog
 - **Business Description**: A centralized hub for discovering upcoming and past alumni events.
 - **User Roles**: Public, Member.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/events`.
     - **API**: `GET /api/events`.
 - **Dependencies**: Events Service.
@@ -200,7 +229,7 @@ The following provides a full, structured breakdown of system features, user rol
 #### 2.2 Intelligent Event Registration
 - **Business Description**: Allows members and guests to register for events with integrated payment tracking.
 - **User Roles**: Member, Guest (if allowed).
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/events/:id`.
     - **API**: `POST /api/events/register`.
     - **Key Fields**: Payment Reference, Receipt Upload, Contribution Amount.
@@ -213,17 +242,16 @@ The following provides a full, structured breakdown of system features, user rol
 #### 2.3 Event Management (Admin)
 - **Business Description**: CRUD operations for events, including registration capping and deadline management.
 - **User Roles**: Admin, SuperAdmin.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/admin/events`.
     - **API**: `POST /api/events/create`, `PUT /api/events/update`.
 - **Dependencies**: Admin Controller.
 
 ### 3. Financial Management & Payments
-
 #### 3.1 Automated Payment Gateways
 - **Business Description**: Secure online payment integration for subscriptions and event fees.
 - **User Roles**: Member, Admin.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **API**: `POST /api/gateways/initiate`, `POST /api/gateways/callback`.
     - **Gateways**: SSLCommerz, bKash (Ready).
 - **Validations & Rules**:
@@ -234,7 +262,7 @@ The following provides a full, structured breakdown of system features, user rol
 #### 3.2 Financial Ledger & Audit
 - **Business Description**: Tracking all income and expenses of the association with categorized ledger entries.
 - **User Roles**: Admin (Finance), SuperAdmin.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/admin/ledger`.
     - **API**: `GET /api/financialledger`.
 - **Dependencies**: Financial Ledger Controller.
@@ -242,7 +270,7 @@ The following provides a full, structured breakdown of system features, user rol
 #### 3.3 Payment Configuration (Admin)
 - **Business Description**: Managing gateway keys, transaction limits, and automated service charges.
 - **User Roles**: SuperAdmin.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/admin/payments`.
     - **API**: `GET /api/finance/configs`, `POST /api/finance/configs`.
 - **Validations & Rules**:
@@ -250,11 +278,10 @@ The following provides a full, structured breakdown of system features, user rol
 - **Dependencies**: Payment Config Controller.
 
 ### 4. Networking & Social Features
-
 #### 4.1 Alumni Directory (Search & Networking)
 - **Business Description**: High-performance "infinite scroll" directory for finding alumni.
 - **User Roles**: Public (Limited), Member (Full).
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/directory`.
     - **API**: `GET /api/networking/members`.
     - **Key Fields**: Search Query, Batch Filter, Department Filter.
@@ -263,7 +290,7 @@ The following provides a full, structured breakdown of system features, user rol
 #### 4.2 Professional Job Hub
 - **Business Description**: Internal portal for sharing and applying for job opportunities within the alumni network.
 - **User Roles**: Member.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/portal/jobs`.
     - **API**: `GET /api/jobhub`.
 - **Dependencies**: Job Hub Service.
@@ -271,17 +298,16 @@ The following provides a full, structured breakdown of system features, user rol
 #### 4.3 Direct Peer Messaging
 - **Business Description**: Secure communication channel for members to network without exposing private contact data.
 - **User Roles**: Member.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/portal/messages`.
     - **API**: `POST /api/messaging/send`.
 - **Dependencies**: Real-time Messaging Hub.
 
 ### 5. Governance & Operations
-
 #### 5.1 Executive Committee (EC) Management
 - **Business Description**: Managing committee periods, roles, and historical records of governance.
 - **User Roles**: Admin, SuperAdmin.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/admin/members/ec`.
     - **API**: `POST /api/admingovernance/assign-role`, `POST /api/admingovernance/periods`.
 - **Validations & Rules**:
@@ -293,7 +319,7 @@ The following provides a full, structured breakdown of system features, user rol
 #### 5.2 Bulk Member Import
 - **Business Description**: Excel-to-Database bridging for migrating legacy records.
 - **User Roles**: SuperAdmin.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/admin/members` (Import Modal).
     - **API**: `POST /api/memberimport/upload`.
 - **Validations & Rules**:
@@ -302,11 +328,10 @@ The following provides a full, structured breakdown of system features, user rol
 - **Dependencies**: ClosedXML Service.
 
 ### 6. Intelligent Assistant (AI)
-
 #### 6.1 Haraganga AI Assistant
 - **Business Description**: A Gemini-powered AI helping members find information and alumni through natural language.
 - **User Roles**: Member.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/portal/assistant`.
     - **API**: `POST /api/assistant/ask`.
 - **Validations & Rules**:
@@ -316,17 +341,16 @@ The following provides a full, structured breakdown of system features, user rol
 #### 6.2 Intelligent Support Chat
 - **Business Description**: Real-time support for common queries and system navigation.
 - **User Roles**: Public, Member.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: Floating Chat Widget.
     - **API**: `POST /api/chat/message`.
 - **Dependencies**: Chat Service.
 
 ### 7. Global Content Management (CMS)
-
 #### 7.1 News & Press Releases
 - **Business Description**: Publishing and managing association news with image support.
 - **User Roles**: Public (Read), Admin (CRUD).
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/news`.
     - **API**: `POST /api/news`.
 - **Dependencies**: News Service.
@@ -334,7 +358,7 @@ The following provides a full, structured breakdown of system features, user rol
 #### 7.2 Media Gallery & Albums
 - **Business Description**: Visual records of association history categorized by events.
 - **User Roles**: Public (Read), Admin (CRUD).
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/gallery`.
     - **API**: `POST /api/gallery`.
 - **Dependencies**: Gallery Service, File Storage.
@@ -342,7 +366,7 @@ The following provides a full, structured breakdown of system features, user rol
 #### 7.3 Theme Management (Special Days)
 - **Business Description**: Dynamic UI transformation for special occasions (e.g., Independence Day).
 - **User Roles**: Admin.
-- **Inputs/Outputs**: 
+- **Inputs/Outputs**:
     - **Screen**: `/admin/themes`.
     - **API**: `POST /api/theme/activate`.
 - **Dependencies**: Theme Service.
