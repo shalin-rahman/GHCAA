@@ -12,7 +12,7 @@ namespace GHCAA.Tests.Services;
 [TestFixture]
 public class OtpServiceTests : TestBase
 {
-    private Mock<IEmailService> _mockEmail = null!;
+    private Mock<ICommunicationService> _mockCommunication = null!;
     private Mock<IConfiguration> _mockConfig = null!;
     private Mock<ILogger<OtpService>> _mockLogger = null!;
     private OtpService _service = null!;
@@ -20,11 +20,11 @@ public class OtpServiceTests : TestBase
     [SetUp]
     public void Setup()
     {
-        _mockEmail = new Mock<IEmailService>();
+        _mockCommunication = new Mock<ICommunicationService>();
         _mockConfig = new Mock<IConfiguration>();
         _mockLogger = new Mock<ILogger<OtpService>>();
         _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("10");
-        _service = new OtpService(_context, _mockEmail.Object, _mockConfig.Object, _mockLogger.Object);
+        _service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
     }
 
     [Test]
@@ -62,17 +62,15 @@ public class OtpServiceTests : TestBase
         var email = "otp3@example.com";
         await _service.GenerateAndSendOtpAsync(email);
 
-        _mockEmail.Verify(x => x.SendEmailAsync(
-            email, "Your GHC Alumni OTP",
-            It.Is<string>(body => body.Contains("verification code")),
-            It.IsAny<CancellationToken>()), Times.Once);
+        _mockCommunication.Verify(x => x.SendEmailByCodeAsync(
+            email, "OTP_EMAIL", It.IsAny<Dictionary<string, string>>(), null, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
     public async Task GenerateAndSendOtpAsync_WithCustomExpiryMinutes_ShouldUseCustomValue()
     {
         _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("5");
-        var service = new OtpService(_context, _mockEmail.Object, _mockConfig.Object, _mockLogger.Object);
+        var service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
         var email = "otp4@example.com";
         var before = DateTime.UtcNow;
         await service.GenerateAndSendOtpAsync(email);
@@ -87,7 +85,7 @@ public class OtpServiceTests : TestBase
     public async Task GenerateAndSendOtpAsync_WithInvalidConfigValue_ShouldUseDefaultExpiry()
     {
         _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("invalid");
-        var service = new OtpService(_context, _mockEmail.Object, _mockConfig.Object, _mockLogger.Object);
+        var service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
         var email = "otp5@example.com";
         var before = DateTime.UtcNow;
         await service.GenerateAndSendOtpAsync(email);

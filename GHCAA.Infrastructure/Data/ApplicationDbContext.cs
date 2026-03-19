@@ -83,6 +83,7 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<AcademicRecord> AcademicRecords { get; set; } = null!;
         public DbSet<ProfessionalRecord> ProfessionalRecords { get; set; } = null!;
         public DbSet<PaymentConfiguration> PaymentConfigurations { get; set; } = null!;
+        public DbSet<FamilyLinkRequest> FamilyLinkRequests { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -130,6 +131,19 @@ namespace GHCAA.Infrastructure.Data
                 .WithMany(m => m.PaymentHistories)
                 .HasForeignKey(p => p.MemberId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // FamilyLinkRequest relationships
+            modelBuilder.Entity<FamilyLinkRequest>()
+                .HasOne(f => f.Requester)
+                .WithMany(m => m.SentFamilyLinkRequests)
+                .HasForeignKey(f => f.RequesterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FamilyLinkRequest>()
+                .HasOne(f => f.TargetMember)
+                .WithMany(m => m.ReceivedFamilyLinkRequests)
+                .HasForeignKey(f => f.TargetMemberId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Member <-> User (one-to-one)
             modelBuilder.Entity<User>()
@@ -322,10 +336,6 @@ namespace GHCAA.Infrastructure.Data
             // Seed Membership Dues from JSON
             var dues = LoadSeed<MembershipDue>("membership_dues.json");
             if (dues.Any()) modelBuilder.Entity<MembershipDue>().HasData(dues);
-
-            // Seed Payment Histories from JSON
-            var payments = LoadSeed<PaymentHistory>("payment_histories.json");
-            if (payments.Any()) modelBuilder.Entity<PaymentHistory>().HasData(payments);
 
             // Seed Financial Records from JSON
             var financial = LoadSeed<FinancialRecord>("financial_records.json");

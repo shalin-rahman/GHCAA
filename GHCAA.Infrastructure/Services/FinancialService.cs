@@ -9,6 +9,10 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using QuestPDF.Previewer;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -342,6 +346,105 @@ namespace GHCAA.Infrastructure.Services
             _db.PaymentHistories.Remove(payment);
             await _db.SaveChangesAsync(cancellationToken);
             return true;
+        }
+
+        public async Task<byte[]> GenerateTaxReceiptAsync(int paymentId, CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories
+                .Include(p => p.Member)
+                .FirstOrDefaultAsync(p => p.Id == paymentId, cancellationToken);
+
+            if (payment == null) throw new KeyNotFoundException("Payment record not found.");
+
+            // Create PDF using QuestPDF
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(1, Unit.Inch);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(11));
+
+                    page.Header().Row(row =>
+                    {
+                        row.RelativeItem().Column(col =>
+                        {
+                            col.Item().Text("PAYMENT RECEIPT").FontSize(24).Bold().FontColor(Colors.Blue.Medium);
+                            col.Item().Text($"{Constants.Branding.AppName}").FontSize(14).Bold();
+                        });
+
+                        row.RelativeItem().AlignRight().Column(col =>
+                        {
+                            col.Item().Text($"Receipt #: {payment.Id:D6}");
+                            col.Item().Text($"Date: {payment.PaidAt:dd MMM yyyy}");
+                        });
+                    });
+
+                    page.Content().PaddingVertical(1, Unit.Centimetre).Column(col =>
+                    {
+                        col.Item().BorderBottom(1).PaddingBottom(5).Text("Member Information").Bold();
+                        col.Item().PaddingTop(5).Row(row =>
+                        {
+                            row.RelativeItem().Text("Name:");
+                            row.RelativeItem().Text(payment.Member.FullName);
+                        });
+                        col.Item().Row(row =>
+                        {
+                            row.RelativeItem().Text("Membership ID:");
+                            row.RelativeItem().Text(payment.Member.MembershipNumber ?? "Pending");
+                        });
+
+                        col.Item().PaddingVertical(20).Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(30);
+                                columns.RelativeColumn();
+                                columns.ConstantColumn(100);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Text("#");
+                                header.Cell().Text("Description");
+                                header.Cell().AlignRight().Text("Amount (BDT)");
+                                header.Cell().Element(Block).PaddingBottom(5).BorderBottom(1);
+                            });
+
+                            table.Cell().Text("1");
+                            table.Cell().Text($"{payment.Category} - TrxID: {payment.TransactionId}");
+                            table.Cell().AlignRight().Text($"{payment.Amount:N2}");
+                        });
+
+                        col.Item().AlignRight().PaddingRight(5).Text($"Total: {payment.Amount:N2} BDT").FontSize(14).Bold();
+
+                        col.Item().PaddingTop(50).Text("Note: This is an automatically generated receipt and does not require a signature.").FontSize(10).Italic().FontColor(Colors.Grey.Medium);
+                    });
+
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                    });
+                });
+            });
+
+            using var stream = new MemoryStream();
+            document.GeneratePdf(stream);
+            return stream.ToArray();
+        }
+
+        static IContainer Block(IContainer container)
+        {
+            return container
+                .Border(1)
+                .Background(Colors.Grey.Lighten3)
+                .ShowOnce()
+                .MinWidth(50)
+                .MinHeight(50)
+                .AlignCenter()
+                .AlignMiddle();
         }
 
         private static PaymentHistoryDto MapToPaymentDto(PaymentHistory p)

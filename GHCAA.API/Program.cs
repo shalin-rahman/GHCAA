@@ -152,6 +152,7 @@ app.UseRateLimiter(); // Apply Rate Limiting
 app.UseWebSockets();
 app.UseStaticFiles(); // serve wwwroot/uploads
 app.UseAuthentication();
+app.UseMiddleware<SecurityStampMiddleware>(); // Invalidates sessions on status change
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/hubs/chat");

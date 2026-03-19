@@ -13,6 +13,9 @@ namespace GHCAA.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            // QuestPDF Community License
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
             // Register DbContext — provider selected by "DatabaseProvider" in appsettings.json
             // Supported values: "PgSql" (default), "MySql", "Sqlite"
             var provider = configuration.GetValue<string>("DatabaseProvider") ?? "PgSql";
@@ -89,6 +92,7 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IMemberImportService, MemberImportService>();
             services.AddScoped<IThemeService, ThemeService>();
             services.AddScoped<IGovernanceService, GovernanceService>();
+            services.AddScoped<IFamilyLinkService, FamilyLinkService>();
 
             // Payment Gateways
             services.AddHttpClient<SSLCommerzGateway>();

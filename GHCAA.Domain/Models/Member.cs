@@ -40,6 +40,7 @@ namespace GHCAA.Domain.Models
         public bool IsEmailPublic { get; set; } = false;
         public bool IsAddressPublic { get; set; } = false;
         public bool IsNIDPublic { get; set; } = false;
+        public bool IsFamilyPublic { get; set; } = false;
         public bool HasAcceptedTerms { get; set; } = false;
 
         public bool IsArchived { get; set; } = false;
@@ -48,6 +49,7 @@ namespace GHCAA.Domain.Models
         // Membership details
         public MembershipType MembershipType { get; set; } = MembershipType.General;
         public MemberCategory Category { get; set; } = MemberCategory.None;
+        public bool IsVerified { get; set; } = false; // Blue Tick / Verification Status
 
         // Navigation
         public User? User { get; set; }
@@ -55,5 +57,9 @@ namespace GHCAA.Domain.Models
         public ICollection<AcademicRecord> AcademicHistory { get; set; } = new List<AcademicRecord>();
         public ICollection<ProfessionalRecord> ProfessionalHistory { get; set; } = new List<ProfessionalRecord>();
         public ICollection<PaymentHistory> PaymentHistories { get; set; } = new List<PaymentHistory>();
+
+        // Family link requests
+        public ICollection<FamilyLinkRequest> SentFamilyLinkRequests { get; set; } = new List<FamilyLinkRequest>();
+        public ICollection<FamilyLinkRequest> ReceivedFamilyLinkRequests { get; set; } = new List<FamilyLinkRequest>();
     }
 }

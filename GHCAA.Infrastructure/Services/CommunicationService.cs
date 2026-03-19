@@ -62,6 +62,48 @@ namespace GHCAA.Infrastructure.Services
                 Subject = "Participation Approved: {{EventTitle}}", 
                 Description = "Final confirmation with entry pass details",
                 Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto; background: #fff;'><h2 style='color: #27ae60;'>Registration Confirmed!</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your participation in <strong>{{EventTitle}}</strong> has been officially approved.</p><div style='background: #111; color: #fff; padding: 25px; border-radius: 12px; margin: 25px 0; border: 2px solid #c5a059; text-align: center;'><h3 style='color: #c5a059; margin-top: 0; font-size: 1.2rem;'>ENTRY PASS</h3><div style='font-size: 1.1rem; font-weight: bold;'>{{FullName}}</div><div style='font-size: 0.8rem; margin: 10px 0; opacity: 0.7;'>Pass ID: {{PassId}}</div><div style='border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0; padding-top: 15px;'><p style='margin: 5px 0;'>📍 {{EventLocation}}</p><p style='margin: 5px 0;'>⏰ {{EventDate}}</p></div></div><p>Please present this email or your pass at the registration desk. We look forward to seeing you!</p></div>",
+            },
+            new EmailTemplate
+            {
+                Code = "APPLICATION_REJECTED",
+                Subject = "Update on your GHCAA Membership Application",
+                Description = "Rejection notice with reason",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #e74c3c;'>Application Status Update</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Thank you for your interest in the GHC Alumni Association. After reviewing your application, we regret to inform you that we cannot approve it at this time.</p><div style='background: #fdf2f2; padding: 15px; border-radius: 5px; border-left: 5px solid #e74c3c;'><p><strong>Reason:</strong> {{Reason}}</p></div><p>If you believe this is an error, please contact the association office.</p></div>"
+            },
+            new EmailTemplate
+            {
+                Code = "PAYMENT_RECEIVED",
+                Subject = "Payment Received: {{Amount}} BDT",
+                Description = "Acknowledgment of payment submission",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Payment Received</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>We have successfully received your payment. It is currently under verification.</p><div style='background: #f8f9fa; padding: 15px; border-radius: 5px;'><p><strong>Amount:</strong> {{Amount}} BDT</p><p><strong>Transaction ID:</strong> {{TrxID}}</p></div><p>You will be notified once the payment is verified.</p></div>"
+            },
+            new EmailTemplate
+            {
+                Code = "PAYMENT_STATUS_UPDATED",
+                Subject = "Payment Status Updated: {{Status}}",
+                Description = "Notification when payment is verified/rejected",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Payment Status Update</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>The status of your transaction <strong>{{TrxID}}</strong> has been updated to <strong>{{Status}}</strong>.</p><p>Thank you for your contribution.</p></div>"
+            },
+            new EmailTemplate
+            {
+                Code = "FAMILY_LINK_REQUEST",
+                Subject = "New Family Link Request from {{RequesterName}}",
+                Description = "Request from another member to link accounts",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Family Link Request</h2><p>Hello <strong>{{FullName}}</strong>,</p><p><strong>{{RequesterName}}</strong> has requested to link their account with yours as a <strong>{{Relationship}}</strong>.</p><div style='text-align: center; margin: 30px 0;'><a href='{{ProfileUrl}}' style='background: #c5a059; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;'>Review Request</a></div><p>Please log in to your profile to accept or decline this request.</p></div>"
+            },
+             new EmailTemplate
+            {
+                Code = "FAMILY_LINK_ACCEPTED",
+                Subject = "Family Link Request Accepted",
+                Description = "Confirmation that a family link was approved",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #27ae60;'>Link Request Accepted</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>Your family link request to <strong>{{TargetName}}</strong> has been accepted.</p><p>You are now connected in the GHCAA network.</p></div>"
+            },
+            new EmailTemplate
+            {
+                Code = "PORTAL_ENQUIRY",
+                Subject = "New Portal Enquiry: {{Subject}}",
+                Description = "Admin notification for contact form submissions",
+                Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>New Portal Enquiry</h2><p><strong>From:</strong> {{RequesterName}} ({{RequesterEmail}})</p><p><strong>Subject:</strong> {{Subject}}</p><div style='background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #c5a059;'><p>{{Message}}</p></div><p style='color: #888; font-size: 0.8rem;'>Submitted via GHCAA Portal</p></div>"
             }
         };
 
@@ -156,7 +198,35 @@ namespace GHCAA.Infrastructure.Services
                 .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) throw new KeyNotFoundException("Member not found");
 
-            await SendTemplatedEmailAsync(member.Email, member, templateCode, customVars, cancellationToken);
+            await SendEmailByCodeAsync(member.Email, templateCode, customVars, member, cancellationToken);
+        }
+
+        public async Task SendEmailByCodeAsync(string to, string templateCode, Dictionary<string, string>? customVars = null, Member? member = null, CancellationToken cancellationToken = default)
+        {
+            var template = await GetTemplateByCodeAsync(templateCode, cancellationToken);
+            if (template == null)
+            {
+                _logger.LogWarning("Email template {TemplateCode} not found. Skipping email.", templateCode);
+                return;
+            }
+
+            var vars = new Dictionary<string, string>();
+            if (member != null)
+            {
+                vars["FullName"] = member.FullName;
+                vars["MembershipNumber"] = member.MembershipNumber ?? "Pending";
+                // ... more common vars could be added here if needed for all templates
+            }
+
+            if (customVars != null)
+            {
+                foreach (var kvp in customVars) vars[kvp.Key] = kvp.Value;
+            }
+
+            string subject = ReplacePlaceholders(template.Subject, vars);
+            string body = ReplacePlaceholders(template.Body, vars);
+
+            await SendAndLogEmailAsync(to, subject, body, templateCode, "Templated", cancellationToken);
         }
 
         public async Task SendBatchEmailAsync(IEnumerable<int> passingYears, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default)

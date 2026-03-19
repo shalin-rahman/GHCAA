@@ -23,8 +23,15 @@ namespace GHCAA.Infrastructure.Services
         public async Task<MemberProfileDto?> GetMemberProfileAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members
+                .AsNoTracking()
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.SentFamilyLinkRequests)
+                    .ThenInclude(r => r.TargetMember)
+                .Include(m => m.ReceivedFamilyLinkRequests)
+                    .ThenInclude(r => r.Requester)
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
                 .Where(m => m.Id == memberId && m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -91,6 +98,7 @@ namespace GHCAA.Infrastructure.Services
             // If no period specified, get current active one
             var query = _db.ECMembers
                 .Include(em => em.Member)
+                    .ThenInclude(m => m!.AcademicHistory)
                 .Include(em => em.ECPeriod)
                 .AsQueryable();
             
@@ -145,9 +153,9 @@ namespace GHCAA.Infrastructure.Services
                 // Personal
                 FatherName = m.FatherName,
                 MotherName = m.MotherName,
-                DateOfBirth = m.DateOfBirth,
-                AppliedDate = DateTime.SpecifyKind(m.AppliedDate, DateTimeKind.Utc),
-                ApprovedDate = m.ApprovedDate.HasValue ? DateTime.SpecifyKind(m.ApprovedDate.Value, DateTimeKind.Utc) : null,
+                DateOfBirth = m.DateOfBirth.ToLocalTime(),
+                AppliedDate = m.AppliedDate.ToLocalTime(),
+                ApprovedDate = m.ApprovedDate.HasValue ? m.ApprovedDate.Value.ToLocalTime() : null,
                 Gender = m.Gender,
                 BloodGroup = m.BloodGroup,
                 NID = m.NID,
@@ -173,8 +181,8 @@ namespace GHCAA.Infrastructure.Services
                     Designation = p.Designation,
                     Sector = p.Sector,
                     Location = p.Location,
-                    StartDate = p.StartDate,
-                    EndDate = p.EndDate,
+                    StartDate = p.StartDate.ToLocalTime(),
+                    EndDate = p.EndDate.HasValue ? p.EndDate.Value.ToLocalTime() : null,
                     IsCurrent = p.IsCurrent
                 }).ToList(),
 
@@ -182,14 +190,63 @@ namespace GHCAA.Infrastructure.Services
                 PhotoPath = m.PhotoPath,
                 PresentAddress = m.IsAddressPublic ? m.PresentAddress : "Confidential",
                 PermanentAddress = m.IsAddressPublic ? m.PermanentAddress : "Confidential",
-                IsMobilePublic = m.IsMobilePublic,
-                IsEmailPublic = m.IsEmailPublic,
-                IsAddressPublic = m.IsAddressPublic,
-                
+                IsVerified = m.IsVerified,
                 MembershipType = m.MembershipType,
                 Category = m.Category,
-                ECHistory = new List<ECHistoryDto>()
+                IsFamilyPublic = m.IsFamilyPublic,
+                ECHistory = new List<ECHistoryDto>(),
+                FamilyMembers = new List<MemberFamilyDto>()
             };
+
+            // Populate Family links from both sent and received requests
+            if (m.IsFamilyPublic)
+            {
+                // From sent requests
+                if (m.SentFamilyLinkRequests != null)
+                {
+                    foreach (var r in m.SentFamilyLinkRequests)
+                    {
+                        if (r.TargetMember != null && r.TargetMember.IsFamilyPublic)
+                        {
+                            dto.FamilyMembers.Add(new MemberFamilyDto
+                            {
+                                RequestId = r.Id,
+                                MemberId = r.TargetMemberId,
+                                FullName = r.TargetMember.FullName,
+                                MembershipNumber = r.TargetMember.MembershipNumber,
+                                PhotoPath = r.TargetMember.PhotoPath,
+                                IsVerified = r.TargetMember.IsVerified,
+                                Relationship = r.Relationship,
+                                Status = r.Status,
+                                IsRequester = true
+                            });
+                        }
+                    }
+                }
+
+                // From received requests
+                if (m.ReceivedFamilyLinkRequests != null)
+                {
+                    foreach (var r in m.ReceivedFamilyLinkRequests)
+                    {
+                        if (r.Requester != null && r.Requester.IsFamilyPublic)
+                        {
+                            dto.FamilyMembers.Add(new MemberFamilyDto
+                            {
+                                RequestId = r.Id,
+                                MemberId = r.RequesterId,
+                                FullName = r.Requester.FullName,
+                                MembershipNumber = r.Requester.MembershipNumber,
+                                PhotoPath = r.Requester.PhotoPath,
+                                IsVerified = r.Requester.IsVerified,
+                                Relationship = r.Relationship,
+                                Status = r.Status,
+                                IsRequester = false
+                            });
+                        }
+                    }
+                }
+            }
 
             if (m.ECMembers != null && m.ECMembers.Any())
             {
@@ -199,8 +256,8 @@ namespace GHCAA.Infrastructure.Services
                     PeriodId = em.ECPeriodId,
                     PeriodTitle = em.ECPeriod?.Title ?? "Unknown Period",
                     Position = em.Position,
-                    StartDate = em.ECPeriod?.StartDate ?? DateTime.MinValue,
-                    EndDate = em.ECPeriod?.EndDate,
+                    StartDate = (em.ECPeriod?.StartDate ?? em.StartDate).ToLocalTime(),
+                    EndDate = (em.ECPeriod?.EndDate ?? em.EndDate)?.ToLocalTime(),
                     ChangeReason = em.ChangeReason,
                     IsCurrent = em.ECPeriod?.IsActive ?? false
                 }).OrderByDescending(h => h.StartDate).ToList();
@@ -224,6 +281,10 @@ namespace GHCAA.Infrastructure.Services
                 IsMobilePublic = m.IsMobilePublic,
                 MembershipType = m.MembershipType,
                 Category = m.Category,
+                AppliedDate = m.AppliedDate.ToLocalTime(),
+                IsVerified = m.IsVerified,
+                IsFamilyPublic = m.IsFamilyPublic,
+                FamilyMembers = new List<MemberFamilyDto>(),
                 ECHistory = m.ECMembers?.Select(em => new ECHistoryDto
                 {
                     Id = em.Id,

@@ -13,10 +13,17 @@ namespace GHCAA.Application.DTOs
         public string NID { get; set; } = null!;
         public string MobileNo { get; set; } = null!;
         public string Email { get; set; } = null!;
+        public Gender Gender { get; set; } = Gender.Male;
+        public BloodGroup BloodGroup { get; set; } = BloodGroup.APositive;
+        public MembershipType MembershipType { get; set; } = MembershipType.General;
 
         public string PresentAddress { get; set; } = null!;
         public string PermanentAddress { get; set; } = null!;
         public string? TShirtSize { get; set; }
+
+        public string EmergencyContactName { get; set; } = null!;
+        public string EmergencyContactRelation { get; set; } = null!;
+        public string EmergencyContactPhone { get; set; } = null!;
 
         // Privacy
         public bool IsMobilePublic { get; set; }

@@ -111,6 +111,14 @@ namespace GHCAA.API.Controllers
             return Ok(new { Message = "Member archived successfully" });
         }
 
+        [HttpPost("members/bulk-archive-inactive")]
+        [Authorize(Policy = "SuperAdminOnly")]
+        public async Task<IActionResult> BulkArchiveInactive(CancellationToken cancellationToken)
+        {
+            var count = await _memberService.BulkArchiveInactiveMembersAsync(cancellationToken);
+            return Ok(new { Message = $"Successfully bulk-archived {count} inactive members.", ArchivedCount = count });
+        }
+
         [HttpPost("members/{id}/restore")]
         [Authorize(Policy = "SuperAdminOnly")]
         public async Task<IActionResult> RestoreMember(int id, CancellationToken cancellationToken)

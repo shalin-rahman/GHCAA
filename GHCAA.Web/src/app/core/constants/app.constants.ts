@@ -50,10 +50,16 @@ export const MEMBERSHIP_TYPES = [
 
 export const MEMBER_CATEGORIES = [
     'None',
-    'Lifelong',
-    'Donor',
-    'Patron',
-    'Guest'
+    'Lifelong Patron',
+    'Sponsor',
+    'Advisor',
+    'Mentor',
+    'Recruiter',
+    'Active',
+    'Volunteer',
+    'Contributor',
+    'Guest',
+    'Student'
 ];
 
 export const BLOOD_GROUPS = [
@@ -234,10 +240,16 @@ export const MEMBERSHIP_TYPE_OPTIONS = [
 
 export const MEMBER_CATEGORY_OPTIONS = [
     { value: 'None', label: 'No Special Status' },
-    { value: 'Lifelong', label: 'Lifelong Member' },
-    { value: 'Donor', label: 'Donor Member' },
-    { value: 'Patron', label: 'Patron Member' },
-    { value: 'Guest', label: 'Guest Member' }
+    { value: 'LifelongPatron', label: 'Lifelong Patron' },
+    { value: 'Sponsor', label: 'Sponsor' },
+    { value: 'Advisor', label: 'Advisor' },
+    { value: 'Mentor', label: 'Mentor' },
+    { value: 'Recruiter', label: 'Recruiter' },
+    { value: 'Active', label: 'Active Member' },
+    { value: 'Volunteer', label: 'Volunteer' },
+    { value: 'Contributor', label: 'Contributor' },
+    { value: 'Guest', label: 'Guest Member' },
+    { value: 'Student', label: 'Student Member' }
 ];
 
 export const FINANCIAL_CATEGORY_OPTIONS = [

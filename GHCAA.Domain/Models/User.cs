@@ -24,6 +24,7 @@ namespace GHCAA.Domain.Models
         // Security
         public string? ResetToken { get; set; }
         public DateTime? ResetTokenExpiry { get; set; }
+        public string SecurityStamp { get; set; } = Guid.NewGuid().ToString("N");
 
         // Navigation
         public Member? Member { get; set; }

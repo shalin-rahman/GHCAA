@@ -28,5 +28,6 @@ namespace GHCAA.Application.Interfaces
         Task<object> GetPublicStatsAsync(CancellationToken cancellationToken = default);
         Task<bool> UpdateMemberDocumentsAsync(int id, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default);
         Task<string> UpdateMemberPhotoAsync(int memberId, UploadedFileDto photo, CancellationToken cancellationToken = default);
+        Task<int> BulkArchiveInactiveMembersAsync(CancellationToken cancellationToken = default);
     }
 }

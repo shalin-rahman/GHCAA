@@ -24,5 +24,6 @@ namespace GHCAA.Application.Interfaces
         Task<MembershipFeeConfigDto> UpdateMembershipFeeConfigAsync(UpdateMembershipFeeConfigDto dto, int adminMemberId, CancellationToken cancellationToken = default);
         Task<decimal> GetApplicableMembershipFeeAsync(Domain.Enums.MembershipType type, int year, CancellationToken cancellationToken = default);
         Task<bool> DeletePaymentAsync(int paymentId, CancellationToken cancellationToken = default);
+        Task<byte[]> GenerateTaxReceiptAsync(int paymentId, CancellationToken cancellationToken = default);
     }
 }

@@ -58,6 +58,27 @@ namespace GHCAA.API.Controllers
             return success ? Ok() : NotFound();
         }
 
+        [HttpGet("receipt/{paymentId}")]
+        public async Task<IActionResult> DownloadReceipt(int paymentId, CancellationToken cancellationToken)
+        {
+            // Security check: If not admin, verify ownership
+            if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
+            {
+                var memberIdClaim = User.FindFirst("MemberId")?.Value;
+                if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
+                {
+                    return Unauthorized("Invalid session.");
+                }
+
+                var payment = await _db.PaymentHistories.FindAsync(new object[] { paymentId }, cancellationToken);
+                if (payment == null) return NotFound();
+                if (payment.MemberId != memberId) return Forbid("You can only download your own receipts.");
+            }
+
+            var pdfBytes = await _financialService.GenerateTaxReceiptAsync(paymentId, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"Receipt_{paymentId}.pdf");
+        }
+
         [HttpGet("my-dues")]
         public async Task<IActionResult> GetMyDues(CancellationToken cancellationToken)
         {

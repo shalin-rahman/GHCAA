@@ -776,6 +776,43 @@ public class MemberServiceTests : TestBase
     }
 
     [Test]
+    public async Task RejectMemberAsync_ShouldSendEmailAndRemoveMember()
+    {
+        // Arrange
+        var member = new Member
+        {
+            FullName = "To Reject",
+            Email = "reject@example.com",
+            NID = "1111111111",
+            MobileNo = "01711111111",
+            Status = Enums.MembershipStatus.Applied,
+            FatherName = "Father",
+            MotherName = "Mother",
+            PresentAddress = "Address",
+            PermanentAddress = "Address",
+            EmergencyContactName = "Contact",
+            EmergencyContactRelation = "Relation",
+            EmergencyContactPhone = "01999999999",
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", PassingYear = 2007, IsGHC = true } }
+        };
+        await _context.Members.AddAsync(member);
+        await _context.SaveChangesAsync();
+        var adminId = 1;
+        var reason = "Invalid data";
+
+        // Act
+        var result = await _service.RejectMemberAsync(member.Id, adminId, reason);
+
+        // Assert
+        result.Should().BeTrue();
+        var deletedMember = await _context.Members.FindAsync(member.Id);
+        deletedMember.Should().BeNull();
+        
+        _mockCommunication.Verify(x => x.SendEmailByCodeAsync(
+            member.Email, "APPLICATION_REJECTED", It.Is<Dictionary<string, string>>(d => d["Reason"] == reason), It.IsAny<Member>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
     public async Task ApproveMemberAsync_ShouldStampApprovalMetadata()
     {
         // Arrange

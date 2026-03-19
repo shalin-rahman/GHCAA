@@ -24,7 +24,7 @@ namespace GHCAA.Domain.Models
         public decimal? RegistrationFee { get; set; }
 
         public bool RequiresPayment { get; set; } = true;
-
+        public Enums.EventStatus Status { get; set; } = Enums.EventStatus.Draft;
         public bool IsActive { get; set; } = true;
         public bool AllowNonMembers { get; set; } = false;
 

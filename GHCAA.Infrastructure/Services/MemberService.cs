@@ -66,8 +66,8 @@ namespace GHCAA.Infrastructure.Services
                 FatherName = dto.FatherName,
                 MotherName = dto.MotherName,
                 DateOfBirth = DateTime.SpecifyKind(dto.DateOfBirth, DateTimeKind.Utc),
-                Gender = Enum.Parse<Enums.Gender>(dto.Gender),
-                BloodGroup = Enum.Parse<Enums.BloodGroup>(dto.BloodGroup),
+                Gender = dto.Gender,
+                BloodGroup = dto.BloodGroup,
                 NID = dto.NID.Replace(" ", ""),
                 MobileNo = dto.MobileNo.Replace(" ", ""),
                 Email = dto.Email.Trim().ToLower(),
@@ -84,8 +84,32 @@ namespace GHCAA.Infrastructure.Services
                 IsEmailPublic = dto.IsEmailPublic,
                 IsAddressPublic = dto.IsAddressPublic,
                 IsNIDPublic = dto.IsNIDPublic,
-                HasAcceptedTerms = dto.HasAcceptedTerms
+                HasAcceptedTerms = dto.HasAcceptedTerms,
+                MembershipType = dto.MembershipType,
+                IsVerified = false
             };
+
+            // Generate Membership Number: lGC + YY + MM + (last 3 digit max + 1)
+            var now = DateTime.UtcNow;
+            var prefix = $"lGC{now:yyMM}";
+            
+            // Get the last membership number for the current month prefix
+            var lastMember = await _db.Members
+                .Where(m => m.MembershipNumber != null && m.MembershipNumber.StartsWith(prefix))
+                .OrderByDescending(m => m.MembershipNumber)
+                .FirstOrDefaultAsync(cancellationToken);
+                
+            int nextId = 1;
+            if (lastMember != null && lastMember.MembershipNumber != null && lastMember.MembershipNumber.Length >= prefix.Length + 1)
+            {
+                var lastPart = lastMember.MembershipNumber.Substring(prefix.Length);
+                if (int.TryParse(lastPart, out int lastId))
+                {
+                    nextId = lastId + 1;
+                }
+            }
+            
+            member.MembershipNumber = $"{prefix}{nextId:D3}";
 
             // Handle Academic History
             if (dto.AcademicHistory != null && dto.AcademicHistory.Any())
@@ -255,20 +279,30 @@ namespace GHCAA.Infrastructure.Services
                         throw new InvalidOperationException($"Member must have 'Applied' status to be approved. Current status: {member.Status}");
                     }
 
-                    // Generate membership number: GHC-{PassingYear}-{Serial}
-                    // Derive passing year from GHC academic record (replaces removed Member field)
-                    var ghcRecord = member.AcademicHistory.FirstOrDefault(a => a.IsGHC);
-                    var passingYear = ghcRecord?.PassingYear ?? DateTime.UtcNow.Year;
-                    var yearPrefix = $"GHC-{passingYear}-";
-                    var maxSerial = await _db.Members
-                        .Where(m => m.MembershipNumber != null && m.MembershipNumber.StartsWith(yearPrefix))
-                        .CountAsync(cancellationToken);
+                    // Generate membership number: lGCYYMMXXX
+                    var now = DateTime.UtcNow;
+                    var prefix = $"lGC{now:yyMM}";
                     
-                    var serial = (maxSerial + 1).ToString("D4"); // 4-digit zero-padded
-                    membershipNumber = $"GHC-{passingYear}-{serial}";
+                    var lastBound = await _db.Members
+                        .Where(m => m.MembershipNumber != null && m.MembershipNumber.StartsWith(prefix))
+                        .OrderByDescending(m => m.MembershipNumber)
+                        .FirstOrDefaultAsync(cancellationToken);
+                        
+                    int nextId = 1;
+                    if (lastBound != null && lastBound.MembershipNumber != null && lastBound.MembershipNumber.Length >= prefix.Length + 1)
+                    {
+                        var lastPart = lastBound.MembershipNumber.Substring(prefix.Length);
+                        if (int.TryParse(lastPart, out int lastId))
+                        {
+                            nextId = lastId + 1;
+                        }
+                    }
+                    
+                    membershipNumber = member.MembershipNumber ?? $"{prefix}{nextId:D3}";
 
                     // Update member
                     member.Status = Enums.MembershipStatus.Active;
+                    member.IsVerified = true; // Mark as verified upon admin approval
                     member.MembershipNumber = membershipNumber;
                     member.ApprovedDate = DateTime.UtcNow;
                     member.ApprovedBy = approvedByAdminId;
@@ -324,14 +358,23 @@ namespace GHCAA.Infrastructure.Services
             if (member.Status != Enums.MembershipStatus.Applied)
                 throw new InvalidOperationException("Only pending registrations can be rejected.");
 
-            // Remove registry filing or archive it? 
-            // Better to remove it so they can re-register if it was a data error.
+            // Send rejection email before deleting the record
+            try
+            {
+                var customVars = new Dictionary<string, string> { { "Reason", reason } };
+                // Using SendEmailByCodeAsync with the template ensures professional styling from DB settings
+                await _communicationService.SendEmailByCodeAsync(member.Email, "APPLICATION_REJECTED", customVars, member, cancellationToken);
+                
+                await _activityService.LogActivityAsync(id, "EmailSent", "Application rejection email sent.", adminId, cancellationToken: cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send rejection email to {Email}", member.Email);
+            }
+
+            // Remove registry filing
             _db.Members.Remove(member);
             await _db.SaveChangesAsync(cancellationToken);
-
-            // Notify user via email
-            await _email.SendEmailAsync(member.Email, "GHCAA Application Update", 
-                $"Dear {member.FullName}, your registry application was not approved for the following reason: {reason}. You are welcome to submit a new application with updated data.");
 
             _logger.LogWarning("Admin {AdminId} rejected application {MemberId} for: {Reason}", adminId, id, reason);
             return true;
@@ -341,7 +384,11 @@ namespace GHCAA.Infrastructure.Services
         {
             var member = await _db.Members
                 .Include(m => m.ECMembers)
-                .ThenInclude(em => em.ECPeriod)
+                    .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.SentFamilyLinkRequests)
+                    .ThenInclude(r => r.TargetMember)
+                .Include(m => m.ReceivedFamilyLinkRequests)
+                    .ThenInclude(r => r.Requester)
                 .Include(m => m.AcademicHistory)
                 .Include(m => m.ProfessionalHistory)
                 .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
@@ -376,8 +423,55 @@ namespace GHCAA.Infrastructure.Services
                 IsAddressPublic = member.IsAddressPublic,
                 HasAcceptedTerms = member.HasAcceptedTerms,
                 AppliedDate = DateTime.SpecifyKind(member.AppliedDate, DateTimeKind.Utc),
-                ApprovedDate = member.ApprovedDate.HasValue ? DateTime.SpecifyKind(member.ApprovedDate.Value, DateTimeKind.Utc) : null
+                // Family members from Request system
+                FamilyMembers = new List<MemberFamilyDto>()
             };
+
+            // Populate Family links from both sent and received requests
+            // (Note: Admin view ignores IsFamilyPublic so they can manage all)
+            if (member.SentFamilyLinkRequests != null)
+            {
+                foreach (var r in member.SentFamilyLinkRequests)
+                {
+                    if (r.TargetMember != null)
+                    {
+                        dto.FamilyMembers.Add(new MemberFamilyDto
+                        {
+                            RequestId = r.Id,
+                            MemberId = r.TargetMemberId,
+                            FullName = r.TargetMember.FullName,
+                            MembershipNumber = r.TargetMember.MembershipNumber,
+                            PhotoPath = r.TargetMember.PhotoPath,
+                            IsVerified = r.TargetMember.IsVerified,
+                            Relationship = r.Relationship,
+                            Status = r.Status,
+                            IsRequester = true
+                        });
+                    }
+                }
+            }
+
+            if (member.ReceivedFamilyLinkRequests != null)
+            {
+                foreach (var r in member.ReceivedFamilyLinkRequests)
+                {
+                    if (r.Requester != null)
+                    {
+                        dto.FamilyMembers.Add(new MemberFamilyDto
+                        {
+                            RequestId = r.Id,
+                            MemberId = r.RequesterId,
+                            FullName = r.Requester.FullName,
+                            MembershipNumber = r.Requester.MembershipNumber,
+                            PhotoPath = r.Requester.PhotoPath,
+                            IsVerified = r.Requester.IsVerified,
+                            Relationship = r.Relationship,
+                            Status = r.Status,
+                            IsRequester = false
+                        });
+                    }
+                }
+            }
 
             if (member.ECMembers != null && member.ECMembers.Any())
             {
@@ -386,8 +480,8 @@ namespace GHCAA.Infrastructure.Services
                     Id = em.Id,
                     PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
                     Position = em.Position,
-                    StartDate = DateTime.SpecifyKind(em.StartDate, DateTimeKind.Utc),
-                    EndDate = em.EndDate.HasValue ? DateTime.SpecifyKind(em.EndDate.Value, DateTimeKind.Utc) : null,
+                    StartDate = em.StartDate.ToLocalTime(),
+                    EndDate = em.EndDate.HasValue ? em.EndDate.Value.ToLocalTime() : null,
                     ChangeReason = em.ChangeReason,
                     IsCurrent = em.ECPeriod?.IsActive ?? false
                 }).OrderByDescending(h => h.StartDate).ToList();
@@ -521,11 +615,12 @@ namespace GHCAA.Infrastructure.Services
 
             member.IsArchived = true;
             
-            // Also archive the associated user if exists
+            // Also archive the associated user if exists — rotate stamp to invalidate all sessions
             var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
             if (user != null)
             {
                 user.IsArchived = true;
+                user.SecurityStamp = Guid.NewGuid().ToString("N"); // Invalidate all active JWTs
             }
 
             // End active EC roles
@@ -685,7 +780,7 @@ namespace GHCAA.Infrastructure.Services
                     Id = member.Id,
                     FullName = member.FullName,
                     Status = member.Status,
-                    AppliedDate = member.AppliedDate,
+                    AppliedDate = member.AppliedDate.ToLocalTime(),
                     MembershipNumber = member.MembershipNumber,
                     PhotoPath = member.PhotoPath,
                     BloodGroup = member.BloodGroup,
@@ -710,8 +805,8 @@ namespace GHCAA.Infrastructure.Services
                         PeriodId = em.ECPeriodId,
                         PeriodTitle = em.ECPeriod?.Title ?? "Unknown",
                         Position = em.Position,
-                        StartDate = DateTime.SpecifyKind(em.StartDate, DateTimeKind.Utc),
-                        EndDate = em.EndDate.HasValue ? DateTime.SpecifyKind(em.EndDate.Value, DateTimeKind.Utc) : null,
+                        StartDate = em.StartDate.ToLocalTime(),
+                        EndDate = em.EndDate.HasValue ? em.EndDate.Value.ToLocalTime() : null,
                         ChangeReason = em.ChangeReason,
                         IsCurrent = em.ECPeriod?.IsActive ?? false
                     }).OrderByDescending(h => h.StartDate).ToList();
@@ -764,19 +859,21 @@ namespace GHCAA.Infrastructure.Services
             member.PresentAddress = dto.PresentAddress;
             member.PermanentAddress = dto.PermanentAddress;
 
-            if (Enum.TryParse<Enums.Gender>(dto.Gender, true, out var gender))
-                member.Gender = gender;
-            
-            if (Enum.TryParse<Enums.BloodGroup>(dto.BloodGroup, true, out var blood))
-                member.BloodGroup = blood;
+            member.Gender = dto.Gender;
+            member.BloodGroup = dto.BloodGroup;
             member.MembershipNumber = dto.MembershipNumber;
             if (!string.IsNullOrWhiteSpace(dto.PhotoPath)) member.PhotoPath = dto.PhotoPath;
 
-            if (Enum.TryParse<Enums.MembershipType>(dto.MembershipType, true, out var mType))
-                member.MembershipType = mType;
+            member.MembershipType = dto.MembershipType;
+            member.Status = dto.Status;
+            // Domain Validation: Only Founding members can be Lifelong Patrons
+            if (dto.Category == Enums.MemberCategory.LifelongPatron && member.MembershipType != Enums.MembershipType.Founding)
+            {
+                _logger.LogWarning("Admin update attempted to assign Lifelong Patron to a non-founding member {Id}.", id);
+                throw new InvalidOperationException("Only Founding members can be assigned as Lifelong Patrons.");
+            }
 
-            if (Enum.TryParse<Enums.MemberCategory>(dto.Category, true, out var mCat))
-                member.Category = mCat;
+            member.Category = dto.Category;
 
             // Sync Academic History
             if (dto.AcademicHistory != null)
@@ -895,6 +992,19 @@ namespace GHCAA.Infrastructure.Services
             }
 
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Rotate SecurityStamp if status transitions to Terminated or Resigned — invalidates all JWT sessions
+            if (dto.Status == Enums.MembershipStatus.Terminated || dto.Status == Enums.MembershipStatus.InactiveResigned)
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == id, cancellationToken);
+                if (user != null)
+                {
+                    user.SecurityStamp = Guid.NewGuid().ToString("N");
+                    await _db.SaveChangesAsync(cancellationToken);
+                    _logger.LogWarning("SecurityStamp rotated for member {MemberId} — all existing sessions terminated.", id);
+                }
+            }
+
             _logger.LogInformation("Member {MemberId} information updated by Admin", id);
             return true;
         }
@@ -999,12 +1109,56 @@ namespace GHCAA.Infrastructure.Services
             await _email.SendEmailAsync(member.Email, subject, body);
             return true;
         }
+        public async Task<int> BulkArchiveInactiveMembersAsync(CancellationToken cancellationToken = default)
+        {
+            var inactiveStatuses = new[] { 
+                Enums.MembershipStatus.InactivePayment, 
+                Enums.MembershipStatus.InactiveResigned, 
+                Enums.MembershipStatus.Terminated 
+            };
+            
+            // Criteria: Inactive for more than 6 months
+            var threshold = DateTime.UtcNow.AddMonths(-6);
+            
+            var targetMembers = await _db.Members
+                .Where(m => !m.IsArchived && inactiveStatuses.Contains(m.Status) && m.LastUpdateDate < threshold)
+                .Select(m => m.Id)
+                .ToListAsync(cancellationToken);
+                
+            int processedCount = 0;
+            foreach (var id in targetMembers)
+            {
+                try 
+                {
+                    await ArchiveMemberAsync(id, cancellationToken);
+                    processedCount++;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to bulk archive member {MemberId}", id);
+                }
+            }
+            
+            if (processedCount > 0)
+                _logger.LogInformation("Successfully bulk-archived {Count} inactive members.", processedCount);
+                
+            return processedCount;
+        }
+
         public async Task<object> GetPublicStatsAsync(CancellationToken cancellationToken = default)
         {
-            var count = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Active, cancellationToken);
-            var eventsCount = await _db.AlumniEvents.CountAsync(e => e.IsActive || e.Date < DateTime.UtcNow, cancellationToken);
+            var activeMembers = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived, cancellationToken);
+            var ecMembers = await _db.ECMembers.Where(em => em.ECPeriod.IsActive && em.EndDate == null).CountAsync(cancellationToken);
+            var totalEvents = await _db.AlumniEvents.CountAsync(e => e.Status == Enums.EventStatus.Published, cancellationToken);
             
-            return new { TotalMembers = count, Countries = 15, Batches = 68, EventsHosted = eventsCount };
+            return new
+            {
+                TotalActiveMembers = activeMembers,
+                CurrentECMembers = ecMembers,
+                PublishedEvents = totalEvents,
+                AlumniChapters = 12, // Placeholder
+                LastUpdated = DateTime.UtcNow
+            };
         }
 
         private string? MaskPii(string? value, int visibleStart = 4, int visibleEnd = 2)

@@ -4,7 +4,7 @@ namespace GHCAA.Domain
     {
         public enum MembershipStatus { Applied, Active, InactivePayment, InactiveResigned, Terminated }
         public enum MembershipType { Founding, Executive, General, Associate, Honorary, Advisory }
-        public enum MemberCategory { None, Lifelong, Donor, Patron, Guest }
+        public enum MemberCategory { None, LifelongPatron, Sponsor, Advisor, Mentor, Recruiter, Active, Volunteer, Contributor, Guest, Student }
         public enum ECPosition { None, President, VicePresident, GeneralSecretary, OfficeSecretary, JointSecretary1, JointSecretary2, Treasurer, MediaCulturalAndSportsSecretary, OrganizationalSecretary, InformationAndTechnologySecretary, Member1, Member2, LawSecretary, ImmediatePastPresident, InstitutionalRepresentative }
         public enum BloodGroup { APositive, ANegative, BPositive, BNegative, OPositive, ONegative, ABPositive, ABNegative }
         public enum Gender { Male, Female, Other }
@@ -37,5 +37,10 @@ namespace GHCAA.Domain
 
         public enum SubmissionStatus { Draft, Pending, Approved, Rejected }
         public enum ArticleCategory { Event, Magazine, Regular }
+
+        // Family Linking Enums
+        public enum RelationshipType { Spouse, Parent, Child, Sibling, Other }
+        public enum FamilyLinkStatus { Requested, Accepted, Rejected, Cancelled }
+        public enum EventStatus { Draft, Published, Archived }
     }
 }
