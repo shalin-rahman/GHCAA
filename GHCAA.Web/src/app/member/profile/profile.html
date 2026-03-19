@@ -26,10 +26,11 @@
                     }
                 </div>
                 <div class="special-labels flex gap-2 mt-2">
-                    <span *ngIf="profile.category && profile.category !== 'None' && profile.category !== 0"
-                        class="badge" [class]="getCategoryLabel(profile.category).toLowerCase()">
-                        {{ getCategoryLabel(profile.category) }}
-                    </span>
+                    @if (profile.category && profile.category !== 'None') {
+                        <span class="badge" [class]="profile.category.toLowerCase()">
+                            {{ profile.category }}
+                        </span>
+                    }
                     <span class="ec-pos text-accent font-black text-xs uppercase tracking-widest" *ngIf="getCurrentECPosition(profile.ecHistory) !== 'None'">{{
                         getECPositionName(getCurrentECPosition(profile.ecHistory)) }}</span>
                 </div>

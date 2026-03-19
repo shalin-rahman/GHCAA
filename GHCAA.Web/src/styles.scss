@@ -694,6 +694,75 @@ select.border-red-500 {
   white-space: nowrap;
 }
 
+/* 
+   Member Ranking & Category Badges 
+   Provides visual distinction for various alumni roles.
+*/
+.badge {
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+
+    &.lifelongpatron {
+        background: #fff1f2;
+        color: #be123c;
+        border-color: #ffe4e6;
+        box-shadow: 0 0 10px rgba(190, 18, 60, 0.1);
+    }
+    &.sponsor {
+        background: #f0fdf4;
+        color: #15803d;
+        border-color: #dcfce7;
+    }
+    &.advisor {
+        background: #f0f9ff;
+        color: #0369a1;
+        border-color: #e0f2fe;
+    }
+    &.mentor {
+        background: #f5f3ff;
+        color: #6d28d9;
+        border-color: #ede9fe;
+    }
+    &.recruiter {
+        background: #fff7ed;
+        color: #c2410c;
+        border-color: #ffedd5;
+    }
+    &.active {
+        background: #f0fdfa;
+        color: #0f766e;
+        border-color: #ccfbf1;
+    }
+    &.volunteer {
+        background: #fefce8;
+        color: #a16207;
+        border-color: #fef9c3;
+    }
+    &.contributor {
+        background: #f8fafc;
+        color: #334155;
+        border-color: #f1f5f9;
+    }
+    &.guest {
+        background: #f1f5f9;
+        color: #475569;
+        border-color: #e2e8f0;
+    }
+    &.student {
+        background: #fdf4ff;
+        color: #a21caf;
+        border-color: #fae8ff;
+    }
+}
+
 @media (min-width: 768px) {
   .md\:flex-row {
     flex-direction: row;

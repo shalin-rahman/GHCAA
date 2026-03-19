@@ -79,7 +79,7 @@
                                 <span class="m-type-label">{{ m.membershipType }}</span>
                             }
                             @if (m.category && m.category !== 'None') {
-                                <span class="m-cat-label">{{ m.category }}</span>
+                                <span class="badge" [class]="m.category.toLowerCase()">{{ m.category }}</span>
                             }
                         </div>
                         @if (getCurrentECPosition(m.ecHistory) !== 'None') {
@@ -157,7 +157,7 @@
                         <span class="m-type-label">{{ selectedMember()?.membershipType }}</span>
                     }
                     @if (selectedMember()?.category && selectedMember()?.category !== 'None') {
-                        <span class="m-cat-label">{{ selectedMember()?.category }}</span>
+                        <span class="badge ml-2" [class]="selectedMember()!.category!.toLowerCase()">{{ selectedMember()?.category }}</span>
                     }
                 </div>
             </div>
