@@ -230,6 +230,26 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
+        public async Task<bool> ResendOtpAsync(string email, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Email == email, cancellationToken);
+            if (member == null)
+            {
+                _logger.LogWarning("Resend OTP failed: Member not found for email {Email}", email);
+                return false;
+            }
+
+            if (member.EmailVerified)
+            {
+                _logger.LogWarning("Resend OTP failed: Email {Email} is already verified", email);
+                return false;
+            }
+
+            await _otp.GenerateAndSendOtpAsync(email, cancellationToken);
+            _logger.LogInformation("OTP resent to email {Email}", email);
+            return true;
+        }
+
         public async Task<ApproveMemberResultDto> ApproveMemberAsync(int memberId, int approvedByAdminId, CancellationToken cancellationToken = default)
         {
             Member? member;

@@ -10,6 +10,7 @@ namespace GHCAA.Application.Interfaces
         // Use UploadedFileDto so Application layer does not reference Microsoft.AspNetCore.Http
         Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default);
         Task<bool> VerifyEmailAsync(string email, string code, CancellationToken cancellationToken = default);
+        Task<bool> ResendOtpAsync(string email, CancellationToken cancellationToken = default);
         Task<ApproveMemberResultDto> ApproveMemberAsync(int memberId, int approvedByAdminId, CancellationToken cancellationToken = default);
         Task<MemberProfileDto?> GetProfileAsync(int memberId, bool isPrivileged = false, CancellationToken cancellationToken = default);
         Task<bool> UpdateProfileAsync(int memberId, UpdateProfileDto dto, CancellationToken cancellationToken = default);

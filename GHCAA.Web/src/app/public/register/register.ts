@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RegistrationService } from '../../core/services/registration.service';
@@ -13,7 +13,7 @@ import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GE
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
-export class Register {
+export class Register implements OnDestroy {
   private regService = inject(RegistrationService);
   private router = inject(Router);
   private notify = inject(NotificationService);
@@ -23,6 +23,8 @@ export class Register {
   currentStep = signal(1);
   maxStepReached = signal(1);
   showTerms = signal(false);
+  resendCooldown = signal(0);
+  private timerInterval: any;
   ACADEMIC = ACADEMIC_DATA;
   IS_HSC = IS_HSC;
   years = this.ACADEMIC.getYears();
@@ -202,6 +204,43 @@ export class Register {
         this.notify.error('Incorrect or expired verification code. Please try again.');
       }
     });
+  }
+
+  resendOtp() {
+    if (this.resendCooldown() > 0 || this.loading()) return;
+    
+    this.loading.set(true);
+    this.regService.resendOtp(this.model.Email).subscribe({
+      next: (res: any) => {
+        this.loading.set(false);
+        this.notify.success(res.message || 'Verification code resent successfully!');
+        this.startResendTimer();
+      },
+      error: (err: any) => {
+        this.loading.set(false);
+        this.notify.error(err.error?.message || 'Failed to resend code. Please try again.');
+        this.startResendTimer(); // Start timer anyway to prevent spam
+      }
+    });
+  }
+
+  private startResendTimer() {
+    this.resendCooldown.set(60);
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = setInterval(() => {
+      const current = this.resendCooldown();
+      if (current > 0) {
+        this.resendCooldown.set(current - 1);
+      } else {
+        clearInterval(this.timerInterval);
+      }
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
   }
 }
 

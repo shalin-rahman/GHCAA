@@ -381,7 +381,13 @@
                         @else { Confirm Security Identity }
                     </button>
                     <div class="mt-4">
-                        <small class="text-muted">Code not received? <a href="#" (click)="$event.preventDefault()" class="text-accent font-bold">Resend Authentication Code</a></small>
+                        <small class="text-muted">Code not received? 
+                            @if (resendCooldown() > 0) {
+                                <span class="opacity-60">Resend available in {{ resendCooldown() }}s</span>
+                            } @else {
+                                <a href="#" (click)="$event.preventDefault(); resendOtp()" class="text-accent font-bold hover:underline" [class.opacity-50]="loading()">Resend Authentication Code</a>
+                            }
+                        </small>
                     </div>
                 </div>
                 }

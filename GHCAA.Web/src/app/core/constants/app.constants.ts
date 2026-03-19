@@ -363,6 +363,7 @@ export const API_ENDPOINTS = {
         LOGIN: '/api/auth/login',
         REGISTER: '/api/auth/register',
         VERIFY_EMAIL: '/api/auth/verify-email',
+        RESEND_OTP: '/api/auth/resend-otp',
         STATUS: '/api/auth/status'
     },
     EVENTS: '/api/events',

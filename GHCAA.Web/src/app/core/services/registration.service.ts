@@ -17,6 +17,10 @@ export class RegistrationService {
         return this.http.post(API_ENDPOINTS.AUTH.VERIFY_EMAIL, { email, otpCode });
     }
 
+    resendOtp(email: string): Observable<any> {
+        return this.http.post(API_ENDPOINTS.AUTH.RESEND_OTP, { email });
+    }
+
     getStatus(id: number): Observable<any> {
         return this.http.get(`${API_ENDPOINTS.AUTH.STATUS}/${id}`);
     }

@@ -65,5 +65,18 @@ namespace GHCAA.API.Controllers
 
             return Ok(new { Message = "Email verified successfully" });
         }
+
+        [HttpPost("resend-otp")]
+        [EnableRateLimiting("auth")]
+        public async Task<IActionResult> ResendOtp([FromBody] ResendOtpDto dto, CancellationToken cancellationToken)
+        {
+            var success = await _memberService.ResendOtpAsync(dto.Email, cancellationToken);
+            if (!success)
+            {
+                return BadRequest(new { Message = "Could not resend OTP. Ensure the email is correct and not already verified." });
+            }
+
+            return Ok(new { Message = "A new OTP has been sent to your email." });
+        }
     }
 }
