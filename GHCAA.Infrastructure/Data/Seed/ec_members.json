@@ -1,11 +1,173 @@
 [
   {
+    "Id": 3,
+    "MemberId": 203,
+    "ECPeriodId": 1,
+    "Position": 3,
+    "StartDate": "2026-03-15T13:00:14.568932+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 4,
+    "MemberId": 414,
+    "ECPeriodId": 1,
+    "Position": 4,
+    "StartDate": "2026-03-15T13:01:05.499331+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 5,
+    "MemberId": 286,
+    "ECPeriodId": 1,
+    "Position": 7,
+    "StartDate": "2026-03-15T13:01:25.373268+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 6,
+    "MemberId": 216,
+    "ECPeriodId": 1,
+    "Position": 1,
+    "StartDate": "2026-03-15T13:01:51.109751+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
     "Id": 1,
     "MemberId": 1,
     "ECPeriodId": 1,
     "Position": 1,
-    "StartDate": "2024-01-01T00:00:00Z",
-    "EndDate": null,
+    "StartDate": "2024-01-01T00:00:00+00:00",
+    "EndDate": "2026-03-16T06:35:53.207085+00:00",
     "ChangeReason": null
+  },
+  {
+    "Id": 9,
+    "MemberId": 254,
+    "ECPeriodId": 1,
+    "Position": 4,
+    "StartDate": "2026-03-16T18:49:39.534178+00:00",
+    "EndDate": "2026-03-16T18:49:51.415414+00:00",
+    "ChangeReason": ""
+  },
+  {
+    "Id": 10,
+    "MemberId": 254,
+    "ECPeriodId": 1,
+    "Position": 5,
+    "StartDate": "2026-03-16T18:50:19.133034+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 11,
+    "MemberId": 234,
+    "ECPeriodId": 1,
+    "Position": 6,
+    "StartDate": "2026-03-16T18:50:57.762657+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 12,
+    "MemberId": 272,
+    "ECPeriodId": 1,
+    "Position": 8,
+    "StartDate": "2026-03-16T18:51:35.705468+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 13,
+    "MemberId": 443,
+    "ECPeriodId": 1,
+    "Position": 10,
+    "StartDate": "2026-03-16T18:52:25.809422+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 14,
+    "MemberId": 212,
+    "ECPeriodId": 1,
+    "Position": 2,
+    "StartDate": "2026-03-16T18:52:41.653708+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 8,
+    "MemberId": 612,
+    "ECPeriodId": 1,
+    "Position": 13,
+    "StartDate": "2026-03-16T18:49:00.323296+00:00",
+    "EndDate": "2026-03-16T18:54:22.231510+00:00",
+    "ChangeReason": ""
+  },
+  {
+    "Id": 15,
+    "MemberId": 233,
+    "ECPeriodId": 1,
+    "Position": 13,
+    "StartDate": "2026-03-16T18:56:18.122125+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 16,
+    "MemberId": 225,
+    "ECPeriodId": 1,
+    "Position": 12,
+    "StartDate": "2026-03-16T18:56:42.414848+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 17,
+    "MemberId": 250,
+    "ECPeriodId": 1,
+    "Position": 9,
+    "StartDate": "2026-03-16T18:58:04.967671+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 18,
+    "MemberId": 248,
+    "ECPeriodId": 1,
+    "Position": 15,
+    "StartDate": "2026-03-16T19:00:10.344159+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 7,
+    "MemberId": 201,
+    "ECPeriodId": 1,
+    "Position": 11,
+    "StartDate": "2026-03-16T18:47:37.224257+00:00",
+    "EndDate": "2026-03-16T19:01:20.836788+00:00",
+    "ChangeReason": null
+  },
+  {
+    "Id": 19,
+    "MemberId": 280,
+    "ECPeriodId": 1,
+    "Position": 11,
+    "StartDate": "2026-03-16T19:01:36.323515+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
+  },
+  {
+    "Id": 20,
+    "MemberId": 206,
+    "ECPeriodId": 1,
+    "Position": 14,
+    "StartDate": "2026-03-16T19:05:52.119459+00:00",
+    "EndDate": null,
+    "ChangeReason": ""
   }
 ]

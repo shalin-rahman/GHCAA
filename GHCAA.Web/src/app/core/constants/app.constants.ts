@@ -81,6 +81,15 @@ export const GENDER_OPTIONS = [
     { value: 'Other', label: 'Other' }
 ];
 
+export const TSHIRT_SIZES = [
+    { value: 'S', label: 'Small (S)' },
+    { value: 'M', label: 'Medium (M)' },
+    { value: 'L', label: 'Large (L)' },
+    { value: 'XL', label: 'Extra Large (XL)' },
+    { value: 'XXL', label: 'Double Extra Large (XXL)' },
+    { value: '3XL', label: 'Triple Extra Large (3XL)' }
+];
+
 export const JOB_CATEGORIES = [
     { id: 'IT', name: 'IT & Software Development' },
     { id: 'Finance', name: 'Finance & Banking' },
@@ -141,7 +150,7 @@ export function getCurrentECPosition(ecHistory: any[] | undefined): any {
     // Try to find the active one
     const current = ecHistory.find(h => h.isCurrent && !h.endDate);
     if (current) return current.position;
-    
+
     // Fallback to the latest one if no active found
     return ecHistory[0].position;
 }
@@ -156,13 +165,13 @@ export function getCurrentECPeriod(ecHistory: any[] | undefined): string {
 export function getECPositionForPeriod(ecHistory: any[] | undefined, periodId: number | null): any {
     if (!ecHistory || !Array.isArray(ecHistory) || ecHistory.length === 0) return 'None';
     if (!periodId) return getCurrentECPosition(ecHistory);
-    
+
     // In our ECHistoryDto, we don't have periodId, we have periodTitle.
     // Wait, the ECMember interface HAS ecPeriodId.
     // Let's check what's in the DTO.
     const record = ecHistory.find(h => h.periodId === periodId);
     if (record) return record.position;
-    
+
     return 'None';
 }
 

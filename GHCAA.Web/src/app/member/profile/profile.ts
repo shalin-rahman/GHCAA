@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName, TSHIRT_SIZES } from '../../core/constants/app.constants';
 
 @Component({
     selector: 'app-profile',
@@ -37,6 +37,7 @@ export class Profile implements OnInit {
     sectorOptions = this.ACADEMIC.sectors;
     genderOptions = GENDER_OPTIONS;
     bloodGroupOptions = BLOOD_GROUP_OPTIONS;
+    tShirtOptions = TSHIRT_SIZES;
 
     ngOnInit() {
         this.profileService.getProfile().subscribe({

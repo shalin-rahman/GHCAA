@@ -81,18 +81,12 @@ namespace GHCAA.Tests.Workflows
                 EmergencyContactName = "Emergency",
                 EmergencyContactRelation = "Sibling",
                 EmergencyContactPhone = "01700000000",
-                HighestCertificate = "HSC",
-                HighestCertificateGroup = "Science",
-                HighestCertificateSubject = "General",
-                HighestCertificatePassingYear = 2020,
-                GHCLastCertificate = "HSC",
-                GHCLastCertificateGroup = "Science",
-                GHCLastCertificateSubject = "General",
-                GHCLastCertificatePassingYear = 2020,
-                ProfessionalSector = "IT",
-                Designation = "Developer",
                 PresentAddress = "Dhaka",
-                PermanentAddress = "Dhaka"
+                PermanentAddress = "Dhaka",
+                AcademicHistory = new List<AcademicRecordDto>
+                {
+                    new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2020, IsGHC = true }
+                }
             };
 
             var regId = await _memberService.RegisterAsync(regDto, null, null, null, CancellationToken.None);

@@ -125,6 +125,12 @@ namespace GHCAA.Infrastructure.Data
                 .HasForeignKey(p => p.MemberId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<PaymentHistory>()
+                .HasOne(p => p.Member)
+                .WithMany(m => m.PaymentHistories)
+                .HasForeignKey(p => p.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Member <-> User (one-to-one)
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Member)
@@ -211,9 +217,13 @@ namespace GHCAA.Infrastructure.Data
             var members = LoadSeed<Member>("members.json");
             if (members.Any()) modelBuilder.Entity<Member>().HasData(members);
 
-            // Seed Users from JSON
+            // Seed users from JSON
             var users = LoadSeed<User>("users.json");
             if (users.Any()) modelBuilder.Entity<User>().HasData(users);
+
+            // Seed Payment Histories
+            var payments = LoadSeed<PaymentHistory>("payment_histories.json");
+            if (payments.Any()) modelBuilder.Entity<PaymentHistory>().HasData(payments);
 
             // Seed many-to-many Roles for Users (UserRoles junction table)
             var userRoles = LoadSeed<Dictionary<string, object>>("user_roles.json");

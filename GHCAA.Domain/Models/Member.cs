@@ -24,29 +24,9 @@ namespace GHCAA.Domain.Models
         public string EmergencyContactRelation { get; set; } = null!;
         public string EmergencyContactPhone { get; set; } = null!;
 
-        // B. Academic (2.1 B)
-        // Highest Certificate
-        public int? HSCAdmissionYear { get; set; } // 1950 - Current
-        public string HighestCertificate { get; set; } = null!;
-        public string HighestCertificateGroup { get; set; } = null!;
-        public string HighestCertificateSubject { get; set; } = null!;
-        public int HighestCertificatePassingYear { get; set; }
-
-        // GHC Certificate
-        public int? GHCAdmissionYear { get; set; } // 1950 - Current
-        public string GHCLastCertificate { get; set; } = null!;
-        public string GHCLastCertificateGroup { get; set; } = null!;
-        public string GHCLastCertificateSubject { get; set; } = null!;
-        public int GHCLastCertificatePassingYear { get; set; }
-
-        // C. Professional (2.1 C)
-        public string ProfessionalSector { get; set; } = null!;
-        public string Designation { get; set; } = null!; // Role, Organization, Location
-
         // D. Attachments & System Logic (2.1 D & Section 4)
         public string? PhotoPath { get; set; }
-        public string? CertificatePath { get; set; }
-        public string? PaymentProofPath { get; set; }
+        public string? TShirtSize { get; set; }
 
         // Workflow & Status
         public MembershipStatus Status { get; set; }
@@ -74,5 +54,6 @@ namespace GHCAA.Domain.Models
         public ICollection<ECMember> ECMembers { get; set; } = new List<ECMember>();
         public ICollection<AcademicRecord> AcademicHistory { get; set; } = new List<AcademicRecord>();
         public ICollection<ProfessionalRecord> ProfessionalHistory { get; set; } = new List<ProfessionalRecord>();
+        public ICollection<PaymentHistory> PaymentHistories { get; set; } = new List<PaymentHistory>();
     }
 }

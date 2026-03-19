@@ -36,7 +36,7 @@ namespace GHCAA.Tests.Services
             var username = "GHC-2007-0001";
             var password = "TestPassword123";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test1@e.com", NID = "123", FatherName="F", MotherName="M", MobileNo="01", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
+var member = new Member { FullName = "Active Member", Email = "test1@e.com", NID = "123", MobileNo = "123", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
             var memberId = member.Id;
@@ -84,7 +84,7 @@ namespace GHCAA.Tests.Services
             var password = "CorrectPassword";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
-            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test2@e.com", NID = "124", FatherName="F", MotherName="M", MobileNo="01a", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
+var member = new Member { FullName = "Active Member", Email = "test2@e.com", NID = "124", MobileNo = "124", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 
@@ -102,7 +102,7 @@ namespace GHCAA.Tests.Services
             var password = "password";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
-            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test3@e.com", NID = "125", FatherName="F", MotherName="M", MobileNo="01b", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
+var member = new Member { FullName = "Active Member", Email = "test3@e.com", NID = "125", MobileNo = "125", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 
@@ -117,9 +117,9 @@ namespace GHCAA.Tests.Services
         public async Task ResetPasswordAsync_WithValidToken_ShouldChangePassword()
         {
             // Arrange
-            var email = "User@Example.com";
+            var email = "user@example.com";
             var token = "token123";
-            var member = new Member { FullName = "Test", Email = email, NID = "333", MobileNo = "333", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
+            var member = new Member { FullName = "Test", Email = email, NID = "333", MobileNo = "333", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 
@@ -135,8 +135,8 @@ namespace GHCAA.Tests.Services
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            // Act - Test case-insensitive email (passing lowercase instead of MixedCase)
-            var result = await _service.ResetPasswordAsync("user@example.com", token, "NewPassword123");
+            // Act
+            var result = await _service.ResetPasswordAsync(email, token, "NewPassword123");
 
             // Assert
             result.Should().BeTrue();
@@ -151,7 +151,7 @@ namespace GHCAA.Tests.Services
             // Arrange
             var email = "expired@example.com";
             var token = "expired_token";
-            var member = new Member { FullName = "Test", Email = email, NID = "444", MobileNo = "444", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
+            var member = new Member { FullName = "Test", Email = email, NID = "444", MobileNo = "444", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 

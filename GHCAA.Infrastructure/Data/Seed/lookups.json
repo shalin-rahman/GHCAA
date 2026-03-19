@@ -82,8 +82,8 @@
   {
     "Id": 11,
     "Category": "AcademicGroup",
-    "Value": "Arts \u0026 Humanities",
-    "Label": "Arts \u0026 Humanities",
+    "Value": "Humanities",
+    "Label": "Humanities",
     "IsActive": true,
     "DisplayOrder": 12
   },
@@ -702,5 +702,53 @@
     "Label": "Public Administration \u0026 Defense",
     "IsActive": true,
     "DisplayOrder": 89
+  },
+  {
+    "Id": 1001,
+    "Category": "TShirtSize",
+    "Value": "S",
+    "Label": "S",
+    "IsActive": true,
+    "DisplayOrder": 101
+  },
+  {
+    "Id": 1002,
+    "Category": "TShirtSize",
+    "Value": "M",
+    "Label": "M",
+    "IsActive": true,
+    "DisplayOrder": 102
+  },
+  {
+    "Id": 1003,
+    "Category": "TShirtSize",
+    "Value": "L",
+    "Label": "L",
+    "IsActive": true,
+    "DisplayOrder": 103
+  },
+  {
+    "Id": 1004,
+    "Category": "TShirtSize",
+    "Value": "XL",
+    "Label": "XL",
+    "IsActive": true,
+    "DisplayOrder": 104
+  },
+  {
+    "Id": 1005,
+    "Category": "TShirtSize",
+    "Value": "XXL",
+    "Label": "XXL",
+    "IsActive": true,
+    "DisplayOrder": 105
+  },
+  {
+    "Id": 1006,
+    "Category": "TShirtSize",
+    "Value": "3XL",
+    "Label": "3XL",
+    "IsActive": true,
+    "DisplayOrder": 106
   }
 ]

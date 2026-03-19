@@ -25,6 +25,7 @@ namespace GHCAA.Domain.Models
 
         public bool IsGHC { get; set; } // Flag for Govt. Haraganga College
         public string? Result { get; set; }
+        public string? CertificatePath { get; set; }
 
         // Navigation
         public Member? Member { get; set; }

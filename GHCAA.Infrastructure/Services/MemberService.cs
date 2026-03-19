@@ -76,18 +76,7 @@ namespace GHCAA.Infrastructure.Services
                 EmergencyContactName = dto.EmergencyContactName,
                 EmergencyContactRelation = dto.EmergencyContactRelation,
                 EmergencyContactPhone = dto.EmergencyContactPhone,
-                HSCAdmissionYear = dto.HSCAdmissionYear,
-                HighestCertificate = dto.HighestCertificate,
-                HighestCertificateGroup = dto.HighestCertificateGroup,
-                HighestCertificateSubject = dto.HighestCertificateSubject,
-                HighestCertificatePassingYear = dto.HighestCertificatePassingYear,
-                GHCAdmissionYear = dto.GHCAdmissionYear,
-                GHCLastCertificate = dto.GHCLastCertificate,
-                GHCLastCertificateGroup = dto.GHCLastCertificateGroup,
-                GHCLastCertificateSubject = dto.GHCLastCertificateSubject,
-                GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear,
-                ProfessionalSector = dto.ProfessionalSector,
-                Designation = dto.Designation,
+                TShirtSize = dto.TShirtSize,
                 Status = Enums.MembershipStatus.Applied,
                 AppliedDate = DateTime.UtcNow,
                 EmailVerified = false,
@@ -123,16 +112,7 @@ namespace GHCAA.Infrastructure.Services
             }
             else
             {
-                // Fallback to flat fields if history is not provided (legacy)
-                member.AcademicHistory.Add(new AcademicRecord
-                {
-                    InstitutionName = "Govt. Haraganga College",
-                    Degree = dto.GHCLastCertificate,
-                    Subject = dto.GHCLastCertificateSubject,
-                    AdmissionYear = dto.GHCAdmissionYear,
-                    PassingYear = dto.GHCLastCertificatePassingYear,
-                    IsGHC = true
-                });
+                throw new InvalidOperationException("Academic history is required. At least one record must be from Govt. Haraganga College.");
             }
 
             // Handle Professional History
@@ -171,7 +151,6 @@ namespace GHCAA.Infrastructure.Services
                 var path = await _storage.SaveFileAsync(certificate.Content, certificate.FileName, member.Id, Enums.FileUploadType.Certificate, cancellationToken);
                 var fu = new FileUpload { MemberId = member.Id, UploadType = Enums.FileUploadType.Certificate, FileName = certificate.FileName, FilePath = path, SizeBytes = certificate.Length };
                 await _fileRepo.AddAsync(fu, cancellationToken);
-                member.CertificatePath = fu.FilePath;
             }
 
             if (paymentProof != null)
@@ -179,7 +158,6 @@ namespace GHCAA.Infrastructure.Services
                 var path = await _storage.SaveFileAsync(paymentProof.Content, paymentProof.FileName, member.Id, Enums.FileUploadType.PaymentProof, cancellationToken);
                 var fu = new FileUpload { MemberId = member.Id, UploadType = Enums.FileUploadType.PaymentProof, FileName = paymentProof.FileName, FilePath = path, SizeBytes = paymentProof.Length };
                 await _fileRepo.AddAsync(fu, cancellationToken);
-                member.PaymentProofPath = fu.FilePath;
             }
 
             // update member with file paths
@@ -260,8 +238,10 @@ namespace GHCAA.Infrastructure.Services
             {
                 try
                 {
-                    // Find member
-                    member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+                    // Find member with AcademicHistory
+                    member = await _db.Members
+                        .Include(m => m.AcademicHistory)
+                        .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
                     if (member == null)
                     {
                         _logger.LogWarning("Approval failed: Member {MemberId} not found", memberId);
@@ -276,12 +256,15 @@ namespace GHCAA.Infrastructure.Services
                     }
 
                     // Generate membership number: GHC-{PassingYear}-{Serial}
-                    var passingYear = member.GHCLastCertificatePassingYear;
-                    var existingMembersCount = await _db.Members
-                        .Where(m => m.GHCLastCertificatePassingYear == passingYear && m.MembershipNumber != null)
+                    // Derive passing year from GHC academic record (replaces removed Member field)
+                    var ghcRecord = member.AcademicHistory.FirstOrDefault(a => a.IsGHC);
+                    var passingYear = ghcRecord?.PassingYear ?? DateTime.UtcNow.Year;
+                    var yearPrefix = $"GHC-{passingYear}-";
+                    var maxSerial = await _db.Members
+                        .Where(m => m.MembershipNumber != null && m.MembershipNumber.StartsWith(yearPrefix))
                         .CountAsync(cancellationToken);
                     
-                    var serial = (existingMembersCount + 1).ToString("D4"); // 4-digit zero-padded
+                    var serial = (maxSerial + 1).ToString("D4"); // 4-digit zero-padded
                     membershipNumber = $"GHC-{passingYear}-{serial}";
 
                     // Update member
@@ -373,16 +356,6 @@ namespace GHCAA.Infrastructure.Services
                 MobileNo = member.MobileNo,
                 MembershipNumber = member.MembershipNumber,
                 Status = member.Status,
-                GHCLastCertificatePassingYear = member.GHCLastCertificatePassingYear,
-                GHCLastCertificateGroup = member.GHCLastCertificateGroup,
-                GHCLastCertificateSubject = member.GHCLastCertificateSubject,
-                GHCLastCertificate = member.GHCLastCertificate,
-                HighestCertificate = member.HighestCertificate,
-                HighestCertificateGroup = member.HighestCertificateGroup,
-                HighestCertificateSubject = member.HighestCertificateSubject,
-                HighestCertificatePassingYear = member.HighestCertificatePassingYear,
-                ProfessionalSector = member.ProfessionalSector,
-                Designation = member.Designation,
                 PhotoPath = member.PhotoPath,
                 PresentAddress = member.PresentAddress,
                 PermanentAddress = member.PermanentAddress,
@@ -398,9 +371,6 @@ namespace GHCAA.Infrastructure.Services
                 EmergencyContactName = member.EmergencyContactName,
                 EmergencyContactRelation = member.EmergencyContactRelation,
                 EmergencyContactPhone = member.EmergencyContactPhone,
-                HSCAdmissionYear = member.HSCAdmissionYear,
-                GHCAdmissionYear = member.GHCAdmissionYear,
-                CertificatePath = member.CertificatePath,
                 IsMobilePublic = member.IsMobilePublic,
                 IsEmailPublic = member.IsEmailPublic,
                 IsAddressPublic = member.IsAddressPublic,
@@ -452,7 +422,10 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<bool> UpdateProfileAsync(int memberId, UpdateProfileDto dto, CancellationToken cancellationToken = default)
         {
-            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            var member = await _db.Members
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
+                .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) return false;
 
             if (!string.IsNullOrWhiteSpace(dto.FullName)) member.FullName = dto.FullName;
@@ -463,22 +436,10 @@ namespace GHCAA.Infrastructure.Services
             member.BloodGroup = dto.BloodGroup;
             if (!string.IsNullOrWhiteSpace(dto.PresentAddress)) member.PresentAddress = dto.PresentAddress;
             if (!string.IsNullOrWhiteSpace(dto.PermanentAddress)) member.PermanentAddress = dto.PermanentAddress;
-            if (!string.IsNullOrWhiteSpace(dto.ProfessionalSector)) member.ProfessionalSector = dto.ProfessionalSector;
-            if (!string.IsNullOrWhiteSpace(dto.Designation)) member.Designation = dto.Designation;
-            member.HSCAdmissionYear = dto.HSCAdmissionYear;
-            if (!string.IsNullOrWhiteSpace(dto.HighestCertificate)) member.HighestCertificate = dto.HighestCertificate;
-            if (!string.IsNullOrWhiteSpace(dto.HighestCertificateGroup)) member.HighestCertificateGroup = dto.HighestCertificateGroup;
-            if (!string.IsNullOrWhiteSpace(dto.HighestCertificateSubject)) member.HighestCertificateSubject = dto.HighestCertificateSubject;
-            if (dto.HighestCertificatePassingYear > 0) member.HighestCertificatePassingYear = dto.HighestCertificatePassingYear;
-            member.GHCAdmissionYear = dto.GHCAdmissionYear;
-            if (!string.IsNullOrWhiteSpace(dto.GHCLastCertificate)) member.GHCLastCertificate = dto.GHCLastCertificate;
-            if (!string.IsNullOrWhiteSpace(dto.GHCLastCertificateGroup)) member.GHCLastCertificateGroup = dto.GHCLastCertificateGroup;
-            if (!string.IsNullOrWhiteSpace(dto.GHCLastCertificateSubject)) member.GHCLastCertificateSubject = dto.GHCLastCertificateSubject;
-            if (dto.GHCLastCertificatePassingYear > 0) member.GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear;
-            
             if (!string.IsNullOrWhiteSpace(dto.EmergencyContactName)) member.EmergencyContactName = dto.EmergencyContactName;
             if (!string.IsNullOrWhiteSpace(dto.EmergencyContactRelation)) member.EmergencyContactRelation = dto.EmergencyContactRelation;
             if (!string.IsNullOrWhiteSpace(dto.EmergencyContactPhone)) member.EmergencyContactPhone = dto.EmergencyContactPhone;
+            if (!string.IsNullOrWhiteSpace(dto.TShirtSize)) member.TShirtSize = dto.TShirtSize;
             
             // Photo Path: Delete old file if path changes
             if (!string.IsNullOrWhiteSpace(dto.PhotoPath) && member.PhotoPath != dto.PhotoPath)
@@ -623,9 +584,7 @@ namespace GHCAA.Infrastructure.Services
 
             return new
             {
-                Photo = member.PhotoPath,
-                Certificate = member.CertificatePath,
-                PaymentProof = member.PaymentProofPath
+                Photo = member.PhotoPath
             };
         }
 
@@ -686,7 +645,9 @@ namespace GHCAA.Infrastructure.Services
                             (m.FullName != null && m.FullName.ToLower().Contains(term)) ||
                             (m.Email != null && m.Email.ToLower().Contains(term)) ||
                             (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(term)) ||
-                            (m.MobileNo != null && m.MobileNo.ToLower().Contains(term)));
+                            (m.MobileNo != null && m.MobileNo.ToLower().Contains(term)) ||
+                            m.AcademicHistory.Any(a => a.InstitutionName.ToLower().Contains(term) || a.Degree.ToLower().Contains(term) || a.Subject.ToLower().Contains(term)) ||
+                            m.ProfessionalHistory.Any(p => p.OrganizationName.ToLower().Contains(term) || p.Designation.ToLower().Contains(term)));
                     }
                 }
             }
@@ -727,13 +688,6 @@ namespace GHCAA.Infrastructure.Services
                     AppliedDate = member.AppliedDate,
                     MembershipNumber = member.MembershipNumber,
                     PhotoPath = member.PhotoPath,
-                    PassingYear = member.GHCLastCertificatePassingYear,
-                    GhcLastCertificatePassingYear = member.GHCLastCertificatePassingYear,
-                    GhcLastCertificate = member.GHCLastCertificate,
-                    GhcLastCertificateGroup = member.GHCLastCertificateGroup,
-                    GhcLastCertificateSubject = member.GHCLastCertificateSubject,
-                    ProfessionalSector = member.ProfessionalSector,
-                    Designation = member.Designation,
                     BloodGroup = member.BloodGroup,
                     MembershipType = member.MembershipType,
                     Category = member.Category,
@@ -763,6 +717,23 @@ namespace GHCAA.Infrastructure.Services
                     }).OrderByDescending(h => h.StartDate).ToList();
                 }
 
+                // Enhanced Summary Data from normalized tables
+                var ghcRecord = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC);
+                if (ghcRecord != null)
+                {
+                    dto.PassingYear = ghcRecord.PassingYear;
+                    dto.Degree = ghcRecord.Degree;
+                    dto.Subject = ghcRecord.Subject;
+                }
+
+                var currentJob = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent);
+                if (currentJob != null)
+                {
+                    dto.Designation = currentJob.Designation;
+                    dto.OrganizationName = currentJob.OrganizationName;
+                    dto.ProfessionalSector = currentJob.Sector;
+                }
+
                 return dto;
             });
 
@@ -777,7 +748,10 @@ namespace GHCAA.Infrastructure.Services
         }
         public async Task<bool> AdminUpdateMemberAsync(int id, AdminMemberUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            var member = await _db.Members.FindAsync(new object[] { id }, cancellationToken);
+            var member = await _db.Members
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
+                .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
             if (member == null) return false;
 
             member.FullName = dto.FullName;
@@ -795,18 +769,6 @@ namespace GHCAA.Infrastructure.Services
             
             if (Enum.TryParse<Enums.BloodGroup>(dto.BloodGroup, true, out var blood))
                 member.BloodGroup = blood;
-            member.HSCAdmissionYear = dto.HSCAdmissionYear;
-            member.HighestCertificate = dto.HighestCertificate;
-            member.HighestCertificateGroup = dto.HighestCertificateGroup;
-            member.HighestCertificateSubject = dto.HighestCertificateSubject;
-            member.HighestCertificatePassingYear = dto.HighestCertificatePassingYear;
-            member.GHCAdmissionYear = dto.GHCAdmissionYear;
-            member.GHCLastCertificate = dto.GHCLastCertificate;
-            member.GHCLastCertificateGroup = dto.GHCLastCertificateGroup;
-            member.GHCLastCertificateSubject = dto.GHCLastCertificateSubject;
-            member.GHCLastCertificatePassingYear = dto.GHCLastCertificatePassingYear;
-            member.ProfessionalSector = dto.ProfessionalSector;
-            member.Designation = dto.Designation;
             member.MembershipNumber = dto.MembershipNumber;
             if (!string.IsNullOrWhiteSpace(dto.PhotoPath)) member.PhotoPath = dto.PhotoPath;
 
@@ -815,7 +777,51 @@ namespace GHCAA.Infrastructure.Services
 
             if (Enum.TryParse<Enums.MemberCategory>(dto.Category, true, out var mCat))
                 member.Category = mCat;
-            
+
+            // Sync Academic History
+            if (dto.AcademicHistory != null)
+            {
+                // Validation matching RegisterAsync
+                if (dto.AcademicHistory.Any() && !dto.AcademicHistory.Any(a => a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase)))
+                {
+                    throw new InvalidOperationException("At least one academic record must be from Govt. Haraganga College.");
+                }
+
+                member.AcademicHistory.Clear();
+                foreach (var a in dto.AcademicHistory)
+                {
+                    member.AcademicHistory.Add(new AcademicRecord
+                    {
+                        InstitutionName = a.InstitutionName,
+                        Degree = a.Degree,
+                        Subject = a.Subject,
+                        AdmissionYear = a.AdmissionYear,
+                        PassingYear = a.PassingYear,
+                        IsGHC = a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase),
+                        Result = a.Result
+                    });
+                }
+            }
+
+            // Sync Professional History
+            if (dto.ProfessionalHistory != null)
+            {
+                member.ProfessionalHistory.Clear();
+                foreach (var p in dto.ProfessionalHistory)
+                {
+                    member.ProfessionalHistory.Add(new ProfessionalRecord
+                    {
+                        OrganizationName = p.OrganizationName,
+                        Designation = p.Designation,
+                        Sector = p.Sector,
+                        Location = p.Location,
+                        StartDate = DateTime.SpecifyKind(p.StartDate, DateTimeKind.Utc),
+                        EndDate = p.EndDate.HasValue ? DateTime.SpecifyKind(p.EndDate.Value, DateTimeKind.Utc) : null,
+                        IsCurrent = p.IsCurrent
+                    });
+                }
+            }
+
             // Sync EC History
             if (dto.ECHistory != null)
             {
@@ -903,7 +909,6 @@ namespace GHCAA.Infrastructure.Services
                 var path = await _storage.SaveFileAsync(certificate.Content, certificate.FileName, id, Enums.FileUploadType.Certificate, cancellationToken);
                 var fu = new FileUpload { MemberId = id, UploadType = Enums.FileUploadType.Certificate, FileName = certificate.FileName, FilePath = path, SizeBytes = certificate.Length };
                 await _fileRepo.AddAsync(fu, cancellationToken);
-                member.CertificatePath = fu.FilePath;
             }
 
             if (paymentProof != null)
@@ -911,7 +916,6 @@ namespace GHCAA.Infrastructure.Services
                 var path = await _storage.SaveFileAsync(paymentProof.Content, paymentProof.FileName, id, Enums.FileUploadType.PaymentProof, cancellationToken);
                 var fu = new FileUpload { MemberId = id, UploadType = Enums.FileUploadType.PaymentProof, FileName = paymentProof.FileName, FilePath = path, SizeBytes = paymentProof.Length };
                 await _fileRepo.AddAsync(fu, cancellationToken);
-                member.PaymentProofPath = fu.FilePath;
             }
 
             member.LastUpdateDate = DateTime.UtcNow;

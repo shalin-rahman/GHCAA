@@ -16,23 +16,7 @@ namespace GHCAA.Application.DTOs
 
         public string PresentAddress { get; set; } = null!;
         public string PermanentAddress { get; set; } = null!;
-
-        // Academic - Common
-        public int? HSCAdmissionYear { get; set; }
-        public string HighestCertificate { get; set; } = null!;
-        public string HighestCertificateGroup { get; set; } = null!;
-        public string HighestCertificateSubject { get; set; } = null!;
-        public int HighestCertificatePassingYear { get; set; }
-
-        public int? GHCAdmissionYear { get; set; }
-        public string GHCLastCertificate { get; set; } = null!;
-        public string GHCLastCertificateGroup { get; set; } = null!;
-        public string GHCLastCertificateSubject { get; set; } = null!;
-        public int GHCLastCertificatePassingYear { get; set; }
-
-        // Professional - Common
-        public string ProfessionalSector { get; set; } = null!;
-        public string Designation { get; set; } = null!;
+        public string? TShirtSize { get; set; }
 
         // Privacy
         public bool IsMobilePublic { get; set; }

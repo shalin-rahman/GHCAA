@@ -1,3 +1,5 @@
+using GHCAA.Domain;
+using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -5,7 +7,7 @@ using NUnit.Framework;
 
 namespace GHCAA.Tests
 {
-    public abstract class TestBase
+    public class TestBase
     {
         protected ApplicationDbContext _context = null!;
         private SqliteConnection _connection = null!;
@@ -13,7 +15,6 @@ namespace GHCAA.Tests
         [SetUp]
         public void BaseSetup()
         {
-            ApplicationDbContext.IsSeedDisabled = true;
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
@@ -32,11 +33,34 @@ namespace GHCAA.Tests
             _connection.Close();
         }
 
-        protected DbContextOptions<ApplicationDbContext> GetOptions()
+        protected void DetachAll()
         {
-            return new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseSqlite(_connection)
-                .Options;
+            var entries = _context.ChangeTracker.Entries().ToList();
+            foreach (var entry in entries) entry.State = EntityState.Detached;
+        }
+
+        protected Member CreateTestMember(string name = "John Doe", string email = "test@example.com", string phone = "01712345678", string nid = "1234567890")
+        {
+            return new Member
+            {
+                FullName = name,
+                Email = email,
+                MobileNo = phone,
+                NID = nid,
+                FatherName = "Father",
+                MotherName = "Mother",
+                DateOfBirth = new DateTime(1990, 1, 1),
+                Gender = Enums.Gender.Male,
+                BloodGroup = Enums.BloodGroup.APositive,
+                PresentAddress = "Present Address",
+                PermanentAddress = "Permanent Address",
+                EmergencyContactName = "Emergency",
+                EmergencyContactRelation = "Relation",
+                EmergencyContactPhone = "01812345678",
+                Status = Enums.MembershipStatus.Active,
+                AppliedDate = DateTime.UtcNow,
+                HasAcceptedTerms = true
+            };
         }
     }
 }

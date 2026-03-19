@@ -111,6 +111,13 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
+        
+        var recreateDb = configuration.GetValue<bool>("AppSettings:RecreateDatabaseOnStartup", false);
+        if (recreateDb)
+        {
+            context.Database.EnsureDeleted();
+        }
+
         if (context.Database.IsRelational())
         {
             context.Database.Migrate();

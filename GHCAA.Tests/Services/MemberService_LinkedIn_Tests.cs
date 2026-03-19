@@ -64,9 +64,9 @@ public class MemberService_LinkedIn_Tests : TestBase
             FullName = "Test", Email = email, NID = nid, MobileNo = nid, 
             FatherName = "F", MotherName = "M", PresentAddress="A", PermanentAddress="A", 
             EmergencyContactName="C", EmergencyContactRelation="R", EmergencyContactPhone="P",
-            HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
-            GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
-            ProfessionalSector="IT", Designation="Dev",
+//             HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
+//             GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
+//             ProfessionalSector="IT", Designation="Dev",
             Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive
         };
     }
@@ -143,9 +143,9 @@ public class MemberService_LinkedIn_Tests : TestBase
             Gender = "Male",
             BloodGroup = "APositive",
             FatherName = "F", MotherName = "M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="C", EmergencyContactRelation="R", EmergencyContactPhone="P",
-            HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
-            GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
-            ProfessionalSector="IT", Designation="Dev",
+//             HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
+//             GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
+//             ProfessionalSector="IT", Designation="Dev",
             AcademicHistory = new List<AcademicRecordDto>
             {
                 new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject="S", PassingYear = 2010, IsGHC = true }

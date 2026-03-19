@@ -98,6 +98,12 @@
                                     @for (b of bloodGroupOptions; track b.value) { <option [value]="b.value">{{ b.label }}</option> }
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label>T-Shirt Size *</label>
+                                <select [(ngModel)]="model.TShirtSize" name="tShirtSize" required>
+                                    @for (s of tShirtOptions; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
+                                </select>
+                            </div>
                         </div>
                     </div>
 

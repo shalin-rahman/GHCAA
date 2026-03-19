@@ -33,8 +33,8 @@ public class FileUploadRepositoryTests
             MobileNo = "01700000000",
             FatherName ="F", MotherName="M", PresentAddress="A", PermanentAddress="A", 
             EmergencyContactName="C", EmergencyContactRelation="R", EmergencyContactPhone="017",
-            ProfessionalSector = "IT", Designation = "Dev", GHCLastCertificate = "HSC", GHCLastCertificateGroup = "Science", GHCLastCertificateSubject = "None",
-            HighestCertificate = "HSC", HighestCertificateGroup = "Science", HighestCertificateSubject = "None"
+//             ProfessionalSector = "IT", Designation = "Dev", GHCLastCertificate = "HSC", GHCLastCertificateGroup = "Science", GHCLastCertificateSubject = "None",
+//             HighestCertificate = "HSC", HighestCertificateGroup = "Science", HighestCertificateSubject = "None"
         });
         _context.Members.Add(new Member 
         { 
@@ -45,8 +45,8 @@ public class FileUploadRepositoryTests
             MobileNo = "01700000001",
             FatherName ="F", MotherName="M", PresentAddress="A", PermanentAddress="A", 
             EmergencyContactName="C", EmergencyContactRelation="R", EmergencyContactPhone="017",
-            ProfessionalSector = "IT", Designation = "Dev", GHCLastCertificate = "HSC", GHCLastCertificateGroup = "Science", GHCLastCertificateSubject = "None",
-            HighestCertificate = "HSC", HighestCertificateGroup = "Science", HighestCertificateSubject = "None"
+//             ProfessionalSector = "IT", Designation = "Dev", GHCLastCertificate = "HSC", GHCLastCertificateGroup = "Science", GHCLastCertificateSubject = "None",
+//             HighestCertificate = "HSC", HighestCertificateGroup = "Science", HighestCertificateSubject = "None"
         });
         _context.SaveChanges();
     }

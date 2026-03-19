@@ -74,6 +74,39 @@ public class NetworkingServiceTests : TestBase
     }
 
     [Test]
+    public async Task SearchMembersAsync_WithNewTableFilters_ShouldReturnCorrectMembers()
+    {
+        // Setup scenarios: 
+        // 1. Jane: GHC 2005, IT Sector, Developer
+        // 2. John: GHC 2010, Banking, Manager
+        var jane = CreateValidMember("Jane Doe", "jane@nt.com", "01700000001", "1234567801");
+        jane.AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } };
+        jane.ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "TechCo", Designation = "Developer", Sector = "IT", IsCurrent = true, StartDate = DateTime.UtcNow.AddYears(-1) } };
+
+        var john = CreateValidMember("John Smith", "john@nt.com", "01700000002", "1234567802");
+        john.AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "Hons", Subject = "Business", PassingYear = 2010, IsGHC = true } };
+        john.ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "BankCorp", Designation = "Manager", Sector = "Banking", IsCurrent = true, StartDate = DateTime.UtcNow.AddYears(-2) } };
+
+        _context.Members.AddRange(jane, john);
+        await _context.SaveChangesAsync();
+
+        // 1. Test PassingYear filter (2005)
+        var res1 = await _service.SearchMembersAsync(new MemberSearchFilterDto { PassingYear = 2005 });
+        res1.Items.Should().HaveCount(1);
+        res1.Items.First().FullName.Should().Be("Jane Doe");
+
+        // 2. Test ProfessionalSector filter (Banking)
+        var res2 = await _service.SearchMembersAsync(new MemberSearchFilterDto { ProfessionalSector = "Banking" });
+        res2.Items.Should().HaveCount(1);
+        res2.Items.First().FullName.Should().Be("John Smith");
+
+        // 3. Test Designation filter (Developer)
+        var res3 = await _service.SearchMembersAsync(new MemberSearchFilterDto { Designation = "Developer" });
+        res3.Items.Should().HaveCount(1);
+        res3.Items.First().FullName.Should().Be("Jane Doe");
+    }
+
+    [Test]
     public async Task SearchMembersAsync_ShouldHideInactiveAndArchivedMembers()
     {
         var inactive = CreateValidMember("Inactive Member", "i@nttest.com", "01744445555", "NTST5555");
@@ -97,18 +130,6 @@ public class NetworkingServiceTests : TestBase
 
     private Member CreateValidMember(string name, string email, string phone, string nid)
     {
-        return new Member
-        {
-            FullName = name, Email = email, MobileNo = phone, NID = nid,
-            FatherName = "Father", MotherName = "Mother",
-            DateOfBirth = new DateTime(1990, 1, 1),
-            Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive,
-            PresentAddress = "Present", PermanentAddress = "Permanent",
-            EmergencyContactName = "Emergency", EmergencyContactRelation = "Relation", EmergencyContactPhone = "01111111111",
-            HSCAdmissionYear = 2005, GHCAdmissionYear = 2005,
-            HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None", GHCLastCertificatePassingYear = 2007,
-            ProfessionalSector = "IT", Designation = "Software Engineer",
-            Status = Enums.MembershipStatus.Active, AppliedDate = DateTime.UtcNow
-        };
+        return CreateTestMember(name, email, phone, nid);
     }
 }

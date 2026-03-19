@@ -26,27 +26,10 @@ namespace GHCAA.Application.DTOs
         public string EmergencyContactRelation { get; set; } = null!;
         public string EmergencyContactPhone { get; set; } = null!;
 
-        // Academic
-        public int? HSCAdmissionYear { get; set; }
-        public string HighestCertificate { get; set; } = null!;
-        public string HighestCertificateGroup { get; set; } = null!;
-        public string HighestCertificateSubject { get; set; } = null!;
-        public int HighestCertificatePassingYear { get; set; }
-
-        public int? GHCAdmissionYear { get; set; }
-        public string GHCLastCertificate { get; set; } = null!;
-        public string GHCLastCertificateGroup { get; set; } = null!;
-        public string GHCLastCertificateSubject { get; set; } = null!;
-        public int GHCLastCertificatePassingYear { get; set; }
-        
-        // Professional
-        public string ProfessionalSector { get; set; } = null!;
-        public string Designation { get; set; } = null!;
+        public string? TShirtSize { get; set; }
         
         // Info
         public string? PhotoPath { get; set; }
-        public string? CertificatePath { get; set; }
-        public string? PaymentProofPath { get; set; }
         public string PresentAddress { get; set; } = null!;
         public string PermanentAddress { get; set; } = null!;
         
@@ -72,6 +55,7 @@ namespace GHCAA.Application.DTOs
         public int PassingYear { get; set; }
         public bool IsGHC { get; set; }
         public string? Result { get; set; }
+        public string? CertificatePath { get; set; }
     }
 
     public class ProfessionalRecordDto
@@ -106,13 +90,7 @@ namespace GHCAA.Application.DTOs
         public string? PhotoPath { get; set; }
         public MembershipStatus Status { get; set; }
         public DateTime AppliedDate { get; set; }
-        public int PassingYear { get; set; }
-        public int GhcLastCertificatePassingYear { get; set; }
-        public string? GhcLastCertificate { get; set; }
-        public string? GhcLastCertificateGroup { get; set; }
-        public string? GhcLastCertificateSubject { get; set; }
-        public string? ProfessionalSector { get; set; }
-        public string? Designation { get; set; }
+        public string? TShirtSize { get; set; }
         public BloodGroup BloodGroup { get; set; }
         public string? Email { get; set; }
         public bool IsEmailPublic { get; set; }
@@ -124,5 +102,13 @@ namespace GHCAA.Application.DTOs
         public MembershipType MembershipType { get; set; }
         public MemberCategory Category { get; set; }
         public List<ECHistoryDto> ECHistory { get; set; } = new();
+
+        // Directory Fields (Academic/Professional)
+        public int? PassingYear { get; set; }
+        public string? Degree { get; set; }
+        public string? Subject { get; set; }
+        public string? Designation { get; set; }
+        public string? OrganizationName { get; set; }
+        public string? ProfessionalSector { get; set; }
     }
 }

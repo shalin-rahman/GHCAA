@@ -31,29 +31,33 @@ export interface Member {
     emergencyContactName: string;
     emergencyContactRelation: string;
     emergencyContactPhone: string;
-    hscAdmissionYear?: number;
-    highestCertificate: string;
-    highestCertificateGroup: string;
-    highestCertificateSubject: string;
-    highestCertificatePassingYear: number;
+    tShirtSize?: string;
 
-    ghcAdmissionYear?: number;
-    ghcLastCertificate: string;
-    ghcLastCertificateGroup: string;
-    ghcLastCertificateSubject: string;
-    ghcLastCertificatePassingYear: number;
-    professionalSector: string;
-    designation: string;
     photoPath?: string;
-    certificatePath?: string;
-    paymentProofPath?: string;
     status: MembershipStatus;
     appliedDate: string | Date;
     approvedDate?: string | Date;
     membershipNumber?: string;
     membershipType: MembershipType;
     category: MemberCategory;
+    
+    academicHistory?: AcademicRecord[];
+    professionalHistory?: ProfessionalRecord[];
     ecHistory?: ECMember[];
+    paymentHistories?: PaymentHistory[];
+}
+
+export interface PaymentHistory {
+    id: number;
+    memberId: number;
+    transactionId: string;
+    amount: number;
+    paidAt: string | Date;
+    status: PaymentStatus;
+    category: FinancialCategory;
+    notes?: string;
+    paymentMethod: PaymentMethod;
+    receiptPath?: string;
 }
 
 export interface ECPeriod {
@@ -330,6 +334,7 @@ export interface AcademicRecord {
     passingYear: number;
     isGHC: boolean;
     result?: string;
+    certificatePath?: string;
 }
 
 export interface ProfessionalRecord {
@@ -372,27 +377,10 @@ export interface MemberProfile {
     emergencyContactName?: string;
     emergencyContactRelation?: string;
     emergencyContactPhone?: string;
-
-    // Academic
-    hscAdmissionYear?: number;
-    highestCertificate: string;
-    highestCertificateGroup: string;
-    highestCertificateSubject: string;
-    highestCertificatePassingYear: number;
-    ghcAdmissionYear?: number;
-    ghcLastCertificate: string;
-    ghcLastCertificateGroup: string;
-    ghcLastCertificateSubject: string;
-    ghcLastCertificatePassingYear: number;
-
-    // Professional
-    professionalSector: string;
-    designation: string;
+    tShirtSize?: string;
 
     // Info
     photoPath?: string;
-    certificatePath?: string;
-    paymentProofPath?: string;
     presentAddress: string;
     permanentAddress: string;
 
@@ -405,6 +393,7 @@ export interface MemberProfile {
     academicHistory: AcademicRecord[];
     professionalHistory: ProfessionalRecord[];
     ecHistory?: ECHistoryRecord[];
+    paymentHistories?: PaymentHistory[];
 }
 
 export interface MemberSearchFilter {

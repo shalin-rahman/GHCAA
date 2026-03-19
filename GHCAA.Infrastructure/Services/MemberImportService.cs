@@ -35,6 +35,97 @@ namespace GHCAA.Infrastructure.Services
             _logger = logger;
         }
 
+        public async Task<byte[]> ExportMembersToExcelAsync(CancellationToken cancellationToken = default)
+        {
+            var members = await _db.Members
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
+                .OrderBy(m => m.FullName)
+                .ToListAsync(cancellationToken);
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Members Registry");
+
+            // --- Headers (Personal) ---
+            string[] headers = {
+                "ID", "FullName", "FatherName", "MotherName", "DateOfBirth", "Gender", "BloodGroup", 
+                "NID", "MobileNo", "Email", "PresentAddress", "PermanentAddress", "TShirtSize",
+                "HSCAdmissionYear", "HighestCertificate", "HighestCertificateGroup", "HighestCertificateSubject", "HighestCertificatePassingYear",
+                "GHCAdmissionYear", "GHCLastCertificate", "GHCLastCertificateGroup", "GHCLastCertificateSubject", "GHCLastCertificatePassingYear",
+                "ProfessionalSector", "Designation",
+                "MembershipNumber", "Status", "MembershipType", "Category", "AppliedDate"
+            };
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                worksheet.Cell(1, i + 1).Value = headers[i];
+                var cell = worksheet.Cell(1, i + 1);
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.BackgroundColor = XLColor.GhostWhite;
+            }
+
+            // --- Data ---
+            for (int i = 0; i < members.Count; i++)
+            {
+                var m = members[i];
+                var row = i + 2;
+                
+                // Academics
+                var ghc = m.AcademicHistory.FirstOrDefault(a => a.IsGHC);
+                var hsc = m.AcademicHistory.FirstOrDefault(a => a.Degree == "HSC");
+                var highest = m.AcademicHistory.FirstOrDefault(a => !a.IsGHC && a.Degree != "HSC") 
+                            ?? m.AcademicHistory.OrderByDescending(x => x.PassingYear).FirstOrDefault();
+
+                // Professional
+                var prof = m.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent) 
+                        ?? m.ProfessionalHistory.OrderByDescending(p => p.StartDate).FirstOrDefault();
+
+                worksheet.Cell(row, 1).Value = m.Id;
+                worksheet.Cell(row, 2).Value = m.FullName;
+                worksheet.Cell(row, 3).Value = m.FatherName;
+                worksheet.Cell(row, 4).Value = m.MotherName;
+                worksheet.Cell(row, 5).Value = m.DateOfBirth.ToString("yyyy-MM-dd");
+                worksheet.Cell(row, 6).Value = m.Gender.ToString();
+                worksheet.Cell(row, 7).Value = m.BloodGroup.ToString();
+                worksheet.Cell(row, 8).Value = m.NID;
+                worksheet.Cell(row, 9).Value = m.MobileNo;
+                worksheet.Cell(row, 10).Value = m.Email;
+                worksheet.Cell(row, 11).Value = m.PresentAddress;
+                worksheet.Cell(row, 12).Value = m.PermanentAddress;
+                worksheet.Cell(row, 13).Value = m.TShirtSize;
+
+                // Academic - HSC/Highest
+                worksheet.Cell(row, 14).Value = hsc?.AdmissionYear > 0 ? hsc.AdmissionYear.ToString() : "";
+                worksheet.Cell(row, 15).Value = highest?.Degree;
+                worksheet.Cell(row, 16).Value = highest?.Subject;
+                worksheet.Cell(row, 17).Value = highest?.Subject; // mapped both for backward compatibility
+                worksheet.Cell(row, 18).Value = highest?.PassingYear > 0 ? highest.PassingYear.ToString() : "";
+
+                // Academic - GHC
+                worksheet.Cell(row, 19).Value = ghc?.AdmissionYear > 0 ? ghc.AdmissionYear.ToString() : "";
+                worksheet.Cell(row, 20).Value = ghc?.Degree;
+                worksheet.Cell(row, 21).Value = ghc?.Subject;
+                worksheet.Cell(row, 22).Value = ghc?.Subject;
+                worksheet.Cell(row, 23).Value = ghc?.PassingYear > 0 ? ghc.PassingYear.ToString() : "";
+
+                // Professional
+                worksheet.Cell(row, 24).Value = prof?.Sector;
+                worksheet.Cell(row, 25).Value = prof?.Designation;
+
+                worksheet.Cell(row, 26).Value = m.MembershipNumber;
+                worksheet.Cell(row, 27).Value = m.Status.ToString();
+                worksheet.Cell(row, 28).Value = m.MembershipType.ToString();
+                worksheet.Cell(row, 29).Value = m.Category.ToString();
+                worksheet.Cell(row, 30).Value = m.AppliedDate.ToString("yyyy-MM-dd");
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+        }
+
         public async Task<MemberImportResultDto> ImportMembersAsync(MemberImportRequestDto request, CancellationToken cancellationToken = default)
         {
             var result = new MemberImportResultDto();
@@ -98,6 +189,8 @@ namespace GHCAA.Infrastructure.Services
 
             // Pre-fetch ONLY relevant members for lookup
             var existingMembers = await _db.Members
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
                 .Where(m => nidsInFile.Contains(m.NID) || emailsInFile.Contains(m.Email))
                 .ToListAsync(cancellationToken);
 
@@ -209,14 +302,14 @@ namespace GHCAA.Infrastructure.Services
                     if (string.IsNullOrWhiteSpace(member.EmergencyContactName)) { member.EmergencyContactName = $"{Constants.Defaults.ImportPrefix}-{Constants.Defaults.UnknownValue}";                      result.Errors.Add($"{rowTag}: EmergencyContactName missing — set to '{member.EmergencyContactName}'"); }
                     if (string.IsNullOrWhiteSpace(member.EmergencyContactRelation)) { member.EmergencyContactRelation = Constants.Defaults.UnknownValue;                    result.Errors.Add($"{rowTag}: EmergencyContactRelation missing — set to '{Constants.Defaults.UnknownValue}'"); }
                     if (string.IsNullOrWhiteSpace(member.EmergencyContactPhone)) { member.EmergencyContactPhone = $"{Constants.Defaults.ImportPrefix}-{Constants.Defaults.UnknownValue}";                   result.Errors.Add($"{rowTag}: EmergencyContactPhone missing — set to '{member.EmergencyContactPhone}'"); }
-                    if (string.IsNullOrWhiteSpace(member.HighestCertificate))  { member.HighestCertificate = Enums.Degree.HSC.ToString();                                   result.Errors.Add($"{rowTag}: HighestCertificate missing — defaulted to '{Enums.Degree.HSC}'"); }
-                    if (string.IsNullOrWhiteSpace(member.HighestCertificateGroup))   { member.HighestCertificateGroup = Constants.Defaults.UnknownValue;                    result.Errors.Add($"{rowTag}: HighestCertificateGroup missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
-                    if (string.IsNullOrWhiteSpace(member.HighestCertificateSubject)) { member.HighestCertificateSubject = "None";                     result.Errors.Add($"{rowTag}: HighestCertificateSubject missing — defaulted to 'None'"); }
-                    if (string.IsNullOrWhiteSpace(member.GHCLastCertificate))  { member.GHCLastCertificate = Enums.Degree.HSC.ToString();                                   result.Errors.Add($"{rowTag}: GHCLastCertificate missing — defaulted to '{Enums.Degree.HSC}'"); }
-                    if (string.IsNullOrWhiteSpace(member.GHCLastCertificateGroup))   { member.GHCLastCertificateGroup = Constants.Defaults.UnknownValue;                    result.Errors.Add($"{rowTag}: GHCLastCertificateGroup missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
-                    if (string.IsNullOrWhiteSpace(member.GHCLastCertificateSubject)) { member.GHCLastCertificateSubject = "None";                     result.Errors.Add($"{rowTag}: GHCLastCertificateSubject missing — defaulted to 'None'"); }
-                    if (string.IsNullOrWhiteSpace(member.ProfessionalSector))  { member.ProfessionalSector = Constants.Defaults.UnknownValue;                               result.Errors.Add($"{rowTag}: ProfessionalSector missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
-                    if (string.IsNullOrWhiteSpace(member.Designation))         { member.Designation = Constants.Defaults.UnknownValue;                                       result.Errors.Add($"{rowTag}: Designation missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
+//                     if (string.IsNullOrWhiteSpace(member.HighestCertificate))  { member.HighestCertificate = Enums.Degree.HSC.ToString();                                   result.Errors.Add($"{rowTag}: HighestCertificate missing — defaulted to '{Enums.Degree.HSC}'"); }
+//                     if (string.IsNullOrWhiteSpace(member.HighestCertificateGroup))   { member.HighestCertificateGroup = Constants.Defaults.UnknownValue;                    result.Errors.Add($"{rowTag}: HighestCertificateGroup missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
+//                     if (string.IsNullOrWhiteSpace(member.HighestCertificateSubject)) { member.HighestCertificateSubject = "None";                     result.Errors.Add($"{rowTag}: HighestCertificateSubject missing — defaulted to 'None'"); }
+//                     if (string.IsNullOrWhiteSpace(member.GHCLastCertificate))  { member.GHCLastCertificate = Enums.Degree.HSC.ToString();                                   result.Errors.Add($"{rowTag}: GHCLastCertificate missing — defaulted to '{Enums.Degree.HSC}'"); }
+//                     if (string.IsNullOrWhiteSpace(member.GHCLastCertificateGroup))   { member.GHCLastCertificateGroup = Constants.Defaults.UnknownValue;                    result.Errors.Add($"{rowTag}: GHCLastCertificateGroup missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
+//                     if (string.IsNullOrWhiteSpace(member.GHCLastCertificateSubject)) { member.GHCLastCertificateSubject = "None";                     result.Errors.Add($"{rowTag}: GHCLastCertificateSubject missing — defaulted to 'None'"); }
+//                     if (string.IsNullOrWhiteSpace(member.ProfessionalSector))  { member.ProfessionalSector = Constants.Defaults.UnknownValue;                               result.Errors.Add($"{rowTag}: ProfessionalSector missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
+//                     if (string.IsNullOrWhiteSpace(member.Designation))         { member.Designation = Constants.Defaults.UnknownValue;                                       result.Errors.Add($"{rowTag}: Designation missing — defaulted to '{Constants.Defaults.UnknownValue}'"); }
  
                     // ── UNIQUE: Email (auto-generate from NID if missing) ─────────────────
                     if (string.IsNullOrWhiteSpace(member.Email))
@@ -424,23 +517,21 @@ namespace GHCAA.Infrastructure.Services
                 nameof(Member.FatherName) => member.FatherName,
                 nameof(Member.MotherName) => member.MotherName,
                 nameof(Member.DateOfBirth) => member.DateOfBirth.ToString("yyyy-MM-dd"),
-                nameof(Member.GHCLastCertificatePassingYear) => member.GHCLastCertificatePassingYear.ToString(),
+                "GHCLastCertificatePassingYear" => member.AcademicHistory.FirstOrDefault(a => a.IsGHC)?.PassingYear.ToString(),
                 nameof(Member.MembershipNumber) => member.MembershipNumber,
-                nameof(Member.Designation) => member.Designation,
-                nameof(Member.ProfessionalSector) => member.ProfessionalSector,
+                "Designation" => member.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent)?.Designation,
+                "ProfessionalSector" => member.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent)?.Sector,
                 nameof(Member.PresentAddress) => member.PresentAddress,
                 nameof(Member.PermanentAddress) => member.PermanentAddress,
                 nameof(Member.EmergencyContactName) => member.EmergencyContactName,
                 nameof(Member.EmergencyContactRelation) => member.EmergencyContactRelation,
                 nameof(Member.EmergencyContactPhone) => member.EmergencyContactPhone,
-                nameof(Member.HighestCertificate) => member.HighestCertificate,
-                nameof(Member.HighestCertificateGroup) => member.HighestCertificateGroup,
-                nameof(Member.HighestCertificateSubject) => member.HighestCertificateSubject,
-                nameof(Member.GHCLastCertificate) => member.GHCLastCertificate,
-                nameof(Member.GHCLastCertificateGroup) => member.GHCLastCertificateGroup,
-                nameof(Member.GHCLastCertificateSubject) => member.GHCLastCertificateSubject,
-                nameof(Member.HSCAdmissionYear) => member.HSCAdmissionYear.ToString(),
-                nameof(Member.GHCAdmissionYear) => member.GHCAdmissionYear.ToString(),
+                "HighestCertificate" => member.AcademicHistory.FirstOrDefault(a => !a.IsGHC)?.Degree,
+                "HighestCertificateGroup" => member.AcademicHistory.FirstOrDefault(a => !a.IsGHC)?.Subject,
+                "GHCLastCertificate" => member.AcademicHistory.FirstOrDefault(a => a.IsGHC)?.Degree,
+                "HSCAdmissionYear" => member.AcademicHistory.FirstOrDefault(a => !a.IsGHC && a.Degree == "HSC")?.AdmissionYear.ToString(),
+                "GHCAdmissionYear" => member.AcademicHistory.FirstOrDefault(a => a.IsGHC)?.AdmissionYear.ToString(),
+                nameof(Member.TShirtSize) => member.TShirtSize,
                 nameof(Member.Category) => member.Category.ToString(),
                 _ => null
             };
@@ -458,31 +549,37 @@ namespace GHCAA.Infrastructure.Services
                 case nameof(Member.NID): member.NID = value; break;
                 case nameof(Member.FatherName): member.FatherName = value; break;
                 case nameof(Member.MotherName): member.MotherName = value; break;
-                case nameof(Member.GHCLastCertificatePassingYear): 
-                    if (int.TryParse(value, out var yr)) member.GHCLastCertificatePassingYear = yr; break;
-                case nameof(Member.HSCAdmissionYear): 
-                    if (int.TryParse(value, out var yrHsc)) member.HSCAdmissionYear = yrHsc; break;
-                case nameof(Member.GHCAdmissionYear): 
-                    if (int.TryParse(value, out var yrGhc)) member.GHCAdmissionYear = yrGhc; break;
+                case "GHCLastCertificatePassingYear": 
+                    GetGhcRecord(member).PassingYear = int.TryParse(value, out var yr) ? yr : 0; break;
+                case "HSCAdmissionYear": 
+                    GetHscRecord(member).AdmissionYear = int.TryParse(value, out var yrHsc) ? yrHsc : 0; break;
+                case "GHCAdmissionYear": 
+                    GetGhcRecord(member).AdmissionYear = int.TryParse(value, out var yrGhc) ? yrGhc : 0; break;
                 case nameof(Member.DateOfBirth):
                     if (DateTime.TryParse(value, out var dob))
-                        // Treat Excel dates as local/unspecified; store as UTC for PostgreSQL
                         member.DateOfBirth = DateTime.SpecifyKind(dob, DateTimeKind.Utc);
                     break;
                 case nameof(Member.MembershipNumber): member.MembershipNumber = value; break;
-                case nameof(Member.Designation): member.Designation = value; break;
-                case nameof(Member.ProfessionalSector): member.ProfessionalSector = value; break;
+                case "Designation": 
+                    GetCurrentProfessionalRecord(member).Designation = value; break;
+                case "ProfessionalSector": 
+                    GetCurrentProfessionalRecord(member).Sector = value; break;
                 case nameof(Member.PresentAddress): member.PresentAddress = value; break;
                 case nameof(Member.PermanentAddress): member.PermanentAddress = value; break;
-                case nameof(Member.HighestCertificate): member.HighestCertificate = value; break;
-                case nameof(Member.HighestCertificateGroup): member.HighestCertificateGroup = value; break;
-                case nameof(Member.HighestCertificateSubject): member.HighestCertificateSubject = value; break;
-                case nameof(Member.GHCLastCertificate): member.GHCLastCertificate = value; break;
-                case nameof(Member.GHCLastCertificateGroup): member.GHCLastCertificateGroup = value; break;
-                case nameof(Member.GHCLastCertificateSubject): member.GHCLastCertificateSubject = value; break;
+                case "HighestCertificate": 
+                    GetHighestRecord(member).Degree = value; break;
+                case "HighestCertificateGroup":
+                case "HighestCertificateSubject":
+                    GetHighestRecord(member).Subject = value; break;
+                case "GHCLastCertificate": 
+                    GetGhcRecord(member).Degree = value; break;
+                case "GHCLastCertificateGroup":
+                case "GHCLastCertificateSubject":
+                    GetGhcRecord(member).Subject = value; break;
                 case nameof(Member.EmergencyContactName): member.EmergencyContactName = value; break;
                 case nameof(Member.EmergencyContactRelation): member.EmergencyContactRelation = value; break;
                 case nameof(Member.EmergencyContactPhone): member.EmergencyContactPhone = value; break;
+                case nameof(Member.TShirtSize): member.TShirtSize = value; break;
                 case nameof(Member.Gender):
                     if (Enum.TryParse<Enums.Gender>(value, true, out var gender)) member.Gender = gender; break;
                 case nameof(Member.BloodGroup):
@@ -492,6 +589,51 @@ namespace GHCAA.Infrastructure.Services
                 case nameof(Member.Category):
                     if (Enum.TryParse<Enums.MemberCategory>(value, true, out var cat)) member.Category = cat; break;
             }
+        }
+
+        private AcademicRecord GetGhcRecord(Member member)
+        {
+            var record = member.AcademicHistory.FirstOrDefault(a => a.IsGHC);
+            if (record == null)
+            {
+                record = new AcademicRecord { IsGHC = true, InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "None" };
+                member.AcademicHistory.Add(record);
+            }
+            return record;
+        }
+
+        private AcademicRecord GetHscRecord(Member member)
+        {
+            var record = member.AcademicHistory.FirstOrDefault(a => a.Degree == "HSC");
+            if (record == null)
+            {
+                record = new AcademicRecord { IsGHC = false, InstitutionName = "Unknown", Degree = "HSC", Subject = "None" };
+                member.AcademicHistory.Add(record);
+            }
+            return record;
+        }
+
+        private AcademicRecord GetHighestRecord(Member member)
+        {
+            // If they are updating highest, we might just assume it's a non-GHC one or create new
+            var record = member.AcademicHistory.FirstOrDefault(a => !a.IsGHC && a.Degree != "HSC");
+            if (record == null)
+            {
+                record = new AcademicRecord { IsGHC = false, InstitutionName = "Unknown", Degree = "Other", Subject = "None" };
+                member.AcademicHistory.Add(record);
+            }
+            return record;
+        }
+
+        private ProfessionalRecord GetCurrentProfessionalRecord(Member member)
+        {
+            var record = member.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent);
+            if (record == null)
+            {
+                record = new ProfessionalRecord { IsCurrent = true, OrganizationName = "Unknown", Designation = "Unknown", StartDate = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc) };
+                member.ProfessionalHistory.Add(record);
+            }
+            return record;
         }
     }
 }

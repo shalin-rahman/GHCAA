@@ -63,6 +63,10 @@ export const routes: Routes = [
                     { path: 'success', loadComponent: () => import('./common/payment-status/payment-status').then(m => m.PaymentStatus) },
                     { path: 'failed', loadComponent: () => import('./common/payment-status/payment-status').then(m => m.PaymentStatus) }
                 ]
+            },
+            {
+                path: 'healtz',
+                loadComponent: () => import('./common/health/health').then(m => m.Health)
             }
         ]
     },

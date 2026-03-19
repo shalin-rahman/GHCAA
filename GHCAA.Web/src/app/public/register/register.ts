@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RegistrationService } from '../../core/services/registration.service';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
-import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS } from '../../core/constants/app.constants';
+import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-register',
@@ -34,6 +34,7 @@ export class Register implements OnDestroy {
   sectorOptions = this.ACADEMIC.sectors;
   bloodGroupOptions = BLOOD_GROUP_OPTIONS;
   genderOptions = GENDER_OPTIONS;
+  tShirtOptions = TSHIRT_SIZES;
   paymentConfigs = signal<any[]>([]);
 
   model: any = {
@@ -48,18 +49,7 @@ export class Register implements OnDestroy {
     Email: '',
     PresentAddress: '',
     PermanentAddress: '',
-    HSCAdmissionYear: null,
-    HighestCertificate: 'HSC',
-    HighestCertificateGroup: 'Science',
-    HighestCertificateSubject: 'None',
-    HighestCertificatePassingYear: null,
-    GHCAdmissionYear: null,
-    GHCLastCertificate: 'HSC',
-    GHCLastCertificateGroup: 'Science',
-    GHCLastCertificateSubject: 'None',
-    GHCLastCertificatePassingYear: null,
-    ProfessionalSector: '',
-    Designation: '',
+    TShirtSize: 'L',
     EmergencyContactName: '',
     EmergencyContactRelation: '',
     EmergencyContactPhone: '',

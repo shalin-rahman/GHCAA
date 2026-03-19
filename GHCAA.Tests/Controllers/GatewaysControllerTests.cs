@@ -70,9 +70,9 @@ namespace GHCAA.Tests.Controllers
                 FatherName = "F", MotherName = "M", 
                 PresentAddress = "A", PermanentAddress = "B",
                 EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "P",
-                HighestCertificate = "X", HighestCertificateGroup = "G", HighestCertificateSubject = "S",
-                GHCLastCertificate = "GC", GHCLastCertificateGroup = "GG", GHCLastCertificateSubject = "GS",
-                ProfessionalSector = "PS", Designation = "D"
+//                 HighestCertificate = "X", HighestCertificateGroup = "G", HighestCertificateSubject = "S",
+//                 GHCLastCertificate = "GC", GHCLastCertificateGroup = "GG", GHCLastCertificateSubject = "GS",
+//                 ProfessionalSector = "PS", Designation = "D"
             });
             _dbContext.SaveChanges();
         }

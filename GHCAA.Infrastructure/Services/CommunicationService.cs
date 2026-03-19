@@ -150,7 +150,10 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task SendIndividualEmailAsync(int memberId, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default)
         {
-            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
+            var member = await _db.Members
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
+                .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) throw new KeyNotFoundException("Member not found");
 
             await SendTemplatedEmailAsync(member.Email, member, templateCode, customVars, cancellationToken);
@@ -159,7 +162,9 @@ namespace GHCAA.Infrastructure.Services
         public async Task SendBatchEmailAsync(IEnumerable<int> passingYears, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default)
         {
             var members = await _db.Members
-                .Where(m => passingYears.Contains(m.GHCLastCertificatePassingYear) && !m.IsArchived)
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
+                .Where(m => m.AcademicHistory.Any(a => a.IsGHC && passingYears.Contains(a.PassingYear)) && !m.IsArchived)
                 .ToListAsync(cancellationToken);
 
             foreach (var member in members)
@@ -171,6 +176,8 @@ namespace GHCAA.Infrastructure.Services
         public async Task SendTypeEmailAsync(IEnumerable<string> membershipTypes, string templateCode, Dictionary<string, string>? customVars = null, CancellationToken cancellationToken = default)
         {
             var members = await _db.Members
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
                 .Where(m => membershipTypes.Contains(m.MembershipType.ToString()) && !m.IsArchived)
                 .ToListAsync(cancellationToken);
 
@@ -186,7 +193,10 @@ namespace GHCAA.Infrastructure.Services
             {
                 foreach (var email in emails)
                 {
-                    var member = await _db.Members.FirstOrDefaultAsync(m => m.Email == email, cancellationToken);
+                    var member = await _db.Members
+                        .Include(m => m.AcademicHistory)
+                        .Include(m => m.ProfessionalHistory)
+                        .FirstOrDefaultAsync(m => m.Email == email, cancellationToken);
                     await SendTemplatedEmailAsync(email, member, templateCode, customVars, cancellationToken);
                 }
             }
@@ -202,7 +212,9 @@ namespace GHCAA.Infrastructure.Services
         public async Task SendBatchCustomEmailAsync(IEnumerable<int> passingYears, string subject, string htmlBody, CancellationToken cancellationToken = default)
         {
             var members = await _db.Members
-                .Where(m => passingYears.Contains(m.GHCLastCertificatePassingYear) && !m.IsArchived)
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
+                .Where(m => m.AcademicHistory.Any(a => a.IsGHC && passingYears.Contains(a.PassingYear)) && !m.IsArchived)
                 .ToListAsync(cancellationToken);
 
             foreach (var member in members)
@@ -214,6 +226,8 @@ namespace GHCAA.Infrastructure.Services
         public async Task SendTypeCustomEmailAsync(IEnumerable<string> membershipTypes, string subject, string htmlBody, CancellationToken cancellationToken = default)
         {
             var members = await _db.Members
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
                 .Where(m => membershipTypes.Contains(m.MembershipType.ToString()) && !m.IsArchived)
                 .ToListAsync(cancellationToken);
 
@@ -225,7 +239,10 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task SendMemberCustomEmailAsync(int memberId, string subject, string htmlBody, CancellationToken cancellationToken = default)
         {
-            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
+            var member = await _db.Members
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
+                .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             if (member == null) throw new KeyNotFoundException("Member not found");
 
             await SendAndLogEmailAsync(member.Email, subject, htmlBody, null, "Single Member", cancellationToken);
@@ -257,11 +274,16 @@ namespace GHCAA.Infrastructure.Services
                 vars["MobileNo"] = member.MobileNo;
                 vars["PresentAddress"] = member.PresentAddress;
                 vars["PermanentAddress"] = member.PermanentAddress;
-                vars["PassingYear"] = member.GHCLastCertificatePassingYear.ToString();
-                vars["HSCAdmissionYear"] = member.HSCAdmissionYear?.ToString() ?? "N/A";
-                vars["SubjectGroup"] = member.GHCLastCertificateSubject;
-                vars["ProfessionalSector"] = member.ProfessionalSector;
-                vars["Designation"] = member.Designation;
+                
+                var ghc = member.AcademicHistory.FirstOrDefault(a => a.IsGHC);
+                var hsc = member.AcademicHistory.FirstOrDefault(a => a.Degree == "HSC");
+                var prof = member.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent);
+
+                vars["PassingYear"] = ghc?.PassingYear.ToString() ?? "N/A";
+                vars["HSCAdmissionYear"] = hsc?.AdmissionYear.ToString() ?? "N/A";
+                vars["SubjectGroup"] = ghc?.Subject ?? "N/A";
+                vars["ProfessionalSector"] = prof?.Sector ?? "N/A";
+                vars["Designation"] = prof?.Designation ?? "N/A";
             }
 
             if (customVars != null)

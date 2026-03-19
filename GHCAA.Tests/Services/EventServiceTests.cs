@@ -42,7 +42,7 @@ public class EventServiceTests : TestBase
     [Test]
     public async Task RegisterForEventAsync_ShouldCreateRegistration()
     {
-        var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", FatherName = "F", MotherName = "M", MobileNo = "12", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
+var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", MobileNo = "12", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
         var ev = new AlumniEvent { Title = "Event 1", Description = "D", Date = DateTime.UtcNow, Location = "L" };
         _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);
@@ -59,7 +59,7 @@ public class EventServiceTests : TestBase
     [Test]
     public async Task ApproveRegistrationAsync_ShouldUpdateStatusAndSendEmail()
     {
-        var member = new Member { FullName = "Test Member", Email = "evtest@example.com", NID = "EVT1", FatherName = "F", MotherName = "M", MobileNo = "EVT1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "P", Designation = "D" };
+var member = new Member { FullName = "Test Member", Email = "evtest@example.com", NID = "EVT1", MobileNo = "EVT1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
         var ev = new AlumniEvent { Title = "Grand Reunion", Description = "D", Date = DateTime.UtcNow, Location = "Campus" };
         _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);
@@ -87,7 +87,7 @@ public class EventServiceTests : TestBase
     [Test]
     public async Task RegisterForEventAsync_ShouldIncludeReceiptPath_WhenFileProvided()
     {
-        var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", FatherName = "F", MotherName = "M", MobileNo = "123", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
+var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", MobileNo = "123", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
         var ev = new AlumniEvent { Title = "E", Description = "D", Date = DateTime.UtcNow, Location = "L" };
         _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);

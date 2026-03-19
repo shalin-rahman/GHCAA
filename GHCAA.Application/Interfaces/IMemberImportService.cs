@@ -7,5 +7,6 @@ namespace GHCAA.Application.Interfaces
     public interface IMemberImportService
     {
         Task<MemberImportResultDto> ImportMembersAsync(MemberImportRequestDto request, CancellationToken cancellationToken = default);
+        Task<byte[]> ExportMembersToExcelAsync(CancellationToken cancellationToken = default);
     }
 }
