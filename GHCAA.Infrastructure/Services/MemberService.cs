@@ -89,9 +89,9 @@ namespace GHCAA.Infrastructure.Services
                 IsVerified = false
             };
 
-            // Generate Membership Number: lGC + YY + MM + (last 3 digit max + 1)
+            // Generate Membership Number: GHC + YY + MM + (last 3 digit max + 1)
             var now = DateTime.UtcNow;
-            var prefix = $"lGC{now:yyMM}";
+            var prefix = $"GHC{now:yyMM}";
             
             // Get the last membership number for the current month prefix
             var lastMember = await _db.Members
@@ -279,9 +279,9 @@ namespace GHCAA.Infrastructure.Services
                         throw new InvalidOperationException($"Member must have 'Applied' status to be approved. Current status: {member.Status}");
                     }
 
-                    // Generate membership number: lGCYYMMXXX
+                    // Generate membership number: GHCYYMMXXX
                     var now = DateTime.UtcNow;
-                    var prefix = $"lGC{now:yyMM}";
+                    var prefix = $"GHC{now:yyMM}";
                     
                     var lastBound = await _db.Members
                         .Where(m => m.MembershipNumber != null && m.MembershipNumber.StartsWith(prefix))

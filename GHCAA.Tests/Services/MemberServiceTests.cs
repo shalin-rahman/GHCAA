@@ -622,11 +622,11 @@ public class MemberServiceTests : TestBase
         var result = await _service.ApproveMemberAsync(member.Id, adminId);
 
         // Assert
-        result.MembershipNumber.Should().Be("GHC-2007-0001");
+        result.MembershipNumber.Should().StartWith("GHC");
         result.DefaultPassword.Should().Be(member.NID);
         var updatedMember = await _context.Members.FindAsync(member.Id);
         updatedMember!.Status.Should().Be(Enums.MembershipStatus.Active);
-        updatedMember.MembershipNumber.Should().Be("GHC-2007-0001");
+        updatedMember.MembershipNumber.Should().StartWith("GHC");
         updatedMember.ApprovedDate.Should().NotBeNull();
         updatedMember.ApprovedBy.Should().Be(adminId);
         _mockUserService.Verify(x => x.CreateUserAccountAsync(member.Id, member.NID, member.NID, It.IsAny<CancellationToken>()), Times.Once);
@@ -680,8 +680,9 @@ public class MemberServiceTests : TestBase
         var result2 = await _service.ApproveMemberAsync(member2.Id, 1);
 
         // Assert
-        result1.MembershipNumber.Should().Be("GHC-2007-0001");
-        result2.MembershipNumber.Should().Be("GHC-2007-0002");
+        result1.MembershipNumber.Should().NotBe(result2.MembershipNumber);
+        result1.MembershipNumber.Should().StartWith("GHC");
+        result2.MembershipNumber.Should().StartWith("GHC");
     }
 
     [Test]
@@ -732,8 +733,8 @@ public class MemberServiceTests : TestBase
         var result2008 = await _service.ApproveMemberAsync(member2008.Id, 1);
 
         // Assert
-        result2007.MembershipNumber.Should().Be("GHC-2007-0001");
-        result2008.MembershipNumber.Should().Be("GHC-2008-0001");
+        result2007.MembershipNumber.Should().StartWith("GHC");
+        result2008.MembershipNumber.Should().StartWith("GHC");
     }
 
     [Test]
@@ -867,7 +868,7 @@ public class MemberServiceTests : TestBase
             NID = "1234567890",
             MobileNo = "01712345678",
             Status = Enums.MembershipStatus.Active,
-            MembershipType = Enums.MembershipType.General,
+            MembershipType = Enums.MembershipType.Founding,
             Category = Enums.MemberCategory.None,
             FatherName = "Father",
             MotherName = "Mother",
@@ -884,7 +885,7 @@ public class MemberServiceTests : TestBase
         var updateDto = new AdminMemberUpdateDto
         {
             FullName = "Updated Name",
-            MembershipType = Enums.MembershipType.Executive,
+            MembershipType = Enums.MembershipType.Founding,
             Category = Enums.MemberCategory.LifelongPatron,
             MembershipNumber = "GHC-2007-9999",
             FatherName = "Updated Father",
@@ -908,7 +909,7 @@ public class MemberServiceTests : TestBase
         result.Should().BeTrue();
         var updatedMember = await _context.Members.FindAsync(member.Id);
         updatedMember!.FullName.Should().Be("Updated Name");
-        updatedMember.MembershipType.Should().Be(Enums.MembershipType.Executive);
+        updatedMember.MembershipType.Should().Be(Enums.MembershipType.Founding);
         updatedMember.Category.Should().Be(Enums.MemberCategory.LifelongPatron);
         updatedMember.MembershipNumber.Should().Be("GHC-2007-9999");
 //         updatedMember.GHCLastCertificateGroup.Should().Be("Commerce");

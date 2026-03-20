@@ -148,7 +148,7 @@ public class FamilyLinkServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01900000000",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", PassingYear = 2000, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2000, IsGHC = true } }
         };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
