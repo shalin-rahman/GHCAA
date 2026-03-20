@@ -46,6 +46,15 @@
                     }
                 </select>
             </div>
+            <div class="filter-group">
+                <label>Category</label>
+                <select [(ngModel)]="filters.category" (change)="search()">
+                    <option value="">All Categories</option>
+                    @for (cat of memberCategories; track cat.value) {
+                    <option [value]="cat.value">{{ cat.label }}</option>
+                    }
+                </select>
+            </div>
         </div>
         <div class="results-summary" *ngIf="!loading() && totalItems() > 0">
             <span>Showing <strong>{{ members().length }}</strong> of <strong>{{ totalItems() }}</strong> members</span>

@@ -59,7 +59,7 @@
                 </div>
                 <div class="form-group">
                     <label>Category *</label>
-                    <select [(ngModel)]="newRecord.category" name="category" required>
+                    <select [(ngModel)]="newRecord.financialCategory" name="financialCategory" required>
                         <option value="MembershipFee">Membership Fee</option>
                         <option value="Donation">Donation</option>
                         <option value="Event">Event</option>
@@ -119,7 +119,7 @@
                 <tr>
                     <td>{{ tr.date | date:'mediumDate' }}</td>
                     <td>{{ tr.description }}</td>
-                    <td><span class="category-pill">{{ getCategoryName(tr.category) }}</span></td>
+                    <td><span class="category-pill">{{ getCategoryName(tr.financialCategory) }}</span></td>
                     <td>
                         <span class="type-indicator" [ngClass]="tr.recordType === 'Income' ? 'credit' : 'debit'">
                             {{ tr.recordType === 'Income' ? 'Income' : 'Expense' }}

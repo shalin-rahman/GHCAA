@@ -167,7 +167,7 @@ namespace GHCAA.Infrastructure.Data
 
             // LookupItem Unique Constraint
             modelBuilder.Entity<LookupItem>()
-                .HasIndex(l => new { l.Category, l.Value }).IsUnique();
+                .HasIndex(l => new { l.LookupGroup, l.Value }).IsUnique();
 
             modelBuilder.Entity<EmailTemplate>()
                 .HasIndex(t => t.Code).IsUnique();

@@ -33,6 +33,7 @@ namespace GHCAA.API.Controllers
             [FromQuery] int pageSize = 10,
             [FromQuery] string searchQuery = "",
             [FromQuery] string statusFilter = "all",
+            [FromQuery] string categoryFilter = "all",
             [FromQuery] bool includeArchived = false, 
             CancellationToken cancellationToken = default)
         {
@@ -43,7 +44,7 @@ namespace GHCAA.API.Controllers
             }
 
             var isPrivileged = User.IsInRole("SuperAdmin");
-            var result = await _memberService.GetAllMembersAsync(page, pageSize, searchQuery, statusFilter, includeArchived, isPrivileged, cancellationToken);
+            var result = await _memberService.GetAllMembersAsync(page, pageSize, searchQuery, statusFilter, categoryFilter, includeArchived, isPrivileged, cancellationToken);
             return Ok(result);
         }
 

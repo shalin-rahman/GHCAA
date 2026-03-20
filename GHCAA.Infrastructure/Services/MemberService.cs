@@ -709,7 +709,7 @@ namespace GHCAA.Infrastructure.Services
             };
         }
 
-        public async Task<object> GetAllMembersAsync(int page = 1, int pageSize = 10, string searchQuery = "", string statusFilter = "all", bool includeArchived = false, bool isPrivileged = false, CancellationToken cancellationToken = default)
+        public async Task<object> GetAllMembersAsync(int page = 1, int pageSize = 10, string searchQuery = "", string statusFilter = "all", string categoryFilter = "all", bool includeArchived = false, bool isPrivileged = false, CancellationToken cancellationToken = default)
         {
             IQueryable<Member> query = _db.Members
                 .Include(m => m.ECMembers)
@@ -762,6 +762,20 @@ namespace GHCAA.Infrastructure.Services
                 {
                     var casted = (Enums.MembershipStatus)statusInt;
                     query = query.Where(m => m.Status == casted);
+                }
+            }
+
+            // Apply category filter
+            if (!string.IsNullOrWhiteSpace(categoryFilter) && categoryFilter != "all")
+            {
+                if (Enum.TryParse<Enums.MemberCategory>(categoryFilter, true, out var catEnum))
+                {
+                    query = query.Where(m => m.Category == catEnum);
+                }
+                else if (int.TryParse(categoryFilter, out var catInt))
+                {
+                    var casted = (Enums.MemberCategory)catInt;
+                    query = query.Where(m => m.Category == casted);
                 }
             }
 

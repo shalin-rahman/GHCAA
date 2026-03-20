@@ -28,9 +28,9 @@ public class NewsServiceTests : TestBase
         await _context.SaveChangesAsync();
 
         _context.NewsPosts.AddRange(
-            new NewsPost { Title = "Active 1", Content = "C1", IsActive = true, AuthorId = user.Id, Category = Enums.ArticleCategory.Regular, Status = Enums.SubmissionStatus.Approved },
-            new NewsPost { Title = "Active 2", Content = "C2", IsActive = true, AuthorId = user.Id, Category = Enums.ArticleCategory.Event, Status = Enums.SubmissionStatus.Approved },
-            new NewsPost { Title = "Inactive", Content = "C3", IsActive = false, AuthorId = user.Id, Category = Enums.ArticleCategory.Regular, Status = Enums.SubmissionStatus.Approved }
+            new NewsPost { Title = "Active 1", Content = "C1", IsActive = true, AuthorId = user.Id, ArticleCategory = Enums.ArticleCategory.Regular, Status = Enums.SubmissionStatus.Approved },
+            new NewsPost { Title = "Active 2", Content = "C2", IsActive = true, AuthorId = user.Id, ArticleCategory = Enums.ArticleCategory.Event, Status = Enums.SubmissionStatus.Approved },
+            new NewsPost { Title = "Inactive", Content = "C3", IsActive = false, AuthorId = user.Id, ArticleCategory = Enums.ArticleCategory.Regular, Status = Enums.SubmissionStatus.Approved }
         );
         await _context.SaveChangesAsync();
 

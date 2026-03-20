@@ -9,8 +9,8 @@ import { API_ENDPOINTS } from '../constants/app.constants';
 export class LookupService {
     private http = inject(HttpClient);
 
-    getLookups(category?: string, silent: boolean = false): Observable<any[]> {
-        const url = category ? `${API_ENDPOINTS.LOOKUPS}/${category}` : API_ENDPOINTS.LOOKUPS;
+    getLookups(lookupGroup?: string, silent: boolean = false): Observable<any[]> {
+        const url = lookupGroup ? `${API_ENDPOINTS.LOOKUPS}/${lookupGroup}` : API_ENDPOINTS.LOOKUPS;
         const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
         return this.http.get<any[]>(url, { headers });
     }

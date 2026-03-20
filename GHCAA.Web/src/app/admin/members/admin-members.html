@@ -29,8 +29,16 @@
         </div>
         <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()"
             class="status-select">
+            <option value="all">All Statuses</option>
             @for (s of statusOptions; track s.value) {
             <option [value]="s.value">{{ s.label }}</option>
+            }
+        </select>
+        <select [ngModel]="categoryFilter()" (ngModelChange)="categoryFilter.set($event); onFilterChange()"
+            class="status-select ml-2">
+            <option value="all">Every Special Category</option>
+            @for (c of memberCategories; track c.value) {
+            <option [value]="c.value">{{ c.label }}</option>
             }
         </select>
     </div>
@@ -75,7 +83,14 @@
                         </div>
                     </td>
                     <td><code class="text-accent">{{ member.membershipNumber || '—' }}</code></td>
-                    <td><span class="text-xs uppercase font-bold opacity-70">{{ getMembershipTypeLabel(member.membershipType) }}</span></td>
+                    <td>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-xs uppercase font-bold opacity-70">{{ getMembershipTypeLabel(member.membershipType) }}</span>
+                            @if (member.category && member.category !== 'None') {
+                                <span class="badge" [class]="member.category.toLowerCase()">{{ member.category }}</span>
+                            }
+                        </div>
+                    </td>
                     <td>
                         <span class="status-badge" [class]="getStatusClass(member.status)">
                             {{ getStatusLabel(member.status) }}

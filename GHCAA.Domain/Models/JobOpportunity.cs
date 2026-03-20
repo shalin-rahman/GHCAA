@@ -16,7 +16,7 @@ namespace GHCAA.Domain.Models
         public DateTime PostedDate { get; set; } = DateTime.UtcNow;
         public DateTime? ExpiryDate { get; set; }
         public bool IsActive { get; set; } = true;
-        public Enums.JobCategory Category { get; set; }
+        public Enums.JobCategory JobCategory { get; set; }
 
         // Navigation
         public Member? PostedBy { get; set; }

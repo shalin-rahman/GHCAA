@@ -65,8 +65,8 @@ public class MemberServiceTests : TestBase
             FatherName = "Father Name",
             MotherName = "Mother Name",
             DateOfBirth = new DateTime(1990, 1, 1),
-            Gender = "Male",
-            BloodGroup = "APositive",
+            Gender =  GHCAA.Domain.Enums.Gender.Male,
+            BloodGroup = GHCAA.Domain.Enums.BloodGroup.APositive,
             NID = "1234567890",
             MobileNo = "01712345678",
             Email = "test@example.com",
@@ -793,7 +793,7 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", PassingYear = 2007, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
         };
         await _context.Members.AddAsync(member);
         await _context.SaveChangesAsync();
@@ -884,8 +884,8 @@ public class MemberServiceTests : TestBase
         var updateDto = new AdminMemberUpdateDto
         {
             FullName = "Updated Name",
-            MembershipType = "Executive",
-            Category = "Lifelong",
+            MembershipType = Enums.MembershipType.Executive,
+            Category = Enums.MemberCategory.LifelongPatron,
             MembershipNumber = "GHC-2007-9999",
             FatherName = "Updated Father",
             MotherName = "Updated Mother",
@@ -909,7 +909,7 @@ public class MemberServiceTests : TestBase
         var updatedMember = await _context.Members.FindAsync(member.Id);
         updatedMember!.FullName.Should().Be("Updated Name");
         updatedMember.MembershipType.Should().Be(Enums.MembershipType.Executive);
-        updatedMember.Category.Should().Be(Enums.MemberCategory.Lifelong);
+        updatedMember.Category.Should().Be(Enums.MemberCategory.LifelongPatron);
         updatedMember.MembershipNumber.Should().Be("GHC-2007-9999");
 //         updatedMember.GHCLastCertificateGroup.Should().Be("Commerce");
     }

@@ -37,7 +37,7 @@ namespace GHCAA.Tests.Services
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
 
-            var dto = new CreateJobDto { Title = "Software Engineer", CompanyName = "Tech Corp", Location = "Dhaka", Description = "Develop software", Requirements = "C# Knowledge", ApplicationEmail = "jobs@tech.com", ApplicationDeadline = DateTime.UtcNow.AddDays(30), Category = Enums.JobCategory.IT };
+            var dto = new CreateJobDto { Title = "Software Engineer", CompanyName = "Tech Corp", Location = "Dhaka", Description = "Develop software", Requirements = "C# Knowledge", ApplicationEmail = "jobs@tech.com", ApplicationDeadline = DateTime.UtcNow.AddDays(30), JobCategory = Enums.JobCategory.IT };
             var result = await _service.PostJobAsync(dto, member.Id);
 
             result.Should().NotBeNull();
@@ -57,9 +57,9 @@ namespace GHCAA.Tests.Services
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
 
-            _context.JobOpportunities.Add(new JobOpportunity { Title = "Active Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, ExpiryDate = DateTime.UtcNow.AddDays(10), Category = Enums.JobCategory.IT });
-            _context.JobOpportunities.Add(new JobOpportunity { Title = "Expired Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, ExpiryDate = DateTime.UtcNow.AddDays(-1), Category = Enums.JobCategory.IT });
-            _context.JobOpportunities.Add(new JobOpportunity { Title = "Inactive Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = false, ExpiryDate = DateTime.UtcNow.AddDays(10), Category = Enums.JobCategory.IT });
+            _context.JobOpportunities.Add(new JobOpportunity { Title = "Active Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, ExpiryDate = DateTime.UtcNow.AddDays(10), JobCategory = Enums.JobCategory.IT });
+            _context.JobOpportunities.Add(new JobOpportunity { Title = "Expired Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, ExpiryDate = DateTime.UtcNow.AddDays(-1), JobCategory = Enums.JobCategory.IT });
+            _context.JobOpportunities.Add(new JobOpportunity { Title = "Inactive Job", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = false, ExpiryDate = DateTime.UtcNow.AddDays(10), JobCategory = Enums.JobCategory.IT });
             await _context.SaveChangesAsync();
 
             var result = await _service.GetActiveJobsAsync();
@@ -75,7 +75,7 @@ namespace GHCAA.Tests.Services
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
 
-            var job = new JobOpportunity { Title = "Job To Deactivate", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, ExpiryDate = DateTime.UtcNow.AddDays(10), Category = Enums.JobCategory.IT };
+            var job = new JobOpportunity { Title = "Job To Deactivate", Company = "C", Location = "L", Description = "D", Requirements = "R", ContactEmail = "E", PostedByMemberId = member.Id, IsActive = true, ExpiryDate = DateTime.UtcNow.AddDays(10), JobCategory = Enums.JobCategory.IT };
             _context.JobOpportunities.Add(job);
             await _context.SaveChangesAsync();
 

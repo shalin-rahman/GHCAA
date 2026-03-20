@@ -34,7 +34,7 @@ export class Jobs implements OnInit {
     title: '',
     companyName: '',
     location: '',
-    category: 'IT',
+    jobCategory: 'IT',
     description: '',
     requirements: '',
     applicationDeadline: '',
@@ -45,10 +45,10 @@ export class Jobs implements OnInit {
     this.loadJobs();
   }
 
-  loadJobs(category?: any) {
+  loadJobs(jobCategory?: any) {
     this.loading.set(true);
     const params: any = {};
-    if (category !== undefined) params.category = category;
+    if (jobCategory !== undefined) params.jobCategory = jobCategory;
     if (this.searchQuery) params.query = this.searchQuery;
 
     this.jobService.getJobs(params).subscribe({
@@ -96,7 +96,7 @@ export class Jobs implements OnInit {
       title: job.title,
       companyName: job.companyName,
       location: job.location,
-      category: job.category,
+      jobCategory: job.jobCategory,
       description: job.description,
       requirements: job.requirements,
       deadline: job.applicationDeadline, // Backend usually expects YYYY-MM-DD
@@ -110,7 +110,7 @@ export class Jobs implements OnInit {
     this.showForm.set(false);
     this.isEditing.set(false);
     this.editingId.set(null);
-    this.newJob = { title: '', companyName: '', location: '', category: 'IT', description: '', requirements: '', applicationDeadline: '', applicationEmail: '' };
+    this.newJob = { title: '', companyName: '', location: '', jobCategory: 'IT', description: '', requirements: '', applicationDeadline: '', applicationEmail: '' };
   }
 
   onFilterChange(e: any) {

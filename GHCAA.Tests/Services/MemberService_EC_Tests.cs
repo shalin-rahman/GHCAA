@@ -128,7 +128,7 @@ namespace GHCAA.Tests.Services
             {
                 FullName = m.FullName, Email = m.Email, MobileNo = m.MobileNo, NID = m.NID,
                 FatherName = m.FatherName, MotherName = m.MotherName, PresentAddress = m.PresentAddress,
-                PermanentAddress = m.PermanentAddress, MembershipType = "General", Category = "None",
+                PermanentAddress = m.PermanentAddress, MembershipType = Enums.MembershipType.General, Category = Enums.MemberCategory.None,
 //                 GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear, GHCLastCertificate = m.GHCLastCertificate,
 //                 GHCLastCertificateGroup = m.GHCLastCertificateGroup, GHCLastCertificateSubject = m.GHCLastCertificateSubject,
 //                 HighestCertificate = m.HighestCertificate, HighestCertificateGroup = m.HighestCertificateGroup, HighestCertificateSubject = m.HighestCertificateSubject,

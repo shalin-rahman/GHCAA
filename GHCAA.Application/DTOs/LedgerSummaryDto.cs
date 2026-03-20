@@ -14,7 +14,7 @@ namespace GHCAA.Application.DTOs
     public class LedgerCategorySummaryDto
     {
         public string Type { get; set; } = null!;
-        public string Category { get; set; } = null!;
+        public string FinancialCategory { get; set; } = null!;
         public decimal Total { get; set; }
     }
 }

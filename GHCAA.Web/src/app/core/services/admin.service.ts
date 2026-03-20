@@ -73,8 +73,8 @@ export class AdminService {
         return this.http.get<any>(`${this.apiUrl}${params}`);
     }
 
-    getMembers(page: number = 1, pageSize: number = 10, searchQuery: string = '', statusFilter: string = 'all', includeArchived: boolean = false): Observable<any> {
-        let params = `?page=${page}&pageSize=${pageSize}&includeArchived=${includeArchived}&statusFilter=${statusFilter}`;
+    getMembers(page: number = 1, pageSize: number = 10, searchQuery: string = '', statusFilter: string = 'all', categoryFilter: string = 'all', includeArchived: boolean = false): Observable<any> {
+        let params = `?page=${page}&pageSize=${pageSize}&includeArchived=${includeArchived}&statusFilter=${statusFilter}&categoryFilter=${categoryFilter}`;
         if (searchQuery) params += `&searchQuery=${encodeURIComponent(searchQuery)}`;
         return this.http.get<any>(`${this.apiUrl}${params}`);
     }
@@ -83,9 +83,9 @@ export class AdminService {
         return this.http.get<any>(`${this.apiUrl}/${id}`);
     }
 
-    getAllForExport(searchQuery: string = '', statusFilter: string = 'all'): Observable<any[]> {
+    getAllForExport(searchQuery: string = '', statusFilter: string = 'all', categoryFilter: string = 'all'): Observable<any[]> {
         // Fetch a large number or use a specific export endpoint if you add one later
-        let params = `?page=1&pageSize=10000&statusFilter=${statusFilter}`;
+        let params = `?page=1&pageSize=10000&statusFilter=${statusFilter}&categoryFilter=${categoryFilter}`;
         if (searchQuery) params += `&searchQuery=${encodeURIComponent(searchQuery)}`;
         return this.http.get<any>(`${this.apiUrl}${params}`);
     }

@@ -51,7 +51,7 @@ namespace GHCAA.Infrastructure.Services
                 Amount = dto.Amount,
                 PaidAt = DateTime.SpecifyKind(dto.PaidAt, DateTimeKind.Utc),
                 Status = Enums.PaymentStatus.Pending,
-                Category = dto.Category,
+                FinancialCategory = dto.FinancialCategory,
                 Notes = dto.Notes
             };
 
@@ -413,7 +413,7 @@ namespace GHCAA.Infrastructure.Services
                             });
 
                             table.Cell().Text("1");
-                            table.Cell().Text($"{payment.Category} - TrxID: {payment.TransactionId}");
+                            table.Cell().Text($"{payment.FinancialCategory} - TrxID: {payment.TransactionId}");
                             table.Cell().AlignRight().Text($"{payment.Amount:N2}");
                         });
 
@@ -457,7 +457,7 @@ namespace GHCAA.Infrastructure.Services
                 Amount = p.Amount,
                 PaidAt = p.PaidAt,
                 Status = p.Status,
-                Category = p.Category,
+                FinancialCategory = p.FinancialCategory,
                 Notes = p.Notes
             };
         }

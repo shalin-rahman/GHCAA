@@ -16,7 +16,7 @@ namespace GHCAA.Domain.Models
         public string Content { get; set; } = null!; // HTML support
 
         [Required]
-        public ArticleCategory Category { get; set; }
+        public ArticleCategory ArticleCategory { get; set; }
 
         public SubmissionStatus Status { get; set; } = SubmissionStatus.Approved; // Default for existing/admin news
 

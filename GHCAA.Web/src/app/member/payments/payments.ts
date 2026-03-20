@@ -29,7 +29,7 @@ export class Payments implements OnInit {
         transactionId: '',
         notes: '',
         paymentMethod: 'ManualReceipt',
-        category: 'MembershipFee'
+        financialCategory: 'MembershipFee'
     };
 
     selectedPaymentMethod = signal<PaymentConfig | null>(null);
@@ -57,7 +57,7 @@ export class Payments implements OnInit {
             transactionId: '',
             notes: due ? `Annual Dues for ${due.year}` : '',
             paymentMethod: 'ManualReceipt',
-            category: due ? 'MembershipFee' : 'Donation'
+            financialCategory: due ? 'MembershipFee' : 'Donation'
         };
         this.showPayModal.set(true);
     }

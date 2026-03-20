@@ -13,7 +13,7 @@ export interface PaymentRecord {
     amount: number;
     paidAt: string;
     status: PaymentStatus;
-    category: FinancialCategory;
+    financialCategory: FinancialCategory;
     notes?: string;
 }
 

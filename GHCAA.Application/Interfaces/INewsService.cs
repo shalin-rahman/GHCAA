@@ -4,7 +4,7 @@ namespace GHCAA.Application.Interfaces
 {
     public interface INewsService
     {
-        Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(GHCAA.Domain.Enums.ArticleCategory? category = null, CancellationToken cancellationToken = default);
+        Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(GHCAA.Domain.Enums.ArticleCategory? articleCategory = null, CancellationToken cancellationToken = default);
         Task<IEnumerable<NewsPostDto>> GetAllNewsForAdminAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<NewsPostDto>> GetPendingSubmissionsAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<NewsPostDto>> GetMySubmissionsAsync(int userId, CancellationToken cancellationToken = default);

@@ -28,7 +28,7 @@ export class AdminNews implements OnInit {
     saving = signal(false);
     editingId = signal<number | null>(null);
 
-    form: any = { title: '', content: '', category: 'Regular', imageUrl: '', isActive: true };
+    form: any = { title: '', content: '', articleCategory: 'Regular', imageUrl: '', isActive: true };
 
 
     ngOnInit() { this.loadNews(); }
@@ -43,7 +43,7 @@ export class AdminNews implements OnInit {
 
     openForm() {
         this.editingId.set(null);
-        this.form = { title: '', content: '', category: 'Regular', imageUrl: '', isActive: true };
+        this.form = { title: '', content: '', articleCategory: 'Regular', imageUrl: '', isActive: true };
 
         this.showForm.set(true);
     }
@@ -55,7 +55,7 @@ export class AdminNews implements OnInit {
         this.form = {
             title: post.title,
             content: post.content,
-            category: post.category,
+            articleCategory: post.articleCategory,
             imageUrl: post.imageUrl || '',
             isActive: post.isActive
         };

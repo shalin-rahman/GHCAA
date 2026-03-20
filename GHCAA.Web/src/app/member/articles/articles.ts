@@ -27,14 +27,14 @@ export class MemberArticles implements OnInit {
     id: number;
     title: string;
     content: string;
-    category: any;
+    articleCategory: any;
     imageUrl: string;
     status: SubmissionStatus;
   } = {
     id: 0,
     title: '',
     content: '',
-    category: 'Regular',
+    articleCategory: 'Regular',
     imageUrl: '',
     status: SUBMISSION_STATUS.DRAFT
   };
@@ -66,7 +66,7 @@ export class MemberArticles implements OnInit {
       id: 0,
       title: '',
       content: '',
-      category: 'Regular',
+      articleCategory: 'Regular',
       imageUrl: '',
       status: SUBMISSION_STATUS.DRAFT
     };
@@ -84,7 +84,7 @@ export class MemberArticles implements OnInit {
       id: article.id,
       title: article.title,
       content: article.content,
-      category: article.category,
+      articleCategory: article.articleCategory,
       imageUrl: article.imageUrl || '',
       status: article.status
     };

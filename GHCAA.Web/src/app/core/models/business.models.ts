@@ -1,6 +1,6 @@
 export type MembershipStatus = 'Applied' | 'Active' | 'InactivePayment' | 'InactiveResigned' | 'Terminated';
 export type MembershipType = 'Founding' | 'Executive' | 'General' | 'Associate' | 'Honorary' | 'Advisory';
-export type MemberCategory = 'None' | 'Lifelong' | 'Donor' | 'Patron' | 'Guest';
+export type MemberCategory = 'None' | 'LifelongPatron' | 'Sponsor' | 'Advisor' | 'Mentor' | 'Recruiter' | 'Active' | 'Volunteer' | 'Contributor' | 'Guest' | 'Student';
 export type ECPosition = 'None' | 'President' | 'VicePresident' | 'GeneralSecretary' | 'OfficeSecretary' | 'JointSecretary1' | 'JointSecretary2' | 'Treasurer' | 'MediaCulturalAndSportsSecretary' | 'OrganizationalSecretary' | 'InformationAndTechnologySecretary' | 'Member1' | 'Member2' | 'LawSecretary' | 'ImmediatePastPresident' | 'InstitutionalRepresentative';
 export type Gender = 'Male' | 'Female' | 'Other';
 export type BloodGroup = 'APositive' | 'ANegative' | 'BPositive' | 'BNegative' | 'OPositive' | 'ONegative' | 'ABPositive' | 'ABNegative';
@@ -54,7 +54,7 @@ export interface PaymentHistory {
     amount: number;
     paidAt: string | Date;
     status: PaymentStatus;
-    category: FinancialCategory;
+    financialCategory: FinancialCategory;
     notes?: string;
     paymentMethod: PaymentMethod;
     receiptPath?: string;
@@ -95,7 +95,7 @@ export interface FinancialRecord {
     id: number;
     year: number;
     recordType: RecordType;
-    category: FinancialCategory;
+    financialCategory: FinancialCategory;
     date: string | Date;
     amount: number;
     description: string;
@@ -113,7 +113,7 @@ export interface LedgerSummary {
 
 export interface LedgerCategorySummary {
     type: RecordType;
-    category: FinancialCategory;
+    financialCategory: FinancialCategory;
     total: number;
 }
 
@@ -122,7 +122,7 @@ export interface NewsPost {
     id: number;
     title: string;
     content: string;
-    category: ArticleCategory;
+    articleCategory: ArticleCategory;
     status: SubmissionStatus;
     imageUrl?: string;
     isActive: boolean;
@@ -133,7 +133,7 @@ export interface NewsPost {
 export interface CreateNewsDto {
     title: string;
     content: string;
-    category: ArticleCategory;
+    articleCategory: ArticleCategory;
     status?: SubmissionStatus;
     imageUrl?: string;
     isActive?: boolean;
@@ -155,7 +155,7 @@ export interface Job {
     applicationLink?: string;
     postedDate: string | Date;
     applicationDeadline?: string | Date;
-    category: JobCategory;
+    jobCategory: JobCategory;
     isActive: boolean;
     postedByMemberId: number;
     postedByMemberName?: string;
@@ -170,7 +170,7 @@ export interface CreateJobDto {
     applicationEmail?: string;
     applicationLink?: string;
     applicationDeadline?: string | Date;
-    category: JobCategory;
+    jobCategory: JobCategory;
 }
 
 export interface UpdateJobDto extends Partial<CreateJobDto> {
@@ -292,7 +292,7 @@ export interface EventRegistration {
 
 export interface LookupItem {
     id: number;
-    category: string;
+    lookupGroup: string;
     code: string;
     value: string;
     order: number;
@@ -402,6 +402,7 @@ export interface MemberSearchFilter {
     bloodGroup?: BloodGroup;
     professionalSector?: string;
     designation?: string;
+    category?: MemberCategory;
 }
 
 

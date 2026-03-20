@@ -23,11 +23,11 @@ namespace GHCAA.Infrastructure.Services
         {
             var items = await _db.Lookups
                 .Where(l => l.IsActive)
-                .OrderBy(l => l.Category)
+                .OrderBy(l => l.LookupGroup)
                 .ThenBy(l => l.DisplayOrder)
                 .ToListAsync(cancellationToken);
 
-            return items.GroupBy(l => l.Category)
+            return items.GroupBy(l => l.LookupGroup)
                 .ToDictionary(
                     g => g.Key,
                     g => g.Select(l => new LookupDto
@@ -39,10 +39,10 @@ namespace GHCAA.Infrastructure.Services
                 );
         }
 
-        public async Task<IEnumerable<LookupDto>> GetByCategoryAsync(string category, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<LookupDto>> GetByGroupAsync(string group, CancellationToken cancellationToken = default)
         {
             return await _db.Lookups
-                .Where(l => l.Category == category && l.IsActive)
+                .Where(l => l.LookupGroup == group && l.IsActive)
                 .OrderBy(l => l.DisplayOrder)
                 .Select(l => new LookupDto
                 {

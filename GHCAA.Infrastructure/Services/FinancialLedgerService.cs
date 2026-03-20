@@ -73,7 +73,7 @@ namespace GHCAA.Infrastructure.Services
 
             existing.Year = record.Year;
             existing.RecordType = record.RecordType;
-            existing.Category = record.Category;
+            existing.FinancialCategory = record.FinancialCategory;
             existing.Date = DateTime.SpecifyKind(record.Date, DateTimeKind.Utc);
             existing.Amount = record.Amount;
             existing.Description = record.Description;
@@ -103,11 +103,11 @@ namespace GHCAA.Infrastructure.Services
             var totalExpense = records.Where(r => r.RecordType == Enums.FinancialRecordType.Expense).Sum(r => r.Amount);
 
             var byCategory = records
-                .GroupBy(r => new { r.RecordType, r.Category })
+                .GroupBy(r => new { r.RecordType, r.FinancialCategory })
                 .Select(g => new LedgerCategorySummaryDto
                 {
                     Type = g.Key.RecordType.ToString(),
-                    Category = g.Key.Category.ToString(),
+                    FinancialCategory = g.Key.FinancialCategory.ToString(),
                     Total = g.Sum(r => r.Amount)
                 });
 
@@ -130,7 +130,7 @@ namespace GHCAA.Infrastructure.Services
 
             foreach (var r in records)
             {
-                csv.AppendLine($"{r.Date:yyyy-MM-dd},{r.RecordType},{r.Category},{r.Amount},\"{r.Description?.Replace("\"", "\"\"")}\",\"{r.Reference?.Replace("\"", "\"\"")}\"");
+                csv.AppendLine($"{r.Date:yyyy-MM-dd},{r.RecordType},{r.FinancialCategory},{r.Amount},\"{r.Description?.Replace("\"", "\"\"")}\",\"{r.Reference?.Replace("\"", "\"\"")}\"");
             }
 
             return System.Text.Encoding.UTF8.GetBytes(csv.ToString());

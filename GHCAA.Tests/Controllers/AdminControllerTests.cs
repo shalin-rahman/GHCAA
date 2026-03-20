@@ -41,10 +41,10 @@ namespace GHCAA.Tests.Controllers
         public async Task GetAllMembers_ReturnsOk_WithData()
         {
             var fakeResult = new { TotalItems = 1, Items = new object[] { } };
-            _memberServiceMock.Setup(x => x.GetAllMembersAsync(1, 10, "", "Applied", false, true, It.IsAny<CancellationToken>()))
+            _memberServiceMock.Setup(x => x.GetAllMembersAsync(1, 10, "", "Applied", "all", false, true, It.IsAny<CancellationToken>()))
                               .ReturnsAsync(fakeResult);
 
-            var result = await _controller.GetAllMembers(1, 10, "", "Applied", false, CancellationToken.None);
+            var result = await _controller.GetAllMembers(1, 10, "", "Applied", "all", false, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;

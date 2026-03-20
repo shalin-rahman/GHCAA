@@ -32,7 +32,7 @@ namespace GHCAA.Infrastructure.Services
                 .Where(j => j.IsActive && (j.ExpiryDate == null || j.ExpiryDate > DateTime.UtcNow));
  
             if (category.HasValue)
-                qry = qry.Where(j => j.Category == category.Value);
+                qry = qry.Where(j => j.JobCategory == category.Value);
                 
             if (!string.IsNullOrEmpty(query))
             {
@@ -66,7 +66,7 @@ namespace GHCAA.Infrastructure.Services
             job.Requirements = dto.Requirements;
             job.ContactEmail = dto.ApplicationEmail ?? "";
             job.ApplicationLink = dto.ApplicationLink;
-            job.Category = dto.Category;
+            job.JobCategory = dto.JobCategory;
             job.ExpiryDate = dto.ApplicationDeadline.HasValue 
                 ? DateTime.SpecifyKind(dto.ApplicationDeadline.Value, DateTimeKind.Utc) 
                 : null;
@@ -87,7 +87,7 @@ namespace GHCAA.Infrastructure.Services
                 Requirements = dto.Requirements,
                 ContactEmail = dto.ApplicationEmail ?? "",
                 ApplicationLink = dto.ApplicationLink,
-                Category = dto.Category,
+                JobCategory = dto.JobCategory,
                 PostedByMemberId = memberId,
                 PostedDate = DateTime.UtcNow,
                 ExpiryDate = dto.ApplicationDeadline.HasValue 
@@ -160,7 +160,7 @@ namespace GHCAA.Infrastructure.Services
                 ApplicationLink = job.ApplicationLink,
                 PostedDate = job.PostedDate,
                 ApplicationDeadline = job.ExpiryDate ?? DateTime.MaxValue,
-                Category = job.Category,
+                JobCategory = job.JobCategory,
                 IsActive = job.IsActive,
                 PostedByMemberId = job.PostedByMemberId,
                 PostedByMemberName = job.PostedBy?.FullName

@@ -28,7 +28,7 @@ namespace GHCAA.Infrastructure.Services
 
             if (category.HasValue)
             {
-                query = query.Where(n => n.Category == category.Value);
+                query = query.Where(n => n.ArticleCategory == category.Value);
             }
 
             return await query
@@ -79,7 +79,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 Title = dto.Title,
                 Content = dto.Content,
-                Category = dto.Category,
+                ArticleCategory = dto.ArticleCategory,
                 Status = dto.Status,
                 ImageUrl = dto.ImageUrl,
                 IsActive = dto.IsActive,
@@ -99,7 +99,7 @@ namespace GHCAA.Infrastructure.Services
 
             existing.Title = dto.Title;
             existing.Content = dto.Content;
-            existing.Category = dto.Category;
+            existing.ArticleCategory = dto.ArticleCategory;
             existing.Status = dto.Status;
             existing.ImageUrl = dto.ImageUrl;
             existing.IsActive = dto.IsActive;
@@ -151,7 +151,7 @@ namespace GHCAA.Infrastructure.Services
                 Id = post.Id,
                 Title = post.Title,
                 Content = post.Content,
-                Category = post.Category,
+                ArticleCategory = post.ArticleCategory,
                 Status = post.Status,
                 ImageUrl = post.ImageUrl,
                 IsActive = post.IsActive,

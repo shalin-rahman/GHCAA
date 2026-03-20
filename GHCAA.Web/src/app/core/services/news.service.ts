@@ -12,9 +12,9 @@ export class NewsService {
     private http = inject(HttpClient);
     private apiUrl = API_ENDPOINTS.NEWS;
 
-    getNews(category?: string, silent: boolean = false): Observable<NewsPost[]> {
+    getNews(articleCategory?: string, silent: boolean = false): Observable<NewsPost[]> {
         let url = this.apiUrl;
-        if (category) url += `?category=${category}`;
+        if (articleCategory) url += `?articleCategory=${articleCategory}`;
         const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
         return this.http.get<NewsPost[]>(url, { headers });
     }

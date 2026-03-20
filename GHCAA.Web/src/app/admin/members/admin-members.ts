@@ -29,6 +29,7 @@ export class AdminMembers implements OnInit {
   isExporting = signal(false);
   searchQuery = signal('');
   statusFilter = signal('all');
+  categoryFilter = signal('all');
   selectedMember = signal<any>(null);
   isEditing = signal(false);
   certToUpload: File | null = null;
@@ -149,7 +150,7 @@ export class AdminMembers implements OnInit {
 
   handleExport(format: string) {
     this.isExporting.set(true);
-    this.adminService.getAllForExport(this.searchQuery(), this.statusFilter()).subscribe({
+    this.adminService.getAllForExport(this.searchQuery(), this.statusFilter(), this.categoryFilter()).subscribe({
       next: async (res: any) => {
         const rawData = res.items || res;
         
@@ -184,7 +185,7 @@ export class AdminMembers implements OnInit {
 
   loadMembers() {
     this.loading.set(true);
-    this.adminService.getMembers(this.currentPage(), this.pageSize(), this.searchQuery(), this.statusFilter(), false).subscribe({
+    this.adminService.getMembers(this.currentPage(), this.pageSize(), this.searchQuery(), this.statusFilter(), this.categoryFilter(), false).subscribe({
       next: (res: any) => {
         this.allMembers.set(res.items);
         this.totalPages.set(res.totalPages || 1);

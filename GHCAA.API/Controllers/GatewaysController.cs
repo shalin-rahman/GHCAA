@@ -76,7 +76,7 @@ namespace GHCAA.API.Controllers
                     Amount = request.Amount,
                     TransactionId = trxId,
                     PaidAt = DateTime.UtcNow,
-                    Category = request.Reference.Contains("EVT-REG") ? Enums.FinancialCategory.RegistrationFee : Enums.FinancialCategory.MembershipFee,
+                    FinancialCategory = request.Reference.Contains("EVT-REG") ? Enums.FinancialCategory.RegistrationFee : Enums.FinancialCategory.MembershipFee,
                     Notes = $"Initiated via {request.Gateway}. Ref: {request.Reference}" + (memberId == null ? " (Guest)" : "")
                 }, cancellationToken);
 

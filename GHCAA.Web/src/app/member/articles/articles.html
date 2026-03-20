@@ -32,7 +32,7 @@
                     <span class="status-badge" [class]="getStatusInfo(article.status).class">
                         {{ getStatusInfo(article.status).label }}
                     </span>
-                    <span class="category-tag">{{ getCategoryLabel(article.category) }}</span>
+                    <span class="category-tag">{{ getCategoryLabel(article.articleCategory) }}</span>
                 </div>
                 <div class="card-content">
                     <h3>{{ article.title }}</h3>
@@ -74,7 +74,7 @@
 
                 <div class="form-group">
                     <label>Category</label>
-                    <select [(ngModel)]="articleForm.category" [disabled]="isSubmitting()">
+                    <select [(ngModel)]="articleForm.articleCategory" [disabled]="isSubmitting()">
                         @for (cat of categories; track cat.value) {
                         <option [value]="cat.value">{{ cat.label }}</option>
                         }

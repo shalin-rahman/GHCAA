@@ -9,7 +9,7 @@ namespace GHCAA.Application.Interfaces
     public interface ILookupService
     {
         Task<IDictionary<string, IEnumerable<LookupDto>>> GetAllLookupsAsync(CancellationToken cancellationToken = default);
-        Task<IEnumerable<LookupDto>> GetByCategoryAsync(string category, CancellationToken cancellationToken = default);
+        Task<IEnumerable<LookupDto>> GetByGroupAsync(string group, CancellationToken cancellationToken = default);
         
         // Admin Management
         Task<LookupItem> AddLookupItemAsync(LookupItem item, CancellationToken cancellationToken = default);

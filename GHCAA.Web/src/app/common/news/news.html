@@ -14,7 +14,7 @@
             </div>
             <div class="article-body">
                 <div class="meta">
-                    <span class="cat">{{ post.category }}</span>
+                    <span class="cat">{{ post.articleCategory }}</span>
                     <span>{{ post.createdAt | date:'mediumDate' }}</span>
                 </div>
                 <h3>{{ post.title }}</h3>
@@ -38,7 +38,7 @@
     <div id="news-detail" class="news-detail-section glass-card reveal-bottom mt-12">
         <div class="detail-header">
             <div class="flex justify-between items-center mb-6">
-                <span class="cat-tag">{{ post.category }}</span>
+                <span class="cat-tag">{{ post.articleCategory }}</span>
                 <button class="close-btn" (click)="selectedPost.set(null)">✕ Close</button>
             </div>
             <img [src]="post.imageUrl || '/assets/logo.jpg'" class="detail-img mb-8" *ngIf="post.imageUrl">

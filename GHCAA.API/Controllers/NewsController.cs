@@ -26,9 +26,9 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetActiveNews([FromQuery] Enums.ArticleCategory? category, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetActiveNews([FromQuery] Enums.ArticleCategory? articleCategory, CancellationToken cancellationToken)
         {
-            var news = await _newsService.GetActiveNewsAsync(category, cancellationToken);
+            var news = await _newsService.GetActiveNewsAsync(articleCategory, cancellationToken);
             return Ok(news);
         }
 

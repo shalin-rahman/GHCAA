@@ -67,6 +67,9 @@ namespace GHCAA.Infrastructure.Services
 
             if (!string.IsNullOrEmpty(filter.ECPosition) && System.Enum.TryParse<Enums.ECPosition>(filter.ECPosition, true, out var pos))
                 query = query.Where(m => m.ECMembers.Any(em => em.Position == pos && em.EndDate == null));
+            
+            if (!string.IsNullOrEmpty(filter.Category) && System.Enum.TryParse<Enums.MemberCategory>(filter.Category, true, out var cat))
+                query = query.Where(m => m.Category == cat);
 
             var totalItems = await query.CountAsync(cancellationToken);
             var pageSize = Math.Clamp(filter.PageSize, 1, 100);

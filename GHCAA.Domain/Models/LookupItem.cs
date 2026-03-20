@@ -8,7 +8,7 @@ namespace GHCAA.Domain.Models
 
         [Required]
         [MaxLength(50)]
-        public string Category { get; set; } = null!; // e.g., "ProfessionalSector", "Degree"
+        public string LookupGroup { get; set; } = null!; // e.g., "ProfessionalSector", "Degree"
 
         [Required]
         [MaxLength(100)]

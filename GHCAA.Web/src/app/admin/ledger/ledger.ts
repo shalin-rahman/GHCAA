@@ -39,7 +39,7 @@ export class Ledger implements OnInit {
   pdfMapper = (r: any) => [
     new Date(r.date).toLocaleDateString(),
     r.recordType === 'Income' ? 'Income' : 'Expense',
-    this.getCategoryName(r.category),
+    this.getCategoryName(r.financialCategory),
     r.description,
     r.amount.toLocaleString()
   ];
@@ -49,7 +49,7 @@ export class Ledger implements OnInit {
     date: new Date().toISOString().split('T')[0],
     amount: 1000,
     recordType: 'Income',
-    category: 'MembershipFee',
+    financialCategory: 'MembershipFee',
     description: '',
     year: new Date().getFullYear()
   };

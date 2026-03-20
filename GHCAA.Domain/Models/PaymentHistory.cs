@@ -12,7 +12,7 @@ namespace GHCAA.Domain.Models
         public decimal Amount { get; set; }
         public DateTime PaidAt { get; set; }
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
-        public FinancialCategory Category { get; set; } = FinancialCategory.Other;
+        public FinancialCategory FinancialCategory { get; set; } = FinancialCategory.Other;
         public string? Notes { get; set; }
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.ManualReceipt;
         [MaxLength(500)]

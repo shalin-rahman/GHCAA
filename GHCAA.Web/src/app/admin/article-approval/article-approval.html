@@ -35,7 +35,7 @@
                             </div>
                         </div>
                     </td>
-                    <td><span class="badge">{{ article.category }}</span></td>
+                    <td><span class="badge">{{ article.articleCategory }}</span></td>
                     <td>{{ article.authorName }}</td>
                     <td>{{ article.createdAt | date:'shortTime' }} <br> <small>{{ article.createdAt | date:'mediumDate' }}</small></td>
                     <td>
@@ -69,7 +69,7 @@
                 <img [src]="selectedArticle()?.imageUrl" alt="Cover" class="preview-hero">
                 }
                 <div class="preview-meta mb-6 flex gap-4">
-                    <span class="badge bg-gold-gradient text-black">{{ selectedArticle()?.category }}</span>
+                    <span class="badge bg-gold-gradient text-black">{{ selectedArticle()?.articleCategory }}</span>
                     <span class="text-muted">By <strong>{{ selectedArticle()?.authorName }}</strong></span>
                 </div>
                 <h1>{{ selectedArticle()?.title }}</h1>
