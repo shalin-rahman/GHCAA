@@ -4,7 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { FinancialService, PaymentRecord, MembershipDue } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { PaymentMethodSelectorComponent } from '../../common/payment-method-selector/payment-method-selector.component';
-import { FINANCIAL_CATEGORY_OPTIONS } from '../../core/constants/app.constants';
+import {
+    FINANCIAL_CATEGORY_OPTIONS,
+    getFinancialCategoryLabel,
+    getPaymentStatusClass,
+    getPaymentStatusLabel
+} from '../../core/constants/app.constants';
 import { PaymentConfig } from '../../core/services/payment-config.service';
 
 @Component({
@@ -87,17 +92,15 @@ export class Payments implements OnInit {
     }
 
     getStatusClass(status: any): string {
-        const map: Record<string, string> = { '0': 'pending', '1': 'success', '2': 'failed' };
-        return map[String(status)] || '';
+        return getPaymentStatusClass(status);
     }
 
     getStatusLabel(status: any): string {
-        const map: Record<string, string> = { '0': 'Pending Audit', '1': 'Verified', '2': 'Rejected' };
-        return map[String(status)] || 'Unknown';
+        return getPaymentStatusLabel(status);
     }
 
     getCategoryLabel(val: any): string {
-        return this.categoryOptions.find(o => o.value === val)?.label || val;
+        return getFinancialCategoryLabel(val);
     }
 }
 

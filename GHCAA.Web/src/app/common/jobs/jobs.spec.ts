@@ -55,5 +55,6 @@ describe('Jobs Component', () => {
     it('should format category names correctly', () => {
         expect(component.getCategoryName('IT')).toBe('IT & Software Development');
         expect(component.getCategoryName('Mentorship')).toBe('Mentorship & Career Guidance');
+        expect(component.getCategoryName('PublicSector')).toBe('Govt. & Public Sector');
     });
 });

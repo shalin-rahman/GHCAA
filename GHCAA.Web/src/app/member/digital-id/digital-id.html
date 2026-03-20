@@ -43,7 +43,7 @@
                         </div>
                         <div class="meta-item">
                             <span class="label">Grad. Year</span>
-                            <span class="value">{{ profile()?.ghcLastCertificatePassingYear || 'N/A' }}</span>
+                            <span class="value">{{ profile()?.academicHistory?.[0]?.passingYear || 'N/A' }}</span>
                         </div>
                     </div>
                 </div>

@@ -32,7 +32,6 @@ export class Profile implements OnInit {
     yearsList = this.ACADEMIC.getYears();
     IS_HSC = IS_HSC;
     degreeOptions = this.ACADEMIC.certificates;
-    groupOptions = this.ACADEMIC.groups;
     subjectOptions = this.ACADEMIC.subjects;
     sectorOptions = this.ACADEMIC.sectors;
     genderOptions = GENDER_OPTIONS;
@@ -100,44 +99,29 @@ export class Profile implements OnInit {
     }
 
     getAvailableSubjects(degree: string): string[] {
-        if (!degree) return this.subjectOptions;
-        if (degree === 'HSC') return this.groupOptions;
         return this.subjectOptions;
     }
 
-    getMajor(degree: string, group: string, subject: string): string {
-        if (degree === 'HSC') return group || 'None';
-        return subject || 'None';
+    getMajorDisplay(degree: string, subject: string): string {
+        return subject && subject !== 'None' ? `in ${subject}` : '';
     }
 
-    getMajorDisplay(degree: string, group: string, subject: string): string {
-        const major = this.getMajor(degree, group, subject);
-        return major && major !== 'None' ? `in ${major}` : '';
+
+
+    getGHCHistory() {
+        if (!this.profile.academicHistory) return null;
+        const ghc = this.profile.academicHistory.filter((a: any) => a.isGHC);
+        if (ghc.length === 0) return null;
+        return ghc.sort((a: any, b: any) => (b.passingYear || 0) - (a.passingYear || 0))[0];
     }
 
-    private syncAcademicFields() {
-        // Sync Highest Certificate
-        if (this.profile.highestCertificate === 'HSC') {
-            this.profile.highestCertificateSubject = 'None';
-        } else if (this.profile.highestCertificate) {
-            this.profile.highestCertificateGroup = 'None';
-        }
-
-        // Sync GHC Last Certificate
-        if (this.profile.ghcLastCertificate === 'HSC') {
-            this.profile.ghcLastCertificateSubject = 'None';
-        } else if (this.profile.ghcLastCertificate) {
-            this.profile.ghcLastCertificateGroup = 'None';
-        }
-    }
-
-    getDegreeName(degree: any): string {
-        return degree;
+    getHighestHistory() {
+        if (!this.profile.academicHistory || this.profile.academicHistory.length === 0) return null;
+        return this.profile.academicHistory.sort((a: any, b: any) => (b.passingYear || 0) - (a.passingYear || 0))[0];
     }
 
     async updateProfile() {
         if (this.saving()) return;
-        this.syncAcademicFields();
         ensureValidAcademicData(this.profile);
 
         this.saving.set(true);

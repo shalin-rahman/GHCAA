@@ -12,7 +12,7 @@ describe('NewsService', () => {
         id: 1,
         title: 'Tech Update',
         content: 'Latest tech news.',
-        category: 'Regular',
+        articleCategory: 'Regular',
         status: 'Approved',
         isActive: true,
         authorName: 'Admin',
@@ -46,6 +46,13 @@ describe('NewsService', () => {
         req.flush([mockPost]);
     });
 
+    it('should send article category as a query parameter', () => {
+        service.getNews('Magazine').subscribe();
+        const req = httpMock.expectOne(`${API_ENDPOINTS.NEWS}?articleCategory=Magazine`);
+        expect(req.request.method).toBe('GET');
+        req.flush([]);
+    });
+
     it('should get news silently with special header', () => {
         service.getNews(undefined, true).subscribe();
         const req = httpMock.expectOne(API_ENDPOINTS.NEWS);
@@ -72,7 +79,7 @@ describe('NewsService', () => {
     });
 
     it('should create news', () => {
-        const payload = { title: 'New', content: 'C', category: 'Regular' as any, isActive: true };
+        const payload = { title: 'New', content: 'C', articleCategory: 'Regular' as any, isActive: true };
         service.createNews(payload).subscribe(res => {
             expect(res.id).toBe(1);
         });

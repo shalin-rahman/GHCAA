@@ -172,7 +172,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Major Cluster / Subject *</label>
-                                        <input type="text" [(ngModel)]="item.subject" [name]="'sub_' + $index" required list="group-list">
+                                        <input type="text" [(ngModel)]="item.subject" [name]="'sub_' + $index" required list="subject-list">
                                     </div>
                                     <div class="form-group full">
                                         <label>Passing Year (Graduation) *</label>
@@ -369,7 +369,6 @@
                 <datalist id="year-list"> <option *ngFor="let year of years" [value]="year"></option> </datalist>
                 <datalist id="subject-list"> <option *ngFor="let s of subjectOptions" [value]="s"></option> </datalist>
                 <datalist id="certificate-list"> <option *ngFor="let d of certificateOptions" [value]="d"></option> </datalist>
-                <datalist id="group-list"> <option *ngFor="let g of groupOptions" [value]="g"></option> </datalist>
                 <datalist id="sector-list"> <option *ngFor="let sec of sectorOptions" [value]="sec"></option> </datalist>
 
                 } @else {

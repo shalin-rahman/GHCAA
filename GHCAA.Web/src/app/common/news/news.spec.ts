@@ -34,4 +34,9 @@ describe('News Component', () => {
     it('should load news on init', () => {
         expect(newsServiceMock.getNews).toHaveBeenCalled();
     });
+
+    it('should format backend article categories for display', () => {
+        expect(component.getArticleCategoryLabel('Regular')).toBe('Regular Portal Update');
+        expect(component.getArticleCategoryLabel('Magazine')).toBe('E-Magazine Article');
+    });
 });

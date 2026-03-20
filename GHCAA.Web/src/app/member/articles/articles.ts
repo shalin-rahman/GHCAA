@@ -4,7 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost, SubmissionStatus } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
-import { ARTICLE_CATEGORIES, SUBMISSION_STATUS_MAP, SUBMISSION_STATUS } from '../../core/constants/app.constants';
+import {
+  ARTICLE_CATEGORIES,
+  SUBMISSION_STATUS_MAP,
+  SUBMISSION_STATUS,
+  getArticleCategoryLabel
+} from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-member-articles',
@@ -148,6 +153,6 @@ export class MemberArticles implements OnInit {
 
 
   getCategoryLabel(val: string) {
-    return this.categories.find(c => c.value === val)?.label || val;
+    return getArticleCategoryLabel(val);
   }
 }

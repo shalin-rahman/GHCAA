@@ -31,7 +31,7 @@
                             }
                         </div>
                         <h3>{{ member.fullName }}</h3>
-                        <p class="batch">Batch: <strong>{{ member.ghcLastCertificatePassingYear }}</strong> ({{ member.ghcLastCertificate }} {{ getMajorDisplay(member.ghcLastCertificate, member.ghcLastCertificateGroup, member.ghcLastCertificateSubject) }})</p>
+                        <p class="batch">Batch: <strong>{{ member.passingYear }}</strong> ({{ member.degree }} {{ getMajorDisplay(member.degree, member.subject) }})</p>
                         <div class="professional" *ngIf="member.designation">
                             <small>{{ member.designation }}</small>
                         </div>

@@ -36,9 +36,9 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     memberCategories = MEMBER_CATEGORY_OPTIONS;
     selectedMember = signal<any | null>(null);
 
-    getMajorDisplay(degree: string | undefined, group: string | undefined, subject: string | undefined): string {
+    getMajorDisplay(degree: string | undefined, subject: string | undefined): string {
         if (!degree) return '';
-        const major = degree === 'HSC' ? (group || 'None') : (subject || 'None');
+        const major = subject || 'None';
         return major && major !== 'None' ? `in ${major}` : '';
     }
 

@@ -29,7 +29,6 @@ export class Register implements OnDestroy {
   IS_HSC = IS_HSC;
   years = this.ACADEMIC.getYears();
   certificateOptions = this.ACADEMIC.certificates;
-  groupOptions = this.ACADEMIC.groups;
   subjectOptions = this.ACADEMIC.subjects;
   sectorOptions = this.ACADEMIC.sectors;
   bloodGroupOptions = BLOOD_GROUP_OPTIONS;

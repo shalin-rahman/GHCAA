@@ -43,13 +43,13 @@
         <div class="status-grid">
             <div class="grid-item">
                 <small>Associated Batch</small>
-                <p><strong>{{ profile.ghcLastCertificatePassingYear }}</strong></p>
-                <span class="text-[10px] opacity-60 uppercase">{{ profile.ghcLastCertificate }} {{ getMajorDisplay(profile.ghcLastCertificate, profile.ghcLastCertificateGroup, profile.ghcLastCertificateSubject) }}</span>
+                <p><strong>{{ getGHCHistory()?.passingYear || 'N/A' }}</strong></p>
+                <span class="text-[10px] opacity-60 uppercase">{{ getGHCHistory()?.degree || 'N/A' }} {{ getMajorDisplay(getGHCHistory()?.degree, getGHCHistory()?.subject) }}</span>
             </div>
             <div class="grid-item">
                 <small>Highest Degree</small>
-                <p><strong>{{ profile.highestCertificate }}</strong></p>
-                <span class="text-[10px] opacity-60 uppercase truncate block max-w-[150px]">{{ getMajorDisplay(profile.highestCertificate, profile.highestCertificateGroup, profile.highestCertificateSubject).replace('in ', '') || 'General' }}</span>
+                <p><strong>{{ getHighestHistory()?.degree || 'N/A' }}</strong></p>
+                <span class="text-[10px] opacity-60 uppercase truncate block max-w-[150px]">{{ getMajorDisplay(getHighestHistory()?.degree, getHighestHistory()?.subject).replace('in ', '') || 'General' }}</span>
             </div>
             <div class="grid-item">
                 <small>Member Since</small>
@@ -96,33 +96,15 @@
     <!-- Education History Section -->
     <div class="glass-card mb-12 p-12">
         <h4 class="section-label">Educational Timeline</h4>
-        @if ((profile.academicHistory && profile.academicHistory.length > 0) || profile.ghcLastCertificate) {
+        @if (profile.academicHistory && profile.academicHistory.length > 0) {
         <div class="history-list">
-            <!-- Primary Overview (from Main Profile) -->
-            @if (profile.ghcLastCertificate) {
-            <div class="history-row primary">
-                <div class="row-main">
-                    <span class="row-title">
-                        {{ profile.ghcLastCertificate }} {{ getMajorDisplay(profile.ghcLastCertificate, profile.ghcLastCertificateGroup, profile.ghcLastCertificateSubject) }}
-                    </span>
-                    <div class="row-sub">
-                        <span>Govt. Haraganga College</span>
-                        <span class="badge-info !text-[9px]">Primary Registry</span>
-                    </div>
-                </div>
-                <div class="row-period">
-                    {{ profile.ghcAdmissionYear ? profile.ghcAdmissionYear + ' - ' : '' }}{{ profile.ghcLastCertificatePassingYear }}
-                </div>
-            </div>
-            }
-
             @for (h of profile.academicHistory; track $index) {
-            <div class="history-row">
+            <div class="history-row" [class.primary]="h.isGHC">
                 <div class="row-main">
-                    <span class="row-title">{{ h.degree }} {{ getMajorDisplay(h.degree, 'None', h.subject) }}</span>
+                    <span class="row-title">{{ h.degree }} {{ getMajorDisplay(h.degree, h.subject) }}</span>
                     <div class="row-sub">
                         <span>{{ h.institutionName }}</span>
-                        @if (h.isGHC) { <span class="badge-info !text-[9px]">Haragangian Record</span> }
+                        @if (h.isGHC) { <span class="badge-info !text-[9px]">Primary Registry</span> }
                     </div>
                 </div>
                 <div class="row-period">
@@ -136,6 +118,7 @@
             </div>
             }
         </div>
+        
         } @else {
         <div class="empty-placeholder">
             <span>🎓</span>
@@ -272,93 +255,7 @@
                 </div>
             </div>
 
-            <!-- Section 2: Academic Achievements -->
-            <div class="section-block mt-12">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Overall Highest Academic Achievement</h4>
-                </div>
-                <div class="form-grid mb-12">
-                    <div class="form-group">
-                        <label>Highest Degree Title</label>
-                        <select [(ngModel)]="profile.highestCertificate" name="highDeg">
-                            <option value="">Choose Degree...</option>
-                            @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Major / Group / Subject</label>
-                        @if (profile.highestCertificate === 'HSC') {
-                            <select [(ngModel)]="profile.highestCertificateGroup" name="highGrp">
-                                <option value="None">None / General</option>
-                                @for (g of groupOptions; track g) { <option [value]="g">{{ g }}</option> }
-                            </select>
-                        } @else {
-                            <select [(ngModel)]="profile.highestCertificateSubject" name="highSub">
-                                <option value="None">None / General</option>
-                                @for (s of subjectOptions; track s) { <option [value]="s">{{ s }}</option> }
-                            </select>
-                        }
-                    </div>
-                    <div class="form-group">
-                        <label>Passing Year</label>
-                        <select [(ngModel)]="profile.highestCertificatePassingYear" name="highPass">
-                            <option [value]="null">Select Year...</option>
-                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>HSC Admission Year (Reference)</label>
-                        <select [(ngModel)]="profile.hscAdmissionYear" name="hscAdm">
-                            <option [value]="null">Select Year...</option>
-                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
-                        </select>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Section 3: Registration Summary -->
-            <div class="section-block mt-12">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Member Registration Summary (GHC)</h4>
-                </div>
-                <div class="form-grid mb-12">
-                    <div class="form-group">
-                        <label>Last GHC Degree</label>
-                        <select [(ngModel)]="profile.ghcLastCertificate" name="ghcDeg">
-                            <option value="">Select Certificate...</option>
-                            @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>GHC Subject / Group</label>
-                        @if (profile.ghcLastCertificate === 'HSC') {
-                            <select [(ngModel)]="profile.ghcLastCertificateGroup" name="ghcGrp">
-                                <option value="None">None / General</option>
-                                @for (g of groupOptions; track g) { <option [value]="g">{{ g }}</option> }
-                            </select>
-                        } @else {
-                            <select [(ngModel)]="profile.ghcLastCertificateSubject" name="ghcSub">
-                                <option value="None">None / General</option>
-                                @for (s of subjectOptions; track s) { <option [value]="s">{{ s }}</option> }
-                            </select>
-                        }
-                    </div>
-                    <div class="form-group">
-                        <label>GHC Admission Year</label>
-                        <select [(ngModel)]="profile.ghcAdmissionYear" name="ghcAdm">
-                            <option [value]="null">Select Year...</option>
-                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>GHC Passing Year</label>
-                        <select [(ngModel)]="profile.ghcLastCertificatePassingYear" name="ghcPass">
-                            <option [value]="null">Select Year...</option>
-                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
-                        </select>
-                    </div>
-                </div>
-            </div>
 
             <!-- Section 4: Academic History -->
             <div class="section-block mt-12">
@@ -397,10 +294,10 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Major / Group / Subject</label>
+                                <label>Major / Subject</label>
                                 <select [(ngModel)]="item.subject" [name]="'sub_' + $index">
                                     <option value="None">None</option>
-                                    @for (sub of getAvailableSubjects(item.degree); track sub) { <option [value]="sub">{{ sub }}</option> }
+                                    @for (sub of subjectOptions; track sub) { <option [value]="sub">{{ sub }}</option> }
                                 </select>
                             </div>
 
@@ -586,7 +483,6 @@
     <!-- Reference Datalists -->
     <datalist id="years-list"> <option *ngFor="let y of yearsList" [value]="y"></option> </datalist>
     <datalist id="sector-list"> <option *ngFor="let s of sectorOptions" [value]="s"></option> </datalist>
-    <datalist id="group-list"> <option *ngFor="let g of groupOptions" [value]="g"></option> </datalist>
     <datalist id="subject-list"> <option *ngFor="let s of subjectOptions" [value]="s"></option> </datalist>
     <datalist id="degree-list"> <option *ngFor="let d of degreeOptions" [value]="d"></option> </datalist>
     }

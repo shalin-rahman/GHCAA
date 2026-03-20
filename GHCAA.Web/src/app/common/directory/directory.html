@@ -102,7 +102,7 @@
                 <div class="member-body">
                     <div class="info-item academic-batch">
                         <span class="icon">🎓</span>
-                        <span class="batch-text">Batch: <strong>{{ m.ghcLastCertificatePassingYear }}</strong> ({{ m.ghcLastCertificate }} {{ getMajorDisplay(m.ghcLastCertificate, m.ghcLastCertificateGroup, m.ghcLastCertificateSubject) }})</span>
+                        <span class="batch-text">Batch: <strong>{{ m.passingYear || 'N/A' }}</strong> ({{ m.degree || 'N/A' }} {{ getMajorDisplay(m.degree, m.subject) }})</span>
                     </div>
                     <div class="info-item" *ngIf="m.professionalSector">
                         <span class="icon">💼</span>
@@ -187,7 +187,7 @@
                     <p class="role">{{ selectedMember()?.designation }} at {{ selectedMember()?.professionalSector }}
                     </p>
                     <div class="social-tags">
-                        <span class="tag">🎓 Batch: <strong>{{ selectedMember()?.ghcLastCertificatePassingYear }}</strong> ({{ selectedMember()?.ghcLastCertificate }} {{ getMajorDisplay(selectedMember()?.ghcLastCertificate, selectedMember()?.ghcLastCertificateGroup, selectedMember()?.ghcLastCertificateSubject) }})</span>
+                        <span class="tag">🎓 Batch: <strong>{{ selectedMember()?.passingYear || 'N/A' }}</strong> ({{ selectedMember()?.degree || 'N/A' }} {{ getMajorDisplay(selectedMember()?.degree, selectedMember()?.subject) }})</span>
                         <span class="tag">🩸 {{ getBloodGroupName(selectedMember()?.bloodGroup) }}</span>
                     </div>
                 </div>
@@ -225,27 +225,14 @@
                 </div>
 
                 <div class="v-section">
-                    <h4>Academic History</h4>
+                    <h4>Academic Summary</h4>
                     <div class="v-item">
-                        <span class="v-label">HSC Batch</span>
-                        <span class="v-value">{{ selectedMember()?.hscAdmissionYear || 'N/A' }}</span>
+                        <span class="v-label">Batch</span>
+                        <span class="v-value"><strong>{{ selectedMember()?.passingYear || 'N/A' }}</strong></span>
                     </div>
                     <div class="v-item">
-                        <span class="v-label">Academic Status</span>
-                        <span class="v-value">{{ selectedMember()?.highestCertificate }} {{ getMajorDisplay(selectedMember()?.highestCertificate, selectedMember()?.highestCertificateGroup, selectedMember()?.highestCertificateSubject) }}</span>
-                    </div>
-                    <div class="v-item">
-                        <span class="v-label">Passing Year</span>
-                        <span class="v-value">{{ selectedMember()?.highestCertificatePassingYear }}</span>
-                    </div>
-                    <div class="v-divider"></div>
-                    <div class="v-item">
-                        <span class="v-label">GHC Registry</span>
-                        <span class="v-value">{{ selectedMember()?.ghcLastCertificate }} {{ getMajorDisplay(selectedMember()?.ghcLastCertificate, selectedMember()?.ghcLastCertificateGroup, selectedMember()?.ghcLastCertificateSubject) }}</span>
-                    </div>
-                    <div class="v-item">
-                        <span class="v-label">GHC Batch</span>
-                        <span class="v-value"><strong>{{ selectedMember()?.ghcLastCertificatePassingYear }}</strong> (HSC Adm: {{ selectedMember()?.hscAdmissionYear || 'N/A' }})</span>
+                        <span class="v-label">Degree</span>
+                        <span class="v-value">{{ selectedMember()?.degree || 'N/A' }} {{ getMajorDisplay(selectedMember()?.degree, selectedMember()?.subject) }}</span>
                     </div>
                 </div>
 

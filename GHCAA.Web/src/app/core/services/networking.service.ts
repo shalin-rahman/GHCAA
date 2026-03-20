@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
-import { MemberProfile, MemberSearchFilter } from '../models/business.models';
+import { MemberProfile, MemberSearchFilter, MembershipStatus, MemberCategory, BloodGroup, MembershipType } from '../models/business.models';
 
 export interface PagedResult<T> {
     items: T[];
@@ -18,20 +18,24 @@ export interface MemberSummary {
     fullName: string;
     membershipNumber?: string;
     photoPath?: string;
-    passingYear: number;
-    ghcLastCertificate?: string;
-    ghcLastCertificateGroup?: string;
-    ghcLastCertificateSubject?: string;
-    ghcLastCertificatePassingYear?: number;
-    professionalSector?: string;
+    status: MembershipStatus;
+    appliedDate: string | Date;
+    category: MemberCategory;
+    
+    // Directory Fields
+    passingYear?: number;
+    degree?: string;
+    subject?: string;
     designation?: string;
-    bloodGroup?: string;
+    organizationName?: string;
+    professionalSector?: string;
+    
+    bloodGroup?: BloodGroup;
     email?: string;
     isEmailPublic?: boolean;
     mobileNo?: string;
     isMobilePublic?: boolean;
-    membershipType?: string;
-    category?: string;
+    membershipType?: MembershipType;
     ecHistory: any[];
 }
 

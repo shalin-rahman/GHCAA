@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
+import { getArticleCategoryLabel } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-news',
@@ -12,6 +13,7 @@ import { NewsPost } from '../../core/models/business.models';
 })
 export class News implements OnInit {
   private newsService = inject(NewsService);
+  getArticleCategoryLabel = getArticleCategoryLabel;
 
   news = signal<NewsPost[]>([]);
   loading = signal(true);

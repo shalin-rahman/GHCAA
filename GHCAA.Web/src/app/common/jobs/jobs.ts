@@ -5,7 +5,7 @@ import { JobService } from '../../core/services/job.service';
 import { Job } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
-import { JOB_CATEGORIES } from '../../core/constants/app.constants';
+import { JOB_CATEGORIES, getJobCategoryLabel } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-jobs',
@@ -119,8 +119,7 @@ export class Jobs implements OnInit {
   }
 
   getCategoryName(categoryStr: string): string {
-    const cat = JOB_CATEGORIES.find(c => c.id === categoryStr || c.name === categoryStr);
-    return cat?.name || categoryStr || 'General';
+    return getJobCategoryLabel(categoryStr);
   }
 
 

@@ -13,7 +13,7 @@ describe('JobService', () => {
         title: 'Software Engineer',
         companyName: 'Tech Co',
         location: 'Remote',
-        category: 'IT',
+        jobCategory: 'IT',
         description: 'D',
         requirements: 'R',
         applicationDeadline: '2026-12-31',
@@ -46,7 +46,17 @@ describe('JobService', () => {
         });
         const req = httpMock.expectOne(req => req.url === API_ENDPOINTS.JOBS);
         expect(req.request.method).toBe('GET');
+        expect(req.request.params.get('query')).toBe('tech');
         req.flush([mockJob]);
+    });
+
+    it('should pass backend job category filters through query params', () => {
+        service.getJobs({ jobCategory: 'Mentorship', query: 'career' }).subscribe();
+        const req = httpMock.expectOne(req => req.url === API_ENDPOINTS.JOBS);
+        expect(req.request.method).toBe('GET');
+        expect(req.request.params.get('jobCategory')).toBe('Mentorship');
+        expect(req.request.params.get('query')).toBe('career');
+        req.flush([]);
     });
 
     it('should get jobs silently with special header', () => {

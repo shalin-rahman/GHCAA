@@ -5,7 +5,7 @@ import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 
-import { ARTICLE_CATEGORIES } from '../../core/constants/app.constants';
+import { ARTICLE_CATEGORIES, getArticleCategoryLabel } from '../../core/constants/app.constants';
 
 
 @Component({
@@ -116,8 +116,7 @@ export class AdminNews implements OnInit {
     }
 
     getCategoryLabel(cat: any): string {
-        const c = this.categories.find(x => x.value === cat);
-        return c ? c.label : (cat || 'Article');
+        return getArticleCategoryLabel(cat);
     }
 
 }

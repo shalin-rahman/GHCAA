@@ -114,6 +114,17 @@ export const ARTICLE_CATEGORIES = [
     { value: 'Regular', label: 'Regular Portal Update' }
 ];
 
+export const PAYMENT_STATUS_MAP: Record<string | number, { label: string, class: string }> = {
+    Pending: { label: 'Pending Verification', class: 'pending' },
+    0: { label: 'Pending Verification', class: 'pending' },
+    Completed: { label: 'Completed', class: 'success' },
+    1: { label: 'Completed', class: 'success' },
+    Failed: { label: 'Failed', class: 'failed' },
+    2: { label: 'Failed', class: 'failed' },
+    Refunded: { label: 'Refunded', class: 'refunded' },
+    3: { label: 'Refunded', class: 'refunded' }
+};
+
 export const SUBMISSION_STATUS = {
     DRAFT: 'Draft',
     PENDING: 'Pending',
@@ -207,6 +218,44 @@ export function getCategoryLabel(cat: string | number): string {
     return cat || 'None';
 }
 
+export function getArticleCategoryLabel(category: string | number | null | undefined): string {
+    if (typeof category === 'number') {
+        return ARTICLE_CATEGORIES[category]?.label || 'Article';
+    }
+    return ARTICLE_CATEGORIES.find(item => item.value === category)?.label || category || 'Article';
+}
+
+export function getJobCategoryLabel(category: string | null | undefined): string {
+    return JOB_CATEGORIES.find(item => item.id === category || item.name === category)?.name || category || 'General';
+}
+
+export function getFinancialCategoryLabel(category: string | number | null | undefined): string {
+    if (typeof category === 'number') {
+        return FINANCIAL_CATEGORY_OPTIONS[category]?.label || 'Other';
+    }
+    return FINANCIAL_CATEGORY_OPTIONS.find(item => item.value === category)?.label || category || 'Other';
+}
+
+export function getPaymentStatusLabel(status: string | number | null | undefined): string {
+    if (status === null || status === undefined) return 'Unknown';
+    const match = PAYMENT_STATUS_MAP[status];
+    if (match) return match.label;
+    if (typeof status === 'string' && /^\d+$/.test(status)) {
+        return PAYMENT_STATUS_MAP[parseInt(status, 10)]?.label || status;
+    }
+    return String(status);
+}
+
+export function getPaymentStatusClass(status: string | number | null | undefined): string {
+    if (status === null || status === undefined) return '';
+    const match = PAYMENT_STATUS_MAP[status];
+    if (match) return match.class;
+    if (typeof status === 'string' && /^\d+$/.test(status)) {
+        return PAYMENT_STATUS_MAP[parseInt(status, 10)]?.class || '';
+    }
+    return '';
+}
+
 export function getMembershipTypeLabel(type: string | number): string {
     if (typeof type === 'number') return MEMBERSHIP_TYPES[type] || 'General';
     return type || 'General';
@@ -257,6 +306,9 @@ export const FINANCIAL_CATEGORY_OPTIONS = [
     { value: 'RegistrationFee', label: 'Registration Fee' },
     { value: 'Donation', label: 'Donation' },
     { value: 'Event', label: 'Event Fee' },
+    { value: 'Maintenance', label: 'Maintenance' },
+    { value: 'Salary', label: 'Salary' },
+    { value: 'Utilities', label: 'Utilities' },
     { value: 'Other', label: 'Other' }
 ];
 
@@ -272,14 +324,9 @@ export const ACADEMIC_CERTIFICATES = [
     'Law'
 ];
 
-export const ACADEMIC_GROUPS = [
-    'Science',
-    'Arts & Humanities',
-    'Business Studies'
-];
 
 export const ACADEMIC_SUBJECTS = [
-    'None', 'Bengali', 'English', 'History', 'Islamic History & Culture',
+    'None', 'Science', 'Arts & Humanities', 'Business Studies', 'Bengali', 'English', 'History', 'Islamic History & Culture',
     'Philosophy', 'Islamic Studies', 'Library Science', 'Economics',
     'Political Science', 'Sociology', 'Social Work', 'Anthropology',
     'Public Administration', 'Physics', 'Chemistry', 'Mathematics',
@@ -337,35 +384,24 @@ export const IS_HSC = (cert: string | undefined | null) => cert === 'HSC';
 
 export const ACADEMIC_DATA = {
     certificates: ACADEMIC_CERTIFICATES,
-    groups: ACADEMIC_GROUPS,
     subjects: ACADEMIC_SUBJECTS,
     sectors: PROFESSIONAL_SECTORS,
     getYears: getAcademicYears
 };
 
 export const ensureValidAcademicData = (member: any) => {
-    // Process flat structure (Legacy/Registration)
-    if (IS_HSC(member.highestCertificate) || IS_HSC(member.HighestCertificate)) {
-        if (member.highestCertificateSubject) member.highestCertificateSubject = 'None';
-        if (member.HighestCertificateSubject) member.HighestCertificateSubject = 'None';
-    }
-    if (IS_HSC(member.ghcLastCertificate) || IS_HSC(member.GHCLastCertificate)) {
-        if (member.ghcLastCertificateSubject) member.ghcLastCertificateSubject = 'None';
-        if (member.GHCLastCertificateSubject) member.GHCLastCertificateSubject = 'None';
-    }
-
     // Process AcademicHistory array (New LinkedIn style)
     if (member.academicHistory && Array.isArray(member.academicHistory)) {
         member.academicHistory.forEach((item: any) => {
             if (IS_HSC(item.degree)) {
-                item.subject = 'None';
+                // HSC uses science/arts/business from the combined subject list
             }
         });
     }
     if (member.AcademicHistory && Array.isArray(member.AcademicHistory)) {
         member.AcademicHistory.forEach((item: any) => {
             if (IS_HSC(item.degree)) {
-                item.subject = 'None';
+                // HSC uses science/arts/business from the combined subject list
             }
         });
     }

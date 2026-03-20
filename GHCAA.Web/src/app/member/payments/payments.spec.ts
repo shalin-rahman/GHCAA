@@ -43,4 +43,16 @@ describe('Payments Component', () => {
         expect(financialServiceMock.getMyDues).toHaveBeenCalled();
         expect(financialServiceMock.getMyHistory).toHaveBeenCalled();
     });
+
+    it('should map enum payment statuses from the backend', () => {
+        expect(component.getStatusLabel('Pending')).toBe('Pending Verification');
+        expect(component.getStatusClass('Completed')).toBe('success');
+        expect(component.getStatusLabel('Failed')).toBe('Failed');
+        expect(component.getStatusLabel('Refunded')).toBe('Refunded');
+    });
+
+    it('should format financial category labels', () => {
+        expect(component.getCategoryLabel('MembershipFee')).toBe('Yearly Membership Fee');
+        expect(component.getCategoryLabel('Utilities')).toBe('Utilities');
+    });
 });

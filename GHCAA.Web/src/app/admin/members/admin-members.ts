@@ -115,7 +115,6 @@ export class AdminMembers implements OnInit {
   yearsList = this.ACADEMIC.getYears();
   IS_HSC = IS_HSC;
   degreeOptions = this.ACADEMIC.certificates;
-  groupOptions = this.ACADEMIC.groups;
   subjectOptions = this.ACADEMIC.subjects;
   sectorOptions = this.ACADEMIC.sectors;
 

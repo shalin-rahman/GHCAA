@@ -7,6 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
 import { ExportUtil } from '../../core/utils/export.util';
+import { getFinancialCategoryLabel } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-ledger',
@@ -129,8 +130,7 @@ export class Ledger implements OnInit {
   }
 
   getCategoryName(id: any): string {
-    const c = this.categories.find(x => x.id == id);
-    return c ? c.name : 'Other';
+    return getFinancialCategoryLabel(id);
   }
 
   addRecord() {
