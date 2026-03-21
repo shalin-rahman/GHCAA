@@ -84,6 +84,7 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<ProfessionalRecord> ProfessionalRecords { get; set; } = null!;
         public DbSet<PaymentConfiguration> PaymentConfigurations { get; set; } = null!;
         public DbSet<FamilyLinkRequest> FamilyLinkRequests { get; set; } = null!;
+        public DbSet<FamilyLinkRequest> FamilyLinkRequests { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -144,6 +145,8 @@ namespace GHCAA.Infrastructure.Data
                 .WithMany(m => m.ReceivedFamilyLinkRequests)
                 .HasForeignKey(f => f.TargetMemberId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FamilyLinkRequest>().HasQueryFilter(f => f.Requester != null && !f.Requester.IsArchived && f.TargetMember != null && !f.TargetMember.IsArchived);
 
             // Member <-> User (one-to-one)
             modelBuilder.Entity<User>()
