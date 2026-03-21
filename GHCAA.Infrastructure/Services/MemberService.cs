@@ -27,6 +27,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly IActivityService _activityService;
         private readonly INotificationService _notificationService;
         private readonly IConfiguration _config;
+        private readonly IGamificationService _gamification;
 
         public MemberService(
             ApplicationDbContext db,
@@ -39,7 +40,8 @@ namespace GHCAA.Infrastructure.Services
             ILogger<MemberService> logger,
             IActivityService activityService,
             INotificationService notificationService,
-            IConfiguration config)
+            IConfiguration config,
+            IGamificationService gamification)
         {
             _db = db;
             _storage = storage;
@@ -52,6 +54,7 @@ namespace GHCAA.Infrastructure.Services
             _activityService = activityService;
             _notificationService = notificationService;
             _config = config;
+            _gamification = gamification;
         }
 
         public async Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default)
@@ -85,6 +88,8 @@ namespace GHCAA.Infrastructure.Services
                 IsAddressPublic = dto.IsAddressPublic,
                 IsNIDPublic = dto.IsNIDPublic,
                 HasAcceptedTerms = dto.HasAcceptedTerms,
+                HasAcceptedGdpr = dto.HasAcceptedGdpr,
+                GdprAcceptedAt = dto.HasAcceptedGdpr ? DateTime.UtcNow : null,
                 MembershipType = dto.MembershipType,
                 IsVerified = false
             };
@@ -190,6 +195,8 @@ namespace GHCAA.Infrastructure.Services
 
             // Generate & send OTP
             await _otp.GenerateAndSendOtpAsync(member.Email ?? string.Empty, cancellationToken);
+
+            await _activityService.LogActivityAsync(member.Id, "Registration", "New registry filing submitted for review.", member.Id, cancellationToken: cancellationToken);
 
             _logger.LogInformation("Registered application for MemberId {MemberId}", member.Id);
             return member.Id;
@@ -308,6 +315,10 @@ namespace GHCAA.Infrastructure.Services
                     member.ApprovedBy = approvedByAdminId;
 
                     await _db.SaveChangesAsync(cancellationToken);
+                    
+                    // Award points for verification
+                    await _gamification.AwardPointsAsync(memberId, "PROFILE_VERIFIED", metadata: "Initial approval", cancellationToken: cancellationToken);
+
                     await transaction.CommitAsync(cancellationToken);
 
                     await _activityService.LogActivityAsync(memberId, "Approved", $"Member approved by Admin {approvedByAdminId}. Membership Number: {membershipNumber}", approvedByAdminId, cancellationToken: cancellationToken);
@@ -395,6 +406,7 @@ namespace GHCAA.Infrastructure.Services
             
             if (member == null) return null;
 
+            var gains = await GetMemberGainsAsync(member.Id, member.ContributionPoints, cancellationToken);
             var dto = new MemberProfileDto
             {
                 Id = member.Id,
@@ -423,6 +435,10 @@ namespace GHCAA.Infrastructure.Services
                 IsAddressPublic = member.IsAddressPublic,
                 HasAcceptedTerms = member.HasAcceptedTerms,
                 AppliedDate = DateTime.SpecifyKind(member.AppliedDate, DateTimeKind.Utc),
+                // Gamification & Health
+                ContributionPoints = member.ContributionPoints,
+                Rank = gains.rank,
+                ProfileCompletionPercentage = CalculateProfileCompletion(member),
                 // Family members from Request system
                 FamilyMembers = new List<MemberFamilyDto>()
             };
@@ -788,7 +804,11 @@ namespace GHCAA.Infrastructure.Services
                 .Take(pageSize);
 
             var members = await membersQuery.ToListAsync(cancellationToken);
-            var memberDtos = members.Select(member => {
+            var memberDtos = new List<MemberSummaryDto>();
+
+            foreach (var member in members)
+            {
+                var gains = await GetMemberGainsAsync(member.Id, member.ContributionPoints, cancellationToken);
                 var dto = new MemberSummaryDto
                 {
                     Id = member.Id,
@@ -804,6 +824,11 @@ namespace GHCAA.Infrastructure.Services
                     IsMobilePublic = member.IsMobilePublic,
                     IsAddressPublic = member.IsAddressPublic,
                     IsNIDPublic = member.IsNIDPublic,
+                    
+                    // Gamification
+                    ContributionPoints = member.ContributionPoints,
+                    Rank = gains.rank,
+                    CategoryBadge = gains.badge,
                     
                     // Mask PII if not privileged (SuperAdmin or self) AND not public
                     Email = (isPrivileged || member.IsEmailPublic) ? member.Email : MaskPii(member.Email, 3, 3),
@@ -843,8 +868,8 @@ namespace GHCAA.Infrastructure.Services
                     dto.ProfessionalSector = currentJob.Sector;
                 }
 
-                return dto;
-            });
+                memberDtos.Add(dto);
+            }
 
             return new
             {
@@ -1184,6 +1209,44 @@ namespace GHCAA.Infrastructure.Services
             var end = value.Substring(value.Length - visibleEnd);
             var middle = new string('*', value.Length - (visibleStart + visibleEnd));
             return $"{start}{middle}{end}";
+        }
+
+        // --- Gamification & Profile Health Helpers ---
+
+        private decimal CalculateProfileCompletion(Member member)
+        {
+            int totalFields = 10;
+            int completedFields = 0;
+
+            if (!string.IsNullOrEmpty(member.FullName)) completedFields++;
+            if (!string.IsNullOrEmpty(member.MobileNo)) completedFields++;
+            if (!string.IsNullOrEmpty(member.Email)) completedFields++;
+            if (!string.IsNullOrEmpty(member.NID)) completedFields++;
+            if (!string.IsNullOrEmpty(member.PhotoPath)) completedFields++;
+            if (member.AcademicHistory != null && member.AcademicHistory.Any()) completedFields++;
+            if (member.ProfessionalHistory != null && member.ProfessionalHistory.Any()) completedFields++;
+            if (member.BloodGroup != default) completedFields++;
+            if (member.DateOfBirth != default && member.DateOfBirth > new DateTime(1900, 1, 1)) completedFields++;
+            if (!string.IsNullOrEmpty(member.PermanentAddress)) completedFields++;
+
+            return Math.Round((decimal)completedFields / totalFields * 100, 2);
+        }
+
+        private string GetCategoryBadge(int points)
+        {
+            if (points >= 1000) return "Legend";
+            if (points >= 500) return "Elite";
+            if (points >= 200) return "Active";
+            return "Member";
+        }
+
+        private async Task<(int rank, string badge)> GetMemberGainsAsync(int memberId, int points, CancellationToken cancellationToken)
+        {
+            var rank = await _db.Members
+                .Where(m => m.ContributionPoints > points && !m.IsArchived)
+                .CountAsync(cancellationToken) + 1;
+
+            return (rank, GetCategoryBadge(points));
         }
     }
 }

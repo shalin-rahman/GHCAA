@@ -84,11 +84,14 @@
                         <h4>{{ m.fullName }}</h4>
                         <div class="membership-meta">
                             <span class="m-no">{{ m.membershipNumber || 'REG-PENDING' }}</span>
+                            @if (m.rank) {
+                                <span class="badge badge-rank !bg-amber-500/20 !text-amber-500 !border-amber-500/30">#{{ m.rank }}</span>
+                            }
+                            @if (m.categoryBadge) {
+                                <span class="badge badge-category !bg-blue-500/20 !text-blue-500 !border-blue-500/30">{{ m.categoryBadge }}</span>
+                            }
                             @if (m.membershipType) {
                                 <span class="m-type-label">{{ m.membershipType }}</span>
-                            }
-                            @if (m.category && m.category !== 'None') {
-                                <span class="badge" [class]="m.category.toLowerCase()">{{ m.category }}</span>
                             }
                         </div>
                         @if (getCurrentECPosition(m.ecHistory) !== 'None') {
@@ -162,11 +165,14 @@
                 <h3>Member Profile</h3>
                 <div class="membership-meta ml-4">
                     <span class="m-no">{{ selectedMember()?.membershipNumber || 'REG-PENDING' }}</span>
-                    @if (selectedMember()?.membershipType) {
-                        <span class="m-type-label">{{ selectedMember()?.membershipType }}</span>
+                    @if (selectedMember()?.rank) {
+                        <span class="badge badge-rank !bg-amber-500/20 !text-amber-500 ml-2">#{{ selectedMember()?.rank }}</span>
                     }
-                    @if (selectedMember()?.category && selectedMember()?.category !== 'None') {
-                        <span class="badge ml-2" [class]="selectedMember()!.category!.toLowerCase()">{{ selectedMember()?.category }}</span>
+                    @if (selectedMember()?.categoryBadge) {
+                        <span class="badge badge-category !bg-blue-500/20 !text-blue-500 ml-2">{{ selectedMember()?.categoryBadge }}</span>
+                    }
+                    @if (selectedMember()?.membershipType) {
+                        <span class="m-type-label ml-2">{{ selectedMember()?.membershipType }}</span>
                     }
                 </div>
             </div>

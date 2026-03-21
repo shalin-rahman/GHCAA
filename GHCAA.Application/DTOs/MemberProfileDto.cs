@@ -18,5 +18,10 @@ namespace GHCAA.Application.DTOs
         public List<MemberSummaryDto> Dependents { get; set; } = new();
         public List<MemberFamilyDto> FamilyMembers { get; set; } = new();
         public bool IsFamilyPublic { get; set; }
+
+        // Gamification & Health
+        public int ContributionPoints { get; set; }
+        public int Rank { get; set; }
+        public decimal ProfileCompletionPercentage { get; set; }
     }
 }

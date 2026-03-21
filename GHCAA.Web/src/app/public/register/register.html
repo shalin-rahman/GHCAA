@@ -338,6 +338,11 @@
                                             <a href="#" (click)="$event.preventDefault(); showTerms.set(true)" class="text-accent underline">Broadened Terms and Conditions of Registration</a>, 
                                             and I irrevocably agree to be bound by them.</span>
                                     </label>
+                                    <label class="premium-checkbox-label mb-4">
+                                        <input type="checkbox" name="gdpr" [(ngModel)]="model.HasAcceptedGdpr" required>
+                                        <span class="checkmark"></span>
+                                        <span class="label-text max-w-lg">I explicitly consent to the Association's <b>Data Privacy & GDPR</b> protocols for processing my personal information as described in the directory and privacy sections.</span>
+                                    </label>
                                     <label class="premium-checkbox-label">
                                         <input type="checkbox" name="agree" required ngModel>
                                         <span class="checkmark"></span>

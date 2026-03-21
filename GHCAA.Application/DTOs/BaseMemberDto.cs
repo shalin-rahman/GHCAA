@@ -31,6 +31,7 @@ namespace GHCAA.Application.DTOs
         public bool IsAddressPublic { get; set; }
         public bool IsNIDPublic { get; set; }
         public bool HasAcceptedTerms { get; set; }
+        public bool HasAcceptedGdpr { get; set; }
 
         // Attachments
         public string? PhotoPath { get; set; }

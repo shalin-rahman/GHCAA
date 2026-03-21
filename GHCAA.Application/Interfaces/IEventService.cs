@@ -25,5 +25,20 @@ namespace GHCAA.Application.Interfaces
         Task<EventRegistration?> GetRegistrationByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> SendInvitationEmailAsync(int registrationId, CancellationToken cancellationToken = default);
         Task<IEnumerable<PublicParticipantDto>> GetPublicParticipantsAsync(int eventId, CancellationToken cancellationToken = default);
+
+        // Event Operations (Admin)
+        Task<IEnumerable<EventTaskDto>> GetEventTasksAsync(int eventId, CancellationToken cancellationToken = default);
+        Task<EventTask> CreateEventTaskAsync(CreateEventTaskDto dto, CancellationToken cancellationToken = default);
+        Task<bool> ToggleTaskStatusAsync(int taskId, CancellationToken cancellationToken = default);
+        Task<bool> DeleteTaskAsync(int taskId, CancellationToken cancellationToken = default);
+
+        Task<EventBudgetDto?> GetEventBudgetAsync(int eventId, CancellationToken cancellationToken = default);
+        Task<bool> UpdateEventBudgetAsync(UpdateEventBudgetDto dto, CancellationToken cancellationToken = default);
+        Task<EventExpense> AddEventExpenseAsync(AddEventExpenseDto dto, CancellationToken cancellationToken = default);
+        Task<bool> DeleteExpenseAsync(int expenseId, CancellationToken cancellationToken = default);
+
+        // Check-in & QR
+        Task<bool> CheckInParticipantAsync(int registrationId, CancellationToken cancellationToken = default);
+        Task<bool> CheckInByTicketCodeAsync(string ticketCode, CancellationToken cancellationToken = default);
     }
 }

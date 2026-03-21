@@ -56,7 +56,8 @@ export class Register implements OnDestroy {
       { institutionName: 'Govt. Haraganga College', degree: 'HSC', subject: 'None', passingYear: null, isGHC: true }
     ],
     ProfessionalHistory: [],
-    HasAcceptedTerms: false
+    HasAcceptedTerms: false,
+    HasAcceptedGdpr: false
   };
 
   addAcademic() {

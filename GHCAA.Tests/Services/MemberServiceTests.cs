@@ -24,6 +24,7 @@ public class MemberServiceTests : TestBase
     private Mock<IActivityService> _mockActivityService = null!;
     private Mock<INotificationService> _mockNotificationService = null!;
     private Mock<IConfiguration> _mockConfig = null!;
+    private Mock<IGamificationService> _mockGamification = null!;
     private MemberService _service = null!;
 
     private Mock<ICommunicationService> _mockCommunication = null!;
@@ -41,6 +42,7 @@ public class MemberServiceTests : TestBase
         _mockCommunication = new Mock<ICommunicationService>();
         _mockNotificationService = new Mock<INotificationService>();
         _mockConfig = new Mock<IConfiguration>();
+        _mockGamification = new Mock<IGamificationService>();
 
         _service = new MemberService(
             _context,
@@ -53,7 +55,8 @@ public class MemberServiceTests : TestBase
             _mockLogger.Object,
             _mockActivityService.Object,
             _mockNotificationService.Object,
-            _mockConfig.Object
+            _mockConfig.Object,
+            _mockGamification.Object
         );
     }
 

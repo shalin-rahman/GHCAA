@@ -84,7 +84,10 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<ProfessionalRecord> ProfessionalRecords { get; set; } = null!;
         public DbSet<PaymentConfiguration> PaymentConfigurations { get; set; } = null!;
         public DbSet<FamilyLinkRequest> FamilyLinkRequests { get; set; } = null!;
-        public DbSet<FamilyLinkRequest> FamilyLinkRequests { get; set; } = null!;
+        public DbSet<EventTask> EventTasks { get; set; } = null!;
+        public DbSet<EventBudget> EventBudgets { get; set; } = null!;
+        public DbSet<EventExpense> EventExpenses { get; set; } = null!;
+        public DbSet<GamificationConfig> GamificationConfigs { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -154,6 +157,25 @@ namespace GHCAA.Infrastructure.Data
                 .WithOne(m => m.User)
                 .HasForeignKey<User>(u => u.MemberId);
 
+            // Event Operations relationships
+            modelBuilder.Entity<EventTask>()
+                .HasOne(t => t.AssignedMember)
+                .WithMany()
+                .HasForeignKey(t => t.AssignedMemberId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<EventBudget>()
+                .HasOne(b => b.Event)
+                .WithOne() // One budget per event
+                .HasForeignKey<EventBudget>(b => b.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<EventExpense>()
+                .HasOne(e => e.Budget)
+                .WithMany(b => b.Expenses)
+                .HasForeignKey(e => e.EventBudgetId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // User <-> Role (many-to-many)
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Roles)
@@ -185,6 +207,14 @@ namespace GHCAA.Infrastructure.Data
             // Seed Email Templates from JSON
             var emailTemplates = LoadSeed<EmailTemplate>("email_templates.json");
             if (emailTemplates.Any()) modelBuilder.Entity<EmailTemplate>().HasData(emailTemplates);
+
+            // Seed Gamification Configs
+            modelBuilder.Entity<GamificationConfig>().HasData(
+                new GamificationConfig { Id = 1, ActivityCode = "PROFILE_VERIFIED", Name = "Verifying Profile", Points = 50 },
+                new GamificationConfig { Id = 2, ActivityCode = "EVENT_ATTENDANCE", Name = "Attending an Event", Points = 100 },
+                new GamificationConfig { Id = 3, ActivityCode = "DONATION", Name = "Making a Donation", Points = 200 },
+                new GamificationConfig { Id = 4, ActivityCode = "MENTORING", Name = "Mentoring a Fellow Alumni", Points = 200 }
+            );
 
             // Soft Delete Filters
             modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsArchived);

@@ -45,6 +45,12 @@ export interface Member {
     professionalHistory?: ProfessionalRecord[];
     ecHistory?: ECMember[];
     paymentHistories?: PaymentHistory[];
+    
+    // Gamification & Health
+    contributionPoints?: number;
+    rank?: number;
+    categoryBadge?: string;
+    profileCompletionPercentage?: number;
 }
 
 export interface PaymentHistory {
@@ -394,6 +400,11 @@ export interface MemberProfile {
     professionalHistory: ProfessionalRecord[];
     ecHistory?: ECHistoryRecord[];
     paymentHistories?: PaymentHistory[];
+
+    // Gamification & Health
+    contributionPoints?: number;
+    rank?: number;
+    profileCompletionPercentage?: number;
 }
 
 export interface MemberSearchFilter {

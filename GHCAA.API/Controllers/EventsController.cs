@@ -213,5 +213,71 @@ namespace GHCAA.API.Controllers
             var success = await _eventService.SendInvitationEmailAsync(id, cancellationToken);
             return success ? Ok() : BadRequest("Failed to send invitation or registration not approved.");
         }
+
+        // --- Operations (Tasks & Budget) ---
+
+        [HttpGet("admin/{eventId}/tasks")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetEventTasks(int eventId, CancellationToken cancellationToken)
+        {
+            var tasks = await _eventService.GetEventTasksAsync(eventId, cancellationToken);
+            return Ok(tasks);
+        }
+
+        [HttpPost("admin/tasks")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> CreateTask([FromBody] CreateEventTaskDto dto, CancellationToken cancellationToken)
+        {
+            var task = await _eventService.CreateEventTaskAsync(dto, cancellationToken);
+            return Ok(task);
+        }
+
+        [HttpPost("admin/tasks/{id}/toggle")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> ToggleTask(int id, CancellationToken cancellationToken)
+        {
+            var success = await _eventService.ToggleTaskStatusAsync(id, cancellationToken);
+            return success ? Ok() : NotFound();
+        }
+
+        [HttpDelete("admin/tasks/{id}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> DeleteTask(int id, CancellationToken cancellationToken)
+        {
+            var success = await _eventService.DeleteTaskAsync(id, cancellationToken);
+            return success ? Ok() : NotFound();
+        }
+
+        [HttpGet("admin/{eventId}/budget")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetEventBudget(int eventId, CancellationToken cancellationToken)
+        {
+            var budget = await _eventService.GetEventBudgetAsync(eventId, cancellationToken);
+            return budget == null ? NotFound() : Ok(budget);
+        }
+
+        [HttpPost("admin/budget")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UpdateBudget([FromBody] UpdateEventBudgetDto dto, CancellationToken cancellationToken)
+        {
+            var success = await _eventService.UpdateEventBudgetAsync(dto, cancellationToken);
+            return success ? Ok() : BadRequest();
+        }
+
+        [HttpPost("admin/expenses")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> AddExpense([FromBody] AddEventExpenseDto dto, CancellationToken cancellationToken)
+        {
+            var expense = await _eventService.AddEventExpenseAsync(dto, cancellationToken);
+            return Ok(expense);
+        }
+
+        [HttpDelete("admin/expenses/{id}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> DeleteExpense(int id, CancellationToken cancellationToken)
+        {
+            var success = await _eventService.DeleteExpenseAsync(id, cancellationToken);
+            return success ? Ok() : NotFound();
+        }
     }
 }

@@ -42,6 +42,8 @@ namespace GHCAA.Domain.Models
         public bool IsNIDPublic { get; set; } = false;
         public bool IsFamilyPublic { get; set; } = false;
         public bool HasAcceptedTerms { get; set; } = false;
+        public bool HasAcceptedGdpr { get; set; } = false;
+        public DateTime? GdprAcceptedAt { get; set; }
 
         public bool IsArchived { get; set; } = false;
         public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow;
@@ -50,6 +52,7 @@ namespace GHCAA.Domain.Models
         public MembershipType MembershipType { get; set; } = MembershipType.General;
         public MemberCategory Category { get; set; } = MemberCategory.None;
         public bool IsVerified { get; set; } = false; // Blue Tick / Verification Status
+        public int ContributionPoints { get; set; } = 0;
 
         // Navigation
         public User? User { get; set; }

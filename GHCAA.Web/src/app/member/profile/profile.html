@@ -40,11 +40,22 @@
                 <span class="text-[9px] opacity-60 uppercase tracking-tighter">{{ profile.status === 1 ? 'Legacy Active' : 'Waiting for Admin Signature' }}</span>
             </div>
         </div>
-        <div class="status-grid">
+            <div class="grid-item">
+                <small>Global Rank</small>
+                <p><strong>#{{ profile.rank || '---' }}</strong></p>
+                <span class="text-[10px] opacity-60 uppercase">{{ profile.contributionPoints || 0 }} Points</span>
+            </div>
+            <div class="grid-item">
+                <small>Profile Health</small>
+                <div class="h-1 bg-white/5 rounded-full mt-1 mb-1 overflow-hidden">
+                    <div class="h-full bg-accent transition-all duration-1000" [style.width.%]="profile.profileCompletionPercentage"></div>
+                </div>
+                <span class="text-[10px] opacity-60 uppercase">{{ profile.profileCompletionPercentage }}% Complete</span>
+            </div>
             <div class="grid-item">
                 <small>Associated Batch</small>
                 <p><strong>{{ getGHCHistory()?.passingYear || 'N/A' }}</strong></p>
-                <span class="text-[10px] opacity-60 uppercase">{{ getGHCHistory()?.degree || 'N/A' }} {{ getMajorDisplay(getGHCHistory()?.degree, getGHCHistory()?.subject) }}</span>
+                <span class="text-[10px] opacity-60 uppercase">{{ getGHCHistory()?.degree || 'N/A' }}</span>
             </div>
             <div class="grid-item">
                 <small>Highest Degree</small>

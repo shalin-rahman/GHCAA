@@ -22,5 +22,10 @@ namespace GHCAA.Application.DTOs
         public string? Designation { get; set; }
         public string? OrganizationName { get; set; }
         public string? ProfessionalSector { get; set; }
+
+        // Gamification
+        public int ContributionPoints { get; set; }
+        public int Rank { get; set; }
+        public string? CategoryBadge { get; set; }
     }
 }

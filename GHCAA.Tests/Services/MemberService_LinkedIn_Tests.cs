@@ -26,6 +26,7 @@ public class MemberService_LinkedIn_Tests : TestBase
     private Mock<INotificationService> _mockNotificationService = null!;
     private Mock<ICommunicationService> _mockCommunication = null!;
     private Mock<IConfiguration> _mockConfig = null!;
+    private Mock<IGamificationService> _mockGamification = null!;
     private MemberService _service = null!;
 
     [SetUp]
@@ -41,6 +42,7 @@ public class MemberService_LinkedIn_Tests : TestBase
         _mockCommunication = new Mock<ICommunicationService>();
         _mockNotificationService = new Mock<INotificationService>();
         _mockConfig = new Mock<IConfiguration>();
+        _mockGamification = new Mock<IGamificationService>();
 
         _service = new MemberService(
             _context,
@@ -53,7 +55,8 @@ public class MemberService_LinkedIn_Tests : TestBase
             _mockLogger.Object,
             _mockActivityService.Object,
             _mockNotificationService.Object,
-            _mockConfig.Object
+            _mockConfig.Object,
+            _mockGamification.Object
         );
     }
 

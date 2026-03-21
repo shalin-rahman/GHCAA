@@ -11,6 +11,8 @@ namespace GHCAA.Domain.Models
         public string Description { get; set; } = null!;
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public string? IPAddress { get; set; }
+        public string? UserAgent { get; set; }
+        public string? Metadata { get; set; } // Detailed audit trail (JSON)
         
         // Navigation
         public Member? Member { get; set; }

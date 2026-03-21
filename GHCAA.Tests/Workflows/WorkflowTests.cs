@@ -45,6 +45,7 @@ namespace GHCAA.Tests.Workflows
             var loggerMock = new Mock<ILogger<MemberService>>();
 
             var configMock = new Mock<IConfiguration>();
+            var gamificationMock = new Mock<IGamificationService>();
 
             _memberService = new MemberService(
                 _context, 
@@ -57,9 +58,10 @@ namespace GHCAA.Tests.Workflows
                 loggerMock.Object,
                 _activityMock.Object,
                 _notificationMock.Object,
-                configMock.Object);
+                configMock.Object,
+                gamificationMock.Object);
 
-            _eventService = new EventService(_context, _commMock.Object, _storageMock.Object);
+            _eventService = new EventService(_context, _commMock.Object, _storageMock.Object, gamificationMock.Object);
             _financialService = new FinancialService(_context, _commMock.Object, _notificationMock.Object);
         }
 

@@ -37,8 +37,9 @@ namespace GHCAA.Tests.Services
             var activity = new Mock<IActivityService>();
             var notify = new Mock<INotificationService>();
             var config = new Mock<IConfiguration>();
+            var gamification = new Mock<IGamificationService>();
 
-            _service = new MemberService(_context, storage.Object, fileRepo.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object);
+            _service = new MemberService(_context, storage.Object, fileRepo.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object);
         
             if (!_context.ECPeriods.Any())
             {

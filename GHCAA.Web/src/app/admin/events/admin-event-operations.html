@@ -1,0 +1,169 @@
+<div class="ops-container glass-card p-6 border border-white/20 rounded-2xl shadow-2xl">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-slate-100 flex items-center gap-3">
+            <i class="fas fa-briefcase text-accent"></i>
+            Event Operations: {{ event.title }}
+        </h3>
+        
+        <div class="flex bg-slate-800/50 p-1 rounded-xl border border-white/5">
+            <button (click)="activeOpTab.set('tasks')" 
+                    [class.bg-accent]="activeOpTab() === 'tasks'"
+                    [class.text-slate-900]="activeOpTab() === 'tasks'"
+                    [class.text-slate-400]="activeOpTab() !== 'tasks'"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                Tasks & Volunteers
+            </button>
+            <button (click)="activeOpTab.set('budget')" 
+                    [class.bg-accent]="activeOpTab() === 'budget'"
+                    [class.text-slate-900]="activeOpTab() === 'budget'"
+                    [class.text-slate-400]="activeOpTab() !== 'budget'"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                Budget & Expenses
+            </button>
+        </div>
+    </div>
+
+    <!-- TASKS TAB -->
+    <div *ngIf="activeOpTab() === 'tasks'" class="space-y-6 animate-fade-in">
+        <!-- New Task Form -->
+        <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Assign New Task</h4>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="md:col-span-2">
+                    <input type="text" [(ngModel)]="newTask.title" placeholder="Task title (e.g. Catering Lead)" 
+                           class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
+                </div>
+                <div>
+                    <input type="date" [(ngModel)]="newTask.dueDate" 
+                           class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
+                </div>
+                <button (click)="addTask()" 
+                        class="bg-accent text-slate-900 px-6 py-2 rounded-lg font-bold hover:shadow-lg transition-all h-fit self-end">
+                    Assign
+                </button>
+            </div>
+        </div>
+
+        <!-- Task List -->
+        <div class="space-y-3">
+            <div *ngFor="let task of tasks()" 
+                 class="flex items-center justify-between p-4 bg-slate-800/40 rounded-xl border border-white/5 hover:border-accent/30 transition-all group">
+                <div class="flex items-center gap-4">
+                    <button (click)="toggleTask(task.id)" 
+                            class="w-6 h-6 rounded-full border-2 border-accent/50 flex items-center justify-center transition-all"
+                            [class.bg-accent]="task.isCompleted">
+                        <i *ngIf="task.isCompleted" class="fas fa-check text-slate-900 text-xs"></i>
+                    </button>
+                    <div>
+                        <p class="font-semibold" [class.line-through]="task.isCompleted" [class.text-slate-400]="task.isCompleted">
+                            {{ task.title }}
+                        </p>
+                        <p class="text-xs text-slate-500">
+                            <span *ngIf="task.assignedMemberName" class="text-accent/70">Assigned: {{ task.assignedMemberName }}</span>
+                            <span *ngIf="task.dueDate" class="ml-2">Due: {{ task.dueDate | date }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <button (click)="deleteTask(task.id)" class="text-slate-600 hover:text-red-400 p-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+
+            <div *ngIf="tasks().length === 0" class="text-center py-10 text-slate-500 italic">
+                No tasks assigned yet.
+            </div>
+        </div>
+    </div>
+
+    <!-- BUDGET TAB -->
+    <div *ngIf="activeOpTab() === 'budget'" class="space-y-6 animate-fade-in">
+        <!-- Budget Health -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-indigo-500/10 p-6 rounded-2xl border border-indigo-500/20">
+                <p class="text-xs font-bold text-indigo-400 uppercase mb-1">Estimated Budget</p>
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl font-bold text-slate-100">৳</span>
+                    <input type="number" [(ngModel)]="newBudget.estimatedTotal" (blur)="updateBudget()"
+                           class="bg-transparent text-3xl font-bold text-slate-100 w-full focus:outline-none">
+                </div>
+                <p class="text-[10px] text-slate-500 mt-2 italic">Click to edit and tab out to save.</p>
+            </div>
+
+            <div class="bg-emerald-500/10 p-6 rounded-2xl border border-emerald-500/20">
+                <p class="text-xs font-bold text-emerald-400 uppercase mb-1">Actual Spend</p>
+                <p class="text-3xl font-bold text-slate-100">৳ {{ (budget()?.actualTotal || 0) | number:'1.2-2' }}</p>
+                <p class="text-xs text-slate-400 mt-2">Captured through expenses</p>
+            </div>
+
+            <div class="p-6 rounded-2xl border" 
+                 [class.bg-red-500/10]="(budget()?.actualTotal || 0) > (budget()?.estimatedTotal || 0)"
+                 [class.bg-slate-500/10]="(budget()?.actualTotal || 0) <= (budget()?.estimatedTotal || 0)"
+                 [class.border-red-500/20]="(budget()?.actualTotal || 0) > (budget()?.estimatedTotal || 0)"
+                 [class.border-slate-500/20]="(budget()?.actualTotal || 0) <= (budget()?.estimatedTotal || 0)">
+                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Remaining / Over</p>
+                <p class="text-3xl font-bold text-slate-100">
+                    ৳ {{ ((budget()?.estimatedTotal || 0) - (budget()?.actualTotal || 0)) | number:'1.2-2' }}
+                </p>
+                <p class="text-xs mt-2" [class.text-red-400]="(budget()?.actualTotal || 0) > (budget()?.estimatedTotal || 0)">
+                    {{ (budget()?.actualTotal || 0) > (budget()?.estimatedTotal || 0) ? 'Over budget' : 'Under budget' }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Add Expense -->
+        <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Record New Expense</h4>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="md:col-span-1">
+                    <input type="text" [(ngModel)]="newExpense.category" placeholder="Category (e.g. Venue)" 
+                           class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
+                </div>
+                <div>
+                    <input type="number" [(ngModel)]="newExpense.amount" placeholder="Amount (৳)" 
+                           class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
+                </div>
+                <div>
+                    <input type="date" [(ngModel)]="newExpense.spentAt" 
+                           class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
+                </div>
+                <button (click)="addExpense()" 
+                        class="bg-emerald-500 text-slate-900 px-6 py-2 rounded-lg font-bold hover:shadow-lg transition-all">
+                    Add Expense
+                </button>
+            </div>
+        </div>
+
+        <!-- Expense History -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="text-xs font-bold text-slate-500 uppercase">
+                    <tr>
+                        <th class="px-4 py-3">Date</th>
+                        <th class="px-4 py-3">Category</th>
+                        <th class="px-4 py-3">Note</th>
+                        <th class="px-4 py-3 text-right">Amount</th>
+                        <th class="px-4 py-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <tr *ngFor="let ex of budget()?.expenses" class="hover:bg-white/5 transition-all text-sm">
+                        <td class="px-4 py-4 text-slate-400">{{ ex.spentAt | date:'mediumDate' }}</td>
+                        <td class="px-4 py-4 font-semibold text-slate-200">{{ ex.category }}</td>
+                        <td class="px-4 py-4 text-slate-400 italic text-xs">{{ ex.note || '---' }}</td>
+                        <td class="px-4 py-4 text-right font-mono text-emerald-400 font-bold">৳ {{ ex.amount | number:'1.2-2' }}</td>
+                        <td class="px-4 py-4 text-right">
+                            <button (click)="deleteExpense(ex.id)" class="text-slate-600 hover:text-red-400 transition-all p-2">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div *ngIf="!budget()?.expenses?.length" class="text-center py-10 text-slate-500 italic">
+                No expenses recorded yet.
+            </div>
+        </div>
+    </div>
+</div>

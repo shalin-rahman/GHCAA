@@ -303,6 +303,16 @@ The following provides a full, structured breakdown of system features, user rol
     - **API**: `POST /api/messaging/send`.
 - **Dependencies**: Real-time Messaging Hub.
 
+#### 4.4 Gamification & Member Standing
+- **Business Description**: Rewards member engagement with contribution points, ranks, and category badges.
+- **User Roles**: Member.
+- **Inputs/Outputs**:
+    - **API**: `GET /api/profile` (includes points/rank).
+    - **Logic**: Points awarded for `PROFILE_VERIFIED` (50 pts) and `EVENT_ATTENDANCE` (100 pts).
+- **Validations & Rules**:
+    - **Category Thresholds**: Legend (1000+), Elite (500+), Active (200+).
+- **Dependencies**: Gamification Service.
+
 ### 5. Governance & Operations
 #### 5.1 Executive Committee (EC) Management
 - **Business Description**: Managing committee periods, roles, and historical records of governance.

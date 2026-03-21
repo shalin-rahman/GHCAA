@@ -42,5 +42,9 @@ namespace GHCAA.Domain
         public enum RelationshipType { Spouse, Parent, Child, Sibling, Other }
         public enum FamilyLinkStatus { Requested, Accepted, Rejected, Cancelled }
         public enum EventStatus { Draft, Published, Archived }
+
+
+        // Volunteer Enums
+        public enum VolunteerRole { EventOrganizer, GuestManagement, ContentCreator, Mentor, TechnicalSupport, Other }
     }
 }

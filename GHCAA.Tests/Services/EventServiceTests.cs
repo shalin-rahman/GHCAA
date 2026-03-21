@@ -14,13 +14,15 @@ public class EventServiceTests : TestBase
     private EventService _service = null!;
     private Mock<ICommunicationService> _communicationMock = null!;
     private Mock<IFileStorageService> _fileStorageMock = null!;
+    private Mock<IGamificationService> _gamificationMock = null!;
 
     [SetUp]
     public async Task Setup()
     {
         _communicationMock = new Mock<ICommunicationService>();
         _fileStorageMock = new Mock<IFileStorageService>();
-        _service = new EventService(_context, _communicationMock.Object, _fileStorageMock.Object);
+        _gamificationMock = new Mock<IGamificationService>();
+        _service = new EventService(_context, _communicationMock.Object, _fileStorageMock.Object, _gamificationMock.Object);
 
         // Clear seed data so count assertions are deterministic
         _context.AlumniEvents.RemoveRange(_context.AlumniEvents);

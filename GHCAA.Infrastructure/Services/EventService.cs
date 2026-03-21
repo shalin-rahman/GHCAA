@@ -17,12 +17,14 @@ namespace GHCAA.Infrastructure.Services
         private readonly ApplicationDbContext _context;
         private readonly ICommunicationService _communicationService;
         private readonly IFileStorageService _fileStorageService;
+        private readonly IGamificationService _gamificationService;
 
-        public EventService(ApplicationDbContext context, ICommunicationService communicationService, IFileStorageService fileStorageService)
+        public EventService(ApplicationDbContext context, ICommunicationService communicationService, IFileStorageService fileStorageService, IGamificationService gamificationService)
         {
             _context = context;
             _communicationService = communicationService;
             _fileStorageService = fileStorageService;
+            _gamificationService = gamificationService;
         }
 
         public async Task<IEnumerable<EventDto>> GetActiveEventsAsync(CancellationToken cancellationToken = default)
@@ -203,10 +205,11 @@ namespace GHCAA.Infrastructure.Services
                     : GHCAA.Domain.Enums.PaymentMethod.ManualReceipt,
                 ReceiptPath = receiptPath,
                 ContributionAmount = dto.ContributionAmount,
+                TicketCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
                 Status = EventRegistrationStatus.Pending,
                 RegisteredAt = DateTime.UtcNow
             };
-
+            
             _context.EventRegistrations.Add(registration);
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -395,6 +398,210 @@ namespace GHCAA.Infrastructure.Services
                     RegisteredAt = r.RegisteredAt
                 })
                 .ToListAsync(cancellationToken);
+        }
+
+        // --- Event Operations (Admin) ---
+
+        public async Task<IEnumerable<EventTaskDto>> GetEventTasksAsync(int eventId, CancellationToken cancellationToken = default)
+        {
+            return await _context.EventTasks
+                .Include(t => t.AssignedMember)
+                .Where(t => t.EventId == eventId)
+                .OrderBy(t => t.DueDate)
+                .Select(t => new EventTaskDto
+                {
+                    Id = t.Id,
+                    EventId = t.EventId,
+                    Title = t.Title,
+                    Description = t.Description,
+                    AssignedMemberId = t.AssignedMemberId,
+                    AssignedMemberName = t.AssignedMember != null ? t.AssignedMember.FullName : null,
+                    DueDate = t.DueDate,
+                    IsCompleted = t.IsCompleted
+                })
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<EventTask> CreateEventTaskAsync(CreateEventTaskDto dto, CancellationToken cancellationToken = default)
+        {
+            var task = new EventTask
+            {
+                EventId = dto.EventId,
+                Title = dto.Title,
+                Description = dto.Description,
+                AssignedMemberId = dto.AssignedMemberId,
+                DueDate = dto.DueDate.HasValue ? DateTime.SpecifyKind(dto.DueDate.Value, DateTimeKind.Utc) : null,
+                IsCompleted = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.EventTasks.Add(task);
+            await _context.SaveChangesAsync(cancellationToken);
+            return task;
+        }
+
+        public async Task<bool> ToggleTaskStatusAsync(int taskId, CancellationToken cancellationToken = default)
+        {
+            var task = await _context.EventTasks.FindAsync(new object[] { taskId }, cancellationToken);
+            if (task == null) return false;
+
+            task.IsCompleted = !task.IsCompleted;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> DeleteTaskAsync(int taskId, CancellationToken cancellationToken = default)
+        {
+            var task = await _context.EventTasks.FindAsync(new object[] { taskId }, cancellationToken);
+            if (task == null) return false;
+
+            _context.EventTasks.Remove(task);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<EventBudgetDto?> GetEventBudgetAsync(int eventId, CancellationToken cancellationToken = default)
+        {
+            var budget = await _context.EventBudgets
+                .Include(b => b.Expenses)
+                .FirstOrDefaultAsync(b => b.EventId == eventId, cancellationToken);
+
+            if (budget == null) return null;
+
+            return new EventBudgetDto
+            {
+                Id = budget.Id,
+                EventId = budget.EventId,
+                EstimatedTotal = budget.EstimatedTotal,
+                ActualTotal = budget.ActualTotal,
+                Expenses = budget.Expenses.Select(e => new EventExpenseDto
+                {
+                    Id = e.Id,
+                    Category = e.Category,
+                    Amount = e.Amount,
+                    Note = e.Note,
+                    SpentAt = e.SpentAt
+                }).OrderByDescending(e => e.SpentAt).ToList()
+            };
+        }
+
+        public async Task<bool> UpdateEventBudgetAsync(UpdateEventBudgetDto dto, CancellationToken cancellationToken = default)
+        {
+            var budget = await _context.EventBudgets.FirstOrDefaultAsync(b => b.EventId == dto.EventId, cancellationToken);
+            if (budget == null)
+            {
+                budget = new EventBudget
+                {
+                    EventId = dto.EventId,
+                    EstimatedTotal = dto.EstimatedTotal,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.EventBudgets.Add(budget);
+            }
+            else
+            {
+                budget.EstimatedTotal = dto.EstimatedTotal;
+                budget.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<EventExpense> AddEventExpenseAsync(AddEventExpenseDto dto, CancellationToken cancellationToken = default)
+        {
+            var budget = await _context.EventBudgets.FirstOrDefaultAsync(b => b.EventId == dto.EventId, cancellationToken);
+            if (budget == null)
+            {
+                budget = new EventBudget
+                {
+                    EventId = dto.EventId,
+                    EstimatedTotal = 0,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.EventBudgets.Add(budget);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            var expense = new EventExpense
+            {
+                EventBudgetId = budget.Id,
+                Category = dto.Category,
+                Amount = dto.Amount,
+                Note = dto.Note,
+                SpentAt = DateTime.SpecifyKind(dto.SpentAt, DateTimeKind.Utc),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.EventExpenses.Add(expense);
+            
+            // Re-calculate actual total
+            budget.ActualTotal += dto.Amount;
+            budget.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync(cancellationToken);
+            return expense;
+        }
+
+        public async Task<bool> DeleteExpenseAsync(int expenseId, CancellationToken cancellationToken = default)
+        {
+            var expense = await _context.EventExpenses.FindAsync(new object[] { expenseId }, cancellationToken);
+            if (expense == null) return false;
+
+            var budget = await _context.EventBudgets.FindAsync(expense.EventBudgetId);
+            if (budget != null)
+            {
+                budget.ActualTotal -= expense.Amount;
+                budget.UpdatedAt = DateTime.UtcNow;
+            }
+
+            _context.EventExpenses.Remove(expense);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> CheckInParticipantAsync(int registrationId, CancellationToken cancellationToken = default)
+        {
+            var reg = await _context.EventRegistrations
+                .Include(r => r.Event)
+                .FirstOrDefaultAsync(r => r.Id == registrationId, cancellationToken);
+
+            if (reg == null || reg.IsCheckedIn) return false;
+
+            reg.IsCheckedIn = true;
+            reg.CheckedInAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            // Award Points if member
+            if (reg.MemberId.HasValue)
+            {
+                await _gamificationService.AwardPointsAsync(reg.MemberId.Value, "EVENT_ATTENDANCE", reg.EventId, $"Attended: {reg.Event?.Title}", cancellationToken);
+            }
+
+            return true;
+        }
+
+        public async Task<bool> CheckInByTicketCodeAsync(string ticketCode, CancellationToken cancellationToken = default)
+        {
+            var reg = await _context.EventRegistrations
+                .Include(r => r.Event)
+                .FirstOrDefaultAsync(r => r.TicketCode == ticketCode, cancellationToken);
+
+            if (reg == null || reg.IsCheckedIn) return false;
+
+            reg.IsCheckedIn = true;
+            reg.CheckedInAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            // Award Points if member
+            if (reg.MemberId.HasValue)
+            {
+                await _gamificationService.AwardPointsAsync(reg.MemberId.Value, "EVENT_ATTENDANCE", reg.EventId, $"Attended: {reg.Event?.Title}", cancellationToken);
+            }
+
+            return true;
         }
     }
 }
