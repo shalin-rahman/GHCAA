@@ -5,9 +5,9 @@ param (
 
 # ── Banner ──────────────────────────────────────────────────────────────────
 Write-Host ""
-Write-Host "  ============================================================" -ForegroundColor DarkRed
-Write-Host "    GHCAA Platform  |  Stop All Services" -ForegroundColor Red
-Write-Host "  ============================================================" -ForegroundColor DarkRed
+Write-Host "  ============================================================" -ForegroundColor DarkCyan
+Write-Host "    GHCAA Platform  |  Stop All Services" -ForegroundColor Cyan
+Write-Host "  ============================================================" -ForegroundColor DarkCyan
 Write-Host ""
 
 if (-not $Force -and -not $PortsOnly) {
@@ -68,8 +68,8 @@ Release-Port 4200   # Angular frontend
 
 # ── Done ────────────────────────────────────────────────────────────────────
 Write-Host ""
-Write-Host "  ============================================================" -ForegroundColor DarkRed
+Write-Host "  ============================================================" -ForegroundColor DarkCyan
 Write-Host "    All GHCAA services stopped." -ForegroundColor Green
-Write-Host "  ============================================================" -ForegroundColor DarkRed
+Write-Host "  ============================================================" -ForegroundColor DarkCyan
 Write-Host "    Run .\run-app.ps1 or run-app.bat to restart." -ForegroundColor DarkGray
 Write-Host ""

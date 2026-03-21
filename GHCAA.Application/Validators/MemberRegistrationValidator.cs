@@ -13,6 +13,7 @@ namespace GHCAA.Application.Validators
             RuleFor(x => x.MobileNo).NotEmpty().Matches(@"^01\d{9}$").WithMessage("Mobile must be 11 digits and start with 01");
             RuleFor(x => x.Email).NotEmpty().EmailAddress();
             RuleFor(x => x.DateOfBirth).LessThan(DateTime.UtcNow).WithMessage("Invalid DOB");
+            RuleFor(x => x.PaymentMethodId).GreaterThan(0).WithMessage("Please select a valid payment method");
         }
     }
 }

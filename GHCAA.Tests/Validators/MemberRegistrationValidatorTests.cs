@@ -36,11 +36,34 @@ public class MemberRegistrationValidatorTests
 //             HSCAdmissionYear = 2005,
 //             GHCAdmissionYear = 2005,
 //             HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
-//             GHCLastCertificatePassingYear = 2007,
-//             ProfessionalSector = "IT",
-//             Designation = "Developer"
+            HasAcceptedTerms = true,
+            HasAcceptedGdpr = true,
+            PaymentMethodId = 1
         };
     }
+
+    #region PaymentMethodId Tests
+
+    [Test]
+    public void PaymentMethodId_WhenZero_ShouldHaveValidationError()
+    {
+        var dto = CreateValidDto();
+        dto.PaymentMethodId = 0;
+        var result = _validator.TestValidate(dto);
+        result.ShouldHaveValidationErrorFor(x => x.PaymentMethodId)
+            .WithErrorMessage("Please select a valid payment method");
+    }
+
+    [Test]
+    public void PaymentMethodId_WhenValid_ShouldNotHaveValidationError()
+    {
+        var dto = CreateValidDto();
+        dto.PaymentMethodId = 1;
+        var result = _validator.TestValidate(dto);
+        result.ShouldNotHaveValidationErrorFor(x => x.PaymentMethodId);
+    }
+
+    #endregion
 
     #region FullName Tests
 

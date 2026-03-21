@@ -40,5 +40,9 @@ namespace GHCAA.Application.DTOs
         public List<AcademicRecordDto> AcademicHistory { get; set; } = new();
         public List<ProfessionalRecordDto> ProfessionalHistory { get; set; } = new();
         public List<ECHistoryDto> ECHistory { get; set; } = new();
+
+        // Payment (Refined)
+        public int PaymentMethodId { get; set; }
+        public string? TransactionId { get; set; }
     }
 }

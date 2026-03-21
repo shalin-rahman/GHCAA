@@ -166,6 +166,38 @@ namespace GHCAA.Infrastructure.Services
             _db.Members.Add(member);
             await _db.SaveChangesAsync(cancellationToken);
 
+            // Handle Payment History (Refined)
+            if (dto.PaymentMethodId > 0)
+            {
+                var payConfig = await _db.PaymentConfigurations.FindAsync(new object[] { dto.PaymentMethodId }, cancellationToken);
+                if (payConfig != null)
+                {
+                    var payment = new PaymentHistory
+                    {
+                        MemberId = member.Id,
+                        TransactionId = dto.TransactionId ?? "REG-" + Guid.NewGuid().ToString("N").Substring(0, 8),
+                        Amount = 500, // Default for General/Reg
+                        PaidAt = DateTime.UtcNow,
+                        Status = Enums.PaymentStatus.Pending,
+                        FinancialCategory = Enums.FinancialCategory.RegistrationFee,
+                        PaymentMethod = payConfig.Method,
+                        Notes = $"Registration payment via {payConfig.DisplayName}"
+                    };
+                    _db.PaymentHistories.Add(payment);
+                    await _db.SaveChangesAsync(cancellationToken);
+                    
+                    // Link paymentProof to this history record if it exists
+                    if (paymentProof != null)
+                    {
+                        var path = await _storage.SaveFileAsync(paymentProof.Content, paymentProof.FileName, member.Id, Enums.FileUploadType.PaymentProof, cancellationToken);
+                        var fu = new FileUpload { MemberId = member.Id, UploadType = Enums.FileUploadType.PaymentProof, FileName = paymentProof.FileName, FilePath = path, SizeBytes = paymentProof.Length };
+                        await _fileRepo.AddAsync(fu, cancellationToken);
+                        payment.ReceiptPath = path;
+                        await _db.SaveChangesAsync(cancellationToken);
+                    }
+                }
+            }
+
             // Save files if present (use UploadedFileDto.Content stream)
             if (photo != null)
             {
@@ -182,12 +214,7 @@ namespace GHCAA.Infrastructure.Services
                 await _fileRepo.AddAsync(fu, cancellationToken);
             }
 
-            if (paymentProof != null)
-            {
-                var path = await _storage.SaveFileAsync(paymentProof.Content, paymentProof.FileName, member.Id, Enums.FileUploadType.PaymentProof, cancellationToken);
-                var fu = new FileUpload { MemberId = member.Id, UploadType = Enums.FileUploadType.PaymentProof, FileName = paymentProof.FileName, FilePath = path, SizeBytes = paymentProof.Length };
-                await _fileRepo.AddAsync(fu, cancellationToken);
-            }
+
 
             // update member with file paths
             _db.Members.Update(member);

@@ -20,6 +20,7 @@ var configuration = builder.Configuration;
 // Register layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(configuration);
+builder.Services.AddMemoryCache();
 
 // Configure JWT Authentication
 builder.Services.AddJwtAuthentication(configuration);

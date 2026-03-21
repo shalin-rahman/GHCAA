@@ -81,7 +81,9 @@ public class MemberServiceTests : TestBase
             AcademicHistory = new List<AcademicRecordDto>
             {
                 new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true }
-            }
+            },
+            PaymentMethodId = 1,
+            TransactionId = "TEST-TXN-123"
         };
     }
 
@@ -97,10 +99,21 @@ public class MemberServiceTests : TestBase
     }
 
     [Test]
-    public async Task RegisterAsync_WithValidData_ShouldCreateMember()
+    public async Task RegisterAsync_WithValidData_ShouldCreateMemberAndPaymentHistory()
     {
         // Arrange
         var dto = CreateValidDto();
+        
+        // Setup payment config
+        await _context.PaymentConfigurations.AddAsync(new PaymentConfiguration 
+        { 
+            Id = 1, 
+            Method = Enums.PaymentMethod.BKash, 
+            DisplayName = "bKash",
+            IsEnabled = true
+        });
+        await _context.SaveChangesAsync();
+
         _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("123456");
 
@@ -115,6 +128,12 @@ public class MemberServiceTests : TestBase
         member.Email.Should().Be(dto.Email);
         member.Status.Should().Be(Enums.MembershipStatus.Applied);
         member.EmailVerified.Should().BeFalse();
+
+        // Check Payment History
+        var payment = await _context.PaymentHistories.FirstOrDefaultAsync(p => p.MemberId == memberId);
+        payment.Should().NotBeNull();
+        payment!.TransactionId.Should().Be(dto.TransactionId);
+        payment.PaymentMethod.Should().Be(Enums.PaymentMethod.BKash);
     }
 
     [Test]

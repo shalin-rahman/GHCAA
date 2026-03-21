@@ -62,4 +62,34 @@ describe('Register Component', () => {
         component.removeAcademic(initialCount);
         expect(component.model.AcademicHistory.length).toBe(initialCount);
     });
+
+    it('should handle payment method change', () => {
+        const mockMethod = { id: 101, displayName: 'Test bKash' };
+        component.onPaymentMethodChange(mockMethod);
+        expect(component.model.PaymentMethodId).toBe(101);
+        expect(component.selectedPaymentMethod()).toEqual(mockMethod);
+    });
+
+    it('should handle transaction reference change', () => {
+        const mockRef = 'T-999-XYZ';
+        component.onReferenceSelected(mockRef);
+        expect(component.model.TransactionId).toBe(mockRef);
+    });
+
+    it('should handle payment receipt selection', () => {
+        const mockFile = new File([''], 'receipt.pdf', { type: 'application/pdf' });
+        component.onPaymentReceiptSelected(mockFile);
+        expect(component.files['paymentProof']).toBe(mockFile);
+    });
+
+    it('should fail submission if payment method is missing', () => {
+        const mockForm = { invalid: false };
+        component.model.PaymentMethodId = 0;
+        component.onSubmit(mockForm);
+        
+        expect(notificationServiceMock.error).toHaveBeenCalledWith(
+            expect.stringContaining('select a payment method')
+        );
+        expect(regServiceMock.register).not.toHaveBeenCalled();
+    });
 });

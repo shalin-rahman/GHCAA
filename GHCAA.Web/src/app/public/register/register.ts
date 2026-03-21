@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { RegistrationService } from '../../core/services/registration.service';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
-import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES } from '../../core/constants/app.constants';
+import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
+import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaymentPortalComponent],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
@@ -24,6 +25,9 @@ export class Register implements OnDestroy {
   maxStepReached = signal(1);
   showTerms = signal(false);
   resendCooldown = signal(0);
+  maxBirthDate = new Date(new Date().setFullYear(new Date().getFullYear() - 15)).toISOString().split('T')[0];
+  paymentConfigs = signal<any[]>([]);
+  selectedPaymentMethod = signal<any>(null);
   private timerInterval: any;
   ACADEMIC = ACADEMIC_DATA;
   IS_HSC = IS_HSC;
@@ -34,7 +38,8 @@ export class Register implements OnDestroy {
   bloodGroupOptions = BLOOD_GROUP_OPTIONS;
   genderOptions = GENDER_OPTIONS;
   tShirtOptions = TSHIRT_SIZES;
-  paymentConfigs = signal<any[]>([]);
+  membershipTypeOptions = MEMBERSHIP_TYPE_OPTIONS;
+
 
   model: any = {
     FullName: '',
@@ -53,15 +58,28 @@ export class Register implements OnDestroy {
     EmergencyContactRelation: '',
     EmergencyContactPhone: '',
     AcademicHistory: [
-      { institutionName: 'Govt. Haraganga College', degree: 'HSC', subject: 'None', passingYear: null, isGHC: true }
+      { institutionName: 'Govt. Haraganga College', degree: 'HSC', subject: 'None', admissionYear: null, passingYear: null, isGHC: true }
     ],
-    ProfessionalHistory: [],
+    ProfessionalHistory: [
+      { organizationName: '', designation: '', sector: '', location: '', startDate: '', isCurrent: false }
+    ],
     HasAcceptedTerms: false,
-    HasAcceptedGdpr: false
+    HasAcceptedGdpr: false,
+    PaymentMethodId: 0,
+    TransactionId: ''
   };
 
+  getFilteredSubjects(degree: string) {
+    const hscClusters = ['Science', 'Arts & Humanities', 'Business Studies'];
+    if (degree === 'HSC') {
+      return hscClusters;
+    }
+    // Return all subjects except the three general clusters
+    return this.subjectOptions.filter(s => !hscClusters.includes(s));
+  }
+
   addAcademic() {
-    this.model.AcademicHistory.push({ institutionName: '', degree: '', subject: '', passingYear: null, isGHC: false });
+    this.model.AcademicHistory.push({ institutionName: '', degree: '', subject: '', admissionYear: null, passingYear: null, isGHC: false });
   }
 
   removeAcademic(idx: number) {
@@ -89,8 +107,28 @@ export class Register implements OnDestroy {
     });
   }
 
+  onPaymentMethodChange(method: any) {
+    this.selectedPaymentMethod.set(method);
+    this.model.PaymentMethodId = method.id;
+  }
+
+  onReferenceSelected(val: string) {
+    this.model.TransactionId = val;
+  }
+
+  onPaymentReceiptSelected(file: File) {
+    this.files['paymentProof'] = file;
+  }
+
+  getValidYears() {
+    if (!this.model.DateOfBirth) return this.years;
+    const birthYear = new Date(this.model.DateOfBirth).getFullYear();
+    const minYear = birthYear + 15;
+    return this.years.filter(y => y >= minYear);
+  }
+
   nextStep() {
-    if (this.currentStep() < 5) {
+    if (this.currentStep() < 3) {
       this.currentStep.update(s => s + 1);
       if (this.currentStep() > this.maxStepReached()) {
         this.maxStepReached.set(this.currentStep());
@@ -121,10 +159,22 @@ export class Register implements OnDestroy {
   }
 
   onSubmit(form: any) {
-    if (form.invalid) {
-      this.notify.error('Please complete all mandatory fields and provide necessary files.');
+    if (form.invalid || !this.model.PaymentMethodId) {
+      this.notify.error('Please complete all mandatory fields, select a payment method and provide necessary files.');
       return;
     }
+
+    // Birth year validation for academic records
+    if (this.model.DateOfBirth) {
+      const birthYear = new Date(this.model.DateOfBirth).getFullYear();
+      for (const item of this.model.AcademicHistory) {
+        if (item.admissionYear < birthYear + 15 || item.passingYear < birthYear + 15) {
+          this.notify.error(`Academic milestones must be at least 15 years after your birth year (${birthYear}).`);
+          return;
+        }
+      }
+    }
+
     if (this.loading()) return;
     this.loading.set(true);
 
