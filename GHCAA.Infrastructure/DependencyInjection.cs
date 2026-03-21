@@ -92,6 +92,7 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IMemberImportService, MemberImportService>();
             services.AddScoped<IThemeService, ThemeService>();
             services.AddScoped<IGovernanceService, GovernanceService>();
+            services.AddScoped<IGamificationService, GamificationService>();
             services.AddScoped<IFamilyLinkService, FamilyLinkService>();
 
             // Payment Gateways

@@ -37,6 +37,11 @@ export interface MemberSummary {
     isMobilePublic?: boolean;
     membershipType?: MembershipType;
     ecHistory: any[];
+
+    // Gamification
+    rank?: number;
+    categoryBadge?: string;
+    profileCompletionPercentage?: number;
 }
 
 @Injectable({

@@ -31,9 +31,11 @@ namespace GHCAA.Infrastructure.Data
             var json = File.ReadAllText(path);
             var items = System.Text.Json.JsonSerializer.Deserialize<List<T>>(json) ?? new List<T>();
 
-            // Strip collections to avoid EF Core HasData navigation errors
+            // Strip collections to avoid EF Core HasData navigation errors, but preserve List<string> which map to native PG arrays
             var collectionProps = typeof(T).GetProperties()
                 .Where(p => p.PropertyType != typeof(string) && 
+                            p.PropertyType != typeof(List<string>) &&
+                            p.PropertyType != typeof(string[]) &&
                             typeof(System.Collections.IEnumerable).IsAssignableFrom(p.PropertyType))
                 .ToList();
 

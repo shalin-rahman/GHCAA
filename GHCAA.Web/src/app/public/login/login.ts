@@ -22,6 +22,11 @@ export class Login {
   credentials: LoginDto = { username: '', password: '' };
   loading = signal(false);
   errorMessage = signal('');
+  showPassword = signal(false);
+
+  togglePassword() {
+    this.showPassword.set(!this.showPassword());
+  }
 
   onLogin() {
     this.loading.set(true);

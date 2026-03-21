@@ -187,12 +187,18 @@ export interface UpdateJobDto extends Partial<CreateJobDto> {
 export interface SpecialDayTheme {
     id: number;
     title: string;
-    date: string; // MM-DD
-    primaryColor: string;
-    accentColor: string;
-    logoSecondary?: string;
-    greetingMessage: string;
+    startDate: string | Date;
+    endDate: string | Date;
+    backgroundColor: string;
+    textColor: string;
+    announcementText: string;
+    animatedTexts: string[];
+    animationStyle: string; // Fade, 3D, Typewriter, None
+    imageUrl: string;
+    sidebarColor: string;
+    enableGradientFading: boolean;
     isActive: boolean;
+    isEnabled: boolean; // mapped from backend
 }
 
 export interface ActivityLog {

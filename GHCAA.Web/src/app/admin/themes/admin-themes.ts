@@ -89,6 +89,8 @@ export class AdminThemes implements OnInit {
         });
     }
 
+
+
     private resetTheme(): SpecialDayTheme {
         return {
             id: 0,
@@ -98,6 +100,11 @@ export class AdminThemes implements OnInit {
             backgroundColor: '#000000',
             textColor: '#ffffff',
             announcementText: '',
+            animationStyle: 'None',
+            imageUrl: '',
+            sidebarColor: '#111111',
+            enableGradientFading: false,
+            isActive: false,
             isEnabled: true
         };
     }

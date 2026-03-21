@@ -24,6 +24,11 @@ export class ResetPassword {
   loading = signal(false);
   error = signal('');
   success = signal(false);
+  showPassword = signal(false);
+
+  togglePassword() {
+    this.showPassword.set(!this.showPassword());
+  }
 
   constructor() {
     this.email = this.route.snapshot.queryParamMap.get('email') || '';

@@ -27,7 +27,12 @@
                     </div>
                     <div class="input-group">
                         <label>Secure Cipher / Password</label>
-                        <input type="password" formControlName="password" placeholder="••••••••">
+                        <div class="password-input relative flex items-center">
+                            <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="••••••••" class="w-full pr-12 bg-black/40 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-accent">
+                            <button type="button" class="toggle-password absolute right-3 text-white/40 hover:text-accent transition-colors" (click)="togglePassword()" tabindex="-1">
+                                <i class="fas" [ngClass]="showPassword() ? 'fa-eye-slash' : 'fa-eye'"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="input-group">
                         <label>Initial Privilege Level</label>

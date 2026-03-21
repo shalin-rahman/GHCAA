@@ -30,6 +30,11 @@ export class AdminRoles implements OnInit {
 
     customRoleName = signal('');
     creatingRole = signal(false);
+    showPassword = signal(false);
+
+    togglePassword() {
+        this.showPassword.set(!this.showPassword());
+    }
 
     ngOnInit() {
         this.loadData();

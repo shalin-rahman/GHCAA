@@ -13,6 +13,11 @@ export interface SpecialDayTheme {
     backgroundColor: string;
     textColor: string;
     announcementText: string;
+    animationStyle: string; // 'Fade' | '3D' | 'Typewriter' | 'Scroll' | 'None'
+    imageUrl: string;
+    sidebarColor: string;
+    enableGradientFading: boolean;
+    isActive?: boolean;
     isEnabled: boolean;
 }
 

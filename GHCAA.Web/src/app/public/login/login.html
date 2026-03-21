@@ -15,8 +15,13 @@
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" [(ngModel)]="credentials.password" required
-                    placeholder="••••••••" class="form-control">
+                <div class="password-input">
+                    <input [type]="showPassword() ? 'text' : 'password'" name="password" [(ngModel)]="credentials.password" required
+                        placeholder="••••••••" class="form-control">
+                    <button type="button" class="toggle-password" (click)="togglePassword()" tabindex="-1">
+                        <i class="fas" [ngClass]="showPassword() ? 'fa-eye-slash' : 'fa-eye'"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="error-msg" *ngIf="errorMessage()">

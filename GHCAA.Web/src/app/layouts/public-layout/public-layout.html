@@ -1,11 +1,24 @@
-<div class="dark-theme public-wrapper">
+
 @let activeTheme = themeService.activeSpecialTheme();
 
 @if (activeTheme) {
-<div class="top-announcement-banner" [style.background-color]="activeTheme.backgroundColor"
+<div class="top-announcement-banner"
+    [style.background]="activeTheme.enableGradientFading
+        ? 'linear-gradient(135deg, ' + activeTheme.backgroundColor + ', ' + (activeTheme.sidebarColor || activeTheme.backgroundColor) + ')'
+        : activeTheme.backgroundColor"
     [style.color]="activeTheme.textColor">
     <div class="container banner-content">
-        <span class="banner-text">{{ activeTheme.announcementText }}</span>
+        @if (activeTheme.imageUrl) {
+            <img [src]="activeTheme.imageUrl" alt="Special Day Banner" class="banner-image">
+        } @else {
+            <span class="banner-text"
+                [class.anim-fade]="activeTheme.animationStyle === 'Fade'"
+                [class.anim-typewriter]="activeTheme.animationStyle === 'Typewriter'"
+                [class.anim-flip3d]="activeTheme.animationStyle === '3D'"
+                [class.anim-scroll]="activeTheme.animationStyle === 'Scroll'">
+                {{ displayedText || activeTheme.announcementText }}
+            </span>
+        }
     </div>
 </div>
 }
@@ -32,7 +45,6 @@
             <a routerLink="/about" class="nav-link">About</a>
             <a routerLink="/events" class="nav-link">Events</a>
             <a routerLink="/news" class="nav-link" title="Latest News">News</a>
-            <a routerLink="/register" class="nav-link">Join</a>
             <a routerLink="/gallery" class="nav-link">Gallery</a>
             <a routerLink="/contact" class="nav-link">Contact</a>
             <a routerLink="/login" class="nav-link">Login</a>
@@ -45,4 +57,3 @@
 </main>
 
 <app-footer></app-footer>
-</div>

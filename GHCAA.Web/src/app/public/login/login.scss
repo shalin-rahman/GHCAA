@@ -141,6 +141,39 @@
     }
 }
 
+.password-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    input {
+        padding-right: 3.5rem;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 1rem;
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.4);
+        cursor: pointer;
+        padding: 0.5rem;
+        font-size: 1.1rem;
+        transition: color 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            color: var(--accent-color);
+        }
+
+        &:focus {
+            outline: none;
+        }
+    }
+}
+
 .form-control {
     width: 100%;
     padding: 1.15rem 1.5rem;
