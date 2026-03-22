@@ -4,16 +4,17 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { EventsService } from '../../core/services/events.service';
 import { AlumniEvent, EventRegistration } from '../../core/models/business.models';
 import { AuthService } from '../../core/services/auth.service';
-import { PaymentMethodSelectorComponent } from '../../common/payment-method-selector/payment-method-selector.component';
+import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
 import { PaymentConfig, PaymentConfigService } from '../../core/services/payment-config.service';
 import { GatewaysService, PaymentGateway } from '../../core/services/gateways.service';
 import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
+import { FinancialService } from '../../core/services/financial.service';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, PaymentMethodSelectorComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PaymentPortalComponent],
   templateUrl: './events.html',
   styleUrl: './events.scss'
 })
@@ -24,6 +25,7 @@ export class Events implements OnInit {
   private route = inject(ActivatedRoute);
   private gatewaysService = inject(GatewaysService);
   private notify = inject(NotificationService);
+  private finService = inject(FinancialService);
 
   events = signal<AlumniEvent[]>([]);
   activeTab = signal<'upcoming' | 'my-registrations'>('upcoming');
@@ -44,6 +46,8 @@ export class Events implements OnInit {
   activeParticipantEventId = signal<number | null>(null);
   loadingParticipants = signal<boolean>(false);
   formError = signal<string | null>(null);
+  saveMethodRequested = signal<boolean>(false);
+  saveMethodLabel = signal<string>('');
 
   regForm = this.fb.group({
     paymentReference: ['', [Validators.required, Validators.minLength(4)]],
@@ -143,7 +147,7 @@ export class Events implements OnInit {
     }
   }
 
-  onPaymentMethodSelected(method: PaymentConfig) {
+  onPaymentMethodSelected(method: any) {
     this.selectedPaymentMethod.set(method);
     if (method.requiresReference) {
       this.regForm.get('paymentReference')?.setValidators([Validators.required, Validators.minLength(4)]);
@@ -152,6 +156,19 @@ export class Events implements OnInit {
     }
     this.regForm.get('paymentReference')?.updateValueAndValidity();
     this.regForm.updateValueAndValidity();
+  }
+
+  onReferenceChange(ref: string) {
+    this.regForm.get('paymentReference')?.setValue(ref);
+  }
+
+  onReceiptSelected(file: File) {
+    this.selectedFile = file;
+  }
+
+  onSaveRequested(data: {save: boolean, label: string}) {
+    this.saveMethodRequested.set(data.save);
+    this.saveMethodLabel.set(data.label);
   }
 
   submitRegistration() {
@@ -205,13 +222,23 @@ export class Events implements OnInit {
         if (this.selectedPaymentMethod()?.isOnline) {
           this.initiateGateway(ev, ref);
         } else {
+          // If user requested to save this manual method for future
+          if (this.saveMethodRequested() && this.selectedPaymentMethod()) {
+              const m = this.selectedPaymentMethod()!;
+              this.finService.addSavedMethod({
+                  displayName: this.saveMethodLabel() || m.displayName,
+                  method: m.method || m.displayName,
+                  accountNumber: '' // Leave empty for manual hints or add logic
+              }).subscribe();
+          }
+
           this.notify.success('Project participation received! Wait for registry approval.');
           this.isSubmitting.set(false);
           this.closeModal();
           this.loadMyRegistrations();
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error(err);
         this.formError.set(err.error?.message || 'Registration failed. Please check your inputs.');
         this.isSubmitting.set(false);

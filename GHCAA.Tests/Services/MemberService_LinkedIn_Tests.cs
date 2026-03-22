@@ -17,8 +17,7 @@ namespace GHCAA.Tests.Services;
 public class MemberService_LinkedIn_Tests : TestBase
 {
     private Mock<IFileStorageService> _mockStorage = null!;
-    private Mock<IFileUploadRepository> _mockFileRepo = null!;
-    private Mock<IOtpService> _mockOtp = null!;
+        private Mock<IOtpService> _mockOtp = null!;
     private Mock<IEmailService> _mockEmail = null!;
     private Mock<IUserService> _mockUserService = null!;
     private Mock<ILogger<MemberService>> _mockLogger = null!;
@@ -27,14 +26,14 @@ public class MemberService_LinkedIn_Tests : TestBase
     private Mock<ICommunicationService> _mockCommunication = null!;
     private Mock<IConfiguration> _mockConfig = null!;
     private Mock<IGamificationService> _mockGamification = null!;
+    private Mock<IFinancialService> _mockFinancialService = null!;
     private MemberService _service = null!;
 
     [SetUp]
     public void Setup()
     {
         _mockStorage = new Mock<IFileStorageService>();
-        _mockFileRepo = new Mock<IFileUploadRepository>();
-        _mockOtp = new Mock<IOtpService>();
+                _mockOtp = new Mock<IOtpService>();
         _mockEmail = new Mock<IEmailService>();
         _mockUserService = new Mock<IUserService>();
         _mockLogger = new Mock<ILogger<MemberService>>();
@@ -43,11 +42,11 @@ public class MemberService_LinkedIn_Tests : TestBase
         _mockNotificationService = new Mock<INotificationService>();
         _mockConfig = new Mock<IConfiguration>();
         _mockGamification = new Mock<IGamificationService>();
+        _mockFinancialService = new Mock<IFinancialService>();
 
         _service = new MemberService(
             _context,
             _mockStorage.Object,
-            _mockFileRepo.Object,
             _mockOtp.Object,
             _mockEmail.Object,
             _mockUserService.Object,
@@ -56,7 +55,8 @@ public class MemberService_LinkedIn_Tests : TestBase
             _mockActivityService.Object,
             _mockNotificationService.Object,
             _mockConfig.Object,
-            _mockGamification.Object
+            _mockGamification.Object,
+            _mockFinancialService.Object
         );
     }
 

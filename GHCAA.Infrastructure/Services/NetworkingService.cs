@@ -284,6 +284,7 @@ namespace GHCAA.Infrastructure.Services
                 IsMobilePublic = m.IsMobilePublic,
                 MembershipType = m.MembershipType,
                 Category = m.Category,
+                Status = m.Status,
                 AppliedDate = m.AppliedDate.ToLocalTime(),
                 IsVerified = m.IsVerified,
                 IsFamilyPublic = m.IsFamilyPublic,

@@ -66,6 +66,17 @@ export interface PaymentHistory {
     receiptPath?: string;
 }
 
+export interface SavedPaymentMethod {
+    id: number;
+    memberId: number;
+    displayName: string;
+    method: string;
+    accountNumber: string;
+    icon?: string;
+    isDefault: boolean;
+    lastUsedAt?: string | Date;
+}
+
 export interface ECPeriod {
     id: number;
     title: string;
@@ -422,4 +433,37 @@ export interface MemberSearchFilter {
     category?: MemberCategory;
 }
 
+export interface MembershipHistory {
+    id: number;
+    memberId: number;
+    oldType: string;
+    newType: string;
+    changeDate: string | Date;
+    reason?: string;
+    changedByAdminId?: number;
+}
 
+export interface MembershipFeeConfig {
+    id: number;
+    category: FinancialCategory;
+    membershipType: string;
+    amount: number;
+    effectiveDate: string | Date;
+    effectiveTo?: string | Date;
+    isActive: boolean;
+    description: string;
+}
+
+export interface CreateMembershipFeeConfig {
+    category: FinancialCategory;
+    membershipType: string;
+    amount: number;
+    effectiveDate: string | Date;
+    effectiveTo?: string | Date;
+    isActive: boolean;
+    description: string;
+}
+
+export interface UpdateMembershipFeeConfig extends Partial<CreateMembershipFeeConfig> {
+    id: number;
+}

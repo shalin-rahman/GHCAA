@@ -36,7 +36,7 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
-            Assert.That(okResult.Value, Is.EqualTo(resultDto));
+            Assert.That(okResult!.Value, Is.EqualTo(resultDto));
         }
     }
 }

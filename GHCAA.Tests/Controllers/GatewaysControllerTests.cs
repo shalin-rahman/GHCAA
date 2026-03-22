@@ -20,24 +20,19 @@ using NUnit.Framework;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    public class GatewaysControllerTests
+    [TestFixture]
+    public class GatewaysControllerTests : ControllerTestBase
     {
         private Mock<IPaymentGatewayFactory> _gatewayFactoryMock;
         private Mock<IFinancialService> _financialServiceMock;
         private Mock<IMemberService> _memberServiceMock;
-        private ApplicationDbContext _dbContext;
         private Mock<ILogger<GatewaysController>> _loggerMock;
         private GatewaysController _controller;
+        private Member _testMember;
 
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            ApplicationDbContext.IsSeedDisabled = true;
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            _dbContext = new ApplicationDbContext(options);
-
             _gatewayFactoryMock = new Mock<IPaymentGatewayFactory>();
             _financialServiceMock = new Mock<IFinancialService>();
             _memberServiceMock = new Mock<IMemberService>();
@@ -53,46 +48,19 @@ namespace GHCAA.Tests.Controllers
                 _gatewayFactoryMock.Object,
                 _financialServiceMock.Object,
                 _memberServiceMock.Object,
-                _dbContext,
+                _context,
                 _loggerMock.Object,
                 configMock.Object);
 
-            SetUserContext(10); // Member 10
+            _testMember = await CreateAndSaveTestMemberAsync("Test Member", "test@test.com", "123", "123");
             
-            // Add the member to the DB as well so filters/logic doesn't fail
-            _dbContext.Members.Add(new Member 
-            { 
-                Id = 10, 
-                FullName = "Test Member", 
-                Email = "test@test.com", 
-                NID = "123", 
-                MobileNo = "123", 
-                FatherName = "F", MotherName = "M", 
-                PresentAddress = "A", PermanentAddress = "B",
-                EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "P",
-//                 HighestCertificate = "X", HighestCertificateGroup = "G", HighestCertificateSubject = "S",
-//                 GHCLastCertificate = "GC", GHCLastCertificateGroup = "GG", GHCLastCertificateSubject = "GS",
-//                 ProfessionalSector = "PS", Designation = "D"
-            });
-            _dbContext.SaveChanges();
+            SetMemberContext(_controller, _testMember.Id);
         }
 
         [TearDown]
-        public void TearDown()
+        public void TearDownCleanup()
         {
-            _dbContext?.Dispose();
-        }
-
-        private void SetUserContext(int memberId)
-        {
-            var claims = new List<Claim> {
-                new Claim("MemberId", memberId.ToString())
-            };
-            var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuthentication"));
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
+            ApplicationDbContext.IsSeedDisabled = false;
         }
 
         [Test]
@@ -123,8 +91,8 @@ namespace GHCAA.Tests.Controllers
         {
             var txnId = "TXN123";
             var ev = new AlumniEvent { Title = "Event", Description = "Desc", Location = "Loc", RegistrationFee = 100 };
-            _dbContext.AlumniEvents.Add(ev);
-            await _dbContext.SaveChangesAsync();
+            _context.AlumniEvents.Add(ev);
+            await _context.SaveChangesAsync();
             var eventId = ev.Id;
             
             var registration = new EventRegistration 
@@ -133,20 +101,20 @@ namespace GHCAA.Tests.Controllers
                 PaymentReference = "EVT-REG-ABCD", 
                 Status = Enums.EventRegistrationStatus.Pending 
             };
-            _dbContext.EventRegistrations.Add(registration);
-            await _dbContext.SaveChangesAsync();
+            _context.EventRegistrations.Add(registration);
+            await _context.SaveChangesAsync();
             var registrationId = registration.Id;
 
             var payment = new PaymentHistory
             {
-                MemberId = 10,
+                MemberId = _testMember.Id,
                 Amount = 100,
                 TransactionId = txnId,
                 Status = Enums.PaymentStatus.Pending,
                 Notes = "Initiated via SSLCommerz. Ref: EVT-REG-ABCD"
             };
-            _dbContext.PaymentHistories.Add(payment);
-            await _dbContext.SaveChangesAsync();
+            _context.PaymentHistories.Add(payment);
+            await _context.SaveChangesAsync();
 
             var callbackData = new Dictionary<string, string>
             {
@@ -158,8 +126,8 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<RedirectResult>());
             
-            var updatedReg = await _dbContext.EventRegistrations.FirstOrDefaultAsync(r => r.Id == registrationId);
-            Assert.That(updatedReg.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
+            var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.Id == registrationId);
+            Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
             
             _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(It.IsAny<int>(), Enums.PaymentStatus.Completed, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
         }
@@ -169,8 +137,8 @@ namespace GHCAA.Tests.Controllers
         {
             var txnId = "TXN456";
             var ev = new AlumniEvent { Title = "Event Complex", Description = "D", Location = "L", RegistrationFee = 500 };
-            _dbContext.AlumniEvents.Add(ev);
-            await _dbContext.SaveChangesAsync();
+            _context.AlumniEvents.Add(ev);
+            await _context.SaveChangesAsync();
             
             var reg = new EventRegistration 
             { 
@@ -178,26 +146,26 @@ namespace GHCAA.Tests.Controllers
                 PaymentReference = "EVT-REG-COMPLEX-99", 
                 Status = Enums.EventRegistrationStatus.Pending 
             };
-            _dbContext.EventRegistrations.Add(reg);
+            _context.EventRegistrations.Add(reg);
             
             // Note the space and extra text after the unique prefix
             var payment = new PaymentHistory
             {
-                MemberId = 10,
+                MemberId = _testMember.Id,
                 Amount = 500,
                 TransactionId = txnId,
                 Status = Enums.PaymentStatus.Pending,
                 Notes = "Initiated via BkashGateway. Ref: EVT-REG-COMPLEX-99 (Optional extra text here)"
             };
-            _dbContext.PaymentHistories.Add(payment);
-            await _dbContext.SaveChangesAsync();
+            _context.PaymentHistories.Add(payment);
+            await _context.SaveChangesAsync();
 
             // Simulate a callback that triggers HandleSuccessfulPayment
             var callbackData = new Dictionary<string, string> { { "status", "VALID" }, { "tran_id", txnId } };
             await _controller.SSLCommerzCallback(callbackData, CancellationToken.None);
 
-            var updatedReg = await _dbContext.EventRegistrations.FirstOrDefaultAsync(r => r.PaymentReference == "EVT-REG-COMPLEX-99");
-            Assert.That(updatedReg.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
+            var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.PaymentReference == "EVT-REG-COMPLEX-99");
+            Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
         }
     }
 }

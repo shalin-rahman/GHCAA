@@ -28,7 +28,7 @@ namespace GHCAA.Tests.Services
         {
             // Minimal mocks
             var storage = new Mock<IFileStorageService>();
-            var fileRepo = new Mock<IFileUploadRepository>();
+
             var otp = new Mock<IOtpService>();
             var email = new Mock<IEmailService>();
             var user = new Mock<IUserService>();
@@ -38,8 +38,9 @@ namespace GHCAA.Tests.Services
             var notify = new Mock<INotificationService>();
             var config = new Mock<IConfiguration>();
             var gamification = new Mock<IGamificationService>();
+            var financials = new Mock<IFinancialService>();
 
-            _service = new MemberService(_context, storage.Object, fileRepo.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object);
+            _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object, financials.Object);
         
             if (!_context.ECPeriods.Any())
             {
@@ -55,17 +56,14 @@ namespace GHCAA.Tests.Services
             var period = await _context.ECPeriods.FirstOrDefaultAsync(p => p.IsActive);
             period.Should().NotBeNull();
 
-            var member = CreateMinimalMember("Tester");
+            var member = await CreateAndSaveTestMemberAsync("Tester");
             
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
-
             var updateDto = CreateUpdateDto(member);
             updateDto.ECHistory = new List<ECHistoryDto>
             {
                 new ECHistoryDto
                 {
-                    PeriodTitle = "Test Period",
+                    PeriodTitle = "Interim Executive Committee",
                     Position = Enums.ECPosition.President,
                     StartDate = DateTime.UtcNow,
                     IsCurrent = true
@@ -73,13 +71,13 @@ namespace GHCAA.Tests.Services
             };
 
             // Act
-            await _service.AdminUpdateMemberAsync(member.Id, updateDto);
+            await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1);
 
             // Assert
             var ecMember = await _context.ECMembers.Include(em => em.ECPeriod).FirstOrDefaultAsync(em => em.MemberId == member.Id);
             ecMember.Should().NotBeNull();
             ecMember!.Position.Should().Be(Enums.ECPosition.President);
-            ecMember.ECPeriod!.Title.Should().Be("Test Period");
+            ecMember.ECPeriod!.Title.Should().Be("Interim Executive Committee");
         }
 
         [Test]
@@ -89,24 +87,18 @@ namespace GHCAA.Tests.Services
             var period = await _context.ECPeriods.FirstOrDefaultAsync(p => p.IsActive);
             period.Should().NotBeNull();
 
-            var member = CreateMinimalMember("Tester");
+            var member = await CreateAndSaveTestMemberAsync("Tester");
             
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
-
             var oldRecord = new ECMember { MemberId = member.Id, ECPeriodId = period!.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow.AddMonths(-2) };
             _context.ECMembers.Add(oldRecord);
             await _context.SaveChangesAsync();
 
             var updateDto = CreateUpdateDto(member);
             updateDto.ECHistory = new List<ECHistoryDto>(); // EMPTY history essentially removes current role if the logic wipes and replaces.
-            // Wait, MemberService.cs:807-808 removes ALL existing.
-            // So if I send an empty list, it wipes history. 
-            // If I want to "End" it but keep it in history, I should send it with an EndDate.
 
             updateDto.ECHistory.Add(new ECHistoryDto 
             {
-                PeriodTitle = "Test Period",
+                PeriodTitle = "Interim Executive Committee",
                 Position = Enums.ECPosition.President,
                 StartDate = DateTime.UtcNow.AddMonths(-2),
                 EndDate = DateTime.UtcNow,
@@ -114,7 +106,7 @@ namespace GHCAA.Tests.Services
             });
 
             // Act
-            await _service.AdminUpdateMemberAsync(member.Id, updateDto);
+            await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1);
 
             // Assert
             var records = await _context.ECMembers.Where(em => em.MemberId == member.Id).ToListAsync();
@@ -130,30 +122,6 @@ namespace GHCAA.Tests.Services
                 FullName = m.FullName, Email = m.Email, MobileNo = m.MobileNo, NID = m.NID,
                 FatherName = m.FatherName, MotherName = m.MotherName, PresentAddress = m.PresentAddress,
                 PermanentAddress = m.PermanentAddress, MembershipType = Enums.MembershipType.General, Category = Enums.MemberCategory.None,
-//                 GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear, GHCLastCertificate = m.GHCLastCertificate,
-//                 GHCLastCertificateGroup = m.GHCLastCertificateGroup, GHCLastCertificateSubject = m.GHCLastCertificateSubject,
-//                 HighestCertificate = m.HighestCertificate, HighestCertificateGroup = m.HighestCertificateGroup, HighestCertificateSubject = m.HighestCertificateSubject,
-//                 ProfessionalSector = m.ProfessionalSector,
-//                 Designation = m.Designation
-            };
-        }
-
-        private Member CreateMinimalMember(string name)
-        {
-            return new Member
-            {
-                FullName = name,
-                Email = $"{name}@test.com",
-                MobileNo = "01700000000",
-                NID = "1234567890",
-                FatherName = "F", MotherName = "M",
-                PresentAddress = "A", PermanentAddress = "A",
-                EmergencyContactName = "EC", EmergencyContactRelation = "Brother", EmergencyContactPhone = "01800000000",
-//                 HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "P", Designation = "D",
-//                 GHCLastCertificatePassingYear = 2005,
-                DateOfBirth = new DateTime(1990,1,1),
-                Gender = Enums.Gender.Male,
-                BloodGroup = Enums.BloodGroup.APositive
             };
         }
     }

@@ -52,6 +52,7 @@ namespace GHCAA.Infrastructure.Services
                 PaidAt = DateTime.SpecifyKind(dto.PaidAt, DateTimeKind.Utc),
                 Status = Enums.PaymentStatus.Pending,
                 FinancialCategory = dto.FinancialCategory,
+                PaymentMethod = dto.PaymentMethod,
                 Notes = dto.Notes
             };
 
@@ -187,9 +188,12 @@ namespace GHCAA.Infrastructure.Services
             return configs.Select(c => new MembershipFeeConfigDto
             {
                 Id = c.Id,
+                Category = c.Category,
                 MembershipType = c.MembershipType.ToString(),
                 Amount = c.Amount,
                 EffectiveDate = c.EffectiveDate,
+                EffectiveTo = c.EffectiveTo,
+                IsActive = c.IsActive,
                 Description = c.Description
             });
         }
@@ -203,9 +207,12 @@ namespace GHCAA.Infrastructure.Services
 
             var config = new MembershipFeeConfig
             {
+                Category = dto.Category,
                 MembershipType = type,
                 Amount = dto.Amount,
                 EffectiveDate = DateTime.SpecifyKind(dto.EffectiveDate, DateTimeKind.Utc),
+                EffectiveTo = dto.EffectiveTo.HasValue ? DateTime.SpecifyKind(dto.EffectiveTo.Value, DateTimeKind.Utc) : null,
+                IsActive = dto.IsActive,
                 Description = dto.Description,
                 CreatedByAdminId = adminMemberId,
                 CreatedAt = DateTime.UtcNow
@@ -217,9 +224,12 @@ namespace GHCAA.Infrastructure.Services
             return new MembershipFeeConfigDto
             {
                 Id = config.Id,
+                Category = config.Category,
                 MembershipType = config.MembershipType.ToString(),
                 Amount = config.Amount,
                 EffectiveDate = config.EffectiveDate,
+                EffectiveTo = config.EffectiveTo,
+                IsActive = config.IsActive,
                 Description = config.Description
             };
         }
@@ -229,8 +239,11 @@ namespace GHCAA.Infrastructure.Services
             var config = await _db.MembershipFeeConfigs.FindAsync(new object[] { dto.Id }, cancellationToken);
             if (config == null) throw new KeyNotFoundException($"MembershipFeeConfig with ID {dto.Id} not found.");
 
+            if (dto.Category.HasValue) config.Category = dto.Category.Value;
             config.Amount = dto.Amount;
             config.EffectiveDate = DateTime.SpecifyKind(dto.EffectiveDate, DateTimeKind.Utc);
+            config.EffectiveTo = dto.EffectiveTo.HasValue ? DateTime.SpecifyKind(dto.EffectiveTo.Value, DateTimeKind.Utc) : null;
+            config.IsActive = dto.IsActive;
             config.Description = dto.Description;
             // distinct from "CreatedBy", we might want "UpdatedBy" later, but for now simple update.
 
@@ -239,30 +252,26 @@ namespace GHCAA.Infrastructure.Services
             return new MembershipFeeConfigDto
             {
                 Id = config.Id,
+                Category = config.Category,
                 MembershipType = config.MembershipType.ToString(),
                 Amount = config.Amount,
                 EffectiveDate = config.EffectiveDate,
+                EffectiveTo = config.EffectiveTo,
+                IsActive = config.IsActive,
                 Description = config.Description
             };
         }
 
         public async Task<decimal> GetApplicableMembershipFeeAsync(Enums.MembershipType type, int year, CancellationToken cancellationToken = default)
         {
-            // Logic: Find the latest config that is effective on or before the start of the target year (or end of it? usually start).
-            // Let's assume dues for 2024 are based on the fee set before or during 2024.
-            // A fee set on Jan 1 2024 is applicable for 2024.
-            // A fee set on Dec 31 2023 is applicable for 2024.
-            // A fee set on Feb 1 2024 might be applicable for 2025?
-            // "Applicable Date" usually means "Any dues generated for a period starting AFTER this date".
-            // Let's use: The most recent config where EffectiveDate <= Dec 31 of that year. 
-            // Actually simpler: typically fees don't change mid-year. 
-            // Let's Find the config with max EffectiveDate where EffectiveDate <= Now (or generation time).
-            // But we generate for a specific year.
-            
-            var targetDate = new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc); // End of the target year
+            return await GetApplicableFeeAsync(Enums.FinancialCategory.MembershipFee, type, new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc), cancellationToken);
+        }
 
+        public async Task<decimal> GetApplicableFeeAsync(Enums.FinancialCategory category, Enums.MembershipType type, DateTime date, CancellationToken cancellationToken = default)
+        {
+            // The most recent config where EffectiveDate <= target date AND (EffectiveTo == null OR EffectiveTo >= target date) AND IsActive == true
             var config = await _db.MembershipFeeConfigs
-                .Where(c => c.MembershipType == type && c.EffectiveDate <= targetDate)
+                .Where(c => c.IsActive && c.Category == category && c.MembershipType == type && c.EffectiveDate <= date && (c.EffectiveTo == null || c.EffectiveTo >= date))
                 .OrderByDescending(c => c.EffectiveDate)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -447,6 +456,63 @@ namespace GHCAA.Infrastructure.Services
                 .AlignMiddle();
         }
 
+        // Saved Payment Methods
+        public async Task<IEnumerable<SavedPaymentMethodDto>> GetSavedPaymentMethodsAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var methods = await _db.SavedPaymentMethods
+                .Where(s => s.MemberId == memberId)
+                .OrderByDescending(s => s.LastUsedAt)
+                .ToListAsync(cancellationToken);
+
+            return methods.Select(s => new SavedPaymentMethodDto
+            {
+                Id = s.Id,
+                DisplayName = s.DisplayName,
+                Method = s.Method,
+                AccountNumber = s.AccountNumber,
+                Icon = s.Icon,
+                IsDefault = s.IsDefault
+            });
+        }
+
+        public async Task<SavedPaymentMethodDto> AddSavedPaymentMethodAsync(int memberId, CreateSavedPaymentMethodDto dto, CancellationToken cancellationToken = default)
+        {
+            var method = new SavedPaymentMethod
+            {
+                MemberId = memberId,
+                DisplayName = dto.DisplayName,
+                Method = dto.Method,
+                AccountNumber = dto.AccountNumber,
+                CreatedAt = DateTime.UtcNow,
+                LastUsedAt = DateTime.UtcNow
+            };
+
+            await _db.SavedPaymentMethods.AddAsync(method, cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return new SavedPaymentMethodDto
+            {
+                Id = method.Id,
+                DisplayName = method.DisplayName,
+                Method = method.Method,
+                AccountNumber = method.AccountNumber,
+                Icon = method.Icon,
+                IsDefault = method.IsDefault
+            };
+        }
+
+        public async Task<bool> DeleteSavedPaymentMethodAsync(int memberId, int id, CancellationToken cancellationToken = default)
+        {
+            var method = await _db.SavedPaymentMethods
+                .FirstOrDefaultAsync(s => s.Id == id && s.MemberId == memberId, cancellationToken);
+            
+            if (method == null) return false;
+
+            _db.SavedPaymentMethods.Remove(method);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
         private static PaymentHistoryDto MapToPaymentDto(PaymentHistory p)
         {
             return new PaymentHistoryDto
@@ -458,6 +524,7 @@ namespace GHCAA.Infrastructure.Services
                 PaidAt = p.PaidAt,
                 Status = p.Status,
                 FinancialCategory = p.FinancialCategory,
+                PaymentMethod = p.PaymentMethod,
                 Notes = p.Notes
             };
         }

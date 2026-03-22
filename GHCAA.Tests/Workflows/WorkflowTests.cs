@@ -23,8 +23,7 @@ namespace GHCAA.Tests.Workflows
         private FinancialService _financialService;
         private Mock<IEmailService> _emailMock;
         private Mock<IFileStorageService> _storageMock;
-        private Mock<IFileUploadRepository> _fileRepoMock;
-        private Mock<IOtpService> _otpMock;
+                private Mock<IOtpService> _otpMock;
         private Mock<INotificationService> _notificationMock;
         private Mock<IActivityService> _activityMock;
         private Mock<IUserService> _userServiceMock;
@@ -35,7 +34,7 @@ namespace GHCAA.Tests.Workflows
         {
             _emailMock = new Mock<IEmailService>();
             _storageMock = new Mock<IFileStorageService>();
-            _fileRepoMock = new Mock<IFileUploadRepository>();
+            
             _otpMock = new Mock<IOtpService>();
             _notificationMock = new Mock<INotificationService>();
             _activityMock = new Mock<IActivityService>();
@@ -47,10 +46,12 @@ namespace GHCAA.Tests.Workflows
             var configMock = new Mock<IConfiguration>();
             var gamificationMock = new Mock<IGamificationService>();
 
+            _financialService = new FinancialService(_context, _commMock.Object, _notificationMock.Object);
+
             _memberService = new MemberService(
                 _context, 
                 _storageMock.Object,
-                _fileRepoMock.Object,
+                
                 _otpMock.Object,
                 _emailMock.Object,
                 _userServiceMock.Object, 
@@ -59,10 +60,10 @@ namespace GHCAA.Tests.Workflows
                 _activityMock.Object,
                 _notificationMock.Object,
                 configMock.Object,
-                gamificationMock.Object);
+                gamificationMock.Object,
+                _financialService);
 
             _eventService = new EventService(_context, _commMock.Object, _storageMock.Object, gamificationMock.Object);
-            _financialService = new FinancialService(_context, _commMock.Object, _notificationMock.Object);
         }
 
         [Test]
@@ -132,7 +133,7 @@ namespace GHCAA.Tests.Workflows
             Assert.That(approveReg, Is.True);
 
             var finalReg = _context.EventRegistrations.Find(eventReg.Id);
-            Assert.That(finalReg.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
+            Assert.That(finalReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
         }
     }
 }

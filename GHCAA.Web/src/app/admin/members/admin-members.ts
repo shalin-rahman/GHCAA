@@ -320,6 +320,7 @@ export class AdminMembers implements OnInit {
       membershipType: member.membershipType,
       category: member.category,
       membershipNumber: member.membershipNumber,
+      membershipChangeReason: member.membershipChangeReason,
       isMobilePublic: member.isMobilePublic,
       isEmailPublic: member.isEmailPublic,
       isAddressPublic: member.isAddressPublic,

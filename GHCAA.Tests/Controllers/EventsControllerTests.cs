@@ -15,7 +15,7 @@ using NUnit.Framework;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    public class EventsControllerTests
+    public class EventsControllerTests : ControllerTestBase
     {
         private Mock<IEventService> _eventServiceMock;
         private EventsController _controller;
@@ -26,24 +26,9 @@ namespace GHCAA.Tests.Controllers
             _eventServiceMock = new Mock<IEventService>();
             _controller = new EventsController(_eventServiceMock.Object);
             
-            SetUserContext(1, 10); // Admin 1, Member 10
-        }
-
-        private void SetUserContext(int userId, int? memberId, string role = "Admin")
-        {
-            var claims = new List<Claim> {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Role, role)
-            };
-            if (memberId.HasValue) 
-                claims.Add(new Claim("MemberId", memberId.Value.ToString()));
-
-            var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuthentication"));
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
+            SetUserContext(_controller, 10, "Admin", 1); // Admin 1, Member 10
+            // Optional: if tests need MemberId 10, we can use SetMemberContext(_controller, 10);
+            // Looking at RegisterForEvent test, it uses 10.
         }
 
         [Test]
@@ -90,11 +75,11 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetMyRegistrations_SuperAdmin_ReturnsEmptyList()
         {
-            SetUserContext(1, null, "SuperAdmin");
+            SetUserContext(_controller, null, "SuperAdmin");
             var result = await _controller.GetMyRegistrations(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
-            Assert.That(okResult.Value, Is.Empty);
+            Assert.That(okResult!.Value, Is.Empty);
         }
         
         [Test]

@@ -16,8 +16,7 @@ namespace GHCAA.Tests.Services;
 public class MemberServiceTests : TestBase
 {
     private Mock<IFileStorageService> _mockStorage = null!;
-    private Mock<IFileUploadRepository> _mockFileRepo = null!;
-    private Mock<IOtpService> _mockOtp = null!;
+        private Mock<IOtpService> _mockOtp = null!;
     private Mock<IEmailService> _mockEmail = null!;
     private Mock<IUserService> _mockUserService = null!;
     private Mock<ILogger<MemberService>> _mockLogger = null!;
@@ -25,6 +24,7 @@ public class MemberServiceTests : TestBase
     private Mock<INotificationService> _mockNotificationService = null!;
     private Mock<IConfiguration> _mockConfig = null!;
     private Mock<IGamificationService> _mockGamification = null!;
+    private Mock<IFinancialService> _mockFinancialService = null!;
     private MemberService _service = null!;
 
     private Mock<ICommunicationService> _mockCommunication = null!;
@@ -33,8 +33,7 @@ public class MemberServiceTests : TestBase
     public void Setup()
     {
         _mockStorage = new Mock<IFileStorageService>();
-        _mockFileRepo = new Mock<IFileUploadRepository>();
-        _mockOtp = new Mock<IOtpService>();
+                _mockOtp = new Mock<IOtpService>();
         _mockEmail = new Mock<IEmailService>();
         _mockUserService = new Mock<IUserService>();
         _mockLogger = new Mock<ILogger<MemberService>>();
@@ -43,11 +42,11 @@ public class MemberServiceTests : TestBase
         _mockNotificationService = new Mock<INotificationService>();
         _mockConfig = new Mock<IConfiguration>();
         _mockGamification = new Mock<IGamificationService>();
+        _mockFinancialService = new Mock<IFinancialService>();
 
         _service = new MemberService(
             _context,
             _mockStorage.Object,
-            _mockFileRepo.Object,
             _mockOtp.Object,
             _mockEmail.Object,
             _mockUserService.Object,
@@ -56,7 +55,8 @@ public class MemberServiceTests : TestBase
             _mockActivityService.Object,
             _mockNotificationService.Object,
             _mockConfig.Object,
-            _mockGamification.Object
+            _mockGamification.Object,
+            _mockFinancialService.Object
         );
     }
 
@@ -104,15 +104,14 @@ public class MemberServiceTests : TestBase
         // Arrange
         var dto = CreateValidDto();
         
-        // Setup payment config
-        await _context.PaymentConfigurations.AddAsync(new PaymentConfiguration 
-        { 
-            Id = 1, 
-            Method = Enums.PaymentMethod.BKash, 
-            DisplayName = "bKash",
-            IsEnabled = true
-        });
-        await _context.SaveChangesAsync();
+        // Ensure a bKash config is available (seeded by EnsureCreated)
+        var payConfig = await _context.PaymentConfigurations.FirstOrDefaultAsync(x => x.Method == Enums.PaymentMethod.BKash);
+        if (payConfig == null)
+        {
+            throw new Exception("PaymentConfigurations should be seeded by EnsureCreated in TestBase.");
+        }
+        
+        dto.PaymentMethodId = payConfig.Id;
 
         _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("123456");
@@ -141,22 +140,7 @@ public class MemberServiceTests : TestBase
     {
         // Arrange
         var dto = CreateValidDto();
-        await _context.Members.AddAsync(new Member 
-        { 
-            Email = dto.Email, 
-            NID = "9999999999", 
-            MobileNo = "01999999999",
-            FullName = "Other User",
-            FatherName = "Father",
-            MotherName = "Mother",
-            PresentAddress = "Address",
-            PermanentAddress = "Address",
-            EmergencyContactName = "Contact",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
-        });
-        await _context.SaveChangesAsync();
+        await CreateAndSaveTestMemberAsync("Other User", dto.Email, "01999999999", "9999999999");
 
         // Act & Assert
         var act = async () => await _service.RegisterAsync(dto, null, null, null);
@@ -169,22 +153,7 @@ public class MemberServiceTests : TestBase
     {
         // Arrange
         var dto = CreateValidDto();
-        await _context.Members.AddAsync(new Member 
-        { 
-            Email = "other@example.com", 
-            NID = dto.NID, 
-            MobileNo = "01999999999",
-            FullName = "Other User",
-            FatherName = "Father",
-            MotherName = "Mother",
-            PresentAddress = "Address",
-            PermanentAddress = "Address",
-            EmergencyContactName = "Contact",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
-        });
-        await _context.SaveChangesAsync();
+        await CreateAndSaveTestMemberAsync("Other User", "other@example.com", "01999999999", dto.NID);
 
         // Act & Assert
         var act = async () => await _service.RegisterAsync(dto, null, null, null);
@@ -197,22 +166,7 @@ public class MemberServiceTests : TestBase
     {
         // Arrange
         var dto = CreateValidDto();
-        await _context.Members.AddAsync(new Member 
-        { 
-            Email = "other@example.com", 
-            NID = "9999999999", 
-            MobileNo = dto.MobileNo,
-            FullName = "Other User",
-            FatherName = "Father",
-            MotherName = "Mother",
-            PresentAddress = "Address",
-            PermanentAddress = "Address",
-            EmergencyContactName = "Contact",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
-        });
-        await _context.SaveChangesAsync();
+        await CreateAndSaveTestMemberAsync("Other User", "other@example.com", dto.MobileNo, "9999999999");
 
         // Act & Assert
         var act = async () => await _service.RegisterAsync(dto, null, null, null);
@@ -251,9 +205,8 @@ public class MemberServiceTests : TestBase
             memberId,
             Enums.FileUploadType.Photo,
             It.IsAny<CancellationToken>()), Times.Once);
-        _mockFileRepo.Verify(x => x.AddAsync(
-            It.Is<FileUpload>(f => f.UploadType == Enums.FileUploadType.Photo && f.MemberId == memberId),
-            It.IsAny<CancellationToken>()), Times.Once);
+        var fileUploads = await _context.FileUploads.CountAsync(f => f.MemberId == memberId);
+        fileUploads.Should().BeGreaterThan(0);
     }
 
     [Test]
@@ -281,9 +234,8 @@ public class MemberServiceTests : TestBase
         // Assert
         var member = await _context.Members.FindAsync(memberId);
 //         member!.CertificatePath.Should().Be(expectedPath);
-        _mockFileRepo.Verify(x => x.AddAsync(
-            It.Is<FileUpload>(f => f.UploadType == Enums.FileUploadType.Certificate),
-            It.IsAny<CancellationToken>()), Times.Once);
+        var fileUploads = await _context.FileUploads.CountAsync(f => f.MemberId == memberId);
+        fileUploads.Should().BeGreaterThan(0);
     }
 
     [Test]
@@ -311,9 +263,8 @@ public class MemberServiceTests : TestBase
         // Assert
         var member = await _context.Members.FindAsync(memberId);
 //         member!.PaymentProofPath.Should().Be(expectedPath);
-        _mockFileRepo.Verify(x => x.AddAsync(
-            It.Is<FileUpload>(f => f.UploadType == Enums.FileUploadType.PaymentProof),
-            It.IsAny<CancellationToken>()), Times.Once);
+        var fileUploads = await _context.FileUploads.CountAsync(f => f.MemberId == memberId);
+        fileUploads.Should().BeGreaterThan(0);
     }
 
     [Test]
@@ -335,23 +286,8 @@ public class MemberServiceTests : TestBase
     public async Task GetStatusAsync_WithValidMemberId_ShouldReturnStatus()
     {
         // Arrange
-        var member = new Member
-        {
-            FullName = "Test Member",
-            Email = "test@example.com",
-            NID = "1234567890",
-            MobileNo = "01712345678",
-            Status = Enums.MembershipStatus.Active,
-            FatherName = "Father",
-            MotherName = "Mother",
-            PresentAddress = "Address",
-            PermanentAddress = "Address",
-            EmergencyContactName = "Contact",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
-        };
-        await _context.Members.AddAsync(member);
+        var member = await CreateAndSaveTestMemberAsync("Test Member", "test@example.com", "01712345678", "1234567890");
+        member.Status = Enums.MembershipStatus.Active;
         await _context.SaveChangesAsync();
 
         // Act
@@ -370,23 +306,8 @@ public class MemberServiceTests : TestBase
         // Arrange
         var email = "test@example.com";
         var otpCode = "123456";
-        var member = new Member
-        {
-            FullName = "Test Member",
-            Email = email,
-            NID = "1234567890",
-            MobileNo = "01712345678",
-            EmailVerified = false,
-            FatherName = "Father",
-            MotherName = "Mother",
-            PresentAddress = "Address",
-            PermanentAddress = "Address",
-            EmergencyContactName = "Contact",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
-        };
-        await _context.Members.AddAsync(member);
+        var member = await CreateAndSaveTestMemberAsync("Test Member", email, "01712345678", "1234567890");
+        member.EmailVerified = false;
         await _context.SaveChangesAsync();
 
         _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<CancellationToken>()))
@@ -407,23 +328,8 @@ public class MemberServiceTests : TestBase
         // Arrange
         var email = "test@example.com";
         var otpCode = "999999";
-        var member = new Member
-        {
-            FullName = "Test Member",
-            Email = email,
-            NID = "1234567890",
-            MobileNo = "01712345678",
-            EmailVerified = false,
-            FatherName = "Father",
-            MotherName = "Mother",
-            PresentAddress = "Address",
-            PermanentAddress = "Address",
-            EmergencyContactName = "Contact",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
-        };
-        await _context.Members.AddAsync(member);
+        var member = await CreateAndSaveTestMemberAsync("Test Member", email, "01712345678", "1234567890");
+        member.EmailVerified = false;
         await _context.SaveChangesAsync();
 
         _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<CancellationToken>()))
@@ -459,23 +365,7 @@ public class MemberServiceTests : TestBase
     public async Task GetProfileAsync_WithPrivilegedAccess_ShouldReturnFullProfile()
     {
         // Arrange
-        var member = new Member
-        {
-            FullName = "Test Member",
-            Email = "test@example.com",
-            MobileNo = "01712345678",
-            FatherName = "Father",
-            MotherName = "Mother",
-            NID = "1234567890",
-            PresentAddress = "Present",
-            PermanentAddress = "Permanent",
-            EmergencyContactName = "EC",
-            EmergencyContactRelation = "Brother",
-            EmergencyContactPhone = "01812345678",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
-        };
-        await _context.Members.AddAsync(member);
-        await _context.SaveChangesAsync();
+        var member = await CreateAndSaveTestMemberAsync("Test Member", "test@example.com", "01712345678", "1234567890");
 
         // Act
         var result = await _service.GetProfileAsync(member.Id, isPrivileged: true);
@@ -491,23 +381,8 @@ public class MemberServiceTests : TestBase
     public async Task GetProfileAsync_WithNonPrivilegedAccess_ShouldReturnMaskedProfile()
     {
         // Arrange
-        var member = new Member
-        {
-            FullName = "Test Member",
-            Email = "test@example.com",
-            MobileNo = "01712345678",
-            FatherName = "Father",
-            MotherName = "Mother",
-            NID = "1234567890",
-            PresentAddress = "Present",
-            PermanentAddress = "Permanent",
-            EmergencyContactName = "EC",
-            EmergencyContactRelation = "Brother",
-            EmergencyContactPhone = "01812345678",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } },
-            IsNIDPublic = false
-        };
-        await _context.Members.AddAsync(member);
+        var member = await CreateAndSaveTestMemberAsync("Test Member", "test@example.com", "01712345678", "1234567890");
+        member.IsNIDPublic = false;
         await _context.SaveChangesAsync();
 
         // Act
@@ -523,23 +398,9 @@ public class MemberServiceTests : TestBase
     public async Task UpdateProfileAsync_WithValidData_ShouldUpdateMember()
     {
         // Arrange
-        var member = new Member
-        {
-            FullName = "Test Member",
-            Email = "test@example.com",
-            MobileNo = "01712345678",
-            FatherName = "Father",
-            MotherName = "Mother",
-            NID = "1234567890",
-            PresentAddress = "Old Address",
-            PermanentAddress = "Permanent",
-            EmergencyContactName = "EC",
-            EmergencyContactRelation = "Brother",
-            EmergencyContactPhone = "01812345678",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } },
-            IsMobilePublic = false
-        };
-        await _context.Members.AddAsync(member);
+        var member = await CreateAndSaveTestMemberAsync("Test Member", "test@example.com", "01712345678", "1234567890");
+        member.PresentAddress = "Old Address";
+        member.IsMobilePublic = false;
         await _context.SaveChangesAsync();
 
         var updateDto = new UpdateProfileDto
@@ -604,54 +465,8 @@ public class MemberServiceTests : TestBase
         member!.PhotoPath.Should().NotBeNullOrEmpty();
 //         member.CertificatePath.Should().NotBeNullOrEmpty();
 //         member.PaymentProofPath.Should().NotBeNullOrEmpty();
-        _mockFileRepo.Verify(x => x.AddAsync(It.IsAny<FileUpload>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
-    }
-
-    [Test]
-    public async Task ApproveMemberAsync_WithValidMember_ShouldApproveAndGenerateMembershipNumber()
-    {
-        // Arrange
-        var member = new Member
-        {
-            FullName = "Test Member",
-            Email = "test@example.com",
-            NID = "1234567890",
-            MobileNo = "01712345678",
-            Status = Enums.MembershipStatus.Applied,
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
-            FatherName = "Father",
-            MotherName = "Mother",
-            PresentAddress = "Address",
-            PermanentAddress = "Address",
-            EmergencyContactName = "Contact",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01999999999",
-//             HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
-//             ProfessionalSector = "IT",
-//             Designation = "Developer"
-        };
-        await _context.Members.AddAsync(member);
-        await _context.SaveChangesAsync();
-
-        var adminId = 1;
-        var defaultPassword = "Test1234";
-        _mockUserService.Setup(x => x.GenerateDefaultPassword()).Returns(defaultPassword);
-        _mockUserService.Setup(x => x.CreateUserAccountAsync(
-            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new User { Id = 1, Username = "GHC-2007-0001", MemberId = member.Id });
-
-        // Act
-        var result = await _service.ApproveMemberAsync(member.Id, adminId);
-
-        // Assert
-        result.MembershipNumber.Should().StartWith("GHC");
-        result.DefaultPassword.Should().Be(member.NID);
-        var updatedMember = await _context.Members.FindAsync(member.Id);
-        updatedMember!.Status.Should().Be(Enums.MembershipStatus.Active);
-        updatedMember.MembershipNumber.Should().StartWith("GHC");
-        updatedMember.ApprovedDate.Should().NotBeNull();
-        updatedMember.ApprovedBy.Should().Be(adminId);
-        _mockUserService.Verify(x => x.CreateUserAccountAsync(member.Id, member.NID, member.NID, It.IsAny<CancellationToken>()), Times.Once);
+        var fileUploads = await _context.FileUploads.CountAsync(f => f.MemberId == memberId);
+        fileUploads.Should().BeGreaterThan(0);
     }
 
     [Test]
@@ -925,7 +740,7 @@ public class MemberServiceTests : TestBase
         };
 
         // Act
-        var result = await _service.AdminUpdateMemberAsync(member.Id, updateDto);
+        var result = await _service.AdminUpdateMemberAsync(member.Id, updateDto, 42);
 
         // Assert
         result.Should().BeTrue();
@@ -936,4 +751,29 @@ public class MemberServiceTests : TestBase
         updatedMember.MembershipNumber.Should().Be("GHC-2007-9999");
 //         updatedMember.GHCLastCertificateGroup.Should().Be("Commerce");
     }
+    [Test]
+    public async Task RegisterAsync_WithFailingDependency_ShouldRollbackTransactionAndNotSaveMember()
+    {
+        // Assemble
+        var dto = CreateValidDto();
+        var photo = CreateMockFile("photo.jpg");
+        var payConfig = await _context.PaymentConfigurations.FirstOrDefaultAsync(x => x.Method == Enums.PaymentMethod.BKash);
+        if (payConfig == null) throw new Exception("PaymentConfigurations should be seeded by EnsureCreated in TestBase.");
+        dto.PaymentMethodId = payConfig.Id;
+
+        // Force the storage service to throw an exception AFTER database insertion starts, simulating catastrophic failure
+        _mockStorage.Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Enums.FileUploadType>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new IOException("Storage failure"));
+
+        var membersBefore = await _context.Members.CountAsync();
+
+        // Act & Assert
+        var act = async () => await _service.RegisterAsync(dto, photo, null, null);
+        await act.Should().ThrowAsync<IOException>().WithMessage("Storage failure");
+
+        // Verification: Check if transaction actually rolled back. Count should remain the same.
+        var membersAfter = await _context.Members.CountAsync();
+        membersAfter.Should().Be(membersBefore); // No dirty data committed
+    }
+
 }

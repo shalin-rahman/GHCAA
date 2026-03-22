@@ -180,6 +180,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./admin/themes/admin-themes').then(m => m.AdminThemes)
             },
             {
+                path: 'payments/fees',
+                loadComponent: () => import('./admin/fee-config/admin-fee-config').then(m => m.AdminFeeConfig)
+            },
+            {
                 path: 'payments',
                 loadComponent: () => import('./admin/payment-config/admin-payment-config').then(m => m.AdminPaymentConfig)
             },

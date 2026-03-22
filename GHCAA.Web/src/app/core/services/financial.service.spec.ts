@@ -30,4 +30,12 @@ describe('FinancialService', () => {
         expect(req.request.method).toBe('GET');
         req.flush([]);
     });
+    it('should fetch applicable fee dynamically', () => {
+        service.getApplicableFee('MembershipFee', 'General', '2024-03-22').subscribe(f => {
+            expect(f.amount).toBe(1000);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/applicable?category=MembershipFee&type=General&date=2024-03-22`);
+        expect(req.request.method).toBe('GET');
+        req.flush({ amount: 1000 });
+    });
 });

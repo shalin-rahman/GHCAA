@@ -190,4 +190,55 @@ public class FinancialServiceTests : TestBase
         fee2024.Should().Be(1000);
         fee2025.Should().Be(2000);
     }
+
+    [Test]
+    public async Task GetSavedPaymentMethodsAsync_ShouldReturnSavedMethods()
+    {
+        var member = new Member { FullName = "U1", Email = "u1@e.com", NID = "U1", MobileNo = "U1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        _context.SavedPaymentMethods.Add(new SavedPaymentMethod { MemberId = member.Id, Method = "BKash", AccountNumber = "01711", DisplayName = "My BKash", LastUsedAt = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetSavedPaymentMethodsAsync(member.Id);
+
+        result.Should().HaveCount(1);
+        result.First().Method.Should().Be("BKash");
+    }
+
+    [Test]
+    public async Task AddSavedPaymentMethodAsync_ShouldCreateMethod()
+    {
+        var member = new Member { FullName = "U2", Email = "u2@e.com", NID = "U2", MobileNo = "U2", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        var dto = new CreateSavedPaymentMethodDto { Method = "Nagad", AccountNumber = "01811", DisplayName = "Nagad Personal" };
+        var result = await _service.AddSavedPaymentMethodAsync(member.Id, dto);
+
+        result.Should().NotBeNull();
+        result.Method.Should().Be("Nagad");
+
+        var dbMethod = await _context.SavedPaymentMethods.FirstOrDefaultAsync(m => m.MemberId == member.Id);
+        dbMethod.Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task DeleteSavedPaymentMethodAsync_ShouldRemoveMethodIfOwner()
+    {
+        var member = new Member { FullName = "U3", Email = "u3@e.com", NID = "U3", MobileNo = "U3", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        var method = new SavedPaymentMethod { MemberId = member.Id, Method = "Rocket", AccountNumber = "01911", DisplayName = "Rocket", LastUsedAt = DateTime.UtcNow };
+        _context.SavedPaymentMethods.Add(method);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.DeleteSavedPaymentMethodAsync(member.Id, method.Id);
+
+        result.Should().BeTrue();
+        var exists = await _context.SavedPaymentMethods.AnyAsync(m => m.Id == method.Id);
+        exists.Should().BeFalse();
+    }
 }

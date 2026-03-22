@@ -14,48 +14,25 @@ using NUnit.Framework;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    public class PaymentConfigControllerTests
+    public class PaymentConfigControllerTests : ControllerTestBase
     {
-        private ApplicationDbContext _dbContext;
         private PaymentConfigController _controller;
 
         [SetUp]
         public void Setup()
         {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            _dbContext = new ApplicationDbContext(options);
-            _controller = new PaymentConfigController(_dbContext);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _dbContext.Dispose();
-        }
-
-        private void SetUserRole(string role)
-        {
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                new Claim(ClaimTypes.Role, role)
-            }, "TestAuthentication"));
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
+            _context.PaymentConfigurations.RemoveRange(_context.PaymentConfigurations); _context.SaveChanges(); _controller = new PaymentConfigController(_context);
         }
 
         [Test]
         public async Task GetActiveMethods_ReturnsOnlyEnabled()
         {
-            _dbContext.PaymentConfigurations.AddRange(new List<PaymentConfiguration>
+            _context.PaymentConfigurations.AddRange(new List<PaymentConfiguration>
             {
                 new() { DisplayName = "P1", IsEnabled = true, Method = Domain.Enums.PaymentMethod.BKash },
                 new() { DisplayName = "P2", IsEnabled = false, Method = Domain.Enums.PaymentMethod.Nagad }
             });
-            await _dbContext.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             var result = await _controller.GetActivePaymentMethods(CancellationToken.None);
             var okResult = result as OkObjectResult;
@@ -72,86 +49,86 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetAllConfigs_ObfuscatesSecretsForAdmin()
         {
-            SetUserRole("Admin");
-            _dbContext.PaymentConfigurations.Add(new PaymentConfiguration 
+            SetUserContext(_controller, null, "Admin");
+            _context.PaymentConfigurations.Add(new PaymentConfiguration 
             { 
                 DisplayName = "Gateway", 
                 GatewaySecretKey = "super-secret",
                 GatewayPublicKey = "pub-key",
                 Method = Domain.Enums.PaymentMethod.CreditCard
             });
-            await _dbContext.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             var result = await _controller.GetAllConfigs(CancellationToken.None);
             var okResult = result as OkObjectResult;
-            var configs = okResult.Value as List<PaymentConfiguration>;
+            var configs = okResult!.Value as List<PaymentConfiguration>;
 
-            Assert.That(configs[0].GatewaySecretKey, Is.EqualTo("********"));
+            Assert.That(configs![0].GatewaySecretKey, Is.EqualTo("********"));
             Assert.That(configs[0].GatewayPublicKey, Is.EqualTo("********"));
         }
 
         [Test]
         public async Task GetAllConfigs_ShowsSecretsForSuperAdmin()
         {
-            SetUserRole("SuperAdmin");
-            _dbContext.PaymentConfigurations.Add(new PaymentConfiguration 
+            SetUserContext(_controller, null, "SuperAdmin");
+            _context.PaymentConfigurations.Add(new PaymentConfiguration 
             { 
                 DisplayName = "Gateway", 
                 GatewaySecretKey = "super-secret",
                 GatewayPublicKey = "pub-key",
                 Method = Domain.Enums.PaymentMethod.CreditCard
             });
-            await _dbContext.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             var result = await _controller.GetAllConfigs(CancellationToken.None);
             var okResult = result as OkObjectResult;
-            var configs = okResult.Value as List<PaymentConfiguration>;
+            var configs = okResult!.Value as List<PaymentConfiguration>;
 
-            Assert.That(configs[0].GatewaySecretKey, Is.EqualTo("super-secret"));
+            Assert.That(configs![0].GatewaySecretKey, Is.EqualTo("super-secret"));
             Assert.That(configs[0].GatewayPublicKey, Is.EqualTo("pub-key"));
         }
 
         [Test]
         public async Task UpdateConfig_SuperAdminCanChangeSecrets()
         {
-            SetUserRole("SuperAdmin");
+            SetUserContext(_controller, null, "SuperAdmin");
             var original = new PaymentConfiguration { DisplayName = "Old", GatewaySecretKey = "OldSec", Method = Domain.Enums.PaymentMethod.CreditCard };
-            _dbContext.PaymentConfigurations.Add(original);
-            await _dbContext.SaveChangesAsync();
+            _context.PaymentConfigurations.Add(original);
+            await _context.SaveChangesAsync();
 
             var updateDto = new PaymentConfiguration { DisplayName = "New", GatewaySecretKey = "NewSec" };
             var result = await _controller.UpdateConfig(original.Id, updateDto, CancellationToken.None);
 
-            var updated = await _dbContext.PaymentConfigurations.FindAsync(original.Id);
-            Assert.That(updated.GatewaySecretKey, Is.EqualTo("NewSec"));
+            var updated = await _context.PaymentConfigurations.FindAsync(original.Id);
+            Assert.That(updated!.GatewaySecretKey, Is.EqualTo("NewSec"));
         }
 
         [Test]
         public async Task UpdateConfig_AdminCannotChangeSecrets()
         {
-            SetUserRole("Admin");
+            SetUserContext(_controller, null, "Admin");
             var original = new PaymentConfiguration { DisplayName = "Old", GatewaySecretKey = "OldSec", Method = Domain.Enums.PaymentMethod.CreditCard };
-            _dbContext.PaymentConfigurations.Add(original);
-            await _dbContext.SaveChangesAsync();
+            _context.PaymentConfigurations.Add(original);
+            await _context.SaveChangesAsync();
 
             // Admin sends obfuscated string (which would happen from UI)
             var updateDto = new PaymentConfiguration { DisplayName = "New", GatewaySecretKey = "********" };
             await _controller.UpdateConfig(original.Id, updateDto, CancellationToken.None);
 
-            var updated = await _dbContext.PaymentConfigurations.FindAsync(original.Id);
-            Assert.That(updated.GatewaySecretKey, Is.EqualTo("OldSec"));
+            var updated = await _context.PaymentConfigurations.FindAsync(original.Id);
+            Assert.That(updated!.GatewaySecretKey, Is.EqualTo("OldSec"));
         }
         [Test]
         public async Task GetActivePaymentMethods_ReturnsProperlyMappedObjects()
         {
-            _dbContext.PaymentConfigurations.Add(new PaymentConfiguration 
+            _context.PaymentConfigurations.Add(new PaymentConfiguration 
             { 
                 DisplayName = "Wallet", 
                 IsEnabled = true, 
                 Method = Domain.Enums.PaymentMethod.BKash,
                 WalletNumber = "017"
             });
-            await _dbContext.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             var result = await _controller.GetActivePaymentMethods(CancellationToken.None);
             var okResult = result as OkObjectResult;
@@ -175,14 +152,14 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task SeedDefaults_ShouldCreateInitialConfigs()
         {
-            SetUserRole("Admin");
+            SetUserContext(_controller, null, "Admin");
             var result = await _controller.SeedDefaults(CancellationToken.None);
             
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
-            var items = await _dbContext.PaymentConfigurations.CountAsync();
+            var items = await _context.PaymentConfigurations.CountAsync();
             Assert.That(items, Is.GreaterThan(0));
             
-            var bkash = await _dbContext.PaymentConfigurations.FirstOrDefaultAsync(p => p.DisplayName == "bKash");
+            var bkash = await _context.PaymentConfigurations.FirstOrDefaultAsync(p => p.DisplayName == "bKash");
             Assert.That(bkash, Is.Not.Null);
             Assert.That(bkash!.RequiresReceipt, Is.True);
         }

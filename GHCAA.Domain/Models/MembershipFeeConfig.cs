@@ -9,6 +9,9 @@ namespace GHCAA.Domain.Models
         public int Id { get; set; }
 
         [Required]
+        public FinancialCategory Category { get; set; } = FinancialCategory.MembershipFee;
+
+        [Required]
         public MembershipType MembershipType { get; set; }
 
         [Required]
@@ -17,6 +20,10 @@ namespace GHCAA.Domain.Models
 
         [Required]
         public DateTime EffectiveDate { get; set; } = DateTime.UtcNow;
+
+        public DateTime? EffectiveTo { get; set; }
+
+        public bool IsActive { get; set; } = true;
 
         [Required]
         public string Description { get; set; } = "Annual Membership Fee";

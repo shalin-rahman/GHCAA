@@ -47,6 +47,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     
     { path: '/admin/ledger', label: 'Financial Ledger', icon: '📖', roles: ['SuperAdmin'], section: 'Finance & Tools' },
     { path: '/admin/payments', label: 'Payment Settings', icon: '💳', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/payments/fees', label: 'Fee Policy', icon: '🧾', roles: ['SuperAdmin'], section: 'Finance & Tools' },
     { path: '/admin/roles', label: 'User Roles', icon: '🛡️', roles: ['SuperAdmin'], section: 'Finance & Tools' },
     { path: '/admin/audit', label: 'Audit Logs', icon: '📜', roles: ['SuperAdmin'], section: 'Finance & Tools' }
 ];

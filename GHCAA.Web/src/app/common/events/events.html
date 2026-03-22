@@ -221,46 +221,13 @@
                                 </div>
                             </div>
 
-                            <!-- Payment Method Selector -->
-                            <app-payment-method-selector (methodSelected)="onPaymentMethodSelected($event)">
-                            </app-payment-method-selector>
-
-                            <!-- Transaction Reference (conditionally shown) -->
-                            @if (selectedPaymentMethod()?.requiresReference) {
-                            <div class="input-group">
-                                <label>Reference (TrxID / Bank Slip No.) *</label>
-                                <input type="text" formControlName="paymentReference" class="font-mono text-accent"
-                                    placeholder="e.g. BK729XJS01"
-                                    [class.border-red-500]="regForm.get('paymentReference')?.invalid && regForm.get('paymentReference')?.touched">
-                                <div *ngIf="regForm.get('paymentReference')?.invalid && regForm.get('paymentReference')?.touched"
-                                    class="text-[9px] text-red-500 font-bold uppercase mt-1 tracking-widest">
-                                    Payment Reference Required
-                                </div>
-                            </div>
-                            }
-
-                            <!-- Receipt Upload (conditionally shown) -->
-                            @if (selectedPaymentMethod()?.requiresReceipt) {
-                            <div class="input-group">
-                                <label>Evidence of Transaction (Receipt Photo)</label>
-                                <div
-                                    class="file-drop-zone h-32 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center relative hover:border-accent transition-all cursor-pointer group">
-                                    <input type="file" (change)="onFileSelected($event)"
-                                        class="absolute inset-0 opacity-0 cursor-pointer">
-
-                                    <div *ngIf="!selectedFile"
-                                        class="text-center group-hover:scale-110 transition-transform">
-                                        <span class="text-3xl mb-2 block">📸</span>
-                                        <p class="text-[10px] font-black opacity-50 uppercase tracking-widest">Upload
-                                            Receipt</p>
-                                    </div>
-
-                                    <div *ngIf="selectedFile" class="text-accent font-black flex items-center gap-3">
-                                        <span class="text-xl">✅</span> {{ selectedFile.name }}
-                                    </div>
-                                </div>
-                            </div>
-                            }
+                            <!-- Common Payment Hub Integration -->
+                            <app-payment-portal
+                                (methodSelected)="onPaymentMethodSelected($event)"
+                                (referenceChange)="onReferenceChange($event)"
+                                (receiptSelected)="onReceiptSelected($event)"
+                                (saveRequested)="onSaveRequested($event)">
+                            </app-payment-portal>
                             }
 
                             <div class="flex gap-4 pt-2">

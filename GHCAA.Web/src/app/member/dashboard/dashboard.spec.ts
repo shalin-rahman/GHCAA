@@ -1,3 +1,4 @@
+import { createAuthServiceMock } from '../../core/testing/testing-utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Dashboard } from './dashboard';
 import { ProfileService } from '../../core/services/profile.service';

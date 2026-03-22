@@ -12,6 +12,7 @@ namespace GHCAA.Application.DTOs
         public DateTime PaidAt { get; set; }
         public Enums.PaymentStatus Status { get; set; }
         public Enums.FinancialCategory FinancialCategory { get; set; }
+        public Enums.PaymentMethod PaymentMethod { get; set; }
         public string? Notes { get; set; }
     }
 
@@ -21,6 +22,7 @@ namespace GHCAA.Application.DTOs
         public decimal Amount { get; set; }
         public DateTime PaidAt { get; set; }
         public Enums.FinancialCategory FinancialCategory { get; set; }
+        public Enums.PaymentMethod PaymentMethod { get; set; }
         public string? Notes { get; set; }
         // Admin might set this, otherwise ignored
         public int? MemberId { get; set; }
@@ -51,25 +53,34 @@ namespace GHCAA.Application.DTOs
     public class MembershipFeeConfigDto
     {
         public int Id { get; set; }
+        public Enums.FinancialCategory Category { get; set; }
         public string MembershipType { get; set; } = string.Empty;
         public decimal Amount { get; set; }
         public DateTime EffectiveDate { get; set; }
+        public DateTime? EffectiveTo { get; set; }
+        public bool IsActive { get; set; }
         public string Description { get; set; } = string.Empty;
     }
 
     public class CreateMembershipFeeConfigDto
     {
+        public Enums.FinancialCategory Category { get; set; } = Enums.FinancialCategory.MembershipFee;
         public string MembershipType { get; set; } = string.Empty;
         public decimal Amount { get; set; }
         public DateTime EffectiveDate { get; set; }
+        public DateTime? EffectiveTo { get; set; }
+        public bool IsActive { get; set; } = true;
         public string Description { get; set; } = string.Empty;
     }
 
     public class UpdateMembershipFeeConfigDto
     {
         public int Id { get; set; }
+        public Enums.FinancialCategory? Category { get; set; }
         public decimal Amount { get; set; }
         public DateTime EffectiveDate { get; set; }
+        public DateTime? EffectiveTo { get; set; }
+        public bool IsActive { get; set; }
         public string Description { get; set; } = string.Empty;
     }
 }

@@ -140,8 +140,14 @@ namespace GHCAA.API.Controllers
         [HttpPut("members/{id}")]
         public async Task<IActionResult> UpdateMemberAdmin(int id, [FromBody] AdminMemberUpdateDto dto, CancellationToken cancellationToken)
         {
+            var adminIdClaim = User.FindFirst("MemberId")?.Value;
+            if (string.IsNullOrEmpty(adminIdClaim) || !int.TryParse(adminIdClaim, out var adminId))
+            {
+                return Unauthorized();
+            }
+
             // Admins can update all membership information
-            var success = await _memberService.AdminUpdateMemberAsync(id, dto, cancellationToken);
+            var success = await _memberService.AdminUpdateMemberAsync(id, dto, adminId, cancellationToken);
             if (!success) return NotFound();
             return Ok(new { Message = "Member updated by admin successfully" });
         }

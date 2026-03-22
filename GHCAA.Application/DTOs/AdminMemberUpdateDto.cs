@@ -11,5 +11,6 @@ namespace GHCAA.Application.DTOs
         public string? MembershipNumber { get; set; }
         
         public string? ECChangeReason { get; set; }
+        public string? MembershipChangeReason { get; set; }
     }
 }

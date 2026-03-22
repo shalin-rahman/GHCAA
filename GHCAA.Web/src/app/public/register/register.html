@@ -107,7 +107,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Membership Category *</label>
-                                <select [(ngModel)]="model.MembershipType" name="membershipType" required>
+                                <select [(ngModel)]="model.MembershipType" name="membershipType" required (change)="loadRegistrationFee()">
                                     @for (m of membershipTypeOptions; track m.value) { <option [value]="m.value">{{ m.label }}</option> }
                                 </select>
                             </div>
@@ -298,6 +298,7 @@
                         <!-- Reusable Payment Hub -->
                         <app-payment-portal 
                             [methods]="paymentConfigs()"
+                            [amount]="registrationFee()"
                             (methodSelected)="onPaymentMethodChange($event)"
                             (referenceChange)="onReferenceSelected($event)"
                             (receiptSelected)="onPaymentReceiptSelected($event)">

@@ -245,6 +245,16 @@
                     </select>
                 </div>
 
+                @if (isEditing()) {
+                <div class="form-group full bg-primary/5 p-4 rounded-lg border border-primary/10">
+                    <label class="text-accent font-bold">Membership Change Reason</label>
+                    <input type="text" [(ngModel)]="selectedMember().membershipChangeReason" 
+                        placeholder="Why is this membership type or category being updated? (e.g., Paid via Bank, Long-term Service)"
+                        class="w-full">
+                    <small class="opacity-50 italic">Required only if changing membership tier.</small>
+                </div>
+                }
+
 
                 <!-- Dynamic Academic History Section (Placeholder for consistency) -->
                 <div class="full border-b pb-4 mb-4 mt-8">

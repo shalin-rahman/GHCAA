@@ -23,7 +23,13 @@ namespace GHCAA.Application.Interfaces
         Task<MembershipFeeConfigDto> AddMembershipFeeConfigAsync(CreateMembershipFeeConfigDto dto, int adminMemberId, CancellationToken cancellationToken = default);
         Task<MembershipFeeConfigDto> UpdateMembershipFeeConfigAsync(UpdateMembershipFeeConfigDto dto, int adminMemberId, CancellationToken cancellationToken = default);
         Task<decimal> GetApplicableMembershipFeeAsync(Domain.Enums.MembershipType type, int year, CancellationToken cancellationToken = default);
+        Task<decimal> GetApplicableFeeAsync(Domain.Enums.FinancialCategory category, Domain.Enums.MembershipType type, DateTime date, CancellationToken cancellationToken = default);
         Task<bool> DeletePaymentAsync(int paymentId, CancellationToken cancellationToken = default);
         Task<byte[]> GenerateTaxReceiptAsync(int paymentId, CancellationToken cancellationToken = default);
+
+        // Saved Payment Methods
+        Task<IEnumerable<SavedPaymentMethodDto>> GetSavedPaymentMethodsAsync(int memberId, CancellationToken cancellationToken = default);
+        Task<SavedPaymentMethodDto> AddSavedPaymentMethodAsync(int memberId, CreateSavedPaymentMethodDto dto, CancellationToken cancellationToken = default);
+        Task<bool> DeleteSavedPaymentMethodAsync(int memberId, int id, CancellationToken cancellationToken = default);
     }
 }

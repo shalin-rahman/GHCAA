@@ -35,23 +35,8 @@ namespace GHCAA.Tests.Services
             // Arrange
             var username = "GHC-2007-0001";
             var password = "TestPassword123";
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-var member = new Member { FullName = "Active Member", Email = "test1@e.com", NID = "123", MobileNo = "123", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            await _context.Members.AddAsync(member);
-            await _context.SaveChangesAsync();
-            var memberId = member.Id;
-
-            var user = new User
-            {
-                Username = username,
-                PasswordHash = passwordHash,
-                MemberId = memberId,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
-
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            var member = await CreateAndSaveTestMemberAsync("Active Member", "test1@e.com", "123", "123");
+            var user = await CreateAndSaveTestUserAsync(member.Id, username, password);
 
             var expectedToken = "mock_jwt_token";
             _mockTokenService.Setup(x => x.CreateToken(It.IsAny<User>()))
@@ -66,7 +51,7 @@ var member = new Member { FullName = "Active Member", Email = "test1@e.com", NID
             result.Should().NotBeNull();
             result!.Token.Should().Be(expectedToken);
             result.Username.Should().Be(username);
-            result.MemberId.Should().Be(memberId);
+            result.MemberId.Should().Be(member.Id);
         }
 
         [Test]
@@ -81,15 +66,8 @@ var member = new Member { FullName = "Active Member", Email = "test1@e.com", NID
         public async Task LoginAsync_WithWrongPassword_ShouldReturnNull()
         {
             var username = "testuser";
-            var password = "CorrectPassword";
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
-var member = new Member { FullName = "Active Member", Email = "test2@e.com", NID = "124", MobileNo = "124", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            await _context.Members.AddAsync(member);
-            await _context.SaveChangesAsync();
-
-            await _context.Users.AddAsync(new User { Username = username, PasswordHash = passwordHash, MemberId = member.Id, CreatedAt = DateTime.UtcNow, IsActive = true });
-            await _context.SaveChangesAsync();
+            var member = await CreateAndSaveTestMemberAsync("Active Member", "test2@e.com", "124", "124");
+            await CreateAndSaveTestUserAsync(member.Id, username, "CorrectPassword");
 
             var result = await _service.LoginAsync(new LoginDto { Username = username, Password = "WrongPassword" });
             result.Should().BeNull();
@@ -100,13 +78,9 @@ var member = new Member { FullName = "Active Member", Email = "test2@e.com", NID
         {
             var username = "inactiveuser";
             var password = "password";
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
-var member = new Member { FullName = "Active Member", Email = "test3@e.com", NID = "125", MobileNo = "125", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            await _context.Members.AddAsync(member);
-            await _context.SaveChangesAsync();
-
-            await _context.Users.AddAsync(new User { Username = username, PasswordHash = passwordHash, MemberId = member.Id, CreatedAt = DateTime.UtcNow, IsActive = false });
+            var member = await CreateAndSaveTestMemberAsync("Active Member", "test3@e.com", "125", "125");
+            var user = await CreateAndSaveTestUserAsync(member.Id, username, password);
+            user.IsActive = false;
             await _context.SaveChangesAsync();
 
             var result = await _service.LoginAsync(new LoginDto { Username = username, Password = password });
@@ -119,20 +93,11 @@ var member = new Member { FullName = "Active Member", Email = "test3@e.com", NID
             // Arrange
             var email = "user@example.com";
             var token = "token123";
-            var member = new Member { FullName = "Test", Email = email, NID = "333", MobileNo = "333", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            await _context.Members.AddAsync(member);
-            await _context.SaveChangesAsync();
-
-            var user = new User
-            {
-                Username = "testuser_reset",
-                MemberId = member.Id,
-                PasswordHash = "old_hash",
-                ResetToken = token,
-                ResetTokenExpiry = DateTime.UtcNow.AddHours(1),
-                IsActive = true
-            };
-            await _context.Users.AddAsync(user);
+            var member = await CreateAndSaveTestMemberAsync("Test", email, "333", "333");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "testuser_reset", "old_password");
+            
+            user.ResetToken = token;
+            user.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
             await _context.SaveChangesAsync();
 
             // Act
@@ -151,20 +116,11 @@ var member = new Member { FullName = "Active Member", Email = "test3@e.com", NID
             // Arrange
             var email = "expired@example.com";
             var token = "expired_token";
-            var member = new Member { FullName = "Test", Email = email, NID = "444", MobileNo = "444", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-            await _context.Members.AddAsync(member);
-            await _context.SaveChangesAsync();
-
-            var user = new User
-            {
-                Username = "expired_user",
-                MemberId = member.Id,
-                PasswordHash = "old_hash",
-                ResetToken = token,
-                ResetTokenExpiry = DateTime.UtcNow.AddHours(-1),
-                IsActive = true
-            };
-            await _context.Users.AddAsync(user);
+            var member = await CreateAndSaveTestMemberAsync("Test", email, "444", "444");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "expired_user", "old_password");
+            
+            user.ResetToken = token;
+            user.ResetTokenExpiry = DateTime.UtcNow.AddHours(-1);
             await _context.SaveChangesAsync();
 
             // Act

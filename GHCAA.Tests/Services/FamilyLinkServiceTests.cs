@@ -38,8 +38,8 @@ public class FamilyLinkServiceTests : TestBase
     public async Task SendRequestAsync_ShouldCreateRequestAndNotify()
     {
         // Arrange
-        var requester = await CreateTestMemberAsync(1, "R001");
-        var target = await CreateTestMemberAsync(2, "T001");
+        var requester = await CreateTestMemberAsync("R001");
+        var target = await CreateTestMemberAsync("T001");
 
         var dto = new SendFamilyLinkDto
         {
@@ -71,8 +71,8 @@ public class FamilyLinkServiceTests : TestBase
     public async Task RespondAsync_WhenApproved_ShouldAcceptAndLink()
     {
         // Arrange
-        var requester = await CreateTestMemberAsync(1, "R001");
-        var target = await CreateTestMemberAsync(2, "T001");
+        var requester = await CreateTestMemberAsync("R001");
+        var target = await CreateTestMemberAsync("T001");
         
         var request = new FamilyLinkRequest
         {
@@ -105,8 +105,8 @@ public class FamilyLinkServiceTests : TestBase
     public async Task RemoveLinkAsync_ShouldDissolveConnection()
     {
         // Arrange
-        var requester = await CreateTestMemberAsync(1, "R001");
-        var target = await CreateTestMemberAsync(2, "T001");
+        var requester = await CreateTestMemberAsync("R001");
+        var target = await CreateTestMemberAsync("T001");
         // Connection is handled by requests
         
         var request = new FamilyLinkRequest
@@ -131,26 +131,11 @@ public class FamilyLinkServiceTests : TestBase
         // Connection removed status is in FamilyLinkRequests
     }
 
-    private async Task<Member> CreateTestMemberAsync(int id, string membershipNo)
+    private async Task<Member> CreateTestMemberAsync(string membershipNo)
     {
-        var member = new Member
-        {
-            Id = id,
-            FullName = $"Test {id}",
-            Email = $"test{id}@example.com",
-            MembershipNumber = membershipNo,
-            NID = $"NID{id}",
-            MobileNo = $"0170000000{id}",
-            FatherName = "Father",
-            MotherName = "Mother",
-            PresentAddress = "Address",
-            PermanentAddress = "Address",
-            EmergencyContactName = "Contact",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01900000000",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2000, IsGHC = true } }
-        };
-        _context.Members.Add(member);
+        var member = await CreateAndSaveTestMemberAsync($"Test {membershipNo}", $"test{membershipNo}@example.com", $"017{Guid.NewGuid().ToString("N").Substring(0, 8)}", $"NID{membershipNo}");
+        member.MembershipNumber = membershipNo;
+        _context.Members.Update(member);
         await _context.SaveChangesAsync();
         return member;
     }

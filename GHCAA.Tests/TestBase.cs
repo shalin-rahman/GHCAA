@@ -15,6 +15,7 @@ namespace GHCAA.Tests
         [SetUp]
         public void BaseSetup()
         {
+            ApplicationDbContext.IsSeedDisabled = false;
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
@@ -39,9 +40,9 @@ namespace GHCAA.Tests
             foreach (var entry in entries) entry.State = EntityState.Detached;
         }
 
-        protected Member CreateTestMember(string name = "John Doe", string email = "test@example.com", string phone = "01712345678", string nid = "1234567890")
+        protected async Task<Member> CreateAndSaveTestMemberAsync(string name = "John Doe", string email = "test@example.com", string phone = "01712345678", string nid = "1234567890", int passingYear = 2020)
         {
-            return new Member
+            var member = new Member
             {
                 FullName = name,
                 Email = email,
@@ -59,8 +60,46 @@ namespace GHCAA.Tests
                 EmergencyContactPhone = "01812345678",
                 Status = Enums.MembershipStatus.Active,
                 AppliedDate = DateTime.UtcNow,
-                HasAcceptedTerms = true
+                HasAcceptedTerms = true,
+                AcademicHistory = new List<AcademicRecord>
+                {
+                    new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = passingYear, IsGHC = true }
+                }
             };
+            await _context.Members.AddAsync(member);
+            await _context.SaveChangesAsync();
+            return member;
+        }
+
+        protected async Task<AlumniEvent> CreateAndSaveTestEventAsync(string title = "Test Event", decimal fee = 100)
+        {
+            var ev = new AlumniEvent
+            {
+                Title = title,
+                Description = "Test Description",
+                Date = DateTime.UtcNow.AddDays(30),
+                Location = "Test Location",
+                RegistrationFee = fee,
+                IsActive = true
+            };
+            await _context.AlumniEvents.AddAsync(ev);
+            await _context.SaveChangesAsync();
+            return ev;
+        }
+
+        protected async Task<User> CreateAndSaveTestUserAsync(int memberId, string username, string password = "TestPassword123")
+        {
+            var user = new User
+            {
+                Username = username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+                MemberId = memberId,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            return user;
         }
     }
 }

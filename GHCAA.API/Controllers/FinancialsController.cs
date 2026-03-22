@@ -21,6 +21,14 @@ namespace GHCAA.API.Controllers
             _db = db;
         }
 
+        [HttpGet("fees/applicable")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetApplicableFee([FromQuery] Domain.Enums.FinancialCategory category, [FromQuery] Domain.Enums.MembershipType type, [FromQuery] DateTime? date, CancellationToken cancellationToken)
+        {
+            var fee = await _financialService.GetApplicableFeeAsync(category, type, date ?? DateTime.UtcNow, cancellationToken);
+            return Ok(new { Amount = fee });
+        }
+
         [HttpGet("my-history")]
         public async Task<IActionResult> GetMyPaymentHistory(CancellationToken cancellationToken)
         {
@@ -170,6 +178,36 @@ namespace GHCAA.API.Controllers
         {
             var history = await _financialService.GetMemberPaymentHistoryAsync(memberId, cancellationToken);
             return Ok(history);
+        }
+
+        [HttpGet("saved-methods")]
+        public async Task<IActionResult> GetSavedPaymentMethods(CancellationToken cancellationToken)
+        {
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
+
+            var methods = await _financialService.GetSavedPaymentMethodsAsync(memberId, cancellationToken);
+            return Ok(methods);
+        }
+
+        [HttpPost("saved-methods")]
+        public async Task<IActionResult> AddSavedPaymentMethod([FromBody] CreateSavedPaymentMethodDto dto, CancellationToken cancellationToken)
+        {
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
+
+            var result = await _financialService.AddSavedPaymentMethodAsync(memberId, dto, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpDelete("saved-methods/{id}")]
+        public async Task<IActionResult> DeleteSavedPaymentMethod(int id, CancellationToken cancellationToken)
+        {
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
+
+            var result = await _financialService.DeleteSavedPaymentMethodAsync(memberId, id, cancellationToken);
+            return result ? Ok() : NotFound();
         }
     }
 }

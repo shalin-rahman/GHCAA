@@ -14,7 +14,7 @@ using GHCAA.Domain;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    public class NewsControllerTests
+    public class NewsControllerTests : ControllerTestBase
     {
         private Mock<INewsService> _newsServiceMock;
         private Mock<IFileStorageService> _fileStorageServiceMock;
@@ -27,14 +27,7 @@ namespace GHCAA.Tests.Controllers
             _fileStorageServiceMock = new Mock<IFileStorageService>();
             _controller = new NewsController(_newsServiceMock.Object, _fileStorageServiceMock.Object);
 
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                new Claim(ClaimTypes.NameIdentifier, "1")
-            }, "TestAuthentication"));
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
+            SetUserContext(_controller, null, "Admin", 1); // UserId 1, no specific MemberId
         }
 
         [Test]

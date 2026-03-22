@@ -5,7 +5,9 @@ import { RegistrationService } from '../../core/services/registration.service';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
+import { FinancialService } from '../../core/services/financial.service';
 import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { GatewaysService } from '../../core/services/gateways.service';
 
 @Component({
   selector: 'app-register',
@@ -18,8 +20,11 @@ export class Register implements OnDestroy {
   private regService = inject(RegistrationService);
   private router = inject(Router);
   private notify = inject(NotificationService);
+  private gatewaysService = inject(GatewaysService);
+  private finService = inject(FinancialService);
 
   loading = signal(false);
+  registrationFee = signal<number>(500); // Default placeholder
   submitted = signal(false);
   currentStep = signal(1);
   maxStepReached = signal(1);
@@ -28,6 +33,7 @@ export class Register implements OnDestroy {
   maxBirthDate = new Date(new Date().setFullYear(new Date().getFullYear() - 15)).toISOString().split('T')[0];
   paymentConfigs = signal<any[]>([]);
   selectedPaymentMethod = signal<any>(null);
+  registrationResult = signal<any>(null);
   private timerInterval: any;
   ACADEMIC = ACADEMIC_DATA;
   IS_HSC = IS_HSC;
@@ -54,6 +60,7 @@ export class Register implements OnDestroy {
     PresentAddress: '',
     PermanentAddress: '',
     TShirtSize: 'L',
+    MembershipType: 'General',
     EmergencyContactName: '',
     EmergencyContactRelation: '',
     EmergencyContactPhone: '',
@@ -99,6 +106,15 @@ export class Register implements OnDestroy {
 
   ngOnInit() {
     this.loadPaymentInfo();
+    this.loadRegistrationFee();
+  }
+
+  loadRegistrationFee() {
+    const type = this.model.MembershipType || 'General';
+    this.finService.getApplicableFee('RegistrationFee', type).subscribe({
+      next: (res) => this.registrationFee.set(res.amount),
+      error: () => this.registrationFee.set(500) // fallback
+    });
   }
 
   loadPaymentInfo() {
@@ -218,14 +234,48 @@ export class Register implements OnDestroy {
     ensureValidAcademicData(this.model);
 
     this.regService.register(formData).subscribe({
-      next: () => {
-        this.loading.set(false);
-        this.submitted.set(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      next: (res) => {
+        this.registrationResult.set(res);
+        
+        // Handle Online Payment Redirection
+        if (this.selectedPaymentMethod()?.isOnline) {
+          this.initiateGateway(res.memberId);
+        } else {
+          this.currentStep.set(4);
+          this.notify.success('Registry filing submitted successfully. Please verify your email.');
+        }
       },
       error: (err) => {
+        this.notify.error(err.error?.message || 'Registration failed. Please check your data.');
         this.loading.set(false);
-        this.notify.error(err.error?.message || 'Registration failed. Please try again.');
+      }
+    });
+  }
+
+  private initiateGateway(memberId: number) {
+    const method = this.selectedPaymentMethod();
+    if (!method) return;
+
+    this.gatewaysService.initiatePayment({
+      amount: this.registrationFee(), // Dynamically fetched fee
+      gateway: method.gateway,
+      reference: this.model.TransactionId || `REG-${memberId}`,
+      baseUrl: window.location.origin,
+      customerName: this.model.FullName,
+      customerEmail: this.model.Email,
+      customerPhone: this.model.MobileNo
+    }).subscribe({
+      next: (res) => {
+        if (res.success && res.gatewayUrl) {
+          window.location.href = res.gatewayUrl;
+        } else {
+          this.notify.warning('Registry filed, but online payment initiation failed. Please verify with manual receipt or check dashboard.');
+          this.currentStep.set(4);
+        }
+      },
+      error: () => {
+        this.notify.warning('Online payment initiation failed. Manual verification will be required.');
+        this.currentStep.set(4);
       }
     });
   }

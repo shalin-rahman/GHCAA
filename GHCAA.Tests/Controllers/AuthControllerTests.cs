@@ -35,7 +35,7 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
-            Assert.That(okResult.Value, Is.EqualTo(responseDto));
+            Assert.That(okResult!.Value, Is.EqualTo(responseDto));
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace GHCAA.Tests.Controllers
             var loginDto = new LoginDto { Username = "user", Password = "wrongpassword" };
 
             _authServiceMock.Setup(x => x.LoginAsync(loginDto, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync((TokenResponseDto)null);
+                            .ReturnsAsync((TokenResponseDto)null!);
 
             var result = await _controller.Login(loginDto, CancellationToken.None);
 

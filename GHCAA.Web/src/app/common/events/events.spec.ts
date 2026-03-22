@@ -1,3 +1,4 @@
+import { createAuthServiceMock } from '../../core/testing/testing-utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Events } from './events';
 import { EventsService } from '../../core/services/events.service';

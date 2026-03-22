@@ -13,7 +13,7 @@ using NUnit.Framework;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    public class AdminControllerTests
+    public class AdminControllerTests : ControllerTestBase
     {
         private Mock<IMemberService> _memberServiceMock;
         private Mock<IIDCardService> _idCardServiceMock;
@@ -27,14 +27,7 @@ namespace GHCAA.Tests.Controllers
 
             _controller = new AdminController(_memberServiceMock.Object, _idCardServiceMock.Object);
 
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                new Claim(ClaimTypes.Role, "SuperAdmin")
-            }, "TestAuthentication"));
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
+            SetSuperAdminContext(_controller, 1);
         }
 
         [Test]
@@ -48,7 +41,7 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
-            Assert.That(okResult.Value, Is.EqualTo(fakeResult));
+            Assert.That(okResult!.Value, Is.EqualTo(fakeResult));
         }
 
         [Test]
@@ -112,7 +105,7 @@ namespace GHCAA.Tests.Controllers
         public async Task UpdateMemberAdmin_ReturnsOk_OnSuccess()
         {
             var dto = new AdminMemberUpdateDto { FullName = "Updated Name" };
-            _memberServiceMock.Setup(x => x.AdminUpdateMemberAsync(100, dto, It.IsAny<CancellationToken>()))
+            _memberServiceMock.Setup(x => x.AdminUpdateMemberAsync(100, dto, 1, It.IsAny<CancellationToken>()))
                               .ReturnsAsync(true);
 
             var result = await _controller.UpdateMemberAdmin(100, dto, CancellationToken.None);

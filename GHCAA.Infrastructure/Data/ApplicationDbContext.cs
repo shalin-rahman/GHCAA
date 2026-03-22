@@ -90,6 +90,7 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<EventBudget> EventBudgets { get; set; } = null!;
         public DbSet<EventExpense> EventExpenses { get; set; } = null!;
         public DbSet<GamificationConfig> GamificationConfigs { get; set; } = null!;
+        public DbSet<SavedPaymentMethod> SavedPaymentMethods { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -136,6 +137,12 @@ namespace GHCAA.Infrastructure.Data
                 .HasOne(p => p.Member)
                 .WithMany(m => m.PaymentHistories)
                 .HasForeignKey(p => p.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SavedPaymentMethod>()
+                .HasOne(s => s.Member)
+                .WithMany() // Or add a collection to Member if needed
+                .HasForeignKey(s => s.MemberId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // FamilyLinkRequest relationships
@@ -233,6 +240,7 @@ namespace GHCAA.Infrastructure.Data
             modelBuilder.Entity<ECMember>().HasQueryFilter(em => em.Member != null && !em.Member.IsArchived);
             modelBuilder.Entity<NewsPost>().HasQueryFilter(np => np.Author != null && !np.Author.IsArchived);
             modelBuilder.Entity<ChatMessage>().HasQueryFilter(cm => (cm.Sender != null && !cm.Sender.IsArchived) && (cm.Receiver != null && !cm.Receiver.IsArchived));
+            modelBuilder.Entity<SavedPaymentMethod>().HasQueryFilter(s => s.Member != null && !s.Member.IsArchived);
 
             // Unique constraints
             modelBuilder.Entity<Member>().HasIndex(m => m.Email).IsUnique();
@@ -379,6 +387,10 @@ namespace GHCAA.Infrastructure.Data
             // Seed File Uploads from JSON
             var uploads = LoadSeed<FileUpload>("file_uploads.json");
             if (uploads.Any()) modelBuilder.Entity<FileUpload>().HasData(uploads);
+
+            // Seed Saved Payment Methods from JSON
+            var savedMethods = LoadSeed<SavedPaymentMethod>("saved_payment_methods.json");
+            if (savedMethods.Any()) modelBuilder.Entity<SavedPaymentMethod>().HasData(savedMethods);
         }
     }
 }

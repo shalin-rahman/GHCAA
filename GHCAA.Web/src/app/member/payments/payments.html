@@ -105,41 +105,17 @@
                 <input type="number" [(ngModel)]="paymentForm.amount" placeholder="0.00">
             </div>
 
-            <!-- Payment Method Selector -->
-            <app-payment-method-selector
-                (methodSelected)="onPaymentMethodSelected($event)">
-            </app-payment-method-selector>
+            <!-- Common Payment Hub Integration -->
+            <app-payment-portal
+                [amount]="paymentForm.amount"
+                (methodSelected)="onPaymentMethodSelected($event)"
+                (referenceChange)="onReferenceSelected($event)"
+                (receiptSelected)="onReceiptSelected($event)">
+            </app-payment-portal>
 
-            <!-- Transaction ID (conditionally shown) -->
-            @if (selectedPaymentMethod()?.requiresReference) {
-            <div class="form-group">
-                <label>Transaction ID *</label>
-                <input type="text" [(ngModel)]="paymentForm.transactionId"
-                    placeholder="e.g. 8K029SXL">
-            </div>
-            }
-
-            <!-- Receipt Upload (conditionally shown) -->
-            @if (selectedPaymentMethod()?.requiresReceipt) {
-            <div class="form-group">
-                <label>Upload Receipt / Screenshot</label>
-                <div class="file-drop-zone" style="height: 6rem; border: 2px dashed rgba(255,255,255,0.1); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: all 0.3s;">
-                    <input type="file" (change)="onReceiptSelected($event)"
-                        style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
-                    <div *ngIf="!selectedReceiptFile" style="text-align: center;">
-                        <span style="font-size: 1.5rem; display: block; margin-bottom: 0.25rem;">📸</span>
-                        <p style="font-size: 0.65rem; font-weight: 800; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.1em;">Upload Receipt</p>
-                    </div>
-                    <div *ngIf="selectedReceiptFile" class="text-accent font-black flex items-center gap-3">
-                        <span>✅</span> {{ selectedReceiptFile.name }}
-                    </div>
-                </div>
-            </div>
-            }
-
-            <div class="form-group">
-                <label>Notes / Purpose</label>
-                <textarea [(ngModel)]="paymentForm.notes" rows="3" placeholder="e.g. Annual Dues 2024"></textarea>
+            <div class="form-group mb-0">
+                <label>Additional Notes / Purpose</label>
+                <textarea [(ngModel)]="paymentForm.notes" rows="2" placeholder="e.g. Annual Dues 2024"></textarea>
             </div>
         </div>
         <div class="modal-footer">

@@ -18,7 +18,7 @@ namespace GHCAA.Infrastructure.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly IFileStorageService _storage;
-        private readonly IFileUploadRepository _fileRepo;
+        
         private readonly IOtpService _otp;
         private readonly IEmailService _email;
         private readonly IUserService _userService;
@@ -28,11 +28,12 @@ namespace GHCAA.Infrastructure.Services
         private readonly INotificationService _notificationService;
         private readonly IConfiguration _config;
         private readonly IGamificationService _gamification;
+        private readonly IFinancialService _financialService;
 
         public MemberService(
             ApplicationDbContext db,
             IFileStorageService storage,
-            IFileUploadRepository fileRepo,
+            
             IOtpService otp,
             IEmailService email,
             IUserService userService,
@@ -41,11 +42,12 @@ namespace GHCAA.Infrastructure.Services
             IActivityService activityService,
             INotificationService notificationService,
             IConfiguration config,
-            IGamificationService gamification)
+            IGamificationService gamification,
+            IFinancialService financialService)
         {
             _db = db;
             _storage = storage;
-            _fileRepo = fileRepo;
+            
             _otp = otp;
             _email = email;
             _userService = userService;
@@ -55,10 +57,14 @@ namespace GHCAA.Infrastructure.Services
             _notificationService = notificationService;
             _config = config;
             _gamification = gamification;
+            _financialService = financialService;
         }
 
         public async Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default)
         {
+            using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+            try
+            {
             // Prevent duplicates by NID/Email/Mobile
             if (await _db.Members.AnyAsync(m => m.Email == dto.Email || m.NID == dto.NID || m.MobileNo == dto.MobileNo, cancellationToken))
                 throw new InvalidOperationException("Member with same Email, NID, or Mobile already exists.");
@@ -172,11 +178,18 @@ namespace GHCAA.Infrastructure.Services
                 var payConfig = await _db.PaymentConfigurations.FindAsync(new object[] { dto.PaymentMethodId }, cancellationToken);
                 if (payConfig != null)
                 {
+                    // Fetch dynamic fee config
+                    var applicableFee = await _financialService.GetApplicableFeeAsync(
+                        Enums.FinancialCategory.RegistrationFee, 
+                        dto.MembershipType, 
+                        DateTime.UtcNow, 
+                        cancellationToken);
+                    
                     var payment = new PaymentHistory
                     {
                         MemberId = member.Id,
                         TransactionId = dto.TransactionId ?? "REG-" + Guid.NewGuid().ToString("N").Substring(0, 8),
-                        Amount = 500, // Default for General/Reg
+                        Amount = applicableFee, 
                         PaidAt = DateTime.UtcNow,
                         Status = Enums.PaymentStatus.Pending,
                         FinancialCategory = Enums.FinancialCategory.RegistrationFee,
@@ -191,7 +204,7 @@ namespace GHCAA.Infrastructure.Services
                     {
                         var path = await _storage.SaveFileAsync(paymentProof.Content, paymentProof.FileName, member.Id, Enums.FileUploadType.PaymentProof, cancellationToken);
                         var fu = new FileUpload { MemberId = member.Id, UploadType = Enums.FileUploadType.PaymentProof, FileName = paymentProof.FileName, FilePath = path, SizeBytes = paymentProof.Length };
-                        await _fileRepo.AddAsync(fu, cancellationToken);
+                        await _db.FileUploads.AddAsync(fu, cancellationToken);
                         payment.ReceiptPath = path;
                         await _db.SaveChangesAsync(cancellationToken);
                     }
@@ -203,7 +216,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 var path = await _storage.SaveFileAsync(photo.Content, photo.FileName, member.Id, Enums.FileUploadType.Photo, cancellationToken);
                 var fu = new FileUpload { MemberId = member.Id, UploadType = Enums.FileUploadType.Photo, FileName = photo.FileName, FilePath = path, SizeBytes = photo.Length };
-                await _fileRepo.AddAsync(fu, cancellationToken);
+                await _db.FileUploads.AddAsync(fu, cancellationToken);
                 member.PhotoPath = fu.FilePath;
             }
 
@@ -211,7 +224,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 var path = await _storage.SaveFileAsync(certificate.Content, certificate.FileName, member.Id, Enums.FileUploadType.Certificate, cancellationToken);
                 var fu = new FileUpload { MemberId = member.Id, UploadType = Enums.FileUploadType.Certificate, FileName = certificate.FileName, FilePath = path, SizeBytes = certificate.Length };
-                await _fileRepo.AddAsync(fu, cancellationToken);
+                await _db.FileUploads.AddAsync(fu, cancellationToken);
             }
 
 
@@ -226,7 +239,14 @@ namespace GHCAA.Infrastructure.Services
             await _activityService.LogActivityAsync(member.Id, "Registration", "New registry filing submitted for review.", member.Id, cancellationToken: cancellationToken);
 
             _logger.LogInformation("Registered application for MemberId {MemberId}", member.Id);
-            return member.Id;
+                await transaction.CommitAsync(cancellationToken);
+                return member.Id;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
 
         public async Task<MemberRegistrationResultDto> GetStatusAsync(int memberId, CancellationToken cancellationToken = default)
@@ -907,13 +927,25 @@ namespace GHCAA.Infrastructure.Services
                 Items = memberDtos
             };
         }
-        public async Task<bool> AdminUpdateMemberAsync(int id, AdminMemberUpdateDto dto, CancellationToken cancellationToken = default)
+        public async Task<bool> AdminUpdateMemberAsync(int id, AdminMemberUpdateDto dto, int adminId, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members
                 .Include(m => m.AcademicHistory)
                 .Include(m => m.ProfessionalHistory)
                 .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
             if (member == null) return false;
+
+            // Track membership type change
+            if (member.MembershipType != dto.MembershipType)
+            {
+                await _financialService.RecordMembershipChangeAsync(
+                    id, 
+                    member.MembershipType.ToString(), 
+                    dto.MembershipType.ToString(), 
+                    adminId, 
+                    dto.MembershipChangeReason ?? "Administrative Update", 
+                    cancellationToken);
+            }
 
             member.FullName = dto.FullName;
             member.FatherName = dto.FatherName;
@@ -1013,50 +1045,6 @@ namespace GHCAA.Infrastructure.Services
             member.IsAddressPublic = dto.IsAddressPublic;
             member.LastUpdateDate = DateTime.UtcNow;
 
-            // Sync Academic History
-            if (dto.AcademicHistory != null)
-            {
-                var existingAcademic = await _db.AcademicRecords.Where(a => a.MemberId == id).ToListAsync(cancellationToken);
-                _db.AcademicRecords.RemoveRange(existingAcademic);
-
-                foreach (var a in dto.AcademicHistory)
-                {
-                    _db.AcademicRecords.Add(new AcademicRecord
-                    {
-                        MemberId = id,
-                        InstitutionName = a.InstitutionName,
-                        Degree = a.Degree,
-                        Subject = a.Subject,
-                        AdmissionYear = a.AdmissionYear,
-                        PassingYear = a.PassingYear,
-                        IsGHC = a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase),
-                        Result = a.Result
-                    });
-                }
-            }
-
-            // Sync Professional History
-            if (dto.ProfessionalHistory != null)
-            {
-                var existingProfessional = await _db.ProfessionalRecords.Where(p => p.MemberId == id).ToListAsync(cancellationToken);
-                _db.ProfessionalRecords.RemoveRange(existingProfessional);
-
-                foreach (var p in dto.ProfessionalHistory)
-                {
-                    _db.ProfessionalRecords.Add(new ProfessionalRecord
-                    {
-                        MemberId = id,
-                        OrganizationName = p.OrganizationName,
-                        Designation = p.Designation,
-                        Sector = p.Sector,
-                        Location = p.Location,
-                        StartDate = DateTime.SpecifyKind(p.StartDate, DateTimeKind.Utc),
-                        EndDate = p.EndDate.HasValue ? DateTime.SpecifyKind(p.EndDate.Value, DateTimeKind.Utc) : null,
-                        IsCurrent = p.IsCurrent
-                    });
-                }
-            }
-
             await _db.SaveChangesAsync(cancellationToken);
 
             // Rotate SecurityStamp if status transitions to Terminated or Resigned — invalidates all JWT sessions
@@ -1084,14 +1072,14 @@ namespace GHCAA.Infrastructure.Services
             {
                 var path = await _storage.SaveFileAsync(certificate.Content, certificate.FileName, id, Enums.FileUploadType.Certificate, cancellationToken);
                 var fu = new FileUpload { MemberId = id, UploadType = Enums.FileUploadType.Certificate, FileName = certificate.FileName, FilePath = path, SizeBytes = certificate.Length };
-                await _fileRepo.AddAsync(fu, cancellationToken);
+                await _db.FileUploads.AddAsync(fu, cancellationToken);
             }
 
             if (paymentProof != null)
             {
                 var path = await _storage.SaveFileAsync(paymentProof.Content, paymentProof.FileName, id, Enums.FileUploadType.PaymentProof, cancellationToken);
                 var fu = new FileUpload { MemberId = id, UploadType = Enums.FileUploadType.PaymentProof, FileName = paymentProof.FileName, FilePath = path, SizeBytes = paymentProof.Length };
-                await _fileRepo.AddAsync(fu, cancellationToken);
+                await _db.FileUploads.AddAsync(fu, cancellationToken);
             }
 
             member.LastUpdateDate = DateTime.UtcNow;
@@ -1113,7 +1101,7 @@ namespace GHCAA.Infrastructure.Services
 
             var path = await _storage.SaveFileAsync(photo.Content, photo.FileName, memberId, Enums.FileUploadType.Photo, cancellationToken);
             var fu = new FileUpload { MemberId = memberId, UploadType = Enums.FileUploadType.Photo, FileName = photo.FileName, FilePath = path, SizeBytes = photo.Length };
-            await _fileRepo.AddAsync(fu, cancellationToken);
+            await _db.FileUploads.AddAsync(fu, cancellationToken);
 
             member.PhotoPath = path;
             member.LastUpdateDate = DateTime.UtcNow;

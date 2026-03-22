@@ -309,6 +309,10 @@ export const FINANCIAL_CATEGORY_OPTIONS = [
     { value: 'Maintenance', label: 'Maintenance' },
     { value: 'Salary', label: 'Salary' },
     { value: 'Utilities', label: 'Utilities' },
+    { value: 'ReunionFee', label: 'Reunion Fee' },
+    { value: 'Sponsorship', label: 'Sponsorship' },
+    { value: 'Grant', label: 'Grant' },
+    { value: 'Refund', label: 'Refund' },
     { value: 'Other', label: 'Other' }
 ];
 
