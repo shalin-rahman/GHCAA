@@ -114,7 +114,7 @@ namespace GHCAA.Tests.Services
             var newEnd = new DateTime(2025, 12, 31, 23, 59, 59, DateTimeKind.Local);
 
             // Act
-            await _service.UpdatePeriodAsync(period.Id, "Updated", newStart, newEnd);
+            await _service.UpdatePeriodAsync(period.Id, "Updated", newStart, newEnd, false);
 
             // Assert
             var updated = await _context.ECPeriods.FindAsync(period.Id);
@@ -139,7 +139,7 @@ namespace GHCAA.Tests.Services
                 EmergencyContactName = "EC",
                 EmergencyContactRelation = "Brother",
                 EmergencyContactPhone = "01800000000",
-                AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", PassingYear = 2005, IsGHC = true } },
+                AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } },
                 DateOfBirth = new DateTime(1990, 1, 1),
                 Gender = Enums.Gender.Male,
                 BloodGroup = Enums.BloodGroup.APositive,

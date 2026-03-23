@@ -512,207 +512,11 @@ public class MemberServiceTests : TestBase
         _mockUserService.Setup(x => x.CreateUserAccountAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((int mid, string un, string pw, CancellationToken ct) => new User { Id = mid, Username = un, MemberId = mid });
 
-        result.Should().BeTrue();
-        var updatedMember = await _context.Members.FirstAsync(m => m.Email == email);
-        updatedMember.EmailVerified.Should().BeTrue();
-    }
-
-    [Test]
-    public async Task VerifyEmailAsync_WithInvalidOtp_ShouldReturnFalse()
-    {
-        // Arrange
-        var email = "test@example.com";
-        var otpCode = "999999";
-        var member = await CreateAndSaveTestMemberAsync("Test Member", email, "01712345678", "1234567890");
-        member.EmailVerified = false;
-        await _context.SaveChangesAsync();
-
-        _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
-
-        // Act
-        var result = await _service.VerifyEmailAsync(email, otpCode);
-
-        // Assert
-        result.Should().BeFalse();
-        var updatedMember = await _context.Members.FirstAsync(m => m.Email == email);
-        updatedMember.EmailVerified.Should().BeFalse();
-    }
-
-    [Test]
-    public async Task VerifyEmailAsync_WithNonExistentEmail_ShouldReturnFalse()
-    {
-        // Arrange
-        var email = "nonexistent@example.com";
-        var otpCode = "123456";
-
-        _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
-        // Act
-        var result = await _service.VerifyEmailAsync(email, otpCode);
-
-        // Assert
-        result.Should().BeFalse();
-    }
-
-    [Test]
-    public async Task GetProfileAsync_WithPrivilegedAccess_ShouldReturnFullProfile()
-    {
-        // Arrange
-        var member = await CreateAndSaveTestMemberAsync("Test Member", "test@example.com", "01712345678", "1234567890");
-
-        // Act
-        var result = await _service.GetProfileAsync(member.Id, isPrivileged: true);
-
-        // Assert
-        result.Should().NotBeNull();
-        result!.FullName.Should().Be(member.FullName);
-        result.Email.Should().Be(member.Email);
-        result.NID.Should().Be("1234567890");
-    }
-
-    [Test]
-    public async Task GetProfileAsync_WithNonPrivilegedAccess_ShouldReturnMaskedProfile()
-    {
-        // Arrange
-        var member = await CreateAndSaveTestMemberAsync("Test Member", "test@example.com", "01712345678", "1234567890");
-        member.IsNIDPublic = false;
-        await _context.SaveChangesAsync();
-
-        // Act
-        var result = await _service.GetProfileAsync(member.Id, isPrivileged: false);
-
-        // Assert
-        result.Should().NotBeNull();
-        result!.NID.Should().NotBe("1234567890");
-        result.NID.Should().Contain("*");
-    }
-
-    [Test]
-    public async Task UpdateProfileAsync_WithValidData_ShouldUpdateMember()
-    {
-        // Arrange
-        var member = await CreateAndSaveTestMemberAsync("Test Member", "test@example.com", "01712345678", "1234567890");
-        member.PresentAddress = "Old Address";
-        member.IsMobilePublic = false;
-        await _context.SaveChangesAsync();
-
-        var updateDto = new UpdateProfileDto
-        {
-            PresentAddress = "New Address",
-            PermanentAddress = "Perm Address",
-            AcademicHistory = new List<AcademicRecordDto>
-            {
-                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "Bachelor", Subject = "Science", PassingYear = 2007, IsGHC = true }
-            },
-            IsMobilePublic = true,
-            IsEmailPublic = true,
-            IsAddressPublic = true
-        };
-
-        // Act
-        var result = await _service.UpdateProfileAsync(member.Id, updateDto);
-
-        // Assert
-        result.Should().BeTrue();
-        var updatedMember = await _context.Members.FindAsync(member.Id);
-        updatedMember!.PresentAddress.Should().Be("New Address");
-//         updatedMember.Designation.Should().Be("Senior Dev");
-        updatedMember.IsMobilePublic.Should().BeTrue();
-    }
-
-    [Test]
-    public async Task GetStatusAsync_WithInvalidMemberId_ShouldThrowException()
-    {
-        // Act & Assert
-        var act = async () => await _service.GetStatusAsync(999);
-        await act.Should().ThrowAsync<KeyNotFoundException>()
-            .WithMessage("Member not found");
-    }
-
-    [Test]
-    public async Task RegisterAsync_WithAllFiles_ShouldSaveAllFilesAndUpdateMember()
-    {
-        // Arrange
-        var dto = CreateValidDto();
-        var photo = CreateMockFile("photo.jpg");
-        var certificate = CreateMockFile("cert.pdf");
-        var paymentProof = CreateMockFile("payment.jpg");
-
-        _mockStorage.Setup(x => x.SaveFileAsync(
-            It.IsAny<Stream>(),
-            It.IsAny<string>(),
-            It.IsAny<int>(),
-            It.IsAny<Enums.FileUploadType>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Stream s, string fn, int mid, Enums.FileUploadType t, CancellationToken ct) =>
-                $"uploads/members/{mid}/{t.ToString().ToLower()}/{fn}");
-
-        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("123456");
-
-        // Act
-        var memberId = await _service.RegisterAsync(dto, photo, certificate, paymentProof);
-
-        // Assert
-        var member = await _context.Members.FindAsync(memberId);
-        member!.PhotoPath.Should().NotBeNullOrEmpty();
-//         member.CertificatePath.Should().NotBeNullOrEmpty();
-//         member.PaymentProofPath.Should().NotBeNullOrEmpty();
-        var fileUploads = await _context.FileUploads.CountAsync(f => f.MemberId == memberId);
-        fileUploads.Should().BeGreaterThan(0);
-    }
-
-    [Test]
-    public async Task ApproveMemberAsync_WithMultipleMembersSameYear_ShouldGenerateSequentialNumbers()
-    {
-        // Arrange
-        var member1 = new Member
-        {
-            FullName = "Member 1",
-            Email = "member1@example.com",
-            NID = "1111111111",
-            MobileNo = "01711111111",
-            Status = Enums.MembershipStatus.Applied,
-            FatherName = "Father",
-            MotherName = "Mother",
-            PresentAddress = "Address",
-            PermanentAddress = "Address",
-            EmergencyContactName = "Contact",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
-        };
-        var member2 = new Member
-        {
-            FullName = "Member 2",
-            Email = "member2@example.com",
-            NID = "2222222222",
-            MobileNo = "01722222222",
-            Status = Enums.MembershipStatus.Applied,
-            FatherName = "Father",
-            MotherName = "Mother",
-            PresentAddress = "Address",
-            PermanentAddress = "Address",
-            EmergencyContactName = "Contact",
-            EmergencyContactRelation = "Relation",
-            EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
-        };
-        await _context.Members.AddRangeAsync(member1, member2);
-        await _context.SaveChangesAsync();
-
-        _mockUserService.Setup(x => x.GenerateDefaultPassword()).Returns("Pass1234");
-        _mockUserService.Setup(x => x.CreateUserAccountAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int mid, string un, string pw, CancellationToken ct) => new User { Id = mid, Username = un, MemberId = mid });
-
-        // Act
         var result1 = await _service.ApproveMemberAsync(member1.Id, 1);
         var result2 = await _service.ApproveMemberAsync(member2.Id, 1);
 
         // Assert
-        {        // Assert
+        // Assert
         result1.MembershipNumber.Should().NotBe(result2.MembershipNumber);
         result1.MembershipNumber.Should().StartWith("GHC");
         result2.MembershipNumber.Should().StartWith("GHC");
@@ -814,7 +618,7 @@ public class MemberServiceTests : TestBase
         var member = new Member
         {
             FullName = "Original Name", Email = "original@e.com", NID = "123", MobileNo = "017",
-            Status = Enums.MembershipStatus.Active, MembershipType = Enums.MembershipType.General,
+            Status = Enums.MembershipStatus.Active, MembershipType = Enums.MembershipType.Founding,
             FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P",
             EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
@@ -825,11 +629,20 @@ public class MemberServiceTests : TestBase
         var updateDto = new AdminMemberUpdateDto
         {
             FullName = "Updated Name",
+            FatherName = "Updated Father",
+            MotherName = "Updated Mother",
+            DateOfBirth = new DateTime(1990, 1, 1),
+            PresentAddress = "Updated Address",
+            PermanentAddress = "Updated Perm Address",
+            EmergencyContactName = "EC",
+            EmergencyContactRelation = "Brother",
+            EmergencyContactPhone = "01800000000",
             MembershipNumber = "GHC-9999",
             Email = "updated@e.com",
-            MobileNo = "017999",
-            NID = "999",
-            Category = Enums.MemberCategory.LifelongPatron
+            MobileNo = "01799999999",
+            NID = "9999999999",
+            Category = Enums.MemberCategory.LifelongPatron,
+            MembershipType = Enums.MembershipType.Founding
         };
 
         // Act

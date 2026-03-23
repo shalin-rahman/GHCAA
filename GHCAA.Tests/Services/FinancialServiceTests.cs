@@ -271,8 +271,8 @@ public class FinancialServiceTests : TestBase
         
         var history = await _context.MembershipHistories.Where(h => h.MemberId == member.Id).ToListAsync();
         history.Should().HaveCount(1);
-        history[0].FromType.Should().Be("General");
-        history[0].ToType.Should().Be("Life");
+        history[0].ChangedFrom.Should().Be("General");
+        history[0].ChangedTo.Should().Be("Life");
     }
 
     [Test]

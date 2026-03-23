@@ -41,7 +41,7 @@ describe('FinancialService', () => {
 
     it('should fetch all fee configs', () => {
         service.getFeeConfigs().subscribe(c => expect(c).toBeTruthy());
-        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/configs`);
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/config`);
         expect(req.request.method).toBe('GET');
         req.flush([]);
     });
@@ -49,7 +49,7 @@ describe('FinancialService', () => {
     it('should post new fee config', () => {
         const dto = { category: 'Registration', amount: 500 };
         service.addFeeConfig(dto).subscribe(c => expect(c).toBeTruthy());
-        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/configs`);
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/config`);
         expect(req.request.method).toBe('POST');
         expect(req.request.body).toEqual(dto);
         req.flush({ id: 1 });
@@ -58,7 +58,7 @@ describe('FinancialService', () => {
     it('should put updated fee config', () => {
         const dto = { id: 5, amount: 600 };
         service.updateFeeConfig(dto).subscribe(c => expect(c).toBeTruthy());
-        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/configs`);
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/config`);
         expect(req.request.method).toBe('PUT');
         expect(req.request.body).toEqual(dto);
         req.flush({ id: 5 });

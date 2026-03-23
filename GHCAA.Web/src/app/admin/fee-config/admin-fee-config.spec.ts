@@ -72,7 +72,7 @@ describe('AdminFeeConfig Component', () => {
     });
 
     it('should call updateFeeConfig on valid edit submission', () => {
-        const config = { id: 5, category: 'MembershipFee', amount: 500 };
+        const config = { id: 5, category: 'MembershipFee', amount: 500, effectiveDate: '2023-01-01' };
         component.openEditForm(config);
         component.form.patchValue({ amount: 600 });
         

@@ -1,6 +1,7 @@
 using FluentAssertions;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
+using GHCAA.Application.DTOs;
 using GHCAA.Infrastructure.Services;
 
 namespace GHCAA.Tests.Services;
@@ -9,27 +10,29 @@ namespace GHCAA.Tests.Services;
 public class NewsServiceTests : TestBase
 {
     private NewsService _service = null!;
+    private int _authorId;
 
     [SetUp]
-    public void Setup()
+    public async Task Setup()
     {
         _service = new NewsService(_context);
 
         // Clear seed data so count assertions are deterministic
         _context.NewsPosts.RemoveRange(_context.NewsPosts);
-        _context.SaveChanges();
+        
+        // Ensure an author exists
+        var user = new User { Username = "author", PasswordHash = "hash" };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        _authorId = user.Id;
     }
 
     [Test]
     public async Task GetActiveNewsAsync_ShouldOnlyReturnActivePosts()
     {
-        var user = new User { Id = 1, Username = "author", PasswordHash = "hash" };
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
         _context.NewsPosts.AddRange(
-            new NewsPost { Title = "Active 1", Content = "C1", IsActive = true, AuthorId = user.Id, Status = Enums.SubmissionStatus.Approved },
-            new NewsPost { Title = "Inactive", Content = "C3", IsActive = false, AuthorId = user.Id, Status = Enums.SubmissionStatus.Approved }
+            new NewsPost { Title = "Active 1", Content = "C1", IsActive = true, AuthorId = _authorId, Status = Enums.SubmissionStatus.Approved },
+            new NewsPost { Title = "Inactive", Content = "C3", IsActive = false, AuthorId = _authorId, Status = Enums.SubmissionStatus.Approved }
         );
         await _context.SaveChangesAsync();
 
@@ -41,8 +44,8 @@ public class NewsServiceTests : TestBase
     public async Task CreateNewsAsync_ShouldSavePostWithImageUrl()
     {
         // Act
-        var dto = new CreateNewsDto { Title = "New News", Content = "Some content", Category = "Regular", ImageUrl = "/uploads/news/test.jpg" };
-        var result = await _service.CreateNewsAsync(dto, 1);
+        var dto = new CreateNewsDto { Title = "New News", Content = "Some content", ArticleCategory = Enums.ArticleCategory.Regular, ImageUrl = "/uploads/news/test.jpg" };
+        var result = await _service.CreateNewsAsync(dto, _authorId);
 
         // Assert
         result.Should().NotBeNull();
@@ -56,7 +59,7 @@ public class NewsServiceTests : TestBase
     public async Task UpdateNewsAsync_ShouldModifyExistingPost()
     {
         // Arrange
-        var post = new NewsPost { Title = "Old", Content = "Old C", AuthorId = 1, Status = Enums.SubmissionStatus.Approved };
+        var post = new NewsPost { Title = "Old", Content = "Old C", AuthorId = _authorId, Status = Enums.SubmissionStatus.Approved };
         _context.NewsPosts.Add(post);
         await _context.SaveChangesAsync();
 
@@ -73,7 +76,7 @@ public class NewsServiceTests : TestBase
     public async Task ApproveArticleAsync_ShouldUpdateStatus()
     {
         // Arrange
-        var post = new NewsPost { Title = "Pending", Content = "C", AuthorId = 1, Status = Enums.SubmissionStatus.Pending };
+        var post = new NewsPost { Title = "Pending", Content = "C", AuthorId = _authorId, Status = Enums.SubmissionStatus.Pending };
         _context.NewsPosts.Add(post);
         await _context.SaveChangesAsync();
 
@@ -89,7 +92,7 @@ public class NewsServiceTests : TestBase
     public async Task DeleteNewsAsync_ShouldRemovePost()
     {
         // Arrange
-        var post = new NewsPost { Title = "To Delete", Content = "C", AuthorId = 1 };
+        var post = new NewsPost { Title = "To Delete", Content = "C", AuthorId = _authorId };
         _context.NewsPosts.Add(post);
         await _context.SaveChangesAsync();
 

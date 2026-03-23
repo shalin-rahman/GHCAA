@@ -205,7 +205,7 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
     [Test]
     public async Task DeleteEventAsync_ShouldRemoveEventIfNoRegistrations()
     {
-        var ev = new AlumniEvent { Title = "Empty Event", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(1), Location = "L" };
+        var ev = new AlumniEvent { Title = "Empty Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(1), Location = "L" };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
@@ -217,24 +217,30 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
     [Test]
     public async Task CheckInParticipantAsync_ShouldSetCheckInTime()
     {
-        var reg = new EventRegistration { EventId = 1, MemberId = 1, Status = EventRegistrationStatus.Approved, TicketCode = "TC-1" };
+        var member = new Member { FullName = "EVT3", Email = "e3@t.com", NID = "1234", MobileNo = "1234", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        var ev = new AlumniEvent { Title = "E", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
+        _context.Members.Add(member);
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var reg = new EventRegistration { EventId = ev.Id, MemberId = member.Id, Status = EventRegistrationStatus.Approved, TicketCode = "TC-1" };
         _context.EventRegistrations.Add(reg);
         await _context.SaveChangesAsync();
 
         var result = await _service.CheckInParticipantAsync(reg.Id);
         result.Should().BeTrue();
         var updated = await _context.EventRegistrations.FindAsync(reg.Id);
-        updated!.CheckInTime.Should().NotBeNull();
+        updated!.CheckedInAt.Should().NotBeNull();
     }
 
     [Test]
     public async Task AddEventExpenseAsync_ShouldCreateExpense()
     {
-        var ev = new AlumniEvent { Title = "Exp Event", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(1), Location = "L" };
+        var ev = new AlumniEvent { Title = "Exp Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(1), Location = "L" };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
-        var dto = new AddEventExpenseDto { EventId = ev.Id, Category = "Catering", Amount = 500, Description = "Lunch" };
+        var dto = new AddEventExpenseDto { EventId = ev.Id, Category = "Catering", Amount = 500, Note = "Lunch" };
         var result = await _service.AddEventExpenseAsync(dto);
 
         result.Should().NotBeNull();
