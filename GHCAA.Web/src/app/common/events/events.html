@@ -25,8 +25,8 @@
                         <img [src]="ev.imageUrl || '/assets/images/event-placeholder.jpg'" alt="Event Image"
                             class="banner-img">
                         <div class="date-badge">
-                            <span class="day">{{ ev.date | date:'dd' }}</span>
-                            <span class="month">{{ ev.date | date:'MMM' }}</span>
+                            <span class="day">{{ ev.startDate | date:'dd' }}</span>
+                            <span class="month">{{ ev.startDate | date:'MMM' }}</span>
                         </div>
                     </div>
 
@@ -52,7 +52,7 @@
                             <div class="meta-item">
                                 <span class="icon">⏰</span>
                                 <div class="val text-xs">
-                                    <strong>{{ ev.date | date:'shortTime' }}</strong>
+                                    <strong>{{ ev.startDate | date:'shortTime' }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -73,11 +73,11 @@
                                     </strong>
                                 </div>
                             </div>
-                            @if (ev.registrationDeadline) {
+                            @if (ev.registrationEndDate) {
                             <div class="meta-item" [class.urgent]="!isRegistrationOpen(ev)">
                                 <span class="icon">⏳</span>
                                 <div class="val text-xs">
-                                    <strong>Ends: {{ isRegistrationOpen(ev) ? (ev.registrationDeadline | date:'MMM d') :
+                                    <strong>Reg. Ends: {{ isRegistrationOpen(ev) ? (ev.registrationEndDate | date:'MMM d') :
                                         'Closed' }}</strong>
                                 </div>
                             </div>

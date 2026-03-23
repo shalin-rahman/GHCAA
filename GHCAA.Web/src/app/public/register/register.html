@@ -62,32 +62,53 @@
                         <div class="form-grid">
                             <div class="form-group full">
                                 <label>Full Legal Name (SSC/HSC Record) <span class="required-star">*</span></label>
-                                <input type="text" [(ngModel)]="model.FullName" name="fullName" required #nameReg="ngModel"
+                                <input type="text" [(ngModel)]="model.FullName" name="fullName" required maxlength="200" #nameReg="ngModel"
                                     [class.border-red-500]="nameReg.invalid && nameReg.touched"
                                     placeholder="Enter full name according to certificates">
+                                <div class="field-error mt-1" *ngIf="nameReg.touched && nameReg.invalid">
+                                    <span class="text-xs text-red-500" *ngIf="nameReg.errors?.['required']">Full name is required.</span>
+                                    <span class="text-xs text-red-500" *ngIf="nameReg.errors?.['maxlength']">Name must not exceed 200 characters.</span>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>Father's Name <span class="required-star">*</span></label>
-                                <input type="text" [(ngModel)]="model.FatherName" name="fatherName" required #fatherReg="ngModel"
+                                <input type="text" [(ngModel)]="model.FatherName" name="fatherName" required maxlength="200" #fatherReg="ngModel"
                                     [class.border-red-500]="fatherReg.invalid && fatherReg.touched"
                                     placeholder="Full Name">
+                                <div class="field-error mt-1" *ngIf="fatherReg.touched && fatherReg.invalid">
+                                    <span class="text-xs text-red-500" *ngIf="fatherReg.errors?.['required']">Father's name is required.</span>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>Mother's Name *</label>
-                                <input type="text" [(ngModel)]="model.MotherName" name="motherName" required
+                                <input type="text" [(ngModel)]="model.MotherName" name="motherName" required maxlength="200" #motherReg="ngModel"
+                                    [class.border-red-500]="motherReg.invalid && motherReg.touched"
                                     placeholder="Full Name">
+                                <div class="field-error mt-1" *ngIf="motherReg.touched && motherReg.invalid">
+                                    <span class="text-xs text-red-500" *ngIf="motherReg.errors?.['required']">Mother's name is required.</span>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>Date of Birth *</label>
-                                <input type="date" [(ngModel)]="model.DateOfBirth" name="dateOfBirth" required [max]="maxBirthDate">
+                                <input type="date" [(ngModel)]="model.DateOfBirth" name="dateOfBirth" required [max]="maxBirthDate" #dobReg="ngModel"
+                                    [class.border-red-500]="dobReg.invalid && dobReg.touched">
+                                <div class="field-error mt-1" *ngIf="dobReg.touched && dobReg.invalid">
+                                    <span class="text-xs text-red-500" *ngIf="dobReg.errors?.['required']">Birth date is required.</span>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>National ID (NID) *</label>
-                                <input type="text" [(ngModel)]="model.NID" name="nid" required placeholder="Verification Number">
+                                <input type="text" [(ngModel)]="model.NID" name="nid" required minlength="10" maxlength="20" #nidReg="ngModel"
+                                    [class.border-red-500]="nidReg.invalid && nidReg.touched" placeholder="Verification Number">
+                                <div class="field-error mt-1" *ngIf="nidReg.touched && nidReg.invalid">
+                                    <span class="text-xs text-red-500" *ngIf="nidReg.errors?.['required']">NID is required.</span>
+                                    <span class="text-xs text-red-500" *ngIf="nidReg.errors?.['minlength']">NID must be at least 10 characters.</span>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>Gender *</label>
-                                <select [(ngModel)]="model.Gender" name="gender" required>
+                                <select [(ngModel)]="model.Gender" name="gender" required #genderReg="ngModel"
+                                    [class.border-red-500]="genderReg.invalid && genderReg.touched">
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
                                     <option value="Other">Other</option>
@@ -95,44 +116,63 @@
                             </div>
                             <div class="form-group">
                                 <label>Blood Group *</label>
-                                <select [(ngModel)]="model.BloodGroup" name="bloodGroup" required>
+                                <select [(ngModel)]="model.BloodGroup" name="bloodGroup" required #bgReg="ngModel"
+                                    [class.border-red-500]="bgReg.invalid && bgReg.touched">
                                     @for (b of bloodGroupOptions; track b.value) { <option [value]="b.value">{{ b.label }}</option> }
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>T-Shirt Size *</label>
-                                <select [(ngModel)]="model.TShirtSize" name="tShirtSize" required>
+                                <select [(ngModel)]="model.TShirtSize" name="tShirtSize" required #tsReg="ngModel"
+                                    [class.border-red-500]="tsReg.invalid && tsReg.touched">
                                     @for (s of tShirtOptions; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Membership Category *</label>
-                                <select [(ngModel)]="model.MembershipType" name="membershipType" required (change)="loadRegistrationFee()">
+                                <select [(ngModel)]="model.MembershipType" name="membershipType" required (change)="loadRegistrationFee()" #mtReg="ngModel"
+                                    [class.border-red-500]="mtReg.invalid && mtReg.touched">
                                     @for (m of membershipTypeOptions; track m.value) { <option [value]="m.value">{{ m.label }}</option> }
                                 </select>
                             </div>
 
                             <div class="form-group">
                                 <label>Primary Email (Login) <span class="required-star">*</span></label>
-                                <input type="email" [(ngModel)]="model.Email" name="email" required #emailReg="ngModel"
+                                <input type="email" [(ngModel)]="model.Email" name="email" required email maxlength="200" #emailReg="ngModel"
                                     [class.border-red-500]="emailReg.invalid && emailReg.touched"
                                     placeholder="alumni@domain.com">
+                                <div class="field-error mt-1" *ngIf="emailReg.touched && emailReg.invalid">
+                                    <span class="text-xs text-red-500" *ngIf="emailReg.errors?.['required']">Email is required.</span>
+                                    <span class="text-xs text-red-500" *ngIf="emailReg.errors?.['email']">Enter a valid email address.</span>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>Verified Mobile <span class="required-star">*</span></label>
-                                <input type="text" [(ngModel)]="model.MobileNo" name="mobileNo" required #mobileReg="ngModel"
+                                <input type="text" [(ngModel)]="model.MobileNo" name="mobileNo" required pattern="01[3-9]\d{8}" #mobileReg="ngModel"
                                     [class.border-red-500]="mobileReg.invalid && mobileReg.touched"
                                     placeholder="01XXXXXXXXX">
+                                <div class="field-error mt-1" *ngIf="mobileReg.touched && mobileReg.invalid">
+                                    <span class="text-xs text-red-500" *ngIf="mobileReg.errors?.['required']">Mobile is required.</span>
+                                    <span class="text-xs text-red-500" *ngIf="mobileReg.errors?.['pattern']">Enter a valid 11-digit mobile number.</span>
+                                </div>
                             </div>
                             <div class="form-group full">
                                 <label>Present Resident Address *</label>
-                                <textarea [(ngModel)]="model.PresentAddress" name="presentAddress" required rows="2"
+                                <textarea [(ngModel)]="model.PresentAddress" name="presentAddress" required maxlength="500" #presAddrReg="ngModel"
+                                    [class.border-red-500]="presAddrReg.invalid && presAddrReg.touched" rows="2"
                                     placeholder="House, Street, Area, District"></textarea>
+                                <div class="field-error mt-1" *ngIf="presAddrReg.touched && presAddrReg.invalid">
+                                    <span class="text-xs text-red-500" *ngIf="presAddrReg.errors?.['required']">Present address is required.</span>
+                                </div>
                             </div>
                             <div class="form-group full">
                                 <label>Permanent Family Residence *</label>
-                                <textarea [(ngModel)]="model.PermanentAddress" name="permanentAddress" required rows="2"
+                                <textarea [(ngModel)]="model.PermanentAddress" name="permanentAddress" required maxlength="500" #permAddrReg="ngModel"
+                                    [class.border-red-500]="permAddrReg.invalid && permAddrReg.touched" rows="2"
                                     placeholder="Village/Area, PO, PS, District"></textarea>
+                                <div class="field-error mt-1" *ngIf="permAddrReg.touched && permAddrReg.invalid">
+                                    <span class="text-xs text-red-500" *ngIf="permAddrReg.errors?.['required']">Permanent address is required.</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -162,7 +202,8 @@
                                     <div class="form-grid">
                                         <div class="form-group full">
                                             <label>Institution / University Name *</label>
-                                            <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" required 
+                                            <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" required maxlength="250"
+                                                #instM="ngModel" [class.border-red-500]="instM.invalid && instM.touched"
                                                 [disabled]="$index === 0 && model.AcademicHistory.length === 1"
                                                 placeholder="Select or type institution">
                                         </div>
@@ -176,28 +217,32 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Degree Conferred *</label>
-                                            <select [(ngModel)]="item.degree" [name]="'deg_' + $index" required>
+                                            <select [(ngModel)]="item.degree" [name]="'deg_' + $index" required maxlength="100"
+                                                #degM="ngModel" [class.border-red-500]="degM.invalid && degM.touched">
                                                 <option [value]="undefined" disabled selected>Select Degree</option>
                                                 <option *ngFor="let d of certificateOptions" [value]="d">{{ d }}</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
                                             <label>Major Cluster / Subject *</label>
-                                            <select [(ngModel)]="item.subject" [name]="'sub_' + $index" required>
+                                            <select [(ngModel)]="item.subject" [name]="'sub_' + $index" required maxlength="100"
+                                                #subM="ngModel" [class.border-red-500]="subM.invalid && subM.touched">
                                                 <option [value]="undefined" disabled selected>Select Major/Subject</option>
                                                 <option *ngFor="let s of getFilteredSubjects(item.degree)" [value]="s">{{ s }}</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
                                             <label>Admission / Enrollment Year *</label>
-                                            <select [(ngModel)]="item.admissionYear" [name]="'adm_' + $index" required>
+                                            <select [(ngModel)]="item.admissionYear" [name]="'adm_' + $index" required
+                                                #admYM="ngModel" [class.border-red-500]="admYM.invalid && admYM.touched">
                                                 <option [value]="undefined" disabled selected>Select Year</option>
                                                 <option *ngFor="let year of getValidYears()" [value]="year">{{ year }}</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
                                             <label>Passing Year *</label>
-                                            <select [(ngModel)]="item.passingYear" [name]="'pass_' + $index" required>
+                                            <select [(ngModel)]="item.passingYear" [name]="'pass_' + $index" required
+                                                #passYM="ngModel" [class.border-red-500]="passYM.invalid && passYM.touched">
                                                 <option [value]="undefined" disabled selected>Select Year</option>
                                                 <option *ngFor="let year of getValidYears()" [value]="year">{{ year }}</option>
                                             </select>
@@ -228,27 +273,31 @@
                                     <div class="form-grid">
                                         <div class="form-group">
                                             <label>Organisation / Company *</label>
-                                            <input type="text" [(ngModel)]="p.organizationName" [name]="'org_' + $index" required placeholder="Employer Title">
+                                            <input type="text" [(ngModel)]="p.organizationName" [name]="'org_' + $index" required maxlength="250"
+                                                #orgM="ngModel" [class.border-red-500]="orgM.invalid && orgM.touched" placeholder="Employer Title">
                                         </div>
                                         <div class="form-group">
                                             <label>Designation / Role *</label>
-                                            <input type="text" [(ngModel)]="p.designation" [name]="'des_' + $index" required placeholder="e.g. Chief Technologist">
+                                            <input type="text" [(ngModel)]="p.designation" [name]="'des_' + $index" required maxlength="150"
+                                                #desM="ngModel" [class.border-red-500]="desM.invalid && desM.touched" placeholder="e.g. Chief Technologist">
                                         </div>
                                         <div class="form-group">
                                             <label>Functional Sector</label>
-                                            <input type="text" [(ngModel)]="p.sector" [name]="'sec_' + $index" list="sector-list">
+                                            <input type="text" [(ngModel)]="p.sector" [name]="'sec_' + $index" maxlength="100" list="sector-list">
                                         </div>
                                         <div class="form-group">
                                             <label>Work Location</label>
-                                            <input type="text" [(ngModel)]="p.location" [name]="'loc_' + $index" placeholder="City, Country">
+                                            <input type="text" [(ngModel)]="p.location" [name]="'loc_' + $index" maxlength="200" placeholder="City, Country">
                                         </div>
                                         <div class="form-group">
-                                            <label>Start Date</label>
-                                            <input type="date" [(ngModel)]="p.startDate" [name]="'pSD_' + $index">
+                                            <label>Start Date *</label>
+                                            <input type="date" [(ngModel)]="p.startDate" [name]="'pSD_' + $index" required
+                                                #psdM="ngModel" [class.border-red-500]="psdM.invalid && psdM.touched">
                                         </div>
                                         <div class="form-group" *ngIf="!p.isCurrent">
-                                            <label>Relief Date (End)</label>
-                                            <input type="date" [(ngModel)]="p.endDate" [name]="'pED_' + $index">
+                                            <label>Relief Date (End) *</label>
+                                            <input type="date" [(ngModel)]="p.endDate" [name]="'pED_' + $index" required
+                                                #pedM="ngModel" [class.border-red-500]="pedM.invalid && pedM.touched">
                                         </div>
                                         <div class="input-group full py-2">
                                             <label class="premium-checkbox-label">
@@ -271,16 +320,22 @@
                             <h4 class="text-accent uppercase tracking-widest text-xs font-black mb-10">🆘 Emergency Protocol Personnel</h4>
                             <div class="form-grid">
                                 <div class="form-group full">
-                                    <label>Emergency Contact Person Legal Name</label>
-                                    <input type="text" [(ngModel)]="model.EmergencyContactName" name="emergencyContactName">
+                                    <label>Emergency Contact Person Legal Name *</label>
+                                    <input type="text" [(ngModel)]="model.EmergencyContactName" name="emergencyContactName" required maxlength="200"
+                                        #ecnM="ngModel" [class.border-red-500]="ecnM.invalid && ecnM.touched">
                                 </div>
                                 <div class="form-group">
-                                    <label>Consanguinity / Relationship</label>
-                                    <input type="text" [(ngModel)]="model.EmergencyContactRelation" name="emergencyContactRelation">
+                                    <label>Consanguinity / Relationship *</label>
+                                    <input type="text" [(ngModel)]="model.EmergencyContactRelation" name="emergencyContactRelation" required maxlength="100"
+                                        #ecrM="ngModel" [class.border-red-500]="ecrM.invalid && ecrM.touched">
                                 </div>
                                 <div class="form-group">
-                                    <label>Direct Phone Channel</label>
-                                    <input type="text" [(ngModel)]="model.EmergencyContactPhone" name="emergencyContactPhone">
+                                    <label>Direct Phone Channel *</label>
+                                    <input type="text" [(ngModel)]="model.EmergencyContactPhone" name="emergencyContactPhone" required pattern="01[3-9]\d{8}"
+                                        #ecpM="ngModel" [class.border-red-500]="ecpM.invalid && ecpM.touched" placeholder="01XXXXXXXXX">
+                                    <div class="field-error mt-1" *ngIf="ecpM.touched && ecpM.invalid">
+                                        <span class="text-xs text-red-500" *ngIf="ecpM.errors?.['pattern']">Enter a valid 11-digit mobile number.</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -309,11 +364,12 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div class="form-group">
                                     <label class="block text-accent uppercase tracking-widest text-[10px] font-black mb-4 px-1">Formal Profile Photo *</label>
-                                    <div class="file-drop" [class.has-file]="files['photo']">
-                                        <input type="file" (change)="onFileSelect($event, 'photo')" accept="image/*" required>
+                                    <div class="file-drop" [class.has-file]="files['photo']" [class.border-red-500]="regForm.submitted && !files['photo']">
+                                        <input type="file" (change)="onFileSelect($event, 'photo')" accept="image/*">
                                         <p class="text-[11px] leading-tight">{{ files['photo'] ? '✅ ' + files['photo'].name : 'Select Identify Photo' }}</p>
                                         @if (files['photo']) { <span class="file-check">✓</span> }
                                     </div>
+                                    <div *ngIf="regForm.submitted && !files['photo']" class="text-[10px] text-red-500 mt-2 ml-1">Profile photo is mandatory.</div>
                                 </div>
                                 <div class="form-group">
                                     <label class="block text-accent uppercase tracking-widest text-[10px] font-black mb-4 px-1">Academic Certificate Proof</label>
@@ -328,19 +384,22 @@
                             <div class="form-group full">
                                 <div class="consent-box glass-card border-none bg-surface/40">
                                     <label class="premium-checkbox-label mb-4">
-                                        <input type="checkbox" name="terms" [(ngModel)]="model.HasAcceptedTerms" required>
+                                        <input type="checkbox" name="terms" [(ngModel)]="model.HasAcceptedTerms" required #termsM="ngModel"
+                                            [class.is-invalid]="termsM.invalid && termsM.touched">
                                         <span class="checkmark"></span>
                                         <span class="label-text max-w-lg">I have read and understood the constitution and the 
                                             <a href="#" (click)="$event.preventDefault(); showTerms.set(true)" class="text-accent underline">Broadened Terms and Conditions of Registration</a>, 
                                             and I irrevocably agree to be bound by them.</span>
                                     </label>
                                     <label class="premium-checkbox-label mb-4">
-                                        <input type="checkbox" name="gdpr" [(ngModel)]="model.HasAcceptedGdpr" required>
+                                        <input type="checkbox" name="gdpr" [(ngModel)]="model.HasAcceptedGdpr" required #gdprM="ngModel"
+                                            [class.is-invalid]="gdprM.invalid && gdprM.touched">
                                         <span class="checkmark"></span>
                                         <span class="label-text max-w-lg">I explicitly consent to the Association's <b>Data Privacy & GDPR</b> protocols for processing my personal information as described in the directory and privacy sections.</span>
                                     </label>
                                     <label class="premium-checkbox-label">
-                                        <input type="checkbox" name="agree" required ngModel>
+                                        <input type="checkbox" name="agree" required ngModel #agreeM="ngModel"
+                                            [class.is-invalid]="agreeM.invalid && agreeM.touched">
                                         <span class="checkmark"></span>
                                         <span class="label-text max-w-lg">I solemnly affirm that the data provided is accurate. I pledge to uphold the
                                             GHCAA Constitution and maintain association decorum.</span>
@@ -357,12 +416,12 @@
                                 *ngIf="currentStep() > 1">← Previous Step</button>
                         </div>
                         <div class="right-actions">
-                            <button type="button" class="btn btn-accent px-10 shadow-gold h-14" (click)="nextStep()"
+                            <button type="button" class="btn btn-accent px-10 shadow-gold h-14" (click)="nextStep(regForm)"
                                 *ngIf="currentStep() < 3">Continue Assessment →</button>
                             <button type="submit" class="btn btn-accent px-10 shadow-gold h-14" *ngIf="currentStep() === 3">
                                 @if (loading()) { <span class="spinner">⏳</span> Initiating Filing... }
                                 @else { <span class="icon">🚀</span> Finalize Registry }
-                            </button>
+                             </button>
                         </div>
                     </div>
                 </form>

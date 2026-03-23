@@ -143,7 +143,13 @@ export class Register implements OnDestroy {
     return this.years.filter(y => y >= minYear);
   }
 
-  nextStep() {
+  nextStep(form: any) {
+    if (form.invalid) {
+      form.control.markAllAsTouched();
+      this.notify.error('Please complete all mandatory fields correctly before proceeding.');
+      return;
+    }
+
     if (this.currentStep() < 3) {
       this.currentStep.update(s => s + 1);
       if (this.currentStep() > this.maxStepReached()) {
@@ -175,7 +181,8 @@ export class Register implements OnDestroy {
   }
 
   onSubmit(form: any) {
-    if (form.invalid || !this.model.PaymentMethodId) {
+    if (form.invalid || !this.model.PaymentMethodId || !this.files['photo']) {
+      form.control.markAllAsTouched();
       this.notify.error('Please complete all mandatory fields, select a payment method and provide necessary files.');
       return;
     }

@@ -57,27 +57,47 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Full Name</label>
-                        <input type="text" name="fullName" [(ngModel)]="model.fullName" required placeholder="John Doe">
+                        <input type="text" name="fullName" [(ngModel)]="model.fullName" required maxlength="150" 
+                            #fullNameModel="ngModel" placeholder="John Doe"
+                            [class.is-invalid]="fullNameModel.touched && fullNameModel.invalid">
+                        <div class="field-error" *ngIf="fullNameModel.touched && fullNameModel.invalid">
+                            <span *ngIf="fullNameModel.errors?.['required']">Name is required.</span>
+                            <span *ngIf="fullNameModel.errors?.['maxlength']">Name is too long.</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" name="email" [(ngModel)]="model.email" required
-                            placeholder="john@example.com">
+                        <input type="email" name="email" [(ngModel)]="model.email" required email maxlength="200"
+                            #emailModel="ngModel" placeholder="john@example.com"
+                            [class.is-invalid]="emailModel.touched && emailModel.invalid">
+                        <div class="field-error" *ngIf="emailModel.touched && emailModel.invalid">
+                            <span *ngIf="emailModel.errors?.['required']">Email is required.</span>
+                            <span *ngIf="emailModel.errors?.['email']">Invalid email format.</span>
+                        </div>
                     </div>
                     <div class="form-group full-width">
                         <label>Subject</label>
-                        <select name="subject" [(ngModel)]="model.subject" required>
+                        <select name="subject" [(ngModel)]="model.subject" required #subjectModel="ngModel"
+                            [class.is-invalid]="subjectModel.touched && subjectModel.invalid">
                             <option value="Membership Enquiry">Membership Enquiry</option>
                             <option value="Request Relevant Help">Request Relevant Help</option>
                             <option value="Event Sponsorship">Event Sponsorship</option>
                             <option value="Registration Issue">Registration Issue</option>
                             <option value="Other">Other</option>
                         </select>
+                        <div class="field-error" *ngIf="subjectModel.touched && subjectModel.invalid">
+                            <span *ngIf="subjectModel.errors?.['required']">Subject selection is required.</span>
+                        </div>
                     </div>
                     <div class="form-group full-width">
                         <label>Message Details</label>
-                        <textarea name="message" [(ngModel)]="model.message" required rows="4"
-                            placeholder="How can the secretariat help you today?"></textarea>
+                        <textarea name="message" [(ngModel)]="model.message" required minlength="10" maxlength="2000"
+                            #messageModel="ngModel" rows="4" placeholder="How can the secretariat help you today?"
+                            [class.is-invalid]="messageModel.touched && messageModel.invalid"></textarea>
+                        <div class="field-error" *ngIf="messageModel.touched && messageModel.invalid">
+                            <span *ngIf="messageModel.errors?.['required']">Message is required.</span>
+                            <span *ngIf="messageModel.errors?.['minlength']">Message must be at least 10 characters.</span>
+                        </div>
                     </div>
                 </div>
 

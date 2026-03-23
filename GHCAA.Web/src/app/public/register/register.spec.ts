@@ -11,6 +11,10 @@ describe('Register Component', () => {
     let regServiceMock: any;
     let notificationServiceMock: any;
     let routerMock: any;
+    const mockForm = { 
+        invalid: false, 
+        control: { markAllAsTouched: vi.fn() } 
+    };
 
     beforeEach(async () => {
         regServiceMock = {
@@ -49,7 +53,7 @@ describe('Register Component', () => {
 
     it('should navigate between steps', () => {
         expect(component.currentStep()).toBe(1);
-        component.nextStep();
+        component.nextStep(mockForm);
         expect(component.currentStep()).toBe(2);
         component.prevStep();
         expect(component.currentStep()).toBe(1);
@@ -83,7 +87,6 @@ describe('Register Component', () => {
     });
 
     it('should fail submission if payment method is missing', () => {
-        const mockForm = { invalid: false };
         component.model.PaymentMethodId = 0;
         component.onSubmit(mockForm);
         

@@ -226,13 +226,15 @@ export interface AlumniEvent {
     id: number;
     title: string;
     description: string;
-    date: string | Date;
+    startDate: string | Date;
+    endDate: string | Date;
     location: string;
     registrationFee?: number | null;
     requiresPayment: boolean;
     isActive: boolean;
     imageUrl?: string;
-    registrationDeadline?: string | Date;
+    registrationStartDate?: string | Date;
+    registrationEndDate?: string | Date;
     adminNote?: string;
     allowNonMembers: boolean;
     participantCount?: number;

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using GHCAA.Domain;
 
 namespace GHCAA.Application.DTOs
@@ -18,13 +19,22 @@ namespace GHCAA.Application.DTOs
 
     public class CreatePaymentHistoryDto
     {
+        [Required(ErrorMessage = "Transaction ID is required.")]
+        [MaxLength(200, ErrorMessage = "Transaction ID must not exceed 200 characters.")]
         public string TransactionId { get; set; } = null!;
+
+        [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than zero.")]
         public decimal Amount { get; set; }
+
+        [Required(ErrorMessage = "Payment date is required.")]
         public DateTime PaidAt { get; set; }
+
         public Enums.FinancialCategory FinancialCategory { get; set; }
         public Enums.PaymentMethod PaymentMethod { get; set; }
+
+        [MaxLength(500, ErrorMessage = "Notes must not exceed 500 characters.")]
         public string? Notes { get; set; }
-        // Admin might set this, otherwise ignored
+
         public int? MemberId { get; set; }
     }
 
@@ -62,25 +72,58 @@ namespace GHCAA.Application.DTOs
         public string Description { get; set; } = string.Empty;
     }
 
-    public class CreateMembershipFeeConfigDto
+    public class CreateMembershipFeeConfigDto : IValidatableObject
     {
         public Enums.FinancialCategory Category { get; set; } = Enums.FinancialCategory.MembershipFee;
+
+        [Required(ErrorMessage = "Membership type is required.")]
+        [MaxLength(100)]
         public string MembershipType { get; set; } = string.Empty;
+
+        [Range(0.01, double.MaxValue, ErrorMessage = "Fee amount must be greater than zero.")]
         public decimal Amount { get; set; }
+
+        [Required(ErrorMessage = "Effective date is required.")]
         public DateTime EffectiveDate { get; set; }
+
         public DateTime? EffectiveTo { get; set; }
         public bool IsActive { get; set; } = true;
+
+        [MaxLength(500, ErrorMessage = "Description must not exceed 500 characters.")]
         public string Description { get; set; } = string.Empty;
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (EffectiveTo.HasValue && EffectiveTo.Value <= EffectiveDate)
+                yield return new ValidationResult(
+                    "'Effective To' date must be after the 'Effective From' date.",
+                    new[] { nameof(EffectiveTo) });
+        }
     }
 
-    public class UpdateMembershipFeeConfigDto
+    public class UpdateMembershipFeeConfigDto : IValidatableObject
     {
         public int Id { get; set; }
         public Enums.FinancialCategory? Category { get; set; }
+
+        [Range(0.01, double.MaxValue, ErrorMessage = "Fee amount must be greater than zero.")]
         public decimal Amount { get; set; }
+
+        [Required(ErrorMessage = "Effective date is required.")]
         public DateTime EffectiveDate { get; set; }
+
         public DateTime? EffectiveTo { get; set; }
         public bool IsActive { get; set; }
+
+        [MaxLength(500, ErrorMessage = "Description must not exceed 500 characters.")]
         public string Description { get; set; } = string.Empty;
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (EffectiveTo.HasValue && EffectiveTo.Value <= EffectiveDate)
+                yield return new ValidationResult(
+                    "'Effective To' date must be after the 'Effective From' date.",
+                    new[] { nameof(EffectiveTo) });
+        }
     }
 }

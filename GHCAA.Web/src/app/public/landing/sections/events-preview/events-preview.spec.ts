@@ -12,8 +12,8 @@ describe('LandingEventsPreview Component', () => {
     let eventsServiceMock: any;
 
     const mockEvents: AlumniEvent[] = [
-        { id: 1, title: 'Active Event', date: new Date().toISOString(), location: 'Loc', registrationDeadline: new Date(Date.now() + 86400000).toISOString(), isActive: true } as any,
-        { id: 2, title: 'Closed Event', date: new Date(Date.now() - 86400000).toISOString(), location: 'Loc', registrationDeadline: new Date(Date.now() - 86400000).toISOString(), isActive: true } as any,
+        { id: 1, title: 'Active Event', startDate: new Date().toISOString(), endDate: new Date(Date.now() + 7200000).toISOString(), location: 'Loc', registrationEndDate: new Date(Date.now() + 86400000).toISOString(), isActive: true } as any,
+        { id: 2, title: 'Closed Event', startDate: new Date(Date.now() - 86400000).toISOString(), endDate: new Date(Date.now() - 79200000).toISOString(), location: 'Loc', registrationEndDate: new Date(Date.now() - 86400000).toISOString(), isActive: true } as any,
     ];
 
     beforeEach(async () => {
@@ -50,8 +50,9 @@ describe('LandingEventsPreview Component', () => {
         const past = new Date(now.getTime() - 1000).toISOString();
         const future = new Date(now.getTime() + 10000).toISOString();
 
-        expect(component.isRegistrationClosed(past)).toBe(true);
-        expect(component.isRegistrationClosed(future)).toBe(false);
+        expect(component.isRegistrationClosed({ registrationEndDate: past } as any)).toBe(true);
+        expect(component.isRegistrationClosed({ registrationEndDate: future } as any)).toBe(false);
+        expect(component.isRegistrationClosed({ registrationEndDate: undefined } as any)).toBe(false);
     });
 
     it('should hide section and set isVisible to false on error', () => {

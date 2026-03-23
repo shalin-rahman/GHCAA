@@ -15,7 +15,7 @@ namespace GHCAA.Domain.Models
         public string Description { get; set; } = null!;
 
         [Required]
-        public DateTime Date { get; set; }
+        public DateTime StartDate { get; set; }
 
         [Required]
         [MaxLength(200)]
@@ -31,7 +31,9 @@ namespace GHCAA.Domain.Models
         [MaxLength(500)]
         public string? ImageUrl { get; set; }
 
-        public DateTime? RegistrationDeadline { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime? RegistrationStartDate { get; set; }
+        public DateTime? RegistrationEndDate { get; set; }
         
         public string? AdminNote { get; set; }
 

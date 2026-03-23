@@ -28,12 +28,17 @@
     <!-- Create / Edit Form Section -->
     @if (showForm()) {
     <div class="glass-card p-10 reveal-top max-w-5xl mx-auto">
-        <form (ngSubmit)="saveNews()" class="news-form space-y-8">
+        <form #newsForm="ngForm" (ngSubmit)="saveNews(newsForm)" class="news-form space-y-8">
             <div class="form-group">
                 <label>Article Headline <span class="required-star">*</span></label>
-                <input type="text" [(ngModel)]="form.title" name="title" required #titleInput="ngModel"
+                <input type="text" [(ngModel)]="form.title" name="title" required minlength="5" maxlength="300" 
+                    #titleInput="ngModel"
                     [class.border-red-500]="titleInput.invalid && titleInput.touched"
                     placeholder="Enter a compelling title..." class="text-xl font-black">
+                <div class="field-error mt-1" *ngIf="titleInput.touched && titleInput.invalid">
+                    <span class="text-xs text-red-500" *ngIf="titleInput.errors?.['required']">Headline is required.</span>
+                    <span class="text-xs text-red-500" *ngIf="titleInput.errors?.['minlength']">Headline must be at least 5 characters.</span>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -48,7 +53,9 @@
                 <div class="form-group">
                     <label>Cover Image</label>
                     <div class="image-upload-wrapper" style="display: flex; gap: 10px; align-items: center;">
-                        <input type="text" [(ngModel)]="form.imageUrl" name="imageUrl" placeholder="Image URL or upload..." style="flex: 1;" [disabled]="uploadingImage()">
+                        <input type="url" [(ngModel)]="form.imageUrl" name="imageUrl" #imageUrlInput="ngModel"
+                            placeholder="Image URL or upload..." style="flex: 1;" [disabled]="uploadingImage()"
+                            [class.border-red-500]="imageUrlInput.invalid && imageUrlInput.touched">
                         <label class="btn btn-secondary btn-sm" style="margin: 0; cursor: pointer;">
                             @if (!uploadingImage()) { <span class="icon">📁</span> }
                             @if (uploadingImage()) { <span class="icon animate-spin">⏳</span> }
@@ -61,9 +68,13 @@
 
             <div class="form-group">
                 <label>Article Content <span class="required-star">*</span></label>
-                <textarea [(ngModel)]="form.content" name="content" rows="12" required #contentInput="ngModel"
+                <textarea [(ngModel)]="form.content" name="content" rows="12" required minlength="20" #contentInput="ngModel"
                     [class.border-red-500]="contentInput.invalid && contentInput.touched"
                     placeholder="Compose your article here..."></textarea>
+                <div class="field-error mt-1" *ngIf="contentInput.touched && contentInput.invalid">
+                    <span class="text-xs text-red-500" *ngIf="contentInput.errors?.['required']">Content is required.</span>
+                    <span class="text-xs text-red-500" *ngIf="contentInput.errors?.['minlength']">Content must be at least 20 characters.</span>
+                </div>
             </div>
 
             <div class="flex items-center justify-between pt-6 border-t border-primary/5">

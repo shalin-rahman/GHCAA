@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
+import { NotificationService } from '../../core/services/notification.service';
 import { ACADEMIC_CERTIFICATES, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getAcademicYears, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
 
 @Component({
@@ -17,6 +18,7 @@ export class MemberApproval implements OnInit {
   private adminService = inject(AdminService);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private notify = inject(NotificationService);
 
   requests = signal<any[]>([]);
   pendingRequests = computed(() => {
@@ -65,10 +67,11 @@ export class MemberApproval implements OnInit {
       const adminId = this.auth.currentUser()?.memberId || 1;
       this.adminService.approveMember(id, adminId).subscribe({
         next: () => {
-          alert('Registry verified. Member successfully inducted.');
+          this.notify.success('Registry verified. Member successfully inducted.');
           this.selectedMember.set(null);
           this.loadMembers();
-        }
+        },
+        error: () => this.notify.error('Failed to verify registry.')
       });
     }
   }
@@ -79,10 +82,11 @@ export class MemberApproval implements OnInit {
       const adminId = this.auth.currentUser()?.memberId || 1;
       this.adminService.rejectMember(this.selectedMember().id, adminId, this.rejectionReason).subscribe({
         next: () => {
-          alert('Application declined. Record removed from active queue.');
+          this.notify.success('Application declined. Record removed from active queue.');
           this.selectedMember.set(null);
           this.loadMembers();
-        }
+        },
+        error: () => this.notify.error('Failed to decline application.')
       });
     }
   }

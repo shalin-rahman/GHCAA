@@ -22,16 +22,26 @@
                 <p class="text-xs uppercase font-bold text-muted mb-6 tracking-widest">Generating non-member administrative node</p>
                 <form [formGroup]="createForm" (ngSubmit)="createAdmin()" class="space-y-6">
                     <div class="input-group">
-                        <label>Unique System Username</label>
-                        <input type="text" formControlName="username" placeholder="e.g. system_admin_01">
+                        <label>Unique System Username *</label>
+                        <input type="text" formControlName="username" 
+                               [class.border-red-500]="createForm.get('username')?.touched && createForm.get('username')?.invalid"
+                               placeholder="e.g. system_admin_01">
+                        <div *ngIf="createForm.get('username')?.touched && createForm.get('username')?.invalid" class="text-[9px] text-red-500 font-bold uppercase mt-1">
+                            Username is required (min 3 chars)
+                        </div>
                     </div>
                     <div class="input-group">
-                        <label>Secure Cipher / Password</label>
+                        <label>Secure Cipher / Password *</label>
                         <div class="password-input relative flex items-center">
-                            <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="••••••••" class="w-full pr-12 bg-black/40 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-accent">
+                            <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" 
+                                   [class.border-red-500]="createForm.get('password')?.touched && createForm.get('password')?.invalid"
+                                   placeholder="••••••••" class="w-full pr-12 bg-black/40 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-accent">
                             <button type="button" class="toggle-password absolute right-3 text-white/40 hover:text-accent transition-colors" (click)="togglePassword()" tabindex="-1">
                                 <i class="fas" [ngClass]="showPassword() ? 'fa-eye-slash' : 'fa-eye'"></i>
                             </button>
+                        </div>
+                        <div *ngIf="createForm.get('password')?.touched && createForm.get('password')?.invalid" class="text-[9px] text-red-500 font-bold uppercase mt-1">
+                            Password is required (min 6 chars)
                         </div>
                     </div>
                     <div class="input-group">

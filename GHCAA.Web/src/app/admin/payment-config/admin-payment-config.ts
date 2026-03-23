@@ -112,7 +112,11 @@ export class AdminPaymentConfig implements OnInit {
   }
 
   submitForm() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.notify.error('Please correct the validation errors before saving.');
+      return;
+    }
 
     this.submitting.set(true);
     const id = this.editingId();

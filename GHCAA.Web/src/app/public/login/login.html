@@ -6,21 +6,33 @@
             <p>Login to your account</p>
         </div>
 
-        <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+        <form (ngSubmit)="onLogin(loginForm)" #loginForm="ngForm">
             <div class="form-group">
                 <label>Username</label>
-                <input type="text" name="username" [(ngModel)]="credentials.username" required
-                    placeholder="Enter your username" class="form-control">
+                <input type="text" name="username" [(ngModel)]="credentials.username" 
+                    required minlength="3" #usernameModel="ngModel"
+                    placeholder="Enter your username" class="form-control"
+                    [class.is-invalid]="usernameModel.touched && usernameModel.invalid">
+                <div class="field-error" *ngIf="usernameModel.touched && usernameModel.invalid">
+                    <span *ngIf="usernameModel.errors?.['required']">Username is required.</span>
+                    <span *ngIf="usernameModel.errors?.['minlength']">Username must be at least 3 characters.</span>
+                </div>
             </div>
 
             <div class="form-group">
                 <label>Password</label>
                 <div class="password-input">
-                    <input [type]="showPassword() ? 'text' : 'password'" name="password" [(ngModel)]="credentials.password" required
-                        placeholder="••••••••" class="form-control">
+                    <input [type]="showPassword() ? 'text' : 'password'" name="password" [(ngModel)]="credentials.password" 
+                        required minlength="6" #passwordModel="ngModel"
+                        placeholder="••••••••" class="form-control"
+                        [class.is-invalid]="passwordModel.touched && passwordModel.invalid">
                     <button type="button" class="toggle-password" (click)="togglePassword()" tabindex="-1">
                         <i class="fas" [ngClass]="showPassword() ? 'fa-eye-slash' : 'fa-eye'"></i>
                     </button>
+                </div>
+                <div class="field-error" *ngIf="passwordModel.touched && passwordModel.invalid">
+                    <span *ngIf="passwordModel.errors?.['required']">Password is required.</span>
+                    <span *ngIf="passwordModel.errors?.['minlength']">Password must be at least 6 characters.</span>
                 </div>
             </div>
 

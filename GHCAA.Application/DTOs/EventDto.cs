@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Application.DTOs
@@ -8,30 +10,66 @@ namespace GHCAA.Application.DTOs
         public int Id { get; set; }
         public string Title { get; set; } = null!;
         public string Description { get; set; } = null!;
-        public DateTime Date { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public string Location { get; set; } = null!;
         public decimal? RegistrationFee { get; set; }
         public bool RequiresPayment { get; set; }
         public bool IsActive { get; set; }
         public string? ImageUrl { get; set; }
-        public DateTime? RegistrationDeadline { get; set; }
+        public DateTime? RegistrationStartDate { get; set; }
+        public DateTime? RegistrationEndDate { get; set; }
         public string? AdminNote { get; set; }
         public int ParticipantCount { get; set; }
     }
 
-    public class CreateEventDto
+    public class CreateEventDto : IValidatableObject
     {
+        [Required]
         public string Title { get; set; } = null!;
+
+        [Required]
         public string Description { get; set; } = null!;
-        public DateTime Date { get; set; }
+
+        [Required]
+        public DateTime StartDate { get; set; }
+
+        [Required]
+        public DateTime EndDate { get; set; }
+
+        [Required]
         public string Location { get; set; } = null!;
+
         public decimal? RegistrationFee { get; set; }
         public bool RequiresPayment { get; set; } = true;
         public bool IsActive { get; set; } = true;
         public bool AllowNonMembers { get; set; } = false;
         public string? ImageUrl { get; set; }
-        public DateTime? RegistrationDeadline { get; set; }
+        public DateTime? RegistrationStartDate { get; set; }
+        public DateTime? RegistrationEndDate { get; set; }
         public string? AdminNote { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            // 1. End date must be strictly after start date
+            if (EndDate <= StartDate)
+                yield return new ValidationResult(
+                    "Event end date must be after the start date.",
+                    new[] { nameof(EndDate) });
+
+            // 2. Registration window: close must be after open
+            if (RegistrationStartDate.HasValue && RegistrationEndDate.HasValue
+                && RegistrationEndDate.Value <= RegistrationStartDate.Value)
+                yield return new ValidationResult(
+                    "Registration close date must be after the registration open date.",
+                    new[] { nameof(RegistrationEndDate) });
+
+            // 3. Registration should close on or before the event starts
+            if (RegistrationEndDate.HasValue && RegistrationEndDate.Value > StartDate)
+                yield return new ValidationResult(
+                    "Registration must close on or before the event start date.",
+                    new[] { nameof(RegistrationEndDate) });
+        }
     }
 
     public class UpdateEventDto : CreateEventDto
@@ -85,3 +123,4 @@ namespace GHCAA.Application.DTOs
         public DateTime RegisteredAt { get; set; }
     }
 }
+

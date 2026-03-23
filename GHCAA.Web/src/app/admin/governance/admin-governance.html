@@ -119,15 +119,21 @@
         <div class="modal-body">
             <div class="form-group">
                 <label>Period Title <span class="required-star">*</span></label>
-                <input type="text" class="form-control" [(ngModel)]="editPeriodData().title" #periodTitle="ngModel" required
+                <input type="text" class="form-control" [(ngModel)]="editPeriodData().title" #periodTitle="ngModel" required maxlength="150"
                     [class.border-red-500]="periodTitle.invalid && periodTitle.touched"
                     placeholder="e.g. 2023-2025 Committee">
+                <div *ngIf="periodTitle.touched && periodTitle.invalid" class="text-[10px] text-red-500 mt-1">
+                    <span *ngIf="periodTitle.errors?.['required']">Period title is required.</span>
+                </div>
             </div>
             
             <div class="form-group">
                 <label>Start Date <span class="required-star">*</span></label>
                 <input type="date" class="form-control" [(ngModel)]="editPeriodData().startDate" #periodStart="ngModel" required
                     [class.border-red-500]="periodStart.invalid && periodStart.touched">
+                <div *ngIf="periodStart.touched && periodStart.invalid" class="text-[10px] text-red-500 mt-1">
+                    <span *ngIf="periodStart.errors?.['required']">Start date is required.</span>
+                </div>
             </div>
 
             <div class="form-group">
@@ -156,7 +162,7 @@
         <div class="modal-body">
             <!-- Search field for member -->
             <div class="form-group search-group">
-                <label>Search Member</label>
+                <label>Search Member <span class="required-star">*</span></label>
                 <div class="search-box">
                     <input type="text" 
                            class="form-control" 
@@ -166,6 +172,10 @@
                     @if (isSearching()) {
                         <span class="loading-icon animate-spin">⏳</span>
                     }
+                </div>
+                <!-- Selection feedback -->
+                <div *ngIf="assignData().memberId" class="mt-2 text-[10px] text-accent font-bold uppercase tracking-widest">
+                    ✅ Selected: {{ assignData().memberName }}
                 </div>
                 
                 @if (memberSearchResults().length > 0) {
@@ -180,8 +190,8 @@
             </div>
 
             <div class="form-group">
-                <label>Position</label>
-                <select class="form-control" [(ngModel)]="assignData().position">
+                <label>Position <span class="required-star">*</span></label>
+                <select class="form-control" [(ngModel)]="assignData().position" #posInput="ngModel" required>
                     @for (pos of ecPositions; track pos.value) {
                         <option [value]="pos.value">{{ pos.label }}</option>
                     }
@@ -190,7 +200,7 @@
         </div>
         <div class="modal-footer">
             <button class="btn btn-outline" (click)="showAssignModal.set(false)">Cancel</button>
-            <button class="btn btn-accent shadow-gold" (click)="assignRole()">Assign Role</button>
+            <button class="btn btn-accent shadow-gold" (click)="assignRole()" [disabled]="!assignData().memberId || posInput.invalid">Assign Role</button>
         </div>
     </div>
 </div>

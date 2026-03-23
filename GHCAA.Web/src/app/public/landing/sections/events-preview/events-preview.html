@@ -23,8 +23,8 @@
 
                 <!-- Column 2: Date -->
                 <div class="event-mini-date">
-                    <span class="day">{{ ev.date | date:'dd' }}</span>
-                    <span class="month">{{ ev.date | date:'MMM' }}</span>
+                    <span class="day">{{ ev.startDate | date:'dd' }}</span>
+                    <span class="month">{{ ev.startDate | date:'MMM' }}</span>
                 </div>
 
                 <!-- Column 3: Info -->
@@ -46,7 +46,7 @@
 
                 <!-- Column 4: Action -->
                 <div class="event-mini-action">
-                    @if (isRegistrationClosed(ev.registrationDeadline)) {
+                    @if (isRegistrationClosed(ev)) {
                         <button class="btn btn-secondary btn-sm" disabled>Closed</button>
                     } @else {
                         <a [routerLink]="['/events', ev.id]" class="btn btn-accent btn-sm px-6">Register Now</a>

@@ -105,6 +105,25 @@ namespace GHCAA.Tests.Services
             updatedECMember!.EndDate.Should().NotBeNull();
         }
 
+        [Test]
+        public async Task UpdatePeriodAsync_ShouldModifyFieldsAndForceUtc()
+        {
+            // Arrange
+            var period = await _service.CreatePeriodAsync("Old", DateTime.UtcNow.AddDays(-1), null);
+            var newStart = new DateTime(2024, 1, 1, 10, 0, 0, DateTimeKind.Unspecified);
+            var newEnd = new DateTime(2025, 12, 31, 23, 59, 59, DateTimeKind.Local);
+
+            // Act
+            await _service.UpdatePeriodAsync(period.Id, "Updated", newStart, newEnd);
+
+            // Assert
+            var updated = await _context.ECPeriods.FindAsync(period.Id);
+            updated!.Title.Should().Be("Updated");
+            updated.StartDate.Kind.Should().Be(DateTimeKind.Utc);
+            updated.EndDate.Should().NotBeNull();
+            updated.EndDate!.Value.Kind.Should().Be(DateTimeKind.Utc);
+        }
+
         private Member CreateMinimalMember(string name)
         {
             return new Member
@@ -120,10 +139,7 @@ namespace GHCAA.Tests.Services
                 EmergencyContactName = "EC",
                 EmergencyContactRelation = "Brother",
                 EmergencyContactPhone = "01800000000",
-//                 HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None",
-//                 ProfessionalSector = "P",
-//                 Designation = "D",
-//                 GHCLastCertificatePassingYear = 2005,
+                AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", PassingYear = 2005, IsGHC = true } },
                 DateOfBirth = new DateTime(1990, 1, 1),
                 Gender = Enums.Gender.Male,
                 BloodGroup = Enums.BloodGroup.APositive,
@@ -132,3 +148,4 @@ namespace GHCAA.Tests.Services
         }
     }
 }
+

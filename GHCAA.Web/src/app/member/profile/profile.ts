@@ -120,7 +120,13 @@ export class Profile implements OnInit {
         return this.profile.academicHistory.sort((a: any, b: any) => (b.passingYear || 0) - (a.passingYear || 0))[0];
     }
 
-    async updateProfile() {
+    async updateProfile(form: any) {
+        if (form.invalid) {
+            form.control.markAllAsTouched();
+            this.notify.error('Please correct all validation errors in the form before saving.');
+            return;
+        }
+
         if (this.saving()) return;
         ensureValidAcademicData(this.profile);
 

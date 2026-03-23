@@ -81,8 +81,9 @@ export class AdminGallery implements OnInit {
         };
     }
 
-    onSubmit() {
-        if (!this.newGallery.title || !this.newGallery.eventDate) {
+    onSubmit(form: any) {
+        if (form.invalid) {
+            Object.values(form.controls).forEach((control: any) => control.markAsTouched());
             this.notify.error('Title and Date are required assets.');
             return;
         }
@@ -112,20 +113,20 @@ export class AdminGallery implements OnInit {
     toggleActive(id: number) {
         this.galleryService.toggleActive(id).subscribe({
             next: (res) => {
-                alert(`Gallery is now ${res.isActive ? 'Active' : 'Hidden'}`);
+                this.notify.success(`Gallery is now ${res.isActive ? 'Active' : 'Hidden'}`);
                 this.loadGalleries();
             },
-            error: () => alert('Failed to toggle status')
+            error: () => this.notify.error('Failed to toggle status')
         });
     }
 
     toggleFeatured(id: number) {
         this.galleryService.toggleFeatured(id).subscribe({
             next: (res) => {
-                alert(`Gallery is now ${res.isFeatured ? 'Featured' : 'Regular'}`);
+                this.notify.success(`Gallery is now ${res.isFeatured ? 'Featured' : 'Regular'}`);
                 this.loadGalleries();
             },
-            error: () => alert('Failed to toggle featured status')
+            error: () => this.notify.error('Failed to toggle featured status')
         });
     }
 
@@ -134,10 +135,10 @@ export class AdminGallery implements OnInit {
 
         this.galleryService.deleteGallery(id).subscribe({
             next: () => {
-                alert('Gallery deleted');
+                this.notify.success('Gallery deleted');
                 this.loadGalleries();
             },
-            error: () => alert('Failed to delete gallery')
+            error: () => this.notify.error('Failed to delete gallery')
         });
     }
 
@@ -169,7 +170,7 @@ export class AdminGallery implements OnInit {
 
             if (paths.length > 0) {
                 await firstValueFrom(this.galleryService.addPhotos(gallery.id, paths));
-                alert(`🚀 ${paths.length} Photo(s) uploaded successfully!`);
+                this.notify.success(`🚀 ${paths.length} Photo(s) uploaded successfully!`);
                 
                 // Refresh data from server
                 this.galleryService.getAllGalleries().subscribe(all => {
@@ -179,7 +180,7 @@ export class AdminGallery implements OnInit {
                 });
             }
         } catch (error) {
-            alert('Error uploading photos');
+            this.notify.error('Error uploading photos');
         } finally {
             this.isUploading.set(false);
             this.uploadedFiles.set([]);
@@ -201,7 +202,7 @@ export class AdminGallery implements OnInit {
                 // Also refresh the background galleries list
                 this.loadGalleries();
             },
-            error: () => alert('Failed to remove photo')
+            error: () => this.notify.error('Failed to remove photo')
         });
     }
 

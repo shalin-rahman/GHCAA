@@ -1,48 +1,101 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Application.DTOs
 {
+    /// <summary>
+    /// Shared base for member creation and profile update DTOs.
+    /// All [Required] and length rules are enforced here and inherited automatically.
+    /// </summary>
     public abstract class BaseMemberDto
     {
+        // ── Personal ─────────────────────────────────────────────────────────────
+        [Required(ErrorMessage = "Full name is required.")]
+        [MaxLength(200, ErrorMessage = "Full name must not exceed 200 characters.")]
         public string FullName { get; set; } = null!;
+
+        [Required(ErrorMessage = "Father's name is required.")]
+        [MaxLength(200, ErrorMessage = "Father's name must not exceed 200 characters.")]
         public string FatherName { get; set; } = null!;
+
+        [Required(ErrorMessage = "Mother's name is required.")]
+        [MaxLength(200, ErrorMessage = "Mother's name must not exceed 200 characters.")]
         public string MotherName { get; set; } = null!;
+
+        [Required(ErrorMessage = "Date of birth is required.")]
         public DateTime DateOfBirth { get; set; }
+
+        [Required(ErrorMessage = "National ID (NID) is required.")]
+        [MinLength(10, ErrorMessage = "NID must be at least 10 characters.")]
+        [MaxLength(20, ErrorMessage = "NID must not exceed 20 characters.")]
         public string NID { get; set; } = null!;
+
+        [Required(ErrorMessage = "Mobile number is required.")]
+        [RegularExpression(@"^01[3-9]\d{8}$", ErrorMessage = "Enter a valid Bangladeshi mobile number (e.g. 01XXXXXXXXX).")]
         public string MobileNo { get; set; } = null!;
+
+        [Required(ErrorMessage = "Email address is required.")]
+        [EmailAddress(ErrorMessage = "A valid email address is required.")]
+        [MaxLength(200, ErrorMessage = "Email must not exceed 200 characters.")]
         public string Email { get; set; } = null!;
+
         public Gender Gender { get; set; } = Gender.Male;
         public BloodGroup BloodGroup { get; set; } = BloodGroup.APositive;
         public MembershipType MembershipType { get; set; } = MembershipType.General;
 
+        // ── Address ───────────────────────────────────────────────────────────────
+        [Required(ErrorMessage = "Present address is required.")]
+        [MaxLength(500, ErrorMessage = "Address must not exceed 500 characters.")]
         public string PresentAddress { get; set; } = null!;
+
+        [Required(ErrorMessage = "Permanent address is required.")]
+        [MaxLength(500, ErrorMessage = "Address must not exceed 500 characters.")]
         public string PermanentAddress { get; set; } = null!;
+
+        [MaxLength(10)]
         public string? TShirtSize { get; set; }
 
+        // ── Emergency contact ─────────────────────────────────────────────────────
+        [Required(ErrorMessage = "Emergency contact name is required.")]
+        [MaxLength(200, ErrorMessage = "Emergency contact name must not exceed 200 characters.")]
         public string EmergencyContactName { get; set; } = null!;
+
+        [Required(ErrorMessage = "Emergency contact relation is required.")]
+        [MaxLength(100, ErrorMessage = "Relation must not exceed 100 characters.")]
         public string EmergencyContactRelation { get; set; } = null!;
+
+        [Required(ErrorMessage = "Emergency contact phone is required.")]
+        [RegularExpression(@"^01[3-9]\d{8}$", ErrorMessage = "Enter a valid Bangladeshi mobile number for the emergency contact.")]
         public string EmergencyContactPhone { get; set; } = null!;
 
-        // Privacy
+        // ── Privacy flags ─────────────────────────────────────────────────────────
         public bool IsMobilePublic { get; set; }
         public bool IsEmailPublic { get; set; }
         public bool IsAddressPublic { get; set; }
         public bool IsNIDPublic { get; set; }
+
+        [Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the Terms & Conditions.")]
         public bool HasAcceptedTerms { get; set; }
+
+        [Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the Data Privacy (GDPR) policy.")]
         public bool HasAcceptedGdpr { get; set; }
 
-        // Attachments
+        // ── Attachments & history ─────────────────────────────────────────────────
         public string? PhotoPath { get; set; }
 
-        // History
+        [MinLength(1, ErrorMessage = "At least one academic record is required.")]
         public List<AcademicRecordDto> AcademicHistory { get; set; } = new();
+
         public List<ProfessionalRecordDto> ProfessionalHistory { get; set; } = new();
         public List<ECHistoryDto> ECHistory { get; set; } = new();
 
-        // Payment (Refined)
+        // ── Payment ───────────────────────────────────────────────────────────────
+        [Range(1, int.MaxValue, ErrorMessage = "A valid payment method must be selected.")]
         public int PaymentMethodId { get; set; }
+
+        [MaxLength(200, ErrorMessage = "Transaction ID must not exceed 200 characters.")]
         public string? TransactionId { get; set; }
     }
 }

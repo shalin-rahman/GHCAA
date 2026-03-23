@@ -222,7 +222,7 @@
 
     <!-- Main Profile Edit Form -->
     <div class="glass-card profile-card p-12">
-        <form (submit)="updateProfile()">
+        <form #profileForm="ngForm" (submit)="updateProfile(profileForm)">
             <!-- Section 1: Personal Details -->
             <div class="section-block">
                 <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
@@ -230,8 +230,12 @@
                 </div>
                 <div class="form-grid mb-12">
                     <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" [(ngModel)]="profile.fullName" name="fullName">
+                        <label>Full Name *</label>
+                        <input type="text" [(ngModel)]="profile.fullName" name="fullName" required maxlength="200" #nameM="ngModel"
+                            [class.border-red-500]="nameM.invalid && nameM.touched">
+                        <div *ngIf="nameM.touched && nameM.invalid" class="text-[10px] text-red-500 mt-1">
+                            <span *ngIf="nameM.errors?.['required']">Full name is required.</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>National ID (NID)</label>
@@ -239,35 +243,38 @@
                             title="Contact admin to change verified NID">
                     </div>
                     <div class="form-group">
-                        <label>Father's Name</label>
-                        <input type="text" [(ngModel)]="profile.fatherName" name="fatherName">
+                        <label>Father's Name *</label>
+                        <input type="text" [(ngModel)]="profile.fatherName" name="fatherName" required maxlength="200" #fatherM="ngModel"
+                            [class.border-red-500]="fatherM.invalid && fatherM.touched">
                     </div>
                     <div class="form-group">
-                        <label>Mother's Name</label>
-                        <input type="text" [(ngModel)]="profile.motherName" name="motherName">
+                        <label>Mother's Name *</label>
+                        <input type="text" [(ngModel)]="profile.motherName" name="motherName" required maxlength="200" #motherM="ngModel"
+                            [class.border-red-500]="motherM.invalid && motherM.touched">
                     </div>
                     <div class="form-group">
-                        <label>Gender</label>
-                        <select [(ngModel)]="profile.gender" name="gender">
+                        <label>Gender *</label>
+                        <select [(ngModel)]="profile.gender" name="gender" required #genderM="ngModel"
+                            [class.border-red-500]="genderM.invalid && genderM.touched">
                             <option *ngFor="let g of genderOptions" [value]="g.value">{{ g.label }}</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Blood Group</label>
-                        <select [(ngModel)]="profile.bloodGroup" name="bloodGroup">
+                        <label>Blood Group *</label>
+                        <select [(ngModel)]="profile.bloodGroup" name="bloodGroup" required #bgM="ngModel"
+                            [class.border-red-500]="bgM.invalid && bgM.touched">
                             <option *ngFor="let b of bloodGroupOptions" [value]="b.value">{{ b.label }}</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>T-Shirt Size</label>
-                        <select [(ngModel)]="profile.tShirtSize" name="tShirtSize">
+                        <label>T-Shirt Size *</label>
+                        <select [(ngModel)]="profile.tShirtSize" name="tShirtSize" required #tsM="ngModel"
+                            [class.border-red-500]="tsM.invalid && tsM.touched">
                             <option *ngFor="let s of tShirtOptions" [value]="s.value">{{ s.label }}</option>
                         </select>
                     </div>
                 </div>
             </div>
-
-
 
             <!-- Section 4: Academic History -->
             <div class="section-block mt-12">
@@ -287,8 +294,9 @@
                         
                         <div class="form-grid">
                             <div class="form-group full">
-                                <label>Institution / University Name</label>
-                                <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" placeholder="e.g. Govt. Haraganga College">
+                                <label>Institution / University Name *</label>
+                                <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" required maxlength="250"
+                                    #instMi="ngModel" [class.border-red-500]="instMi.invalid && instMi.touched" placeholder="e.g. Govt. Haraganga College">
                             </div>
                             <div class="input-group full py-2">
                                 <label class="premium-checkbox-label">
@@ -299,30 +307,34 @@
                             </div>
                             
                             <div class="form-group">
-                                <label>Degree Type</label>
-                                <select [(ngModel)]="item.degree" [name]="'deg_' + $index">
+                                <label>Degree Type *</label>
+                                <select [(ngModel)]="item.degree" [name]="'deg_' + $index" required maxlength="100"
+                                    #degMi="ngModel" [class.border-red-500]="degMi.invalid && degMi.touched">
                                     <option value="">Select...</option>
                                     @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Major / Subject</label>
-                                <select [(ngModel)]="item.subject" [name]="'sub_' + $index">
+                                <label>Major / Subject *</label>
+                                <select [(ngModel)]="item.subject" [name]="'sub_' + $index" required maxlength="100"
+                                    #subMi="ngModel" [class.border-red-500]="subMi.invalid && subMi.touched">
                                     <option value="None">None</option>
                                     @for (sub of subjectOptions; track sub) { <option [value]="sub">{{ sub }}</option> }
                                 </select>
                             </div>
 
                             <div class="form-group">
-                                <label>Admission Year</label>
-                                <select [(ngModel)]="item.admissionYear" [name]="'admY_' + $index">
+                                <label>Admission Year *</label>
+                                <select [(ngModel)]="item.admissionYear" [name]="'admY_' + $index" required
+                                    #admMi="ngModel" [class.border-red-500]="admMi.invalid && admMi.touched">
                                     <option [value]="null">Select...</option>
                                     @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Passing Year (Graduation)</label>
-                                <select [(ngModel)]="item.passingYear" [name]="'passY_' + $index">
+                                <label>Passing Year (Graduation) *</label>
+                                <select [(ngModel)]="item.passingYear" [name]="'passY_' + $index" required
+                                    #passMi="ngModel" [class.border-red-500]="passMi.invalid && passMi.touched">
                                     <option [value]="null">Select...</option>
                                     @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
                                 </select>
@@ -346,11 +358,11 @@
                 <div class="form-grid mb-12">
                     <div class="form-group full">
                         <label>Primary Designation & Organization</label>
-                        <input type="text" [(ngModel)]="profile.designation" name="profileDesignation" placeholder="e.g. Lead Architect at BuildRight">
+                        <input type="text" [(ngModel)]="profile.designation" name="profileDesignation" maxlength="300" placeholder="e.g. Lead Architect at BuildRight">
                     </div>
                     <div class="form-group">
                         <label>Industry Sector</label>
-                        <input type="text" list="sector-list" [(ngModel)]="profile.professionalSector" name="profileSector">
+                        <input type="text" list="sector-list" [(ngModel)]="profile.professionalSector" name="profileSector" maxlength="100">
                     </div>
                 </div>
             </div>
@@ -373,30 +385,34 @@
                         
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Organisation / Company</label>
-                                <input type="text" [(ngModel)]="work.organizationName" [name]="'org_' + $index" placeholder="Company Name">
+                                <label>Organisation / Company *</label>
+                                <input type="text" [(ngModel)]="work.organizationName" [name]="'org_' + $index" required maxlength="250"
+                                    #pOrgM="ngModel" [class.border-red-500]="pOrgM.invalid && pOrgM.touched" placeholder="Company Name">
                             </div>
                             <div class="form-group">
-                                <label>Official Designation</label>
-                                <input type="text" [(ngModel)]="work.designation" [name]="'des_' + $index" placeholder="Chief Executive / Manager">
+                                <label>Official Designation *</label>
+                                <input type="text" [(ngModel)]="work.designation" [name]="'des_' + $index" required maxlength="150"
+                                    #pDesM="ngModel" [class.border-red-500]="pDesM.invalid && pDesM.touched" placeholder="Chief Executive / Manager">
                             </div>
 
                             <div class="form-group">
                                 <label>Career Sector</label>
-                                <input type="text" list="sector-list" [(ngModel)]="work.sector" [name]="'sec_' + $index">
+                                <input type="text" list="sector-list" [(ngModel)]="work.sector" [name]="'sec_' + $index" maxlength="100">
                             </div>
                             <div class="form-group">
                                 <label>Work Location</label>
-                                <input type="text" [(ngModel)]="work.location" [name]="'loc_' + $index" placeholder="City, Country">
+                                <input type="text" [(ngModel)]="work.location" [name]="'loc_' + $index" maxlength="200" placeholder="City, Country">
                             </div>
                             
                             <div class="form-group">
-                                <label>Date of Induction</label>
-                                <input type="date" [(ngModel)]="work.startDate" [name]="'sD_' + $index">
+                                <label>Date of Induction *</label>
+                                <input type="date" [(ngModel)]="work.startDate" [name]="'sD_' + $index" required
+                                    #pSdM="ngModel" [class.border-red-500]="pSdM.invalid && pSdM.touched">
                             </div>
                             <div class="form-group" *ngIf="!work.isCurrent">
-                                <label>Retirement / Resignation Date</label>
-                                <input type="date" [(ngModel)]="work.endDate" [name]="'eD_' + $index">
+                                <label>Retirement / Resignation Date *</label>
+                                <input type="date" [(ngModel)]="work.endDate" [name]="'eD_' + $index" required
+                                    #pEdM="ngModel" [class.border-red-500]="pEdM.invalid && pEdM.touched">
                             </div>
 
                             <div class="input-group full py-2">
@@ -423,16 +439,19 @@
                 </div>
                 <div class="form-grid mb-4">
                     <div class="form-group full">
-                        <label>Contact Person Legal Name</label>
-                        <input type="text" [(ngModel)]="profile.emergencyContactName" name="ecName">
+                        <label>Contact Person Legal Name *</label>
+                        <input type="text" [(ngModel)]="profile.emergencyContactName" name="ecName" required maxlength="200"
+                            #ecnM="ngModel" [class.border-red-500]="ecnM.invalid && ecnM.touched">
                     </div>
                     <div class="form-group">
-                        <label>Consanguinity / Relation</label>
-                        <input type="text" [(ngModel)]="profile.emergencyContactRelation" name="ecRel">
+                        <label>Consanguinity / Relation *</label>
+                        <input type="text" [(ngModel)]="profile.emergencyContactRelation" name="ecRel" required maxlength="100"
+                            #ecrM="ngModel" [class.border-red-500]="ecrM.invalid && ecrM.touched">
                     </div>
                     <div class="form-group">
-                        <label>Primary Phone Number</label>
-                        <input type="text" [(ngModel)]="profile.emergencyContactPhone" name="ecPhone">
+                        <label>Primary Phone Number *</label>
+                        <input type="text" [(ngModel)]="profile.emergencyContactPhone" name="ecPhone" required pattern="01[3-9]\d{8}"
+                            #ecpM="ngModel" [class.border-red-500]="ecpM.invalid && ecpM.touched">
                     </div>
                 </div>
             </div>
@@ -444,12 +463,14 @@
                 </div>
                 <div class="form-grid mb-4">
                     <div class="form-group full">
-                        <label>Present Primary Address</label>
-                        <textarea [(ngModel)]="profile.presentAddress" name="presentAddress" rows="2"></textarea>
+                        <label>Present Primary Address *</label>
+                        <textarea [(ngModel)]="profile.presentAddress" name="presentAddress" rows="2" required maxlength="500"
+                            #presAM="ngModel" [class.border-red-500]="presAM.invalid && presAM.touched"></textarea>
                     </div>
                     <div class="form-group full">
-                        <label>Permanent Residential Address</label>
-                        <textarea [(ngModel)]="profile.permanentAddress" name="permanentAddress" rows="2"></textarea>
+                        <label>Permanent Residential Address *</label>
+                        <textarea [(ngModel)]="profile.permanentAddress" name="permanentAddress" rows="2" required maxlength="500"
+                            #permAM="ngModel" [class.border-red-500]="permAM.invalid && permAM.touched"></textarea>
                     </div>
                 </div>
             </div>

@@ -24,7 +24,10 @@ export class Contact {
   };
 
   onSubmit(form: any) {
-    if (form.invalid) return;
+    if (form.invalid) {
+      form.control.markAllAsTouched();
+      return;
+    }
     this.loading.set(true);
 
     this.contactService.sendMessage(this.model).subscribe({

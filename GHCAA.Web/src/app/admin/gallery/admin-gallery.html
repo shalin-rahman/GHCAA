@@ -14,18 +14,24 @@
     @if (showForm()) {
     <div class="admin-card glass-card animate-fade mb-8">
         <h3>{{ editingId() ? 'Update Album Metadata' : 'Launch New Album' }}</h3>
-        <form (submit)="onSubmit()" class="admin-form">
+        <form #albumForm="ngForm" (submit)="onSubmit(albumForm)" class="admin-form">
             <div class="form-grid">
                 <div class="form-group">
                     <label>Album Title <span class="required-star">*</span></label>
                     <input type="text" [(ngModel)]="newGallery.title" name="title" required #titleInput="ngModel"
                         [class.border-red-500]="titleInput.invalid && titleInput.touched"
                         placeholder="e.g. Annual Picnic 2024">
+                    <div *ngIf="titleInput.touched && titleInput.invalid" class="text-[10px] text-red-500 mt-1">
+                        Title is required.
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Event Date <span class="required-star">*</span></label>
                     <input type="date" [(ngModel)]="newGallery.eventDate" name="date" required #dateInput="ngModel"
                         [class.border-red-500]="dateInput.invalid && dateInput.touched">
+                    <div *ngIf="dateInput.touched && dateInput.invalid" class="text-[10px] text-red-500 mt-1">
+                        Date is required.
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Location</label>

@@ -55,8 +55,13 @@ export class AdminThemes implements OnInit {
     }
 
     saveTheme() {
-        if (!this.selectedTheme.title) {
-            this.notify.warning('Please enter a title');
+        if (!this.selectedTheme.title || !this.selectedTheme.startDate || !this.selectedTheme.endDate) {
+            this.notify.warning('Title, Start Date and End Date are mandatory assets.');
+            return;
+        }
+
+        if (new Date(this.selectedTheme.endDate) < new Date(this.selectedTheme.startDate)) {
+            this.notify.warning('Theme end date must be after or on the start date.');
             return;
         }
 

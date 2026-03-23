@@ -77,7 +77,10 @@ namespace GHCAA.Tests
             {
                 Title = title,
                 Description = "Test Description",
-                Date = DateTime.UtcNow.AddDays(30),
+                StartDate = DateTime.UtcNow.AddDays(30),
+                EndDate = DateTime.UtcNow.AddDays(30).AddHours(4),
+                RegistrationStartDate = DateTime.UtcNow.AddDays(-1), // Open natively
+                RegistrationEndDate = DateTime.UtcNow.AddDays(29), // Closes 1 day before
                 Location = "Test Location",
                 RegistrationFee = fee,
                 IsActive = true

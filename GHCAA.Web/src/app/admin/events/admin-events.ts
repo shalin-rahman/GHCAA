@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { EventsService } from '../../core/services/events.service';
 import { AlumniEvent, EventRegistration } from '../../core/models/business.models';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
@@ -64,19 +64,43 @@ export class AdminEvents implements OnInit {
     selectedLogo = signal<File | null>(null);
     logoPreview = signal<string | null>(null);
 
+    /** Cross-field date validation: endDate > startDate; regEnd > regStart; regEnd ≤ startDate */
+    static eventDatesValidator(group: AbstractControl): ValidationErrors | null {
+        const start = group.get('startDate')?.value;
+        const end = group.get('endDate')?.value;
+        const regStart = group.get('registrationStartDate')?.value;
+        const regEnd = group.get('registrationEndDate')?.value;
+
+        const errors: ValidationErrors = {};
+
+        if (start && end && new Date(end) <= new Date(start)) {
+            errors['endBeforeStart'] = 'Event end date must be after the start date.';
+        }
+        if (regStart && regEnd && new Date(regEnd) <= new Date(regStart)) {
+            errors['regEndBeforeRegStart'] = 'Registration close date must be after the registration open date.';
+        }
+        if (regEnd && start && new Date(regEnd) > new Date(start)) {
+            errors['regEndAfterEventStart'] = 'Registration should close on or before the event start date.';
+        }
+
+        return Object.keys(errors).length ? errors : null;
+    }
+
     eventForm = this.fb.group({
         title: ['', Validators.required],
         description: ['', Validators.required],
-        date: ['', Validators.required],
+        startDate: ['', Validators.required],
+        endDate: ['', Validators.required],
         location: ['', Validators.required],
         registrationFee: [0],
         requiresPayment: [true],
-        registrationDeadline: [''],
+        registrationStartDate: [''],
+        registrationEndDate: [''],
         adminNote: [''],
         isActive: [true],
         allowNonMembers: [false],
         imageUrl: ['']
-    });
+    }, { validators: AdminEvents.eventDatesValidator });
 
     ngOnInit() {
         this.loadAllEvents();
@@ -150,11 +174,13 @@ export class AdminEvents implements OnInit {
         this.eventForm.patchValue({
             title: ev.title,
             description: ev.description,
-            date: ev.date ? new Date(ev.date).toISOString().slice(0, 16) : '',
+            startDate: ev.startDate ? new Date(ev.startDate).toISOString().slice(0, 16) : '',
+            endDate: ev.endDate ? new Date(ev.endDate).toISOString().slice(0, 16) : '',
             location: ev.location,
             registrationFee: ev.registrationFee,
             requiresPayment: ev.requiresPayment,
-            registrationDeadline: ev.registrationDeadline ? new Date(ev.registrationDeadline).toISOString().slice(0, 16) : '',
+            registrationStartDate: ev.registrationStartDate ? new Date(ev.registrationStartDate).toISOString().slice(0, 16) : '',
+            registrationEndDate: ev.registrationEndDate ? new Date(ev.registrationEndDate).toISOString().slice(0, 16) : '',
             adminNote: ev.adminNote,
             isActive: ev.isActive,
             allowNonMembers: ev.allowNonMembers
@@ -176,8 +202,19 @@ export class AdminEvents implements OnInit {
     }
 
     submitEvent() {
+        this.eventForm.markAllAsTouched();
+
         if (this.eventForm.invalid) {
-            this.notify.error('Please complete all required fields.');
+            const errors = this.eventForm.errors;
+            if (errors?.['endBeforeStart']) {
+                this.notify.error(errors['endBeforeStart']);
+            } else if (errors?.['regEndBeforeRegStart']) {
+                this.notify.error(errors['regEndBeforeRegStart']);
+            } else if (errors?.['regEndAfterEventStart']) {
+                this.notify.error(errors['regEndAfterEventStart']);
+            } else {
+                this.notify.error('Please complete all required fields.');
+            }
             return;
         }
 
@@ -196,8 +233,10 @@ export class AdminEvents implements OnInit {
             title: raw.title || '',
             description: raw.description || '',
             location: raw.location || '',
-            date: toSafeISO(raw.date)!,
-            registrationDeadline: toSafeISO(raw.registrationDeadline),
+            startDate: toSafeISO(raw.startDate)!,
+            endDate: toSafeISO(raw.endDate)!,
+            registrationStartDate: toSafeISO(raw.registrationStartDate),
+            registrationEndDate: toSafeISO(raw.registrationEndDate),
             registrationFee: raw.registrationFee || 0,
             requiresPayment: raw.requiresPayment ?? true,
             adminNote: raw.adminNote || undefined,

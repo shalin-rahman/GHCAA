@@ -58,7 +58,11 @@ export class AdminRoles implements OnInit {
     }
 
     createAdmin() {
-        if (this.createForm.invalid) return;
+        if (this.createForm.invalid) {
+            this.createForm.markAllAsTouched();
+            this.notify.error('Please provide a valid username and password (min 6 chars).');
+            return;
+        }
         this.submitting.set(true);
         this.http.post('/api/roles/users', this.createForm.value).subscribe({
             next: () => {

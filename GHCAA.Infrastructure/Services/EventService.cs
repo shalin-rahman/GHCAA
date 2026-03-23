@@ -31,19 +31,21 @@ namespace GHCAA.Infrastructure.Services
         {
             return await _context.AlumniEvents
                 .Where(e => e.IsActive)
-                .OrderBy(e => e.Date)
+                .OrderBy(e => e.StartDate)
                 .Select(e => new EventDto
                 {
                     Id = e.Id,
                     Title = e.Title,
                     Description = e.Description,
-                    Date = e.Date,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
                     Location = e.Location,
                     RegistrationFee = e.RegistrationFee,
                     RequiresPayment = e.RequiresPayment,
                     IsActive = e.IsActive,
                     ImageUrl = e.ImageUrl,
-                    RegistrationDeadline = e.RegistrationDeadline,
+                    RegistrationStartDate = e.RegistrationStartDate,
+                    RegistrationEndDate = e.RegistrationEndDate,
                     AdminNote = e.AdminNote,
                     ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
                 })
@@ -59,13 +61,15 @@ namespace GHCAA.Infrastructure.Services
                     Id = e.Id,
                     Title = e.Title,
                     Description = e.Description,
-                    Date = e.Date,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
                     Location = e.Location,
                     RegistrationFee = e.RegistrationFee,
                     RequiresPayment = e.RequiresPayment,
                     IsActive = e.IsActive,
                     ImageUrl = e.ImageUrl,
-                    RegistrationDeadline = e.RegistrationDeadline,
+                    RegistrationStartDate = e.RegistrationStartDate,
+                    RegistrationEndDate = e.RegistrationEndDate,
                     AdminNote = e.AdminNote,
                     ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
                 })
@@ -82,13 +86,15 @@ namespace GHCAA.Infrastructure.Services
                 Id = e.Id,
                 Title = e.Title,
                 Description = e.Description,
-                Date = e.Date,
+                StartDate = e.StartDate,
+                EndDate = e.EndDate,
                 Location = e.Location,
                 RegistrationFee = e.RegistrationFee,
                 RequiresPayment = e.RequiresPayment,
                 IsActive = e.IsActive,
                 ImageUrl = e.ImageUrl,
-                RegistrationDeadline = e.RegistrationDeadline,
+                RegistrationStartDate = e.RegistrationStartDate,
+                RegistrationEndDate = e.RegistrationEndDate,
                 AdminNote = e.AdminNote,
                 ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
             };
@@ -100,14 +106,18 @@ namespace GHCAA.Infrastructure.Services
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                Date = DateTime.SpecifyKind(dto.Date, DateTimeKind.Utc),
+                StartDate = DateTime.SpecifyKind(dto.StartDate, DateTimeKind.Utc),
+                EndDate = DateTime.SpecifyKind(dto.EndDate, DateTimeKind.Utc),
                 Location = dto.Location,
                 RegistrationFee = dto.RegistrationFee,
                 RequiresPayment = dto.RequiresPayment,
                 IsActive = dto.IsActive,
                 ImageUrl = dto.ImageUrl,
-                RegistrationDeadline = dto.RegistrationDeadline.HasValue 
-                    ? DateTime.SpecifyKind(dto.RegistrationDeadline.Value, DateTimeKind.Utc) 
+                RegistrationStartDate = dto.RegistrationStartDate.HasValue
+                    ? DateTime.SpecifyKind(dto.RegistrationStartDate.Value, DateTimeKind.Utc)
+                    : null,
+                RegistrationEndDate = dto.RegistrationEndDate.HasValue
+                    ? DateTime.SpecifyKind(dto.RegistrationEndDate.Value, DateTimeKind.Utc)
                     : null,
                 AllowNonMembers = dto.AllowNonMembers,
                 AdminNote = dto.AdminNote,
@@ -126,14 +136,18 @@ namespace GHCAA.Infrastructure.Services
 
             alumniEvent.Title = dto.Title;
             alumniEvent.Description = dto.Description;
-            alumniEvent.Date = DateTime.SpecifyKind(dto.Date, DateTimeKind.Utc);
+            alumniEvent.StartDate = DateTime.SpecifyKind(dto.StartDate, DateTimeKind.Utc);
+            alumniEvent.EndDate = DateTime.SpecifyKind(dto.EndDate, DateTimeKind.Utc);
             alumniEvent.Location = dto.Location;
             alumniEvent.RegistrationFee = dto.RegistrationFee;
             alumniEvent.RequiresPayment = dto.RequiresPayment;
             alumniEvent.IsActive = dto.IsActive;
             alumniEvent.ImageUrl = dto.ImageUrl;
-            alumniEvent.RegistrationDeadline = dto.RegistrationDeadline.HasValue 
-                ? DateTime.SpecifyKind(dto.RegistrationDeadline.Value, DateTimeKind.Utc) 
+            alumniEvent.RegistrationStartDate = dto.RegistrationStartDate.HasValue
+                ? DateTime.SpecifyKind(dto.RegistrationStartDate.Value, DateTimeKind.Utc)
+                : null;
+            alumniEvent.RegistrationEndDate = dto.RegistrationEndDate.HasValue
+                ? DateTime.SpecifyKind(dto.RegistrationEndDate.Value, DateTimeKind.Utc)
                 : null;
             alumniEvent.AllowNonMembers = dto.AllowNonMembers;
             alumniEvent.AdminNote = dto.AdminNote;
@@ -157,10 +171,15 @@ namespace GHCAA.Infrastructure.Services
             var alumniEvent = await _context.AlumniEvents.FindAsync(new object[] { dto.EventId }, cancellationToken);
             if (alumniEvent == null) throw new ArgumentException("Event not found");
 
-            if (!alumniEvent.IsActive || (alumniEvent.RegistrationDeadline.HasValue && alumniEvent.RegistrationDeadline.Value < DateTime.UtcNow))
-            {
-                throw new InvalidOperationException("Registration is closed for this event.");
-            }
+            if (!alumniEvent.IsActive)
+                throw new InvalidOperationException("This event is not currently active.");
+
+            var now = DateTime.UtcNow;
+            if (alumniEvent.RegistrationStartDate.HasValue && now < alumniEvent.RegistrationStartDate.Value)
+                throw new InvalidOperationException("Registration for this event has not opened yet.");
+
+            if (alumniEvent.RegistrationEndDate.HasValue && now > alumniEvent.RegistrationEndDate.Value)
+                throw new InvalidOperationException("Registration for this event is closed.");
 
             // Check for existing registration for this event
             bool alreadyRegistered = false;
@@ -313,7 +332,7 @@ namespace GHCAA.Infrastructure.Services
             var customVars = new Dictionary<string, string>
             {
                 { "EventTitle", registration.Event.Title },
-                { "EventDate", registration.Event.Date.ToString("f") },
+                { "EventDate", registration.Event.StartDate.ToString("f") },
                 { "EventLocation", registration.Event.Location },
                 { "FullName", name },
                 { "Status", registration.Status.ToString() },

@@ -281,8 +281,10 @@ export class Events implements OnInit {
 
   isRegistrationOpen(ev: AlumniEvent): boolean {
     if (!ev.isActive) return false;
-    if (!ev.registrationDeadline) return true;
-    return new Date(ev.registrationDeadline) > new Date();
+    const now = new Date();
+    if (ev.registrationStartDate && new Date(ev.registrationStartDate) > now) return false;
+    if (ev.registrationEndDate && new Date(ev.registrationEndDate) < now) return false;
+    return true;
   }
 
   askAdmin(ev: AlumniEvent) {
@@ -311,8 +313,10 @@ export class Events implements OnInit {
   }
 
   getCalendarLink(ev: AlumniEvent): string {
-    const start = new Date(ev.date).toISOString().replace(/-|:|\.\d+/g, '');
-    const end = new Date(new Date(ev.date).getTime() + 7200000).toISOString().replace(/-|:|\.\d+/g, ''); // 2h default
+    const start = new Date(ev.startDate).toISOString().replace(/-|:|\.\d+/g, '');
+    const end = ev.endDate
+      ? new Date(ev.endDate).toISOString().replace(/-|:|\.\d+/g, '')
+      : new Date(new Date(ev.startDate).getTime() + 7200000).toISOString().replace(/-|:|\.\d+/g, '');
     return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.title)}&dates=${start}/${end}&details=${encodeURIComponent(ev.description)}&location=${encodeURIComponent(ev.location)}`;
   }
 

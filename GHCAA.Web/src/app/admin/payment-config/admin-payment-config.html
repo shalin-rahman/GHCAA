@@ -79,7 +79,8 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div class="input-group">
                       <label>Frontend Display Name *</label>
-                      <input type="text" formControlName="displayName">
+                      <input type="text" formControlName="displayName" [class.border-red-500]="form.get('displayName')?.invalid && form.get('displayName')?.touched">
+                      <div *ngIf="form.get('displayName')?.invalid && form.get('displayName')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Display name is required</div>
                   </div>
                   <div class="input-group">
                       <label>Network Emoji/Icon</label>

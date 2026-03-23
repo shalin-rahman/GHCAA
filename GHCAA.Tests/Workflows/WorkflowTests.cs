@@ -111,7 +111,8 @@ namespace GHCAA.Tests.Workflows
                 Title = "Annual Picnic",
                 Description = "A fun day out for all alumni",
                 Location = "Dhaka City Park",
-                Date = DateTime.UtcNow.AddDays(30),
+                StartDate = DateTime.UtcNow.AddDays(30),
+                EndDate = DateTime.UtcNow.AddDays(31),
                 RegistrationFee = 500,
                 IsActive = true
             };

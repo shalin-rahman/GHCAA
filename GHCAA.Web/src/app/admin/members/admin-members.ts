@@ -291,6 +291,12 @@ export class AdminMembers implements OnInit {
       return;
     }
 
+    const mobilePattern = /^01[3-9]\d{8}$/;
+    if (!mobilePattern.test(member.mobileNo)) {
+      this.notify.error('Please enter a valid 11-digit Bangladeshi mobile number.');
+      return;
+    }
+
     ensureValidAcademicData(member);
 
     this.adminService.updateMember(member.id, {

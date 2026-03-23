@@ -28,7 +28,12 @@ export class Login {
     this.showPassword.set(!this.showPassword());
   }
 
-  onLogin() {
+  onLogin(form: any) {
+    if (form.invalid) {
+      form.control.markAllAsTouched();
+      return;
+    }
+
     this.loading.set(true);
     this.errorMessage.set('');
 
@@ -43,7 +48,7 @@ export class Login {
       },
       error: (err) => {
         this.loading.set(false);
-        this.errorMessage.set('Invalid username or password.');
+        this.errorMessage.set(err.error?.message || 'Invalid username or password.');
       }
     });
   }

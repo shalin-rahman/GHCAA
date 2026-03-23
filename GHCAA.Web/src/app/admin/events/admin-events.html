@@ -96,8 +96,12 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="input-group">
-                        <label>Participation Deadline</label>
-                        <input type="datetime-local" formControlName="registrationDeadline">
+                        <label>Registration Opens</label>
+                        <input type="datetime-local" formControlName="registrationStartDate">
+                    </div>
+                    <div class="input-group">
+                        <label>Registration Closes (Deadline)</label>
+                        <input type="datetime-local" formControlName="registrationEndDate">
                     </div>
                     <div class="input-group">
                         <label>Public Secretariat Note</label>
@@ -133,6 +137,29 @@
                     </div>
                 </div>
 
+                <!-- Cross-field date validation errors -->
+                @if (eventForm.errors && eventForm.touched) {
+                <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-fade-in">
+                    <div class="flex items-start gap-3">
+                        <span class="text-xl mt-0.5">⚠️</span>
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2">Date Configuration Error</p>
+                            <ul class="space-y-1">
+                                @if (eventForm.errors['endBeforeStart']) {
+                                <li class="text-xs text-red-300">• {{ eventForm.errors['endBeforeStart'] }}</li>
+                                }
+                                @if (eventForm.errors['regEndBeforeRegStart']) {
+                                <li class="text-xs text-red-300">• {{ eventForm.errors['regEndBeforeRegStart'] }}</li>
+                                }
+                                @if (eventForm.errors['regEndAfterEventStart']) {
+                                <li class="text-xs text-red-300">• {{ eventForm.errors['regEndAfterEventStart'] }}</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                }
+
                 <div class="flex gap-4 pt-4 border-t border-white/5">
                     <button type="button" (click)="showForm.set(false)"
                         class="btn btn-secondary flex-1 py-4 h-14">Discard
@@ -143,6 +170,7 @@
                     </button>
                 </div>
             </form>
+
         </div>
     </div>
     }
@@ -180,8 +208,8 @@
 
                 <!-- Date Badge -->
                 <div class="date-box w-16 h-16 bg-surface border border-white/5 rounded-2xl flex flex-col items-center justify-center group-hover:bg-accent/10 transition-colors">
-                    <span class="text-xl font-black text-accent">{{ ev.date | date:'dd' }}</span>
-                    <span class="text-[10px] uppercase font-bold text-muted">{{ ev.date | date:'MMM' }}</span>
+                    <span class="text-xl font-black text-accent">{{ ev.startDate | date:'dd' }}</span>
+                    <span class="text-[10px] uppercase font-bold text-muted">{{ ev.startDate | date:'MMM' }}</span>
                 </div>
 
                 <!-- Info -->
@@ -193,7 +221,7 @@
                             {{ ev.isActive ? 'Active' : 'Archived' }}
                         </span>
                     </div>
-                    <p class="meta">{{ ev.location }} • {{ ev.date | date:'shortTime' }}</p>
+                    <p class="meta">{{ ev.location }} • {{ ev.startDate | date:'shortTime' }} – {{ ev.endDate | date:'shortTime' }}</p>
                 </div>
 
                 <!-- Actions -->
@@ -363,7 +391,7 @@
                         </div>
                     }
                     <h3 class="text-accent">{{ ev.title }}</h3>
-                    <p class="text-xs uppercase font-black tracking-widest text-muted mt-1">{{ ev.location }} • {{ ev.date | date:'longDate' }}</p>
+                    <p class="text-xs uppercase font-black tracking-widest text-muted mt-1">{{ ev.location }} • {{ ev.startDate | date:'longDate' }} – {{ ev.endDate | date:'longDate' }}</p>
                 </div>
                 <button (click)="closeDetail()" class="close-btn">✕</button>
             </div>
@@ -379,8 +407,12 @@
                         <p>{{ ((ev?.registrationFee || 0) > 0) ? (ev?.registrationFee | currency:'BDT ':'symbol':'1.0-0') : 'Free Entry Access' }}</p>
                     </div>
                     <div class="data-field-box">
-                        <h5>Registry Deadline</h5>
-                        <p>{{ ev.registrationDeadline | date:'medium' }}</p>
+                        <h5>Registration Opens</h5>
+                        <p>{{ (ev.registrationStartDate | date:'medium') || 'Immediately' }}</p>
+                    </div>
+                    <div class="data-field-box">
+                        <h5>Registration Closes</h5>
+                        <p>{{ (ev.registrationEndDate | date:'medium') || 'Open until event' }}</p>
                     </div>
                 </div>
 

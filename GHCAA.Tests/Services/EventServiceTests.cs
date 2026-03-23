@@ -32,7 +32,7 @@ public class EventServiceTests : TestBase
     [Test]
     public async Task CreateEventAsync_ShouldAddEvent()
     {
-        var dto = new CreateEventDto { Title = "Test Event", Description = "Test Description", Date = DateTime.UtcNow.AddDays(10), Location = "Test Location", RegistrationFee = 100, IsActive = true, RegistrationDeadline = DateTime.UtcNow.AddDays(5), AdminNote = "Staff only" };
+        var dto = new CreateEventDto { Title = "Test Event", Description = "Test Description", Location = "Dhaka City Park", StartDate = DateTime.UtcNow.AddDays(30), EndDate = DateTime.UtcNow.AddDays(31), RegistrationFee = 100, IsActive = true, RegistrationEndDate = DateTime.UtcNow.AddDays(5), AdminNote = "Staff only" };
         var result = await _service.CreateEventAsync(dto);
 
         result.Should().NotBeNull();
@@ -45,7 +45,7 @@ public class EventServiceTests : TestBase
     public async Task RegisterForEventAsync_ShouldCreateRegistration()
     {
 var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", MobileNo = "12", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-        var ev = new AlumniEvent { Title = "Event 1", Description = "D", Date = DateTime.UtcNow, Location = "L" };
+        var ev = new AlumniEvent { Title = "Event 1", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
         _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
@@ -62,7 +62,7 @@ var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", Mobil
     public async Task ApproveRegistrationAsync_ShouldUpdateStatusAndSendEmail()
     {
 var member = new Member { FullName = "Test Member", Email = "evtest@example.com", NID = "EVT1", MobileNo = "EVT1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-        var ev = new AlumniEvent { Title = "Grand Reunion", Description = "D", Date = DateTime.UtcNow, Location = "Campus" };
+        var ev = new AlumniEvent { Title = "Grand Reunion", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "Campus" };
         _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
@@ -90,7 +90,7 @@ var member = new Member { FullName = "Test Member", Email = "evtest@example.com"
     public async Task RegisterForEventAsync_ShouldIncludeReceiptPath_WhenFileProvided()
     {
 var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", MobileNo = "123", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-        var ev = new AlumniEvent { Title = "E", Description = "D", Date = DateTime.UtcNow, Location = "L" };
+        var ev = new AlumniEvent { Title = "E", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
         _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
@@ -106,22 +106,22 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
     [Test]
     public async Task RegisterForEventAsync_ShouldThrowException_WhenDeadlinePassed()
     {
-        var ev = new AlumniEvent { Title = "Past Event", Description = "D", Date = DateTime.UtcNow, Location = "L", RegistrationDeadline = DateTime.UtcNow.AddHours(-1) };
+        var ev = new AlumniEvent { Title = "Past Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", RegistrationEndDate = DateTime.UtcNow.AddHours(-1) };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
         Func<Task> act = async () => await _service.RegisterForEventAsync(new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P" }, 1, null);
-        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Registration is closed*");
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Registration for this event is closed.");
     }
 
     [Test]
     public async Task UpdateEventAsync_ShouldUpdateAllFields()
     {
-        var ev = new AlumniEvent { Title = "Old Title", Description = "D", Date = DateTime.UtcNow, Location = "L" };
+        var ev = new AlumniEvent { Title = "Old Title", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
-        var result = await _service.UpdateEventAsync(new UpdateEventDto { Id = ev.Id, Title = "New Title", Description = "New D", Date = DateTime.UtcNow.AddDays(1), Location = "New Loc", AdminNote = "Important Update" });
+        var result = await _service.UpdateEventAsync(new UpdateEventDto { Id = ev.Id, Title = "New Title", Description = "New D", StartDate = DateTime.UtcNow.AddDays(1), EndDate = DateTime.UtcNow.AddDays(2), Location = "New Loc", AdminNote = "Important Update" });
 
         result.Should().NotBeNull();
         result!.Title.Should().Be("New Title");
@@ -131,7 +131,7 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
     [Test]
     public async Task RegisterForEventAsync_NonMember_ShouldFail_WhenEventDoesNotAllow()
     {
-        var ev = new AlumniEvent { Title = "Member Only", Description = "D", Date = DateTime.UtcNow, Location = "L", AllowNonMembers = false };
+        var ev = new AlumniEvent { Title = "Member Only", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", AllowNonMembers = false };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
@@ -144,7 +144,7 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
     [Test]
     public async Task RegisterForEventAsync_NonMember_ShouldSucceed_WhenEventAllows()
     {
-        var ev = new AlumniEvent { Title = "Open Event", Description = "D", Date = DateTime.UtcNow, Location = "L", AllowNonMembers = true };
+        var ev = new AlumniEvent { Title = "Open Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", AllowNonMembers = true };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
@@ -160,7 +160,7 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
     [Test]
     public async Task UpdateEventLogoAsync_ShouldUpdateImageUrl()
     {
-        var ev = new AlumniEvent { Title = "Event", Description = "D", Date = DateTime.UtcNow, Location = "L" };
+        var ev = new AlumniEvent { Title = "Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
@@ -178,7 +178,7 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
     [Test]
     public async Task GetAllRegistrationsForAdminAsync_ShouldIncludeReceiptPath()
     {
-        var ev = new AlumniEvent { Title = "Event 1", Description = "D", Date = DateTime.UtcNow, Location = "L" };
+        var ev = new AlumniEvent { Title = "Event 1", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
@@ -201,4 +201,45 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
         
         path.Should().Be("/uploads/receipt.pdf");
     }
+
+    [Test]
+    public async Task DeleteEventAsync_ShouldRemoveEventIfNoRegistrations()
+    {
+        var ev = new AlumniEvent { Title = "Empty Event", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(1), Location = "L" };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.DeleteEventAsync(ev.Id);
+        result.Should().BeTrue();
+        _context.AlumniEvents.Any(e => e.Id == ev.Id).Should().BeFalse();
+    }
+
+    [Test]
+    public async Task CheckInParticipantAsync_ShouldSetCheckInTime()
+    {
+        var reg = new EventRegistration { EventId = 1, MemberId = 1, Status = EventRegistrationStatus.Approved, TicketCode = "TC-1" };
+        _context.EventRegistrations.Add(reg);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.CheckInParticipantAsync(reg.Id);
+        result.Should().BeTrue();
+        var updated = await _context.EventRegistrations.FindAsync(reg.Id);
+        updated!.CheckInTime.Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task AddEventExpenseAsync_ShouldCreateExpense()
+    {
+        var ev = new AlumniEvent { Title = "Exp Event", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(1), Location = "L" };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var dto = new AddEventExpenseDto { EventId = ev.Id, Category = "Catering", Amount = 500, Description = "Lunch" };
+        var result = await _service.AddEventExpenseAsync(dto);
+
+        result.Should().NotBeNull();
+        result.Amount.Should().Be(500);
+        _context.EventExpenses.Any(ex => ex.Id == result.Id).Should().BeTrue();
+    }
 }
+

@@ -241,4 +241,52 @@ public class FinancialServiceTests : TestBase
         var exists = await _context.SavedPaymentMethods.AnyAsync(m => m.Id == method.Id);
         exists.Should().BeFalse();
     }
+
+    [Test]
+    public async Task GetMembershipFeeConfigsAsync_ShouldReturnAllConfigs()
+    {
+        // Setup ensures at least 1 config exists.
+        var configs = await _service.GetMembershipFeeConfigsAsync();
+        configs.Should().NotBeEmpty();
+    }
+
+    [Test]
+    public async Task UpdateMembershipFeeConfigAsync_ShouldModifyExistingConfig()
+    {
+        var current = await _context.MembershipFeeConfigs.FirstAsync();
+        var dto = new UpdateMembershipFeeConfigDto { Id = current.Id, Amount = 9999, EffectiveDate = current.EffectiveDate, Description = "Updated" };
+        
+        var result = await _service.UpdateMembershipFeeConfigAsync(dto, 1);
+        
+        result.Amount.Should().Be(9999);
+        var updated = await _context.MembershipFeeConfigs.FindAsync(current.Id);
+        updated!.Amount.Should().Be(9999);
+    }
+
+    [Test]
+    public async Task RecordMembershipChangeAsync_ShouldCreateHistoryRecord()
+    {
+        var member = await CreateAndSaveTestMemberAsync("CHG", "chg@e.com", "CHG1", "CHG1");
+        await _service.RecordMembershipChangeAsync(member.Id, "General", "Life", 1, "Upgrade");
+        
+        var history = await _context.MembershipHistories.Where(h => h.MemberId == member.Id).ToListAsync();
+        history.Should().HaveCount(1);
+        history[0].FromType.Should().Be("General");
+        history[0].ToType.Should().Be("Life");
+    }
+
+    [Test]
+    public async Task DeletePaymentAsync_ShouldRemovePaymentAndLogActivity()
+    {
+        var p = new PaymentHistory { MemberId = 1, TransactionId = "DEL-T1", Amount = 100, Status = Enums.PaymentStatus.Completed, PaidAt = DateTime.UtcNow };
+        _context.PaymentHistories.Add(p);
+        await _context.SaveChangesAsync();
+        
+        var result = await _service.DeletePaymentAsync(p.Id);
+        
+        result.Should().BeTrue();
+        var exists = await _context.PaymentHistories.AnyAsync(ph => ph.Id == p.Id);
+        exists.Should().BeFalse();
+    }
 }
+
