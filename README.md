@@ -3,7 +3,7 @@
 Welcome to the GHCAA Platform. This project is a comprehensive digital ecosystem designed to connect Haraganga College Alumni through secure membership, intelligent search, and integrated financial governance.
 
 > [!IMPORTANT]
-> This document and the associated **[Software Requirements Specification (SRS)](file:///c:/Users/HabiburRahmanShalin/.gemini/antigravity/brain/bce7f8da-1836-4cec-9dcf-8854cca6d702/srs_document.md)** serve as the definitive technical handover for the development team.
+> This document and the associated **[Software Requirements Specification (SRS)](SRS.md)** serve as the definitive technical handover for the development team.
 
 ---
 
@@ -39,9 +39,10 @@ This project serves as a highly structured digital ecosystem. The following outl
 - **EC Management & Import:** SuperAdmin tools to manage Executive Committee terms and a bulk Excel importer for legacy member migration.
 
 **D. Networking, Social, & Support**
-- **Smart Directory:** Infinite-scroll member directory heavily governed by privacy toggles.
-- **Job & Mentorship Hub:** Job board with a dedicated workflow to request/offer career mentorship.
-- **Haraganga AI & Communications:** Gemini-powered chat agent for queries. Bulk email and **SMS Gateway** capabilities for administrators to message specific batches.
+- **Smart Directory:** Infinite-scroll member directory heavily governed by privacy toggles. Includes search by batch, department, and professional domain.
+- **Job & Mentorship Hub:** Job board for alumni to post and discover opportunities. Supports career-focused networking.
+- **Haraganga AI & Communications:** Gemini-powered chat agent for queries. Bulk email and **Communication Hub** for administrators to message specific segments (e.g., specific batches).
+- **Direct Messaging:** Peer-to-peer real-time chat between members without exposing private contact info.
 
 ---
 
@@ -71,11 +72,13 @@ The following features and integrations have been prioritized for the next phase
 
 **4. Networking & Engagement**
 - **Granular Privacy Strictness**: Tightly bind the `NetworkingController` Search endpoint to privacy toggles, ensuring DTOs never leak masked fields.
-- **Job Hub Mentorship Flow**: Introduce a structured "Mentorship Request" workflow extending the job posting capabilities.
+- **Improved Peer Chat**: Enhance the messaging flow with read receipts and persistent history.
+- **Haraganga AI Context Extension**: Feed more institutional policy data to the Gemini agent for more accurate support responses.
 
 **5. Deployment & Security Integrations**
 - **SMS Gateway**: Implement an SMS provider (e.g., Twilio, SSLWireless/Banglalink) for OTP verification and time-sensitive notifications.
-- **Automatic Session Termination**: Real-time invalidation of all JWT tokens for a user if their status changes to "Terminated" or "Inactive".
+- **Automatic Session Invalidation**: Real-time invalidation of all JWT tokens for a user if their status changes to "Terminated" or "Inactive".
+- **Real-time Notifications**: SignalR integration for instant alerts on approvals, messages, and event updates.
 
 ---
 
@@ -205,16 +208,16 @@ The following provides a full, structured breakdown of system features, user rol
     - **PII Masking**: Sensitive fields are automatically masked for other members unless the 'Public' toggle is active.
 - **Dependencies**: Profile Controller, Infrastructure Services.
 
-#### 1.4 Digital ID Card Generation
-- **Business Description**: Automatically generates a secure, downloadable digital ID card for verified members.
+#### 1.4 Digital ID Card & Certificate
+- **Business Description**: Automatically generates secure, downloadable digital ID cards and certificates for verified members.
 - **User Roles**: Approved Member.
 - **Inputs/Outputs**:
-    - **Screen**: `/portal/id-card`.
-    - **API**: `GET /api/idcard/generate`.
-    - **Key Fields**: QR Code, Membership ID.
+    - **Screen**: `/portal/profile` (Download buttons).
+    - **API**: `GET /api/profile/id-card`, `GET /api/profile/certificate`.
+    - **Key Fields**: QR Code Data Stream, Membership ID.
 - **Validations & Rules**:
-    - **Eligibility**: Card generation is locked until the `Active` status is achieved.
-    - **Format**: Sequential 4-digit serials (e.g., GHC-2015-0001).
+    - **Eligibility**: Generation locked until `MembershipStatus == Active`.
+    - **Format**: Auto-generated sequential serials during approval.
 - **Dependencies**: ID Card Generation Service.
 
 ### 2. Events & Participation
@@ -267,15 +270,15 @@ The following provides a full, structured breakdown of system features, user rol
     - **API**: `GET /api/financialledger`.
 - **Dependencies**: Financial Ledger Controller.
 
-#### 3.3 Payment Configuration (Admin)
-- **Business Description**: Managing gateway keys, transaction limits, and automated service charges.
+#### 3.3 Payment & Fee Configuration (Admin)
+- **Business Description**: Managing membership fees, registration costs, and gateway settings.
 - **User Roles**: SuperAdmin.
 - **Inputs/Outputs**:
-    - **Screen**: `/admin/payments`.
-    - **API**: `GET /api/finance/configs`, `POST /api/finance/configs`.
+    - **Screen**: `/admin/fee-configs`.
+    - **API**: `GET /api/financials/fees/config`, `POST /api/financials/fees/config`, `PUT /api/financials/fees/config`.
 - **Validations & Rules**:
-    - **Temporal Logic**: Fees applied based on the most recent `EffectiveDate` relative to the billing year.
-- **Dependencies**: Payment Config Controller.
+    - **Temporal Logic**: Fees applied based on the most recent `EffectiveDate` relative to the current year.
+- **Dependencies**: Financials Controller.
 
 ### 4. Networking & Social Features
 #### 4.1 Alumni Directory (Search & Networking)
@@ -283,8 +286,8 @@ The following provides a full, structured breakdown of system features, user rol
 - **User Roles**: Public (Limited), Member (Full).
 - **Inputs/Outputs**:
     - **Screen**: `/directory`.
-    - **API**: `GET /api/networking/members`.
-    - **Key Fields**: Search Query, Batch Filter, Department Filter.
+    - **API**: `GET /api/networking/search`, `GET /api/networking/member/{id}`.
+    - **Key Fields**: Search Query, Batch/Department Filters.
 - **Dependencies**: Networking Service.
 
 #### 4.2 Professional Job Hub
@@ -292,16 +295,16 @@ The following provides a full, structured breakdown of system features, user rol
 - **User Roles**: Member.
 - **Inputs/Outputs**:
     - **Screen**: `/portal/jobs`.
-    - **API**: `GET /api/jobhub`.
+    - **API**: `GET /api/jobs`, `POST /api/jobs`.
 - **Dependencies**: Job Hub Service.
 
 #### 4.3 Direct Peer Messaging
 - **Business Description**: Secure communication channel for members to network without exposing private contact data.
 - **User Roles**: Member.
 - **Inputs/Outputs**:
-    - **Screen**: `/portal/messages`.
-    - **API**: `POST /api/messaging/send`.
-- **Dependencies**: Real-time Messaging Hub.
+    - **Screen**: Chat overlay or `/portal/chat`.
+    - **API**: `POST /api/chat/send`, `GET /api/chat/history/{otherId}`.
+- **Dependencies**: Chat Service, Real-time Hub.
 
 #### 4.4 Gamification & Member Standing
 - **Business Description**: Rewards member engagement with contribution points, ranks, and category badges.
@@ -314,28 +317,28 @@ The following provides a full, structured breakdown of system features, user rol
 - **Dependencies**: Gamification Service.
 
 ### 5. Governance & Operations
-#### 5.1 Executive Committee (EC) Management
+#### 5.1 Executive Committee (EC) Management & Governance
 - **Business Description**: Managing committee periods, roles, and historical records of governance.
 - **User Roles**: Admin, SuperAdmin.
 - **Inputs/Outputs**:
-    - **Screen**: `/admin/members/ec`.
-    - **API**: `POST /api/admingovernance/assign-role`, `POST /api/admingovernance/periods`.
+    - **Screen**: `/admin/governance`.
+    - **API**: `POST /api/admin/governance/periods`, `POST /api/admin/governance/periods/{id}/members`.
 - **Validations & Rules**:
     - **Continuity**: Prevents temporal overlaps between EC periods.
-    - **Exclusivity**: President, GS, and Treasurer roles are unique per term.
-    - **Eligibility**: Restricted to 'Active' status members only.
+    - **Exclusivity**: Core roles (President, GS, Treasurer) must be unique per term.
+    - **Eligibility**: Restricted to Members with 'Active' status.
 - **Dependencies**: Governance Service.
 
-#### 5.2 Bulk Member Import
-- **Business Description**: Excel-to-Database bridging for migrating legacy records.
+#### 5.2 Bulk Member Import & Export
+- **Business Description**: Excel-to-Database bridging for migrating legacy records and exporting registry data.
 - **User Roles**: SuperAdmin.
 - **Inputs/Outputs**:
-    - **Screen**: `/admin/members` (Import Modal).
-    - **API**: `POST /api/memberimport/upload`.
+    - **Screen**: `/admin/members`.
+    - **API**: `POST /api/admin/members/import`, `GET /api/admin/members/import/export`.
 - **Validations & Rules**:
-    - **Deduplication**: Automatic NID/Email collision detection with graceful auto-suffixing to prevent failures.
-    - **Provisioning**: Transparent creation of User accounts with NID-based credentials during import.
-- **Dependencies**: ClosedXML Service.
+    - **Deduplication**: Automatic NID/Email collision detection.
+    - **Auto-Provisioning**: Creation of User accounts with NID-based credentials during import.
+- **Dependencies**: Member Import Service.
 
 ### 6. Intelligent Assistant (AI)
 #### 6.1 Haraganga AI Assistant

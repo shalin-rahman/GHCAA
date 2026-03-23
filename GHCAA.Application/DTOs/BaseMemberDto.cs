@@ -28,7 +28,7 @@ namespace GHCAA.Application.DTOs
         public DateTime DateOfBirth { get; set; }
 
         [Required(ErrorMessage = "National ID (NID) is required.")]
-        [MinLength(10, ErrorMessage = "NID must be at least 10 characters.")]
+        [MinLength(6, ErrorMessage = "NID must be at least 6 characters.")]
         [MaxLength(20, ErrorMessage = "NID must not exceed 20 characters.")]
         public string NID { get; set; } = null!;
 
@@ -76,12 +76,6 @@ namespace GHCAA.Application.DTOs
         public bool IsAddressPublic { get; set; }
         public bool IsNIDPublic { get; set; }
 
-        [Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the Terms & Conditions.")]
-        public bool HasAcceptedTerms { get; set; }
-
-        [Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the Data Privacy (GDPR) policy.")]
-        public bool HasAcceptedGdpr { get; set; }
-
         // ── Attachments & history ─────────────────────────────────────────────────
         public string? PhotoPath { get; set; }
 
@@ -90,12 +84,5 @@ namespace GHCAA.Application.DTOs
 
         public List<ProfessionalRecordDto> ProfessionalHistory { get; set; } = new();
         public List<ECHistoryDto> ECHistory { get; set; } = new();
-
-        // ── Payment ───────────────────────────────────────────────────────────────
-        [Range(1, int.MaxValue, ErrorMessage = "A valid payment method must be selected.")]
-        public int PaymentMethodId { get; set; }
-
-        [MaxLength(200, ErrorMessage = "Transaction ID must not exceed 200 characters.")]
-        public string? TransactionId { get; set; }
     }
 }

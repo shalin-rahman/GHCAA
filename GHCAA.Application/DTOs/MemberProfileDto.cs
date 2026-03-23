@@ -23,5 +23,8 @@ namespace GHCAA.Application.DTOs
         public int ContributionPoints { get; set; }
         public int Rank { get; set; }
         public decimal ProfileCompletionPercentage { get; set; }
+        
+        public bool HasAcceptedTerms { get; set; }
+        public bool HasAcceptedGdpr { get; set; }
     }
 }

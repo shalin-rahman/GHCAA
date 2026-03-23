@@ -3,6 +3,7 @@ using System;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GHCAA.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PgSqlApplicationDbContext))]
-    partial class PgSqlApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260323024044_UpdateAlumniEventDates")]
+    partial class UpdateAlumniEventDates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -7651,7 +7654,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 500px;'><h2 style='color: #2c3e50;'>Verification Code</h2><p>Hello <strong>{{FullName}}</strong> metallic,</p><p>Your security code is:</p><div style='font-size: 24px; font-weight: bold; background: #f8f9fa; padding: 15px; text-align: center; border-radius: 5px; color: #c5a059; border: 1px solid #eee;'>{{OtpCode}}</div><p>Valid for 10 minutes. Do not share this code.</p></div>",
                             Code = "OTP_EMAIL",
                             Description = "OTP verification email",
-                            LastUpdated = new DateTime(2026, 3, 23, 18, 35, 51, 351, DateTimeKind.Utc).AddTicks(6025),
+                            LastUpdated = new DateTime(2026, 3, 23, 2, 40, 38, 406, DateTimeKind.Utc).AddTicks(172),
                             Subject = "GHCAA Verification Code: {{OtpCode}}",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -7661,7 +7664,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Welcome to GHCAA</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your membership has been approved! We are excited to have you as part of our community.</p><div style='background: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db;'><p><strong>Membership No:</strong> {{MembershipNumber}}</p><p><strong>Default Password:</strong> <code style='background:#fff; padding:2px 5px;'>{{DefaultPassword}}</code></p></div><p>Please log in and change your password immediately.</p></div>",
                             Code = "WELCOME_EMAIL",
                             Description = "Welcome email",
-                            LastUpdated = new DateTime(2026, 3, 23, 18, 35, 51, 352, DateTimeKind.Utc).AddTicks(6361),
+                            LastUpdated = new DateTime(2026, 3, 23, 2, 40, 38, 406, DateTimeKind.Utc).AddTicks(6838),
                             Subject = "Welcome to GHC Alumni Association!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                         },
@@ -7671,7 +7674,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #c5a059;'>Password Reset</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>An administrator has initiated a password reset for your GHCAA account. Click below to set a new password — the link is valid for 24 hours.</p><div style='text-align: center; margin: 30px 0;'><a href='{{ResetUrl}}' style='background: #111; color: #c5a059; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; border: 1px solid #c5a059;'>Reset My Password</a></div><p style='color: #666; font-size: 0.9rem;'>If you did not request this, please ignore this email.</p></div>",
                             Code = "PASSWORD_RESET",
                             Description = "Password reset email",
-                            LastUpdated = new DateTime(2026, 3, 23, 18, 35, 51, 352, DateTimeKind.Utc).AddTicks(6442),
+                            LastUpdated = new DateTime(2026, 3, 23, 2, 40, 38, 406, DateTimeKind.Utc).AddTicks(6911),
                             Subject = "GHCAA Account Password Reset",
                             Variables = "['FullName', 'ResetUrl']"
                         },
@@ -7681,7 +7684,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #e74c3c;'>Application Status Update</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Thank you for your interest in the GHC Alumni Association. After reviewing your application, we regret to inform you that we cannot approve it at this time.</p><div style='background: #fdf2f2; padding: 15px; border-radius: 5px; border-left: 5px solid #e74c3c;'><p><strong>Reason:</strong> {{Reason}}</p></div><p>If you believe this is an error, please contact the association office.</p></div>",
                             Code = "APPLICATION_REJECTED",
                             Description = "Application rejection email",
-                            LastUpdated = new DateTime(2026, 3, 23, 18, 35, 51, 352, DateTimeKind.Utc).AddTicks(6601),
+                            LastUpdated = new DateTime(2026, 3, 23, 2, 40, 38, 406, DateTimeKind.Utc).AddTicks(7039),
                             Subject = "Update on your GHCAA Membership Application",
                             Variables = "['FullName', 'Reason']"
                         },
@@ -7691,7 +7694,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Payment Received</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>We have successfully received your payment. It is currently under verification.</p><div style='background: #f8f9fa; padding: 15px; border-radius: 5px;'><p><strong>Amount:</strong> {{Amount}} BDT</p><p><strong>Transaction ID:</strong> {{TrxID}}</p></div><p>You will be notified once the payment is verified.</p></div>",
                             Code = "PAYMENT_RECEIVED",
                             Description = "Payment received acknowledgment",
-                            LastUpdated = new DateTime(2026, 3, 23, 18, 35, 51, 352, DateTimeKind.Utc).AddTicks(6657),
+                            LastUpdated = new DateTime(2026, 3, 23, 2, 40, 38, 406, DateTimeKind.Utc).AddTicks(7085),
                             Subject = "Payment Received: {{Amount}} BDT",
                             Variables = "['FullName', 'Amount', 'TrxID']"
                         },
@@ -7701,7 +7704,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Payment Status Update</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>The status of your transaction <strong>{{TrxID}}</strong> has been updated to <strong>{{Status}}</strong>.</p><p>Thank you for your contribution.</p></div>",
                             Code = "PAYMENT_STATUS_UPDATED",
                             Description = "Payment status update email",
-                            LastUpdated = new DateTime(2026, 3, 23, 18, 35, 51, 352, DateTimeKind.Utc).AddTicks(6697),
+                            LastUpdated = new DateTime(2026, 3, 23, 2, 40, 38, 406, DateTimeKind.Utc).AddTicks(7118),
                             Subject = "Payment Status Updated: {{Status}}",
                             Variables = "['FullName', 'TrxID', 'Status']"
                         },
@@ -7711,7 +7714,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Family Link Request</h2><p>Hello <strong>{{FullName}}</strong>,</p><p><strong>{{RequesterName}}</strong> has requested to link their account with yours as a <strong>{{Relationship}}</strong>.</p><div style='text-align: center; margin: 30px 0;'><a href='{{ProfileUrl}}' style='background: #c5a059; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; border: 1px solid #c5a059;'>Review Request</a></div><p>Please log in to your profile to accept or decline this request.</p></div>",
                             Code = "FAMILY_LINK_REQUEST",
                             Description = "Family link request email",
-                            LastUpdated = new DateTime(2026, 3, 23, 18, 35, 51, 352, DateTimeKind.Utc).AddTicks(6726),
+                            LastUpdated = new DateTime(2026, 3, 23, 2, 40, 38, 406, DateTimeKind.Utc).AddTicks(7142),
                             Subject = "New Family Link Request from {{RequesterName}}",
                             Variables = "['FullName', 'RequesterName', 'Relationship', 'ProfileUrl']"
                         },
@@ -7721,7 +7724,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #27ae60;'>Link Request Accepted</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>Your family link request to <strong>{{TargetName}}</strong> has been accepted.</p><p>You are now connected in the GHCAA network.</p></div>",
                             Code = "FAMILY_LINK_ACCEPTED",
                             Description = "Family link acceptance confirmation",
-                            LastUpdated = new DateTime(2026, 3, 23, 18, 35, 51, 352, DateTimeKind.Utc).AddTicks(6764),
+                            LastUpdated = new DateTime(2026, 3, 23, 2, 40, 38, 406, DateTimeKind.Utc).AddTicks(7171),
                             Subject = "Family Link Request Accepted",
                             Variables = "['FullName', 'TargetName']"
                         });
@@ -9303,8 +9306,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 1,
                             AppliedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             BloodGroup = 2,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9325,7 +9326,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             MembershipNumber = "GHC-0000000001",
                             MembershipType = 3,
@@ -9341,8 +9342,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 200,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 42, 419, DateTimeKind.Utc).AddTicks(30),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 42, 419, DateTimeKind.Utc).AddTicks(30),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9363,7 +9362,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 42, 419, DateTimeKind.Utc).AddTicks(400),
                             MembershipNumber = "GHC-2512003",
                             MembershipType = 2,
@@ -9380,8 +9379,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 201,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 42, 897, DateTimeKind.Utc).AddTicks(8100),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 42, 897, DateTimeKind.Utc).AddTicks(8100),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9402,7 +9399,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 42, 897, DateTimeKind.Utc).AddTicks(8120),
                             MembershipNumber = "GHC-2512005",
                             MembershipType = 2,
@@ -9419,8 +9416,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 202,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 42, 954, DateTimeKind.Utc).AddTicks(6640),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 42, 954, DateTimeKind.Utc).AddTicks(6640),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9441,7 +9436,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 42, 954, DateTimeKind.Utc).AddTicks(6670),
                             MembershipNumber = "GHC-2512006",
                             MembershipType = 2,
@@ -9458,8 +9453,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 203,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 42, 978, DateTimeKind.Utc).AddTicks(3150),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 42, 978, DateTimeKind.Utc).AddTicks(3150),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9480,7 +9473,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 42, 978, DateTimeKind.Utc).AddTicks(3190),
                             MembershipNumber = "GHC-2512012",
                             MembershipType = 2,
@@ -9497,8 +9490,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 204,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 329, DateTimeKind.Utc).AddTicks(5980),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 329, DateTimeKind.Utc).AddTicks(5980),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9519,7 +9510,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 329, DateTimeKind.Utc).AddTicks(6000),
                             MembershipNumber = "GHC-2512017",
                             MembershipType = 2,
@@ -9536,8 +9527,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 205,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 353, DateTimeKind.Utc).AddTicks(4570),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 353, DateTimeKind.Utc).AddTicks(4570),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9558,7 +9547,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 353, DateTimeKind.Utc).AddTicks(4590),
                             MembershipNumber = "GHC-2512019",
                             MembershipType = 2,
@@ -9575,8 +9564,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 206,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 476, DateTimeKind.Utc).AddTicks(7400),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 476, DateTimeKind.Utc).AddTicks(7400),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9597,7 +9584,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 476, DateTimeKind.Utc).AddTicks(7420),
                             MembershipNumber = "GHC-2512020",
                             MembershipType = 2,
@@ -9614,8 +9601,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 207,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 528, DateTimeKind.Utc).AddTicks(5650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 528, DateTimeKind.Utc).AddTicks(5650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9636,7 +9621,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 528, DateTimeKind.Utc).AddTicks(5670),
                             MembershipNumber = "GHC-2512022",
                             MembershipType = 2,
@@ -9653,8 +9638,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 208,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 556, DateTimeKind.Utc).AddTicks(2180),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 556, DateTimeKind.Utc).AddTicks(2180),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9675,7 +9658,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 556, DateTimeKind.Utc).AddTicks(2210),
                             MembershipNumber = "GHC-2512023",
                             MembershipType = 2,
@@ -9692,8 +9675,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 209,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 570, DateTimeKind.Utc).AddTicks(230),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 570, DateTimeKind.Utc).AddTicks(230),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9714,7 +9695,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 570, DateTimeKind.Utc).AddTicks(250),
                             MembershipNumber = "GHC-2512027",
                             MembershipType = 2,
@@ -9731,8 +9712,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 210,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 581, DateTimeKind.Utc).AddTicks(4310),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 581, DateTimeKind.Utc).AddTicks(4310),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9753,7 +9732,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 581, DateTimeKind.Utc).AddTicks(4330),
                             MembershipNumber = "GHC-2512028",
                             MembershipType = 2,
@@ -9770,8 +9749,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 211,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 593, DateTimeKind.Utc).AddTicks(2310),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 593, DateTimeKind.Utc).AddTicks(2310),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9792,7 +9769,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 593, DateTimeKind.Utc).AddTicks(2340),
                             MembershipNumber = "GHC-2512029",
                             MembershipType = 2,
@@ -9809,8 +9786,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 212,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 615, DateTimeKind.Utc).AddTicks(9780),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 615, DateTimeKind.Utc).AddTicks(9780),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9831,7 +9806,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 615, DateTimeKind.Utc).AddTicks(9810),
                             MembershipNumber = "GHC-2512030",
                             MembershipType = 2,
@@ -9848,8 +9823,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 213,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 718, DateTimeKind.Utc).AddTicks(3960),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 718, DateTimeKind.Utc).AddTicks(3960),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9870,7 +9843,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 718, DateTimeKind.Utc).AddTicks(3980),
                             MembershipNumber = "GHC-2512031",
                             MembershipType = 2,
@@ -9887,8 +9860,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 214,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 813, DateTimeKind.Utc).AddTicks(9430),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 813, DateTimeKind.Utc).AddTicks(9430),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9909,7 +9880,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 813, DateTimeKind.Utc).AddTicks(9450),
                             MembershipNumber = "GHC-2512032",
                             MembershipType = 2,
@@ -9926,8 +9897,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 215,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 855, DateTimeKind.Utc).AddTicks(8510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 855, DateTimeKind.Utc).AddTicks(8510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9948,7 +9917,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 855, DateTimeKind.Utc).AddTicks(8520),
                             MembershipNumber = "GHC-2512033",
                             MembershipType = 2,
@@ -9965,8 +9934,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 216,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 876, DateTimeKind.Utc).AddTicks(9560),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 876, DateTimeKind.Utc).AddTicks(9560),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -9987,7 +9954,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 876, DateTimeKind.Utc).AddTicks(9570),
                             MembershipNumber = "GHC-2512034",
                             MembershipType = 2,
@@ -10004,8 +9971,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 217,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 43, 892, DateTimeKind.Utc).AddTicks(8230),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 43, 892, DateTimeKind.Utc).AddTicks(8230),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10026,7 +9991,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 43, 892, DateTimeKind.Utc).AddTicks(8260),
                             MembershipNumber = "GHC-2512035",
                             MembershipType = 2,
@@ -10043,8 +10008,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 218,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 98, DateTimeKind.Utc).AddTicks(5210),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 98, DateTimeKind.Utc).AddTicks(5210),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10065,7 +10028,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 98, DateTimeKind.Utc).AddTicks(5240),
                             MembershipNumber = "GHC-2512036",
                             MembershipType = 2,
@@ -10082,8 +10045,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 219,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 184, DateTimeKind.Utc).AddTicks(4450),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 184, DateTimeKind.Utc).AddTicks(4450),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10104,7 +10065,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 184, DateTimeKind.Utc).AddTicks(4460),
                             MembershipNumber = "GHC-2512038",
                             MembershipType = 2,
@@ -10121,8 +10082,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 220,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 201, DateTimeKind.Utc).AddTicks(4400),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 201, DateTimeKind.Utc).AddTicks(4400),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10143,7 +10102,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 201, DateTimeKind.Utc).AddTicks(4420),
                             MembershipNumber = "GHC-2512040",
                             MembershipType = 2,
@@ -10160,8 +10119,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 221,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 218, DateTimeKind.Utc).AddTicks(2210),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 218, DateTimeKind.Utc).AddTicks(2210),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10182,7 +10139,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 218, DateTimeKind.Utc).AddTicks(2230),
                             MembershipNumber = "GHC-2512043",
                             MembershipType = 2,
@@ -10199,8 +10156,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 222,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 265, DateTimeKind.Utc).AddTicks(3380),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 265, DateTimeKind.Utc).AddTicks(3380),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10221,7 +10176,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 265, DateTimeKind.Utc).AddTicks(3400),
                             MembershipNumber = "GHC-2512044",
                             MembershipType = 2,
@@ -10238,8 +10193,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 223,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 296, DateTimeKind.Utc).AddTicks(4030),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 296, DateTimeKind.Utc).AddTicks(4030),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10260,7 +10213,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 296, DateTimeKind.Utc).AddTicks(4050),
                             MembershipNumber = "GHC-2512046",
                             MembershipType = 2,
@@ -10277,8 +10230,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 224,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 325, DateTimeKind.Utc).AddTicks(5140),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 325, DateTimeKind.Utc).AddTicks(5140),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10299,7 +10250,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 325, DateTimeKind.Utc).AddTicks(5150),
                             MembershipNumber = "GHC-2512047",
                             MembershipType = 2,
@@ -10316,8 +10267,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 225,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 378, DateTimeKind.Utc).AddTicks(5610),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 378, DateTimeKind.Utc).AddTicks(5610),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10338,7 +10287,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 378, DateTimeKind.Utc).AddTicks(5630),
                             MembershipNumber = "GHC-2512049",
                             MembershipType = 2,
@@ -10355,8 +10304,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 226,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 430, DateTimeKind.Utc).AddTicks(3300),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 430, DateTimeKind.Utc).AddTicks(3300),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10377,7 +10324,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 430, DateTimeKind.Utc).AddTicks(3320),
                             MembershipNumber = "GHC-2512050",
                             MembershipType = 2,
@@ -10394,8 +10341,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 227,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 446, DateTimeKind.Utc).AddTicks(8330),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 446, DateTimeKind.Utc).AddTicks(8330),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10416,7 +10361,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 446, DateTimeKind.Utc).AddTicks(8350),
                             MembershipNumber = "GHC-2512051",
                             MembershipType = 2,
@@ -10433,8 +10378,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 228,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 455, DateTimeKind.Utc).AddTicks(3140),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 455, DateTimeKind.Utc).AddTicks(3140),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10455,7 +10398,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 455, DateTimeKind.Utc).AddTicks(3160),
                             MembershipNumber = "GHC-2512052",
                             MembershipType = 2,
@@ -10472,8 +10415,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 229,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 532, DateTimeKind.Utc).AddTicks(8850),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 532, DateTimeKind.Utc).AddTicks(8850),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10494,7 +10435,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 532, DateTimeKind.Utc).AddTicks(8860),
                             MembershipNumber = "GHC-2512053",
                             MembershipType = 2,
@@ -10511,8 +10452,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 230,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 586, DateTimeKind.Utc).AddTicks(6830),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 586, DateTimeKind.Utc).AddTicks(6830),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10533,7 +10472,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 586, DateTimeKind.Utc).AddTicks(6840),
                             MembershipNumber = "GHC-2512054",
                             MembershipType = 2,
@@ -10550,8 +10489,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 231,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 613, DateTimeKind.Utc).AddTicks(4810),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 613, DateTimeKind.Utc).AddTicks(4810),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10572,7 +10509,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 613, DateTimeKind.Utc).AddTicks(4830),
                             MembershipNumber = "GHC-2512055",
                             MembershipType = 2,
@@ -10589,8 +10526,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 232,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 625, DateTimeKind.Utc).AddTicks(4130),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 625, DateTimeKind.Utc).AddTicks(4130),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10611,7 +10546,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 625, DateTimeKind.Utc).AddTicks(4150),
                             MembershipNumber = "GHC-2512056",
                             MembershipType = 2,
@@ -10628,8 +10563,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 233,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 642, DateTimeKind.Utc).AddTicks(5090),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 642, DateTimeKind.Utc).AddTicks(5090),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10650,7 +10583,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 642, DateTimeKind.Utc).AddTicks(5110),
                             MembershipNumber = "GHC-2512057",
                             MembershipType = 2,
@@ -10667,8 +10600,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 234,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 713, DateTimeKind.Utc).AddTicks(5330),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 713, DateTimeKind.Utc).AddTicks(5330),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10689,7 +10620,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 713, DateTimeKind.Utc).AddTicks(5350),
                             MembershipNumber = "GHC-2512058",
                             MembershipType = 2,
@@ -10706,8 +10637,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 235,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 721, DateTimeKind.Utc).AddTicks(9750),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 721, DateTimeKind.Utc).AddTicks(9750),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10728,7 +10657,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 721, DateTimeKind.Utc).AddTicks(9770),
                             MembershipNumber = "GHC-2512059",
                             MembershipType = 2,
@@ -10745,8 +10674,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 236,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 732, DateTimeKind.Utc).AddTicks(9680),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 732, DateTimeKind.Utc).AddTicks(9680),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10767,7 +10694,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 732, DateTimeKind.Utc).AddTicks(9700),
                             MembershipNumber = "GHC-2512060",
                             MembershipType = 2,
@@ -10784,8 +10711,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 237,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 747, DateTimeKind.Utc).AddTicks(4690),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 747, DateTimeKind.Utc).AddTicks(4690),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10806,7 +10731,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 747, DateTimeKind.Utc).AddTicks(4700),
                             MembershipNumber = "GHC-2512061",
                             MembershipType = 2,
@@ -10823,8 +10748,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 238,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 777, DateTimeKind.Utc).AddTicks(6330),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 777, DateTimeKind.Utc).AddTicks(6330),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10845,7 +10768,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 777, DateTimeKind.Utc).AddTicks(6350),
                             MembershipNumber = "GHC-2512064",
                             MembershipType = 2,
@@ -10862,8 +10785,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 239,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 839, DateTimeKind.Utc).AddTicks(4480),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 839, DateTimeKind.Utc).AddTicks(4480),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10884,7 +10805,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 839, DateTimeKind.Utc).AddTicks(4500),
                             MembershipNumber = "GHC-2512065",
                             MembershipType = 2,
@@ -10901,8 +10822,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 240,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 858, DateTimeKind.Utc).AddTicks(8310),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 858, DateTimeKind.Utc).AddTicks(8310),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10923,7 +10842,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 858, DateTimeKind.Utc).AddTicks(8320),
                             MembershipNumber = "GHC-2512066",
                             MembershipType = 2,
@@ -10940,8 +10859,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 241,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 897, DateTimeKind.Utc).AddTicks(1300),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 897, DateTimeKind.Utc).AddTicks(1300),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -10962,7 +10879,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 897, DateTimeKind.Utc).AddTicks(1330),
                             MembershipNumber = "GHC-2512067",
                             MembershipType = 2,
@@ -10979,8 +10896,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 242,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 911, DateTimeKind.Utc).AddTicks(8730),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 911, DateTimeKind.Utc).AddTicks(8730),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11001,7 +10916,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 911, DateTimeKind.Utc).AddTicks(8750),
                             MembershipNumber = "GHC-2512069",
                             MembershipType = 2,
@@ -11018,8 +10933,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 243,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 919, DateTimeKind.Utc).AddTicks(9730),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 919, DateTimeKind.Utc).AddTicks(9730),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11040,7 +10953,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 919, DateTimeKind.Utc).AddTicks(9750),
                             MembershipNumber = "GHC-2512070",
                             MembershipType = 2,
@@ -11057,8 +10970,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 244,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 928, DateTimeKind.Utc).AddTicks(4830),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 928, DateTimeKind.Utc).AddTicks(4830),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11079,7 +10990,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 928, DateTimeKind.Utc).AddTicks(4840),
                             MembershipNumber = "GHC-2512071",
                             MembershipType = 2,
@@ -11096,8 +11007,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 245,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 940, DateTimeKind.Utc).AddTicks(710),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 940, DateTimeKind.Utc).AddTicks(710),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11118,7 +11027,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 940, DateTimeKind.Utc).AddTicks(730),
                             MembershipNumber = "GHC-2512072",
                             MembershipType = 2,
@@ -11135,8 +11044,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 246,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 948, DateTimeKind.Utc).AddTicks(3560),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 948, DateTimeKind.Utc).AddTicks(3560),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11157,7 +11064,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 948, DateTimeKind.Utc).AddTicks(3580),
                             MembershipNumber = "GHC-2512073",
                             MembershipType = 2,
@@ -11174,8 +11081,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 247,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 960, DateTimeKind.Utc).AddTicks(8880),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 960, DateTimeKind.Utc).AddTicks(8880),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11196,7 +11101,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 960, DateTimeKind.Utc).AddTicks(8900),
                             MembershipNumber = "GHC-2512074",
                             MembershipType = 2,
@@ -11213,8 +11118,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 248,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 965, DateTimeKind.Utc).AddTicks(9020),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 965, DateTimeKind.Utc).AddTicks(9020),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11235,7 +11138,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 965, DateTimeKind.Utc).AddTicks(9040),
                             MembershipNumber = "GHC-2512075",
                             MembershipType = 2,
@@ -11252,8 +11155,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 249,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 977, DateTimeKind.Utc).AddTicks(4180),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 977, DateTimeKind.Utc).AddTicks(4180),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11274,7 +11175,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 977, DateTimeKind.Utc).AddTicks(4200),
                             MembershipNumber = "GHC-2512078",
                             MembershipType = 2,
@@ -11291,8 +11192,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 250,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 986, DateTimeKind.Utc).AddTicks(8150),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 986, DateTimeKind.Utc).AddTicks(8150),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11313,7 +11212,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 986, DateTimeKind.Utc).AddTicks(8170),
                             MembershipNumber = "GHC-2512079",
                             MembershipType = 2,
@@ -11330,8 +11229,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 251,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 44, 999, DateTimeKind.Utc).AddTicks(840),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 44, 999, DateTimeKind.Utc).AddTicks(840),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11352,7 +11249,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 44, 999, DateTimeKind.Utc).AddTicks(860),
                             MembershipNumber = "GHC-2512080",
                             MembershipType = 2,
@@ -11369,8 +11266,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 252,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 10, DateTimeKind.Utc).AddTicks(2440),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 10, DateTimeKind.Utc).AddTicks(2440),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11391,7 +11286,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 10, DateTimeKind.Utc).AddTicks(2470),
                             MembershipNumber = "GHC-2512082",
                             MembershipType = 2,
@@ -11408,8 +11303,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 253,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 54, DateTimeKind.Utc).AddTicks(6780),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 54, DateTimeKind.Utc).AddTicks(6780),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11430,7 +11323,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 54, DateTimeKind.Utc).AddTicks(6810),
                             MembershipNumber = "GHC-2512083",
                             MembershipType = 2,
@@ -11447,8 +11340,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 254,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 122, DateTimeKind.Utc).AddTicks(620),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 122, DateTimeKind.Utc).AddTicks(620),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11469,7 +11360,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 122, DateTimeKind.Utc).AddTicks(640),
                             MembershipNumber = "GHC-2512084",
                             MembershipType = 2,
@@ -11486,8 +11377,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 255,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 139, DateTimeKind.Utc).AddTicks(5850),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 139, DateTimeKind.Utc).AddTicks(5850),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11508,7 +11397,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 139, DateTimeKind.Utc).AddTicks(5860),
                             MembershipNumber = "GHC-2512087",
                             MembershipType = 2,
@@ -11525,8 +11414,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 256,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 149, DateTimeKind.Utc).AddTicks(4140),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 149, DateTimeKind.Utc).AddTicks(4140),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11547,7 +11434,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 149, DateTimeKind.Utc).AddTicks(4150),
                             MembershipNumber = "GHC-2512088",
                             MembershipType = 2,
@@ -11564,8 +11451,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 257,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 179, DateTimeKind.Utc).AddTicks(8870),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 179, DateTimeKind.Utc).AddTicks(8870),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11586,7 +11471,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 179, DateTimeKind.Utc).AddTicks(8880),
                             MembershipNumber = "GHC-2512089",
                             MembershipType = 2,
@@ -11603,8 +11488,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 258,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 216, DateTimeKind.Utc).AddTicks(9900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 216, DateTimeKind.Utc).AddTicks(9900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11625,7 +11508,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 216, DateTimeKind.Utc).AddTicks(9910),
                             MembershipNumber = "GHC-2512091",
                             MembershipType = 2,
@@ -11642,8 +11525,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 259,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 262, DateTimeKind.Utc).AddTicks(1700),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 262, DateTimeKind.Utc).AddTicks(1700),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11664,7 +11545,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 262, DateTimeKind.Utc).AddTicks(1710),
                             MembershipNumber = "GHC-2512092",
                             MembershipType = 2,
@@ -11681,8 +11562,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 260,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 273, DateTimeKind.Utc).AddTicks(9130),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 273, DateTimeKind.Utc).AddTicks(9130),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11703,7 +11582,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 273, DateTimeKind.Utc).AddTicks(9130),
                             MembershipNumber = "GHC-2512093",
                             MembershipType = 2,
@@ -11720,8 +11599,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 261,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 309, DateTimeKind.Utc).AddTicks(7130),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 309, DateTimeKind.Utc).AddTicks(7130),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11742,7 +11619,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 309, DateTimeKind.Utc).AddTicks(7160),
                             MembershipNumber = "GHC-2512094",
                             MembershipType = 2,
@@ -11759,8 +11636,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 262,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 360, DateTimeKind.Utc).AddTicks(8860),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 360, DateTimeKind.Utc).AddTicks(8860),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11781,7 +11656,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 360, DateTimeKind.Utc).AddTicks(8870),
                             MembershipNumber = "GHC-2512095",
                             MembershipType = 2,
@@ -11798,8 +11673,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 263,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 385, DateTimeKind.Utc).AddTicks(7500),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 385, DateTimeKind.Utc).AddTicks(7500),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11820,7 +11693,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 385, DateTimeKind.Utc).AddTicks(7510),
                             MembershipNumber = "GHC-2512096",
                             MembershipType = 2,
@@ -11837,8 +11710,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 264,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 394, DateTimeKind.Utc).AddTicks(6020),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 394, DateTimeKind.Utc).AddTicks(6020),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11859,7 +11730,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 394, DateTimeKind.Utc).AddTicks(6030),
                             MembershipNumber = "GHC-2512097",
                             MembershipType = 2,
@@ -11876,8 +11747,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 265,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 400, DateTimeKind.Utc).AddTicks(5590),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 400, DateTimeKind.Utc).AddTicks(5590),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11898,7 +11767,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 400, DateTimeKind.Utc).AddTicks(5600),
                             MembershipNumber = "GHC-2512098",
                             MembershipType = 2,
@@ -11915,8 +11784,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 266,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 558, DateTimeKind.Utc).AddTicks(5460),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 558, DateTimeKind.Utc).AddTicks(5460),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11937,7 +11804,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 558, DateTimeKind.Utc).AddTicks(5470),
                             MembershipNumber = "GHC-2512099",
                             MembershipType = 2,
@@ -11954,8 +11821,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 267,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 591, DateTimeKind.Utc).AddTicks(3040),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 591, DateTimeKind.Utc).AddTicks(3040),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -11976,7 +11841,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 591, DateTimeKind.Utc).AddTicks(3040),
                             MembershipNumber = "GHC-2512101",
                             MembershipType = 2,
@@ -11993,8 +11858,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 268,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 609, DateTimeKind.Utc).AddTicks(7160),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 609, DateTimeKind.Utc).AddTicks(7160),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12015,7 +11878,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 609, DateTimeKind.Utc).AddTicks(7170),
                             MembershipNumber = "GHC-2512102",
                             MembershipType = 2,
@@ -12032,8 +11895,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 269,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 619, DateTimeKind.Utc).AddTicks(6550),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 619, DateTimeKind.Utc).AddTicks(6550),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12054,7 +11915,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 619, DateTimeKind.Utc).AddTicks(6560),
                             MembershipNumber = "GHC-2512103",
                             MembershipType = 2,
@@ -12071,8 +11932,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 270,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 630, DateTimeKind.Utc).AddTicks(5530),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 630, DateTimeKind.Utc).AddTicks(5530),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12093,7 +11952,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 630, DateTimeKind.Utc).AddTicks(5540),
                             MembershipNumber = "GHC-2512105",
                             MembershipType = 2,
@@ -12110,8 +11969,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 271,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 696, DateTimeKind.Utc).AddTicks(110),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 696, DateTimeKind.Utc).AddTicks(110),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12132,7 +11989,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 696, DateTimeKind.Utc).AddTicks(120),
                             MembershipNumber = "GHC-2512106",
                             MembershipType = 2,
@@ -12149,8 +12006,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 272,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 713, DateTimeKind.Utc).AddTicks(8070),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 713, DateTimeKind.Utc).AddTicks(8070),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12171,7 +12026,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 713, DateTimeKind.Utc).AddTicks(8090),
                             MembershipNumber = "GHC-2512107",
                             MembershipType = 2,
@@ -12188,8 +12043,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 273,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 729, DateTimeKind.Utc).AddTicks(2440),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 729, DateTimeKind.Utc).AddTicks(2440),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12210,7 +12063,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 729, DateTimeKind.Utc).AddTicks(2450),
                             MembershipNumber = "GHC-2512108",
                             MembershipType = 2,
@@ -12227,8 +12080,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 274,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 739, DateTimeKind.Utc).AddTicks(9920),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 739, DateTimeKind.Utc).AddTicks(9920),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12249,7 +12100,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 739, DateTimeKind.Utc).AddTicks(9930),
                             MembershipNumber = "GHC-2512110",
                             MembershipType = 2,
@@ -12266,8 +12117,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 275,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 758, DateTimeKind.Utc).AddTicks(1090),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 758, DateTimeKind.Utc).AddTicks(1090),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12288,7 +12137,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 758, DateTimeKind.Utc).AddTicks(1100),
                             MembershipNumber = "GHC-2512111",
                             MembershipType = 2,
@@ -12305,8 +12154,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 276,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 796, DateTimeKind.Utc).AddTicks(750),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 796, DateTimeKind.Utc).AddTicks(750),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12327,7 +12174,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 796, DateTimeKind.Utc).AddTicks(760),
                             MembershipNumber = "GHC-2512112",
                             MembershipType = 2,
@@ -12344,8 +12191,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 277,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 804, DateTimeKind.Utc).AddTicks(650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 804, DateTimeKind.Utc).AddTicks(650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12366,7 +12211,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 804, DateTimeKind.Utc).AddTicks(650),
                             MembershipNumber = "GHC-2512113",
                             MembershipType = 2,
@@ -12383,8 +12228,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 278,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 814, DateTimeKind.Utc).AddTicks(760),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 814, DateTimeKind.Utc).AddTicks(760),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12405,7 +12248,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 814, DateTimeKind.Utc).AddTicks(770),
                             MembershipNumber = "GHC-2512114",
                             MembershipType = 2,
@@ -12422,8 +12265,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 279,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 826, DateTimeKind.Utc).AddTicks(5780),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 826, DateTimeKind.Utc).AddTicks(5780),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12444,7 +12285,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 826, DateTimeKind.Utc).AddTicks(5790),
                             MembershipNumber = "GHC-2512115",
                             MembershipType = 2,
@@ -12461,8 +12302,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 280,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 840, DateTimeKind.Utc).AddTicks(7120),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 840, DateTimeKind.Utc).AddTicks(7120),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12483,7 +12322,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 840, DateTimeKind.Utc).AddTicks(7130),
                             MembershipNumber = "GHC-2512116",
                             MembershipType = 2,
@@ -12500,8 +12339,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 281,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 847, DateTimeKind.Utc).AddTicks(3120),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 847, DateTimeKind.Utc).AddTicks(3120),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12522,7 +12359,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 847, DateTimeKind.Utc).AddTicks(3130),
                             MembershipNumber = "GHC-2512117",
                             MembershipType = 2,
@@ -12539,8 +12376,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 282,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 860, DateTimeKind.Utc).AddTicks(8580),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 860, DateTimeKind.Utc).AddTicks(8580),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12561,7 +12396,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 860, DateTimeKind.Utc).AddTicks(8580),
                             MembershipNumber = "GHC-2512118",
                             MembershipType = 2,
@@ -12578,8 +12413,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 283,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 893, DateTimeKind.Utc).AddTicks(740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 893, DateTimeKind.Utc).AddTicks(740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12600,7 +12433,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 893, DateTimeKind.Utc).AddTicks(760),
                             MembershipNumber = "GHC-2512120",
                             MembershipType = 2,
@@ -12617,8 +12450,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 284,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 899, DateTimeKind.Utc).AddTicks(3610),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 899, DateTimeKind.Utc).AddTicks(3610),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12639,7 +12470,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 899, DateTimeKind.Utc).AddTicks(3620),
                             MembershipNumber = "GHC-2512123",
                             MembershipType = 2,
@@ -12656,8 +12487,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 285,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 911, DateTimeKind.Utc).AddTicks(8100),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 911, DateTimeKind.Utc).AddTicks(8100),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12678,7 +12507,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 911, DateTimeKind.Utc).AddTicks(8100),
                             MembershipNumber = "GHC-2512125",
                             MembershipType = 2,
@@ -12695,8 +12524,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 286,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 919, DateTimeKind.Utc).AddTicks(9040),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 919, DateTimeKind.Utc).AddTicks(9040),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12717,7 +12544,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 919, DateTimeKind.Utc).AddTicks(9040),
                             MembershipNumber = "GHC-2512126",
                             MembershipType = 2,
@@ -12734,8 +12561,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 287,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 935, DateTimeKind.Utc).AddTicks(9640),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 935, DateTimeKind.Utc).AddTicks(9640),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12756,7 +12581,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 935, DateTimeKind.Utc).AddTicks(9640),
                             MembershipNumber = "GHC-2512127",
                             MembershipType = 2,
@@ -12773,8 +12598,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 288,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 980, DateTimeKind.Utc).AddTicks(4360),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 980, DateTimeKind.Utc).AddTicks(4360),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12795,7 +12618,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 980, DateTimeKind.Utc).AddTicks(4370),
                             MembershipNumber = "GHC-2512128",
                             MembershipType = 2,
@@ -12812,8 +12635,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 289,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 45, 989, DateTimeKind.Utc).AddTicks(7480),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 45, 989, DateTimeKind.Utc).AddTicks(7480),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12834,7 +12655,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 45, 989, DateTimeKind.Utc).AddTicks(7490),
                             MembershipNumber = "GHC-2512129",
                             MembershipType = 2,
@@ -12851,8 +12672,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 290,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 3, DateTimeKind.Utc).AddTicks(3570),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 3, DateTimeKind.Utc).AddTicks(3570),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12873,7 +12692,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 3, DateTimeKind.Utc).AddTicks(3580),
                             MembershipNumber = "GHC-2512131",
                             MembershipType = 2,
@@ -12890,8 +12709,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 291,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 123, DateTimeKind.Utc).AddTicks(9050),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 123, DateTimeKind.Utc).AddTicks(9050),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12912,7 +12729,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 123, DateTimeKind.Utc).AddTicks(9060),
                             MembershipNumber = "GHC-2512135",
                             MembershipType = 2,
@@ -12929,8 +12746,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 292,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 172, DateTimeKind.Utc).AddTicks(1680),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 172, DateTimeKind.Utc).AddTicks(1680),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12951,7 +12766,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 172, DateTimeKind.Utc).AddTicks(1690),
                             MembershipNumber = "GHC-2512136",
                             MembershipType = 2,
@@ -12968,8 +12783,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 293,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 205, DateTimeKind.Utc).AddTicks(6020),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 205, DateTimeKind.Utc).AddTicks(6020),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -12990,7 +12803,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 205, DateTimeKind.Utc).AddTicks(6040),
                             MembershipNumber = "GHC-2512137",
                             MembershipType = 2,
@@ -13007,8 +12820,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 294,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 211, DateTimeKind.Utc).AddTicks(4330),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 211, DateTimeKind.Utc).AddTicks(4330),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13029,7 +12840,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 211, DateTimeKind.Utc).AddTicks(4340),
                             MembershipNumber = "GHC-2512138",
                             MembershipType = 2,
@@ -13046,8 +12857,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 295,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 256, DateTimeKind.Utc).AddTicks(3690),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 256, DateTimeKind.Utc).AddTicks(3690),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13068,7 +12877,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 256, DateTimeKind.Utc).AddTicks(3700),
                             MembershipNumber = "GHC-2512139",
                             MembershipType = 2,
@@ -13085,8 +12894,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 296,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 265, DateTimeKind.Utc).AddTicks(8370),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 265, DateTimeKind.Utc).AddTicks(8370),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13107,7 +12914,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 265, DateTimeKind.Utc).AddTicks(8380),
                             MembershipNumber = "GHC-2512140",
                             MembershipType = 2,
@@ -13124,8 +12931,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 297,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 278, DateTimeKind.Utc).AddTicks(9240),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 278, DateTimeKind.Utc).AddTicks(9240),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13146,7 +12951,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 278, DateTimeKind.Utc).AddTicks(9250),
                             MembershipNumber = "GHC-2512141",
                             MembershipType = 2,
@@ -13163,8 +12968,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 298,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 292, DateTimeKind.Utc).AddTicks(1850),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 292, DateTimeKind.Utc).AddTicks(1850),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13185,7 +12988,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 292, DateTimeKind.Utc).AddTicks(1850),
                             MembershipNumber = "GHC-2512142",
                             MembershipType = 2,
@@ -13202,8 +13005,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 299,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 319, DateTimeKind.Utc).AddTicks(7760),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 319, DateTimeKind.Utc).AddTicks(7760),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13224,7 +13025,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 319, DateTimeKind.Utc).AddTicks(7770),
                             MembershipNumber = "GHC-2512143",
                             MembershipType = 2,
@@ -13241,8 +13042,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 300,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 355, DateTimeKind.Utc).AddTicks(6050),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 355, DateTimeKind.Utc).AddTicks(6050),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13263,7 +13062,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 355, DateTimeKind.Utc).AddTicks(6070),
                             MembershipNumber = "GHC-2512144",
                             MembershipType = 2,
@@ -13280,8 +13079,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 301,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 379, DateTimeKind.Utc).AddTicks(420),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 379, DateTimeKind.Utc).AddTicks(420),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13302,7 +13099,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 379, DateTimeKind.Utc).AddTicks(430),
                             MembershipNumber = "GHC-2512145",
                             MembershipType = 2,
@@ -13319,8 +13116,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 302,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 386, DateTimeKind.Utc).AddTicks(3610),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 386, DateTimeKind.Utc).AddTicks(3610),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13341,7 +13136,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 386, DateTimeKind.Utc).AddTicks(3620),
                             MembershipNumber = "GHC-2512146",
                             MembershipType = 2,
@@ -13358,8 +13153,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 303,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 435, DateTimeKind.Utc).AddTicks(1340),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 435, DateTimeKind.Utc).AddTicks(1340),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13380,7 +13173,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 435, DateTimeKind.Utc).AddTicks(1350),
                             MembershipNumber = "GHC-2512147",
                             MembershipType = 2,
@@ -13397,8 +13190,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 304,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 453, DateTimeKind.Utc).AddTicks(6440),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 453, DateTimeKind.Utc).AddTicks(6440),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13419,7 +13210,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 453, DateTimeKind.Utc).AddTicks(6450),
                             MembershipNumber = "GHC-2512148",
                             MembershipType = 2,
@@ -13436,8 +13227,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 305,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 470, DateTimeKind.Utc).AddTicks(4660),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 470, DateTimeKind.Utc).AddTicks(4660),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13458,7 +13247,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 470, DateTimeKind.Utc).AddTicks(4670),
                             MembershipNumber = "GHC-2512149",
                             MembershipType = 2,
@@ -13475,8 +13264,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 306,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 502, DateTimeKind.Utc).AddTicks(5680),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 502, DateTimeKind.Utc).AddTicks(5680),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13497,7 +13284,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 502, DateTimeKind.Utc).AddTicks(5700),
                             MembershipNumber = "GHC-2512150",
                             MembershipType = 2,
@@ -13514,8 +13301,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 307,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 509, DateTimeKind.Utc).AddTicks(4880),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 509, DateTimeKind.Utc).AddTicks(4880),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13536,7 +13321,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 509, DateTimeKind.Utc).AddTicks(4890),
                             MembershipNumber = "GHC-2512151",
                             MembershipType = 2,
@@ -13553,8 +13338,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 308,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 525, DateTimeKind.Utc).AddTicks(8200),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 525, DateTimeKind.Utc).AddTicks(8200),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13575,7 +13358,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 525, DateTimeKind.Utc).AddTicks(8220),
                             MembershipNumber = "GHC-2512152",
                             MembershipType = 2,
@@ -13592,8 +13375,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 309,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 569, DateTimeKind.Utc).AddTicks(7470),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 569, DateTimeKind.Utc).AddTicks(7470),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13614,7 +13395,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 569, DateTimeKind.Utc).AddTicks(7480),
                             MembershipNumber = "GHC-2512153",
                             MembershipType = 2,
@@ -13631,8 +13412,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 310,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 579, DateTimeKind.Utc).AddTicks(10),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 579, DateTimeKind.Utc).AddTicks(10),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13653,7 +13432,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 579, DateTimeKind.Utc).AddTicks(20),
                             MembershipNumber = "GHC-2512154",
                             MembershipType = 2,
@@ -13670,8 +13449,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 311,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 661, DateTimeKind.Utc).AddTicks(5650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 661, DateTimeKind.Utc).AddTicks(5650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13692,7 +13469,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 661, DateTimeKind.Utc).AddTicks(5660),
                             MembershipNumber = "GHC-2512155",
                             MembershipType = 2,
@@ -13709,8 +13486,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 312,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 695, DateTimeKind.Utc).AddTicks(100),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 695, DateTimeKind.Utc).AddTicks(100),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13731,7 +13506,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 695, DateTimeKind.Utc).AddTicks(110),
                             MembershipNumber = "GHC-2512156",
                             MembershipType = 2,
@@ -13748,8 +13523,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 313,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 710, DateTimeKind.Utc).AddTicks(4430),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 710, DateTimeKind.Utc).AddTicks(4430),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13770,7 +13543,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 710, DateTimeKind.Utc).AddTicks(4440),
                             MembershipNumber = "GHC-2512157",
                             MembershipType = 2,
@@ -13787,8 +13560,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 314,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 737, DateTimeKind.Utc).AddTicks(4040),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 737, DateTimeKind.Utc).AddTicks(4040),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13809,7 +13580,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 737, DateTimeKind.Utc).AddTicks(4050),
                             MembershipNumber = "GHC-2512158",
                             MembershipType = 2,
@@ -13826,8 +13597,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 315,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 786, DateTimeKind.Utc).AddTicks(7970),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 786, DateTimeKind.Utc).AddTicks(7970),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13848,7 +13617,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 786, DateTimeKind.Utc).AddTicks(7980),
                             MembershipNumber = "GHC-2512159",
                             MembershipType = 2,
@@ -13865,8 +13634,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 316,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 799, DateTimeKind.Utc).AddTicks(9510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 799, DateTimeKind.Utc).AddTicks(9510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13887,7 +13654,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 799, DateTimeKind.Utc).AddTicks(9520),
                             MembershipNumber = "GHC-2512160",
                             MembershipType = 2,
@@ -13904,8 +13671,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 317,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 845, DateTimeKind.Utc).AddTicks(3220),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 845, DateTimeKind.Utc).AddTicks(3220),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13926,7 +13691,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 845, DateTimeKind.Utc).AddTicks(3230),
                             MembershipNumber = "GHC-2512161",
                             MembershipType = 2,
@@ -13943,8 +13708,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 318,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 914, DateTimeKind.Utc).AddTicks(4160),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 914, DateTimeKind.Utc).AddTicks(4160),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -13965,7 +13728,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 914, DateTimeKind.Utc).AddTicks(4180),
                             MembershipNumber = "GHC-2512162",
                             MembershipType = 2,
@@ -13982,8 +13745,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 319,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 46, 956, DateTimeKind.Utc).AddTicks(5960),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 46, 956, DateTimeKind.Utc).AddTicks(5960),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14004,7 +13765,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 46, 956, DateTimeKind.Utc).AddTicks(5980),
                             MembershipNumber = "GHC-2512163",
                             MembershipType = 2,
@@ -14021,8 +13782,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 320,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 30, DateTimeKind.Utc).AddTicks(9460),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 30, DateTimeKind.Utc).AddTicks(9460),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14043,7 +13802,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 30, DateTimeKind.Utc).AddTicks(9470),
                             MembershipNumber = "GHC-2512164",
                             MembershipType = 2,
@@ -14060,8 +13819,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 321,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 82, DateTimeKind.Utc).AddTicks(4940),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 82, DateTimeKind.Utc).AddTicks(4940),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14082,7 +13839,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 82, DateTimeKind.Utc).AddTicks(4960),
                             MembershipNumber = "GHC-2512165",
                             MembershipType = 2,
@@ -14099,8 +13856,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 322,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 107, DateTimeKind.Utc).AddTicks(3750),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 107, DateTimeKind.Utc).AddTicks(3750),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14121,7 +13876,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 107, DateTimeKind.Utc).AddTicks(3750),
                             MembershipNumber = "GHC-2512171",
                             MembershipType = 2,
@@ -14138,8 +13893,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 323,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 115, DateTimeKind.Utc).AddTicks(3830),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 115, DateTimeKind.Utc).AddTicks(3830),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14160,7 +13913,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 115, DateTimeKind.Utc).AddTicks(3840),
                             MembershipNumber = "GHC-2512172",
                             MembershipType = 2,
@@ -14177,8 +13930,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 324,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 122, DateTimeKind.Utc).AddTicks(7520),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 122, DateTimeKind.Utc).AddTicks(7520),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14199,7 +13950,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 122, DateTimeKind.Utc).AddTicks(7540),
                             MembershipNumber = "GHC-2512173",
                             MembershipType = 2,
@@ -14216,8 +13967,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 325,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 138, DateTimeKind.Utc).AddTicks(490),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 138, DateTimeKind.Utc).AddTicks(490),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14238,7 +13987,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 138, DateTimeKind.Utc).AddTicks(490),
                             MembershipNumber = "GHC-2512174",
                             MembershipType = 2,
@@ -14255,8 +14004,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 326,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 171, DateTimeKind.Utc).AddTicks(2690),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 171, DateTimeKind.Utc).AddTicks(2690),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14277,7 +14024,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 171, DateTimeKind.Utc).AddTicks(2700),
                             MembershipNumber = "GHC-2512175",
                             MembershipType = 2,
@@ -14294,8 +14041,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 327,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 199, DateTimeKind.Utc).AddTicks(1740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 199, DateTimeKind.Utc).AddTicks(1740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14316,7 +14061,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 199, DateTimeKind.Utc).AddTicks(1760),
                             MembershipNumber = "GHC-2512176",
                             MembershipType = 2,
@@ -14333,8 +14078,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 328,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 231, DateTimeKind.Utc).AddTicks(2600),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 231, DateTimeKind.Utc).AddTicks(2600),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14355,7 +14098,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 231, DateTimeKind.Utc).AddTicks(2620),
                             MembershipNumber = "GHC-2512177",
                             MembershipType = 2,
@@ -14372,8 +14115,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 329,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 283, DateTimeKind.Utc).AddTicks(9410),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 283, DateTimeKind.Utc).AddTicks(9410),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14394,7 +14135,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 283, DateTimeKind.Utc).AddTicks(9420),
                             MembershipNumber = "GHC-2512179",
                             MembershipType = 2,
@@ -14411,8 +14152,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 330,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 309, DateTimeKind.Utc).AddTicks(3700),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 309, DateTimeKind.Utc).AddTicks(3700),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14433,7 +14172,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 309, DateTimeKind.Utc).AddTicks(3710),
                             MembershipNumber = "GHC-2512180",
                             MembershipType = 2,
@@ -14450,8 +14189,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 331,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 340, DateTimeKind.Utc).AddTicks(6330),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 340, DateTimeKind.Utc).AddTicks(6330),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14472,7 +14209,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 340, DateTimeKind.Utc).AddTicks(6350),
                             MembershipNumber = "GHC-2512181",
                             MembershipType = 2,
@@ -14489,8 +14226,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 332,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 348, DateTimeKind.Utc).AddTicks(3880),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 348, DateTimeKind.Utc).AddTicks(3880),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14511,7 +14246,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 348, DateTimeKind.Utc).AddTicks(3900),
                             MembershipNumber = "GHC-2512182",
                             MembershipType = 2,
@@ -14528,8 +14263,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 333,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 378, DateTimeKind.Utc).AddTicks(4250),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 378, DateTimeKind.Utc).AddTicks(4250),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14550,7 +14283,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 378, DateTimeKind.Utc).AddTicks(4260),
                             MembershipNumber = "GHC-2512183",
                             MembershipType = 2,
@@ -14567,8 +14300,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 334,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 382, DateTimeKind.Utc).AddTicks(6230),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 382, DateTimeKind.Utc).AddTicks(6230),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14589,7 +14320,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 382, DateTimeKind.Utc).AddTicks(6240),
                             MembershipNumber = "GHC-2512184",
                             MembershipType = 2,
@@ -14606,8 +14337,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 335,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 415, DateTimeKind.Utc).AddTicks(8020),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 415, DateTimeKind.Utc).AddTicks(8020),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14628,7 +14357,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 415, DateTimeKind.Utc).AddTicks(8030),
                             MembershipNumber = "GHC-2512185",
                             MembershipType = 2,
@@ -14645,8 +14374,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 336,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 450, DateTimeKind.Utc).AddTicks(4420),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 450, DateTimeKind.Utc).AddTicks(4420),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14667,7 +14394,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 450, DateTimeKind.Utc).AddTicks(4430),
                             MembershipNumber = "GHC-2512187",
                             MembershipType = 2,
@@ -14684,8 +14411,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 337,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 466, DateTimeKind.Utc).AddTicks(6690),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 466, DateTimeKind.Utc).AddTicks(6690),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14706,7 +14431,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 466, DateTimeKind.Utc).AddTicks(6700),
                             MembershipNumber = "GHC-2512188",
                             MembershipType = 2,
@@ -14723,8 +14448,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 338,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 476, DateTimeKind.Utc).AddTicks(740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 476, DateTimeKind.Utc).AddTicks(740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14745,7 +14468,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 476, DateTimeKind.Utc).AddTicks(760),
                             MembershipNumber = "GHC-2512189",
                             MembershipType = 2,
@@ -14762,8 +14485,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 339,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 516, DateTimeKind.Utc).AddTicks(1290),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 516, DateTimeKind.Utc).AddTicks(1290),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14784,7 +14505,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 516, DateTimeKind.Utc).AddTicks(1310),
                             MembershipNumber = "GHC-2512190",
                             MembershipType = 2,
@@ -14801,8 +14522,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 340,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 553, DateTimeKind.Utc).AddTicks(1450),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 553, DateTimeKind.Utc).AddTicks(1450),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14823,7 +14542,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 553, DateTimeKind.Utc).AddTicks(1460),
                             MembershipNumber = "GHC-2512191",
                             MembershipType = 2,
@@ -14840,8 +14559,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 341,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 560, DateTimeKind.Utc).AddTicks(7610),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 560, DateTimeKind.Utc).AddTicks(7610),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14862,7 +14579,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 560, DateTimeKind.Utc).AddTicks(7620),
                             MembershipNumber = "GHC-2512192",
                             MembershipType = 2,
@@ -14879,8 +14596,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 342,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 566, DateTimeKind.Utc).AddTicks(8190),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 566, DateTimeKind.Utc).AddTicks(8190),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14901,7 +14616,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 566, DateTimeKind.Utc).AddTicks(8200),
                             MembershipNumber = "GHC-2512195",
                             MembershipType = 2,
@@ -14918,8 +14633,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 343,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 582, DateTimeKind.Utc).AddTicks(8090),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 582, DateTimeKind.Utc).AddTicks(8090),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14940,7 +14653,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 582, DateTimeKind.Utc).AddTicks(8100),
                             MembershipNumber = "GHC-2512196",
                             MembershipType = 2,
@@ -14957,8 +14670,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 344,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 591, DateTimeKind.Utc).AddTicks(9200),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 591, DateTimeKind.Utc).AddTicks(9200),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -14979,7 +14690,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 591, DateTimeKind.Utc).AddTicks(9220),
                             MembershipNumber = "GHC-2512197",
                             MembershipType = 2,
@@ -14996,8 +14707,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 345,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 600, DateTimeKind.Utc).AddTicks(1680),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 600, DateTimeKind.Utc).AddTicks(1680),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15018,7 +14727,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 600, DateTimeKind.Utc).AddTicks(1690),
                             MembershipNumber = "GHC-2512198",
                             MembershipType = 2,
@@ -15035,8 +14744,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 346,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 606, DateTimeKind.Utc).AddTicks(9440),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 606, DateTimeKind.Utc).AddTicks(9440),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15057,7 +14764,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 606, DateTimeKind.Utc).AddTicks(9450),
                             MembershipNumber = "GHC-2512201",
                             MembershipType = 2,
@@ -15074,8 +14781,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 347,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 619, DateTimeKind.Utc).AddTicks(290),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 619, DateTimeKind.Utc).AddTicks(290),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15096,7 +14801,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 619, DateTimeKind.Utc).AddTicks(300),
                             MembershipNumber = "GHC-2512204",
                             MembershipType = 2,
@@ -15113,8 +14818,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 348,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 654, DateTimeKind.Utc).AddTicks(9220),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 654, DateTimeKind.Utc).AddTicks(9220),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15135,7 +14838,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 654, DateTimeKind.Utc).AddTicks(9230),
                             MembershipNumber = "GHC-2512205",
                             MembershipType = 2,
@@ -15152,8 +14855,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 349,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 658, DateTimeKind.Utc).AddTicks(7830),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 658, DateTimeKind.Utc).AddTicks(7830),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15174,7 +14875,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 658, DateTimeKind.Utc).AddTicks(7830),
                             MembershipNumber = "GHC-2512208",
                             MembershipType = 2,
@@ -15191,8 +14892,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 350,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 696, DateTimeKind.Utc).AddTicks(7830),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 696, DateTimeKind.Utc).AddTicks(7830),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15213,7 +14912,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 696, DateTimeKind.Utc).AddTicks(7850),
                             MembershipNumber = "GHC-2512210",
                             MembershipType = 2,
@@ -15230,8 +14929,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 351,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 823, DateTimeKind.Utc).AddTicks(1010),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 823, DateTimeKind.Utc).AddTicks(1010),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15252,7 +14949,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 823, DateTimeKind.Utc).AddTicks(1020),
                             MembershipNumber = "GHC-2512213",
                             MembershipType = 2,
@@ -15269,8 +14966,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 352,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 834, DateTimeKind.Utc).AddTicks(9470),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 834, DateTimeKind.Utc).AddTicks(9470),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15291,7 +14986,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 834, DateTimeKind.Utc).AddTicks(9480),
                             MembershipNumber = "GHC-2512214",
                             MembershipType = 2,
@@ -15308,8 +15003,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 353,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 870, DateTimeKind.Utc).AddTicks(810),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 870, DateTimeKind.Utc).AddTicks(810),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15330,7 +15023,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 870, DateTimeKind.Utc).AddTicks(820),
                             MembershipNumber = "GHC-2512215",
                             MembershipType = 2,
@@ -15347,8 +15040,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 354,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 880, DateTimeKind.Utc).AddTicks(6550),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 880, DateTimeKind.Utc).AddTicks(6550),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15369,7 +15060,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 880, DateTimeKind.Utc).AddTicks(6570),
                             MembershipNumber = "GHC-2512216",
                             MembershipType = 2,
@@ -15386,8 +15077,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 355,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 893, DateTimeKind.Utc).AddTicks(4800),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 893, DateTimeKind.Utc).AddTicks(4800),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15408,7 +15097,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 893, DateTimeKind.Utc).AddTicks(4810),
                             MembershipNumber = "GHC-2512217",
                             MembershipType = 2,
@@ -15425,8 +15114,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 356,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 906, DateTimeKind.Utc).AddTicks(8650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 906, DateTimeKind.Utc).AddTicks(8650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15447,7 +15134,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 906, DateTimeKind.Utc).AddTicks(8670),
                             MembershipNumber = "GHC-2512218",
                             MembershipType = 2,
@@ -15464,8 +15151,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 357,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 927, DateTimeKind.Utc).AddTicks(2360),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 927, DateTimeKind.Utc).AddTicks(2360),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15486,7 +15171,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 927, DateTimeKind.Utc).AddTicks(2370),
                             MembershipNumber = "GHC-2512219",
                             MembershipType = 2,
@@ -15503,8 +15188,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 358,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 941, DateTimeKind.Utc).AddTicks(220),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 941, DateTimeKind.Utc).AddTicks(220),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15525,7 +15208,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 941, DateTimeKind.Utc).AddTicks(230),
                             MembershipNumber = "GHC-2512220",
                             MembershipType = 2,
@@ -15542,8 +15225,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 359,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 950, DateTimeKind.Utc).AddTicks(4820),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 950, DateTimeKind.Utc).AddTicks(4820),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15564,7 +15245,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 950, DateTimeKind.Utc).AddTicks(4830),
                             MembershipNumber = "GHC-2512221",
                             MembershipType = 2,
@@ -15581,8 +15262,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 360,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 963, DateTimeKind.Utc).AddTicks(4570),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 963, DateTimeKind.Utc).AddTicks(4570),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15603,7 +15282,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 963, DateTimeKind.Utc).AddTicks(4580),
                             MembershipNumber = "GHC-2512222",
                             MembershipType = 2,
@@ -15620,8 +15299,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 361,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 968, DateTimeKind.Utc).AddTicks(3940),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 968, DateTimeKind.Utc).AddTicks(3940),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15642,7 +15319,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 968, DateTimeKind.Utc).AddTicks(3950),
                             MembershipNumber = "GHC-2512223",
                             MembershipType = 2,
@@ -15659,8 +15336,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 362,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 47, 983, DateTimeKind.Utc).AddTicks(4180),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 47, 983, DateTimeKind.Utc).AddTicks(4180),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15681,7 +15356,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 47, 983, DateTimeKind.Utc).AddTicks(4190),
                             MembershipNumber = "GHC-2512224",
                             MembershipType = 2,
@@ -15698,8 +15373,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 363,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 40, DateTimeKind.Utc).AddTicks(9760),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 40, DateTimeKind.Utc).AddTicks(9760),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15720,7 +15393,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 40, DateTimeKind.Utc).AddTicks(9770),
                             MembershipNumber = "GHC-2512228",
                             MembershipType = 2,
@@ -15737,8 +15410,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 364,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 48, DateTimeKind.Utc).AddTicks(1780),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 48, DateTimeKind.Utc).AddTicks(1780),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15759,7 +15430,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 48, DateTimeKind.Utc).AddTicks(1790),
                             MembershipNumber = "GHC-2512229",
                             MembershipType = 2,
@@ -15776,8 +15447,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 365,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 53, DateTimeKind.Utc).AddTicks(6110),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 53, DateTimeKind.Utc).AddTicks(6110),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15798,7 +15467,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 53, DateTimeKind.Utc).AddTicks(6120),
                             MembershipNumber = "GHC-2512230",
                             MembershipType = 2,
@@ -15815,8 +15484,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 366,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 81, DateTimeKind.Utc).AddTicks(5650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 81, DateTimeKind.Utc).AddTicks(5650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15837,7 +15504,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 81, DateTimeKind.Utc).AddTicks(5660),
                             MembershipNumber = "GHC-2512231",
                             MembershipType = 2,
@@ -15854,8 +15521,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 367,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 93, DateTimeKind.Utc).AddTicks(7540),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 93, DateTimeKind.Utc).AddTicks(7540),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15876,7 +15541,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 93, DateTimeKind.Utc).AddTicks(7550),
                             MembershipNumber = "GHC-2512235",
                             MembershipType = 2,
@@ -15893,8 +15558,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 368,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 102, DateTimeKind.Utc).AddTicks(5580),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 102, DateTimeKind.Utc).AddTicks(5580),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15915,7 +15578,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 102, DateTimeKind.Utc).AddTicks(5600),
                             MembershipNumber = "GHC-2512236",
                             MembershipType = 2,
@@ -15932,8 +15595,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 369,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 219, DateTimeKind.Utc).AddTicks(610),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 219, DateTimeKind.Utc).AddTicks(610),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15954,7 +15615,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 219, DateTimeKind.Utc).AddTicks(620),
                             MembershipNumber = "GHC-2512237",
                             MembershipType = 2,
@@ -15971,8 +15632,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 370,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 238, DateTimeKind.Utc).AddTicks(4580),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 238, DateTimeKind.Utc).AddTicks(4580),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -15993,7 +15652,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 238, DateTimeKind.Utc).AddTicks(4600),
                             MembershipNumber = "GHC-2512238",
                             MembershipType = 2,
@@ -16010,8 +15669,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 371,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 254, DateTimeKind.Utc).AddTicks(5630),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 254, DateTimeKind.Utc).AddTicks(5630),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16032,7 +15689,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 254, DateTimeKind.Utc).AddTicks(5640),
                             MembershipNumber = "GHC-2512239",
                             MembershipType = 2,
@@ -16049,8 +15706,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 372,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 315, DateTimeKind.Utc).AddTicks(2030),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 315, DateTimeKind.Utc).AddTicks(2030),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16071,7 +15726,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 315, DateTimeKind.Utc).AddTicks(2040),
                             MembershipNumber = "GHC-2512240",
                             MembershipType = 2,
@@ -16088,8 +15743,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 373,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 320, DateTimeKind.Utc).AddTicks(6850),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 320, DateTimeKind.Utc).AddTicks(6850),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16110,7 +15763,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 320, DateTimeKind.Utc).AddTicks(6860),
                             MembershipNumber = "GHC-2512243",
                             MembershipType = 2,
@@ -16127,8 +15780,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 374,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 321, DateTimeKind.Utc).AddTicks(970),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 321, DateTimeKind.Utc).AddTicks(970),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16149,7 +15800,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 321, DateTimeKind.Utc).AddTicks(980),
                             MembershipNumber = "GHC-2512245",
                             MembershipType = 2,
@@ -16166,8 +15817,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 375,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 353, DateTimeKind.Utc).AddTicks(1240),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 353, DateTimeKind.Utc).AddTicks(1240),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16188,7 +15837,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 353, DateTimeKind.Utc).AddTicks(1250),
                             MembershipNumber = "GHC-2512246",
                             MembershipType = 2,
@@ -16205,8 +15854,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 376,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 388, DateTimeKind.Utc).AddTicks(5020),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 388, DateTimeKind.Utc).AddTicks(5020),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16227,7 +15874,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 388, DateTimeKind.Utc).AddTicks(5030),
                             MembershipNumber = "GHC-2512247",
                             MembershipType = 2,
@@ -16244,8 +15891,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 377,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 396, DateTimeKind.Utc).AddTicks(7930),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 396, DateTimeKind.Utc).AddTicks(7930),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16266,7 +15911,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 396, DateTimeKind.Utc).AddTicks(7940),
                             MembershipNumber = "GHC-2512248",
                             MembershipType = 2,
@@ -16283,8 +15928,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 378,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 404, DateTimeKind.Utc).AddTicks(2670),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 404, DateTimeKind.Utc).AddTicks(2670),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16305,7 +15948,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 404, DateTimeKind.Utc).AddTicks(2680),
                             MembershipNumber = "GHC-2512249",
                             MembershipType = 2,
@@ -16322,8 +15965,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 379,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 426, DateTimeKind.Utc).AddTicks(1210),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 426, DateTimeKind.Utc).AddTicks(1210),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16344,7 +15985,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 426, DateTimeKind.Utc).AddTicks(1220),
                             MembershipNumber = "GHC-2512250",
                             MembershipType = 2,
@@ -16361,8 +16002,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 380,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 430, DateTimeKind.Utc).AddTicks(4860),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 430, DateTimeKind.Utc).AddTicks(4860),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16383,7 +16022,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 430, DateTimeKind.Utc).AddTicks(4880),
                             MembershipNumber = "GHC-2512251",
                             MembershipType = 2,
@@ -16400,8 +16039,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 381,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 440, DateTimeKind.Utc).AddTicks(3470),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 440, DateTimeKind.Utc).AddTicks(3470),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16422,7 +16059,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 440, DateTimeKind.Utc).AddTicks(3480),
                             MembershipNumber = "GHC-2512252",
                             MembershipType = 2,
@@ -16439,8 +16076,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 382,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 450, DateTimeKind.Utc).AddTicks(4280),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 450, DateTimeKind.Utc).AddTicks(4280),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16461,7 +16096,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 450, DateTimeKind.Utc).AddTicks(4290),
                             MembershipNumber = "GHC-2512253",
                             MembershipType = 2,
@@ -16478,8 +16113,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 383,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 460, DateTimeKind.Utc).AddTicks(5410),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 460, DateTimeKind.Utc).AddTicks(5410),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16500,7 +16133,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 460, DateTimeKind.Utc).AddTicks(5420),
                             MembershipNumber = "GHC-2512254",
                             MembershipType = 2,
@@ -16517,8 +16150,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 384,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 471, DateTimeKind.Utc).AddTicks(2850),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 471, DateTimeKind.Utc).AddTicks(2850),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16539,7 +16170,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 471, DateTimeKind.Utc).AddTicks(2860),
                             MembershipNumber = "GHC-2512255",
                             MembershipType = 2,
@@ -16556,8 +16187,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 385,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 502, DateTimeKind.Utc).AddTicks(260),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 502, DateTimeKind.Utc).AddTicks(260),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16578,7 +16207,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 502, DateTimeKind.Utc).AddTicks(270),
                             MembershipNumber = "GHC-2512256",
                             MembershipType = 2,
@@ -16595,8 +16224,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 386,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 506, DateTimeKind.Utc).AddTicks(8450),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 506, DateTimeKind.Utc).AddTicks(8450),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16617,7 +16244,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 506, DateTimeKind.Utc).AddTicks(8470),
                             MembershipNumber = "GHC-2512257",
                             MembershipType = 2,
@@ -16634,8 +16261,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 387,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 514, DateTimeKind.Utc).AddTicks(2450),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 514, DateTimeKind.Utc).AddTicks(2450),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16656,7 +16281,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 514, DateTimeKind.Utc).AddTicks(2460),
                             MembershipNumber = "GHC-2512258",
                             MembershipType = 2,
@@ -16673,8 +16298,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 388,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 526, DateTimeKind.Utc).AddTicks(2780),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 526, DateTimeKind.Utc).AddTicks(2780),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16695,7 +16318,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 526, DateTimeKind.Utc).AddTicks(2790),
                             MembershipNumber = "GHC-2512259",
                             MembershipType = 2,
@@ -16712,8 +16335,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 389,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 544, DateTimeKind.Utc).AddTicks(2740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 544, DateTimeKind.Utc).AddTicks(2740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16734,7 +16355,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 544, DateTimeKind.Utc).AddTicks(2740),
                             MembershipNumber = "GHC-2512260",
                             MembershipType = 2,
@@ -16751,8 +16372,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 390,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 584, DateTimeKind.Utc).AddTicks(9670),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 584, DateTimeKind.Utc).AddTicks(9670),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16773,7 +16392,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 584, DateTimeKind.Utc).AddTicks(9670),
                             MembershipNumber = "GHC-2512261",
                             MembershipType = 2,
@@ -16790,8 +16409,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 391,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 592, DateTimeKind.Utc).AddTicks(1200),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 592, DateTimeKind.Utc).AddTicks(1200),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16812,7 +16429,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 592, DateTimeKind.Utc).AddTicks(1210),
                             MembershipNumber = "GHC-2512262",
                             MembershipType = 2,
@@ -16829,8 +16446,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 392,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 618, DateTimeKind.Utc).AddTicks(9620),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 618, DateTimeKind.Utc).AddTicks(9620),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16851,7 +16466,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 618, DateTimeKind.Utc).AddTicks(9630),
                             MembershipNumber = "GHC-2512263",
                             MembershipType = 2,
@@ -16868,8 +16483,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 393,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 638, DateTimeKind.Utc).AddTicks(8840),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 638, DateTimeKind.Utc).AddTicks(8840),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16890,7 +16503,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 638, DateTimeKind.Utc).AddTicks(8850),
                             MembershipNumber = "GHC-2512264",
                             MembershipType = 2,
@@ -16907,8 +16520,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 394,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 645, DateTimeKind.Utc).AddTicks(2600),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 645, DateTimeKind.Utc).AddTicks(2600),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16929,7 +16540,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 645, DateTimeKind.Utc).AddTicks(2610),
                             MembershipNumber = "GHC-2512265",
                             MembershipType = 2,
@@ -16946,8 +16557,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 395,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 653, DateTimeKind.Utc).AddTicks(7650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 653, DateTimeKind.Utc).AddTicks(7650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -16968,7 +16577,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 653, DateTimeKind.Utc).AddTicks(7660),
                             MembershipNumber = "GHC-2512266",
                             MembershipType = 2,
@@ -16985,8 +16594,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 396,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 663, DateTimeKind.Utc).AddTicks(7510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 663, DateTimeKind.Utc).AddTicks(7510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17007,7 +16614,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 663, DateTimeKind.Utc).AddTicks(7520),
                             MembershipNumber = "GHC-2512267",
                             MembershipType = 2,
@@ -17024,8 +16631,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 397,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 677, DateTimeKind.Utc).AddTicks(1120),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 677, DateTimeKind.Utc).AddTicks(1120),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17046,7 +16651,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 677, DateTimeKind.Utc).AddTicks(1130),
                             MembershipNumber = "GHC-2512268",
                             MembershipType = 2,
@@ -17063,8 +16668,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 398,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 681, DateTimeKind.Utc).AddTicks(6760),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 681, DateTimeKind.Utc).AddTicks(6760),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17085,7 +16688,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 681, DateTimeKind.Utc).AddTicks(6770),
                             MembershipNumber = "GHC-2512269",
                             MembershipType = 2,
@@ -17102,8 +16705,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 399,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 689, DateTimeKind.Utc).AddTicks(2620),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 689, DateTimeKind.Utc).AddTicks(2620),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17124,7 +16725,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 689, DateTimeKind.Utc).AddTicks(2630),
                             MembershipNumber = "GHC-2512272",
                             MembershipType = 2,
@@ -17141,8 +16742,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 400,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 697, DateTimeKind.Utc).AddTicks(7510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 697, DateTimeKind.Utc).AddTicks(7510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17163,7 +16762,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 697, DateTimeKind.Utc).AddTicks(7520),
                             MembershipNumber = "GHC-2512273",
                             MembershipType = 2,
@@ -17180,8 +16779,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 401,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 705, DateTimeKind.Utc).AddTicks(6280),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 705, DateTimeKind.Utc).AddTicks(6280),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17202,7 +16799,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 705, DateTimeKind.Utc).AddTicks(6290),
                             MembershipNumber = "GHC-2512275",
                             MembershipType = 2,
@@ -17219,8 +16816,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 402,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 716, DateTimeKind.Utc).AddTicks(7410),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 716, DateTimeKind.Utc).AddTicks(7410),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17241,7 +16836,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 716, DateTimeKind.Utc).AddTicks(7410),
                             MembershipNumber = "GHC-2512278",
                             MembershipType = 2,
@@ -17258,8 +16853,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 403,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 729, DateTimeKind.Utc).AddTicks(2980),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 729, DateTimeKind.Utc).AddTicks(2980),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17280,7 +16873,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 729, DateTimeKind.Utc).AddTicks(3000),
                             MembershipNumber = "GHC-2512279",
                             MembershipType = 2,
@@ -17297,8 +16890,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 404,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 743, DateTimeKind.Utc).AddTicks(5690),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 743, DateTimeKind.Utc).AddTicks(5690),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17319,7 +16910,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 743, DateTimeKind.Utc).AddTicks(5690),
                             MembershipNumber = "GHC-2512280",
                             MembershipType = 2,
@@ -17336,8 +16927,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 405,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 783, DateTimeKind.Utc).AddTicks(7790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 783, DateTimeKind.Utc).AddTicks(7790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17358,7 +16947,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 783, DateTimeKind.Utc).AddTicks(7810),
                             MembershipNumber = "GHC-2512281",
                             MembershipType = 2,
@@ -17375,8 +16964,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 406,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 813, DateTimeKind.Utc).AddTicks(1330),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 813, DateTimeKind.Utc).AddTicks(1330),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17397,7 +16984,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 813, DateTimeKind.Utc).AddTicks(1330),
                             MembershipNumber = "GHC-2512283",
                             MembershipType = 2,
@@ -17414,8 +17001,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 407,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 853, DateTimeKind.Utc).AddTicks(2570),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 853, DateTimeKind.Utc).AddTicks(2570),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17436,7 +17021,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 853, DateTimeKind.Utc).AddTicks(2580),
                             MembershipNumber = "GHC-2512284",
                             MembershipType = 2,
@@ -17453,8 +17038,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 408,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 860, DateTimeKind.Utc).AddTicks(5380),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 860, DateTimeKind.Utc).AddTicks(5380),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17475,7 +17058,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 860, DateTimeKind.Utc).AddTicks(5390),
                             MembershipNumber = "GHC-2512285",
                             MembershipType = 2,
@@ -17492,8 +17075,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 409,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 872, DateTimeKind.Utc).AddTicks(4930),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 872, DateTimeKind.Utc).AddTicks(4930),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17514,7 +17095,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 872, DateTimeKind.Utc).AddTicks(4940),
                             MembershipNumber = "GHC-2512286",
                             MembershipType = 2,
@@ -17531,8 +17112,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 410,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 883, DateTimeKind.Utc).AddTicks(8740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 883, DateTimeKind.Utc).AddTicks(8740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17553,7 +17132,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 883, DateTimeKind.Utc).AddTicks(8750),
                             MembershipNumber = "GHC-2512287",
                             MembershipType = 2,
@@ -17570,8 +17149,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 411,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 48, 916, DateTimeKind.Utc).AddTicks(6030),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 48, 916, DateTimeKind.Utc).AddTicks(6030),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17592,7 +17169,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 48, 916, DateTimeKind.Utc).AddTicks(6050),
                             MembershipNumber = "GHC-2512288",
                             MembershipType = 2,
@@ -17609,8 +17186,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 412,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 6, DateTimeKind.Utc).AddTicks(7580),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 6, DateTimeKind.Utc).AddTicks(7580),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17631,7 +17206,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 6, DateTimeKind.Utc).AddTicks(7580),
                             MembershipNumber = "GHC-2512290",
                             MembershipType = 2,
@@ -17648,8 +17223,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 413,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 14, DateTimeKind.Utc).AddTicks(300),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 14, DateTimeKind.Utc).AddTicks(300),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17670,7 +17243,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 14, DateTimeKind.Utc).AddTicks(300),
                             MembershipNumber = "GHC-2512291",
                             MembershipType = 2,
@@ -17687,8 +17260,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 414,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 37, DateTimeKind.Utc).AddTicks(9840),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 37, DateTimeKind.Utc).AddTicks(9840),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17709,7 +17280,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 37, DateTimeKind.Utc).AddTicks(9850),
                             MembershipNumber = "GHC-2512292",
                             MembershipType = 2,
@@ -17726,8 +17297,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 415,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 61, DateTimeKind.Utc).AddTicks(7040),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 61, DateTimeKind.Utc).AddTicks(7040),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17748,7 +17317,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 61, DateTimeKind.Utc).AddTicks(7060),
                             MembershipNumber = "GHC-2512293",
                             MembershipType = 2,
@@ -17765,8 +17334,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 416,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 83, DateTimeKind.Utc).AddTicks(2790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 83, DateTimeKind.Utc).AddTicks(2790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17787,7 +17354,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 83, DateTimeKind.Utc).AddTicks(2800),
                             MembershipNumber = "GHC-2512294",
                             MembershipType = 2,
@@ -17804,8 +17371,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 417,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 94, DateTimeKind.Utc).AddTicks(4180),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 94, DateTimeKind.Utc).AddTicks(4180),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17826,7 +17391,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 94, DateTimeKind.Utc).AddTicks(4190),
                             MembershipNumber = "GHC-2512295",
                             MembershipType = 2,
@@ -17843,8 +17408,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 418,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 121, DateTimeKind.Utc).AddTicks(5610),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 121, DateTimeKind.Utc).AddTicks(5610),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17865,7 +17428,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 121, DateTimeKind.Utc).AddTicks(5620),
                             MembershipNumber = "GHC-2512296",
                             MembershipType = 2,
@@ -17882,8 +17445,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 419,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 188, DateTimeKind.Utc).AddTicks(7280),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 188, DateTimeKind.Utc).AddTicks(7280),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17904,7 +17465,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 188, DateTimeKind.Utc).AddTicks(7280),
                             MembershipNumber = "GHC-2512298",
                             MembershipType = 2,
@@ -17921,8 +17482,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 420,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 214, DateTimeKind.Utc).AddTicks(2200),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 214, DateTimeKind.Utc).AddTicks(2200),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17943,7 +17502,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 214, DateTimeKind.Utc).AddTicks(2210),
                             MembershipNumber = "GHC-2512299",
                             MembershipType = 2,
@@ -17960,8 +17519,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 421,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 224, DateTimeKind.Utc).AddTicks(4000),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 224, DateTimeKind.Utc).AddTicks(4000),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -17982,7 +17539,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 224, DateTimeKind.Utc).AddTicks(4010),
                             MembershipNumber = "GHC-2512300",
                             MembershipType = 2,
@@ -17999,8 +17556,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 422,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 233, DateTimeKind.Utc).AddTicks(5020),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 233, DateTimeKind.Utc).AddTicks(5020),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18021,7 +17576,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 233, DateTimeKind.Utc).AddTicks(5030),
                             MembershipNumber = "GHC-2512301",
                             MembershipType = 2,
@@ -18038,8 +17593,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 423,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 255, DateTimeKind.Utc).AddTicks(5070),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 255, DateTimeKind.Utc).AddTicks(5070),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18060,7 +17613,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 255, DateTimeKind.Utc).AddTicks(5080),
                             MembershipNumber = "GHC-2512302",
                             MembershipType = 2,
@@ -18077,8 +17630,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 424,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 277, DateTimeKind.Utc).AddTicks(9630),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 277, DateTimeKind.Utc).AddTicks(9630),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18099,7 +17650,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 277, DateTimeKind.Utc).AddTicks(9640),
                             MembershipNumber = "GHC-2512303",
                             MembershipType = 2,
@@ -18116,8 +17667,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 425,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 295, DateTimeKind.Utc).AddTicks(7000),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 295, DateTimeKind.Utc).AddTicks(7000),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18138,7 +17687,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 295, DateTimeKind.Utc).AddTicks(7000),
                             MembershipNumber = "GHC-2512305",
                             MembershipType = 2,
@@ -18155,8 +17704,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 426,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 306, DateTimeKind.Utc).AddTicks(9510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 306, DateTimeKind.Utc).AddTicks(9510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18177,7 +17724,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 306, DateTimeKind.Utc).AddTicks(9520),
                             MembershipNumber = "GHC-2512306",
                             MembershipType = 2,
@@ -18194,8 +17741,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 427,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 320, DateTimeKind.Utc).AddTicks(8010),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 320, DateTimeKind.Utc).AddTicks(8010),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18216,7 +17761,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 320, DateTimeKind.Utc).AddTicks(8020),
                             MembershipNumber = "GHC-2512308",
                             MembershipType = 2,
@@ -18233,8 +17778,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 428,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 360, DateTimeKind.Utc).AddTicks(7270),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 360, DateTimeKind.Utc).AddTicks(7270),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18255,7 +17798,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 360, DateTimeKind.Utc).AddTicks(7280),
                             MembershipNumber = "GHC-2512309",
                             MembershipType = 2,
@@ -18272,8 +17815,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 429,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 436, DateTimeKind.Utc).AddTicks(8190),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 436, DateTimeKind.Utc).AddTicks(8190),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18294,7 +17835,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 436, DateTimeKind.Utc).AddTicks(8200),
                             MembershipNumber = "GHC-2512311",
                             MembershipType = 2,
@@ -18311,8 +17852,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 430,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 486, DateTimeKind.Utc).AddTicks(4300),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 486, DateTimeKind.Utc).AddTicks(4300),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18333,7 +17872,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 486, DateTimeKind.Utc).AddTicks(4310),
                             MembershipNumber = "GHC-2512312",
                             MembershipType = 2,
@@ -18350,8 +17889,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 431,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 501, DateTimeKind.Utc).AddTicks(8220),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 501, DateTimeKind.Utc).AddTicks(8220),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18372,7 +17909,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 501, DateTimeKind.Utc).AddTicks(8230),
                             MembershipNumber = "GHC-2512313",
                             MembershipType = 2,
@@ -18389,8 +17926,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 432,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 527, DateTimeKind.Utc).AddTicks(7200),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 527, DateTimeKind.Utc).AddTicks(7200),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18411,7 +17946,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 527, DateTimeKind.Utc).AddTicks(7220),
                             MembershipNumber = "GHC-2512314",
                             MembershipType = 2,
@@ -18428,8 +17963,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 433,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 540, DateTimeKind.Utc).AddTicks(220),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 540, DateTimeKind.Utc).AddTicks(220),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18450,7 +17983,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 540, DateTimeKind.Utc).AddTicks(230),
                             MembershipNumber = "GHC-2512315",
                             MembershipType = 2,
@@ -18467,8 +18000,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 434,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 579, DateTimeKind.Utc).AddTicks(8950),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 579, DateTimeKind.Utc).AddTicks(8950),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18489,7 +18020,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 579, DateTimeKind.Utc).AddTicks(8960),
                             MembershipNumber = "GHC-2512316",
                             MembershipType = 2,
@@ -18506,8 +18037,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 435,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 625, DateTimeKind.Utc).AddTicks(7680),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 625, DateTimeKind.Utc).AddTicks(7680),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18528,7 +18057,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 625, DateTimeKind.Utc).AddTicks(7690),
                             MembershipNumber = "GHC-2512319",
                             MembershipType = 2,
@@ -18545,8 +18074,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 436,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 657, DateTimeKind.Utc).AddTicks(6370),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 657, DateTimeKind.Utc).AddTicks(6370),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18567,7 +18094,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 657, DateTimeKind.Utc).AddTicks(6380),
                             MembershipNumber = "GHC-2512320",
                             MembershipType = 2,
@@ -18584,8 +18111,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 437,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 674, DateTimeKind.Utc).AddTicks(6120),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 674, DateTimeKind.Utc).AddTicks(6120),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18606,7 +18131,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 674, DateTimeKind.Utc).AddTicks(6130),
                             MembershipNumber = "GHC-2512323",
                             MembershipType = 2,
@@ -18623,8 +18148,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 438,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 687, DateTimeKind.Utc).AddTicks(4770),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 687, DateTimeKind.Utc).AddTicks(4770),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18645,7 +18168,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 687, DateTimeKind.Utc).AddTicks(4780),
                             MembershipNumber = "GHC-2512324",
                             MembershipType = 2,
@@ -18662,8 +18185,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 439,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 697, DateTimeKind.Utc).AddTicks(9170),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 697, DateTimeKind.Utc).AddTicks(9170),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18684,7 +18205,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 697, DateTimeKind.Utc).AddTicks(9180),
                             MembershipNumber = "GHC-2512325",
                             MembershipType = 2,
@@ -18701,8 +18222,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 440,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 748, DateTimeKind.Utc).AddTicks(4200),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 748, DateTimeKind.Utc).AddTicks(4200),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18723,7 +18242,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 748, DateTimeKind.Utc).AddTicks(4210),
                             MembershipNumber = "GHC-2512326",
                             MembershipType = 2,
@@ -18740,8 +18259,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 441,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 767, DateTimeKind.Utc).AddTicks(8840),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 767, DateTimeKind.Utc).AddTicks(8840),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18762,7 +18279,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 767, DateTimeKind.Utc).AddTicks(8850),
                             MembershipNumber = "GHC-2512333",
                             MembershipType = 2,
@@ -18779,8 +18296,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 442,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 784, DateTimeKind.Utc).AddTicks(1470),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 784, DateTimeKind.Utc).AddTicks(1470),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18801,7 +18316,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 784, DateTimeKind.Utc).AddTicks(1470),
                             MembershipNumber = "GHC-2512334",
                             MembershipType = 2,
@@ -18818,8 +18333,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 443,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 821, DateTimeKind.Utc).AddTicks(4600),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 821, DateTimeKind.Utc).AddTicks(4600),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18840,7 +18353,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 821, DateTimeKind.Utc).AddTicks(4610),
                             MembershipNumber = "GHC-2512336",
                             MembershipType = 2,
@@ -18857,8 +18370,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 444,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 826, DateTimeKind.Utc).AddTicks(6760),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 826, DateTimeKind.Utc).AddTicks(6760),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18879,7 +18390,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 826, DateTimeKind.Utc).AddTicks(6770),
                             MembershipNumber = "GHC-2512337",
                             MembershipType = 2,
@@ -18896,8 +18407,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 445,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 831, DateTimeKind.Utc).AddTicks(2600),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 831, DateTimeKind.Utc).AddTicks(2600),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18918,7 +18427,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 831, DateTimeKind.Utc).AddTicks(2600),
                             MembershipNumber = "GHC-2512338",
                             MembershipType = 2,
@@ -18935,8 +18444,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 446,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 844, DateTimeKind.Utc).AddTicks(6090),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 844, DateTimeKind.Utc).AddTicks(6090),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18957,7 +18464,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 844, DateTimeKind.Utc).AddTicks(6100),
                             MembershipNumber = "GHC-2512339",
                             MembershipType = 2,
@@ -18974,8 +18481,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 447,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 901, DateTimeKind.Utc).AddTicks(2890),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 901, DateTimeKind.Utc).AddTicks(2890),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -18996,7 +18501,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 901, DateTimeKind.Utc).AddTicks(2900),
                             MembershipNumber = "GHC-2512340",
                             MembershipType = 2,
@@ -19013,8 +18518,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 448,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 905, DateTimeKind.Utc).AddTicks(6690),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 905, DateTimeKind.Utc).AddTicks(6690),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19035,7 +18538,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 905, DateTimeKind.Utc).AddTicks(6700),
                             MembershipNumber = "GHC-2512341",
                             MembershipType = 2,
@@ -19052,8 +18555,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 449,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 951, DateTimeKind.Utc).AddTicks(3410),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 951, DateTimeKind.Utc).AddTicks(3410),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19074,7 +18575,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 951, DateTimeKind.Utc).AddTicks(3410),
                             MembershipNumber = "GHC-2512342",
                             MembershipType = 2,
@@ -19091,8 +18592,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 450,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 956, DateTimeKind.Utc).AddTicks(1120),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 956, DateTimeKind.Utc).AddTicks(1120),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19113,7 +18612,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 956, DateTimeKind.Utc).AddTicks(1120),
                             MembershipNumber = "GHC-2512344",
                             MembershipType = 2,
@@ -19130,8 +18629,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 451,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 49, 979, DateTimeKind.Utc).AddTicks(5060),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 49, 979, DateTimeKind.Utc).AddTicks(5060),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19152,7 +18649,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 49, 979, DateTimeKind.Utc).AddTicks(5080),
                             MembershipNumber = "GHC-2512345",
                             MembershipType = 2,
@@ -19169,8 +18666,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 452,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 15, DateTimeKind.Utc).AddTicks(1980),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 15, DateTimeKind.Utc).AddTicks(1980),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19191,7 +18686,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 15, DateTimeKind.Utc).AddTicks(1990),
                             MembershipNumber = "GHC-2512346",
                             MembershipType = 2,
@@ -19208,8 +18703,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 453,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 26, DateTimeKind.Utc).AddTicks(590),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 26, DateTimeKind.Utc).AddTicks(590),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19230,7 +18723,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 26, DateTimeKind.Utc).AddTicks(600),
                             MembershipNumber = "GHC-2512347",
                             MembershipType = 2,
@@ -19247,8 +18740,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 454,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 67, DateTimeKind.Utc).AddTicks(7900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 67, DateTimeKind.Utc).AddTicks(7900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19269,7 +18760,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 67, DateTimeKind.Utc).AddTicks(7920),
                             MembershipNumber = "GHC-2512348",
                             MembershipType = 2,
@@ -19286,8 +18777,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 455,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 86, DateTimeKind.Utc).AddTicks(5800),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 86, DateTimeKind.Utc).AddTicks(5800),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19308,7 +18797,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 86, DateTimeKind.Utc).AddTicks(5820),
                             MembershipNumber = "GHC-2512350",
                             MembershipType = 2,
@@ -19325,8 +18814,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 456,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 97, DateTimeKind.Utc).AddTicks(480),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 97, DateTimeKind.Utc).AddTicks(480),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19347,7 +18834,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 97, DateTimeKind.Utc).AddTicks(490),
                             MembershipNumber = "GHC-2512351",
                             MembershipType = 2,
@@ -19364,8 +18851,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 457,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 175, DateTimeKind.Utc).AddTicks(2100),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 175, DateTimeKind.Utc).AddTicks(2100),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19386,7 +18871,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 175, DateTimeKind.Utc).AddTicks(2100),
                             MembershipNumber = "GHC-2512352",
                             MembershipType = 2,
@@ -19403,8 +18888,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 458,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 232, DateTimeKind.Utc).AddTicks(4020),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 232, DateTimeKind.Utc).AddTicks(4020),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19425,7 +18908,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 232, DateTimeKind.Utc).AddTicks(4030),
                             MembershipNumber = "GHC-2512353",
                             MembershipType = 2,
@@ -19442,8 +18925,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 459,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 305, DateTimeKind.Utc).AddTicks(7030),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 305, DateTimeKind.Utc).AddTicks(7030),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19464,7 +18945,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 305, DateTimeKind.Utc).AddTicks(7040),
                             MembershipNumber = "GHC-2512354",
                             MembershipType = 2,
@@ -19481,8 +18962,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 460,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 428, DateTimeKind.Utc).AddTicks(780),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 428, DateTimeKind.Utc).AddTicks(780),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19503,7 +18982,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 428, DateTimeKind.Utc).AddTicks(790),
                             MembershipNumber = "GHC-2512355",
                             MembershipType = 2,
@@ -19520,8 +18999,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 461,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 438, DateTimeKind.Utc).AddTicks(5790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 438, DateTimeKind.Utc).AddTicks(5790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19542,7 +19019,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 438, DateTimeKind.Utc).AddTicks(5800),
                             MembershipNumber = "GHC-2512357",
                             MembershipType = 2,
@@ -19559,8 +19036,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 462,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 442, DateTimeKind.Utc).AddTicks(1870),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 442, DateTimeKind.Utc).AddTicks(1870),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19581,7 +19056,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 442, DateTimeKind.Utc).AddTicks(1880),
                             MembershipNumber = "GHC-2512362",
                             MembershipType = 2,
@@ -19598,8 +19073,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 463,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 448, DateTimeKind.Utc).AddTicks(6820),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 448, DateTimeKind.Utc).AddTicks(6820),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19620,7 +19093,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 448, DateTimeKind.Utc).AddTicks(6830),
                             MembershipNumber = "GHC-2512363",
                             MembershipType = 2,
@@ -19637,8 +19110,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 464,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 480, DateTimeKind.Utc).AddTicks(6900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 480, DateTimeKind.Utc).AddTicks(6900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19659,7 +19130,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 480, DateTimeKind.Utc).AddTicks(6910),
                             MembershipNumber = "GHC-2512364",
                             MembershipType = 2,
@@ -19676,8 +19147,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 465,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 495, DateTimeKind.Utc).AddTicks(5470),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 495, DateTimeKind.Utc).AddTicks(5470),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19698,7 +19167,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 495, DateTimeKind.Utc).AddTicks(5480),
                             MembershipNumber = "GHC-2512365",
                             MembershipType = 2,
@@ -19715,8 +19184,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 466,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 552, DateTimeKind.Utc).AddTicks(8810),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 552, DateTimeKind.Utc).AddTicks(8810),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19737,7 +19204,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 552, DateTimeKind.Utc).AddTicks(8820),
                             MembershipNumber = "GHC-2512366",
                             MembershipType = 2,
@@ -19754,8 +19221,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 467,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 566, DateTimeKind.Utc).AddTicks(4010),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 566, DateTimeKind.Utc).AddTicks(4010),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19776,7 +19241,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 566, DateTimeKind.Utc).AddTicks(4020),
                             MembershipNumber = "GHC-2512367",
                             MembershipType = 2,
@@ -19793,8 +19258,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 468,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 579, DateTimeKind.Utc).AddTicks(5850),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 579, DateTimeKind.Utc).AddTicks(5850),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19815,7 +19278,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 579, DateTimeKind.Utc).AddTicks(5860),
                             MembershipNumber = "GHC-2512368",
                             MembershipType = 2,
@@ -19832,8 +19295,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 469,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 594, DateTimeKind.Utc).AddTicks(8490),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 594, DateTimeKind.Utc).AddTicks(8490),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19854,7 +19315,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 594, DateTimeKind.Utc).AddTicks(8500),
                             MembershipNumber = "GHC-2512369",
                             MembershipType = 2,
@@ -19871,8 +19332,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 470,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 611, DateTimeKind.Utc).AddTicks(7750),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 611, DateTimeKind.Utc).AddTicks(7750),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19893,7 +19352,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 611, DateTimeKind.Utc).AddTicks(7760),
                             MembershipNumber = "GHC-2512370",
                             MembershipType = 2,
@@ -19910,8 +19369,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 471,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 688, DateTimeKind.Utc).AddTicks(4250),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 688, DateTimeKind.Utc).AddTicks(4250),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19932,7 +19389,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 688, DateTimeKind.Utc).AddTicks(4260),
                             MembershipNumber = "GHC-2512371",
                             MembershipType = 2,
@@ -19949,8 +19406,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 472,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 784, DateTimeKind.Utc).AddTicks(9260),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 784, DateTimeKind.Utc).AddTicks(9260),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -19971,7 +19426,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 784, DateTimeKind.Utc).AddTicks(9270),
                             MembershipNumber = "GHC-2512372",
                             MembershipType = 2,
@@ -19988,8 +19443,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 473,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 799, DateTimeKind.Utc).AddTicks(6710),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 799, DateTimeKind.Utc).AddTicks(6710),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20010,7 +19463,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 799, DateTimeKind.Utc).AddTicks(6720),
                             MembershipNumber = "GHC-2512373",
                             MembershipType = 2,
@@ -20027,8 +19480,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 474,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 824, DateTimeKind.Utc).AddTicks(6650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 824, DateTimeKind.Utc).AddTicks(6650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20049,7 +19500,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 824, DateTimeKind.Utc).AddTicks(6650),
                             MembershipNumber = "GHC-2512374",
                             MembershipType = 2,
@@ -20066,8 +19517,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 475,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 836, DateTimeKind.Utc).AddTicks(2980),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 836, DateTimeKind.Utc).AddTicks(2980),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20088,7 +19537,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 836, DateTimeKind.Utc).AddTicks(2990),
                             MembershipNumber = "GHC-2512376",
                             MembershipType = 2,
@@ -20105,8 +19554,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 476,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 913, DateTimeKind.Utc).AddTicks(5280),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 913, DateTimeKind.Utc).AddTicks(5280),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20127,7 +19574,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 913, DateTimeKind.Utc).AddTicks(5290),
                             MembershipNumber = "GHC-2512377",
                             MembershipType = 2,
@@ -20144,8 +19591,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 477,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 929, DateTimeKind.Utc).AddTicks(3290),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 929, DateTimeKind.Utc).AddTicks(3290),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20166,7 +19611,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 929, DateTimeKind.Utc).AddTicks(3300),
                             MembershipNumber = "GHC-2512378",
                             MembershipType = 2,
@@ -20183,8 +19628,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 478,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 950, DateTimeKind.Utc).AddTicks(6320),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 950, DateTimeKind.Utc).AddTicks(6320),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20205,7 +19648,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 950, DateTimeKind.Utc).AddTicks(6330),
                             MembershipNumber = "GHC-2512379",
                             MembershipType = 2,
@@ -20222,8 +19665,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 479,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 50, 966, DateTimeKind.Utc).AddTicks(6390),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 50, 966, DateTimeKind.Utc).AddTicks(6390),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20244,7 +19685,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 50, 966, DateTimeKind.Utc).AddTicks(6400),
                             MembershipNumber = "GHC-2512380",
                             MembershipType = 2,
@@ -20261,8 +19702,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 480,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 39, DateTimeKind.Utc).AddTicks(110),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 39, DateTimeKind.Utc).AddTicks(110),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20283,7 +19722,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 39, DateTimeKind.Utc).AddTicks(120),
                             MembershipNumber = "GHC-2512381",
                             MembershipType = 2,
@@ -20300,8 +19739,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 481,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 60, DateTimeKind.Utc).AddTicks(6260),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 60, DateTimeKind.Utc).AddTicks(6260),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20322,7 +19759,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 60, DateTimeKind.Utc).AddTicks(6270),
                             MembershipNumber = "GHC-2512383",
                             MembershipType = 2,
@@ -20339,8 +19776,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 482,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 122, DateTimeKind.Utc).AddTicks(1330),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 122, DateTimeKind.Utc).AddTicks(1330),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20361,7 +19796,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 122, DateTimeKind.Utc).AddTicks(1340),
                             MembershipNumber = "GHC-2512384",
                             MembershipType = 2,
@@ -20378,8 +19813,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 483,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 152, DateTimeKind.Utc).AddTicks(1060),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 152, DateTimeKind.Utc).AddTicks(1060),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20400,7 +19833,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 152, DateTimeKind.Utc).AddTicks(1070),
                             MembershipNumber = "GHC-2512385",
                             MembershipType = 2,
@@ -20417,8 +19850,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 484,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 165, DateTimeKind.Utc).AddTicks(1100),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 165, DateTimeKind.Utc).AddTicks(1100),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20439,7 +19870,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 165, DateTimeKind.Utc).AddTicks(1110),
                             MembershipNumber = "GHC-2512386",
                             MembershipType = 2,
@@ -20456,8 +19887,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 485,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 172, DateTimeKind.Utc).AddTicks(8510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 172, DateTimeKind.Utc).AddTicks(8510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20478,7 +19907,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 172, DateTimeKind.Utc).AddTicks(8520),
                             MembershipNumber = "GHC-2512387",
                             MembershipType = 2,
@@ -20495,8 +19924,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 486,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 181, DateTimeKind.Utc).AddTicks(3330),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 181, DateTimeKind.Utc).AddTicks(3330),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20517,7 +19944,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 181, DateTimeKind.Utc).AddTicks(3340),
                             MembershipNumber = "GHC-2512388",
                             MembershipType = 2,
@@ -20534,8 +19961,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 487,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 189, DateTimeKind.Utc).AddTicks(5370),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 189, DateTimeKind.Utc).AddTicks(5370),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20556,7 +19981,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 189, DateTimeKind.Utc).AddTicks(5380),
                             MembershipNumber = "GHC-2512389",
                             MembershipType = 2,
@@ -20573,8 +19998,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 488,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 210, DateTimeKind.Utc).AddTicks(8040),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 210, DateTimeKind.Utc).AddTicks(8040),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20595,7 +20018,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 210, DateTimeKind.Utc).AddTicks(8050),
                             MembershipNumber = "GHC-2512390",
                             MembershipType = 2,
@@ -20612,8 +20035,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 489,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 231, DateTimeKind.Utc).AddTicks(90),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 231, DateTimeKind.Utc).AddTicks(90),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20634,7 +20055,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 231, DateTimeKind.Utc).AddTicks(100),
                             MembershipNumber = "GHC-2512391",
                             MembershipType = 2,
@@ -20651,8 +20072,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 490,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 236, DateTimeKind.Utc).AddTicks(5000),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 236, DateTimeKind.Utc).AddTicks(5000),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20673,7 +20092,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 236, DateTimeKind.Utc).AddTicks(5010),
                             MembershipNumber = "GHC-2512392",
                             MembershipType = 2,
@@ -20690,8 +20109,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 491,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 245, DateTimeKind.Utc).AddTicks(300),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 245, DateTimeKind.Utc).AddTicks(300),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20712,7 +20129,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 245, DateTimeKind.Utc).AddTicks(310),
                             MembershipNumber = "GHC-2512393",
                             MembershipType = 2,
@@ -20729,8 +20146,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 492,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 291, DateTimeKind.Utc).AddTicks(3680),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 291, DateTimeKind.Utc).AddTicks(3680),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20751,7 +20166,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 291, DateTimeKind.Utc).AddTicks(3680),
                             MembershipNumber = "GHC-2512394",
                             MembershipType = 2,
@@ -20768,8 +20183,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 493,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 301, DateTimeKind.Utc).AddTicks(600),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 301, DateTimeKind.Utc).AddTicks(600),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20790,7 +20203,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 301, DateTimeKind.Utc).AddTicks(610),
                             MembershipNumber = "GHC-2512395",
                             MembershipType = 2,
@@ -20807,8 +20220,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 494,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 304, DateTimeKind.Utc).AddTicks(8810),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 304, DateTimeKind.Utc).AddTicks(8810),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20829,7 +20240,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 304, DateTimeKind.Utc).AddTicks(8820),
                             MembershipNumber = "GHC-2512396",
                             MembershipType = 2,
@@ -20846,8 +20257,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 495,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 333, DateTimeKind.Utc).AddTicks(8780),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 333, DateTimeKind.Utc).AddTicks(8780),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20868,7 +20277,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 333, DateTimeKind.Utc).AddTicks(8790),
                             MembershipNumber = "GHC-2512397",
                             MembershipType = 2,
@@ -20885,8 +20294,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 496,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 343, DateTimeKind.Utc).AddTicks(8290),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 343, DateTimeKind.Utc).AddTicks(8290),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20907,7 +20314,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 343, DateTimeKind.Utc).AddTicks(8300),
                             MembershipNumber = "GHC-2512398",
                             MembershipType = 2,
@@ -20924,8 +20331,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 497,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 350, DateTimeKind.Utc).AddTicks(7140),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 350, DateTimeKind.Utc).AddTicks(7140),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20946,7 +20351,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 350, DateTimeKind.Utc).AddTicks(7150),
                             MembershipNumber = "GHC-2512400",
                             MembershipType = 2,
@@ -20963,8 +20368,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 498,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 378, DateTimeKind.Utc).AddTicks(4740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 378, DateTimeKind.Utc).AddTicks(4740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -20985,7 +20388,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 378, DateTimeKind.Utc).AddTicks(4750),
                             MembershipNumber = "GHC-2512401",
                             MembershipType = 2,
@@ -21002,8 +20405,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 499,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 409, DateTimeKind.Utc).AddTicks(7320),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 409, DateTimeKind.Utc).AddTicks(7320),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21024,7 +20425,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 409, DateTimeKind.Utc).AddTicks(7330),
                             MembershipNumber = "GHC-2512402",
                             MembershipType = 2,
@@ -21041,8 +20442,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 500,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 416, DateTimeKind.Utc).AddTicks(1300),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 416, DateTimeKind.Utc).AddTicks(1300),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21063,7 +20462,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 416, DateTimeKind.Utc).AddTicks(1320),
                             MembershipNumber = "GHC-2512403",
                             MembershipType = 2,
@@ -21080,8 +20479,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 501,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 461, DateTimeKind.Utc).AddTicks(2320),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 461, DateTimeKind.Utc).AddTicks(2320),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21102,7 +20499,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 461, DateTimeKind.Utc).AddTicks(2330),
                             MembershipNumber = "GHC-2512407",
                             MembershipType = 2,
@@ -21119,8 +20516,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 502,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 479, DateTimeKind.Utc).AddTicks(6940),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 479, DateTimeKind.Utc).AddTicks(6940),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21141,7 +20536,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 479, DateTimeKind.Utc).AddTicks(6950),
                             MembershipNumber = "GHC-2512408",
                             MembershipType = 2,
@@ -21158,8 +20553,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 503,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 494, DateTimeKind.Utc).AddTicks(2260),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 494, DateTimeKind.Utc).AddTicks(2260),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21180,7 +20573,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 494, DateTimeKind.Utc).AddTicks(2270),
                             MembershipNumber = "GHC-2512409",
                             MembershipType = 2,
@@ -21197,8 +20590,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 504,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 505, DateTimeKind.Utc).AddTicks(2770),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 505, DateTimeKind.Utc).AddTicks(2770),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21219,7 +20610,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 505, DateTimeKind.Utc).AddTicks(2780),
                             MembershipNumber = "GHC-2512413",
                             MembershipType = 2,
@@ -21236,8 +20627,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 505,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 516, DateTimeKind.Utc).AddTicks(2530),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 516, DateTimeKind.Utc).AddTicks(2530),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21258,7 +20647,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 516, DateTimeKind.Utc).AddTicks(2540),
                             MembershipNumber = "GHC-2512414",
                             MembershipType = 2,
@@ -21275,8 +20664,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 506,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 542, DateTimeKind.Utc).AddTicks(5970),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 542, DateTimeKind.Utc).AddTicks(5970),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21297,7 +20684,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 542, DateTimeKind.Utc).AddTicks(5980),
                             MembershipNumber = "GHC-2512415",
                             MembershipType = 2,
@@ -21314,8 +20701,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 507,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 651, DateTimeKind.Utc).AddTicks(2350),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 651, DateTimeKind.Utc).AddTicks(2350),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21336,7 +20721,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 651, DateTimeKind.Utc).AddTicks(2360),
                             MembershipNumber = "GHC-2512416",
                             MembershipType = 2,
@@ -21353,8 +20738,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 508,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 696, DateTimeKind.Utc).AddTicks(4590),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 696, DateTimeKind.Utc).AddTicks(4590),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21375,7 +20758,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 696, DateTimeKind.Utc).AddTicks(4590),
                             MembershipNumber = "GHC-2512418",
                             MembershipType = 2,
@@ -21392,8 +20775,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 509,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 720, DateTimeKind.Utc).AddTicks(900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 720, DateTimeKind.Utc).AddTicks(900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21414,7 +20795,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 720, DateTimeKind.Utc).AddTicks(910),
                             MembershipNumber = "GHC-2512419",
                             MembershipType = 2,
@@ -21431,8 +20812,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 510,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 727, DateTimeKind.Utc).AddTicks(9570),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 727, DateTimeKind.Utc).AddTicks(9570),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21453,7 +20832,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 727, DateTimeKind.Utc).AddTicks(9580),
                             MembershipNumber = "GHC-2512420",
                             MembershipType = 2,
@@ -21470,8 +20849,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 511,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 741, DateTimeKind.Utc).AddTicks(5920),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 741, DateTimeKind.Utc).AddTicks(5920),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21492,7 +20869,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 741, DateTimeKind.Utc).AddTicks(5930),
                             MembershipNumber = "GHC-2512421",
                             MembershipType = 2,
@@ -21509,8 +20886,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 512,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 758, DateTimeKind.Utc).AddTicks(8900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 758, DateTimeKind.Utc).AddTicks(8900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21531,7 +20906,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 758, DateTimeKind.Utc).AddTicks(8900),
                             MembershipNumber = "GHC-2512422",
                             MembershipType = 2,
@@ -21548,8 +20923,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 513,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 764, DateTimeKind.Utc).AddTicks(9770),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 764, DateTimeKind.Utc).AddTicks(9770),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21570,7 +20943,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 764, DateTimeKind.Utc).AddTicks(9780),
                             MembershipNumber = "GHC-2512423",
                             MembershipType = 2,
@@ -21587,8 +20960,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 514,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 770, DateTimeKind.Utc).AddTicks(2430),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 770, DateTimeKind.Utc).AddTicks(2430),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21609,7 +20980,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 770, DateTimeKind.Utc).AddTicks(2440),
                             MembershipNumber = "GHC-2512424",
                             MembershipType = 2,
@@ -21626,8 +20997,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 515,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 774, DateTimeKind.Utc).AddTicks(900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 774, DateTimeKind.Utc).AddTicks(900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21648,7 +21017,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 774, DateTimeKind.Utc).AddTicks(910),
                             MembershipNumber = "GHC-2512425",
                             MembershipType = 2,
@@ -21665,8 +21034,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 516,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 802, DateTimeKind.Utc).AddTicks(8150),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 802, DateTimeKind.Utc).AddTicks(8150),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21687,7 +21054,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 802, DateTimeKind.Utc).AddTicks(8150),
                             MembershipNumber = "GHC-2512426",
                             MembershipType = 2,
@@ -21704,8 +21071,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 517,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 832, DateTimeKind.Utc).AddTicks(8580),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 832, DateTimeKind.Utc).AddTicks(8580),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21726,7 +21091,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 832, DateTimeKind.Utc).AddTicks(8590),
                             MembershipNumber = "GHC-2512427",
                             MembershipType = 2,
@@ -21743,8 +21108,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 518,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 837, DateTimeKind.Utc).AddTicks(6510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 837, DateTimeKind.Utc).AddTicks(6510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21765,7 +21128,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 837, DateTimeKind.Utc).AddTicks(6520),
                             MembershipNumber = "GHC-2512428",
                             MembershipType = 2,
@@ -21782,8 +21145,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 519,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 843, DateTimeKind.Utc).AddTicks(6060),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 843, DateTimeKind.Utc).AddTicks(6060),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21804,7 +21165,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 843, DateTimeKind.Utc).AddTicks(6070),
                             MembershipNumber = "GHC-2512429",
                             MembershipType = 2,
@@ -21821,8 +21182,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 520,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 869, DateTimeKind.Utc).AddTicks(3420),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 869, DateTimeKind.Utc).AddTicks(3420),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21843,7 +21202,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 869, DateTimeKind.Utc).AddTicks(3430),
                             MembershipNumber = "GHC-2512430",
                             MembershipType = 2,
@@ -21860,8 +21219,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 521,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 876, DateTimeKind.Utc).AddTicks(3170),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 876, DateTimeKind.Utc).AddTicks(3170),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21882,7 +21239,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 876, DateTimeKind.Utc).AddTicks(3180),
                             MembershipNumber = "GHC-2512431",
                             MembershipType = 2,
@@ -21899,8 +21256,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 522,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 895, DateTimeKind.Utc).AddTicks(600),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 895, DateTimeKind.Utc).AddTicks(600),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21921,7 +21276,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 895, DateTimeKind.Utc).AddTicks(610),
                             MembershipNumber = "GHC-2512432",
                             MembershipType = 2,
@@ -21938,8 +21293,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 523,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 922, DateTimeKind.Utc).AddTicks(6650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 922, DateTimeKind.Utc).AddTicks(6650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21960,7 +21313,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 922, DateTimeKind.Utc).AddTicks(6660),
                             MembershipNumber = "GHC-2512433",
                             MembershipType = 2,
@@ -21977,8 +21330,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 524,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 51, 949, DateTimeKind.Utc).AddTicks(8160),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 51, 949, DateTimeKind.Utc).AddTicks(8160),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -21999,7 +21350,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 51, 949, DateTimeKind.Utc).AddTicks(8230),
                             MembershipNumber = "GHC-2512434",
                             MembershipType = 2,
@@ -22016,8 +21367,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 525,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 22, DateTimeKind.Utc).AddTicks(340),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 22, DateTimeKind.Utc).AddTicks(340),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22038,7 +21387,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 22, DateTimeKind.Utc).AddTicks(350),
                             MembershipNumber = "GHC-2512435",
                             MembershipType = 2,
@@ -22055,8 +21404,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 526,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 58, DateTimeKind.Utc).AddTicks(8790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 58, DateTimeKind.Utc).AddTicks(8790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22077,7 +21424,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 58, DateTimeKind.Utc).AddTicks(8800),
                             MembershipNumber = "GHC-2512436",
                             MembershipType = 2,
@@ -22094,8 +21441,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 527,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 66, DateTimeKind.Utc).AddTicks(6120),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 66, DateTimeKind.Utc).AddTicks(6120),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22116,7 +21461,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 66, DateTimeKind.Utc).AddTicks(6130),
                             MembershipNumber = "GHC-2512438",
                             MembershipType = 2,
@@ -22133,8 +21478,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 528,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 89, DateTimeKind.Utc).AddTicks(5870),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 89, DateTimeKind.Utc).AddTicks(5870),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22155,7 +21498,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 89, DateTimeKind.Utc).AddTicks(5880),
                             MembershipNumber = "GHC-2512439",
                             MembershipType = 2,
@@ -22172,8 +21515,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 529,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 95, DateTimeKind.Utc).AddTicks(9580),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 95, DateTimeKind.Utc).AddTicks(9580),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22194,7 +21535,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 95, DateTimeKind.Utc).AddTicks(9590),
                             MembershipNumber = "GHC-2512440",
                             MembershipType = 2,
@@ -22211,8 +21552,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 530,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 122, DateTimeKind.Utc).AddTicks(7540),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 122, DateTimeKind.Utc).AddTicks(7540),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22233,7 +21572,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 122, DateTimeKind.Utc).AddTicks(7550),
                             MembershipNumber = "GHC-2512441",
                             MembershipType = 2,
@@ -22250,8 +21589,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 531,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 139, DateTimeKind.Utc).AddTicks(1250),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 139, DateTimeKind.Utc).AddTicks(1250),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22272,7 +21609,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 139, DateTimeKind.Utc).AddTicks(1260),
                             MembershipNumber = "GHC-2512442",
                             MembershipType = 2,
@@ -22289,8 +21626,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 532,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 142, DateTimeKind.Utc).AddTicks(920),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 142, DateTimeKind.Utc).AddTicks(920),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22311,7 +21646,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 142, DateTimeKind.Utc).AddTicks(930),
                             MembershipNumber = "GHC-2512443",
                             MembershipType = 2,
@@ -22328,8 +21663,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 533,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 175, DateTimeKind.Utc).AddTicks(4560),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 175, DateTimeKind.Utc).AddTicks(4560),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22350,7 +21683,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 175, DateTimeKind.Utc).AddTicks(4570),
                             MembershipNumber = "GHC-2512444",
                             MembershipType = 2,
@@ -22367,8 +21700,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 534,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 183, DateTimeKind.Utc).AddTicks(8190),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 183, DateTimeKind.Utc).AddTicks(8190),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22389,7 +21720,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 183, DateTimeKind.Utc).AddTicks(8200),
                             MembershipNumber = "GHC-2512446",
                             MembershipType = 2,
@@ -22406,8 +21737,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 535,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 191, DateTimeKind.Utc).AddTicks(7540),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 191, DateTimeKind.Utc).AddTicks(7540),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22428,7 +21757,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 191, DateTimeKind.Utc).AddTicks(7550),
                             MembershipNumber = "GHC-2512447",
                             MembershipType = 2,
@@ -22445,8 +21774,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 536,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 199, DateTimeKind.Utc).AddTicks(3340),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 199, DateTimeKind.Utc).AddTicks(3340),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22467,7 +21794,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 199, DateTimeKind.Utc).AddTicks(3350),
                             MembershipNumber = "GHC-2512448",
                             MembershipType = 2,
@@ -22484,8 +21811,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 537,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 231, DateTimeKind.Utc).AddTicks(8240),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 231, DateTimeKind.Utc).AddTicks(8240),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22506,7 +21831,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 231, DateTimeKind.Utc).AddTicks(8250),
                             MembershipNumber = "GHC-2512449",
                             MembershipType = 2,
@@ -22523,8 +21848,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 538,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 284, DateTimeKind.Utc).AddTicks(5990),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 284, DateTimeKind.Utc).AddTicks(5990),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22545,7 +21868,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 284, DateTimeKind.Utc).AddTicks(6000),
                             MembershipNumber = "GHC-2512450",
                             MembershipType = 2,
@@ -22562,8 +21885,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 539,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 294, DateTimeKind.Utc).AddTicks(4880),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 294, DateTimeKind.Utc).AddTicks(4880),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22584,7 +21905,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 294, DateTimeKind.Utc).AddTicks(4890),
                             MembershipNumber = "GHC-2512452",
                             MembershipType = 2,
@@ -22601,8 +21922,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 540,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 298, DateTimeKind.Utc).AddTicks(4910),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 298, DateTimeKind.Utc).AddTicks(4910),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22623,7 +21942,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 298, DateTimeKind.Utc).AddTicks(4920),
                             MembershipNumber = "GHC-2512454",
                             MembershipType = 2,
@@ -22640,8 +21959,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 541,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 339, DateTimeKind.Utc).AddTicks(4510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 339, DateTimeKind.Utc).AddTicks(4510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22662,7 +21979,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 339, DateTimeKind.Utc).AddTicks(4520),
                             MembershipNumber = "GHC-2512455",
                             MembershipType = 2,
@@ -22679,8 +21996,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 542,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 348, DateTimeKind.Utc).AddTicks(7710),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 348, DateTimeKind.Utc).AddTicks(7710),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22701,7 +22016,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 348, DateTimeKind.Utc).AddTicks(7710),
                             MembershipNumber = "GHC-2512456",
                             MembershipType = 2,
@@ -22718,8 +22033,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 543,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 353, DateTimeKind.Utc).AddTicks(3250),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 353, DateTimeKind.Utc).AddTicks(3250),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22740,7 +22053,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 353, DateTimeKind.Utc).AddTicks(3250),
                             MembershipNumber = "GHC-2512457",
                             MembershipType = 2,
@@ -22757,8 +22070,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 544,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 364, DateTimeKind.Utc).AddTicks(5650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 364, DateTimeKind.Utc).AddTicks(5650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22779,7 +22090,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 364, DateTimeKind.Utc).AddTicks(5660),
                             MembershipNumber = "GHC-2512458",
                             MembershipType = 2,
@@ -22796,8 +22107,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 545,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 375, DateTimeKind.Utc).AddTicks(80),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 375, DateTimeKind.Utc).AddTicks(80),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22818,7 +22127,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 375, DateTimeKind.Utc).AddTicks(90),
                             MembershipNumber = "GHC-2512459",
                             MembershipType = 2,
@@ -22835,8 +22144,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 546,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 391, DateTimeKind.Utc).AddTicks(3790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 391, DateTimeKind.Utc).AddTicks(3790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22857,7 +22164,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 391, DateTimeKind.Utc).AddTicks(3800),
                             MembershipNumber = "GHC-2512461",
                             MembershipType = 2,
@@ -22874,8 +22181,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 547,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 399, DateTimeKind.Utc).AddTicks(1740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 399, DateTimeKind.Utc).AddTicks(1740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22896,7 +22201,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 399, DateTimeKind.Utc).AddTicks(1750),
                             MembershipNumber = "GHC-2512462",
                             MembershipType = 2,
@@ -22913,8 +22218,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 548,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 405, DateTimeKind.Utc).AddTicks(1510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 405, DateTimeKind.Utc).AddTicks(1510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22935,7 +22238,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 405, DateTimeKind.Utc).AddTicks(1520),
                             MembershipNumber = "GHC-2512463",
                             MembershipType = 2,
@@ -22952,8 +22255,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 549,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 431, DateTimeKind.Utc).AddTicks(8390),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 431, DateTimeKind.Utc).AddTicks(8390),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -22974,7 +22275,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 431, DateTimeKind.Utc).AddTicks(8410),
                             MembershipNumber = "GHC-2512465",
                             MembershipType = 2,
@@ -22991,8 +22292,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 550,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 450, DateTimeKind.Utc).AddTicks(3570),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 450, DateTimeKind.Utc).AddTicks(3570),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23013,7 +22312,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 450, DateTimeKind.Utc).AddTicks(3580),
                             MembershipNumber = "GHC-2512466",
                             MembershipType = 2,
@@ -23030,8 +22329,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 551,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 462, DateTimeKind.Utc).AddTicks(890),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 462, DateTimeKind.Utc).AddTicks(890),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23052,7 +22349,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 462, DateTimeKind.Utc).AddTicks(900),
                             MembershipNumber = "GHC-2512467",
                             MembershipType = 2,
@@ -23069,8 +22366,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 552,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 502, DateTimeKind.Utc).AddTicks(1940),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 502, DateTimeKind.Utc).AddTicks(1940),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23091,7 +22386,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 502, DateTimeKind.Utc).AddTicks(1960),
                             MembershipNumber = "GHC-2512468",
                             MembershipType = 2,
@@ -23108,8 +22403,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 553,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 549, DateTimeKind.Utc).AddTicks(8250),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 549, DateTimeKind.Utc).AddTicks(8250),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23130,7 +22423,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 549, DateTimeKind.Utc).AddTicks(8260),
                             MembershipNumber = "GHC-2512469",
                             MembershipType = 2,
@@ -23147,8 +22440,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 554,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 560, DateTimeKind.Utc).AddTicks(7190),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 560, DateTimeKind.Utc).AddTicks(7190),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23169,7 +22460,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 560, DateTimeKind.Utc).AddTicks(7190),
                             MembershipNumber = "GHC-2512471",
                             MembershipType = 2,
@@ -23186,8 +22477,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 555,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 586, DateTimeKind.Utc).AddTicks(950),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 586, DateTimeKind.Utc).AddTicks(950),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23208,7 +22497,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 586, DateTimeKind.Utc).AddTicks(950),
                             MembershipNumber = "GHC-2512472",
                             MembershipType = 2,
@@ -23225,8 +22514,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 556,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 619, DateTimeKind.Utc).AddTicks(6440),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 619, DateTimeKind.Utc).AddTicks(6440),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23247,7 +22534,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 619, DateTimeKind.Utc).AddTicks(6450),
                             MembershipNumber = "GHC-2512473",
                             MembershipType = 2,
@@ -23264,8 +22551,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 557,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 640, DateTimeKind.Utc).AddTicks(3790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 640, DateTimeKind.Utc).AddTicks(3790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23286,7 +22571,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 640, DateTimeKind.Utc).AddTicks(3800),
                             MembershipNumber = "GHC-2512474",
                             MembershipType = 2,
@@ -23303,8 +22588,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 558,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 649, DateTimeKind.Utc).AddTicks(8070),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 649, DateTimeKind.Utc).AddTicks(8070),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23325,7 +22608,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 649, DateTimeKind.Utc).AddTicks(8080),
                             MembershipNumber = "GHC-2512475",
                             MembershipType = 2,
@@ -23342,8 +22625,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 559,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 674, DateTimeKind.Utc).AddTicks(8850),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 674, DateTimeKind.Utc).AddTicks(8850),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23364,7 +22645,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 674, DateTimeKind.Utc).AddTicks(8860),
                             MembershipNumber = "GHC-2512476",
                             MembershipType = 2,
@@ -23381,8 +22662,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 560,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 728, DateTimeKind.Utc).AddTicks(7780),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 728, DateTimeKind.Utc).AddTicks(7780),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23403,7 +22682,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 728, DateTimeKind.Utc).AddTicks(7790),
                             MembershipNumber = "GHC-2512477",
                             MembershipType = 2,
@@ -23420,8 +22699,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 561,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 736, DateTimeKind.Utc).AddTicks(1650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 736, DateTimeKind.Utc).AddTicks(1650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23442,7 +22719,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 736, DateTimeKind.Utc).AddTicks(1650),
                             MembershipNumber = "GHC-2512478",
                             MembershipType = 2,
@@ -23459,8 +22736,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 562,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 745, DateTimeKind.Utc).AddTicks(7330),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 745, DateTimeKind.Utc).AddTicks(7330),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23481,7 +22756,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 745, DateTimeKind.Utc).AddTicks(7350),
                             MembershipNumber = "GHC-2512479",
                             MembershipType = 2,
@@ -23498,8 +22773,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 563,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 753, DateTimeKind.Utc).AddTicks(3510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 753, DateTimeKind.Utc).AddTicks(3510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23520,7 +22793,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 753, DateTimeKind.Utc).AddTicks(3520),
                             MembershipNumber = "GHC-2512480",
                             MembershipType = 2,
@@ -23537,8 +22810,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 564,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 767, DateTimeKind.Utc).AddTicks(8340),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 767, DateTimeKind.Utc).AddTicks(8340),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23559,7 +22830,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 767, DateTimeKind.Utc).AddTicks(8350),
                             MembershipNumber = "GHC-2512481",
                             MembershipType = 2,
@@ -23576,8 +22847,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 565,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 802, DateTimeKind.Utc).AddTicks(1990),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 802, DateTimeKind.Utc).AddTicks(1990),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23598,7 +22867,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 802, DateTimeKind.Utc).AddTicks(2000),
                             MembershipNumber = "GHC-2512482",
                             MembershipType = 2,
@@ -23615,8 +22884,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 566,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 819, DateTimeKind.Utc).AddTicks(6390),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 819, DateTimeKind.Utc).AddTicks(6390),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23637,7 +22904,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 819, DateTimeKind.Utc).AddTicks(6400),
                             MembershipNumber = "GHC-2512484",
                             MembershipType = 2,
@@ -23654,8 +22921,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 567,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 832, DateTimeKind.Utc).AddTicks(2220),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 832, DateTimeKind.Utc).AddTicks(2220),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23676,7 +22941,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 832, DateTimeKind.Utc).AddTicks(2230),
                             MembershipNumber = "GHC-2512485",
                             MembershipType = 2,
@@ -23693,8 +22958,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 568,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 841, DateTimeKind.Utc).AddTicks(1820),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 841, DateTimeKind.Utc).AddTicks(1820),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23715,7 +22978,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 841, DateTimeKind.Utc).AddTicks(1830),
                             MembershipNumber = "GHC-2512486",
                             MembershipType = 2,
@@ -23732,8 +22995,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 569,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 863, DateTimeKind.Utc).AddTicks(1350),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 863, DateTimeKind.Utc).AddTicks(1350),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23754,7 +23015,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 863, DateTimeKind.Utc).AddTicks(1360),
                             MembershipNumber = "GHC-2512487",
                             MembershipType = 2,
@@ -23771,8 +23032,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 570,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 868, DateTimeKind.Utc).AddTicks(1260),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 868, DateTimeKind.Utc).AddTicks(1260),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23793,7 +23052,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 868, DateTimeKind.Utc).AddTicks(1270),
                             MembershipNumber = "GHC-2512488",
                             MembershipType = 2,
@@ -23810,8 +23069,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 571,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 878, DateTimeKind.Utc).AddTicks(4270),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 878, DateTimeKind.Utc).AddTicks(4270),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23832,7 +23089,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 878, DateTimeKind.Utc).AddTicks(4280),
                             MembershipNumber = "GHC-2512489",
                             MembershipType = 2,
@@ -23849,8 +23106,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 572,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 898, DateTimeKind.Utc).AddTicks(6490),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 898, DateTimeKind.Utc).AddTicks(6490),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23871,7 +23126,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 898, DateTimeKind.Utc).AddTicks(6510),
                             MembershipNumber = "GHC-2512490",
                             MembershipType = 2,
@@ -23888,8 +23143,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 573,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 911, DateTimeKind.Utc).AddTicks(6430),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 911, DateTimeKind.Utc).AddTicks(6430),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23910,7 +23163,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 911, DateTimeKind.Utc).AddTicks(6440),
                             MembershipNumber = "GHC-2512491",
                             MembershipType = 2,
@@ -23927,8 +23180,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 574,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 939, DateTimeKind.Utc).AddTicks(2030),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 939, DateTimeKind.Utc).AddTicks(2030),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23949,7 +23200,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 939, DateTimeKind.Utc).AddTicks(2040),
                             MembershipNumber = "GHC-2512492",
                             MembershipType = 2,
@@ -23966,8 +23217,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 575,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 947, DateTimeKind.Utc).AddTicks(2600),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 947, DateTimeKind.Utc).AddTicks(2600),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -23988,7 +23237,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 947, DateTimeKind.Utc).AddTicks(2610),
                             MembershipNumber = "GHC-2512493",
                             MembershipType = 2,
@@ -24005,8 +23254,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 576,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 958, DateTimeKind.Utc).AddTicks(1470),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 958, DateTimeKind.Utc).AddTicks(1470),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24027,7 +23274,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 958, DateTimeKind.Utc).AddTicks(1480),
                             MembershipNumber = "GHC-2512494",
                             MembershipType = 2,
@@ -24044,8 +23291,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 577,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 969, DateTimeKind.Utc).AddTicks(90),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 969, DateTimeKind.Utc).AddTicks(90),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24066,7 +23311,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 969, DateTimeKind.Utc).AddTicks(100),
                             MembershipNumber = "GHC-2512495",
                             MembershipType = 2,
@@ -24083,8 +23328,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 578,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 983, DateTimeKind.Utc).AddTicks(4680),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 983, DateTimeKind.Utc).AddTicks(4680),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24105,7 +23348,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 983, DateTimeKind.Utc).AddTicks(4690),
                             MembershipNumber = "GHC-2512496",
                             MembershipType = 2,
@@ -24122,8 +23365,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 579,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 52, 989, DateTimeKind.Utc).AddTicks(5940),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 52, 989, DateTimeKind.Utc).AddTicks(5940),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24144,7 +23385,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 52, 989, DateTimeKind.Utc).AddTicks(5950),
                             MembershipNumber = "GHC-2512497",
                             MembershipType = 2,
@@ -24161,8 +23402,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 580,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 12, DateTimeKind.Utc).AddTicks(8200),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 12, DateTimeKind.Utc).AddTicks(8200),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24183,7 +23422,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 12, DateTimeKind.Utc).AddTicks(8210),
                             MembershipNumber = "GHC-2512498",
                             MembershipType = 2,
@@ -24200,8 +23439,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 581,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 97, DateTimeKind.Utc).AddTicks(7220),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 97, DateTimeKind.Utc).AddTicks(7220),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24222,7 +23459,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 97, DateTimeKind.Utc).AddTicks(7230),
                             MembershipNumber = "GHC-2512500",
                             MembershipType = 2,
@@ -24239,8 +23476,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 582,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 106, DateTimeKind.Utc).AddTicks(4070),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 106, DateTimeKind.Utc).AddTicks(4070),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24261,7 +23496,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 106, DateTimeKind.Utc).AddTicks(4080),
                             MembershipNumber = "GHC-2512501",
                             MembershipType = 2,
@@ -24278,8 +23513,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 583,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 110, DateTimeKind.Utc).AddTicks(1740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 110, DateTimeKind.Utc).AddTicks(1740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24300,7 +23533,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 110, DateTimeKind.Utc).AddTicks(1750),
                             MembershipNumber = "GHC-2512502",
                             MembershipType = 2,
@@ -24317,8 +23550,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 584,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 153, DateTimeKind.Utc).AddTicks(7420),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 153, DateTimeKind.Utc).AddTicks(7420),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24339,7 +23570,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 153, DateTimeKind.Utc).AddTicks(7430),
                             MembershipNumber = "GHC-2512503",
                             MembershipType = 2,
@@ -24356,8 +23587,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 585,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 193, DateTimeKind.Utc).AddTicks(2810),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 193, DateTimeKind.Utc).AddTicks(2810),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24378,7 +23607,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 193, DateTimeKind.Utc).AddTicks(2810),
                             MembershipNumber = "GHC-2512504",
                             MembershipType = 2,
@@ -24395,8 +23624,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 586,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 202, DateTimeKind.Utc).AddTicks(7080),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 202, DateTimeKind.Utc).AddTicks(7080),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24417,7 +23644,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 202, DateTimeKind.Utc).AddTicks(7090),
                             MembershipNumber = "GHC-2512505",
                             MembershipType = 2,
@@ -24434,8 +23661,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 587,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 276, DateTimeKind.Utc).AddTicks(4760),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 276, DateTimeKind.Utc).AddTicks(4760),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24456,7 +23681,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 276, DateTimeKind.Utc).AddTicks(4770),
                             MembershipNumber = "GHC-2512506",
                             MembershipType = 2,
@@ -24473,8 +23698,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 588,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 284, DateTimeKind.Utc).AddTicks(3640),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 284, DateTimeKind.Utc).AddTicks(3640),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24495,7 +23718,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 284, DateTimeKind.Utc).AddTicks(3650),
                             MembershipNumber = "GHC-2512507",
                             MembershipType = 2,
@@ -24512,8 +23735,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 589,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 294, DateTimeKind.Utc).AddTicks(5300),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 294, DateTimeKind.Utc).AddTicks(5300),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24534,7 +23755,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 294, DateTimeKind.Utc).AddTicks(5310),
                             MembershipNumber = "GHC-2512508",
                             MembershipType = 2,
@@ -24551,8 +23772,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 590,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 317, DateTimeKind.Utc).AddTicks(7570),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 317, DateTimeKind.Utc).AddTicks(7570),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24573,7 +23792,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 317, DateTimeKind.Utc).AddTicks(7580),
                             MembershipNumber = "GHC-2512509",
                             MembershipType = 2,
@@ -24590,8 +23809,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 591,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 326, DateTimeKind.Utc).AddTicks(8910),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 326, DateTimeKind.Utc).AddTicks(8910),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24612,7 +23829,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 326, DateTimeKind.Utc).AddTicks(8910),
                             MembershipNumber = "GHC-2512510",
                             MembershipType = 2,
@@ -24629,8 +23846,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 592,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 361, DateTimeKind.Utc).AddTicks(6550),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 361, DateTimeKind.Utc).AddTicks(6550),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24651,7 +23866,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 361, DateTimeKind.Utc).AddTicks(6570),
                             MembershipNumber = "GHC-2512512",
                             MembershipType = 2,
@@ -24668,8 +23883,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 593,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 447, DateTimeKind.Utc).AddTicks(4900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 447, DateTimeKind.Utc).AddTicks(4900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24690,7 +23903,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 447, DateTimeKind.Utc).AddTicks(4910),
                             MembershipNumber = "GHC-2512513",
                             MembershipType = 2,
@@ -24707,8 +23920,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 594,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 481, DateTimeKind.Utc).AddTicks(2650),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 481, DateTimeKind.Utc).AddTicks(2650),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24729,7 +23940,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 481, DateTimeKind.Utc).AddTicks(2660),
                             MembershipNumber = "GHC-2512514",
                             MembershipType = 2,
@@ -24746,8 +23957,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 595,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 565, DateTimeKind.Utc).AddTicks(7360),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 565, DateTimeKind.Utc).AddTicks(7360),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24768,7 +23977,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 565, DateTimeKind.Utc).AddTicks(7370),
                             MembershipNumber = "GHC-2512515",
                             MembershipType = 2,
@@ -24785,8 +23994,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 596,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 575, DateTimeKind.Utc).AddTicks(8740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 575, DateTimeKind.Utc).AddTicks(8740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24807,7 +24014,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 575, DateTimeKind.Utc).AddTicks(8750),
                             MembershipNumber = "GHC-2512516",
                             MembershipType = 2,
@@ -24824,8 +24031,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 597,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 581, DateTimeKind.Utc).AddTicks(4920),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 581, DateTimeKind.Utc).AddTicks(4920),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24846,7 +24051,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 581, DateTimeKind.Utc).AddTicks(4930),
                             MembershipNumber = "GHC-2512517",
                             MembershipType = 2,
@@ -24863,8 +24068,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 598,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 591, DateTimeKind.Utc).AddTicks(4840),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 591, DateTimeKind.Utc).AddTicks(4840),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24885,7 +24088,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 591, DateTimeKind.Utc).AddTicks(4850),
                             MembershipNumber = "GHC-2512518",
                             MembershipType = 2,
@@ -24902,8 +24105,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 599,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 600, DateTimeKind.Utc).AddTicks(4920),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 600, DateTimeKind.Utc).AddTicks(4920),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24924,7 +24125,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 600, DateTimeKind.Utc).AddTicks(4930),
                             MembershipNumber = "GHC-2512519",
                             MembershipType = 2,
@@ -24941,8 +24142,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 600,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 609, DateTimeKind.Utc).AddTicks(6400),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 609, DateTimeKind.Utc).AddTicks(6400),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -24963,7 +24162,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 609, DateTimeKind.Utc).AddTicks(6410),
                             MembershipNumber = "GHC-2512520",
                             MembershipType = 2,
@@ -24980,8 +24179,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 601,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 620, DateTimeKind.Utc).AddTicks(880),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 620, DateTimeKind.Utc).AddTicks(880),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25002,7 +24199,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 620, DateTimeKind.Utc).AddTicks(890),
                             MembershipNumber = "GHC-2512521",
                             MembershipType = 2,
@@ -25019,8 +24216,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 602,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 659, DateTimeKind.Utc).AddTicks(4770),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 659, DateTimeKind.Utc).AddTicks(4770),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25041,7 +24236,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 659, DateTimeKind.Utc).AddTicks(4780),
                             MembershipNumber = "GHC-2512522",
                             MembershipType = 2,
@@ -25058,8 +24253,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 603,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 670, DateTimeKind.Utc).AddTicks(2130),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 670, DateTimeKind.Utc).AddTicks(2130),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25080,7 +24273,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 670, DateTimeKind.Utc).AddTicks(2140),
                             MembershipNumber = "GHC-2512524",
                             MembershipType = 2,
@@ -25097,8 +24290,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 604,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 681, DateTimeKind.Utc).AddTicks(8880),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 681, DateTimeKind.Utc).AddTicks(8880),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25119,7 +24310,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 681, DateTimeKind.Utc).AddTicks(8890),
                             MembershipNumber = "GHC-2512525",
                             MembershipType = 2,
@@ -25136,8 +24327,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 605,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 720, DateTimeKind.Utc).AddTicks(6220),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 720, DateTimeKind.Utc).AddTicks(6220),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25158,7 +24347,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 720, DateTimeKind.Utc).AddTicks(6230),
                             MembershipNumber = "GHC-2512526",
                             MembershipType = 2,
@@ -25175,8 +24364,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 606,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 750, DateTimeKind.Utc).AddTicks(7080),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 750, DateTimeKind.Utc).AddTicks(7080),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25197,7 +24384,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 750, DateTimeKind.Utc).AddTicks(7080),
                             MembershipNumber = "GHC-2512527",
                             MembershipType = 2,
@@ -25214,8 +24401,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 607,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 765, DateTimeKind.Utc).AddTicks(1340),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 765, DateTimeKind.Utc).AddTicks(1340),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25236,7 +24421,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 765, DateTimeKind.Utc).AddTicks(1350),
                             MembershipNumber = "GHC-2512531",
                             MembershipType = 2,
@@ -25253,8 +24438,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 608,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 770, DateTimeKind.Utc).AddTicks(9270),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 770, DateTimeKind.Utc).AddTicks(9270),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25275,7 +24458,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 770, DateTimeKind.Utc).AddTicks(9280),
                             MembershipNumber = "GHC-2512532",
                             MembershipType = 2,
@@ -25292,8 +24475,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 609,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 792, DateTimeKind.Utc).AddTicks(3900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 792, DateTimeKind.Utc).AddTicks(3900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25314,7 +24495,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 792, DateTimeKind.Utc).AddTicks(3910),
                             MembershipNumber = "GHC-2512533",
                             MembershipType = 2,
@@ -25331,8 +24512,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 610,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 800, DateTimeKind.Utc).AddTicks(7190),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 800, DateTimeKind.Utc).AddTicks(7190),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25353,7 +24532,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 800, DateTimeKind.Utc).AddTicks(7200),
                             MembershipNumber = "GHC-2512534",
                             MembershipType = 2,
@@ -25370,8 +24549,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 611,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 806, DateTimeKind.Utc).AddTicks(9530),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 806, DateTimeKind.Utc).AddTicks(9530),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25392,7 +24569,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 806, DateTimeKind.Utc).AddTicks(9540),
                             MembershipNumber = "GHC-2512537",
                             MembershipType = 2,
@@ -25409,8 +24586,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 612,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 816, DateTimeKind.Utc).AddTicks(4190),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 816, DateTimeKind.Utc).AddTicks(4190),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25431,7 +24606,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 816, DateTimeKind.Utc).AddTicks(4200),
                             MembershipNumber = "GHC-2512538",
                             MembershipType = 2,
@@ -25448,8 +24623,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 613,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 833, DateTimeKind.Utc).AddTicks(6930),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 833, DateTimeKind.Utc).AddTicks(6930),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25470,7 +24643,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 833, DateTimeKind.Utc).AddTicks(6940),
                             MembershipNumber = "GHC-2512539",
                             MembershipType = 2,
@@ -25487,8 +24660,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 614,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 851, DateTimeKind.Utc).AddTicks(5500),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 851, DateTimeKind.Utc).AddTicks(5500),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25509,7 +24680,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 851, DateTimeKind.Utc).AddTicks(5510),
                             MembershipNumber = "GHC-2512541",
                             MembershipType = 2,
@@ -25526,8 +24697,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 615,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 872, DateTimeKind.Utc).AddTicks(5340),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 872, DateTimeKind.Utc).AddTicks(5340),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25548,7 +24717,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 872, DateTimeKind.Utc).AddTicks(5350),
                             MembershipNumber = "GHC-2512542",
                             MembershipType = 2,
@@ -25565,8 +24734,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 616,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 918, DateTimeKind.Utc).AddTicks(5080),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 918, DateTimeKind.Utc).AddTicks(5080),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25587,7 +24754,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 918, DateTimeKind.Utc).AddTicks(5090),
                             MembershipNumber = "GHC-2512545",
                             MembershipType = 2,
@@ -25604,8 +24771,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 617,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 925, DateTimeKind.Utc).AddTicks(9070),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 925, DateTimeKind.Utc).AddTicks(9070),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25626,7 +24791,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 925, DateTimeKind.Utc).AddTicks(9090),
                             MembershipNumber = "GHC-2512547",
                             MembershipType = 2,
@@ -25643,8 +24808,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 618,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 938, DateTimeKind.Utc).AddTicks(2030),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 938, DateTimeKind.Utc).AddTicks(2030),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25665,7 +24828,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 938, DateTimeKind.Utc).AddTicks(2040),
                             MembershipNumber = "GHC-2512549",
                             MembershipType = 2,
@@ -25682,8 +24845,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 619,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 943, DateTimeKind.Utc).AddTicks(6000),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 943, DateTimeKind.Utc).AddTicks(6000),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25704,7 +24865,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 943, DateTimeKind.Utc).AddTicks(6010),
                             MembershipNumber = "GHC-2512550",
                             MembershipType = 2,
@@ -25721,8 +24882,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 620,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 957, DateTimeKind.Utc).AddTicks(9600),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 957, DateTimeKind.Utc).AddTicks(9600),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25743,7 +24902,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 957, DateTimeKind.Utc).AddTicks(9620),
                             MembershipNumber = "GHC-2512551",
                             MembershipType = 2,
@@ -25760,8 +24919,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 621,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 965, DateTimeKind.Utc).AddTicks(9090),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 965, DateTimeKind.Utc).AddTicks(9090),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25782,7 +24939,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 965, DateTimeKind.Utc).AddTicks(9100),
                             MembershipNumber = "GHC-2512552",
                             MembershipType = 2,
@@ -25799,8 +24956,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 622,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 53, 970, DateTimeKind.Utc).AddTicks(9770),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 53, 970, DateTimeKind.Utc).AddTicks(9770),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25821,7 +24976,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 53, 970, DateTimeKind.Utc).AddTicks(9770),
                             MembershipNumber = "GHC-2512553",
                             MembershipType = 2,
@@ -25838,8 +24993,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 623,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 0, DateTimeKind.Utc).AddTicks(2750),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 0, DateTimeKind.Utc).AddTicks(2750),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25860,7 +25013,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 0, DateTimeKind.Utc).AddTicks(2760),
                             MembershipNumber = "GHC-2512554",
                             MembershipType = 2,
@@ -25877,8 +25030,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 624,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 6, DateTimeKind.Utc).AddTicks(6730),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 6, DateTimeKind.Utc).AddTicks(6730),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25899,7 +25050,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 6, DateTimeKind.Utc).AddTicks(6740),
                             MembershipNumber = "GHC-2512555",
                             MembershipType = 2,
@@ -25916,8 +25067,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 625,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 14, DateTimeKind.Utc).AddTicks(6520),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 14, DateTimeKind.Utc).AddTicks(6520),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25938,7 +25087,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 14, DateTimeKind.Utc).AddTicks(6520),
                             MembershipNumber = "GHC-2512556",
                             MembershipType = 2,
@@ -25955,8 +25104,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 626,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 19, DateTimeKind.Utc).AddTicks(2520),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 19, DateTimeKind.Utc).AddTicks(2520),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -25977,7 +25124,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 19, DateTimeKind.Utc).AddTicks(2530),
                             MembershipNumber = "GHC-2512557",
                             MembershipType = 2,
@@ -25994,8 +25141,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 627,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 28, DateTimeKind.Utc).AddTicks(9100),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 28, DateTimeKind.Utc).AddTicks(9100),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26016,7 +25161,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 28, DateTimeKind.Utc).AddTicks(9110),
                             MembershipNumber = "GHC-2512558",
                             MembershipType = 2,
@@ -26033,8 +25178,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 628,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 45, DateTimeKind.Utc).AddTicks(1460),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 45, DateTimeKind.Utc).AddTicks(1460),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26055,7 +25198,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 45, DateTimeKind.Utc).AddTicks(1470),
                             MembershipNumber = "GHC-2512559",
                             MembershipType = 2,
@@ -26072,8 +25215,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 629,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 80, DateTimeKind.Utc).AddTicks(5480),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 80, DateTimeKind.Utc).AddTicks(5480),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26094,7 +25235,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 80, DateTimeKind.Utc).AddTicks(5490),
                             MembershipNumber = "GHC-2512560",
                             MembershipType = 2,
@@ -26111,8 +25252,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 630,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 102, DateTimeKind.Utc).AddTicks(5570),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 102, DateTimeKind.Utc).AddTicks(5570),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26133,7 +25272,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 102, DateTimeKind.Utc).AddTicks(5580),
                             MembershipNumber = "GHC-2512561",
                             MembershipType = 2,
@@ -26150,8 +25289,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 631,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 111, DateTimeKind.Utc).AddTicks(2890),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 111, DateTimeKind.Utc).AddTicks(2890),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26172,7 +25309,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 111, DateTimeKind.Utc).AddTicks(2900),
                             MembershipNumber = "GHC-2512562",
                             MembershipType = 2,
@@ -26189,8 +25326,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 632,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 132, DateTimeKind.Utc).AddTicks(6410),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 132, DateTimeKind.Utc).AddTicks(6410),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26211,7 +25346,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 132, DateTimeKind.Utc).AddTicks(6420),
                             MembershipNumber = "GHC-2512563",
                             MembershipType = 2,
@@ -26228,8 +25363,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 633,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 136, DateTimeKind.Utc).AddTicks(5390),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 136, DateTimeKind.Utc).AddTicks(5390),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26250,7 +25383,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 136, DateTimeKind.Utc).AddTicks(5400),
                             MembershipNumber = "GHC-2512564",
                             MembershipType = 2,
@@ -26267,8 +25400,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 634,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 172, DateTimeKind.Utc).AddTicks(2620),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 172, DateTimeKind.Utc).AddTicks(2620),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26289,7 +25420,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 172, DateTimeKind.Utc).AddTicks(2640),
                             MembershipNumber = "GHC-2512565",
                             MembershipType = 2,
@@ -26306,8 +25437,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 635,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 204, DateTimeKind.Utc).AddTicks(2530),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 204, DateTimeKind.Utc).AddTicks(2530),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26328,7 +25457,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 204, DateTimeKind.Utc).AddTicks(2700),
                             MembershipNumber = "GHC-2512566",
                             MembershipType = 2,
@@ -26345,8 +25474,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 636,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 240, DateTimeKind.Utc).AddTicks(2540),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 240, DateTimeKind.Utc).AddTicks(2540),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26367,7 +25494,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 240, DateTimeKind.Utc).AddTicks(2550),
                             MembershipNumber = "GHC-2512567",
                             MembershipType = 2,
@@ -26384,8 +25511,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 637,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 263, DateTimeKind.Utc).AddTicks(2350),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 263, DateTimeKind.Utc).AddTicks(2350),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26406,7 +25531,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 263, DateTimeKind.Utc).AddTicks(2350),
                             MembershipNumber = "GHC-2512568",
                             MembershipType = 2,
@@ -26423,8 +25548,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 638,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 478, DateTimeKind.Utc).AddTicks(5450),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 478, DateTimeKind.Utc).AddTicks(5450),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26445,7 +25568,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 478, DateTimeKind.Utc).AddTicks(5460),
                             MembershipNumber = "GHC-2512570",
                             MembershipType = 2,
@@ -26462,8 +25585,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 639,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 507, DateTimeKind.Utc).AddTicks(7770),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 507, DateTimeKind.Utc).AddTicks(7770),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26484,7 +25605,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 507, DateTimeKind.Utc).AddTicks(7780),
                             MembershipNumber = "GHC-2512571",
                             MembershipType = 2,
@@ -26501,8 +25622,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 640,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 624, DateTimeKind.Utc).AddTicks(5210),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 624, DateTimeKind.Utc).AddTicks(5210),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26523,7 +25642,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 624, DateTimeKind.Utc).AddTicks(5220),
                             MembershipNumber = "GHC-2512572",
                             MembershipType = 2,
@@ -26540,8 +25659,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 641,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 672, DateTimeKind.Utc).AddTicks(8860),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 672, DateTimeKind.Utc).AddTicks(8860),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26562,7 +25679,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 672, DateTimeKind.Utc).AddTicks(8870),
                             MembershipNumber = "GHC-2512573",
                             MembershipType = 2,
@@ -26579,8 +25696,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 642,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 723, DateTimeKind.Utc).AddTicks(830),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 723, DateTimeKind.Utc).AddTicks(830),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26601,7 +25716,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 723, DateTimeKind.Utc).AddTicks(850),
                             MembershipNumber = "GHC-2512574",
                             MembershipType = 2,
@@ -26618,8 +25733,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 643,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 729, DateTimeKind.Utc).AddTicks(9550),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 729, DateTimeKind.Utc).AddTicks(9550),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26640,7 +25753,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 729, DateTimeKind.Utc).AddTicks(9560),
                             MembershipNumber = "GHC-2512575",
                             MembershipType = 2,
@@ -26657,8 +25770,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 644,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 814, DateTimeKind.Utc).AddTicks(9390),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 814, DateTimeKind.Utc).AddTicks(9390),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26679,7 +25790,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 814, DateTimeKind.Utc).AddTicks(9400),
                             MembershipNumber = "GHC-2512578",
                             MembershipType = 2,
@@ -26696,8 +25807,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 645,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 826, DateTimeKind.Utc).AddTicks(7190),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 826, DateTimeKind.Utc).AddTicks(7190),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26718,7 +25827,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 826, DateTimeKind.Utc).AddTicks(7190),
                             MembershipNumber = "GHC-2512579",
                             MembershipType = 2,
@@ -26735,8 +25844,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 646,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 835, DateTimeKind.Utc).AddTicks(4350),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 835, DateTimeKind.Utc).AddTicks(4350),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26757,7 +25864,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 835, DateTimeKind.Utc).AddTicks(4360),
                             MembershipNumber = "GHC-2512581",
                             MembershipType = 2,
@@ -26774,8 +25881,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 647,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 845, DateTimeKind.Utc).AddTicks(9900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 845, DateTimeKind.Utc).AddTicks(9900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26796,7 +25901,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 845, DateTimeKind.Utc).AddTicks(9910),
                             MembershipNumber = "GHC-2512582",
                             MembershipType = 2,
@@ -26813,8 +25918,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 648,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 853, DateTimeKind.Utc).AddTicks(4550),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 853, DateTimeKind.Utc).AddTicks(4550),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26835,7 +25938,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 853, DateTimeKind.Utc).AddTicks(4560),
                             MembershipNumber = "GHC-2512583",
                             MembershipType = 2,
@@ -26852,8 +25955,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 649,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 861, DateTimeKind.Utc).AddTicks(4160),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 861, DateTimeKind.Utc).AddTicks(4160),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26874,7 +25975,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 861, DateTimeKind.Utc).AddTicks(4170),
                             MembershipNumber = "GHC-2512584",
                             MembershipType = 2,
@@ -26891,8 +25992,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 650,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 876, DateTimeKind.Utc).AddTicks(8950),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 876, DateTimeKind.Utc).AddTicks(8950),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26913,7 +26012,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 876, DateTimeKind.Utc).AddTicks(8960),
                             MembershipNumber = "GHC-2512585",
                             MembershipType = 2,
@@ -26930,8 +26029,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 651,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 901, DateTimeKind.Utc).AddTicks(6960),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 901, DateTimeKind.Utc).AddTicks(6960),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26952,7 +26049,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 901, DateTimeKind.Utc).AddTicks(6970),
                             MembershipNumber = "GHC-2512586",
                             MembershipType = 2,
@@ -26969,8 +26066,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 652,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 910, DateTimeKind.Utc).AddTicks(4890),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 910, DateTimeKind.Utc).AddTicks(4890),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -26991,7 +26086,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 910, DateTimeKind.Utc).AddTicks(4890),
                             MembershipNumber = "GHC-2512587",
                             MembershipType = 2,
@@ -27008,8 +26103,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 653,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 921, DateTimeKind.Utc).AddTicks(740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 921, DateTimeKind.Utc).AddTicks(740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27030,7 +26123,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 921, DateTimeKind.Utc).AddTicks(750),
                             MembershipNumber = "GHC-2512588",
                             MembershipType = 2,
@@ -27047,8 +26140,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 654,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 944, DateTimeKind.Utc).AddTicks(170),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 944, DateTimeKind.Utc).AddTicks(170),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27069,7 +26160,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 944, DateTimeKind.Utc).AddTicks(180),
                             MembershipNumber = "GHC-2512589",
                             MembershipType = 2,
@@ -27086,8 +26177,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 655,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 54, 962, DateTimeKind.Utc).AddTicks(7420),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 54, 962, DateTimeKind.Utc).AddTicks(7420),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27108,7 +26197,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 54, 962, DateTimeKind.Utc).AddTicks(7430),
                             MembershipNumber = "GHC-2512591",
                             MembershipType = 2,
@@ -27125,8 +26214,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 656,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 5, DateTimeKind.Utc).AddTicks(3420),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 5, DateTimeKind.Utc).AddTicks(3420),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27147,7 +26234,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 5, DateTimeKind.Utc).AddTicks(3430),
                             MembershipNumber = "GHC-2512592",
                             MembershipType = 2,
@@ -27164,8 +26251,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 657,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 31, DateTimeKind.Utc).AddTicks(9040),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 31, DateTimeKind.Utc).AddTicks(9040),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27186,7 +26271,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 31, DateTimeKind.Utc).AddTicks(9060),
                             MembershipNumber = "GHC-2512593",
                             MembershipType = 2,
@@ -27203,8 +26288,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 658,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 50, DateTimeKind.Utc).AddTicks(2170),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 50, DateTimeKind.Utc).AddTicks(2170),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27225,7 +26308,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 50, DateTimeKind.Utc).AddTicks(2180),
                             MembershipNumber = "GHC-2512594",
                             MembershipType = 2,
@@ -27242,8 +26325,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 659,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 68, DateTimeKind.Utc).AddTicks(8480),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 68, DateTimeKind.Utc).AddTicks(8480),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27264,7 +26345,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 68, DateTimeKind.Utc).AddTicks(8490),
                             MembershipNumber = "GHC-2512595",
                             MembershipType = 2,
@@ -27281,8 +26362,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 660,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 79, DateTimeKind.Utc).AddTicks(1700),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 79, DateTimeKind.Utc).AddTicks(1700),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27303,7 +26382,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 79, DateTimeKind.Utc).AddTicks(1720),
                             MembershipNumber = "GHC-2512596",
                             MembershipType = 2,
@@ -27320,8 +26399,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 661,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 84, DateTimeKind.Utc).AddTicks(4110),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 84, DateTimeKind.Utc).AddTicks(4110),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27342,7 +26419,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 84, DateTimeKind.Utc).AddTicks(4130),
                             MembershipNumber = "GHC-2512597",
                             MembershipType = 2,
@@ -27359,8 +26436,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 662,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 111, DateTimeKind.Utc).AddTicks(9410),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 111, DateTimeKind.Utc).AddTicks(9410),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27381,7 +26456,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 111, DateTimeKind.Utc).AddTicks(9420),
                             MembershipNumber = "GHC-2512598",
                             MembershipType = 2,
@@ -27398,8 +26473,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 663,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 149, DateTimeKind.Utc).AddTicks(9010),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 149, DateTimeKind.Utc).AddTicks(9010),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27420,7 +26493,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 149, DateTimeKind.Utc).AddTicks(9020),
                             MembershipNumber = "GHC-2512599",
                             MembershipType = 2,
@@ -27437,8 +26510,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 664,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 161, DateTimeKind.Utc).AddTicks(6850),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 161, DateTimeKind.Utc).AddTicks(6850),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27459,7 +26530,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 161, DateTimeKind.Utc).AddTicks(6870),
                             MembershipNumber = "GHC-2512600",
                             MembershipType = 2,
@@ -27476,8 +26547,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 665,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 179, DateTimeKind.Utc).AddTicks(3250),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 179, DateTimeKind.Utc).AddTicks(3250),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27498,7 +26567,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 179, DateTimeKind.Utc).AddTicks(3260),
                             MembershipNumber = "GHC-2512601",
                             MembershipType = 2,
@@ -27515,8 +26584,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 666,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 198, DateTimeKind.Utc).AddTicks(370),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 198, DateTimeKind.Utc).AddTicks(370),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27537,7 +26604,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 198, DateTimeKind.Utc).AddTicks(380),
                             MembershipNumber = "GHC-2512602",
                             MembershipType = 2,
@@ -27554,8 +26621,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 667,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 278, DateTimeKind.Utc).AddTicks(2380),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 278, DateTimeKind.Utc).AddTicks(2380),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27576,7 +26641,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 278, DateTimeKind.Utc).AddTicks(2390),
                             MembershipNumber = "GHC-2512604",
                             MembershipType = 2,
@@ -27593,8 +26658,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 668,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 344, DateTimeKind.Utc).AddTicks(3940),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 344, DateTimeKind.Utc).AddTicks(3940),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27615,7 +26678,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 344, DateTimeKind.Utc).AddTicks(3950),
                             MembershipNumber = "GHC-2512605",
                             MembershipType = 2,
@@ -27632,8 +26695,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 669,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 588, DateTimeKind.Utc).AddTicks(1270),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 588, DateTimeKind.Utc).AddTicks(1270),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27654,7 +26715,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 588, DateTimeKind.Utc).AddTicks(1280),
                             MembershipNumber = "GHC-2512607",
                             MembershipType = 2,
@@ -27671,8 +26732,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 670,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 591, DateTimeKind.Utc).AddTicks(6960),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 591, DateTimeKind.Utc).AddTicks(6960),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27693,7 +26752,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 591, DateTimeKind.Utc).AddTicks(6970),
                             MembershipNumber = "GHC-2512609",
                             MembershipType = 2,
@@ -27710,8 +26769,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 671,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 636, DateTimeKind.Utc).AddTicks(5410),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 636, DateTimeKind.Utc).AddTicks(5410),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27732,7 +26789,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 636, DateTimeKind.Utc).AddTicks(5420),
                             MembershipNumber = "GHC-2512610",
                             MembershipType = 2,
@@ -27749,8 +26806,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 672,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 645, DateTimeKind.Utc).AddTicks(9230),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 645, DateTimeKind.Utc).AddTicks(9230),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27771,7 +26826,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 645, DateTimeKind.Utc).AddTicks(9230),
                             MembershipNumber = "GHC-2512611",
                             MembershipType = 2,
@@ -27788,8 +26843,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 673,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 792, DateTimeKind.Utc).AddTicks(170),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 792, DateTimeKind.Utc).AddTicks(170),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27810,7 +26863,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 792, DateTimeKind.Utc).AddTicks(180),
                             MembershipNumber = "GHC-2512612",
                             MembershipType = 2,
@@ -27827,8 +26880,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 674,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 814, DateTimeKind.Utc).AddTicks(2160),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 814, DateTimeKind.Utc).AddTicks(2160),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27849,7 +26900,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 814, DateTimeKind.Utc).AddTicks(2170),
                             MembershipNumber = "GHC-2512614",
                             MembershipType = 2,
@@ -27866,8 +26917,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 675,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 839, DateTimeKind.Utc).AddTicks(880),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 839, DateTimeKind.Utc).AddTicks(880),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27888,7 +26937,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 839, DateTimeKind.Utc).AddTicks(890),
                             MembershipNumber = "GHC-2512615",
                             MembershipType = 2,
@@ -27905,8 +26954,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 676,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 849, DateTimeKind.Utc).AddTicks(930),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 849, DateTimeKind.Utc).AddTicks(930),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27927,7 +26974,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 849, DateTimeKind.Utc).AddTicks(940),
                             MembershipNumber = "GHC-2512616",
                             MembershipType = 2,
@@ -27944,8 +26991,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 677,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 922, DateTimeKind.Utc).AddTicks(1920),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 922, DateTimeKind.Utc).AddTicks(1920),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -27966,7 +27011,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 922, DateTimeKind.Utc).AddTicks(1930),
                             MembershipNumber = "GHC-2512617",
                             MembershipType = 2,
@@ -27983,8 +27028,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 678,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 941, DateTimeKind.Utc).AddTicks(7580),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 941, DateTimeKind.Utc).AddTicks(7580),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28005,7 +27048,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 941, DateTimeKind.Utc).AddTicks(7590),
                             MembershipNumber = "GHC-2512618",
                             MembershipType = 2,
@@ -28022,8 +27065,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 679,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 55, 986, DateTimeKind.Utc).AddTicks(9940),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 55, 986, DateTimeKind.Utc).AddTicks(9940),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28044,7 +27085,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 55, 986, DateTimeKind.Utc).AddTicks(9950),
                             MembershipNumber = "GHC-2512619",
                             MembershipType = 2,
@@ -28061,8 +27102,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 680,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 14, DateTimeKind.Utc).AddTicks(5580),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 14, DateTimeKind.Utc).AddTicks(5580),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28083,7 +27122,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 14, DateTimeKind.Utc).AddTicks(5590),
                             MembershipNumber = "GHC-2512620",
                             MembershipType = 2,
@@ -28100,8 +27139,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 681,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 81, DateTimeKind.Utc).AddTicks(2790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 81, DateTimeKind.Utc).AddTicks(2790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28122,7 +27159,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 81, DateTimeKind.Utc).AddTicks(2800),
                             MembershipNumber = "GHC-2512621",
                             MembershipType = 2,
@@ -28139,8 +27176,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 682,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 112, DateTimeKind.Utc).AddTicks(6610),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 112, DateTimeKind.Utc).AddTicks(6610),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28161,7 +27196,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 112, DateTimeKind.Utc).AddTicks(6610),
                             MembershipNumber = "GHC-2512623",
                             MembershipType = 2,
@@ -28178,8 +27213,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 683,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 138, DateTimeKind.Utc).AddTicks(1170),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 138, DateTimeKind.Utc).AddTicks(1170),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28200,7 +27233,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 138, DateTimeKind.Utc).AddTicks(1180),
                             MembershipNumber = "GHC-2512625",
                             MembershipType = 2,
@@ -28217,8 +27250,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 684,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 146, DateTimeKind.Utc).AddTicks(7050),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 146, DateTimeKind.Utc).AddTicks(7050),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28239,7 +27270,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 146, DateTimeKind.Utc).AddTicks(7060),
                             MembershipNumber = "GHC-2512626",
                             MembershipType = 2,
@@ -28256,8 +27287,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 685,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 155, DateTimeKind.Utc).AddTicks(7240),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 155, DateTimeKind.Utc).AddTicks(7240),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28278,7 +27307,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 155, DateTimeKind.Utc).AddTicks(7250),
                             MembershipNumber = "GHC-2512627",
                             MembershipType = 2,
@@ -28295,8 +27324,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 686,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 169, DateTimeKind.Utc).AddTicks(430),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 169, DateTimeKind.Utc).AddTicks(430),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28317,7 +27344,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 169, DateTimeKind.Utc).AddTicks(440),
                             MembershipNumber = "GHC-2512628",
                             MembershipType = 2,
@@ -28334,8 +27361,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 687,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 175, DateTimeKind.Utc).AddTicks(9070),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 175, DateTimeKind.Utc).AddTicks(9070),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28356,7 +27381,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 175, DateTimeKind.Utc).AddTicks(9080),
                             MembershipNumber = "GHC-2512629",
                             MembershipType = 2,
@@ -28373,8 +27398,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 688,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 185, DateTimeKind.Utc).AddTicks(1620),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 185, DateTimeKind.Utc).AddTicks(1620),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28395,7 +27418,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 185, DateTimeKind.Utc).AddTicks(1630),
                             MembershipNumber = "GHC-2512630",
                             MembershipType = 2,
@@ -28412,8 +27435,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 689,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 190, DateTimeKind.Utc).AddTicks(4040),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 190, DateTimeKind.Utc).AddTicks(4040),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28434,7 +27455,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 190, DateTimeKind.Utc).AddTicks(4050),
                             MembershipNumber = "GHC-2512631",
                             MembershipType = 2,
@@ -28451,8 +27472,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 690,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 220, DateTimeKind.Utc).AddTicks(8920),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 220, DateTimeKind.Utc).AddTicks(8920),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28473,7 +27492,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 220, DateTimeKind.Utc).AddTicks(8940),
                             MembershipNumber = "GHC-2512632",
                             MembershipType = 2,
@@ -28490,8 +27509,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 691,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 242, DateTimeKind.Utc).AddTicks(8450),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 242, DateTimeKind.Utc).AddTicks(8450),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28512,7 +27529,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 242, DateTimeKind.Utc).AddTicks(8460),
                             MembershipNumber = "GHC-2512633",
                             MembershipType = 2,
@@ -28529,8 +27546,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 692,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 269, DateTimeKind.Utc).AddTicks(3250),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 269, DateTimeKind.Utc).AddTicks(3250),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28551,7 +27566,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 269, DateTimeKind.Utc).AddTicks(3270),
                             MembershipNumber = "GHC-2512634",
                             MembershipType = 2,
@@ -28568,8 +27583,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 693,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 278, DateTimeKind.Utc).AddTicks(420),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 278, DateTimeKind.Utc).AddTicks(420),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28590,7 +27603,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 278, DateTimeKind.Utc).AddTicks(430),
                             MembershipNumber = "GHC-2512635",
                             MembershipType = 2,
@@ -28607,8 +27620,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 694,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 285, DateTimeKind.Utc).AddTicks(350),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 285, DateTimeKind.Utc).AddTicks(350),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28629,7 +27640,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 285, DateTimeKind.Utc).AddTicks(360),
                             MembershipNumber = "GHC-2512636",
                             MembershipType = 2,
@@ -28646,8 +27657,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 695,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 331, DateTimeKind.Utc).AddTicks(1250),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 331, DateTimeKind.Utc).AddTicks(1250),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28668,7 +27677,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 331, DateTimeKind.Utc).AddTicks(1260),
                             MembershipNumber = "GHC-2512637",
                             MembershipType = 2,
@@ -28685,8 +27694,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 696,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 343, DateTimeKind.Utc).AddTicks(9680),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 343, DateTimeKind.Utc).AddTicks(9680),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28707,7 +27714,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 343, DateTimeKind.Utc).AddTicks(9690),
                             MembershipNumber = "GHC-2512638",
                             MembershipType = 2,
@@ -28724,8 +27731,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 697,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 366, DateTimeKind.Utc).AddTicks(3360),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 366, DateTimeKind.Utc).AddTicks(3360),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28746,7 +27751,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 366, DateTimeKind.Utc).AddTicks(3380),
                             MembershipNumber = "GHC-2512639",
                             MembershipType = 2,
@@ -28763,8 +27768,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 698,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 372, DateTimeKind.Utc).AddTicks(6270),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 372, DateTimeKind.Utc).AddTicks(6270),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28785,7 +27788,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 372, DateTimeKind.Utc).AddTicks(6270),
                             MembershipNumber = "GHC-2512640",
                             MembershipType = 2,
@@ -28802,8 +27805,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 699,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 424, DateTimeKind.Utc).AddTicks(420),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 424, DateTimeKind.Utc).AddTicks(420),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28824,7 +27825,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 424, DateTimeKind.Utc).AddTicks(430),
                             MembershipNumber = "GHC-2512641",
                             MembershipType = 2,
@@ -28841,8 +27842,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 700,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 431, DateTimeKind.Utc).AddTicks(5100),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 431, DateTimeKind.Utc).AddTicks(5100),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28863,7 +27862,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 431, DateTimeKind.Utc).AddTicks(5110),
                             MembershipNumber = "GHC-2512642",
                             MembershipType = 2,
@@ -28880,8 +27879,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 701,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 457, DateTimeKind.Utc).AddTicks(5640),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 457, DateTimeKind.Utc).AddTicks(5640),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28902,7 +27899,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 457, DateTimeKind.Utc).AddTicks(5660),
                             MembershipNumber = "GHC-2512643",
                             MembershipType = 2,
@@ -28919,8 +27916,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 702,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 466, DateTimeKind.Utc).AddTicks(9960),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 466, DateTimeKind.Utc).AddTicks(9960),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28941,7 +27936,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 466, DateTimeKind.Utc).AddTicks(9980),
                             MembershipNumber = "GHC-2512644",
                             MembershipType = 2,
@@ -28958,8 +27953,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 703,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 539, DateTimeKind.Utc).AddTicks(9430),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 539, DateTimeKind.Utc).AddTicks(9430),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -28980,7 +27973,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 539, DateTimeKind.Utc).AddTicks(9440),
                             MembershipNumber = "GHC-2512645",
                             MembershipType = 2,
@@ -28997,8 +27990,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 704,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 548, DateTimeKind.Utc).AddTicks(6640),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 548, DateTimeKind.Utc).AddTicks(6640),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29019,7 +28010,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 548, DateTimeKind.Utc).AddTicks(6650),
                             MembershipNumber = "GHC-2512647",
                             MembershipType = 2,
@@ -29036,8 +28027,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 705,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 597, DateTimeKind.Utc).AddTicks(4510),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 597, DateTimeKind.Utc).AddTicks(4510),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29058,7 +28047,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 597, DateTimeKind.Utc).AddTicks(4520),
                             MembershipNumber = "GHC-2512648",
                             MembershipType = 2,
@@ -29075,8 +28064,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 706,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 610, DateTimeKind.Utc).AddTicks(3180),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 610, DateTimeKind.Utc).AddTicks(3180),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29097,7 +28084,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 610, DateTimeKind.Utc).AddTicks(3180),
                             MembershipNumber = "GHC-2512651",
                             MembershipType = 2,
@@ -29114,8 +28101,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 707,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 623, DateTimeKind.Utc).AddTicks(6500),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 623, DateTimeKind.Utc).AddTicks(6500),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29136,7 +28121,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 623, DateTimeKind.Utc).AddTicks(6500),
                             MembershipNumber = "GHC-2512653",
                             MembershipType = 2,
@@ -29153,8 +28138,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 708,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 628, DateTimeKind.Utc).AddTicks(9570),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 628, DateTimeKind.Utc).AddTicks(9570),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29175,7 +28158,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 628, DateTimeKind.Utc).AddTicks(9580),
                             MembershipNumber = "GHC-2512654",
                             MembershipType = 2,
@@ -29192,8 +28175,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 709,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 665, DateTimeKind.Utc).AddTicks(9630),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 665, DateTimeKind.Utc).AddTicks(9630),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29214,7 +28195,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 665, DateTimeKind.Utc).AddTicks(9640),
                             MembershipNumber = "GHC-2512655",
                             MembershipType = 2,
@@ -29231,8 +28212,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 710,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 706, DateTimeKind.Utc).AddTicks(1540),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 706, DateTimeKind.Utc).AddTicks(1540),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29253,7 +28232,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 706, DateTimeKind.Utc).AddTicks(1550),
                             MembershipNumber = "GHC-2512656",
                             MembershipType = 2,
@@ -29270,8 +28249,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 711,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 714, DateTimeKind.Utc).AddTicks(3200),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 714, DateTimeKind.Utc).AddTicks(3200),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29292,7 +28269,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 714, DateTimeKind.Utc).AddTicks(3220),
                             MembershipNumber = "GHC-2512657",
                             MembershipType = 2,
@@ -29309,8 +28286,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 712,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 724, DateTimeKind.Utc).AddTicks(3550),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 724, DateTimeKind.Utc).AddTicks(3550),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29331,7 +28306,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 724, DateTimeKind.Utc).AddTicks(3560),
                             MembershipNumber = "GHC-2512658",
                             MembershipType = 2,
@@ -29348,8 +28323,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 713,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 744, DateTimeKind.Utc).AddTicks(4920),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 744, DateTimeKind.Utc).AddTicks(4920),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29370,7 +28343,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 744, DateTimeKind.Utc).AddTicks(4930),
                             MembershipNumber = "GHC-2512659",
                             MembershipType = 2,
@@ -29387,8 +28360,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 714,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 756, DateTimeKind.Utc).AddTicks(4800),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 756, DateTimeKind.Utc).AddTicks(4800),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29409,7 +28380,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 756, DateTimeKind.Utc).AddTicks(4810),
                             MembershipNumber = "GHC-2512660",
                             MembershipType = 2,
@@ -29426,8 +28397,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 715,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 766, DateTimeKind.Utc).AddTicks(8710),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 766, DateTimeKind.Utc).AddTicks(8710),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29448,7 +28417,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 766, DateTimeKind.Utc).AddTicks(8720),
                             MembershipNumber = "GHC-2512661",
                             MembershipType = 2,
@@ -29465,8 +28434,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 716,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 769, DateTimeKind.Utc).AddTicks(4790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 769, DateTimeKind.Utc).AddTicks(4790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29487,7 +28454,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 769, DateTimeKind.Utc).AddTicks(4800),
                             MembershipNumber = "GHC-2512662",
                             MembershipType = 2,
@@ -29504,8 +28471,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 717,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 780, DateTimeKind.Utc).AddTicks(6350),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 780, DateTimeKind.Utc).AddTicks(6350),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29526,7 +28491,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 780, DateTimeKind.Utc).AddTicks(6360),
                             MembershipNumber = "GHC-2512663",
                             MembershipType = 2,
@@ -29543,8 +28508,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 718,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 819, DateTimeKind.Utc).AddTicks(1770),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 819, DateTimeKind.Utc).AddTicks(1770),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29565,7 +28528,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 819, DateTimeKind.Utc).AddTicks(1780),
                             MembershipNumber = "GHC-2512664",
                             MembershipType = 2,
@@ -29582,8 +28545,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 719,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 886, DateTimeKind.Utc).AddTicks(4550),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 886, DateTimeKind.Utc).AddTicks(4550),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29604,7 +28565,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 886, DateTimeKind.Utc).AddTicks(4560),
                             MembershipNumber = "GHC-2512665",
                             MembershipType = 2,
@@ -29621,8 +28582,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 720,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 909, DateTimeKind.Utc).AddTicks(6520),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 909, DateTimeKind.Utc).AddTicks(6520),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29643,7 +28602,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 909, DateTimeKind.Utc).AddTicks(6530),
                             MembershipNumber = "GHC-2512666",
                             MembershipType = 2,
@@ -29660,8 +28619,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 721,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 916, DateTimeKind.Utc).AddTicks(9090),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 916, DateTimeKind.Utc).AddTicks(9090),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29682,7 +28639,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 916, DateTimeKind.Utc).AddTicks(9100),
                             MembershipNumber = "GHC-2512667",
                             MembershipType = 2,
@@ -29699,8 +28656,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 722,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 938, DateTimeKind.Utc).AddTicks(7830),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 938, DateTimeKind.Utc).AddTicks(7830),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29721,7 +28676,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 938, DateTimeKind.Utc).AddTicks(7840),
                             MembershipNumber = "GHC-2512669",
                             MembershipType = 2,
@@ -29738,8 +28693,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 723,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 967, DateTimeKind.Utc).AddTicks(1780),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 967, DateTimeKind.Utc).AddTicks(1780),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29760,7 +28713,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 967, DateTimeKind.Utc).AddTicks(1790),
                             MembershipNumber = "GHC-2512670",
                             MembershipType = 2,
@@ -29777,8 +28730,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 724,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 56, 975, DateTimeKind.Utc).AddTicks(5120),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 56, 975, DateTimeKind.Utc).AddTicks(5120),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29799,7 +28750,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 56, 975, DateTimeKind.Utc).AddTicks(5130),
                             MembershipNumber = "GHC-2512671",
                             MembershipType = 2,
@@ -29816,8 +28767,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 725,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 5, DateTimeKind.Utc).AddTicks(7120),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 5, DateTimeKind.Utc).AddTicks(7120),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29838,7 +28787,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 5, DateTimeKind.Utc).AddTicks(7130),
                             MembershipNumber = "GHC-2512672",
                             MembershipType = 2,
@@ -29855,8 +28804,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 726,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 25, DateTimeKind.Utc).AddTicks(1840),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 25, DateTimeKind.Utc).AddTicks(1840),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29877,7 +28824,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 25, DateTimeKind.Utc).AddTicks(1850),
                             MembershipNumber = "GHC-2512673",
                             MembershipType = 2,
@@ -29894,8 +28841,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 727,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 40, DateTimeKind.Utc).AddTicks(7590),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 40, DateTimeKind.Utc).AddTicks(7590),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29916,7 +28861,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 40, DateTimeKind.Utc).AddTicks(7600),
                             MembershipNumber = "GHC-2512674",
                             MembershipType = 2,
@@ -29933,8 +28878,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 728,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 44, DateTimeKind.Utc).AddTicks(3900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 44, DateTimeKind.Utc).AddTicks(3900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29955,7 +28898,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 44, DateTimeKind.Utc).AddTicks(3910),
                             MembershipNumber = "GHC-2512675",
                             MembershipType = 2,
@@ -29972,8 +28915,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 729,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 58, DateTimeKind.Utc).AddTicks(2030),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 58, DateTimeKind.Utc).AddTicks(2030),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -29994,7 +28935,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 58, DateTimeKind.Utc).AddTicks(2050),
                             MembershipNumber = "GHC-2512676",
                             MembershipType = 2,
@@ -30011,8 +28952,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 730,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 71, DateTimeKind.Utc).AddTicks(7920),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 71, DateTimeKind.Utc).AddTicks(7920),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30033,7 +28972,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 71, DateTimeKind.Utc).AddTicks(7930),
                             MembershipNumber = "GHC-2512677",
                             MembershipType = 2,
@@ -30050,8 +28989,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 731,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 90, DateTimeKind.Utc).AddTicks(3390),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 90, DateTimeKind.Utc).AddTicks(3390),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30072,7 +29009,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 90, DateTimeKind.Utc).AddTicks(3400),
                             MembershipNumber = "GHC-2512678",
                             MembershipType = 2,
@@ -30089,8 +29026,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 732,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 101, DateTimeKind.Utc).AddTicks(2040),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 101, DateTimeKind.Utc).AddTicks(2040),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30111,7 +29046,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 101, DateTimeKind.Utc).AddTicks(2050),
                             MembershipNumber = "GHC-2512679",
                             MembershipType = 2,
@@ -30128,8 +29063,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 733,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 138, DateTimeKind.Utc).AddTicks(9460),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 138, DateTimeKind.Utc).AddTicks(9460),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30150,7 +29083,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 138, DateTimeKind.Utc).AddTicks(9470),
                             MembershipNumber = "GHC-2512681",
                             MembershipType = 2,
@@ -30167,8 +29100,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 734,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 192, DateTimeKind.Utc).AddTicks(2040),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 192, DateTimeKind.Utc).AddTicks(2040),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30189,7 +29120,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 192, DateTimeKind.Utc).AddTicks(2060),
                             MembershipNumber = "GHC-2512682",
                             MembershipType = 2,
@@ -30206,8 +29137,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 735,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 197, DateTimeKind.Utc).AddTicks(640),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 197, DateTimeKind.Utc).AddTicks(640),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30228,7 +29157,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 197, DateTimeKind.Utc).AddTicks(650),
                             MembershipNumber = "GHC-2512683",
                             MembershipType = 2,
@@ -30245,8 +29174,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 736,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 259, DateTimeKind.Utc).AddTicks(3750),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 259, DateTimeKind.Utc).AddTicks(3750),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30267,7 +29194,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 259, DateTimeKind.Utc).AddTicks(3750),
                             MembershipNumber = "GHC-2512684",
                             MembershipType = 2,
@@ -30284,8 +29211,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 737,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 283, DateTimeKind.Utc).AddTicks(5880),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 283, DateTimeKind.Utc).AddTicks(5880),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30306,7 +29231,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 283, DateTimeKind.Utc).AddTicks(5890),
                             MembershipNumber = "GHC-2512685",
                             MembershipType = 2,
@@ -30323,8 +29248,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 756,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 991, DateTimeKind.Utc).AddTicks(6740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 991, DateTimeKind.Utc).AddTicks(6740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30345,7 +29268,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 991, DateTimeKind.Utc).AddTicks(6750),
                             MembershipNumber = "GHC-2512707",
                             MembershipType = 2,
@@ -30362,8 +29285,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 738,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 293, DateTimeKind.Utc).AddTicks(6790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 293, DateTimeKind.Utc).AddTicks(6790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30384,7 +29305,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 293, DateTimeKind.Utc).AddTicks(6800),
                             MembershipNumber = "GHC-2512686",
                             MembershipType = 2,
@@ -30401,8 +29322,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 739,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 321, DateTimeKind.Utc).AddTicks(8690),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 321, DateTimeKind.Utc).AddTicks(8690),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30423,7 +29342,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 321, DateTimeKind.Utc).AddTicks(8700),
                             MembershipNumber = "GHC-2512687",
                             MembershipType = 2,
@@ -30440,8 +29359,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 740,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 326, DateTimeKind.Utc).AddTicks(790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 326, DateTimeKind.Utc).AddTicks(790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30462,7 +29379,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 326, DateTimeKind.Utc).AddTicks(800),
                             MembershipNumber = "GHC-2512688",
                             MembershipType = 2,
@@ -30479,8 +29396,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 741,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 357, DateTimeKind.Utc).AddTicks(1740),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 357, DateTimeKind.Utc).AddTicks(1740),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30501,7 +29416,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 357, DateTimeKind.Utc).AddTicks(1750),
                             MembershipNumber = "GHC-2512689",
                             MembershipType = 2,
@@ -30518,8 +29433,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 742,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 390, DateTimeKind.Utc).AddTicks(9520),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 390, DateTimeKind.Utc).AddTicks(9520),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30540,7 +29453,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 390, DateTimeKind.Utc).AddTicks(9530),
                             MembershipNumber = "GHC-2512690",
                             MembershipType = 2,
@@ -30557,8 +29470,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 743,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 403, DateTimeKind.Utc).AddTicks(5920),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 403, DateTimeKind.Utc).AddTicks(5920),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30579,7 +29490,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 403, DateTimeKind.Utc).AddTicks(5940),
                             MembershipNumber = "GHC-2512691",
                             MembershipType = 2,
@@ -30596,8 +29507,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 744,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 465, DateTimeKind.Utc).AddTicks(3020),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 465, DateTimeKind.Utc).AddTicks(3020),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30618,7 +29527,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 465, DateTimeKind.Utc).AddTicks(3030),
                             MembershipNumber = "GHC-2512692",
                             MembershipType = 2,
@@ -30635,8 +29544,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 745,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 489, DateTimeKind.Utc).AddTicks(8310),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 489, DateTimeKind.Utc).AddTicks(8310),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30657,7 +29564,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 489, DateTimeKind.Utc).AddTicks(8320),
                             MembershipNumber = "GHC-2512693",
                             MembershipType = 2,
@@ -30674,8 +29581,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 746,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 529, DateTimeKind.Utc).AddTicks(5380),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 529, DateTimeKind.Utc).AddTicks(5380),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30696,7 +29601,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 529, DateTimeKind.Utc).AddTicks(5390),
                             MembershipNumber = "GHC-2512694",
                             MembershipType = 2,
@@ -30713,8 +29618,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 747,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 559, DateTimeKind.Utc).AddTicks(4300),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 559, DateTimeKind.Utc).AddTicks(4300),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30735,7 +29638,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 559, DateTimeKind.Utc).AddTicks(4310),
                             MembershipNumber = "GHC-2512695",
                             MembershipType = 2,
@@ -30752,8 +29655,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 748,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 573, DateTimeKind.Utc).AddTicks(8630),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 573, DateTimeKind.Utc).AddTicks(8630),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30774,7 +29675,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 573, DateTimeKind.Utc).AddTicks(8630),
                             MembershipNumber = "GHC-2512696",
                             MembershipType = 2,
@@ -30791,8 +29692,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 749,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 601, DateTimeKind.Utc).AddTicks(5750),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 601, DateTimeKind.Utc).AddTicks(5750),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30813,7 +29712,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 601, DateTimeKind.Utc).AddTicks(5760),
                             MembershipNumber = "GHC-2512698",
                             MembershipType = 2,
@@ -30830,8 +29729,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 750,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 616, DateTimeKind.Utc).AddTicks(5540),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 616, DateTimeKind.Utc).AddTicks(5540),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30852,7 +29749,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 616, DateTimeKind.Utc).AddTicks(5550),
                             MembershipNumber = "GHC-2512701",
                             MembershipType = 2,
@@ -30869,8 +29766,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 751,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 624, DateTimeKind.Utc).AddTicks(5300),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 624, DateTimeKind.Utc).AddTicks(5300),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30891,7 +29786,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 624, DateTimeKind.Utc).AddTicks(5320),
                             MembershipNumber = "GHC-2512702",
                             MembershipType = 2,
@@ -30908,8 +29803,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 752,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 692, DateTimeKind.Utc).AddTicks(3380),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 692, DateTimeKind.Utc).AddTicks(3380),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30930,7 +29823,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 692, DateTimeKind.Utc).AddTicks(3400),
                             MembershipNumber = "GHC-2512703",
                             MembershipType = 2,
@@ -30947,8 +29840,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 753,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 719, DateTimeKind.Utc).AddTicks(5610),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 719, DateTimeKind.Utc).AddTicks(5610),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -30969,7 +29860,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 719, DateTimeKind.Utc).AddTicks(5620),
                             MembershipNumber = "GHC-2512704",
                             MembershipType = 2,
@@ -30986,8 +29877,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 754,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 917, DateTimeKind.Utc).AddTicks(2290),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 917, DateTimeKind.Utc).AddTicks(2290),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31008,7 +29897,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 917, DateTimeKind.Utc).AddTicks(2310),
                             MembershipNumber = "GHC-2512705",
                             MembershipType = 2,
@@ -31025,8 +29914,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 755,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 57, 934, DateTimeKind.Utc).AddTicks(4270),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 57, 934, DateTimeKind.Utc).AddTicks(4270),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31047,7 +29934,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 57, 934, DateTimeKind.Utc).AddTicks(4280),
                             MembershipNumber = "GHC-2512706",
                             MembershipType = 2,
@@ -31064,8 +29951,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 757,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 2, DateTimeKind.Utc).AddTicks(3860),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 2, DateTimeKind.Utc).AddTicks(3860),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31086,7 +29971,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 2, DateTimeKind.Utc).AddTicks(3870),
                             MembershipNumber = "GHC-2512708",
                             MembershipType = 2,
@@ -31103,8 +29988,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 758,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 14, DateTimeKind.Utc).AddTicks(2930),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 14, DateTimeKind.Utc).AddTicks(2930),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31125,7 +30008,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 14, DateTimeKind.Utc).AddTicks(2940),
                             MembershipNumber = "GHC-2512709",
                             MembershipType = 2,
@@ -31142,8 +30025,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 759,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 26, DateTimeKind.Utc).AddTicks(8600),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 26, DateTimeKind.Utc).AddTicks(8600),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31164,7 +30045,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 26, DateTimeKind.Utc).AddTicks(8610),
                             MembershipNumber = "GHC-2512710",
                             MembershipType = 2,
@@ -31181,8 +30062,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 760,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 37, DateTimeKind.Utc).AddTicks(7910),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 37, DateTimeKind.Utc).AddTicks(7910),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31203,7 +30082,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 37, DateTimeKind.Utc).AddTicks(7920),
                             MembershipNumber = "GHC-2512711",
                             MembershipType = 2,
@@ -31220,8 +30099,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 761,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 59, DateTimeKind.Utc).AddTicks(7090),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 59, DateTimeKind.Utc).AddTicks(7090),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31242,7 +30119,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 59, DateTimeKind.Utc).AddTicks(7110),
                             MembershipNumber = "GHC-2512712",
                             MembershipType = 2,
@@ -31259,8 +30136,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 762,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 68, DateTimeKind.Utc).AddTicks(900),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 68, DateTimeKind.Utc).AddTicks(900),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31281,7 +30156,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 68, DateTimeKind.Utc).AddTicks(910),
                             MembershipNumber = "GHC-2512713",
                             MembershipType = 2,
@@ -31298,8 +30173,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 763,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 103, DateTimeKind.Utc).AddTicks(560),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 103, DateTimeKind.Utc).AddTicks(560),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31320,7 +30193,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 103, DateTimeKind.Utc).AddTicks(570),
                             MembershipNumber = "GHC-2512714",
                             MembershipType = 2,
@@ -31337,8 +30210,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 764,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 111, DateTimeKind.Utc).AddTicks(1600),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 111, DateTimeKind.Utc).AddTicks(1600),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31359,7 +30230,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 111, DateTimeKind.Utc).AddTicks(1610),
                             MembershipNumber = "GHC-2512715",
                             MembershipType = 2,
@@ -31376,8 +30247,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 765,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 116, DateTimeKind.Utc).AddTicks(7100),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 116, DateTimeKind.Utc).AddTicks(7100),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31398,7 +30267,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 116, DateTimeKind.Utc).AddTicks(7110),
                             MembershipNumber = "GHC-2512716",
                             MembershipType = 2,
@@ -31415,8 +30284,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 766,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 125, DateTimeKind.Utc).AddTicks(3790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 125, DateTimeKind.Utc).AddTicks(3790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31437,7 +30304,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 125, DateTimeKind.Utc).AddTicks(3800),
                             MembershipNumber = "GHC-2512718",
                             MembershipType = 2,
@@ -31454,8 +30321,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 767,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 150, DateTimeKind.Utc).AddTicks(1000),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 150, DateTimeKind.Utc).AddTicks(1000),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31476,7 +30341,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 150, DateTimeKind.Utc).AddTicks(1010),
                             MembershipNumber = "GHC-2512719",
                             MembershipType = 2,
@@ -31493,8 +30358,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 768,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 159, DateTimeKind.Utc).AddTicks(9870),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 159, DateTimeKind.Utc).AddTicks(9870),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31515,7 +30378,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 159, DateTimeKind.Utc).AddTicks(9880),
                             MembershipNumber = "GHC-2512722",
                             MembershipType = 2,
@@ -31532,8 +30395,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 769,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 209, DateTimeKind.Utc).AddTicks(4830),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 209, DateTimeKind.Utc).AddTicks(4830),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31554,7 +30415,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 209, DateTimeKind.Utc).AddTicks(4840),
                             MembershipNumber = "GHC-2512723",
                             MembershipType = 2,
@@ -31571,8 +30432,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 770,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 233, DateTimeKind.Utc).AddTicks(5400),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 233, DateTimeKind.Utc).AddTicks(5400),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31593,7 +30452,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 233, DateTimeKind.Utc).AddTicks(5410),
                             MembershipNumber = "GHC-2512724",
                             MembershipType = 2,
@@ -31610,8 +30469,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 771,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 275, DateTimeKind.Utc).AddTicks(820),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 275, DateTimeKind.Utc).AddTicks(820),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31632,7 +30489,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 275, DateTimeKind.Utc).AddTicks(830),
                             MembershipNumber = "GHC-2512725",
                             MembershipType = 2,
@@ -31649,8 +30506,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 772,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 323, DateTimeKind.Utc).AddTicks(6570),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 323, DateTimeKind.Utc).AddTicks(6570),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31671,7 +30526,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 323, DateTimeKind.Utc).AddTicks(6580),
                             MembershipNumber = "GHC-2512726",
                             MembershipType = 2,
@@ -31688,8 +30543,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 773,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 335, DateTimeKind.Utc).AddTicks(30),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 335, DateTimeKind.Utc).AddTicks(30),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31710,7 +30563,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 335, DateTimeKind.Utc).AddTicks(40),
                             MembershipNumber = "GHC-2512728",
                             MembershipType = 2,
@@ -31727,8 +30580,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 774,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 376, DateTimeKind.Utc).AddTicks(3240),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 376, DateTimeKind.Utc).AddTicks(3240),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31749,7 +30600,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 376, DateTimeKind.Utc).AddTicks(3250),
                             MembershipNumber = "GHC-2512729",
                             MembershipType = 2,
@@ -31766,8 +30617,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 775,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 463, DateTimeKind.Utc).AddTicks(4500),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 463, DateTimeKind.Utc).AddTicks(4500),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31788,7 +30637,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 463, DateTimeKind.Utc).AddTicks(4510),
                             MembershipNumber = "GHC-2512730",
                             MembershipType = 2,
@@ -31805,8 +30654,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 776,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 474, DateTimeKind.Utc).AddTicks(370),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 474, DateTimeKind.Utc).AddTicks(370),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31827,7 +30674,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 474, DateTimeKind.Utc).AddTicks(380),
                             MembershipNumber = "GHC-2512731",
                             MembershipType = 2,
@@ -31844,8 +30691,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 777,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 528, DateTimeKind.Utc).AddTicks(1390),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 528, DateTimeKind.Utc).AddTicks(1390),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31866,7 +30711,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 528, DateTimeKind.Utc).AddTicks(1400),
                             MembershipNumber = "GHC-2512732",
                             MembershipType = 2,
@@ -31883,8 +30728,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 778,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 534, DateTimeKind.Utc).AddTicks(2280),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 534, DateTimeKind.Utc).AddTicks(2280),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31905,7 +30748,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 534, DateTimeKind.Utc).AddTicks(2300),
                             MembershipNumber = "GHC-2512734",
                             MembershipType = 2,
@@ -31922,8 +30765,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 779,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 575, DateTimeKind.Utc).AddTicks(4790),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 575, DateTimeKind.Utc).AddTicks(4790),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31944,7 +30785,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 575, DateTimeKind.Utc).AddTicks(4810),
                             MembershipNumber = "GHC-2512735",
                             MembershipType = 2,
@@ -31961,8 +30802,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 780,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 630, DateTimeKind.Utc).AddTicks(3450),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 630, DateTimeKind.Utc).AddTicks(3450),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -31983,7 +30822,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 630, DateTimeKind.Utc).AddTicks(3460),
                             MembershipNumber = "GHC-2512737",
                             MembershipType = 2,
@@ -32000,8 +30839,6 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         {
                             Id = 781,
                             AppliedDate = new DateTime(2026, 3, 15, 16, 15, 58, 633, DateTimeKind.Utc).AddTicks(7340),
-                            ApprovedBy = 1,
-                            ApprovedDate = new DateTime(2026, 3, 15, 16, 15, 58, 633, DateTimeKind.Utc).AddTicks(7340),
                             BloodGroup = 0,
                             Category = 0,
                             ContributionPoints = 0,
@@ -32022,7 +30859,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             IsFamilyPublic = false,
                             IsMobilePublic = false,
                             IsNIDPublic = false,
-                            IsVerified = true,
+                            IsVerified = false,
                             LastUpdateDate = new DateTime(2026, 3, 15, 16, 15, 58, 633, DateTimeKind.Utc).AddTicks(7350),
                             MembershipNumber = "GHC-2512740",
                             MembershipType = 2,
@@ -53476,7 +52313,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 200,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bgubY.ogZhVPp1a9u1gOGO.TcAj/i.YL2cPSPlJwpxVZlD0MLMOQW",
-                            SecurityStamp = "f76977b344e5466fad37121b6151f1b0",
+                            SecurityStamp = "5e4f3bdef110407d87812d1d59b8c054",
                             Username = "2512003"
                         },
                         new
@@ -53488,7 +52325,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 201,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GswHdfsQ2UU.u9HTVWOABO34k6NqHcbA62P0PvOwJj3x0fpSnSmwO",
-                            SecurityStamp = "a330c4066f3e40a1982d6309ac97e4e4",
+                            SecurityStamp = "4615586f9cef45e89ee23dbfec3ed96c",
                             Username = "2512005"
                         },
                         new
@@ -53500,7 +52337,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 202,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ot6i0lsF.4cOAQR9ywj4weyLdnsozY9kjyxvL/j3DK7IxQdX/mPsO",
-                            SecurityStamp = "7b3a050d4fbb43b09f17546e3abc89aa",
+                            SecurityStamp = "c7bf565d3adf42d5b46b677f216f7650",
                             Username = "2512006"
                         },
                         new
@@ -53512,7 +52349,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 203,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SH3DYAgJF5VK7EmjDzKKb./Ni/EEGzYwN9V9uhgVxQECQmut6Njcm",
-                            SecurityStamp = "8bac2c2829ed43a182eaaff6ff10f376",
+                            SecurityStamp = "d6adf220355d41fabdbd8aff187719ad",
                             Username = "2512012"
                         },
                         new
@@ -53524,7 +52361,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 204,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yzia1Wp2nkIOyVSVJkFzxuXZcmTbBc4HpfJAsj0Bd0sUGzkbx08LC",
-                            SecurityStamp = "2f400c7a394048ea814dc7598c9f431e",
+                            SecurityStamp = "2f616ed9af5c49dfb22bd28f225888fd",
                             Username = "2512017"
                         },
                         new
@@ -53536,7 +52373,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 205,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FroDWG5yM7eKy1UIMyVJDOaCViX5MCKCqFNJ2Y.on7a5.pJitrGGe",
-                            SecurityStamp = "71c4d256026f4ec3b220e9289e23bab9",
+                            SecurityStamp = "9d56f6e6dc004f3e9baa695bdb995f7b",
                             Username = "2512019"
                         },
                         new
@@ -53548,7 +52385,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 206,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sjAYFMX9Xx7waH1veUkMnuuye0Y2KtmxLP4f5aViETDuZrjR8exs2",
-                            SecurityStamp = "5e5992fbef0e4afb95159e9dc40964a9",
+                            SecurityStamp = "f92eb8fd01884b21bc4f300744a319c8",
                             Username = "2512020"
                         },
                         new
@@ -53560,7 +52397,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 207,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BObIOXSpydLB2Pivmn.9Q.Sm4kibw5I.JGPSFCo9Px6Z.n5pRq3We",
-                            SecurityStamp = "1366fcb86e2c4cd5b99652f029894af2",
+                            SecurityStamp = "988ad561bfa34978aeb7362d697f0a08",
                             Username = "2512022"
                         },
                         new
@@ -53572,7 +52409,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 208,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3fPqklIq.onxVlEe4etzyOYKM7dto6t4ErV/S7SGebeGzzNASG0C.",
-                            SecurityStamp = "fe94a4bd03c946f2a42707a64ff9bdaf",
+                            SecurityStamp = "ffd9f01d5e654660b7411f489607a008",
                             Username = "2512023"
                         },
                         new
@@ -53584,7 +52421,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 209,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c8qJ6DVCCZ9GwnXfLCmchuijnaHBazZ0dSI53RAbiV9B.AVM7yAcC",
-                            SecurityStamp = "1e1f432c6b62451b979471d6de67a3ae",
+                            SecurityStamp = "24f4afd005c74e87871d301aca18c8aa",
                             Username = "2512027"
                         },
                         new
@@ -53596,7 +52433,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 210,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jkrkiQFBxvdP2mB1ZMVJ8ublLVTSG4zvAMy4JirXV62u9pkXH1RJa",
-                            SecurityStamp = "547b6a6d9f444095ad60aafa96c381dc",
+                            SecurityStamp = "594dd74d6db14f34bd01aa7b2cc13a6b",
                             Username = "2512028"
                         },
                         new
@@ -53608,7 +52445,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 211,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FOIsMTT98frgxV2VHeTDou7EqFzUCtdxoPdzHMFW/qTCxoJ7vLBEi",
-                            SecurityStamp = "54b201efd1ed4de2afcd99a533718c67",
+                            SecurityStamp = "ed55cc4db8ed4815a144157d28cf805d",
                             Username = "2512029"
                         },
                         new
@@ -53620,7 +52457,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 212,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sd/4srhUSAUbYH.uhdRS6OD7pZ.35Oq.jErojcr7CbBAXa2U5mYWi",
-                            SecurityStamp = "e19e45d618c44230b20df2ba70eb07af",
+                            SecurityStamp = "f243572df9164d86aad2e02d1e8a9975",
                             Username = "2512030"
                         },
                         new
@@ -53632,7 +52469,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 213,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Vvvr0eq.g.2duX8iRqKSyO6G4upeGvQ0Swf/0zwc1xI8q1np67Yze",
-                            SecurityStamp = "43eda7e15d904ce8aac94811765435f1",
+                            SecurityStamp = "421450bd03dc49b7bff941cb2287209e",
                             Username = "2512031"
                         },
                         new
@@ -53644,7 +52481,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 214,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Q/HX3VYn8onko1hpqVIEvOHWxFpk6gQPdfPjQDxBg7iRhqtl2HU26",
-                            SecurityStamp = "f5e5a2d5f7bb4ce19c2e55628d4ff857",
+                            SecurityStamp = "fce685f53b514aadbdb3d3b48a2bacfa",
                             Username = "2512032"
                         },
                         new
@@ -53656,7 +52493,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 215,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3IBC46Jz4XRmo2djZtySL.pi2khNr3vDno5MuhbJy9mpMWI2Qo.AS",
-                            SecurityStamp = "11ea7bd0dbe6475eb5ef704930a3a687",
+                            SecurityStamp = "b8784fb1a1b348f0b19bec8277a91e8e",
                             Username = "2512033"
                         },
                         new
@@ -53668,7 +52505,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 216,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hbigLerJb5XN9wR9ldlvIuY31FMG41TCIXmouS45t8DP9bseQAjmu",
-                            SecurityStamp = "fa1a6dae104a4208a18ee48038e48849",
+                            SecurityStamp = "3b94484a781745e78299e6139e89707b",
                             Username = "2512034"
                         },
                         new
@@ -53680,7 +52517,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 217,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6yL/0jYdnQeXDzQYCPKDUe07IMhlwoX/WiAasKTHm4m2wqZENEud6",
-                            SecurityStamp = "534675518c194014aca4afdedf828839",
+                            SecurityStamp = "629140aa48594692820b638db6246e7c",
                             Username = "2512035"
                         },
                         new
@@ -53692,7 +52529,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 218,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ecFyIwzmUwW355fXnvPchOOnAuhD6kjOb983y8efFaUoe0BBOBfFC",
-                            SecurityStamp = "c8bef03deb7a4e159c01c121ec91d3cf",
+                            SecurityStamp = "1927a31e82a940f886695e18d3d4701d",
                             Username = "2512036"
                         },
                         new
@@ -53704,7 +52541,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 219,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qBLPEMDxHccS3JZ00A5HhuEHt/crwfRJ.Ww71ebbfXw8GsL6/Tzqq",
-                            SecurityStamp = "24ffdc9e8ebe4381a567a093ab3dba35",
+                            SecurityStamp = "4f66827ad5c549698421b048d57cd710",
                             Username = "2512038"
                         },
                         new
@@ -53716,7 +52553,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 220,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Tfzzp/ndua.KqkZpDAHujuXUP8gMlWonyYFFm5zLvFO4glM95oKXO",
-                            SecurityStamp = "d41590b2694a413abcf7023304ca3f11",
+                            SecurityStamp = "dc89bfe0fd1f40cdb4a2e335dc66f790",
                             Username = "2512040"
                         },
                         new
@@ -53728,7 +52565,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 221,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lBML/L8BfT93.lPjK74XieeHlezjfW/YQbbf3a2Ux35OyFSiTzCoK",
-                            SecurityStamp = "a8f48cf8d14b4307ba1d2742c5845ef6",
+                            SecurityStamp = "8a2e4923b4b54c89a1ac725c4e222a3e",
                             Username = "2512043"
                         },
                         new
@@ -53740,7 +52577,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 222,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IYI5nC8pXeC/ILLKxDSlrO79.go6w9zNd7Bfxl.6k5inDGugVDYMq",
-                            SecurityStamp = "571352441c5e42c992483c452a4011a9",
+                            SecurityStamp = "74ca7c60c51f4f6cb2b521a404baf023",
                             Username = "2512044"
                         },
                         new
@@ -53752,7 +52589,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 223,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IdHcoYSrZnybG5.4f5Puaun5T7wabOwbM6csvPonQA5lo/NzVnFO6",
-                            SecurityStamp = "39aadf1008994ba8a3caa10e759d70e2",
+                            SecurityStamp = "72ddebcb14ca48349a32c1b8791a8e52",
                             Username = "2512046"
                         },
                         new
@@ -53764,7 +52601,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 224,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2peWn1OG6FBJGuimYZ0i7uGqBTZO.OCw3nb.u2Kr0GoA5IuLx6pMO",
-                            SecurityStamp = "fe260087c9b1480c919d68bdb14302f6",
+                            SecurityStamp = "93f7e2af871844f2aa21b5a37fa76348",
                             Username = "2512047"
                         },
                         new
@@ -53776,7 +52613,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 225,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$l2RCWgEBOsjemOK9K8afm.MWd.r0WO4UyRPSXqb.c5t6tWx8gVp5C",
-                            SecurityStamp = "cfebe563e81f469e9f12a7f0b1396508",
+                            SecurityStamp = "84b672a1133a445187e2528aa242d7b5",
                             Username = "2512049"
                         },
                         new
@@ -53788,7 +52625,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 226,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$huagvDMeI.38NroiYG1A8.OsUO0HgUw96.hmlq/5eCu/oMXN4ejqi",
-                            SecurityStamp = "f02103e5b4c24962b201172fd4c94dab",
+                            SecurityStamp = "8cddbb37fc8c4be79ac57e2a1d05c431",
                             Username = "2512050"
                         },
                         new
@@ -53800,7 +52637,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 227,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DAnoVijefS0kepPjQP33jeT.Rd/w91.JhsL9WLIvXIbBaHPFm6KJW",
-                            SecurityStamp = "6f90dd67e66541439df343f4170c128d",
+                            SecurityStamp = "3e794c96fa6243da9ed729c954acde15",
                             Username = "2512051"
                         },
                         new
@@ -53812,7 +52649,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 228,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TswhKg4wsZpaf24GbxzsseoG8i4UpSVBYvwqMsEgNIIDE0n2tbz96",
-                            SecurityStamp = "363f73596a37497ba650e1a1fdb834fc",
+                            SecurityStamp = "78566f1ea828468eba7601c48433395e",
                             Username = "2512052"
                         },
                         new
@@ -53824,7 +52661,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 229,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0T.Z4xzwPqsmTk9HP1w0pebWFXb4dGLc3Q3sFSBjn/mPNjz3pPAM2",
-                            SecurityStamp = "ee7f3c682d304544b36d1503bd229a70",
+                            SecurityStamp = "a66acf571a374ca0b4852ef0fafb2e9a",
                             Username = "2512053"
                         },
                         new
@@ -53836,7 +52673,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 230,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IAo2Q35WqBJ0RaPhhqXpT.Bgf6.zDYAXeJ4RQ.8lVMC.J4Vet.xme",
-                            SecurityStamp = "6eaea07cfc9040ac812a9b86b84a41c2",
+                            SecurityStamp = "d6c8c5e482014c5c8280d40aa9f7b05f",
                             Username = "2512054"
                         },
                         new
@@ -53848,7 +52685,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 231,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$R8xhLpPU8G8/rUhqeqz19.cG5vhjcr1LBsKl77rtJqVa4zPOmrBbK",
-                            SecurityStamp = "6f38541bd1f2423890c4bc552cd3429b",
+                            SecurityStamp = "feb42d6d4a18426c8811ee3b047cf0b3",
                             Username = "2512055"
                         },
                         new
@@ -53860,7 +52697,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 232,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hzr1aVzQNOcQbgHc.egDIuFX4obw5OZiYRiJL6Ij.1o50iHnJhm1i",
-                            SecurityStamp = "44fab1e6b84c4449a428f45d101585e7",
+                            SecurityStamp = "1a31bcb69e804ea0854a1d9f9dc5fdc6",
                             Username = "2512056"
                         },
                         new
@@ -53872,7 +52709,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 233,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$p5eGZKVa.dmM0vG0I8g64.G7T13MTpz2T4EDWSpjA5GbFCqc3J0J.",
-                            SecurityStamp = "086a9cff4cfd4facaff4ca16c53369fa",
+                            SecurityStamp = "7b49a994913b49088a5959009cb4f9e1",
                             Username = "2512057"
                         },
                         new
@@ -53884,7 +52721,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 234,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UooJ6nrRTmbCtU82hEkYtOFUOCdkgI/Py/excA3FBE6qiOnM0iQ7u",
-                            SecurityStamp = "6c2ce474f60b42bbb05140af622ccc2b",
+                            SecurityStamp = "4826cb9577ce4a158ab4bed0acc4cfb2",
                             Username = "2512058"
                         },
                         new
@@ -53896,7 +52733,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 235,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jgNnEUENo5RNNuZpHjCpxOe1dIC3JniRylfrfn0aWKZLEWjXDb2MG",
-                            SecurityStamp = "dcbd9d3c9df7483ebda91675b9c6be76",
+                            SecurityStamp = "a045280d924c45bdac08f22ec2c55bf7",
                             Username = "2512059"
                         },
                         new
@@ -53908,7 +52745,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 236,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fvzwdO4mI3BgkeFmNDrxsef2NGaWt/dbgA7eclxQFBjDc1/wiCgZW",
-                            SecurityStamp = "68e0ab54fb514ceab62e25107277f325",
+                            SecurityStamp = "96e5dc04a8854134ab74c57761a279eb",
                             Username = "2512060"
                         },
                         new
@@ -53920,7 +52757,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 237,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uuwk1ykQe3lq3MC0ODv5l.MM6pSFvZ6V7BCMG5eQAVfbu9.JNW6fq",
-                            SecurityStamp = "cb02afdf4dde407f8098bfe5eb5e9855",
+                            SecurityStamp = "68c0de8129b545a981d894eb2c3bb3db",
                             Username = "2512061"
                         },
                         new
@@ -53932,7 +52769,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 238,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PHWcZ854H9Pxa6DKmeriFOQtp/wjAfmR2d4NiSfF47EL4OkrDwPOO",
-                            SecurityStamp = "176e5595507e4bf3b91132a97a180619",
+                            SecurityStamp = "1379381b93bc45f5870af6d0cb7b8727",
                             Username = "2512064"
                         },
                         new
@@ -53944,7 +52781,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 239,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$z1GAxLd4qHnOakhUwxujH.xQPsYH8frZYcfslqY0jVbHW.k1xZd4y",
-                            SecurityStamp = "462b1f8a318f4736ad135488280ab721",
+                            SecurityStamp = "c06295beb8254596b6a723a09b9f6bb8",
                             Username = "2512065"
                         },
                         new
@@ -53956,7 +52793,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 240,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$99HHq/mtvBHPm1RCrY04me3cPvjeQxDud09pE.Z2T1bIdYzGDyfjO",
-                            SecurityStamp = "2266545c568a4bdf93656ed0574d4121",
+                            SecurityStamp = "148ad37f9e4540bda90b7535b1f273aa",
                             Username = "2512066"
                         },
                         new
@@ -53968,7 +52805,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 241,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nLCQdYoxUHLBSZ/LnEsxCugKrHN1driQ4iILiI60QoAaD8gk3G3oi",
-                            SecurityStamp = "3c6f19350d2149cf83e82d87df070ab8",
+                            SecurityStamp = "98f827bc62fa4c67a18a090b9bdb05f9",
                             Username = "2512067"
                         },
                         new
@@ -53980,7 +52817,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 242,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mR1RwTm7zczFiy/mJFWQuunhicDun8HqQ8kql2uTg7I/IE3XG4DnC",
-                            SecurityStamp = "88221624a30e48f69e1ed407760d8f0c",
+                            SecurityStamp = "34639094123548d5a310f81dca4cafca",
                             Username = "2512069"
                         },
                         new
@@ -53992,7 +52829,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 243,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yEDpD8jrOd/jKUnyD.zEHu0FmvjnlhWkrWQ.GF5Aacp/vjm.gw/EC",
-                            SecurityStamp = "13f076fe29554fc5b9238a8619e4fbdb",
+                            SecurityStamp = "1dcdf2735f2144219f959d6b9ea392fb",
                             Username = "2512070"
                         },
                         new
@@ -54004,7 +52841,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 244,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yTrtbtEpElLgkuLm5W6w/u0cykzKjbRozU2Vaj4CbU6tyyqlJsSae",
-                            SecurityStamp = "992101778ab048b5ba16bef7d262e8bc",
+                            SecurityStamp = "98b3dab3ed27403cabb278d52f8a576d",
                             Username = "2512071"
                         },
                         new
@@ -54016,7 +52853,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 245,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wB3InvMG4zC5T8fJgVype.o5rA.X5wrJWb5rgaQL8uazaeIek5S6e",
-                            SecurityStamp = "5d0df6a639ce4f4a8eeb860ac578aabc",
+                            SecurityStamp = "18c5b21be07840afaacf91e900c49b40",
                             Username = "2512072"
                         },
                         new
@@ -54028,7 +52865,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 246,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Jiw8jBRBQvkGAbNIKSvZd.ijCgv5CEeGJB5/9PKZ4Gwi6YV167vqS",
-                            SecurityStamp = "dfed58b3bd5e41e08d7f3ca4042543f2",
+                            SecurityStamp = "2b0ad7dd03ea46f283223678f7990fa1",
                             Username = "2512073"
                         },
                         new
@@ -54040,7 +52877,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 247,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/jPyJxAceF7BwXolL8EA3.aqEPKVDIKT9KYFqk.W8fUT8.UsLN7tW",
-                            SecurityStamp = "1fd7a19bb8ae4502b45b36f4f31cf412",
+                            SecurityStamp = "a483638ac1064166814aae22528d55e4",
                             Username = "2512074"
                         },
                         new
@@ -54052,7 +52889,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 248,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hQX.YOIqWapiLMkpyg8APuGzDeDlIgxR.6MXVKHZ2o56h6Heo.4Fa",
-                            SecurityStamp = "83db54350cf4474580d33b84aea4bc9b",
+                            SecurityStamp = "b4a243f0d001477cbe0a410dd886c3b6",
                             Username = "2512075"
                         },
                         new
@@ -54064,7 +52901,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 249,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$iQ13/1tKF80UAJveLDLFguh4Lc4RbZwJw192pLuplII3WGoF5s09i",
-                            SecurityStamp = "aaaa66d7fb7642ecb96241b2939a3b0b",
+                            SecurityStamp = "36540f9e04f94c889786b4ba7a323d39",
                             Username = "2512078"
                         },
                         new
@@ -54076,7 +52913,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 250,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Js4IcDp9uQJ8rne5Rrc5uu6PJNKcIbwnQ1RF6jRZ2Az.75.wXZ4Ly",
-                            SecurityStamp = "5879877e2aa140c0a423216c2da469c5",
+                            SecurityStamp = "c37b8f3cd66c4f8389ffd282530bc369",
                             Username = "2512079"
                         },
                         new
@@ -54088,7 +52925,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 251,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uBn.12b6og8EiTdh8CETU.pPvTAfym3ZAf44m1LWNYFeAmyP/67ne",
-                            SecurityStamp = "7074b003a5b24daab1df1c0927f8d29d",
+                            SecurityStamp = "7fe6bfc094374c6a97a0a6d513afb114",
                             Username = "2512080"
                         },
                         new
@@ -54100,7 +52937,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 252,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Q0X1/3rETAQVIKU82qnORuMwgAWqHxTnLfDgP0B6m1BiFo49QmR/q",
-                            SecurityStamp = "78eb5bce4559486ca9bc6024fa7961b6",
+                            SecurityStamp = "bd24e9debfa448aeaa104101aeb0285b",
                             Username = "2512082"
                         },
                         new
@@ -54112,7 +52949,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 253,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$QNURF1eYiLroyKonTNtN/.jdA5valfh9.OaTnoJ914G7Q4tAU/rO6",
-                            SecurityStamp = "d915098a09e0455e8f827ef733cfe73b",
+                            SecurityStamp = "b38992f4f2c8419c8c9db2d04dcbc5d3",
                             Username = "2512083"
                         },
                         new
@@ -54124,7 +52961,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 1,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$h7F7uHcOa35SNW7cYytBi.CjqJYETcIZdCHUE8q/rnHK01o00DWoa",
-                            SecurityStamp = "5e9fef339b584ebc94d131ee569b508f",
+                            SecurityStamp = "b5a39e3f0d8b4097a575087f3eaa65bf",
                             Username = "0000000001"
                         },
                         new
@@ -54136,7 +52973,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 254,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YggMlVwR2YYI63Fh/g7ZXO4ehlF3pF7DtF4dLYntImT0DdyhjNoC2",
-                            SecurityStamp = "2f528b4b98c0425b94e92f178ddad4b0",
+                            SecurityStamp = "d887496c183e4af3896f906cfe4a48d3",
                             Username = "2512084"
                         },
                         new
@@ -54148,7 +52985,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 255,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7c1B1sXuKhQ5RObsq/Qy5equot2piRcX6yuDequm/YBAVBG9Xyc3q",
-                            SecurityStamp = "2e64c66df1344e1da60c326b12ba82cc",
+                            SecurityStamp = "d1e356865e9c463ea337e1e5eab515d6",
                             Username = "2512087"
                         },
                         new
@@ -54160,7 +52997,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 256,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e6qToIGQ/8boC.vNZOEWSOIWQPVQhfAuXwm216ftYrjppSJ63zYKe",
-                            SecurityStamp = "acd20b9d780b47219566618c079ffc03",
+                            SecurityStamp = "672323e5ff8f42e1b5152caba62392bd",
                             Username = "2512088"
                         },
                         new
@@ -54172,7 +53009,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 257,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZmW2bUHD19R1nn3jWTgMZ.vdSHZvhVxxH7048Nm/HV4eYOHxip8sO",
-                            SecurityStamp = "a7e77e29b4754b3a988e7de58e8cadc2",
+                            SecurityStamp = "5753841c07b34f97a3c2f4efbdca0e68",
                             Username = "2512089"
                         },
                         new
@@ -54184,7 +53021,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 258,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nvQpIFK2KEFZS5z1wL4vAO/OgBfjG96G3X8soOtxBK8VL7BDxqj8O",
-                            SecurityStamp = "dc9e072efbed44c9bf4576597a4ace25",
+                            SecurityStamp = "0145cb40e282434ea55a144950458e4b",
                             Username = "2512091"
                         },
                         new
@@ -54196,7 +53033,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 259,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pryB1BU30ZR5IDdvBTgcr.IQ6yYlWoYxhOSQirA3aImkMdu.wzpXO",
-                            SecurityStamp = "70aa9f7b03ae4c019d86658777fd80ec",
+                            SecurityStamp = "b4812c959fda430ca7e8486497dce8d0",
                             Username = "2512092"
                         },
                         new
@@ -54208,7 +53045,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 260,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$64Gpwh5gd9lK/Qa/M7T0GeuDsjET7V2HmlxL0zoDa3Ab0QNZNTIru",
-                            SecurityStamp = "6b0e49074cf447c59c4e5e215ffb936f",
+                            SecurityStamp = "a544894ad28f4e9999836bb64bff86e2",
                             Username = "2512093"
                         },
                         new
@@ -54220,7 +53057,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 261,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5nVU/BWRCh5XVs1W8qj7z.pftPt62rWB8lQOZowFXap3K9Al4jrXa",
-                            SecurityStamp = "c9ce2ef5de9f45358cc3acbd887fce36",
+                            SecurityStamp = "a21c04fa61b64fdd82c840d1fa11eb6e",
                             Username = "2512094"
                         },
                         new
@@ -54232,7 +53069,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 262,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Xg8kewDW11gXSe4ry3Ot3uEy3OHuNCq52dC2.lhyjwI4HxqWMoc/y",
-                            SecurityStamp = "d061a019984f4945b6ace19fb69c9608",
+                            SecurityStamp = "21d8674afe3c4ff3accf9af707ef0579",
                             Username = "2512095"
                         },
                         new
@@ -54244,7 +53081,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 263,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RmcwCsxIINqn7yDGq6qWV.PVYTilAXr9AFqn3iyOgpbumwcKqrtRW",
-                            SecurityStamp = "a7c024d77fbf49a6bca7b11f3f02024e",
+                            SecurityStamp = "8081bf17b79f489383c5ee188f455074",
                             Username = "2512096"
                         },
                         new
@@ -54256,7 +53093,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 264,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vV0OA1REbWKvf4R78R7dru1XFTyHhMlNIdJbkc6OjiWRRtnbYkJCe",
-                            SecurityStamp = "593aba44d7284f65b2697182541bb233",
+                            SecurityStamp = "d6fed06c6fe04f2eb06770e56da1ed8b",
                             Username = "2512097"
                         },
                         new
@@ -54268,7 +53105,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 265,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IyLCepNGcnHtp0MHIfKEC.kE8SNRXCfoWFweCaBPDA09LE.8Q.BB.",
-                            SecurityStamp = "b0824f9995194251bc08cae02c0e86b6",
+                            SecurityStamp = "9f5e4f7843c24984932b390417e562ed",
                             Username = "2512098"
                         },
                         new
@@ -54280,7 +53117,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 266,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aIPOPlEEqZKqsr7HdHpfPeeNM8OgKu7M2SQlKH0MfsbOIeKIIfqN.",
-                            SecurityStamp = "76cc569e40904ad0b52b71fe2d2c9ef2",
+                            SecurityStamp = "365bb89f6ab64fb6bbb2c6c454296b9b",
                             Username = "2512099"
                         },
                         new
@@ -54292,7 +53129,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 267,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7AXJ/cZfy2B05wJzhMX/7uwEiWNDIew0de6qdZ79BQ6TpHYbbvRNy",
-                            SecurityStamp = "8df3cddbd4f64b699e1b8ed457c336dc",
+                            SecurityStamp = "54e777b78c7b4b7b8b62429c36fe6d5c",
                             Username = "2512101"
                         },
                         new
@@ -54304,7 +53141,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 268,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fq3X2HYr.3w7LqwWK/vebekGsnhak246dx1UEMnmxalwd5yxbHioa",
-                            SecurityStamp = "94483e7796c54e5997efaefdf30e3c37",
+                            SecurityStamp = "8d715bff399d4ab3bd488499fc26346b",
                             Username = "2512102"
                         },
                         new
@@ -54316,7 +53153,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 269,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$b4hLTu.hzeB8uSAGXZvlyuvCUyJNSxSdLmSdmbOVeUEk/TmtXPOzK",
-                            SecurityStamp = "8449efd15446475a8de49d0fef51491f",
+                            SecurityStamp = "0d14627d2a684bb7bb770092c510f988",
                             Username = "2512103"
                         },
                         new
@@ -54328,7 +53165,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 270,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c/ZVnrJFjAjnrYVBGLmTmOfS667ykLC/MUZSIrLJeZlpSInZQ11nC",
-                            SecurityStamp = "184cc8a0976a41edb5f63102da3f30e8",
+                            SecurityStamp = "0b0b0bcca00b4d7eac0ec47e69db62ff",
                             Username = "2512105"
                         },
                         new
@@ -54340,7 +53177,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 271,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jW52iwpE30og6RKdkHCDVurYSv9OFiHgove74JvCDRQ4TruvaDOcu",
-                            SecurityStamp = "7cb6e88469f64884a8a3329e3a622bfa",
+                            SecurityStamp = "ba849cb923874739ad15dffb00f9e344",
                             Username = "2512106"
                         },
                         new
@@ -54352,7 +53189,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 272,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yLQYQTx20ue7UbAxRr/TEe/UBoPc8U65Sj4uwr0BnRcS.pSt5E.xW",
-                            SecurityStamp = "66518c0473b747849edaacedbfe8ea77",
+                            SecurityStamp = "cca01d1da2104747b4b7271f3cdf28e2",
                             Username = "2512107"
                         },
                         new
@@ -54364,7 +53201,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 273,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$itzxkWW7WGwL.StbpIJhXeUFlAjxopyXh17rcss8dnb44zNrS4e22",
-                            SecurityStamp = "8df5946d1def44119d1f17e00ca99217",
+                            SecurityStamp = "0d81b9c66d37434d8ea8e735fdac96da",
                             Username = "2512108"
                         },
                         new
@@ -54376,7 +53213,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 274,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IaSy98P3YocAUHiTQUFXce8VP0pqncb5GLc7wjVKMdKkfLYSsvTE.",
-                            SecurityStamp = "ce0e15d76cee4977b9d333a11a9f28cb",
+                            SecurityStamp = "a050b76576ee4df486b753ae6030e756",
                             Username = "2512110"
                         },
                         new
@@ -54388,7 +53225,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 275,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rl3PmUybSdEhWFcsBECms.VE4ZtoAnr48CQ90.n.rOm72jV1AeFpS",
-                            SecurityStamp = "96fd308e32b34517958e85ac1a84bbc2",
+                            SecurityStamp = "a500c06eaa644b37ba3565b09f0f13e8",
                             Username = "2512111"
                         },
                         new
@@ -54400,7 +53237,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 276,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wjim..rbcPH4Y3MVRxseoubvxcINUu8DSu3yxdo.Y4910zB3fDtfi",
-                            SecurityStamp = "fde16db4809f4b7580796d4a14761895",
+                            SecurityStamp = "bc21afd1b53046eead6f647b8056d94e",
                             Username = "2512112"
                         },
                         new
@@ -54412,7 +53249,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 277,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sWtqEtdLNN2/0/BSzj4I9uvxHzg0k9Ws2MyQXEXWg1EQqY4M6PYYm",
-                            SecurityStamp = "832890ff1474485d9233c87f5c0226c7",
+                            SecurityStamp = "d7983413052947e0a060bc20fba36d94",
                             Username = "2512113"
                         },
                         new
@@ -54424,7 +53261,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 278,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KUtYtBNvqfzNJPnQtsiyYuz7aK816q1ur7fSLasU90.WOEt1kaCd.",
-                            SecurityStamp = "6d0ce3de1c6749629470b69e59d7eb6b",
+                            SecurityStamp = "b867a946d39546fda7b76395e6ebc4e8",
                             Username = "2512114"
                         },
                         new
@@ -54436,7 +53273,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 279,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xClAYLs9M6WydVmErgmHBuq2Qqn5Z61qwSeSLxShWFjJQUI6ByOw2",
-                            SecurityStamp = "4e615ad739864bd78e62da7046335781",
+                            SecurityStamp = "440c2123dcb4498989f487088ea53c69",
                             Username = "2512115"
                         },
                         new
@@ -54448,7 +53285,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 280,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$R0qmzqSL2OC0ss93ksVl/ekEEd7nCUbw0M.cu52PYzy3xSw/aWOD6",
-                            SecurityStamp = "1bf59644f22845fd91dc5c0add2cd2c0",
+                            SecurityStamp = "891c781a24b342e3b732ee72a2ce4065",
                             Username = "2512116"
                         },
                         new
@@ -54460,7 +53297,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 281,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pwpz9EeC0tCvl6lCrHcT8.R4XKH9slsFx0MXfn69y4WsdmFt9x2gm",
-                            SecurityStamp = "73ab98829fdc49a0871d27f28cdbc1c1",
+                            SecurityStamp = "02cf2d2f21d54cb5adcbb93eb2055319",
                             Username = "2512117"
                         },
                         new
@@ -54472,7 +53309,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 282,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$j2e8X5Wdk7zuTlZqO96.f.Dry4.sz/zgQdJ.uGzU1x/G/lKAJJ1Ja",
-                            SecurityStamp = "b44111c4a81f4814849a4c9e528d8e81",
+                            SecurityStamp = "843013ba646048b98bf4650d35e4c451",
                             Username = "2512118"
                         },
                         new
@@ -54484,7 +53321,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 283,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yrEr4UEk89Awlfgeiwlw8.uxT1Mw11Knu1RtGvBlTJaL2S0ojHgvW",
-                            SecurityStamp = "269d8912c3c04cfa9fdb994fe3f45e0e",
+                            SecurityStamp = "f934e034c87148e2aad934389d95c37e",
                             Username = "2512120"
                         },
                         new
@@ -54496,7 +53333,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 284,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$flwErxwZJKqIxYRAH5fihOptgWH84PpmpfluQE7LtPfxM9jJdR3ei",
-                            SecurityStamp = "eb79e8c9a58e41008f9cadfc2406b35f",
+                            SecurityStamp = "a08b7cd16750489f86f39f2d3a9260de",
                             Username = "2512123"
                         },
                         new
@@ -54508,7 +53345,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 285,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g7LqgKpY2YnlkX0e1ULDru5DbxxPYWixTTzqq.sPwSuMkC.fMyGyW",
-                            SecurityStamp = "9a6e2b2ed7de4a7098d537e4c9365faf",
+                            SecurityStamp = "c7f75a5abe2b4b8b8d84d659a53fd0a4",
                             Username = "2512125"
                         },
                         new
@@ -54520,7 +53357,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 286,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y4GWcYhw/AJVlHZgF/Ng1.sbcDBwiIdHs19tXkw.XYjugJBOiocGq",
-                            SecurityStamp = "3ed88105608f421ba60fe5c38e6ac924",
+                            SecurityStamp = "93157ba206424060b774c687f92ede99",
                             Username = "2512126"
                         },
                         new
@@ -54532,7 +53369,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 287,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yWvLF.41EyRSgxEA5nOB6eRf1ZhR65irB4.nlS8msij6SwcK6shu6",
-                            SecurityStamp = "71cb1eaa7d0e446393c9d7a0eacb515c",
+                            SecurityStamp = "caab51eb17534668b414f010305e584e",
                             Username = "2512127"
                         },
                         new
@@ -54544,7 +53381,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 288,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Afrra9xYamfSLqLD64/1Fep5T8ADPVecZXDVExV.ErgUx98OEiwbi",
-                            SecurityStamp = "6311c5c659564a6a84899f6cc20459cf",
+                            SecurityStamp = "4add2eeba68b4b548a6ef6c2a9e45f27",
                             Username = "2512128"
                         },
                         new
@@ -54556,7 +53393,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 289,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ihU04rgMDkCYz94ZEjDH5OnfkuIYrlcCvHFk.HABM/3pIjCOvOOpa",
-                            SecurityStamp = "1ff111c7a48e4c3a9c6d20b05b7fd0f5",
+                            SecurityStamp = "1eb60473e42048f5ad6fc91928edc9f6",
                             Username = "2512129"
                         },
                         new
@@ -54568,7 +53405,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 290,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ntlxuzUOhakNlNs78a5ma.GxtWbC2SYxb/uIVY8PE73.EDTSnUjki",
-                            SecurityStamp = "0287a7a93bf24f0f8e0f8dffefbe6c24",
+                            SecurityStamp = "ea4af229aa2144a6bf0e8a81622ef255",
                             Username = "2512131"
                         },
                         new
@@ -54580,7 +53417,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 291,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XwydG761vljik4h0i9B8uOGvojLRSzH37F5WXtygO/W3VVUoGxDZ6",
-                            SecurityStamp = "4d47639c468f42f39888a4fde465efc5",
+                            SecurityStamp = "233043c103f64b5092e6cfffe3a4e16a",
                             Username = "2512135"
                         },
                         new
@@ -54592,7 +53429,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 292,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3nnYTCwMBwXxhLKCQ2N1UOUeJZx5WVpKQ588RYYOqBYTsKiHW0YBS",
-                            SecurityStamp = "908d01e9dde44ee69c6c96445ad08b8b",
+                            SecurityStamp = "3cf97411cfb7409281a4f440b259abe2",
                             Username = "2512136"
                         },
                         new
@@ -54604,7 +53441,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 293,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JiOBqgTHgU9MZxDN5vgXie3K6l/5rmjIt8PDxgONBNVmEDzOgLYJq",
-                            SecurityStamp = "31bdfb4393fa4b6f9183611c50e34922",
+                            SecurityStamp = "cda8a0d182794ad58852a1d47aed558c",
                             Username = "2512137"
                         },
                         new
@@ -54616,7 +53453,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 294,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$8.Giv6B3xhOjqZFaK7pakO7mLpHkpV3XdjDLnt.hktr3bjd2gH70W",
-                            SecurityStamp = "12b051ad8e19466e86f007c397438e0a",
+                            SecurityStamp = "181fda4dd49441b2907fe360eecb8c7b",
                             Username = "2512138"
                         },
                         new
@@ -54628,7 +53465,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 295,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cv8mxB9aBEaapcK7EvNjBeGzj3f/ydOsC43sKk8pxScOZaNWHixz6",
-                            SecurityStamp = "84128977e76247078fb706cf3e3225aa",
+                            SecurityStamp = "351867533ced4801a89a5865f497baeb",
                             Username = "2512139"
                         },
                         new
@@ -54640,7 +53477,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 296,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dLIktPjSPCEmiAfMKHElK./4u6m0iEec0nG7dW6QFstuJBou00hzm",
-                            SecurityStamp = "6ceaa030994e46b7b02390a70e2f3092",
+                            SecurityStamp = "6c4c3996d1434ab7ae8dbc347a4a3c64",
                             Username = "2512140"
                         },
                         new
@@ -54652,7 +53489,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 297,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jww3ymGNLLFJ5d4JBR9JdeaeFOE/rUjOYNsCs0lXcvIzBy.Rq9Rjq",
-                            SecurityStamp = "db1261341dae49b58fdff00765c775d0",
+                            SecurityStamp = "90f7fb71eeb04bd7b6179fa1f8197b7d",
                             Username = "2512141"
                         },
                         new
@@ -54664,7 +53501,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 298,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IQo7AM8JPh5m7FvmHLTiK.OkKxcwBbUY5Ja.1mDgdoMvwHKqRM2x6",
-                            SecurityStamp = "d3625e3404024a4690e570b1698fd657",
+                            SecurityStamp = "bb70e3a316c94bbea2c1f25e7166c77d",
                             Username = "2512142"
                         },
                         new
@@ -54676,7 +53513,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 299,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KhAkvj5Lmwy4W87T7qcEpOAqzR2AWVGe2sdIYu.tp7jg.UqYqk8/q",
-                            SecurityStamp = "c768139ab8784e39b2024a3fb337b009",
+                            SecurityStamp = "09505f43e65345709959486f5d9c91ef",
                             Username = "2512143"
                         },
                         new
@@ -54688,7 +53525,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 300,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JL.bQJiJFTC0oxSCGzhrtu0RCR0wd5Wjofii7ddNSguVKjxEW6TOy",
-                            SecurityStamp = "87ebc69e46054efda46496d23d1c4ed4",
+                            SecurityStamp = "43175dbe3edb446d90fabdb26409256f",
                             Username = "2512144"
                         },
                         new
@@ -54700,7 +53537,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 301,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oa4jAGIzJ2b3KlvePmdZT.R2Ps9XaVA4oC5xZ.wATitNeXQtZD7o6",
-                            SecurityStamp = "7c7ffe0bfa54439494891217bfdf2aa3",
+                            SecurityStamp = "5d3cbd6a976d46aabd63908211df68e2",
                             Username = "2512145"
                         },
                         new
@@ -54712,7 +53549,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 302,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BbBjxlPc.mMWtFraAvgLoeg0geSIdSSlaYKjBmSn9Tq5BRueWV6Ei",
-                            SecurityStamp = "6bfd335168c84f128209b1a78fcca31d",
+                            SecurityStamp = "5b08fddb6db54ceda6076a1ddf04abc3",
                             Username = "2512146"
                         },
                         new
@@ -54724,7 +53561,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 303,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PF6QKMVB9a1NZKzhbyjRL.WJ9p5zD9f/s3pZiL04aaHZxMFXg5Yum",
-                            SecurityStamp = "63c43db0a2204d9aafc783c4d4b8b1f7",
+                            SecurityStamp = "39e0d0e43b53412a9c668f14e632dd8d",
                             Username = "2512147"
                         },
                         new
@@ -54736,7 +53573,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 304,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y7pe2YC.TooaU6E6E0ofSeeiRgAv8/6rypdXpRDTEDkqSfeNAbsEy",
-                            SecurityStamp = "54d36ebacbd943fca51dee8d7d1c6c30",
+                            SecurityStamp = "516460db3cd6469a8c1929cf7e86fbc5",
                             Username = "2512148"
                         },
                         new
@@ -54748,7 +53585,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 305,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gSACwLQRnwAoXr/3.5c0DuTJyLQAQYzBjGWHi26QYUTa7pVdnHBXm",
-                            SecurityStamp = "09e7a11b6dc243c290db49a03eee7808",
+                            SecurityStamp = "cef80db87bd5497ba5a861115c976171",
                             Username = "2512149"
                         },
                         new
@@ -54760,7 +53597,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 306,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$QNOjD/wSLKXdogUx1D8TAuWjq8OMnaowqV.ornJSVb0F0RaNiN.J2",
-                            SecurityStamp = "02cd194435bb4af68430fc7098bd1bfb",
+                            SecurityStamp = "8838a1997dbe42d9b66e02f6fb544b5c",
                             Username = "2512150"
                         },
                         new
@@ -54772,7 +53609,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 307,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5bu7vDRWeFabXUJ1DgfKn.xi6RJFmiz85f.rp/J1dWbZuiwSfQ3qO",
-                            SecurityStamp = "d1cf2539434d4af5bf110b2ac0c42bcb",
+                            SecurityStamp = "d0f08acd8d6d46b3af3867e5805f6df1",
                             Username = "2512151"
                         },
                         new
@@ -54784,7 +53621,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 308,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/g3SVnZEITVGsvqWMTKMTe..vya1R3n8q7mkYewDFsWpU6BaDRYP.",
-                            SecurityStamp = "ee0fd3783eaa4487888b0949e5b85611",
+                            SecurityStamp = "495642f5cc004af28e7440a8e9e740d6",
                             Username = "2512152"
                         },
                         new
@@ -54796,7 +53633,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 309,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3wJ9HiEXRAKOJX/p9mhnwO9SQkzTlvi7z9WwBb88IHGFfoDvQn0wO",
-                            SecurityStamp = "a31dbcee671848898a6483da11bfef7c",
+                            SecurityStamp = "1395674493124dcea7572372b3e8e2fc",
                             Username = "2512153"
                         },
                         new
@@ -54808,7 +53645,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 310,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e3cfrRqN39Rfj4Xcjmav6ejNjkBWbXfKR9..nNDYiRM7lPsHz4xwa",
-                            SecurityStamp = "dc82ead39116425e83a8ef9fbadfb810",
+                            SecurityStamp = "6cfa322ec74049b5b076d5028452569b",
                             Username = "2512154"
                         },
                         new
@@ -54820,7 +53657,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 311,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Uk10O52q3J/P1ZRhOTMf9.YBQ794fJvHUEgIFNqA6C8gNwExEsYDq",
-                            SecurityStamp = "5ade1c3cb7d0492c982aa2233d800df3",
+                            SecurityStamp = "d3bd1abd3b3642a4b53a1d1e091292c3",
                             Username = "2512155"
                         },
                         new
@@ -54832,7 +53669,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 312,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OqGesYKJ6Hk7lp6zDlcKfu8wZsH3BOyRGgFBF/JtSq0Osa4NUhtIu",
-                            SecurityStamp = "9fb3e094c9704d46a92a17b6eeb63ef0",
+                            SecurityStamp = "49983f852c0047b0bae2cd5717e626db",
                             Username = "2512156"
                         },
                         new
@@ -54844,7 +53681,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 313,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tSyAXkROSs7.Gz8qfZ4HJ.xE1ezdWBRaRE8JSoglvhIyGGZpm6tUi",
-                            SecurityStamp = "0250db6973c642b6a9752b65e677b9ac",
+                            SecurityStamp = "96d46a9b286443758efb4f8a45c6b01c",
                             Username = "2512157"
                         },
                         new
@@ -54856,7 +53693,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 314,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1LvHigvbuk26MAaYj.LL0eVUsXCrVC3fNjfiANVs8fR5QczSznFZa",
-                            SecurityStamp = "f9f7ef563b9e4abc9b9b6e2f6f4cb644",
+                            SecurityStamp = "98e79f54fa7a4a9085cc9308cfe24a4c",
                             Username = "2512158"
                         },
                         new
@@ -54868,7 +53705,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 315,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5RBN2wolSQJg0OcZ.hOkou.wenzIYcAz.Uv9HHsgnS6Bb8LKjHWMK",
-                            SecurityStamp = "3ccb2ae7dc7c46cdb2eeabc9afd333aa",
+                            SecurityStamp = "f76c62afd0df433c988202188fc83f21",
                             Username = "2512159"
                         },
                         new
@@ -54880,7 +53717,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 316,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$b9nmbrT4C7l9jxY0e1GHQeds/gtWOazoBO/b5jHYVrOmJLFt..k4W",
-                            SecurityStamp = "bf5424d29d9c4927966cb5c4f2dd859d",
+                            SecurityStamp = "0ecf1d12362845ddb411e128e9b4f6d8",
                             Username = "2512160"
                         },
                         new
@@ -54892,7 +53729,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 317,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$v1eoWGx6myROHBO1xVjL7./GkSnJ.F3vq0/7rtdHtg.pOU3o91FJq",
-                            SecurityStamp = "71ff092a33b24609b4848f0deb140785",
+                            SecurityStamp = "d7f92551e59e44a09ebc201607b6661f",
                             Username = "2512161"
                         },
                         new
@@ -54904,7 +53741,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 318,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$HpjcJBMM4dSe/Yfx4DaNee9rjFhd4Gw/o1mCKnE9YKXjbVq3ueA/6",
-                            SecurityStamp = "5c098fb3af3b4f138eaf4641ef45c0e6",
+                            SecurityStamp = "c6619726f99b4db3ad8fadb0763e9c16",
                             Username = "2512162"
                         },
                         new
@@ -54916,7 +53753,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 319,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4LNiwzjmXBx1ltsVrm9fA.9NK5cOTI/VdLvqN2jttyjoAysIqyRkG",
-                            SecurityStamp = "8c635f687e2a4ab2a1893cd781e4be15",
+                            SecurityStamp = "6b1425b6e93f44d4a6e07cf98c90a38c",
                             Username = "2512163"
                         },
                         new
@@ -54928,7 +53765,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 320,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g8P8ooTnGOm/IoRgf5VaWupIe6jhQU.B7ULlNq8mu3qjop3C/KQM6",
-                            SecurityStamp = "99adc4bd354f45cc9ebba23fc43209a8",
+                            SecurityStamp = "21fd2331071745ae9c0990740b54b4a8",
                             Username = "2512164"
                         },
                         new
@@ -54940,7 +53777,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 321,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oWZ/kJ9JgxrZuMU2r1MOdOs43/oDoSpxtB6S1iXFrVJ3amsp1YZUS",
-                            SecurityStamp = "2063f2351bc44d849bd5a15c11e1824f",
+                            SecurityStamp = "456128e695b5497c90a9aeef469fbb63",
                             Username = "2512165"
                         },
                         new
@@ -54952,7 +53789,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 322,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DYnnZ6.1DtaRVBhJ2x3gAe2CpOFt0baT9bJfR.LdLIYvzdo218gpK",
-                            SecurityStamp = "2e293c02390b4cb59ed82bea74a54858",
+                            SecurityStamp = "29ff12c50ed84971aaf0ab81026532ae",
                             Username = "2512171"
                         },
                         new
@@ -54964,7 +53801,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 323,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FfmszMKvDdboDPgjRPiJ5u57tx7RsrNRTQID1Tcg94ALsdWAI8vGG",
-                            SecurityStamp = "3edb1744f23242048e3f7f5845418f86",
+                            SecurityStamp = "5c933538b18a4dacb2fba2a3899cf15e",
                             Username = "2512172"
                         },
                         new
@@ -54976,7 +53813,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 324,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WILy31Hfsqw5d7jLZ7W.zeUaAYF1i1cVPS1dfolXLE8g.pRpUXCUC",
-                            SecurityStamp = "1909c55efa72482cb5988b7ca0bc0c7a",
+                            SecurityStamp = "672b0d1b15c74f6c9169e6efbfffe517",
                             Username = "2512173"
                         },
                         new
@@ -54988,7 +53825,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 325,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rjR4iVMohY3L0haCcrjzK.Y7P/mO8LRu7qEmIjW5pfv43Zg94kjZa",
-                            SecurityStamp = "e7d00990dbff4dbbbcab04bcb8b24420",
+                            SecurityStamp = "6df54c42aa374304a9fb5889fa78abb1",
                             Username = "2512174"
                         },
                         new
@@ -55000,7 +53837,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 326,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bLEvBa4jusNM9quOjGYxR.bhX74MC2JmgB23aHlCe4yPTGUgfcW2K",
-                            SecurityStamp = "8d679ab20a9e495281d86c8b960f8dcb",
+                            SecurityStamp = "675eab0b3bb94cd3b4b690b33ea890fa",
                             Username = "2512175"
                         },
                         new
@@ -55012,7 +53849,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 327,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2vtBt3d5TLy4velV6Zedd.Va9oqUdxR0zSrI0IcDIbwafcxllCzr.",
-                            SecurityStamp = "5694651c3f734c429569761f76151990",
+                            SecurityStamp = "59a04febdd8344528a150c2cf167c689",
                             Username = "2512176"
                         },
                         new
@@ -55024,7 +53861,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 328,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LeThzfvd99p4swMjRCpZCu0VZTWH/1D40v.qW85fvnowhKOtnhVO.",
-                            SecurityStamp = "e9e47fad12e941feab7be4606e9e26f3",
+                            SecurityStamp = "852235753de34a408a1e98ce22ad7f94",
                             Username = "2512177"
                         },
                         new
@@ -55036,7 +53873,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 329,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/Ev../gVh6Sp/US3frfkCOFiXsfxyrFcE4yImUfCMW9mb/A4LtPi2",
-                            SecurityStamp = "1b9e54d6e7e94d1b875e550e35a212fe",
+                            SecurityStamp = "233848bfe64b4f9fb5ea8537e169a3da",
                             Username = "2512179"
                         },
                         new
@@ -55048,7 +53885,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 330,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/JP.ufTdNBrIl.I.Kl.FWeuWsqQ0WS5AYC7iF4VKrc8S.DvtgX9Gu",
-                            SecurityStamp = "bb7a2fb6c0d74efaa4c08ee96ce92696",
+                            SecurityStamp = "47382d778e2949d3a9913d7673dbd8cf",
                             Username = "2512180"
                         },
                         new
@@ -55060,7 +53897,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 331,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FOS3n8c7eYD7spdiQ/X33.NI.HqDnVPvmjCEqm/kZyyQ/zg0Ko8aO",
-                            SecurityStamp = "780b7c57a1904e02b5aaa398bff0516d",
+                            SecurityStamp = "4e87ec740ec04957b3796b23ccd4cb32",
                             Username = "2512181"
                         },
                         new
@@ -55072,7 +53909,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 332,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fl/Pbyrk7t6/o91g46s9Uuo8PrdWUib/lTvG0PAUBr458O6c6yJe6",
-                            SecurityStamp = "06e89e34340945508009aa403ec975ad",
+                            SecurityStamp = "f66d15f1229b41a48170f78621b15d04",
                             Username = "2512182"
                         },
                         new
@@ -55084,7 +53921,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 333,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$x57kRs3d26QwFMJmWP.xaOsZYWCkbii/28IHbzbV5WRE1BghT4Iau",
-                            SecurityStamp = "4912526ad64d4457af7e29c9b4f4c981",
+                            SecurityStamp = "1674db904d8c4bb5a72ab82b3061cbc2",
                             Username = "2512183"
                         },
                         new
@@ -55096,7 +53933,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 334,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tRQ3.NKmMl.GfF2MdSh6pOsg3492QJBg.gtrbwP/mWhYJPgZ5FcM6",
-                            SecurityStamp = "410b26462b114a10aee2363a053d9616",
+                            SecurityStamp = "6265238742294ae5a7dc631adb80d518",
                             Username = "2512184"
                         },
                         new
@@ -55108,7 +53945,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 335,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KoHJoP1m5QOveLxT21t5RepknI1UPUQvqXVQ.LG4qfoVZYBr7RGIS",
-                            SecurityStamp = "cbb083ba171341d29c7eda34771149a5",
+                            SecurityStamp = "fe7f25dc576f444baa51f9a7199b9a9a",
                             Username = "2512185"
                         },
                         new
@@ -55120,7 +53957,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 336,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y.jiQ1yZ0nu/8e7726Yy/.Exbe7PyvPktVTcbUPkQt4E9CL38FxOe",
-                            SecurityStamp = "7e291e6d40e0472ab1b26d87d962d9e5",
+                            SecurityStamp = "003cebc62f7649a9bd33b1f9b7176282",
                             Username = "2512187"
                         },
                         new
@@ -55132,7 +53969,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 337,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MmiUFRAtW00qAwUjPhIeE.7XZKUDyJBzsGYf2Hs9d4Yol0oWms2.W",
-                            SecurityStamp = "386b8ba31edd4bf7af1392d1bd5161de",
+                            SecurityStamp = "b4c9e73a93f44fd6a82e105ff7d5a36a",
                             Username = "2512188"
                         },
                         new
@@ -55144,7 +53981,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 338,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vZxettA5BgLNmqbAptxGquaxRS7Z2vSkoB1upn7q9Lev7jAijAu1m",
-                            SecurityStamp = "9128ce3d383e4c57bded72ef3dab4b85",
+                            SecurityStamp = "00cff6d82b22402bbafa12ceb169ebcd",
                             Username = "2512189"
                         },
                         new
@@ -55156,7 +53993,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 339,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oQuwOQB4XM1kpaLMbvi2HujUWZCevJOrgPVKHDvOFqcSve0UE2GBW",
-                            SecurityStamp = "13c2582866b94dec9df46e896a363146",
+                            SecurityStamp = "d3f9bae08f3c4afc95fe8e1dd78f5959",
                             Username = "2512190"
                         },
                         new
@@ -55168,7 +54005,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 340,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6SrXg4MuGZ5kp9q1gNtj4uvFRQiacvehrxVh3EeRlngN0iQmUWoly",
-                            SecurityStamp = "39f73f06ef9d40aa84bebfeed8b21e29",
+                            SecurityStamp = "7dba94cc5f924f7b8e3a4d75f0dda777",
                             Username = "2512191"
                         },
                         new
@@ -55180,7 +54017,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 341,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JC/7QSa2x5Ui4bghnGT2AOwbZunCfklnD3z/ClfeU2WVOsE1OgfW6",
-                            SecurityStamp = "6e470933104d4270ad646da3d2ab7f1d",
+                            SecurityStamp = "3dbd2800f8154171a5ee4cd4b078b89e",
                             Username = "2512192"
                         },
                         new
@@ -55192,7 +54029,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 342,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0uSDhEHT9iG0vsHHpyrAD.e9an8Nw4Qxpy3dGYqXKDQ0XNowVT5/G",
-                            SecurityStamp = "f461249cbe1d4c79b930fa831fbafb2c",
+                            SecurityStamp = "a7ff7af5e3c947a988e9198c390929ea",
                             Username = "2512195"
                         },
                         new
@@ -55204,7 +54041,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 343,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z4ZRHARi7AbU60lHdA41zOC5y4N360BDbJV7QDgaDrFB9pfDQ5mWi",
-                            SecurityStamp = "8681bdc2e6534a659d378efa7793c0fb",
+                            SecurityStamp = "344ca35c028b4ae6855bafabcb81b9d5",
                             Username = "2512196"
                         },
                         new
@@ -55216,7 +54053,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 344,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xO5ySDBoI.tEYWUHU35c.OnXY0xYgjt63wNSqX4D7.Q55PX.sxccW",
-                            SecurityStamp = "4ff7a4176afe4c1d8a8059273adc751a",
+                            SecurityStamp = "0a3817fd2cd74f1095003fd9e8fc4cdd",
                             Username = "2512197"
                         },
                         new
@@ -55228,7 +54065,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 345,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Eg2nP3bQbv8hqbpD332PPeIclAdbiu575bwrbQkxK1XTOsphU6Qtu",
-                            SecurityStamp = "e477fe3115e94f41ab04ac94a4272573",
+                            SecurityStamp = "5971a9fd663344d989651cfdf7461a29",
                             Username = "2512198"
                         },
                         new
@@ -55240,7 +54077,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 346,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pw3oZwP4tcYa5wmxhbpZSeKfmsR7CCNNBx0nVcLjvGE5EA1rlDIo2",
-                            SecurityStamp = "1178cf4e295541beaaa351c5d1af7e32",
+                            SecurityStamp = "4fdb0c8be53245b9a53efe7b53c1d039",
                             Username = "2512201"
                         },
                         new
@@ -55252,7 +54089,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 347,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sNEeEfrSjONipCwuuoIQKu4rptd3OPipMHKpprl2TmXX8B3VDVGAO",
-                            SecurityStamp = "568072ce21f54c8b9583447be817fdd9",
+                            SecurityStamp = "9c1de0d755e9426ab554343569417fd0",
                             Username = "2512204"
                         },
                         new
@@ -55264,7 +54101,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 348,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$C91MxjRA0CuJeXzrJFGB0O4f4kxcIl9AbKQWyTiRP.n063ki3bh0K",
-                            SecurityStamp = "1b57c72162424aa0bd4674aba7cb9a19",
+                            SecurityStamp = "02853f3076984470bcbb62f22250fa73",
                             Username = "2512205"
                         },
                         new
@@ -55276,7 +54113,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 349,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4UHNM6pSctneMe2XJ.PPnOflp7EH4V82tq7KpVS3UH.Hj8zirc/MK",
-                            SecurityStamp = "e4b0b8f54da34f3aaa44fea2c4444f38",
+                            SecurityStamp = "84e6960e1ee8461095b18404e067d33b",
                             Username = "2512208"
                         },
                         new
@@ -55288,7 +54125,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 350,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UifSbj6M6XIevy./0voXW.k6ai9B7pdG0NuIjq/A9f8d/dYuPKova",
-                            SecurityStamp = "dd1dc71d3dbb474fbf454009ed67d16a",
+                            SecurityStamp = "a6c22bcb52584a48b1b34cfde7a27d5e",
                             Username = "2512210"
                         },
                         new
@@ -55300,7 +54137,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 351,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YHO1l3zMp3V4qZ/adt8C7ekI0WOVje9D.8VF4o9keWk4a5c4L4Of2",
-                            SecurityStamp = "a02b11109d8b43d48804395714611dce",
+                            SecurityStamp = "5c52486d4dbf47bca48e4e966262526d",
                             Username = "2512213"
                         },
                         new
@@ -55312,7 +54149,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 352,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$x7ClRastaJ/HI64dufPN/uAWnbQaRAQ6OhdqBEVukLiDjAVN4p2.C",
-                            SecurityStamp = "b650c0c726cb428eb5ae9a1f7c9d6031",
+                            SecurityStamp = "c40a0570e53c40bea244b5939989b336",
                             Username = "2512214"
                         },
                         new
@@ -55324,7 +54161,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 353,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2KUVmnkc8GCAW0tBOxLLyeNqseT3P9r/I3fR7Kjrn8cuI1pFtklI.",
-                            SecurityStamp = "eeeaeb91a33c4cab946a78101a0378b7",
+                            SecurityStamp = "67a83d680a244a71a9e10db8839fe562",
                             Username = "2512215"
                         },
                         new
@@ -55336,7 +54173,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 354,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.Y0q8bGQE7u3Sxybc96YLuSjntyAV1bumIzoB7EFwt.ptX/VKOgaG",
-                            SecurityStamp = "4873e846803b49a8b152f24aa900f629",
+                            SecurityStamp = "e80a565d374e4640af2c0389cb765944",
                             Username = "2512216"
                         },
                         new
@@ -55348,7 +54185,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 355,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7NSpQNt8FKtFkTxFxKmlyOUuIStxovSjb9fxljeiy3JJuyUe64FT6",
-                            SecurityStamp = "e2ebf56733594062958140e4d3086962",
+                            SecurityStamp = "c772709302e841b4b5f643cae9aef8a1",
                             Username = "2512217"
                         },
                         new
@@ -55360,7 +54197,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 356,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jO.2fElE8OmWfXkpzciz1ePaNYIXh/zOlXhIHmpHIVgpkloV4J2Wy",
-                            SecurityStamp = "151c51c60e194e3eb224ef5a66fad1b6",
+                            SecurityStamp = "4c2ba16eef974cf499ddcf3ec569aa7f",
                             Username = "2512218"
                         },
                         new
@@ -55372,7 +54209,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 357,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ny2gLg/SdI6K53vjQMBHIeiK55QPFUS7Ts7sYFTxp6/3zdAFdTPs6",
-                            SecurityStamp = "fc618c667f3c40d6a61306a2fbb88bd6",
+                            SecurityStamp = "1a6b0667ede648a4969cbd31e5049c75",
                             Username = "2512219"
                         },
                         new
@@ -55384,7 +54221,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 358,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RZpu4tYS9/ESP9i/vfAL6Otu29eqCrzkKZ5iO1W2ztU5QQqvgtBtC",
-                            SecurityStamp = "1ddc6c2eb3b944c7ae9ada05250abd59",
+                            SecurityStamp = "0474f618e59243f1bd85b56f90bcae49",
                             Username = "2512220"
                         },
                         new
@@ -55396,7 +54233,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 359,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XsdnEJZFrWwQ76aLY4mKG.MtaKHP6QpccxufNAjIcPqBNJrG55EHi",
-                            SecurityStamp = "ce66187ffb8547f5aa91103861ba5097",
+                            SecurityStamp = "2bcf290c416349c185baf87f543db8f3",
                             Username = "2512221"
                         },
                         new
@@ -55408,7 +54245,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 360,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jwbmAEkD8x62ll7/DYTOresak9mQytYL/i0oL5k3fCOBP6wopf8qm",
-                            SecurityStamp = "c1e44600524f4b16a72a19e12beff2cf",
+                            SecurityStamp = "8c4014d08a434b04873ab411f47014d1",
                             Username = "2512222"
                         },
                         new
@@ -55420,7 +54257,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 361,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oiqoqkAFN84H7CFmMAg2kOqbZvE4UWj/KfC7RCxuoI4GcjGHUDAC6",
-                            SecurityStamp = "066a5365821a4ce4829ab5191df2d1d0",
+                            SecurityStamp = "e4e0d9599f874777a19f7c0c37427fc1",
                             Username = "2512223"
                         },
                         new
@@ -55432,7 +54269,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 362,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.4UDsbS9QdcdT5T0Za8Q9eqWF2xFeUoMzr4QEI3fzNWWtymOspPH.",
-                            SecurityStamp = "4f03cf8a99a3417aa9e6988f595f713d",
+                            SecurityStamp = "7d5a9d723fd24d86805fb4a26b663863",
                             Username = "2512224"
                         },
                         new
@@ -55444,7 +54281,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 363,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mn0XlZ6p4I.tflQiMnOXHOdWBuFVU5KWRI9UdxLZZhLP7lra8gXUS",
-                            SecurityStamp = "cb569aeec5f44842a69c630305a428e7",
+                            SecurityStamp = "f1825f4cd8104f808b1d81d2df7eb9d9",
                             Username = "2512228"
                         },
                         new
@@ -55456,7 +54293,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 364,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OUKkyBrAIueHfCLGLokE5.uesNI/kKvkR4zeudjEdADwcuaIlDIP6",
-                            SecurityStamp = "30e54a17e588416d9943c91c422d000b",
+                            SecurityStamp = "88fca5b09d8d495d8b4d8738cc94d8ad",
                             Username = "2512229"
                         },
                         new
@@ -55468,7 +54305,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 365,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VvZoR500GfkS6OuvvX7mO.OS/ESFYWJ/qUCl45AVqKSsDHtuv9b8W",
-                            SecurityStamp = "5bbf8b286f1c49cb8b31d054a17d0692",
+                            SecurityStamp = "ca0d51e9ade9456bb6e4a64a8c32dcd1",
                             Username = "2512230"
                         },
                         new
@@ -55480,7 +54317,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 366,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PC0dKCZpjFX9B2Q5Hb4lN.1Hsi5lN8LylIB7M65eaFjcCH83ApLGu",
-                            SecurityStamp = "3f25244fb3e5495c8a8b004acee7320b",
+                            SecurityStamp = "62d36bcdc9b147dd8f89529f73bb9a10",
                             Username = "2512231"
                         },
                         new
@@ -55492,7 +54329,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 367,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wUxSo6TJUXWmnxDTKdLJYe497KWU4zKtlAngQTfsTXFg4QpVDUbwK",
-                            SecurityStamp = "1965ef272bd7406d8a63ff997d85308c",
+                            SecurityStamp = "98afe3ec43dd49398d1d5490cb8a14ba",
                             Username = "2512235"
                         },
                         new
@@ -55504,7 +54341,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 368,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$USnH9WqHx7kq.CwugKJxQ.CYdBzGACb0blj7yjJS6XMPt4v/eRVAq",
-                            SecurityStamp = "1397ce4b27c84b25b904aa2f32807e67",
+                            SecurityStamp = "dcad8e33eed04d39bf4c0a6c0e2893eb",
                             Username = "2512236"
                         },
                         new
@@ -55516,7 +54353,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 369,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dWqhygaZ432BqBBHBvVtxOfp3YD/X43i5GVpewUTa/aAeRWi47OY2",
-                            SecurityStamp = "acb97d29a9734b548bbc4143929ae5b8",
+                            SecurityStamp = "ea165585f5c94b458042c54a8572ca3e",
                             Username = "2512237"
                         },
                         new
@@ -55528,7 +54365,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 370,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$94qdHJr5qC4c8wiQJTCeXeW4LFzRdUxRPhGDVXJuE95gn6MD9XlYS",
-                            SecurityStamp = "abbd1195306a46f6b11520f714968106",
+                            SecurityStamp = "afc0054904d443ef9e7aaa1d422346d4",
                             Username = "2512238"
                         },
                         new
@@ -55540,7 +54377,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 371,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xFcuSsIBCgP.IphIV280GOW1E0LyXxXGhM/IWdcR5tRHPibKz/w8q",
-                            SecurityStamp = "25e9940340a0442f8e4f96aaca1c161f",
+                            SecurityStamp = "7adc0b90885c4ccf9c3a4d7528ce27f3",
                             Username = "2512239"
                         },
                         new
@@ -55552,7 +54389,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 372,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4vL3.K5doQ.LqrUkphkNpufLItgkfSH8q8Ry4rwliQt.l8VXq2Zia",
-                            SecurityStamp = "90bea224c5c544cda7ed9c1c1a22b4e3",
+                            SecurityStamp = "348f1c4367d34bdaa929bd16dbb9b651",
                             Username = "2512240"
                         },
                         new
@@ -55564,7 +54401,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 373,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$20Vzezw2uGCpZ4wvIeCUVe4mlwn/wh9HwqnEOhJ6DtxOcBi7fDeq.",
-                            SecurityStamp = "fa979522920a45c9aa16683c3c29e904",
+                            SecurityStamp = "5c6fd26992fa499ba90878a353ab8409",
                             Username = "2512243"
                         },
                         new
@@ -55576,7 +54413,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 374,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oEpMeHdho6XsTTByWWmAeecSdGqc7ay1ALkT7djLWiEApxtTTbH3u",
-                            SecurityStamp = "a1c2aad72b314ff1800020ba298a5c19",
+                            SecurityStamp = "3b662fd47a9a4dc485b5db5138f753b6",
                             Username = "2512245"
                         },
                         new
@@ -55588,7 +54425,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 375,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MK.MX4X.okdfBXMGrbXT3.vls1z3Oi9m.qc82m.g9vzlpFxEIhcJW",
-                            SecurityStamp = "b7f2b25bedb14a24b1f4aff4d8d6e3da",
+                            SecurityStamp = "3479d5bbbdba4736803939950950d61b",
                             Username = "2512246"
                         },
                         new
@@ -55600,7 +54437,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 376,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$buXYSUYfV7.hJGJ..psT7eZnLpdmgLKREjUFF3sWVY1HsP.9m48Cu",
-                            SecurityStamp = "8aa9dd6f20b24b45b29be8855d8089af",
+                            SecurityStamp = "272f98172e21416faa2b558f99c78798",
                             Username = "2512247"
                         },
                         new
@@ -55612,7 +54449,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 377,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z1u51ERSwpNLEq/ZgTPo/.iYx14NVz815s54pCMwEcNwBOIlQkSle",
-                            SecurityStamp = "d3544cf963064b06a91d49f9634a7b1b",
+                            SecurityStamp = "8a7e95684d80487f8137882d78e1566c",
                             Username = "2512248"
                         },
                         new
@@ -55624,7 +54461,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 378,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.twDnwVeqLAoN2GP4NNWCOv9TyOFTCdHIZaWUZws0Xa.9ZnQPcJaq",
-                            SecurityStamp = "bd9e5c504e6047868dccb129c9543e29",
+                            SecurityStamp = "482877e898af42debc473d90c8d0d252",
                             Username = "2512249"
                         },
                         new
@@ -55636,7 +54473,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 379,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$B4NykYx3nbTLOtZCz1tPa.KWF1i6u9wpVSSZnr0.0hb.zfwqPmbOq",
-                            SecurityStamp = "b030d9eb754046a4a96becb0eeae32d1",
+                            SecurityStamp = "99be60df92514acb83ec617c3e7165e2",
                             Username = "2512250"
                         },
                         new
@@ -55648,7 +54485,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 380,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DWWOJ9NO2ucTOnilpPq55uH2mNK0sFAbrFtjFwCQpZxSFeku4.Nxu",
-                            SecurityStamp = "0b86780b46704a099a11645d3f3efd7d",
+                            SecurityStamp = "8d61cceeba7142c5ba230048a9119c82",
                             Username = "2512251"
                         },
                         new
@@ -55660,7 +54497,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 381,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yqKIIJuPGKteficUIUUKnO9GrxyBAEKYUE8qBEWXUDa4PzTy7lzW2",
-                            SecurityStamp = "f7337033b7154262a1f50547f9fc408f",
+                            SecurityStamp = "7a7c481b619f43399e3393110baa375c",
                             Username = "2512252"
                         },
                         new
@@ -55672,7 +54509,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 382,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rqbOpZiR/g8kV.u6AgQkp.l2ssvOIqfh4VUkjO91IlL8JQDQCmy56",
-                            SecurityStamp = "d28d817968b6492cbdb062667709267c",
+                            SecurityStamp = "f52631aef6084f7a865387e917931850",
                             Username = "2512253"
                         },
                         new
@@ -55684,7 +54521,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 383,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lAHSG8azRbE.lsQJ6XXsTuXvZUNKtLPQVZTE0pBGcj/f2NAIXBLGu",
-                            SecurityStamp = "c615d18f4bef4778aa8932ac266e1a6b",
+                            SecurityStamp = "b6d3481441db46858e93c02b3bbf629d",
                             Username = "2512254"
                         },
                         new
@@ -55696,7 +54533,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 384,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$H8SYiW5Dtt39seI0r.MBpui7Ztwzy0XMxoP9Y0YnNcD0rKTle6b1G",
-                            SecurityStamp = "4fc7139435ff4030a6f9a979bfb0f126",
+                            SecurityStamp = "d24825387ad24d689b6852fc5246c268",
                             Username = "2512255"
                         },
                         new
@@ -55708,7 +54545,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 385,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$siqrN00r9RpE/r3QgUgS2eqVfjVPG4A2A7ZEtG/d3BTJlUa93E/Xq",
-                            SecurityStamp = "f4a1dafece564c08bd722fac45eb7972",
+                            SecurityStamp = "43a0f9d4eec949c9b0f7a0a9a7dc0205",
                             Username = "2512256"
                         },
                         new
@@ -55720,7 +54557,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 386,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$CvzBAW6tFZnlM6gx7USphe9aUArYekryS2q2/rLeNSP0FRKMfUKg6",
-                            SecurityStamp = "0cc7fa786ab046d19d1af9983e9ab990",
+                            SecurityStamp = "503e4c8e1b044d43ad387ee07f188be6",
                             Username = "2512257"
                         },
                         new
@@ -55732,7 +54569,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 387,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qPYwWp3y.9fmU6Axfnas9eZ7dop/0oAY1pDjgC0VhaaZg2wFfwL0u",
-                            SecurityStamp = "7cfd36aa49bf46aa974ba089c7321ad4",
+                            SecurityStamp = "a8322dc9ffef4e2ca3192aaf31db4416",
                             Username = "2512258"
                         },
                         new
@@ -55744,7 +54581,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 388,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$seKBVcd8xOTP7DIZJhpuy.c4ySeN.Ll3Hmu.svSU.cqE7Y0rN.reO",
-                            SecurityStamp = "3f5192abd8af4b52bdbe70251c659952",
+                            SecurityStamp = "614b9e5dfc974b23be573f401e5c30ac",
                             Username = "2512259"
                         },
                         new
@@ -55756,7 +54593,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 389,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DZkBTAazm.xrHcsG/91PvODErc13IKkWdzfexKLm4MkZYjueWlDSu",
-                            SecurityStamp = "a30b550f01d24a87959692709f99bab7",
+                            SecurityStamp = "c98c905c4f9248aaaf37232a5863611f",
                             Username = "2512260"
                         },
                         new
@@ -55768,7 +54605,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 390,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ty7zHtN.ldFhM0lC/9LPa.DvJElqUfa90CpVwPBqlHhDQgPSBbXvK",
-                            SecurityStamp = "2237fe4ef6964580a4118997ed6d9649",
+                            SecurityStamp = "dc446ed5ab814ab6b8aa5b7bfe4e8193",
                             Username = "2512261"
                         },
                         new
@@ -55780,7 +54617,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 391,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XW30hM5Ozst46kLXB7QKkeOGq7VfaJychgPQo6Gm2I05ToAPD6b0K",
-                            SecurityStamp = "4046add15d7a42c495bab096a7c12c09",
+                            SecurityStamp = "e9f7e9d40a0c4ae387b1fe4df357b72a",
                             Username = "2512262"
                         },
                         new
@@ -55792,7 +54629,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 392,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ySDDwRcK0egdl72sutoJ2uej2xlxTyoNBsu67NHnGv0oqiYOpvu/S",
-                            SecurityStamp = "57687628e817465fb4b23de367bf48bb",
+                            SecurityStamp = "4581353d55954d448b586f4a65d12be4",
                             Username = "2512263"
                         },
                         new
@@ -55804,7 +54641,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 393,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SZba8wypkEHdCblbs83xH.Z4vCn3p0pvFlIaNfzoOsz6uJSbXBbfC",
-                            SecurityStamp = "c1e942d0c4bd4b3ebcb3852b683107b5",
+                            SecurityStamp = "a14bb5f2707f49058a38e149ebbe08ab",
                             Username = "2512264"
                         },
                         new
@@ -55816,7 +54653,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 394,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qszh03I2rX.dq8b9u0jY6u91hkWBqAj4aVrJXU3CYESNQO35NVPMq",
-                            SecurityStamp = "0665273cf2064582bb67e487b1d8de33",
+                            SecurityStamp = "335a0c33720b4ffabc1ab378e81423bb",
                             Username = "2512265"
                         },
                         new
@@ -55828,7 +54665,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 395,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2JJSLpVeIodVQ3qPrNZzGetNWY0EVCAaAOAK8NbxMDeGUQDmttnE2",
-                            SecurityStamp = "6a0739dceeef49f9baf04f2ca388ec33",
+                            SecurityStamp = "7f98a86ec87a46b9b6a8ca25c1068e75",
                             Username = "2512266"
                         },
                         new
@@ -55840,7 +54677,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 396,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9SbKWVyWisSKsbGa/7lLou.zd33hOxPPJDlGCLhViPWbVavfnJKBu",
-                            SecurityStamp = "7f845d6c110747238fc26240b6087f72",
+                            SecurityStamp = "7f5b10fcad35420997bb8495099c357f",
                             Username = "2512267"
                         },
                         new
@@ -55852,7 +54689,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 397,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e0HQURNiiDfPFYsr6eHgC.iqWRMeOulRETKpOUMH25fg2f.yG9IEu",
-                            SecurityStamp = "b0246bd211f44bec8a11c9f239ee55a6",
+                            SecurityStamp = "23756092ce0b48b68c8f1b48a517f13d",
                             Username = "2512268"
                         },
                         new
@@ -55864,7 +54701,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 398,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$udKiAG39G0MD7XdQ6SZh1OyXIHhCtKFp5q26KoLtCVg8Y9wt/0FnK",
-                            SecurityStamp = "6f849a7c9eb745d9b4382ef01f32f7ea",
+                            SecurityStamp = "2952a877fb1a442493194ccfe7701f5a",
                             Username = "2512269"
                         },
                         new
@@ -55876,7 +54713,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 399,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aHte3ZZ7vMaDDUFGfKAMtu6tFjDlEc9nUg6iA0g3YhZqNt/4DMzKG",
-                            SecurityStamp = "3bcab73038f84f9d9bab4fe29aba08b0",
+                            SecurityStamp = "7a5ba4b452c44b3699dbcda582a67f5c",
                             Username = "2512272"
                         },
                         new
@@ -55888,7 +54725,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 400,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$P2wb4SXViXxTyqDO7LLF1.FDpOjBM8So9h983jtv2.bP5OLu/STuK",
-                            SecurityStamp = "8ba5bcb62d6d4949a8cb322121fd1aaa",
+                            SecurityStamp = "0db23515091d43bfa388e1c4bfe64670",
                             Username = "2512273"
                         },
                         new
@@ -55900,7 +54737,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 401,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Efq4d0R0n/NXIWXREYUsoe6Da6pwVun4Ye6Z2hA/1FI2bnjarCPjm",
-                            SecurityStamp = "bcb32f6b20b3482f971287d1aa4f737f",
+                            SecurityStamp = "11ddeffdb3294312962f0281a4667e6e",
                             Username = "2512275"
                         },
                         new
@@ -55912,7 +54749,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 402,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1qpHf4JrhdAY.sW8.xTokuF3p3uIG9PbVIGKTYVxp9JFTihgYrPNu",
-                            SecurityStamp = "83acbffa5d124eb4a0723215a6bb720f",
+                            SecurityStamp = "bb9ac1ddb5894cd6853400ac7787db11",
                             Username = "2512278"
                         },
                         new
@@ -55924,7 +54761,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 403,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fT1KjuKZNKC40io6FYAVJOSoszbWHFpuNr/GiXlUvw0KpWO8563Ga",
-                            SecurityStamp = "b7a51038aa1c4ed5aff902dc1c45c557",
+                            SecurityStamp = "1aa3680338d647cebacacf0440a41fbc",
                             Username = "2512279"
                         },
                         new
@@ -55936,7 +54773,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 404,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9rDuI/ySZNWTpOS.8bk5IO7HtaSQDJ7WYSOnABfvH3VfeFKc96ByC",
-                            SecurityStamp = "cfbafe8232ae47e1a8c6319201fb57cb",
+                            SecurityStamp = "c36d9aaad58a48fb8c6da7136bcccce2",
                             Username = "2512280"
                         },
                         new
@@ -55948,7 +54785,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 405,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gc2wWpqn2W0/4jRxudKcIeTH0y/NkPVU3lLPKoaeBs5QudXcgnY8K",
-                            SecurityStamp = "8f2dfab1e69b4761b472fe87c900de1a",
+                            SecurityStamp = "1d5bd0b316054e66a42ef62da0c41ce7",
                             Username = "2512281"
                         },
                         new
@@ -55960,7 +54797,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 406,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YHHuAhhPWVFhDar1kx0nC.v6OTytbzho0jrzNXLaIx1QDaHzH6iUO",
-                            SecurityStamp = "60f386f9a62342f7890f2c17fcde2b82",
+                            SecurityStamp = "07784295239843a8b38d57ee986d3643",
                             Username = "2512283"
                         },
                         new
@@ -55972,7 +54809,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 407,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$i7rUCp3tYDe9pVJbwONWO.1qKxKJT8i5TsWFIjRjCogJ4tg8CvmX2",
-                            SecurityStamp = "ced2e12a88d24ad79ce18b1b396353fb",
+                            SecurityStamp = "5868fbe70ca6456bbad1800cd49bd01e",
                             Username = "2512284"
                         },
                         new
@@ -55984,7 +54821,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 408,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qlZMHgkDOejvcfgGdO8N6e8sbaj.Yyt0t4btywYWOUQIsTsjwMCIK",
-                            SecurityStamp = "8629924fcc6e4871964b6b2698d52206",
+                            SecurityStamp = "0b9773d0c7184112bc9c5989c9af09cf",
                             Username = "2512285"
                         },
                         new
@@ -55996,7 +54833,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 409,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lBYvik6PGW/twkT8rGD1Z.Ktjseg4ptHAXBEBQzq4Ul2Hpj1jwSb.",
-                            SecurityStamp = "50aa495eb1f0472b9eed7cdad8c8d7ad",
+                            SecurityStamp = "ba6d0500f1ad4dbd97dba88fe2a78db0",
                             Username = "2512286"
                         },
                         new
@@ -56008,7 +54845,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 410,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5fTobSJCB1Yhixaocxed/uzDdlekW5zb5ihH.M79oz2/FMhH9SAqe",
-                            SecurityStamp = "8f8081f7e71444ad9d1a2c95fbb34750",
+                            SecurityStamp = "147bfd72a8c94b05af5c21f75561a53e",
                             Username = "2512287"
                         },
                         new
@@ -56020,7 +54857,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 411,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VnxSr3KjIJ1BqNNE6waHA.ZFtmPLOAZ1MiWtQGvc7E6uo0tXh9/Km",
-                            SecurityStamp = "b3662a298cbc4a799b7f317fcddce08e",
+                            SecurityStamp = "8c051d18a8334b3abf957171ffe953df",
                             Username = "2512288"
                         },
                         new
@@ -56032,7 +54869,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 412,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7XCdUpm7tAx9gx9/cVACwOlv2p4RpUPrtZc/pEryDcC6yfi0Rd7VK",
-                            SecurityStamp = "c3adf19e59ca4e318dc1abf665aa60f4",
+                            SecurityStamp = "1499500b51e04f4685dcffe23162f6d4",
                             Username = "2512290"
                         },
                         new
@@ -56044,7 +54881,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 413,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LQrRxM1gtYc3nrA5Q3tM5uqU7oZNEKjyerEo/mgBbeRiK0zIV.sVK",
-                            SecurityStamp = "d5993ba824a14efaaec1b108cc9599bc",
+                            SecurityStamp = "94191c87f4064a55a759a1489e6dd1ab",
                             Username = "2512291"
                         },
                         new
@@ -56056,7 +54893,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 414,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$H7Vn3EE8Usx8iLXo0smt.OR/NyZ751.DCs0y6Hhm811tbe/aO3xCO",
-                            SecurityStamp = "d325b82e66f9438abfbefa0b92c7d663",
+                            SecurityStamp = "8f25d2dbb7224dd1b2bdcd85e52cd849",
                             Username = "2512292"
                         },
                         new
@@ -56068,7 +54905,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 415,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1r.lxCXbb69GNUXmE6QlROIk01zExZIBCIXjJA/BfZr4znNvc4p4m",
-                            SecurityStamp = "e71fafeaa57b4417a405dfc695e67bc8",
+                            SecurityStamp = "aae4129a62bb44db8a6fd9c07b554eb8",
                             Username = "2512293"
                         },
                         new
@@ -56080,7 +54917,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 416,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aeQ4NKwonDgoUbyAjClw4eURIbNd0dDunYi9e93jlAJLZN0tchnaS",
-                            SecurityStamp = "2965f71df68b4e98953343763a7b153a",
+                            SecurityStamp = "dc1bec93fa1846758bfdbd236821f70e",
                             Username = "2512294"
                         },
                         new
@@ -56092,7 +54929,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 417,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NbbyXQEntWteNnzSplMKgeogwMazdgizP/F4RXYhpccBuGJIO9OJ6",
-                            SecurityStamp = "0ef242911e4c442bacfefcd7abe3959f",
+                            SecurityStamp = "6206abb9f08c43179c89e630399911c0",
                             Username = "2512295"
                         },
                         new
@@ -56104,7 +54941,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 418,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4DIR/UqXFjbM1PjZ.newjOqNLv6MG8SLUF5c//CehsVM5M4CR6lAW",
-                            SecurityStamp = "81f0cf1f32ca41a6b7e8b5be67514124",
+                            SecurityStamp = "b9081e0e99b64b7bb5a51cb2c57082c7",
                             Username = "2512296"
                         },
                         new
@@ -56116,7 +54953,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 419,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y6RM0r8mQdj/ABgFGuEZnekYPn7iDgDyWrWcqtxIgOBKMdHONZdw6",
-                            SecurityStamp = "9e499829689046848f80b2006582c141",
+                            SecurityStamp = "81155421bdf9462caa3fc7cefaf16c6f",
                             Username = "2512298"
                         },
                         new
@@ -56128,7 +54965,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 420,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aSWvYW.yYQjUUallT.xC3uplaZXzBiUng4FtLWoO7jv61wZwGWCne",
-                            SecurityStamp = "a3f5c52aec3a4999975ee0bb85c5bf20",
+                            SecurityStamp = "d5a88909f738438d8ed8e44b1a647746",
                             Username = "2512299"
                         },
                         new
@@ -56140,7 +54977,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 421,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DJrXkPdc7FnW3wUa/qr/JeFFER9Boe6tV21fMiAfNzQJp18msBwoG",
-                            SecurityStamp = "1b170cc5d4824f24ac479e550ce42185",
+                            SecurityStamp = "a72d3824bf204bc3a29394a74b9e073f",
                             Username = "2512300"
                         },
                         new
@@ -56152,7 +54989,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 422,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$le5elWrz/gxfd3w4ObcBR.68fP.SfcMhzNLmNkHvPl.YjVVRPyTMu",
-                            SecurityStamp = "243d3a9647764b4ab7df6fbf4c1d5578",
+                            SecurityStamp = "05776ea687de42fba3737cddc7a69a74",
                             Username = "2512301"
                         },
                         new
@@ -56164,7 +55001,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 423,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$A5Qd1ZqlstRwyWxMYwDuKOfkL5rL/PR.9i3xBx6MLmV0hSD9I0jhu",
-                            SecurityStamp = "b74ba6dbb0f84af7bd7a5590bc00deba",
+                            SecurityStamp = "53e5e0848e214e7b8a47f85c6770352a",
                             Username = "2512302"
                         },
                         new
@@ -56176,7 +55013,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 424,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D9so8bQDXafUgiprCTMTq.PJvqLPFJXVd5IBzZ7Fr37IQX4YeVVmy",
-                            SecurityStamp = "57678bfbe6564e20829004403288e1a7",
+                            SecurityStamp = "ea4ad0497ff943b19ab265925f2d98ee",
                             Username = "2512303"
                         },
                         new
@@ -56188,7 +55025,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 425,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Fi8RtJXQp9B7KCmS4GPpO.NGJn8q6ve/vbJbiD3IhrURfMQB14qty",
-                            SecurityStamp = "c8cea755957d413488efd067a0d9ccd0",
+                            SecurityStamp = "c75a52a8f0bd4bc487ce471c6b4c00f5",
                             Username = "2512305"
                         },
                         new
@@ -56200,7 +55037,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 426,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.LItXhBebIZf9RsVqucCZe3Aw4Uqv61AYz3IjREmMwjq3jA0VyD9i",
-                            SecurityStamp = "b8adac7dd1e84bfe8b7653f6f778f80d",
+                            SecurityStamp = "e431484c18a7458cacb5bc87cd890449",
                             Username = "2512306"
                         },
                         new
@@ -56212,7 +55049,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 427,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6wum.GAI2WTEFHqDELYnJeYWQ5L6AEmFjgXd6FdxECoTjo0r..tqu",
-                            SecurityStamp = "3eec45f1a073433796ad79b57fa9ff71",
+                            SecurityStamp = "51ed47d0b4fa408aa3f01bfd2bcc3c10",
                             Username = "2512308"
                         },
                         new
@@ -56224,7 +55061,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 428,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$If94NoQugW9m/8JlNfsx0uTObjgCFTWfWjN0gqVIdUvigeocS.5o.",
-                            SecurityStamp = "057e2826f5e14f10a2137dc5911427f1",
+                            SecurityStamp = "08d882109c774bc5a7f5b1d419e3e514",
                             Username = "2512309"
                         },
                         new
@@ -56236,7 +55073,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 429,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vmktKdLQwm4jkFxXWy6EguFCKnJ7I3bNsEthFcSetpN1.BQhzXEd6",
-                            SecurityStamp = "0ae444f51eaa4ffbb9a121eff970af1a",
+                            SecurityStamp = "b995b8ae4d384c459d5efe7af1cb9393",
                             Username = "2512311"
                         },
                         new
@@ -56248,7 +55085,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 430,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cKC9uo5qOO1r8JaVYR5a4eT71P.BXmEk1.Q3GXyQPpR0.AdfCXXwK",
-                            SecurityStamp = "c7ffeea4349046beaca6d6f60535fa35",
+                            SecurityStamp = "38f740aef4134726948e76d57d7a1cce",
                             Username = "2512312"
                         },
                         new
@@ -56260,7 +55097,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 431,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z5riIO3J/NNe4rFGS1zWqOxhk72hFr.oFHSYcohjFeTu/zuSx2OuK",
-                            SecurityStamp = "2f90c44b73224e8f942766fbb12e0775",
+                            SecurityStamp = "485792cfb6494d81ad13ad3d0870544d",
                             Username = "2512313"
                         },
                         new
@@ -56272,7 +55109,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 432,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y3qtkmE4BQZmCT/PVPkTqOebgD6eNWJ0Q0kfwoiRDafPfUSgPdyii",
-                            SecurityStamp = "c82653d1e8274cbdb52654d163550a3d",
+                            SecurityStamp = "f989d3a71ccd4748b1a58de2ab83c2ed",
                             Username = "2512314"
                         },
                         new
@@ -56284,7 +55121,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 433,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hX0gaCo3g8AoLjoWisWme.T2aNrY93dnmfcbfY09biIaF0eIynnpa",
-                            SecurityStamp = "8f71ef05dd3847c1bad50b4e58cdff6f",
+                            SecurityStamp = "9cfa87e15a6e4f7bab5c9c45f6c82c69",
                             Username = "2512315"
                         },
                         new
@@ -56296,7 +55133,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 434,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y2DBajoFabP/EJx/Bf3wHe5syaZSvUHVB3djNVUDOPX4zr/huS//i",
-                            SecurityStamp = "cd7103f219994690838cad3bb194920f",
+                            SecurityStamp = "27bc0597c7624478816df7b966c11c77",
                             Username = "2512316"
                         },
                         new
@@ -56308,7 +55145,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 435,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tUVAYFlk9oKLHIi4.F2Htey/DOAlKM7ayyn/iCmLmkUbUJkvYO8Yy",
-                            SecurityStamp = "632b274658b24c0b929df96f490edb27",
+                            SecurityStamp = "b158c2176a2946c99bf93da58b9bb2b4",
                             Username = "2512319"
                         },
                         new
@@ -56320,7 +55157,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 436,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9fRCatiVIzW3I1MHSlvR4.FKe2zzoOUB3Eo8U65bm7xoMvePy.18m",
-                            SecurityStamp = "c40858e1648a41ada982e591ee2defc3",
+                            SecurityStamp = "f596d9e2232c41a68cd17d5d31b875a4",
                             Username = "2512320"
                         },
                         new
@@ -56332,7 +55169,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 437,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cx8FV6h0iGqKr5nNkUB5JeozCe6/PGSlSQUEgYgtk2/FbpgvpywhG",
-                            SecurityStamp = "7df3708426ef4932969c4538147b3e37",
+                            SecurityStamp = "5773e252de81425e89c00ff2aee086db",
                             Username = "2512323"
                         },
                         new
@@ -56344,7 +55181,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 438,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oyNpjAYkMp4ESjQQvFs3ceEB/mpsa5TM0RsbodNX6ndEE9iPIUjPi",
-                            SecurityStamp = "2d898d530ffd4f74b81f2ef061d2d5dd",
+                            SecurityStamp = "64fef29b13fc4c87829cefac85a9ac3c",
                             Username = "2512324"
                         },
                         new
@@ -56356,7 +55193,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 439,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NwG6el1CbHSLisf50Zr8f.DHNdDqruRebPEEdVEe4IkVdtPYSEw8C",
-                            SecurityStamp = "677c7e9b62df483f893b11cb59002521",
+                            SecurityStamp = "55c87e99187644d1ab8daa560dd96f4f",
                             Username = "2512325"
                         },
                         new
@@ -56368,7 +55205,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 440,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fIfvPp4yRGx.jP5C8i3KcOJ0AddBv3rAxVyWku8.J85xtLodJrpVe",
-                            SecurityStamp = "01311a4320da4b14851bd4482f63d1f9",
+                            SecurityStamp = "26bdc7b5710c407f9ae5841480d9c0a8",
                             Username = "2512326"
                         },
                         new
@@ -56380,7 +55217,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 441,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ybxVUctegNGF/vvw1p6r4ObhswkugpwGB9GetdW.OmVj8gYtHNJX6",
-                            SecurityStamp = "d4b353538f5e4feaaef1d5395abeeda4",
+                            SecurityStamp = "10ce2ab82c574d64bb8503161ee3ad05",
                             Username = "2512333"
                         },
                         new
@@ -56392,7 +55229,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 442,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$zH4sqG82L1ZXFVvdJEz8IOSRdZZNAh04s/3Oxx/t6/vI/wnJdcjtK",
-                            SecurityStamp = "89d2101709e840f39ca58461a1e69850",
+                            SecurityStamp = "40f0d19ddeeb41928248887203ad7cba",
                             Username = "2512334"
                         },
                         new
@@ -56404,7 +55241,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 443,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LMsgQn4xJRmn.iyVhrwj2e1VqddvU/XdgE5mRHzDTWDHFT4g6camq",
-                            SecurityStamp = "3853dca0a70f46269b1e44e5dd5c6ccb",
+                            SecurityStamp = "e9a660ca40a744d28ec409e2d5bf82c7",
                             Username = "2512336"
                         },
                         new
@@ -56416,7 +55253,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 444,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PLHjRdE7FL.GVt9yk6f1r.yEFPscMPM09GA18gdueLOUMbpdgtbZC",
-                            SecurityStamp = "e9b21ce8a97b4a7b97115a32cf5672cd",
+                            SecurityStamp = "99a7c2f2cab942b0adac3c7828a9e96e",
                             Username = "2512337"
                         },
                         new
@@ -56428,7 +55265,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 445,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cNw4KoTBvxl8H3W.r7dwHukXgIMYhbT.I.V1Lwgp2APSqJLHLPQae",
-                            SecurityStamp = "b74987cc161f4ff7befe07da7cf29c87",
+                            SecurityStamp = "ee9fc46f48f2435a9556182f565c6caf",
                             Username = "2512338"
                         },
                         new
@@ -56440,7 +55277,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 446,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$i5n1Q24tsHjPp6oDRW8y1eIdqCtMq4WC/7zVRPZEYpvJzzDzEYjt6",
-                            SecurityStamp = "bd69ed73872c428b9a4f028fab2ee96f",
+                            SecurityStamp = "dab86809583049919989b13c6643ae62",
                             Username = "2512339"
                         },
                         new
@@ -56452,7 +55289,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 447,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z0v2DnsEtVdsNjIhB3ymLekqxvxSn/KmDanI.imaKdQMbCix5TbNi",
-                            SecurityStamp = "00fca392c81d4c819f2b84c9a3f820ee",
+                            SecurityStamp = "e026b865ff254106b7a178e31a4f60f3",
                             Username = "2512340"
                         },
                         new
@@ -56464,7 +55301,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 448,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wA9b1sCAVJMhBBJxDCA.8.j8HYX3Vuq6Fj8mFEqNpU7mkaCH4T/Kq",
-                            SecurityStamp = "a111b302fafb4c9da45ea47570039a49",
+                            SecurityStamp = "059baceba1664c468ae97461f4ff8cfe",
                             Username = "2512341"
                         },
                         new
@@ -56476,7 +55313,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 449,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y3C/.8rxPxzY6H2nfOME3eFhHaBmF5kQN0p2GnQ8uma.sH5S/sq1S",
-                            SecurityStamp = "aaf272030f5347909e8526dd7fbf54e3",
+                            SecurityStamp = "6b23967f9e27425abfc8bdda127b972a",
                             Username = "2512342"
                         },
                         new
@@ -56488,7 +55325,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 450,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$I1iJSX8IHbGsX9lrINKT7eB1elhhxKuczEYeFgd0qJZWLAlsZzl/q",
-                            SecurityStamp = "677f36160b1444b4bad2ad03eec3454b",
+                            SecurityStamp = "d8b30ff945624fa9b549f565c15ab2b1",
                             Username = "2512344"
                         },
                         new
@@ -56500,7 +55337,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 451,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TYgC2RsKIG2k2JKQLJI3fungXDHppLkuXUys2lhtt.8xrsFP7CQ.i",
-                            SecurityStamp = "37c8b8333c7c4af19361c678c217e359",
+                            SecurityStamp = "c5a9f1754306460cbc34bb32d6d1987f",
                             Username = "2512345"
                         },
                         new
@@ -56512,7 +55349,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 452,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$I3ZolCd6b9h0nZrDO8ZC4e3lA2HhoZ2BwMUBnfTSz9vZeS1ioDuh6",
-                            SecurityStamp = "e703e42fe76f4d26b8fa6b2144368c06",
+                            SecurityStamp = "6310d7e035034c7dba7c98d0cac6fdfc",
                             Username = "2512346"
                         },
                         new
@@ -56524,7 +55361,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 453,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$92kuZ1c0D0LwDhGEhM4DtOU5DNTSDzoh947Pw1wj.VfWP8qfUbVfm",
-                            SecurityStamp = "2acf310f79bf47efbe815e80ff66bb5c",
+                            SecurityStamp = "3cc118a85b264dcbb5be67c5f50231b1",
                             Username = "2512347"
                         },
                         new
@@ -56536,7 +55373,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 454,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Nu5Lb3aoCOXKb6PeOsGhP.QAOPIZpUUasoaG66CLKGBURlrjyGuBm",
-                            SecurityStamp = "0abc2eeced0f4ddca6d88b0a5f62d3e4",
+                            SecurityStamp = "e6e6830277114e2594ec209fd4bfbd2a",
                             Username = "2512348"
                         },
                         new
@@ -56548,7 +55385,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 455,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DWv2jjDYi2ywzq8BZ2RHle.RIklSVna7gXi5t3w.c/ZY9pQMl8rOy",
-                            SecurityStamp = "1f4d115bec144bf49dc24b5f2e18bb26",
+                            SecurityStamp = "23eb48d112d34062b4eabbea3c5fe49d",
                             Username = "2512350"
                         },
                         new
@@ -56560,7 +55397,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 456,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hg5uumPJz7BZyCVIInk5uuNKpL9ASWHN.H.LHa3xj7In2pOsaF2x6",
-                            SecurityStamp = "4b9043eccdac4a03ad8da9f7f934a041",
+                            SecurityStamp = "7bda797fe07a4114a308fa6d409cface",
                             Username = "2512351"
                         },
                         new
@@ -56572,7 +55409,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 457,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Kbkj7VESGehmi4wCB44nne7.lYEEOW4ABstFIozBQHTzO6JDljzVq",
-                            SecurityStamp = "5656f1bbeb034c57b82880379872fbd3",
+                            SecurityStamp = "1bd233c412a646c797d17f32bf17c3d1",
                             Username = "2512352"
                         },
                         new
@@ -56584,7 +55421,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 458,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7bU41O.RhmZ0Z.ubuGX4d.Sa51a7JHq.LqdgGdt9Tp0HNdVtsPHMm",
-                            SecurityStamp = "a9ffb239daeb43afad74a320ae4b1da1",
+                            SecurityStamp = "ee38f86e6cda46c281bf301dcccb8d71",
                             Username = "2512353"
                         },
                         new
@@ -56596,7 +55433,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 459,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pCREV8WEHkf5SunPOg.v..K6R8OkQJ92CHzMf7hILXLbqYWmFSiS.",
-                            SecurityStamp = "91629cde40524b7faaeffce1fad19b58",
+                            SecurityStamp = "1538859aa8fa40228557a97f89bc4ea1",
                             Username = "2512354"
                         },
                         new
@@ -56608,7 +55445,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 460,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ah3i3Ci.mOgsNGpWw9gJz.VTLJE.JYLOprjAlKeAGMkPFqpELG6pK",
-                            SecurityStamp = "6689a609bc57427789a839a79dd367b2",
+                            SecurityStamp = "8eb92425a31c4877963fae17d040025f",
                             Username = "2512355"
                         },
                         new
@@ -56620,7 +55457,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 461,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yq76skWyJR3pOAPc/kxlJeuMX4sE.a5aVDVa8y/WWvGmHCfkFnCc6",
-                            SecurityStamp = "bdda107ec74a43f380364eb4936a7177",
+                            SecurityStamp = "732276cff19640e38b60b0faaf061a22",
                             Username = "2512357"
                         },
                         new
@@ -56632,7 +55469,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 462,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$n8udxV9/fdDCpDUwtCrZBO4kz7l./uVyVdlVFYs7rhVPdFTVb20OG",
-                            SecurityStamp = "e5d2179d084e4932aa119e25fff89b5b",
+                            SecurityStamp = "9c6534de2bbe43d19402460551e1d472",
                             Username = "2512362"
                         },
                         new
@@ -56644,7 +55481,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 463,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cPjlk4Ic/4ka3pZXNtlR6uxT8QVNmHZl7NmDZrFbDL08P5MhoPNom",
-                            SecurityStamp = "03f67ea307a04400a90ed4194441c482",
+                            SecurityStamp = "55d3441570b44d1aa67f8a7dbcf186de",
                             Username = "2512363"
                         },
                         new
@@ -56656,7 +55493,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 464,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xbQAdwESgUNSe3gvJf1xz.t1inBpSvGJfw6tQXM/2Sd0mP.OqLQpq",
-                            SecurityStamp = "05c464d5d7974e648989f423a6f67f81",
+                            SecurityStamp = "aeb15d5298a44872b2ec18d8c6200799",
                             Username = "2512364"
                         },
                         new
@@ -56668,7 +55505,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 465,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6uwKgxOSe.TtgB7Q6nYCT.15rt.gnoMG/kn8k2Rm9Zp5Oxi4D0sD.",
-                            SecurityStamp = "a0b913f07b6c477192f9cf4cb2881664",
+                            SecurityStamp = "575f9f8c9ec0443da43979a19d771333",
                             Username = "2512365"
                         },
                         new
@@ -56680,7 +55517,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 466,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gTt/onAEV99hWFTkX6UYRe.3ZgSJNbqFvEdJQiq45meCjbaUIV7VW",
-                            SecurityStamp = "2f188ea940d94378bdf11a91ae670bcb",
+                            SecurityStamp = "1ff5014e04214091a53c1850f604ed45",
                             Username = "2512366"
                         },
                         new
@@ -56692,7 +55529,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 467,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$laxUFjS.qkL2GVZ.hrVYC.Px6HDQuM.igshr1PGAJdaHyb0pu5Uf6",
-                            SecurityStamp = "27ac51cd603f41f2bb5ca2a89693fab3",
+                            SecurityStamp = "84feced4901d44cb94b6999a5ab7c4d6",
                             Username = "2512367"
                         },
                         new
@@ -56704,7 +55541,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 468,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gML107gdkbxXqMmZS/tguuBRMEQso5/KPpLKEVHYCfzxb0fX80h4a",
-                            SecurityStamp = "0f15eaed46aa4368817cd0c519499015",
+                            SecurityStamp = "239b804955d7474ea22ef50022a44d05",
                             Username = "2512368"
                         },
                         new
@@ -56716,7 +55553,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 469,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Lup3q/CcIc3XLmpRnObI5unPHU2Asr.wtPQ62lT8kJCSsvTqppDhu",
-                            SecurityStamp = "5296796dba074d959f0f5fe248056572",
+                            SecurityStamp = "ea752b30cde94fdea2270f9cb9440190",
                             Username = "2512369"
                         },
                         new
@@ -56728,7 +55565,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 470,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GzB8pX3K8rUgY61U5autJ.bMgnlfVkrsqyjMcPUjVFU09QWL08WTa",
-                            SecurityStamp = "8e997cd7b51d497b9020e33f4f1cda26",
+                            SecurityStamp = "c97dfe2fd55e4fdb98651bd20e19ecf4",
                             Username = "2512370"
                         },
                         new
@@ -56740,7 +55577,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 471,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$36KdDhFHZGl8ISqvRl2cau51D4et776gqePs9Ar1BMmGs1cGzK4BG",
-                            SecurityStamp = "f59e92b903324582931ac53b960d0724",
+                            SecurityStamp = "0eff46a888ff4a9784d88ea2e9247bb1",
                             Username = "2512371"
                         },
                         new
@@ -56752,7 +55589,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 472,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qScOQ.RLpYDzsAefDrVyUOg6z/DvGf8WAZBO8rkQ0IvDwwPxbUS9.",
-                            SecurityStamp = "5f6daab04b784c98b282a440bb875c6c",
+                            SecurityStamp = "e36df665aeb74d56b197c4c668ac5e77",
                             Username = "2512372"
                         },
                         new
@@ -56764,7 +55601,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 473,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pG.uEmliZ.AUEjgZc/sy4eFENpUAoVF0DYgEdzznerCFLENtlXAxu",
-                            SecurityStamp = "f03088d53a364229aa1901de42238b46",
+                            SecurityStamp = "da949d88960c44edb02171d81ae5fdda",
                             Username = "2512373"
                         },
                         new
@@ -56776,7 +55613,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 474,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/HFkcM5vK0613lhYx9wQiuwypnr/RC63R9c7VabV30LvMuqVGvHbm",
-                            SecurityStamp = "1410bcd017e54aeb9497849e12d0aeb5",
+                            SecurityStamp = "4830ad709a0f49169e3bc2d7b3d9e291",
                             Username = "2512374"
                         },
                         new
@@ -56788,7 +55625,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 475,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0m9iCc8fS3SQSGBMjTFTQe2D/MMuWlYlPIc45wWIqfDCm.hS/Nm06",
-                            SecurityStamp = "267dbc3d4041402b82396f113abd8b5d",
+                            SecurityStamp = "d1bb317a04ec43da98ef755db3fbb170",
                             Username = "2512376"
                         },
                         new
@@ -56800,7 +55637,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 476,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$E0IvjA90ECierYgaIty/quacXJDj0tkn7d2fs5p2ijFuzJQ5qm1UW",
-                            SecurityStamp = "fdd5955933554f86adeb507c35c7ac80",
+                            SecurityStamp = "e139ba1781a340d5a06184bd742bfdb7",
                             Username = "2512377"
                         },
                         new
@@ -56812,7 +55649,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 477,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FiXAUjq1tPFWTIRE0SbHSeJEkaQucqU171QItr2GKr3QWxiOAUr4a",
-                            SecurityStamp = "69c8fd67134b444f829782d4b14997ba",
+                            SecurityStamp = "e70840c327c04aaa954d449216012fdf",
                             Username = "2512378"
                         },
                         new
@@ -56824,7 +55661,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 478,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$s9mLZSkHQlzl4NLbKTrHRupamQT9lT5RFNYaA2QFeVuFR.9dGwwfy",
-                            SecurityStamp = "63c111a43347477198b52ddab8c8a3ce",
+                            SecurityStamp = "b4d5c35aee7b4faeb7c8568e3b971252",
                             Username = "2512379"
                         },
                         new
@@ -56836,7 +55673,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 479,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2c8gBK/QfQh6gcY7svXtRewGcQJ6pZYNXce0z4xnQIxzC7gJ/Dk3y",
-                            SecurityStamp = "6a32c886e8444fc79c4eb3695a077d41",
+                            SecurityStamp = "5695637aa88d46a49f940027acc42be6",
                             Username = "2512380"
                         },
                         new
@@ -56848,7 +55685,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 480,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ag0mmlHm/OGRop2e32/RHeC.q1gDdGt.QGvItSpxrClmlU7aZLrdu",
-                            SecurityStamp = "e0bbc917ddaa4c469a7833a450b0cfac",
+                            SecurityStamp = "760e89f82bf3449c8f4bdbaecab47116",
                             Username = "2512381"
                         },
                         new
@@ -56860,7 +55697,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 481,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$q6L/Hvwe1WSU4BWh0GxFBegnOZZJ9sTyIN0ZwEeGRQHBme9HOhdIe",
-                            SecurityStamp = "3c3bb6dfcc5a4fffbb147d01bf377e26",
+                            SecurityStamp = "917fb9b0f4954821938514bc5257055c",
                             Username = "2512383"
                         },
                         new
@@ -56872,7 +55709,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 482,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ga8Yye1pV/CeuqAF5F9bI.2cyLGxN5kLhJD.GZuvjjZQh6/2dsjZm",
-                            SecurityStamp = "10a3c461b3734017bae59e701e862993",
+                            SecurityStamp = "648d7418e56f4992af81faecf5209b92",
                             Username = "2512384"
                         },
                         new
@@ -56884,7 +55721,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 483,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5PHQsxTgXlxW8HFeaF1u8ueq1sJPqTTjG8fTau5wt1IYSrunP20M.",
-                            SecurityStamp = "4f4ca44fd591408f96df756e330e3826",
+                            SecurityStamp = "aff720ac33bb42f18dc96499c0854d92",
                             Username = "2512385"
                         },
                         new
@@ -56896,7 +55733,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 484,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wbW4M2GGKjulDaW3M8Rq6e1DiQuriV3DFGZiHWz8xOFcc8DxJlvga",
-                            SecurityStamp = "a51c0d4b024440c6be1ba3f370921cab",
+                            SecurityStamp = "f107aa80741c42448ab56880dab4a072",
                             Username = "2512386"
                         },
                         new
@@ -56908,7 +55745,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 485,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$O8WS/QemOIecVS8GD4A78ORbzoIQz6kaQbF/oiDfcSFMBOsy4mPAa",
-                            SecurityStamp = "e2ac24f3daac4732963029a7d1451fb9",
+                            SecurityStamp = "48244283674243668df611ad45d91392",
                             Username = "2512387"
                         },
                         new
@@ -56920,7 +55757,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 486,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c35ioBJYV5mNGCzWuJktxeBo3HveQ2xEfr4k5GIzhDKNg4A/8Zn9K",
-                            SecurityStamp = "fa47b5dd8a7c47e887e705753730a9d4",
+                            SecurityStamp = "10ec93d1e8a94cfa886b1c06aa199492",
                             Username = "2512388"
                         },
                         new
@@ -56932,7 +55769,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 487,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OZCgN6GwW7FGlm8iwBwiJeBq6bW2KH3sXGvJpdETM44gjeqQEsmLu",
-                            SecurityStamp = "fdcac2a38d7942daac01c9dd789c0f47",
+                            SecurityStamp = "ee5fc5d79e3949078c9c00825306530c",
                             Username = "2512389"
                         },
                         new
@@ -56944,7 +55781,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 488,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ABSBbEItoS5mIu98xAWSk.n6e.GSOUx28PpGHa.ApXR1Z90XpevFK",
-                            SecurityStamp = "f3fb97e4ed8a4a6b8af09f91dc947385",
+                            SecurityStamp = "de8e4bf630324ac4920edb2f398a5947",
                             Username = "2512390"
                         },
                         new
@@ -56956,7 +55793,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 489,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xtFlRU96/cClhz4Dp9CY4uq2nqxjyHqWZ6dbi0STkFtegiPrpfVKC",
-                            SecurityStamp = "4fb25cb95d5349059ec6f27a1fc53e20",
+                            SecurityStamp = "3de0f8441e574ebbb8353cf2acf0725c",
                             Username = "2512391"
                         },
                         new
@@ -56968,7 +55805,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 490,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aVfKj/RVWvTeV5wKct/btOCwdi3smJZcAhnwtqzFKlzjoxnr8r4dS",
-                            SecurityStamp = "090927a1ff284f828bbeae9b575d137d",
+                            SecurityStamp = "980b6120ce8f48009f5a2f9da8dcdbf5",
                             Username = "2512392"
                         },
                         new
@@ -56980,7 +55817,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 491,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gHebw7bNbf4bCMyLIr8jNelK6O14csjUb5W.KbfqMyTP3OXZpiXKG",
-                            SecurityStamp = "2c0ffb2645d9465ca3f77c7a61ebcf48",
+                            SecurityStamp = "0c954a36a498461ca4e2faeab97b948a",
                             Username = "2512393"
                         },
                         new
@@ -56992,7 +55829,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 492,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YbOiQbdPTsb7OwCqGwi5DeDL/7TALNEZfvCbahuoi/Pe1bsoEa6jO",
-                            SecurityStamp = "d4f4416824644e62b576012e24cec680",
+                            SecurityStamp = "9d4a8c19191544d8b387639ef2d93d56",
                             Username = "2512394"
                         },
                         new
@@ -57004,7 +55841,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 493,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7M71mEz.di2uXDwE1OidCuxuumUgBdONc0XIPOdqYt2sM0oW99qu6",
-                            SecurityStamp = "0d1581e7503f4326ac12193484bbaa9f",
+                            SecurityStamp = "7d84fa7c4810486c917645c62314aa5b",
                             Username = "2512395"
                         },
                         new
@@ -57016,7 +55853,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 494,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MDFt3Muh7v46yPpRzQIbOesgKxaN5DYvEdvDgDil2NxQAU0IbzhZa",
-                            SecurityStamp = "4f4f6b2ca97b4e3ab25f8b563f657f44",
+                            SecurityStamp = "bc31eafe5ad34cc7b9df9174796ffc74",
                             Username = "2512396"
                         },
                         new
@@ -57028,7 +55865,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 495,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$CgUWiXREJVJqJ3NI6is1bOm11R5aHbPz3Y4Yjpx68ucqxIrO3apGW",
-                            SecurityStamp = "62cbc2e2b9914f45aa9e25b6e12e87d1",
+                            SecurityStamp = "eecadff6a8cc479da66253b8b745ffa0",
                             Username = "2512397"
                         },
                         new
@@ -57040,7 +55877,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 496,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jIjcV6BdPbMZROy3NueWxubCUm1ZPNoypvALeWoYWsGDwa1v8B60.",
-                            SecurityStamp = "127437e2ffb54960bfa55ef17005ed81",
+                            SecurityStamp = "5eddb011c6fa46c893cf114494e9963f",
                             Username = "2512398"
                         },
                         new
@@ -57052,7 +55889,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 497,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$I8ma8ZtfYAYXK5OQ5S9Ph.zMEOvtFowsL8e64gWlC3RMwGckNZ6d.",
-                            SecurityStamp = "8e085644ff864d94a38993a3ebb3710b",
+                            SecurityStamp = "f9a8c2a28ff048b0924b0b003c3d5215",
                             Username = "2512400"
                         },
                         new
@@ -57064,7 +55901,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 498,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FrR4/xaxE0TsoQEMGKozueeSd/BdQqDiyKWu9B2JmdA1aGJVRXLJ.",
-                            SecurityStamp = "26c3f11481f042689e415096aede9e40",
+                            SecurityStamp = "2f4bb8e42ea24af3a2e5dede5f512ec1",
                             Username = "2512401"
                         },
                         new
@@ -57076,7 +55913,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 499,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$QbR1RPJVacdovTYENTRp6.LWBQIUZ.ES28mhdDinGZcfAoaqV0Ym.",
-                            SecurityStamp = "2ad7790fd9014882bce63ed8fdd94c2a",
+                            SecurityStamp = "ec9a7e3c5f024f1d90d0388b2d2b5de0",
                             Username = "2512402"
                         },
                         new
@@ -57088,7 +55925,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 500,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$s/Jq53AyKbnD6H.SGANT5.JYv8GM1gM7fCwpMa0HVp1GgLx9sdpKu",
-                            SecurityStamp = "c3a8d06190574fe79c0c9e8f560c65e9",
+                            SecurityStamp = "97afa301b1f34daba5e5323bdd4e6236",
                             Username = "2512403"
                         },
                         new
@@ -57100,7 +55937,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 501,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$v4XAYUM297a6ZX6h4InBsODlWxqPfYaT1TT1uQ/cP5G63l9XtPKZ6",
-                            SecurityStamp = "c8c18d1233ab450a8622917a2dd6fe8d",
+                            SecurityStamp = "8f40714a53d94b348307b01d2b54ef84",
                             Username = "2512407"
                         },
                         new
@@ -57112,7 +55949,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 502,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SutFSk9rvIa9H2R6ebvGFelGv.fgixu8KYqkYOq9Y9agu6bwunBIu",
-                            SecurityStamp = "8b2e6923f60e45ae9bb86e48d8ff9fac",
+                            SecurityStamp = "a3f5f3db33e7445e9f931dda024b27ba",
                             Username = "2512408"
                         },
                         new
@@ -57124,7 +55961,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 503,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JXLoF.ijYl.rcjmifYL9xeBwjgS1i2HEkM1I2xLDAA9KYsSB0SbWa",
-                            SecurityStamp = "aef8e31cc1a242c282a1aa8327d08743",
+                            SecurityStamp = "fbb359b4891a4cc0b76ab9522d31fb53",
                             Username = "2512409"
                         },
                         new
@@ -57136,7 +55973,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 504,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$z9cSAN2Ykc62Vi1gez5wCeqT4SWJZXWmKhyYNzRHCKQ8pNGGzSRnu",
-                            SecurityStamp = "a0fd37c08aff4cbaa1e57a7e4fa16553",
+                            SecurityStamp = "30f92fa7b42d4fda856a90883ee06b8c",
                             Username = "2512413"
                         },
                         new
@@ -57148,7 +55985,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 505,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TqjvQ2IyNMlRJMLG0UpXwe3OgrfrxTu9N89GP5i3oVr9ogvfWUV7O",
-                            SecurityStamp = "db2e4a85568743d78fa1b61e289d9106",
+                            SecurityStamp = "1a99a3c0c0d743129ee771685b70bef3",
                             Username = "2512414"
                         },
                         new
@@ -57160,7 +55997,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 506,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Vrmk87sUED4q0MzCBKfhVuBWFoetIwrEVCqgdTEvK1dbDCMYJ1RE.",
-                            SecurityStamp = "00fb1c33b5e74c4ca046a9252f032756",
+                            SecurityStamp = "31c574e49a7f45419743ba710ebc472b",
                             Username = "2512415"
                         },
                         new
@@ -57172,7 +56009,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 507,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uQF.xWDZfvoT65ZH0ZZdbOntKbanhaak.ZcdpEiRqxKWvDqgWQzHy",
-                            SecurityStamp = "9ebb81dd469e431cac5e7b947534294e",
+                            SecurityStamp = "15daf312daac4d15b05b61ffcdd719ee",
                             Username = "2512416"
                         },
                         new
@@ -57184,7 +56021,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 508,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2O2bv1YFp6AByuTr6/QPMeCiGuZEA7S/QvxHhc/beTxmm0UJhs6.u",
-                            SecurityStamp = "ff4a5fa6b0a3499b92aaee93a3bf8e29",
+                            SecurityStamp = "3e136698555a44f987078389e57f81f1",
                             Username = "2512418"
                         },
                         new
@@ -57196,7 +56033,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 509,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Yqip2VQD7Z3TShC1ybXaZOSk7g1K46LpM.qNtyvLlEKGwdEopcwn2",
-                            SecurityStamp = "9d5aaeb3d5c8402784c8d6424024f787",
+                            SecurityStamp = "5f591e83c07040e5a6edfdca3cfbbcde",
                             Username = "2512419"
                         },
                         new
@@ -57208,7 +56045,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 510,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JGixB0FYAuxGXuQ2vGGiKO/hosVbWuqeyOvpqwEWigUczYUPJh9vu",
-                            SecurityStamp = "c7042bdd24994d1c95808a6e8c4e5da1",
+                            SecurityStamp = "794fe2bd8c2040aa92ee494073f97f56",
                             Username = "2512420"
                         },
                         new
@@ -57220,7 +56057,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 511,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RXNqq54SMurBhdNASrz4GeJadp.XGWG54VvOlivIWfkIWnpZKdw6C",
-                            SecurityStamp = "c30c0d4eff93458d967707b56d588ac1",
+                            SecurityStamp = "3fe9a3988f25458fb622cac861f3e74b",
                             Username = "2512421"
                         },
                         new
@@ -57232,7 +56069,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 512,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$h38YlnDxSUPCSOv5glngeOuveakFcrmygvYIfPDaEqBfbQ3We2ipC",
-                            SecurityStamp = "70e161c6c6b04a3d92447da581b68644",
+                            SecurityStamp = "0d5f55f87dda4424932e34952d3de9eb",
                             Username = "2512422"
                         },
                         new
@@ -57244,7 +56081,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 513,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.U8ArrWET0cC1tF/L4Usa.xKkPq3Ta28uP/Lw8LXeyMx5viM2i.FS",
-                            SecurityStamp = "f39375bca82e4f138e9885efe209fa48",
+                            SecurityStamp = "acefcfbadbf147e8b38ef664848d47c0",
                             Username = "2512423"
                         },
                         new
@@ -57256,7 +56093,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 514,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XLwvGDzYVP3N1/NcR8NY9..BZXsg70bBTT4M/9xYTQr7acLsllLte",
-                            SecurityStamp = "23bf4b04c4264cd5898864c9bfe5cfd7",
+                            SecurityStamp = "8d6cffb2e78145cdbca6c2310fccc49d",
                             Username = "2512424"
                         },
                         new
@@ -57268,7 +56105,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 515,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mpbQcsVv1sFSJThfag.88uoEwguTSO5EKOqXrY9vZSzkYcuKDwAQy",
-                            SecurityStamp = "6011bb1d18394a1cacbca9aafdf17c1f",
+                            SecurityStamp = "bf09555bb08d46c58aa9fe5ce5deb7f1",
                             Username = "2512425"
                         },
                         new
@@ -57280,7 +56117,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 516,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PLy2hzC4D4d52xzymKtUre4JFHJdrhiODSe8m02nSCbngkrmi1VJW",
-                            SecurityStamp = "edba78512b294ba78dd20d930a5adaa0",
+                            SecurityStamp = "7fbcf88aa38d4d4c8feb81c85d90509a",
                             Username = "2512426"
                         },
                         new
@@ -57292,7 +56129,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 517,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$82.5Lrvbuiwj2ClW2I2VteCHJTIJ6MusPl.3aMcQ.wwRdovALhY8a",
-                            SecurityStamp = "281a60c7120f48cdb55513b955b3b0a0",
+                            SecurityStamp = "0ad8e497ac644e06bb41b9b5365d7587",
                             Username = "2512427"
                         },
                         new
@@ -57304,7 +56141,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 518,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lcwmDZf3CObDn/lbYOTNBOce3eksBy.WBb5FVKms5ZVGZrYVB.ef2",
-                            SecurityStamp = "b403402fbf4140438963652653b339b3",
+                            SecurityStamp = "91e5829a0ace40a4a3811df43ad140e9",
                             Username = "2512428"
                         },
                         new
@@ -57316,7 +56153,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 519,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mV24rDrgIQV/zUhlY/8FauIVCQEMsgHcWmoQ4bqWnTLe1nn7DcSlS",
-                            SecurityStamp = "604df10ef1d34974b50d6664d6eb8927",
+                            SecurityStamp = "8bb8186f428e44ce86a41d80e90bbf7f",
                             Username = "2512429"
                         },
                         new
@@ -57328,7 +56165,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 520,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$P7qsWBTHxypmuhacDFynOe285pJ7/39iy92H3nnQM4dj9q2adY0pm",
-                            SecurityStamp = "e9afba4455d645d68f39334c6a131ed7",
+                            SecurityStamp = "f6507ded93474b48af44b30c25244cb8",
                             Username = "2512430"
                         },
                         new
@@ -57340,7 +56177,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 521,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hdv2QzhAPpS6UczM9ciBiOUk1i1M4l0Hf070.R00j1ESY.9hdaKVe",
-                            SecurityStamp = "657ae2acade8441991056810c2c9e473",
+                            SecurityStamp = "cc3c414f1f314ccc8955d17dfa7d5d4f",
                             Username = "2512431"
                         },
                         new
@@ -57352,7 +56189,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 522,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ubp9OfTEVBDtREq5AWuEGuOQW5RVeMZdQJEUggTumNg.vmycgHsnO",
-                            SecurityStamp = "e3862836f4b24900a9e1450fcb499efa",
+                            SecurityStamp = "5af89814acb0421cb3477e43296d51db",
                             Username = "2512432"
                         },
                         new
@@ -57364,7 +56201,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 523,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$EAoZ967TCJF3n3oqG1k7EO8gdYul/QGnRL.dtjMe58VwTBfKJH6jG",
-                            SecurityStamp = "d6548a79dd7646adb7c1d0ae84fabbcd",
+                            SecurityStamp = "66380d0b99694bb185e8475b0bd1f3d4",
                             Username = "2512433"
                         },
                         new
@@ -57376,7 +56213,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 524,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c0NjMF7OjQbzrdifOk8wG.9X8iVTMAwLuLseOkM4XjXABysKA9H4e",
-                            SecurityStamp = "c9ccbba5d1c040458f0386f4133a2482",
+                            SecurityStamp = "4d3c60cd14b240eb8e55425eb10300ba",
                             Username = "2512434"
                         },
                         new
@@ -57388,7 +56225,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 525,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D6FvOjwVCQB7nBjNWv3.IeWdMiGwXAKjINB5nVB9iPmwA4RU1UADS",
-                            SecurityStamp = "9ad6aa6525204a378d3171f8f04fe921",
+                            SecurityStamp = "895b3795da5b400e9f1c5aadf3b8ccfe",
                             Username = "2512435"
                         },
                         new
@@ -57400,7 +56237,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 526,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vBxaDePnMW28qemIHFF/euTzQv7Da9SAronigEpjVKu817QVZ8/Rq",
-                            SecurityStamp = "0d79e916be284c5f9579243cde1c1072",
+                            SecurityStamp = "2610b802cd354f02adf9d8a7402f21e9",
                             Username = "2512436"
                         },
                         new
@@ -57412,7 +56249,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 527,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rj5tJlPrFti5sUtdONB2XOklvkcXCFnTJXyv44zR6xeyDLn99.RC.",
-                            SecurityStamp = "89d99030eb6645f8ae6aff3da580f7b8",
+                            SecurityStamp = "fcf874c4d9e942e7899351c102f007c4",
                             Username = "2512438"
                         },
                         new
@@ -57424,7 +56261,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 528,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SsNv4t0CqPW9jChoriu8T.E6nN0SHMg8h67tBKEJ2qONZcThrv1fW",
-                            SecurityStamp = "dd21fc8e1de94620af9608b60503781a",
+                            SecurityStamp = "7ae89d3f75224c488bafe90771467eef",
                             Username = "2512439"
                         },
                         new
@@ -57436,7 +56273,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 529,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hAT6Wp6PXkusu9PFakv.F.Gv50jiBnpgUGYH7b7FqMpeGk18PBQnu",
-                            SecurityStamp = "90222529360f4737b4a35df42b0e30cf",
+                            SecurityStamp = "e75e059f38a140ed8b2ce67fa7f15480",
                             Username = "2512440"
                         },
                         new
@@ -57448,7 +56285,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 530,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VXlW0tFFDLYM529mOWsEkOr.ze97Ehad454ClhX4.5lEsi3WHy22q",
-                            SecurityStamp = "ea9fec25d559460c8cf5c137384807fe",
+                            SecurityStamp = "668075ba4ca54b3cb8826884cdeaa0fa",
                             Username = "2512441"
                         },
                         new
@@ -57460,7 +56297,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 531,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rx.ctuuhUuUZUo.Saav3PeK0EDYblVlt./TrWQ5fw.mMYGncKXcim",
-                            SecurityStamp = "6c26a61e69194cff8263096f3dfb6723",
+                            SecurityStamp = "589a6564d15c49b3908266b12b7d70ba",
                             Username = "2512442"
                         },
                         new
@@ -57472,7 +56309,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 532,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FuE5d8Fknl.OJPkZo7R2wesh4GSnbGtNlav/.r6RECim/2hOW9MTa",
-                            SecurityStamp = "794d526afbee456ead9d49a4280e77e8",
+                            SecurityStamp = "24dd25f707404f60a1c233bfbebf6ce6",
                             Username = "2512443"
                         },
                         new
@@ -57484,7 +56321,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 533,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WCivprkYPjbrttdgmB3bneAjxhM6Ile9nCK4c0w7UZ/gFYGnTGt9.",
-                            SecurityStamp = "a30936a22a074cf6928068e94baf81b0",
+                            SecurityStamp = "18992576288944fba112a6c7199ad476",
                             Username = "2512444"
                         },
                         new
@@ -57496,7 +56333,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 534,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$G.exqPChMLRnV.gGPljwTuIAeP6y44OOQEOYSCy3.IZ7.YBlwwW.W",
-                            SecurityStamp = "0437f009a9f14c44ac0974f0a752dfc1",
+                            SecurityStamp = "a083de752d6d4bbc92cb8029d990655a",
                             Username = "2512446"
                         },
                         new
@@ -57508,7 +56345,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 535,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nI4fOHnx0Ekcecsh/SBHtuVuMgc11X0Eh0dDrBE3fxgPtNZeFTxG6",
-                            SecurityStamp = "7f51ac922294451c95c1f4a7c0bf458e",
+                            SecurityStamp = "9801f6caa0de4cc08dcc269aa689f033",
                             Username = "2512447"
                         },
                         new
@@ -57520,7 +56357,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 536,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g.UX5CxRNk5tOfoZn1SiQ.hkk2pm7XEJs5LEcngEYUvCojaM3rxrS",
-                            SecurityStamp = "f70c6d8c4afa4206990a6f9cf3a2cfa9",
+                            SecurityStamp = "b4b5a3bb08504385bc97a21b1e8b39c1",
                             Username = "2512448"
                         },
                         new
@@ -57532,7 +56369,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 537,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$S.7UzJtXDEqndxysEeXihu4BuK605WCJe10slZYW9KtTHWj7tin8.",
-                            SecurityStamp = "b6f275920c2847eba84bdd9b0106641c",
+                            SecurityStamp = "ae22d1b55573464c99114f75b3226e70",
                             Username = "2512449"
                         },
                         new
@@ -57544,7 +56381,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 538,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9.AU5/aD2EBJbNyVk8AZ0eEiBCORYx3aNJ7N8sj/QxDD20lfamTYe",
-                            SecurityStamp = "941a5ca9158b49bf83bfa2cdc00501bc",
+                            SecurityStamp = "db8b8b5c2d61499e8f6b7ba67345fd5a",
                             Username = "2512450"
                         },
                         new
@@ -57556,7 +56393,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 539,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rLo36OrgyGyZJZi39LH04uog8QKtrcPLCEXlFz98BHV.5.qRxr0Sa",
-                            SecurityStamp = "74640ad3b4804b3fb71e85bec99f586b",
+                            SecurityStamp = "c6950cacd19b48a7bfd2c6f3d5e04d88",
                             Username = "2512452"
                         },
                         new
@@ -57568,7 +56405,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 540,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dSLzoSSf4pGWCxjuXepriO5tEYCW0RbE1yzLCVRABdrtriqyVNo/i",
-                            SecurityStamp = "516e9c64b7224b9c9f024a6545a5cb41",
+                            SecurityStamp = "4efed85843b4463e94bc241696e98d01",
                             Username = "2512454"
                         },
                         new
@@ -57580,7 +56417,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 541,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$K0BGHEAp8okxdeWmgHkHz.8.I8lYKcGaSUgPsfV0/zC5OyMBp4LTO",
-                            SecurityStamp = "2c840d82a8654b099f2c7f0a932f993a",
+                            SecurityStamp = "2f8e88cd2bf147ca80aaa9122d9b5f1e",
                             Username = "2512455"
                         },
                         new
@@ -57592,7 +56429,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 542,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$q2A6SctspRrQDRgurqLFguX9QwxT/CltPHnRjtFEcaIyC7CO3nPhO",
-                            SecurityStamp = "7f60180b4ac446a7a6750761ca25a614",
+                            SecurityStamp = "940c0af2b68641cf988538f6789bc3df",
                             Username = "2512456"
                         },
                         new
@@ -57604,7 +56441,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 543,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$US7BOiM45eJSu/2LoN3TR.Vkb2XhLkoq9YXuHlzAQRs.CIx5CM.Pa",
-                            SecurityStamp = "463004ae95434518947ebfed9623ec03",
+                            SecurityStamp = "5b9e22fa2ce94c3ca3d6de10bcdf8273",
                             Username = "2512457"
                         },
                         new
@@ -57616,7 +56453,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 544,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dWqxt81XaVrAG6BOCDpnfuAoeiWAD9C84h6QCK2ZNfypU4ozdyiB6",
-                            SecurityStamp = "95eab22e0f934deb80f2218feaffe4df",
+                            SecurityStamp = "1aff51a472c844c588d88002631c52ef",
                             Username = "2512458"
                         },
                         new
@@ -57628,7 +56465,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 545,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$U0bsBWyYQHYwte8eZqOb7uUqjzuiBSE62LdrRairZHhzeo2Z4EWyK",
-                            SecurityStamp = "f8eaa490f60b4553a615e7c515d23c0e",
+                            SecurityStamp = "fb471c13bd84463f90a228ef0da7bcfc",
                             Username = "2512459"
                         },
                         new
@@ -57640,7 +56477,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 546,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pywfWxseawgCq1EKJ51.teDO8yT9swisPqXg4nEV2eb8w4w3WNs.a",
-                            SecurityStamp = "81af8b7b48f445e597b0fb60413e94e8",
+                            SecurityStamp = "c43b5e96985647ea80f5f38a08d90260",
                             Username = "2512461"
                         },
                         new
@@ -57652,7 +56489,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 547,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rn5NsvkSOO9EFX0i3e77W.cI35gzAVR40Il34TzVpVKpXmelCj/hK",
-                            SecurityStamp = "269e6d1c58ca42b0a8b1c120691ebf69",
+                            SecurityStamp = "f0d918a30c0c49c5be45228738ee47f0",
                             Username = "2512462"
                         },
                         new
@@ -57664,7 +56501,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 548,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uY2s2LHhHpf/7WpB6DJZ8.O.IcA.7Jwzj1RdiwHQrT88N53QZ3a.m",
-                            SecurityStamp = "43a60379c0c8401a8b726a52c04f6228",
+                            SecurityStamp = "d0b1d36caaf346b7a220a62f2ec1b851",
                             Username = "2512463"
                         },
                         new
@@ -57676,7 +56513,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 549,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e2M0bOUhQBLXn5LJHqB/G.XiZ.00j5aq09A5O12yg926PULbt8DPm",
-                            SecurityStamp = "59eaa77c6ef9404691d4619432c7a59c",
+                            SecurityStamp = "e4d20b584568428cb6fd668de830dddc",
                             Username = "2512465"
                         },
                         new
@@ -57688,7 +56525,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 550,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.vm6KIUGZhLmfKtnNYuauOUEknRGg04K6ktW2qrxu6RPPKHDf.mS.",
-                            SecurityStamp = "400bf4112e9b485f99d21f30f9d451d1",
+                            SecurityStamp = "0aaf854431c44b4a8ce1368e8c44103b",
                             Username = "2512466"
                         },
                         new
@@ -57700,7 +56537,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 551,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$EAL0mdRwcod/T.rO4zeOgeHo4ynvyaWrx.DxjcM7.bxYjcORrd9he",
-                            SecurityStamp = "249076a4096f433bbccdca59d47a7561",
+                            SecurityStamp = "7a7001d31de040639a216d01174e3258",
                             Username = "2512467"
                         },
                         new
@@ -57712,7 +56549,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 552,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GG7w8Lj/XBMsGslVzVBnKe0lWNMkGyYSwLY68HEmS4t3AVDsuO9Y6",
-                            SecurityStamp = "22f382d9be414cf6987a9140d68a36fc",
+                            SecurityStamp = "ae23694258694b6dbc428c2b585873ff",
                             Username = "2512468"
                         },
                         new
@@ -57724,7 +56561,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 553,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JQ5YRPblEhfSJ0SezLt7eeu5Llz1AusS2hM5XqqIhLk4U2Gkp4UEq",
-                            SecurityStamp = "437c7bfea2b547bcadc80542ec467010",
+                            SecurityStamp = "a727689583984939808698e2f97ce6df",
                             Username = "2512469"
                         },
                         new
@@ -57736,7 +56573,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 554,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PGaqhf8oOT8YdjApClpRIeIEiIGNuCfHGu1J6gwppz8L4qDBH3LnO",
-                            SecurityStamp = "86738bff26f246048922e4ef1e023ca0",
+                            SecurityStamp = "4ce4e92fd52a47eba71437eabde68613",
                             Username = "2512471"
                         },
                         new
@@ -57748,7 +56585,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 555,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5pR8zJxaQRfiziA4BQ6oq.d3SAblpYir78GpZZb0bAB0PyxGn1bO2",
-                            SecurityStamp = "f6c90f11f5c04f66b203b56afd687ba3",
+                            SecurityStamp = "f8145011570c4baea21040c23b0d26e8",
                             Username = "2512472"
                         },
                         new
@@ -57760,7 +56597,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 556,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vEk0O3KohFdOfMCdn526yunRIHwqbdckxCjTSnt18MY7tZPHrgCd2",
-                            SecurityStamp = "f354a1067d844310b5e6c43c3f08a268",
+                            SecurityStamp = "53cfd59e6719494ca6fc0100f22e8685",
                             Username = "2512473"
                         },
                         new
@@ -57772,7 +56609,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 557,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nqdpKchbaQwm6JUruMS32uhLn2.QVN0QNThIjVM1JeGILwoFO3R.6",
-                            SecurityStamp = "095cd6bf70ed4c37940185fe6b213b40",
+                            SecurityStamp = "22058787497d4685950f291a4c03dc33",
                             Username = "2512474"
                         },
                         new
@@ -57784,7 +56621,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 558,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Bmukub8ENu.ahnduliPhGuP/jK2LS9P.1YqrPgrSDtytkT/uPOb.C",
-                            SecurityStamp = "dff6055a84f845068bdcbff0712a6654",
+                            SecurityStamp = "a3195bef8eb243dc93c9862c5ca1ffee",
                             Username = "2512475"
                         },
                         new
@@ -57796,7 +56633,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 559,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VKMmm6Pspe2xiizB4lXpeeEDkiKHqMBUzDRT4rIAk6HWevxiYcA/2",
-                            SecurityStamp = "a2c60c0022cf48ae8cd10143199fdf45",
+                            SecurityStamp = "875de3a03d924630b5877d66b73f53e1",
                             Username = "2512476"
                         },
                         new
@@ -57808,7 +56645,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 560,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$coEjmLh0uCa1T6Fosap4Fu1H.tKytvHjLEzNZhpJQRTzZ04EZjTlW",
-                            SecurityStamp = "b838473ba1c8440abfa3b719a3a9e723",
+                            SecurityStamp = "f547e256797d4639b22d4f6889ea8c34",
                             Username = "2512477"
                         },
                         new
@@ -57820,7 +56657,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 561,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$te5vOgpvjz9lSqoaaEZx1uvyDDSOVNu4uCItZqa0n2W2Sx5JNzQJ6",
-                            SecurityStamp = "8cc42b42cb9842008163480b90e452e5",
+                            SecurityStamp = "699ff5c7186d42a295559d3d39476eaa",
                             Username = "2512478"
                         },
                         new
@@ -57832,7 +56669,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 562,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$orZX6d4ZUjmKLu4HCPeCJOhgTws512Woc4bzoayuubS0UJHG1efsa",
-                            SecurityStamp = "36ea3a868d5a4e71a5245d5fd43d412f",
+                            SecurityStamp = "e3b59becb1324e11a6d4ce543d856810",
                             Username = "2512479"
                         },
                         new
@@ -57844,7 +56681,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 563,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9HvpcMgHWw7FlqSVi.E6ieHcPkGiElY.7P.BpHD6oQGFj5oJE/ieq",
-                            SecurityStamp = "5f6991ce29fb460a9801b0d6f2718d7c",
+                            SecurityStamp = "f0c9d67cf7d641039966c1ecba9cdc97",
                             Username = "2512480"
                         },
                         new
@@ -57856,7 +56693,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 564,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2IH8MOaOruARyhGkipeMJO.I9sJrWKFPp7uhJ7VihI1vT5l2w7KiK",
-                            SecurityStamp = "7022413e3bae49909059bf6443848e2a",
+                            SecurityStamp = "5c34e21559ad4501a9517e581152285c",
                             Username = "2512481"
                         },
                         new
@@ -57868,7 +56705,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 565,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KoC4g2OSsUl0KVxW2t35z.O4H7CGzExSnY5Lv8xymqmsYWQWaP0jK",
-                            SecurityStamp = "b7ce7d95411d4386b12b0d4aeba665cd",
+                            SecurityStamp = "9dd589c54eab408f85ea6384e0b33fc0",
                             Username = "2512482"
                         },
                         new
@@ -57880,7 +56717,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 566,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$eQeq78VVv56x4cbYsMDy0em4hjWVqiFbfXYf5j8qm8yvgNhRfqA3u",
-                            SecurityStamp = "2f0fb6b1233345ecb37b185b551a6984",
+                            SecurityStamp = "f431db850bce4283bdb2c715cd80367a",
                             Username = "2512484"
                         },
                         new
@@ -57892,7 +56729,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 567,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5FFBPtFrZWGtGHeeX0ZzE.sGApIS3wzZTiEWL9EL.LdhOiP0VBrX2",
-                            SecurityStamp = "9111d7cb1d004f8f9eae4d68ba230890",
+                            SecurityStamp = "4627b34386784573b70a50d50ec6f599",
                             Username = "2512485"
                         },
                         new
@@ -57904,7 +56741,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 568,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YO93uk8Z/XvEwrVBWffJv.Hjb54djmL7xblmtlhO1fCZJZMIahgTy",
-                            SecurityStamp = "cddc947e3c1748fd923c307b3db935c6",
+                            SecurityStamp = "24d174f2041945569d1e35c9af0d911b",
                             Username = "2512486"
                         },
                         new
@@ -57916,7 +56753,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 569,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$L5Sic2WSIHXYFS68ExKXWOlGNGoHmV3P8nN9y9l/jrxkWIOgHEuB2",
-                            SecurityStamp = "85b9d8c288b84cbfa55c93aa5da771ca",
+                            SecurityStamp = "87356caf58aa490cb522a63a34a0a3fd",
                             Username = "2512487"
                         },
                         new
@@ -57928,7 +56765,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 570,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$T4oU86qBSNnRzESt43D7IeNQxU6.VSf6BMBxGcBpBhXByq9wIRbMu",
-                            SecurityStamp = "9501563ef4634e3e8df2f8d474d9851f",
+                            SecurityStamp = "17a3024326ac4dd390cc106f72a7d68a",
                             Username = "2512488"
                         },
                         new
@@ -57940,7 +56777,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 571,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.Pvq3GVux/g2skGropLDcev0Qt0jPbQC62q45t067ld8pnwAgxs9G",
-                            SecurityStamp = "bc5a035ad6db44b48b27d1e4e86b94fe",
+                            SecurityStamp = "ae91a5e56e864e6b89ffd03b6ac8cbf1",
                             Username = "2512489"
                         },
                         new
@@ -57952,7 +56789,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 572,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y4EX9Wjgksb3G.8.Sptedu22IH.qiQuMOWijTMZJaTPR/FZtYFkq6",
-                            SecurityStamp = "9c684b0d832a4bea85ec3af08cd0e0fd",
+                            SecurityStamp = "ff108942f25f4191a7dd280fad4a3707",
                             Username = "2512490"
                         },
                         new
@@ -57964,7 +56801,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 573,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$is33/PGrBIUJTlt7R9FpMO0C8cZS01nkYuv/Gy0.VYoiZa60z2SrC",
-                            SecurityStamp = "2856212ad90941b986e7baee95892c1d",
+                            SecurityStamp = "b6ea7af53bce4977b94f33d84bb1e9e6",
                             Username = "2512491"
                         },
                         new
@@ -57976,7 +56813,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 574,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6fkm8YjPl.y5GKSSi.k1BezR3PhdnB5GxK/RUQMV06B94IBjGrOHe",
-                            SecurityStamp = "2316386052894b58b02b63624211210d",
+                            SecurityStamp = "5ed2fa1805fe436fb2b6b4dbbb4d61c0",
                             Username = "2512492"
                         },
                         new
@@ -57988,7 +56825,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 575,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.iqQKilkfgThwLTeTcb1XenIuoKQ6O08o.d4LoTdN.WwO7Ale1Q4m",
-                            SecurityStamp = "55ffdc526c41419fa8f496f3bb24594c",
+                            SecurityStamp = "6a15eef86bd5426d9a53658721880047",
                             Username = "2512493"
                         },
                         new
@@ -58000,7 +56837,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 576,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IdMa2IBeMS7Fdc/6gLqjbOFyH76ax8yHxhAmOug3llNEE5yFkow1.",
-                            SecurityStamp = "1f0df9ce4eee41c48bbf4cfd42af0707",
+                            SecurityStamp = "b34c340f76234011b2584f26b37181bb",
                             Username = "2512494"
                         },
                         new
@@ -58012,7 +56849,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 577,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6yh43ujNEehB7grOMLTGj.8O3qXahpDdx0nrIUwaGvHR5.QUpvXEm",
-                            SecurityStamp = "66bab03725d041acbeb5c9bfa2e51886",
+                            SecurityStamp = "67e701235cdd4fd2a52e2bcf0eb01499",
                             Username = "2512495"
                         },
                         new
@@ -58024,7 +56861,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 578,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$T6PAuisvYqjPzr2LgShLEuPY/DcAjJ1F2cWsKh8rxaN46jTFbJLx6",
-                            SecurityStamp = "8a5355bab3b64ffaac8dd848b455c06b",
+                            SecurityStamp = "897cee69f4d04a17a3eb6a89781372a7",
                             Username = "2512496"
                         },
                         new
@@ -58036,7 +56873,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 579,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5DjOpOtnBVaMg8ean7piw.jRBdUvOhci7xJI.36kl91IXRIpGoQ32",
-                            SecurityStamp = "5991b8fd077b487abc98bc8e448f82ff",
+                            SecurityStamp = "ccffde8e26ad4e9294811854e65b8c2b",
                             Username = "2512497"
                         },
                         new
@@ -58048,7 +56885,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 580,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VK9XGdXN7VGyIDFzaxlXfe0Xudza6140QJxWlP4h4hyXJZy7S/Ioe",
-                            SecurityStamp = "496f0b1768184efb9101ccd3a3ecba3c",
+                            SecurityStamp = "7c11925e3ddd4878a6c330564b941064",
                             Username = "2512498"
                         },
                         new
@@ -58060,7 +56897,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 581,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jPNdTW4sYBbe/23SzueH3eYxkT58BE2jBlg86Ae0oAwSnaB15n5WK",
-                            SecurityStamp = "8da8c6770e1a4b88a7d6ffa247678752",
+                            SecurityStamp = "ef6ae1a9faa245fabb2f2ac812f9f44c",
                             Username = "2512500"
                         },
                         new
@@ -58072,7 +56909,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 582,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dUoPNa78i7BUWBEGSuRG.umOBmmCNTzJnLBti9WTKwh0Titq.Q99.",
-                            SecurityStamp = "1dbd8958b05d49b39cc4dd908923d495",
+                            SecurityStamp = "cc481c45a15d47ff97b61bb2c55f30f5",
                             Username = "2512501"
                         },
                         new
@@ -58084,7 +56921,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 583,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6Z440vCTpzSji8Tj2q5vLuvLta2JDQRRsrGyyNresoPBlRtgSb.WS",
-                            SecurityStamp = "ae9f28a6370d43e3bfa15fe49e27c324",
+                            SecurityStamp = "c3518da165fe4cf5a896bfdbff1c4726",
                             Username = "2512502"
                         },
                         new
@@ -58096,7 +56933,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 584,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4MIOH2bzB9.A4F2O3w3Gfeo4n8xONtPNnLEYZWO0xro/O1DZBZPem",
-                            SecurityStamp = "caa81ccbb9074bafb0b83d30da8b1256",
+                            SecurityStamp = "c2dbc2ef346144aeb65718d55980c91c",
                             Username = "2512503"
                         },
                         new
@@ -58108,7 +56945,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 585,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wu6svGuHK5jFf/RahcEef.DlYENvojK6OpIk2Xdk6uPRYpAU0ntx2",
-                            SecurityStamp = "1c27e4b94f5c4315964b57756866998b",
+                            SecurityStamp = "ed077bf8eaf04ea58cda74f136ed13fb",
                             Username = "2512504"
                         },
                         new
@@ -58120,7 +56957,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 586,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$p2hPaz8uYh084y1X9.vI3OC/MR3EDSo4BBZT7JNgNA6MeA543tHXy",
-                            SecurityStamp = "66561d46352e40728294373f7a87c8f8",
+                            SecurityStamp = "f7e9129f1a8d4195b3327922f5e53cfa",
                             Username = "2512505"
                         },
                         new
@@ -58132,7 +56969,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 587,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$T4C5sNCTBBzQhowfd69CzOlaDpdztIhhxib91fXiEsI.rTD/lY0f2",
-                            SecurityStamp = "a83887ab76944eacad64080f85c8459a",
+                            SecurityStamp = "f01cc017ee074794ac5c103a316e4e82",
                             Username = "2512506"
                         },
                         new
@@ -58144,7 +56981,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 588,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2yjqF/6MFlQahZ2RYu25quIejt/X9DPyqkgqpp.Iqk7wbGMjViEC.",
-                            SecurityStamp = "cfe5d54f684f4b3f83d650818a5fb84f",
+                            SecurityStamp = "0b6c3c486c8b4ea08c8189413951442a",
                             Username = "2512507"
                         },
                         new
@@ -58156,7 +56993,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 589,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$U7yfRgOGL.LIC1DJRF9Rp.v4kUVXKFBlfjIdmfmwkbryuo45O4H1S",
-                            SecurityStamp = "85028f2a9ea84c34a6adb303faf14164",
+                            SecurityStamp = "20ab7ae379904e7bbf297199c8d22a15",
                             Username = "2512508"
                         },
                         new
@@ -58168,7 +57005,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 590,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4oYEySqZf0c9Fdpm9duKB.OzXz90u.Q0OsZ9NiIXXfx0y51z8hI/i",
-                            SecurityStamp = "12763f987d4846f4b1ef39e4012f76af",
+                            SecurityStamp = "30c988fbbe584235a8bfb4512da65789",
                             Username = "2512509"
                         },
                         new
@@ -58180,7 +57017,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 591,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BsuWKrO1Oi7ySOCVnC9S/eDOQkuC6eF.7vixu3tGe0TLD6rQSgssC",
-                            SecurityStamp = "47bfaf4709804fd3a6e75f68ff1e0f16",
+                            SecurityStamp = "b77e9b99a3264b2a8d4e997337da0ab6",
                             Username = "2512510"
                         },
                         new
@@ -58192,7 +57029,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 592,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nghwivB.mCzQCcMqV58BjuSv5AJLr9SLXcmSEOSmbjQx9IGgS.pWK",
-                            SecurityStamp = "09a8e6e23d2944e3ac2460f6f0051ef6",
+                            SecurityStamp = "73bf36822393422288b95fafe03db27b",
                             Username = "2512512"
                         },
                         new
@@ -58204,7 +57041,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 593,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RHXSRgE/WDvGP0JWL0Sage15FtJYrHGAvJUORB83R8PM4Wkbg9ehG",
-                            SecurityStamp = "311251a1ad4c403a92154bc5e473f179",
+                            SecurityStamp = "5fb5bde24c4b40cab38ee0ae2eaccfc1",
                             Username = "2512513"
                         },
                         new
@@ -58216,7 +57053,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 594,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ljPYtbgD.szzKvQvqtW8VeFPz6RT2DULv7fg0JYNFArqv3R3/dypu",
-                            SecurityStamp = "e220ad874efa4f979b730a1ff802856d",
+                            SecurityStamp = "c649c8b3eec64deb9599fb6b1ae901b3",
                             Username = "2512514"
                         },
                         new
@@ -58228,7 +57065,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 595,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fNVfKMi5rNHiaEEdlMmoJ.zyNLvF8CaCXT66jTNkF8nDur5HBmRDy",
-                            SecurityStamp = "085ede38cd2f415aa8c3d337eeaf5f7c",
+                            SecurityStamp = "ccb978de306d4d7089d74b575b8abb65",
                             Username = "2512515"
                         },
                         new
@@ -58240,7 +57077,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 596,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sbtfzTEanxw3dy1/XDPpdOwTB/ZMGkCr913JvOOFSdkUKn1hLsZRa",
-                            SecurityStamp = "a7c573965e514650a2d63969d6c4331a",
+                            SecurityStamp = "c3355f30e1074dc4bd72b15266bdaeff",
                             Username = "2512516"
                         },
                         new
@@ -58252,7 +57089,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 597,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$z.yW7Mnq2gww1mFHf.l9bOOUC29b/B4FAZqCD/72Ftz2bcloYUtCC",
-                            SecurityStamp = "21866a928f76424e9be77eee02e9068b",
+                            SecurityStamp = "a51b10afec2f49009348b40b09e3760e",
                             Username = "2512517"
                         },
                         new
@@ -58264,7 +57101,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 598,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.vGyGw/6Xc3OpQEEfHUTKOloNKYkVyOtASjs.7B0T7vcZubgMQBf2",
-                            SecurityStamp = "18254098f6c64e6a992db4024c6a0f17",
+                            SecurityStamp = "75d1d4101aba4ec2b81b48eea48910f8",
                             Username = "2512518"
                         },
                         new
@@ -58276,7 +57113,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 599,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BSn706J4J7tBwWVfxpbqEOimTDL2CizQtR0Am5bu.cgvRSP8WXVoy",
-                            SecurityStamp = "b16d9b05a90d468dbeb92544c295c462",
+                            SecurityStamp = "a1612ff8974f411aa7638da37fffd23e",
                             Username = "2512519"
                         },
                         new
@@ -58288,7 +57125,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 600,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$j9jz4k2y1ZMoj9CWA5BJm.RDBmbU62DsizsPc85X1FoGt9EcO02sG",
-                            SecurityStamp = "5d756dc951fc4c28842d77168a330fc0",
+                            SecurityStamp = "b4d79e685d04493bbb7ce32664a56f3e",
                             Username = "2512520"
                         },
                         new
@@ -58300,7 +57137,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 601,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$P/irfOyjEKtLP/yhZOvHR.1X25eL6OqYFMGgHHNQT9EYVG6Y/rSvO",
-                            SecurityStamp = "a2134f81a13a4eea9c772a693b5efddb",
+                            SecurityStamp = "f108ef31e34a4ddcb2e53afa3dbc744a",
                             Username = "2512521"
                         },
                         new
@@ -58312,7 +57149,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 602,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1YVHJHF/UIhHtjCnnG/rq.6DTquo5WEfbTaIRzLY1TptY0lKSdHbW",
-                            SecurityStamp = "b17574c9a3dc4a71b9af63ef7b98cba1",
+                            SecurityStamp = "531c7a8c902e4488a90f0be7aedaafd2",
                             Username = "2512522"
                         },
                         new
@@ -58324,7 +57161,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 603,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ShHdG7YrOjGXXZ.q2KevDepfxAfpLC2xj79oT5NIKwKy6JAb5znGm",
-                            SecurityStamp = "6cf64e309c0e463f91e5a8fb2933eeec",
+                            SecurityStamp = "f31a48196615439796ada60c16272c4c",
                             Username = "2512524"
                         },
                         new
@@ -58336,7 +57173,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 604,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vJhNmytn7sHi3qcudnBTmeK49H5oE/uB00HFe94qYfj9qnuVICbvi",
-                            SecurityStamp = "9cb663c8a0894186be071d716aa6e90c",
+                            SecurityStamp = "eefd5ecfab4949f297e7ec27f55b784a",
                             Username = "2512525"
                         },
                         new
@@ -58348,7 +57185,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 605,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g4v28/NjZ8vKtNu.Mv3wpeLBl8NFYr6HoQKKcgPCq2EnhljUrqexu",
-                            SecurityStamp = "2e475134d8ee4a549332ef3db53c244c",
+                            SecurityStamp = "f74806efea7a471aae615e39957db5a1",
                             Username = "2512526"
                         },
                         new
@@ -58360,7 +57197,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 606,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$awqptD1jO0R735BT.7x56.Erhl5mU.jCcEsVLSBXFTyiAmXTC3rLm",
-                            SecurityStamp = "12107f464c1b45c08c87b2ba8ebe94d6",
+                            SecurityStamp = "0bda445d5eaa43378ecb5b9c21a7a0ca",
                             Username = "2512527"
                         },
                         new
@@ -58372,7 +57209,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 607,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pMqsbqrj/lGx1gNRjWAncu38ePeU75c8dvJRpoH9MrJnlsM12Ook2",
-                            SecurityStamp = "66dda758257e4ddd8a8e211ecbe35285",
+                            SecurityStamp = "103336957014445d929685a4e7f86419",
                             Username = "2512531"
                         },
                         new
@@ -58384,7 +57221,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 608,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VyKBdodxXBOOTdzur7C9wuA.EEwnLZS5Wh/ma.Wlg/S7CGwVeOO7W",
-                            SecurityStamp = "060aa6ca87f340109ab9e87014c7af99",
+                            SecurityStamp = "f98fdca3382b4eaeaccc31cf2a3ef807",
                             Username = "2512532"
                         },
                         new
@@ -58396,7 +57233,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 609,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$imzbMBwSLuLRajG4tmIlaezTx4ae65bCYodlU3MxBHGq2uEVqCH9m",
-                            SecurityStamp = "24d1d92be3414ffbbb687d36d47a98f3",
+                            SecurityStamp = "e40877794c004811a44bfb2de323feab",
                             Username = "2512533"
                         },
                         new
@@ -58408,7 +57245,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 610,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GpkekjOmYi.LQGhz7EVDXu9f4cxWW37I5F/LWOcqgQ1qXoWxHZQlO",
-                            SecurityStamp = "f287a37657d040eeb2be79a81b552128",
+                            SecurityStamp = "80bfa90652134cc2a15c89a76698b8f7",
                             Username = "2512534"
                         },
                         new
@@ -58420,7 +57257,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 611,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$CEAKCblDfHl5PtTkIVHgz.YtMQFup1ei59pKbi/yWdpJnn0OaEMZu",
-                            SecurityStamp = "57bc9f02949f4474b76b595cc7d0404e",
+                            SecurityStamp = "6aa8d83fbbbd4f77b74582422d11481e",
                             Username = "2512537"
                         },
                         new
@@ -58432,7 +57269,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 612,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sJLVKUzqKx2Ps2y90n7IYuh3ACEwncIqI3hjKIO9IWbVVaT.5gg.u",
-                            SecurityStamp = "e49e38a63a8c44f58ec8c3ffa0328b47",
+                            SecurityStamp = "2d7d8b063f144bb2aba272059f9322f2",
                             Username = "2512538"
                         },
                         new
@@ -58444,7 +57281,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 613,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jrpJagywSxgG/Jk7DoBS9.VLgt/HE46Gwtaw0g06PSTURKxsAAGt.",
-                            SecurityStamp = "4777756c245a4550930fa140cb4109f5",
+                            SecurityStamp = "ffafa2c43de54c508fbc4ffbbcbb52f6",
                             Username = "2512539"
                         },
                         new
@@ -58456,7 +57293,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 614,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yzgrrH/9sfMexOTby1yq7Oe1eM6S//gMXS4POegKSso8iHwoFBu9a",
-                            SecurityStamp = "16c2907a89474a86b5cbba9c35f893e5",
+                            SecurityStamp = "45f52b3718ab455e82bc8fcb823d8609",
                             Username = "2512541"
                         },
                         new
@@ -58468,7 +57305,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 615,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LIYPyxmuKlYF1piI/Hg0xuyUUk3jrfXyX4mPpxUk7zEn45pTgzpDS",
-                            SecurityStamp = "258f8aaae3514fe080e70af9aabe4e0c",
+                            SecurityStamp = "144c542c7f644fdf9ce527186a9fab49",
                             Username = "2512542"
                         },
                         new
@@ -58480,7 +57317,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 616,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$HFFy.g8pigpWLJbRb5UggeTaRuG2X6U2TcLSWHTGjXkZn/fAr9MIe",
-                            SecurityStamp = "b1d5b3c93667418599c61a64bc98ce5f",
+                            SecurityStamp = "f0e5997e10b640ff93bdd055ab8f7436",
                             Username = "2512545"
                         },
                         new
@@ -58492,7 +57329,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 617,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7ogKa5wPdW34NMlEMHRrcOjG4CbZgPI337SW7hghJ5JdC80WBEeF2",
-                            SecurityStamp = "87f5c10acc1f4f9ca687ed4727cfcd5f",
+                            SecurityStamp = "3ec13f44f6fc4987a6dcad307a320dac",
                             Username = "2512547"
                         },
                         new
@@ -58504,7 +57341,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 618,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9vQKYAyCbrFuzIbdlfSrT.6nRxz4eb9D3xtCXCVEsBHwFR56qXBhm",
-                            SecurityStamp = "d1ed23c364fc4797801b5a321a245fb1",
+                            SecurityStamp = "12b42fbfe60a47509911d1965041d151",
                             Username = "2512549"
                         },
                         new
@@ -58516,7 +57353,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 619,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D6pJl.ZkteCJ2Jd43t6OaOoHPnTtIRf0KSxj.waeouD4JCpj7zoFi",
-                            SecurityStamp = "ed6216ea42314d21b1854cfaee48f661",
+                            SecurityStamp = "22259579ea374d7a801108449fb6a8cb",
                             Username = "2512550"
                         },
                         new
@@ -58528,7 +57365,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 620,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$abBnx7ViwZJ4wfYEe76G5.kdnR3rnL2R.gDDV49CwAv2lCnJbNyOe",
-                            SecurityStamp = "b5f4b3e13fb7414d9bbc3275ae6d6884",
+                            SecurityStamp = "8425e15321ca4c538be239480dbb279b",
                             Username = "2512551"
                         },
                         new
@@ -58540,7 +57377,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 621,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Iiv/tX30J9fRgCOAEdcrFeOLRAYzu520giTZewB08JHAEEEgEucDy",
-                            SecurityStamp = "eb425f1d577a4c7aa9cafbffbe3e52fc",
+                            SecurityStamp = "f57acbbba61344f696a540a88c1b833e",
                             Username = "2512552"
                         },
                         new
@@ -58552,7 +57389,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 622,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xE5A9nDJhlqdwuBYQNpIBOKPBXGZ3DZbLvoZkfvvHeCbOjh3XR1qS",
-                            SecurityStamp = "8eadcb40abaf4e3a8c2883da096065e9",
+                            SecurityStamp = "a52751dc069a4b3b9804937d32c01c5e",
                             Username = "2512553"
                         },
                         new
@@ -58564,7 +57401,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 623,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/j2vKr/c.nXJ2QI8/j29C.a0mze22H0THoGUtHdPKx9xwnwqcxDom",
-                            SecurityStamp = "f450598d544b4486bf988e0de98902fb",
+                            SecurityStamp = "20560d03f9c5419cba757adfa892d66c",
                             Username = "2512554"
                         },
                         new
@@ -58576,7 +57413,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 624,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$u917YhxG15sjXffU9VGhM.x3Xkg/GhsLuHtmgN7LLiZmALU7SZn8y",
-                            SecurityStamp = "6e4022f4a7fe4e5da9da097de7d41060",
+                            SecurityStamp = "ce43910494ca4db498ac9009ab690842",
                             Username = "2512555"
                         },
                         new
@@ -58588,7 +57425,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 625,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$q7g5YIBIfj7I2qcG2SdbxuiZM.lRqUzw6H8lfAGpHAqPHE.MupMyG",
-                            SecurityStamp = "1da5c73d87f649198529f102ecc18b5a",
+                            SecurityStamp = "d0a3d3001cc04fefb798ee61113bdca8",
                             Username = "2512556"
                         },
                         new
@@ -58600,7 +57437,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 626,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2xBETRxeClrC7AUMr1hXKeEi498Bs6FKshVfvKVVpZk8zkyHxrpkq",
-                            SecurityStamp = "56916b66c4cd4a34beb3d935b577a4aa",
+                            SecurityStamp = "0e9f7991083043b7a1cddd08c50b4474",
                             Username = "2512557"
                         },
                         new
@@ -58612,7 +57449,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 627,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$iSYwGrZxzKgKCpSIRVnXj.ojStvLP5rZNK126jV8rthuHXGWE.ZK6",
-                            SecurityStamp = "1c4c7b3b291644f58f57835987e85fef",
+                            SecurityStamp = "57b4b660da344aea97c9b76dfd178d55",
                             Username = "2512558"
                         },
                         new
@@ -58624,7 +57461,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 628,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WLknfcETrQWekLzUhvKlYOm8LPYcnLfBQQ2Gu.nzlzU/NW4TMx4Nm",
-                            SecurityStamp = "7134acd99f6442f8a909750e576e8602",
+                            SecurityStamp = "f46a1d8991034d5dbca8852fa3d19911",
                             Username = "2512559"
                         },
                         new
@@ -58636,7 +57473,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 629,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Q7UtttbGbJEIG1lOC2YRquhmbWFszplzxTMCClCIfRqc/qYeUd2DC",
-                            SecurityStamp = "ff07bc66fc734454b61e839061d32e7e",
+                            SecurityStamp = "f50deb818b014384a26a019e7f9c31a2",
                             Username = "2512560"
                         },
                         new
@@ -58648,7 +57485,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 630,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wvARiSv3gpzo0qiYPKfAwumMPJLLvXmvZu9SGW3qroOaZ/w4TOuA.",
-                            SecurityStamp = "951ae84e2361462abf3dbf482ba35e64",
+                            SecurityStamp = "427b891d645b41b7b54a78f72259367e",
                             Username = "2512561"
                         },
                         new
@@ -58660,7 +57497,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 631,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rf1urUZR9IYLvCx0E8Wj..VoT9.vgKNFXRAITKP9ETCFyE0Wl2eZK",
-                            SecurityStamp = "df0da950be9347459413c352b1d71a80",
+                            SecurityStamp = "eface20c489a4685853f143e26b23724",
                             Username = "2512562"
                         },
                         new
@@ -58672,7 +57509,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 632,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WTpXCcAgBvjPabxhpqr6uugR63/h3Vvai818tZKMdHKBI4O.rKl2y",
-                            SecurityStamp = "6fd64f4fea294ca1a6626384ad64a085",
+                            SecurityStamp = "d2619ee177b24b37aa8df66b219cfde7",
                             Username = "2512563"
                         },
                         new
@@ -58684,7 +57521,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 633,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BAJGvYAgwGcv9hkWSLEXkempjxHqvXviE8A75jb6vjfg62g.i6nFq",
-                            SecurityStamp = "352268b86d70448889537a9938feecd0",
+                            SecurityStamp = "73065e6c238f47708ca6d2a6f299234d",
                             Username = "2512564"
                         },
                         new
@@ -58696,7 +57533,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 634,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y6d4PwqosuLtqMzrxlhYfOkjOMsxs.IyCmhxq/w1d7nixV25cgbcq",
-                            SecurityStamp = "3a36579f3aad4b8f966a20fa054aee69",
+                            SecurityStamp = "66f8e9b2c7ef4c0c94932d7cbe44260f",
                             Username = "2512565"
                         },
                         new
@@ -58708,7 +57545,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 635,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xeqdgQ7tedno.LXK/KqkZ.bgtc7MafNnXV2wPwI4U6dwq4gZvuDmi",
-                            SecurityStamp = "4e521deb94eb42b4b1c6f2dcf5f52433",
+                            SecurityStamp = "f818457b299047bab8e4abf2057027ae",
                             Username = "2512566"
                         },
                         new
@@ -58720,7 +57557,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 636,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KKbVNissZ.ovtk5WkqGXru8CROrvcWb/br2Pgh3cep0Tpc1Hp9TqS",
-                            SecurityStamp = "0fb50a5e5227497999ad3785ac370adb",
+                            SecurityStamp = "e5bf1967822b440f98d47da67a2ed240",
                             Username = "2512567"
                         },
                         new
@@ -58732,7 +57569,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 637,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PG8iAlvM1bxtmiPbIjBdkexOz/SAUrNTVxz5Tr4/qroBFaNt.xZKa",
-                            SecurityStamp = "137b302201794f8b9d015e3707015503",
+                            SecurityStamp = "c8e42eb86d55430faa8d200ff348684f",
                             Username = "2512568"
                         },
                         new
@@ -58744,7 +57581,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 638,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ClOPCxR3sfjdpsQFfM4ULuGaEbt1RaavKdHCsiglUpaHQJ3ZBUA1e",
-                            SecurityStamp = "c9d69c0d4c894b44b2ebabc83b92e9c1",
+                            SecurityStamp = "3c507f64e5b0443b91ec0609603ba9f5",
                             Username = "2512570"
                         },
                         new
@@ -58756,7 +57593,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 639,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rOc/Cm9hK22ocIVLSat8n.01F5d5LXxt.7Ed2RL4tZoWbwH3kr6Yi",
-                            SecurityStamp = "a5125b585c0e4d889d96232c70e7fe10",
+                            SecurityStamp = "cea40f762ff74aa0a804ed1ce3b8a9d3",
                             Username = "2512571"
                         },
                         new
@@ -58768,7 +57605,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 640,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D1gt2Wodwt7kcvy8wll.VOUeL7./ki4VHvaufxAIRbUOp2ulLnUZ.",
-                            SecurityStamp = "0eef5702e4084ea9b018b785787afe30",
+                            SecurityStamp = "de6239f45e7e48078708f3672b504641",
                             Username = "2512572"
                         },
                         new
@@ -58780,7 +57617,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 641,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e8DWF9bIilmuekdfy/Nan.zWlFubntAhcxKpzS53MjWjrQCmSGOke",
-                            SecurityStamp = "303b82eec3544f61b4759b867bdea943",
+                            SecurityStamp = "bef6d0aa171847b797a392c47ea035d5",
                             Username = "2512573"
                         },
                         new
@@ -58792,7 +57629,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 642,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZpepNBhjHMJtwszxJLTy/e3ZuG71DKhxzAFKHGJ4t3Brw4.9E8w7e",
-                            SecurityStamp = "489cd643004245f2bc6e7e0de7483a93",
+                            SecurityStamp = "77e243b7f9cb43f483ec7c46b2c2668f",
                             Username = "2512574"
                         },
                         new
@@ -58804,7 +57641,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 643,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hrXItZ7Nd35/yjJA8Djtd.CRgxaDFwtvkGtGwBXkm3QnvvYwjGrPu",
-                            SecurityStamp = "c633111bfc02427c8757c7061b796eaa",
+                            SecurityStamp = "29508f11d8f84f0aaca0a1048103d012",
                             Username = "2512575"
                         },
                         new
@@ -58816,7 +57653,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 644,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$kNPbs6fWNneVMshYuLUcquowbGvi8500crXXyq/9R61IPIt8ocBgS",
-                            SecurityStamp = "64b2f0b7f3cb4c538feb8b857e88fef8",
+                            SecurityStamp = "718cf2f4c6914ba49baf60df88cb04c9",
                             Username = "2512578"
                         },
                         new
@@ -58828,7 +57665,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 645,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aWyqEGZNmWWRoYaA2STIo.rSnLnR58NoOP.Qb0fSe21f7mPzptUs6",
-                            SecurityStamp = "6f41250442b047b383986a7ed0cbdebb",
+                            SecurityStamp = "87f4d6f68846477bb481c7b0e3026e8b",
                             Username = "2512579"
                         },
                         new
@@ -58840,7 +57677,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 646,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2jC.NghR5WhNFfxlzUyV5ugrb5RKMt7Fi73ZVxcWGM8c1DvH1rsoO",
-                            SecurityStamp = "470acd91355844189fb4fbc6a3790629",
+                            SecurityStamp = "c287371055e94f5cba276b35449ff7bd",
                             Username = "2512581"
                         },
                         new
@@ -58852,7 +57689,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 647,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NTz.VGywLSeEeY.ZxDUs7eXllRIdDCsOSHaT/tXRaSmfE3D5RNNGm",
-                            SecurityStamp = "ddb57b8f6cfb4981b082feac167ca661",
+                            SecurityStamp = "90e71e0a9d564f46bbf0c337d340fd48",
                             Username = "2512582"
                         },
                         new
@@ -58864,7 +57701,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 648,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.9vYZmPbrbhpeDqTSuDFHO6lNsZmlI36Y5iqnT23nz.5XGx81/MP.",
-                            SecurityStamp = "a97f292531cd4bfda3fe55531d7bb92e",
+                            SecurityStamp = "990b290d69054ab888808ffce497d6fc",
                             Username = "2512583"
                         },
                         new
@@ -58876,7 +57713,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 649,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pzBHhmLv1G1YW3crosbdeu8vK7zYypmMaAKzE7g5U9J0mHVDiKKJ6",
-                            SecurityStamp = "ba405dca80464f8fa6f61e556e727529",
+                            SecurityStamp = "214a23eeeb614cc2a4bcfd7791f60552",
                             Username = "2512584"
                         },
                         new
@@ -58888,7 +57725,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 650,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ISe5ClRDX1BwRhoZIIUVJuW2oZ6hXpuygCz/8d2wN8ZgVeK8PF2LG",
-                            SecurityStamp = "4bfc414a07534a1a9fe26c04bb7e7e07",
+                            SecurityStamp = "65a30a529148415bb9b8fd883224bfa7",
                             Username = "2512585"
                         },
                         new
@@ -58900,7 +57737,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 651,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VdtKp1wcVlYT849Mo5BqNeCowyC/G6/PeWlD7q/3J6Neu65KN0IiK",
-                            SecurityStamp = "f19f070ff89c4599bedeb11a70e0f9b5",
+                            SecurityStamp = "dfc1c0b249884329bb4607bdccdc6e8e",
                             Username = "2512586"
                         },
                         new
@@ -58912,7 +57749,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 652,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vsQMhOhC2xttV4xyY4ggY.6aZkZ6sHgLSwxkyrVXC26xI2dBtcLha",
-                            SecurityStamp = "b5df242093ff423e84ba2311ff87fe37",
+                            SecurityStamp = "a1304975e1aa4c17a69a65b5739a27d3",
                             Username = "2512587"
                         },
                         new
@@ -58924,7 +57761,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 653,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$K1u37GgloWlRgTbKy2WMqOUus.i7PEy1S59qNyqQ/Wf/F3O3.JOq6",
-                            SecurityStamp = "aadea778ef9849cf87e5ca19564df2d2",
+                            SecurityStamp = "d9920127e61f4641a6d0ccc469d82ce1",
                             Username = "2512588"
                         },
                         new
@@ -58936,7 +57773,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 654,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YqeIagOBaq1qVZLCZ1R9x.7AhixHRqxNR42MyM71GECvXt2A64tvK",
-                            SecurityStamp = "ed5b2c49e0f34d829fca5c65d69aa64d",
+                            SecurityStamp = "0d17c67a13d44e9096fa35cc916a2dbe",
                             Username = "2512589"
                         },
                         new
@@ -58948,7 +57785,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 655,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fPg0cLTYSWKquWaml/X/P.ieSum63BtTQvIAbMN2/Pgo95IfDkWl6",
-                            SecurityStamp = "8134989ed1cc47aa9bf7305d42b9ed38",
+                            SecurityStamp = "0e465c1a0fa248ddafef691a77466d2d",
                             Username = "2512591"
                         },
                         new
@@ -58960,7 +57797,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 656,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$EWd52NCDIS9bf4.T.c56veH91QcdS.GghRGEwVNZOD5KNDn3o93/K",
-                            SecurityStamp = "b390e26306644c3fa9b333bfe0d69f08",
+                            SecurityStamp = "430c69c105014ed4ba5a70c3c06984a6",
                             Username = "2512592"
                         },
                         new
@@ -58972,7 +57809,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 657,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tdmILACpTjzHcG8kH0fya.fdNUAtzao9GZYx9XqRklFU5BKT.jTMa",
-                            SecurityStamp = "f67cf3a811c04240b77bb38928daed6a",
+                            SecurityStamp = "1f5433a947144115aafd8d6a6cf3edf8",
                             Username = "2512593"
                         },
                         new
@@ -58984,7 +57821,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 658,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bPWibdXjmoQ3Bz.wBZPCiOwKSuHq008qdSQ2EAqHzH5EB.l1QU6gW",
-                            SecurityStamp = "e061319f3449423da804441150891792",
+                            SecurityStamp = "746b974997b6477ebca81414cdcb767e",
                             Username = "2512594"
                         },
                         new
@@ -58996,7 +57833,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 659,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/91ZXF2lXgdXdFN22H9icOpZesjlclmfED8BsX2EPjiX7KyL3ANvq",
-                            SecurityStamp = "0c982fa9ef3b440b8798adba47ad187c",
+                            SecurityStamp = "0314767e6cca419797ff28d2d57ed8ca",
                             Username = "2512595"
                         },
                         new
@@ -59008,7 +57845,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 660,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/mq57ur.ARUuhKzF5LHf9.MI8cBjN2UoSKRh4wpTovJwFk.C.EG4K",
-                            SecurityStamp = "57a710e2793d4a2dba2460780b025770",
+                            SecurityStamp = "2a8582e7d36846fa881876d76461a468",
                             Username = "2512596"
                         },
                         new
@@ -59020,7 +57857,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 661,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aLdL7k8muKju7V7omi62Wu4G.szINkbsj0tSBXWQrv9c6ZgSHgKH.",
-                            SecurityStamp = "cab6de5664fb4a18ae2cac5989f509ed",
+                            SecurityStamp = "cbcde1863d774807ae9d9549bd3ea1e0",
                             Username = "2512597"
                         },
                         new
@@ -59032,7 +57869,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 662,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9wl36I6JEqOjvjtOqnZXyev16LlXkV4CuLlyfi1uWwoji4r1ZXum6",
-                            SecurityStamp = "bd7cff5d227f46999ca6f7ca28d3ac18",
+                            SecurityStamp = "ed6f59cc1016460d8d91ab109263a23e",
                             Username = "2512598"
                         },
                         new
@@ -59044,7 +57881,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 663,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$J35lkQDePzO5xBjVh42EjewDtuCMkxcEs6AyaV0rHYob.YD1/3JpW",
-                            SecurityStamp = "c4c14d1b7309469293a54331a8c9e792",
+                            SecurityStamp = "a242331271ee40e2a30fb798473adeb7",
                             Username = "2512599"
                         },
                         new
@@ -59056,7 +57893,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 664,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$C81KqnpvS99HjS9uJxvXiO3eWAYRtNMpYf7XdtKyRcZQTtB.bqfeu",
-                            SecurityStamp = "7c71b9c505754938be9dd66091994347",
+                            SecurityStamp = "94ae39ce8ecb4aa9a1e329d3af6e6dc3",
                             Username = "2512600"
                         },
                         new
@@ -59068,7 +57905,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 665,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cBohrvgyZH.BZNTsHmV3nugdOsdiBdE2VX8XGcVyoYPe7AOY5J3DG",
-                            SecurityStamp = "1e01d599afa543019b88f9119d4eb100",
+                            SecurityStamp = "431d5708206f4387862e044778032620",
                             Username = "2512601"
                         },
                         new
@@ -59080,7 +57917,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 666,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6gu3ZkxNEBbhq6TIfgMAC.irS254dfPsvOF6aEUv1MJD5/os/ZTlq",
-                            SecurityStamp = "233cfd1cb00c423495cfbd5e86170daa",
+                            SecurityStamp = "d351ebca612d49f4b78c53f9ec829598",
                             Username = "2512602"
                         },
                         new
@@ -59092,7 +57929,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 667,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9pF/GRYNkpWNCW3M3fpzTef2maA5wdk6i3vd/QPjP3sDZ1EYfjYle",
-                            SecurityStamp = "7e9422b3d37943c395b8d300ca7b14a9",
+                            SecurityStamp = "bce3790709ba42e0a1922795d927cda9",
                             Username = "2512604"
                         },
                         new
@@ -59104,7 +57941,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 668,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3UH9Hgf7iXaecoQimuj6Ju6qmRRjp0rkNn/S8rkmmown68yvDRrB2",
-                            SecurityStamp = "041f28665c98458096f167a966954b2c",
+                            SecurityStamp = "34c8777fc6d2472c94a7eb8a0b91e848",
                             Username = "2512605"
                         },
                         new
@@ -59116,7 +57953,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 669,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WgSoTWlJA2d1eHDUBWSMSeQY0cg39uC43GfH357xCZsEHzNU3PFba",
-                            SecurityStamp = "8e0d7f976d0d493bbbce0f135d183ac6",
+                            SecurityStamp = "8fd639eaf73e4fcdbc4a443347a7cad3",
                             Username = "2512607"
                         },
                         new
@@ -59128,7 +57965,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 670,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dZ/Lf/KMlrbPFaUQsBou0..iM1fRzdHuMf9e.G4KmjcHp5fPxlkfO",
-                            SecurityStamp = "a80053a1834f4283ac7eda91a55c6fab",
+                            SecurityStamp = "5f836ce7bb8b4065b78762dd4c5dd071",
                             Username = "2512609"
                         },
                         new
@@ -59140,7 +57977,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 671,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$HHKA12qT1ReKu1fd3dHasuM3yhccCzznqFIk73ut9E/.K8FT1E.Si",
-                            SecurityStamp = "fff31c89a33942b98ecf2bc7e1ec4960",
+                            SecurityStamp = "8bb94296981e430a85f6bd34a8e998af",
                             Username = "2512610"
                         },
                         new
@@ -59152,7 +57989,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 672,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$kCSVXQFh97wUPajakvjcU.n54JNqIV3UI.QTejodJmybW9Hd412Km",
-                            SecurityStamp = "1c8e10567bca45f597a54c367075d9e1",
+                            SecurityStamp = "5159372b3a9d45189d5d7094a65e290a",
                             Username = "2512611"
                         },
                         new
@@ -59164,7 +58001,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 673,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9pXkkPy9ToYIB6zXsyGr7elmriJwx04dtuaHLCmxGQkvW8bilJxeK",
-                            SecurityStamp = "b7730ad94ca9405ba2dc41c3341050c6",
+                            SecurityStamp = "996a2893fe91425fb286da313a844226",
                             Username = "2512612"
                         },
                         new
@@ -59176,7 +58013,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 674,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$79K6XBQGCqBd1tF3ugTYz.hReYaSZqzPYN7iufLFo4Yz/09o5cbCy",
-                            SecurityStamp = "6394bfd0a7f1454db19d32af7327becf",
+                            SecurityStamp = "a3dd0ec7a9ff42b0ad2034200a9febf1",
                             Username = "2512614"
                         },
                         new
@@ -59188,7 +58025,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 675,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vc/L9F5xaC3zrhwmEL9oQe2xtE9upUMs/efz1C3XV4opyY4UugB2m",
-                            SecurityStamp = "99c39f4966ce4c08a0304bbcc88aefa1",
+                            SecurityStamp = "0c606d09654b4df98885e8eb06be963a",
                             Username = "2512615"
                         },
                         new
@@ -59200,7 +58037,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 676,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$d1ACAfO.93ufYeV7VghgAeDTKpIqgXwscrRRzgvrKYiPKrHteWZ3q",
-                            SecurityStamp = "8e3cfc8605414f01b39c5ad7e3d23a33",
+                            SecurityStamp = "f4a6515d987d4ffbb636971fb2bb133b",
                             Username = "2512616"
                         },
                         new
@@ -59212,7 +58049,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 677,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gFjvNl0IGl6nFvDA2VsUWuZNSMfTmCar6P7Jt8HLL5UiZaUyVqTZK",
-                            SecurityStamp = "c8f3a36402da44c1a23797c4aafba33e",
+                            SecurityStamp = "34d2527feea04eb3a048853b460c5000",
                             Username = "2512617"
                         },
                         new
@@ -59224,7 +58061,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 678,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$43wPdz41od6NJjaC4NzFL.Z4E57w5khPDUkkaiP8EKgoju0RyV4pq",
-                            SecurityStamp = "6580631ca126471fb767abfcb578c3e6",
+                            SecurityStamp = "39a574507ef6482386a864afb21f8e33",
                             Username = "2512618"
                         },
                         new
@@ -59236,7 +58073,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 679,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$kK9cVuQ5eFScyqfn9/qYqOWgcKBIIG2i0wAQ4cIwCmUnOeuiAdq9C",
-                            SecurityStamp = "a0d4c302e1c5465d8371f74e028a9799",
+                            SecurityStamp = "a78fa47c4da94937b956de1f64c6b512",
                             Username = "2512619"
                         },
                         new
@@ -59248,7 +58085,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 680,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dd2/IigRO54Y.I0nqf5vqeMCBHxgYnoLkm0gDni7Ctjx4DYdurIBK",
-                            SecurityStamp = "7e45f71fe4b74d569bca9d54d1e02255",
+                            SecurityStamp = "e9b7edfce92c4abc8041907d7cbe94fc",
                             Username = "2512620"
                         },
                         new
@@ -59260,7 +58097,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 681,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ssLosWb.1JmMtFpga96w.uZ/5P4ZRSTRPAW8MrrlHzhk1.OUmFIfO",
-                            SecurityStamp = "d9914919f5ff40e180474a514f7f0b37",
+                            SecurityStamp = "717c77bc178a4d3e99dc1cacc25fabe2",
                             Username = "2512621"
                         },
                         new
@@ -59272,7 +58109,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 682,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oKeYoZuW5TfdDOY8Sbn5ReEweZhSEF1s0UsJiJp9THr3m0Eswy0.O",
-                            SecurityStamp = "56859b966eeb4600a99be3f1ab60b2e7",
+                            SecurityStamp = "f3897783fa9b4ab6940b3669519e2531",
                             Username = "2512623"
                         },
                         new
@@ -59284,7 +58121,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 683,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bJiWhmpo0nPWJ1R9VT/Vwus1y.WrhJLt09t5YOoTr5Q7sBobyanry",
-                            SecurityStamp = "c898ceb8016a49a3b973fa2e1da9155c",
+                            SecurityStamp = "61cbb9d7d78b4999a0d87fcb492cd519",
                             Username = "2512625"
                         },
                         new
@@ -59296,7 +58133,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 684,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MD9SY507BDGLeLigUM6sB.Tn20c4jX1o0HwVqSUsHWfghbC.Fe4uu",
-                            SecurityStamp = "208e7190c9c34488bb8d479ccc18b74b",
+                            SecurityStamp = "de2fcdc144124dffa047c4408688c548",
                             Username = "2512626"
                         },
                         new
@@ -59308,7 +58145,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 685,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$h1Gf22oIsEEpsgzgjUE0cuUtQdmsS.MTmeIqaH2TES2MuaCbKsL62",
-                            SecurityStamp = "45a1962dfa6e46058afa3bf11dfe3554",
+                            SecurityStamp = "fd2248dc39944afeb475265ff1bb0c57",
                             Username = "2512627"
                         },
                         new
@@ -59320,7 +58157,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 686,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tk0JFSaOCwS8Xh8BgVW9put/sQMieXPcjp2adtrHxUqUYOxGkBYoe",
-                            SecurityStamp = "6dbf2b71545949bb94bf7c5023419342",
+                            SecurityStamp = "23aa3fd00a8243d39eb29ab457bd9e66",
                             Username = "2512628"
                         },
                         new
@@ -59332,7 +58169,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 687,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$E3pa2gPz9r6OY.m8wbviyOi6cmRck/mJd2pwq0n8vU1IyndN1Sspy",
-                            SecurityStamp = "b78dba36f8ae4f19ad7e6d31a9f1c0b1",
+                            SecurityStamp = "00944ebae9d4437e8c45aac87f2c21d3",
                             Username = "2512629"
                         },
                         new
@@ -59344,7 +58181,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 688,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$B8PagpJ0p9JEujJxWYptHOBlR.B.J7Kn9TkDAuiONPSgrmPpDgady",
-                            SecurityStamp = "1a617b12db5c44e2b66caf10ad4772a3",
+                            SecurityStamp = "7632657ec45545f0a43c24b66ece1d6a",
                             Username = "2512630"
                         },
                         new
@@ -59356,7 +58193,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 689,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SlhmTN8OPWb5fVwd8ttEAOUj/2MDkdXwnsvKPmm5A07Vi/enjsU0W",
-                            SecurityStamp = "2152ea1cadc6403aa698f229eebd5646",
+                            SecurityStamp = "e6edb8dcf9bd42ab9d458fa10987df86",
                             Username = "2512631"
                         },
                         new
@@ -59368,7 +58205,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 690,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vRINmmwY9N1DZ9p.vkiBcOkkNXmPbkruhzAEu29zROAIw0Yx3OAlq",
-                            SecurityStamp = "bc38c80cd9654c099a62485fdcf227ce",
+                            SecurityStamp = "35a35ac0c79a4feaafbe9c567c03fff5",
                             Username = "2512632"
                         },
                         new
@@ -59380,7 +58217,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 691,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7Xi0tt32CZhJS6oN7JoaJ.XlJfzWk6KyMtithZ1VdF8HBnu/DjPZS",
-                            SecurityStamp = "fdb329f02ab947338d3f3edcf3cb17a8",
+                            SecurityStamp = "9387a43f826e4081b5b378764bf4c4b6",
                             Username = "2512633"
                         },
                         new
@@ -59392,7 +58229,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 692,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0137IGDcLA5i8r4OBmuTcOOZl/D9mQUYMhsEtkRbS2gveCRThM19S",
-                            SecurityStamp = "e40726e0a9b349fbb3fe6cc36ae0d264",
+                            SecurityStamp = "15a3b38345084fb780f56eb0f44f949f",
                             Username = "2512634"
                         },
                         new
@@ -59404,7 +58241,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 693,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4z909lfkdLlWuNYLibBFI.zs8Xm4q5GQD0ZhnfWb1mcFgks8e0Kem",
-                            SecurityStamp = "e0abe44949224da8b57723c42b9cee73",
+                            SecurityStamp = "8a20926180c24512915286d092227b69",
                             Username = "2512635"
                         },
                         new
@@ -59416,7 +58253,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 694,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hgyl6KLGPQcQy5oD0Y0jE.8NeqsSwA8DN1xyx0KH.hf/9Iwu6m7hi",
-                            SecurityStamp = "f638c08a71514589a7b08e97e6d7c187",
+                            SecurityStamp = "fa0a364f517443dca1bd546fc9f64266",
                             Username = "2512636"
                         },
                         new
@@ -59428,7 +58265,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 695,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Gr9X2kc2W1D77mGiG86V7u2nEt3hhEVVjTNwXIYU3oyxyIl5KTM.2",
-                            SecurityStamp = "2547d2aa41d64da09aeebefbb49e3283",
+                            SecurityStamp = "646bae4c21994288ba0009f1acff7569",
                             Username = "2512637"
                         },
                         new
@@ -59440,7 +58277,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 696,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rP.U0hEsbbUajSYNRYEolevRqbK.EG8v6pPIjo8.Wx2vvwTGzy4/O",
-                            SecurityStamp = "85ef661ba2e54bec8ea2d705c7a6604e",
+                            SecurityStamp = "4660fd5f82234f7f8859cbdce2bb4dbd",
                             Username = "2512638"
                         },
                         new
@@ -59452,7 +58289,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 697,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$za3Y7ixqDWS5ncLHZ7Vjv.LyNnXurpJUlK7rwSIZHRiP3i0Meihi6",
-                            SecurityStamp = "f41de5a164b6426a8d8b6dee7da63abf",
+                            SecurityStamp = "3d06979b0a904b9d8ba7233f3d23e9ee",
                             Username = "2512639"
                         },
                         new
@@ -59464,7 +58301,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 698,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jMg/r9Bt71YXP43hWxYZP.zdY2c5dcNqSNLjWChHbJQSGR1ZU1KhK",
-                            SecurityStamp = "7063bb7a1e6d4867bf284c013a074757",
+                            SecurityStamp = "d18bf4db3f47497ab0a93a4aa5ba2ccc",
                             Username = "2512640"
                         },
                         new
@@ -59476,7 +58313,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 699,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$s4ysmdnGLkrfywI.A2wFe.SwaryisE2tXvUyaXfn.r1Csoi.RjGgm",
-                            SecurityStamp = "4dd9f7c9078c44adb210ad6e4098b669",
+                            SecurityStamp = "cae5b3e13cb8492485f53bedb0f4b1c5",
                             Username = "2512641"
                         },
                         new
@@ -59488,7 +58325,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 700,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9spDE16jmeYUjKqua9Y5l.eWtvvUClXgjvjNnOTSDIFI.YPZK0dpO",
-                            SecurityStamp = "b9256b042bed4bc29e080e595012d225",
+                            SecurityStamp = "c8ebca23d550494db4de7a10d51574de",
                             Username = "2512642"
                         },
                         new
@@ -59500,7 +58337,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 701,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DqD69HnixAHh4jNSG28CQeZJO.JMhBHh0FHzxNfTSHkeLx54eEHmS",
-                            SecurityStamp = "66f0186973da4cc6874ce2b63608261e",
+                            SecurityStamp = "566254850c764b2eba984588ddf516dd",
                             Username = "2512643"
                         },
                         new
@@ -59512,7 +58349,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 702,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rhE/2cs.MMgc6mIIMEpyLO4c.lgjo9B5Vu3Xg/4jakzBGmGxSwsda",
-                            SecurityStamp = "5e39aca60ff64c3c9fdfd3050703be26",
+                            SecurityStamp = "eece03a19c5545b9b762d93cb3b2bdb8",
                             Username = "2512644"
                         },
                         new
@@ -59524,7 +58361,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 703,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VXsdT1EU45xigk7UTXf.t..50AAwFGHdSoXBQ2Atji8LmSRqg89ce",
-                            SecurityStamp = "8f866f8bfcde4b0db02757f70055e32c",
+                            SecurityStamp = "552af740fc8a459a80f6510292dc64bd",
                             Username = "2512645"
                         },
                         new
@@ -59536,7 +58373,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 704,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sJ7zF0/wqPNAccT4BFT6AO0yKZ4aR7HlDmG58Vl.u0teX1/NRdm6m",
-                            SecurityStamp = "94929fad44d14d5c8227d3930ef011ea",
+                            SecurityStamp = "2a9f3b60cfb84ab492401b1835c99561",
                             Username = "2512647"
                         },
                         new
@@ -59548,7 +58385,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 705,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FsLNbx7ZIUeYzYb4vNC.yOz1YPzStJuJmFI2pI2jB7dX6qs86UySa",
-                            SecurityStamp = "9d0815489af04685b2404d56b6cd8215",
+                            SecurityStamp = "702c914aab0a4876b187cbebaf301213",
                             Username = "2512648"
                         },
                         new
@@ -59560,7 +58397,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 706,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0F.VYGeUMvRDwdjUo7RF1ePckkZ7I3F5ha/D.gODwRyr.vseJibma",
-                            SecurityStamp = "e535e6c2fdd3444c9862d6988f02d9b6",
+                            SecurityStamp = "d732c6cb61944ba09ac6fdb1855d1417",
                             Username = "2512651"
                         },
                         new
@@ -59572,7 +58409,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 707,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VXR4CazHwBrp.Y26ccq0VuPvP3At4FFqT1PWnf9aaboRsgPI7SjJi",
-                            SecurityStamp = "7077ecd42e3c4957866e9d8fdd086058",
+                            SecurityStamp = "cfd31727408243139a739fd081fa6737",
                             Username = "2512653"
                         },
                         new
@@ -59584,7 +58421,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 708,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0HTX01/ED4ulBU8kghb/9.5dCnvkNPuWXAT/qI9egt4XOOh37QhZK",
-                            SecurityStamp = "c2472863979e4c4db552f2b5bee42392",
+                            SecurityStamp = "711ff9f60e354b37a3990ff3304bc9a8",
                             Username = "2512654"
                         },
                         new
@@ -59596,7 +58433,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 709,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Jdn.egDmS2WprpBSdFrRuOhXuFHtsGK44xqPyJi4NMAYwQ4JGlnWi",
-                            SecurityStamp = "7c40ccb2b4f243469388133c05c12d45",
+                            SecurityStamp = "dd3e09994cc14401a376e9a08ee2b0b7",
                             Username = "2512655"
                         },
                         new
@@ -59608,7 +58445,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 710,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BUV8gHqyVPaT7HDe2NQN5.ckOs3y6llGuE.rQnYzwrGDazfyT41L2",
-                            SecurityStamp = "3826f85d82f445ef86775ea756b606ed",
+                            SecurityStamp = "ea2d8fa1c418400ba690d3bf8808ed26",
                             Username = "2512656"
                         },
                         new
@@ -59620,7 +58457,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 711,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D5ajZ0JW4.BlyuqBQkKyouOA//CHc0op3nwuX9HEeoiJJmMpRMFDG",
-                            SecurityStamp = "d788e9bed177411aae213f97f915ea8e",
+                            SecurityStamp = "2e5052c8f23a4cfdaa01d63b8d4737e9",
                             Username = "2512657"
                         },
                         new
@@ -59632,7 +58469,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 712,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OWGsA8kdYECo0EbuQtktoeBVx5fCta8DeKO7lA.YzHBsu1kVtKGFS",
-                            SecurityStamp = "69bd8fe65e53465992824c97551b06e9",
+                            SecurityStamp = "96d3b9070fb4472ba21e7372f27ce127",
                             Username = "2512658"
                         },
                         new
@@ -59644,7 +58481,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 713,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xzO0plLKGAFuJ3JL9CG0sujfrShcuH4LMiltDiqoClhF3Lv6E85lq",
-                            SecurityStamp = "a58e975f8e754280b7e9e4c536f6280d",
+                            SecurityStamp = "5ba95b1f44634e3fa445fde243bfee6b",
                             Username = "2512659"
                         },
                         new
@@ -59656,7 +58493,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 714,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3gYwsyqb8nfRKJOCmXNHo.rrQjYU9MEYVsCDGsWHeHz/W2jn8nF/C",
-                            SecurityStamp = "c2651212d57c457597dabd9670809f4b",
+                            SecurityStamp = "322bb8a7e63248909576a4d3e9c2b0c9",
                             Username = "2512660"
                         },
                         new
@@ -59668,7 +58505,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 715,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bG1NNjdGaxVclB7ZpyVX0OPNbLIbt.L4G91HdICyZ4qLxcJrAhNPq",
-                            SecurityStamp = "f5d37a6b4e824c1dad1eedee9256e1b5",
+                            SecurityStamp = "f4227611a16e4aafa4491b61e8569c24",
                             Username = "2512661"
                         },
                         new
@@ -59680,7 +58517,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 716,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nl22wZhz.JMQdm4CLHDA4u5ogpziKwcYoy2UDrb5CdTjAfMy1Ldg.",
-                            SecurityStamp = "066fe0f7d4ec46ffaf34feddf48002f4",
+                            SecurityStamp = "57b1a1cbf88b4a00ab955d04109e815d",
                             Username = "2512662"
                         },
                         new
@@ -59692,7 +58529,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 717,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$atFs2tzll/0MoWIT33AQ4uBsRnmZ6WaYgMlSxYYDAeT8FkanPh.I.",
-                            SecurityStamp = "a85d7a14b23a484d8bda6310ee03bad6",
+                            SecurityStamp = "6a59724c698447a6972a03f0e07a1d4a",
                             Username = "2512663"
                         },
                         new
@@ -59704,7 +58541,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 718,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NDEqaX2gVwb/yxBA9tvXj.Gis7DkLORiKw4s1QPSpHXLwtFYhyQ/a",
-                            SecurityStamp = "d4f71bdc311a405ba2ccdf46f3cab728",
+                            SecurityStamp = "3a23e50473ed45c69a128ade51a81241",
                             Username = "2512664"
                         },
                         new
@@ -59716,7 +58553,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 719,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$X1ire3LrKeAl8EKn8oZZRuVniz7O8eCol0dbwWpovxKREMGRYIEw.",
-                            SecurityStamp = "31bba4657e714a2aaa5eee1d2f5132d9",
+                            SecurityStamp = "40195787c20e4ff882a2eece499627a1",
                             Username = "2512665"
                         },
                         new
@@ -59728,7 +58565,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 720,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dnN7QsRv3ESi44lQzfJ/gOY91otEMXxLARTtiIP4PwwNxD15cg3VW",
-                            SecurityStamp = "f07b9c3463664511a5440b42f4f9c988",
+                            SecurityStamp = "de9aa856b91e482b8734e6cdcc4f49b0",
                             Username = "2512666"
                         },
                         new
@@ -59740,7 +58577,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 721,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IVttNVMFbpQPlOIRdJILHOqDXLaKrVkNjshnI9YCIjrXHtVjppsKW",
-                            SecurityStamp = "16d908ed30e14671b7580384ce193cfd",
+                            SecurityStamp = "d62801cb63264ebea84cfc1687a7ff4d",
                             Username = "2512667"
                         },
                         new
@@ -59752,7 +58589,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 722,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gbwyUrmpHFx7I.JmSOMjXOD1iLi9kGaS32xK/UPuERIwoj53Svp0G",
-                            SecurityStamp = "bb7cf29545624f8290e8cd7f60ec2982",
+                            SecurityStamp = "48a10ec3a4404de2ae2127448eeed562",
                             Username = "2512669"
                         },
                         new
@@ -59764,7 +58601,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 723,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MLMVlNjJfMFdm7No7KAVHutz3qu1HfQTCuTWT5etqrZUjtcSvsxfC",
-                            SecurityStamp = "8188dc4647c749acbf80837c4d4f55f8",
+                            SecurityStamp = "2dc1b9b878054d97bb8c64cd35c117c6",
                             Username = "2512670"
                         },
                         new
@@ -59776,7 +58613,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 724,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Dmhb9.9O/n/5RfNPGGKHvOMvgAWn7rF7nxEv4mqlt2sZhSAM1P1rW",
-                            SecurityStamp = "23d927c68c2d4441b54da8f9cb7e6a58",
+                            SecurityStamp = "fd2d8625e00e4e5584ae020d2ab09ad0",
                             Username = "2512671"
                         },
                         new
@@ -59788,7 +58625,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 725,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0kCwrtkQTEVd75ALMoHfwOFqBr3X6ALRdiZg9V5PNSH33YiuvsDyC",
-                            SecurityStamp = "f04319c1fd1f4b26a17122793eff8118",
+                            SecurityStamp = "12a26de871a245859d5723263c73676b",
                             Username = "2512672"
                         },
                         new
@@ -59800,7 +58637,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 726,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.LP0aQVecr5xDF9GrezOk.84r.m3iV/YvHLstA/v5KPgdF4ljSsf.",
-                            SecurityStamp = "943dbf6cc799430b9e522edf7f5f6552",
+                            SecurityStamp = "a1362f55119f45dfb8fbc84bc99ade05",
                             Username = "2512673"
                         },
                         new
@@ -59812,7 +58649,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 727,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NmfQaNj8spWxHeCef3CqHOwh/h1KTv2P05ELEYygd.L6o5Auqam26",
-                            SecurityStamp = "76da69ca3c644db7962748f38704cf30",
+                            SecurityStamp = "b2dbc26e230a4ef89a01455198a9a81b",
                             Username = "2512674"
                         },
                         new
@@ -59824,7 +58661,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 728,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UQ5JNr5GJm85jsLGbIKAh.765VNKcBTtISApAILDLwhwYF1VKCK6e",
-                            SecurityStamp = "a1b9c1c51b204dd89207a12976210919",
+                            SecurityStamp = "51033323df264267b1ab16ac4a05688f",
                             Username = "2512675"
                         },
                         new
@@ -59836,7 +58673,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 729,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2iHzxpoksuDNORsW01wbx.nnu1rEx/yUUd/bocCxZtAh8vBgqdBnq",
-                            SecurityStamp = "31d61c5b7d5e4ee18c834deb5a12facb",
+                            SecurityStamp = "5d8a0adbfe224443a70c9c7481676af5",
                             Username = "2512676"
                         },
                         new
@@ -59848,7 +58685,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 730,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0zff1Zf/hbVC9pfTYehgSeI7KIqpHYNPp27KyEAAQqTL9a0qBQd96",
-                            SecurityStamp = "9c6c0a2231a3425cbeb117fc31d8ea34",
+                            SecurityStamp = "8d083b495b3b480697dc3461bfe0e56f",
                             Username = "2512677"
                         },
                         new
@@ -59860,7 +58697,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 731,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$K2wzIq5cRTEoJtI5hjtflOip/6J53buymxBdfPp7V8kHLrkPmPYSK",
-                            SecurityStamp = "9df1824092e44baaac6549fc3d301d3d",
+                            SecurityStamp = "9ee200cada4c48dc89b3c517dd268f53",
                             Username = "2512678"
                         },
                         new
@@ -59872,7 +58709,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 732,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vDMFszDYNanYC6Gt3sXvaOy6aErz2jQiSzZGHCANwQBLOQ1KbVGMq",
-                            SecurityStamp = "a4fb463e2cff4dab8c4aed98492a39ab",
+                            SecurityStamp = "f20e46271b1248cc8044ad9cbe3f066a",
                             Username = "2512679"
                         },
                         new
@@ -59884,7 +58721,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 733,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UFPix0Yf9cBPkZ6X6d3GsukfSzxLk6T1oE4.0LyE30s2Tb3DlZap2",
-                            SecurityStamp = "0fefa31259304079be84cf20f842dabc",
+                            SecurityStamp = "fdc6b722d5a4452babdd92a80beae97e",
                             Username = "2512681"
                         },
                         new
@@ -59896,7 +58733,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 734,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ppEnOZ/QQRMmA6NCZ29wc.xtDAaJRRjD9sPjl7IlXj8Uqqbb9zUcC",
-                            SecurityStamp = "dc5920154b5c43098efb36980f9dd105",
+                            SecurityStamp = "3685c09987ab4cc592077766d49d8454",
                             Username = "2512682"
                         },
                         new
@@ -59908,7 +58745,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 735,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$USOoXypZJOxKfz/aH.JyIOwJxtTu8zQFndwyCz.qEECLdkkMhz.vq",
-                            SecurityStamp = "749de0a27d9f44f7a569377b61b0718e",
+                            SecurityStamp = "e392f326d0b749f699ce1f63c1142b89",
                             Username = "2512683"
                         },
                         new
@@ -59920,7 +58757,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 736,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BJsjzAU9COBOKYZBzin9Fu01v7sNdXVOerovMO.D9U5nXlDbd93oi",
-                            SecurityStamp = "0f7d620e1cbc41b39e6d9918abc2fd9b",
+                            SecurityStamp = "3b8f7bb17f2d42b2a64b6c7905074337",
                             Username = "2512684"
                         },
                         new
@@ -59932,7 +58769,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 737,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZWFeJtfP4sgpf91OKWbrcOUL.q1X2A0urVbY7Wjca4kygnJXnGkgq",
-                            SecurityStamp = "1b9ce3a80f904bfbbada6bca8a955603",
+                            SecurityStamp = "f51b9f3063b04b9bb01076e5579ce7da",
                             Username = "2512685"
                         },
                         new
@@ -59944,7 +58781,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 738,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1DpbA5WGkHnDbjyWmmSXl.KMjeAPi4sF/vGD0OxPC1e1ZKa6Q3ki6",
-                            SecurityStamp = "4f3e3e26a095486ba755738165473576",
+                            SecurityStamp = "4c1bac9094584e528d57c7d4cbda9014",
                             Username = "2512686"
                         },
                         new
@@ -59956,7 +58793,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 739,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JwgDDCx0qCxQcs.ZsOFKCO2lIf12ulkUItEBzdfsZgkYqPDqdCLhy",
-                            SecurityStamp = "e00d0a49e18f484481905ea4cb95bdbc",
+                            SecurityStamp = "a9db1bf4132b446182bcb3c5aef161cd",
                             Username = "2512687"
                         },
                         new
@@ -59968,7 +58805,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 740,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uizD7iJUyaCqdulN1GlzvuZT5sTi5zka28hkHOJ9s0xQpI0nYsla6",
-                            SecurityStamp = "73ea6d5d365646c2add972d3d574722a",
+                            SecurityStamp = "0c22349ac7594e8f8778dcf01bea7df5",
                             Username = "2512688"
                         },
                         new
@@ -59980,7 +58817,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 741,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Qafx.i9Z5EnoiMZZ.p2Oz.7mGqlK5CDQMQ1RYNA6PvwNwKFFuP.dm",
-                            SecurityStamp = "4bf4042aa79945928d18601f019cbb78",
+                            SecurityStamp = "ef1cae6fe7a340da88f273695b3c3467",
                             Username = "2512689"
                         },
                         new
@@ -59992,7 +58829,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 742,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hqAaEY9j4ItcoNg4DBQl9OQsiZVTCDNrwsM.KVzrq4yTTv6chrX3m",
-                            SecurityStamp = "5ec44884d0e241f0a8de002cd8d1a537",
+                            SecurityStamp = "6cb2dbafe49e46168c8855cbfd54abdd",
                             Username = "2512690"
                         },
                         new
@@ -60004,7 +58841,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 743,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xb2O/oAB59JLwhIplMDUhuFHFDX24S89vxBfYXh03E26W41xcGBwW",
-                            SecurityStamp = "08facffcbfae4fcbb2ef575902faba38",
+                            SecurityStamp = "9f1c8005dbf94b24a4a058562cbcfa58",
                             Username = "2512691"
                         },
                         new
@@ -60016,7 +58853,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 744,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mtHxd.nblg5aYQ8g6C.4rO5mT8/wexuU2.7kG9Llf3BAqGlMOiTh6",
-                            SecurityStamp = "e886647bea7b42b4ac3c517128edc44b",
+                            SecurityStamp = "5270c01e1f624cb6acd6e86f992fd022",
                             Username = "2512692"
                         },
                         new
@@ -60028,7 +58865,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 745,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KZu9qaelDGAZXdDvImknJOaJT1x6koqkMWcPxejKQW5NsmNOaB5a2",
-                            SecurityStamp = "7f1d0da4557743e79dd6847864c85d0b",
+                            SecurityStamp = "5bfed917022240aea0d1a583b6e7f697",
                             Username = "2512693"
                         },
                         new
@@ -60040,7 +58877,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 746,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Df3TERMy1gDub5B0GtQV.O9zKvy6.5LlIpYyS9q627JymuGDHaUpa",
-                            SecurityStamp = "13385d3588c74d789a34c2dc3e8ce049",
+                            SecurityStamp = "fe30b15e67be4b5496638376c5cd6fc0",
                             Username = "2512694"
                         },
                         new
@@ -60052,7 +58889,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 747,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$iWmugVvDZNYJ9WjdJJl.LO2RrBz1uT5gvcaLT.rv0ZdtoEO8BQfZS",
-                            SecurityStamp = "f07dba89f791455aa2020b06b4b6d7d2",
+                            SecurityStamp = "61636d2eff784e1db37d4374f5257d69",
                             Username = "2512695"
                         },
                         new
@@ -60064,7 +58901,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 748,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$AVYrk30urV9Q1HZsDXObF.3tqaHGBLXWKQWa5P8REp7d0pBPKpYXm",
-                            SecurityStamp = "7408da7c9b154be8a762d239d56795b6",
+                            SecurityStamp = "8ccd714d104d45898fa00613d51d5b27",
                             Username = "2512696"
                         },
                         new
@@ -60076,7 +58913,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 749,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FITmXqn9HXgLNktHdrBMOOqmhuotsKWjLXh9rwJn/pPYyqvZnsO1y",
-                            SecurityStamp = "c31d34f879234afd9741de8d4f02a503",
+                            SecurityStamp = "96e73e8414e14a668826e1ebd3b98fb3",
                             Username = "2512698"
                         },
                         new
@@ -60088,7 +58925,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 750,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4YxSIp.yZgwb2bc4aNY2FOWaBUgBcZh13FfzLli89WEi1msUE/W/C",
-                            SecurityStamp = "32f2e76c21d64ce19264df10081dc3bc",
+                            SecurityStamp = "6c0a2ea994364120889a87feb1ea99cf",
                             Username = "2512701"
                         },
                         new
@@ -60100,7 +58937,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 751,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$k5u/IPt0hOsJWDvP01tPGu5UCN5VZ8d7t6pSayWbrmdYuliK.rQw2",
-                            SecurityStamp = "268e35f14a934c10824ec0210efd44d5",
+                            SecurityStamp = "f2d8303ca6de46a89c802a9bd44469ad",
                             Username = "2512702"
                         },
                         new
@@ -60112,7 +58949,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 752,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1fD9FuBcO8n669HPmpajXebjU8IS7Q1exd.ERjY8rkJq4LXxsyc0m",
-                            SecurityStamp = "abbc2b8b401a4134886764d54cc425fd",
+                            SecurityStamp = "8c09d5927a354359989a31b23dfea0b3",
                             Username = "2512703"
                         },
                         new
@@ -60124,7 +58961,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 753,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SLd1aFOk2bfu8HXrK8CN1utiPwAgFhRH19oMYN/R0hrrKmUf3q6CW",
-                            SecurityStamp = "8d0dae2dcbf44b24884b0cc9e3baa1eb",
+                            SecurityStamp = "5205def6a7a541a39ac48b550bd86d5e",
                             Username = "2512704"
                         },
                         new
@@ -60136,7 +58973,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 754,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ub2VcqnzODqYVntoexBAx.8I8K.3qSStGvntqPSd2SOvVpyNkrcSm",
-                            SecurityStamp = "ceee360e3d8640a5bf369d4561aef8d9",
+                            SecurityStamp = "a5933e5a73d441faa9ce970c85621efb",
                             Username = "2512705"
                         },
                         new
@@ -60148,7 +58985,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 755,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4dsLNKNe9WCXvU30XMlxzuQMTzZ73ecg6Wh2.VORLJuT4A3yLNzgK",
-                            SecurityStamp = "96ea456821b94c13a7d7217fd5db0e3c",
+                            SecurityStamp = "c4654cf9a0c847fabf2af7dc27ea8ddc",
                             Username = "2512706"
                         },
                         new
@@ -60160,7 +58997,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 756,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tnGsoCcQftvGtCiifLBxne3ifeVxJYDIK6kuolItM2bg1y.FQMCMq",
-                            SecurityStamp = "bca9bc632e324a3aadff3ff74e944a1f",
+                            SecurityStamp = "8440d6b11f3c4ef59ea6435db021d17b",
                             Username = "2512707"
                         },
                         new
@@ -60172,7 +59009,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 757,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$U/HCSBaI/2B7rSCJsgR16.XVYH8mvc5eVxQ/wgft2o42kNWlnzBO2",
-                            SecurityStamp = "b741b95bb35a48d08a998cdab33e7347",
+                            SecurityStamp = "853e21e5a7a44f32bb58afe9f79690c7",
                             Username = "2512708"
                         },
                         new
@@ -60184,7 +59021,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 758,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$alxruN0bkr7q4Wo4wHNHquvXSceeNMXJ6Cj4FAbicrLNawvbFXjRe",
-                            SecurityStamp = "da7e61c035cb48179af913121f98a383",
+                            SecurityStamp = "d062fd0a9b714d4891c69be9c4b1bcf7",
                             Username = "2512709"
                         },
                         new
@@ -60196,7 +59033,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 759,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xfdmpdfHV4bLIgqe4XTSDeuYkYRpueK14p1n/t5IcNOybjxXNSktK",
-                            SecurityStamp = "43a0b6adf4dd4dc584bd494a63c6cc50",
+                            SecurityStamp = "3adbde24d4df4e9e832809cae56bf971",
                             Username = "2512710"
                         },
                         new
@@ -60208,7 +59045,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 760,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IVHCIk2RU4aEVrTtYNI3hOPS8dpQTIkXl4IkDePXqN1BjDWyswK5u",
-                            SecurityStamp = "ecdd6c2b06bb497fa1faad2d2de89163",
+                            SecurityStamp = "1867de701a9e42b396bab2812abab06a",
                             Username = "2512711"
                         },
                         new
@@ -60220,7 +59057,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 761,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wsTHZdbGReg1eYtZu64q4eLQWvZNLZVoAicCjAUVoPGDHAAyFjmva",
-                            SecurityStamp = "2cb8f51bb8904c22aa7568a1781a6e3a",
+                            SecurityStamp = "20d91dc38a5c4ade9604713b8a303a29",
                             Username = "2512712"
                         },
                         new
@@ -60232,7 +59069,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 762,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VxtJwj0WMqiKOTsul32ysutZ1AgDyUkLcYFOLKFttexOJVcmr9stO",
-                            SecurityStamp = "17fabba3d6f9461398aa1c1a631c95b9",
+                            SecurityStamp = "ae0cf474223a418dbfd4527a54285b7e",
                             Username = "2512713"
                         },
                         new
@@ -60244,7 +59081,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 763,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$f5089NTEHlhOu/U63n5F2.QnkWTKXj09GSUT2vzEdrKvtklhSaw6u",
-                            SecurityStamp = "3f883e9d87574573ae66838e108af8ac",
+                            SecurityStamp = "44f418a999604641adacfaae63ddb575",
                             Username = "2512714"
                         },
                         new
@@ -60256,7 +59093,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 764,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YOeL3ZA1weawpj86/J5jbO2ZWs8RhBMT2M3wxfWWXJDt1Dcy/edym",
-                            SecurityStamp = "32b5e975fdc847b59ae0ef7a1b9705d9",
+                            SecurityStamp = "6078529cc1bf4c699c661fff571e34db",
                             Username = "2512715"
                         },
                         new
@@ -60268,7 +59105,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 765,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/unPJQn6k45G0Hb./kFE1.WuMst3/wAETT3mMP2jMDZ4UfOyIyYti",
-                            SecurityStamp = "8afa16f257144cd99aa84c5d7f291690",
+                            SecurityStamp = "59bff36897e94f8d8a508c88e3240a29",
                             Username = "2512716"
                         },
                         new
@@ -60280,7 +59117,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 766,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZquGN7n9v4gEcNjtbkBtReIXgpxdmi6NRrBtWl0LMw8wncG4uWEBC",
-                            SecurityStamp = "f02db33ce75b44d79efb427ed20bd975",
+                            SecurityStamp = "9b66cb80d4844a58a19be58aa68c4b8e",
                             Username = "2512718"
                         },
                         new
@@ -60292,7 +59129,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 767,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cjJBE6JoeCyvjTZtQLZnE.8aPpNc916VV01xs.6eD0MtnXl8Xtt5K",
-                            SecurityStamp = "711f823e3885421cba128d0f2ddf76f9",
+                            SecurityStamp = "13e8d4bd764b49d6a54481ee17ce21b9",
                             Username = "2512719"
                         },
                         new
@@ -60304,7 +59141,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 768,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2.ynZcImdN2cQ62zxXsFWuyGutaGJDgx3bxBealh.RuHlbQyLj./y",
-                            SecurityStamp = "5e4abf05186649eeb60adb2a27e32b22",
+                            SecurityStamp = "6b69a8d32b9f4d059331d6fae3f5a3bb",
                             Username = "2512722"
                         },
                         new
@@ -60316,7 +59153,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 769,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$t3jx2zoCu8bjgwv.wLMFRu3Of/5g0rFLk4apctHgf/JiadbqOn1CC",
-                            SecurityStamp = "88a8cf4bdb7646f9844c8f665dc09fed",
+                            SecurityStamp = "7fa79f9e568c48a5b69166ee374d7f23",
                             Username = "2512723"
                         },
                         new
@@ -60328,7 +59165,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 770,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TR1ev90v9W5P9ttcmlOOYekvspGQebDC5xFllNYLDwfuWzdAtlH0q",
-                            SecurityStamp = "ad259d30516f4fbb90f912e3c85d09c1",
+                            SecurityStamp = "5c195dcf009d4237b508e1adbe9d98f7",
                             Username = "2512724"
                         },
                         new
@@ -60340,7 +59177,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 771,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BKHVc0SIaD23.1N1DyOCyuFyD4CgbwsF.gw1EFG00pKVtCprPeXNu",
-                            SecurityStamp = "edda06dacb1e4ad1b6a3a084632a042b",
+                            SecurityStamp = "f47f7df6af6947c2b098c139cd138c9c",
                             Username = "2512725"
                         },
                         new
@@ -60352,7 +59189,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 772,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lC79x2afyWkFGhLD1xHOfum1AZkLT7MiOAFIkP9y5wvIWVBMIcgfK",
-                            SecurityStamp = "06ac0cc0d18a4cb8a63657b3a2455e28",
+                            SecurityStamp = "bc0d54b26c054777a9883bcc2ffbd25f",
                             Username = "2512726"
                         },
                         new
@@ -60364,7 +59201,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 773,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$a8V3jWtS5OJo5h.q9HaKeejrB1pivA4rt6zzX4KS9HbE9ykGSgNdy",
-                            SecurityStamp = "c3a21328f471464ea597a60b8f40f1db",
+                            SecurityStamp = "2d37a27f0d75433485d79ae6c8864c5e",
                             Username = "2512728"
                         },
                         new
@@ -60376,7 +59213,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 774,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MHgEJJFa0.lkw5LCFR2CIu1kOexVSFiBtbycrBpVXZC55.Hn8yicu",
-                            SecurityStamp = "7a7053426e20441e886fae12bb284abc",
+                            SecurityStamp = "6a1c44c98bf94ba4bf54a08ac202644c",
                             Username = "2512729"
                         },
                         new
@@ -60388,7 +59225,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 775,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5XUYNdU8KFjnkJ3q78FDau8bjjofXVQbljUyTYYIafCsNrpf5bFe6",
-                            SecurityStamp = "4eda44cbf88d4a89999f0455a656c484",
+                            SecurityStamp = "84aa3948fa814b5d91ccbe39009afe06",
                             Username = "2512730"
                         },
                         new
@@ -60400,7 +59237,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 776,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bRGETVTcA.KDIcjvEZGG9eLDeNe0.gf8iTBxCsTqBotAityjpssga",
-                            SecurityStamp = "66d48076e24d4bd4a4060578886467e8",
+                            SecurityStamp = "8a98e2f961314e3ba01e908b0d27b649",
                             Username = "2512731"
                         },
                         new
@@ -60412,7 +59249,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 777,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3R/K4QHO7Dy7KnSQDIrWRObLjCm9nC95E9es9DfYRHu.v/wIkH5yi",
-                            SecurityStamp = "c5f2cbacddcf449c9357a51f7ece7dc4",
+                            SecurityStamp = "00fd12d4c4544360a03fd6e7332d283e",
                             Username = "2512732"
                         },
                         new
@@ -60424,7 +59261,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 778,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SQn7t/mYWToJYsXvB/fgle/pLMjspmp.oy4wkdlAvuGhQigIkuJNC",
-                            SecurityStamp = "12d6843f526544eaa62e2dedb5f1f7e4",
+                            SecurityStamp = "62c4585a35cc4c68adde7e96025eac10",
                             Username = "2512734"
                         },
                         new
@@ -60436,7 +59273,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 779,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UqfiBjOmRYbwIwRAONX7IezPVu6hEf/TM4MI87tQ0iPmfoKNn2i0W",
-                            SecurityStamp = "51bcd8809e3c48ec9188a1ab13ca379f",
+                            SecurityStamp = "3ec7f228d49a491b9815aaaa708c370f",
                             Username = "2512735"
                         },
                         new
@@ -60448,7 +59285,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 780,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qdG4fqe7GH7y4weXf/enae6cQCEM85hxn3AdiszkXuWa8I4QBAp0i",
-                            SecurityStamp = "930f78d1f6134bc88ccacc39e4bf7903",
+                            SecurityStamp = "5170fdc2c30f4559b8ad3e94c82348c3",
                             Username = "2512737"
                         },
                         new
@@ -60460,7 +59297,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 781,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$v73TkKTZE4LTYjYq53zHWe2pmcxbJcg.VnppOi1.ws1f23jiUiKOe",
-                            SecurityStamp = "d133c4ce298449f7b41a1e3d61cf025f",
+                            SecurityStamp = "31992fa48c2b460681b20ec55465e79f",
                             Username = "2512740"
                         });
                 });

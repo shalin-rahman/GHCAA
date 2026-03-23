@@ -35,9 +35,9 @@
                         getECPositionName(getCurrentECPosition(profile.ecHistory)) }}</span>
                 </div>
             </div>
-            <div class="badge-icon flex flex-col items-end gap-1" [ngClass]="profile.status === 1 ? 'active' : 'pending'">
-                <span class="text-sm font-bold">{{ profile.status === 1 ? 'Verified ✅' : 'Audit Pending ⏳' }}</span>
-                <span class="text-[9px] opacity-60 uppercase tracking-tighter">{{ profile.status === 1 ? 'Legacy Active' : 'Waiting for Admin Signature' }}</span>
+            <div class="badge-icon flex flex-col items-end gap-1" [ngClass]="profile.status === 'Active' || profile.status === 1 ? 'active' : 'pending'">
+                <span class="text-sm font-bold">{{ profile.status === 'Active' || profile.status === 1 ? 'Verified ✅' : 'Audit Pending ⏳' }}</span>
+                <span class="text-[9px] opacity-60 uppercase tracking-tighter">{{ profile.status === 'Active' || profile.status === 1 ? 'Legacy Active' : 'Waiting for Admin Signature' }}</span>
             </div>
         </div>
         <div class="status-grid mt-8 grid grid-cols-2 md:grid-cols-5 gap-6">

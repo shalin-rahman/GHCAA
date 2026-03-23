@@ -37,12 +37,12 @@ export const MEMBERSHIP_STATUS_MAP: Record<string | number, { label: string, cla
 };
 
 export const MEMBERSHIP_TYPES = [
-    'Founding',
-    'Executive',
-    'General',
-    'Associate',
-    'Honorary',
-    'Advisory'
+    'Founding Member',
+    'Executive Member',
+    'General Member',
+    'Associate Member',
+    'Honorary Member',
+    'Advisory Member'
 ];
 
 // Membership options moved to grouped section below
@@ -280,7 +280,7 @@ export const MEMBERSHIP_STATUS_OPTIONS = [
 
 export const MEMBERSHIP_TYPE_OPTIONS = [
     { value: 'Founding', label: 'Founding Member' },
-    { value: 'Executive', label: 'Executive Committee' },
+    { value: 'Executive', label: 'Executive Member' },
     { value: 'General', label: 'General Member' },
     { value: 'Associate', label: 'Associate Member' },
     { value: 'Honorary', label: 'Honorary Member' },
