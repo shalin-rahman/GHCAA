@@ -362,7 +362,10 @@
                     </div>
                     <div class="form-group">
                         <label>Industry Sector</label>
-                        <input type="text" list="sector-list" [(ngModel)]="profile.professionalSector" name="profileSector" maxlength="100">
+                        <select [(ngModel)]="profile.professionalSector" name="profileSector">
+                            <option value="" disabled selected>Select Sector</option>
+                            <option *ngFor="let s of sectorOptions" [value]="s">{{ s }}</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -397,7 +400,10 @@
 
                             <div class="form-group">
                                 <label>Career Sector</label>
-                                <input type="text" list="sector-list" [(ngModel)]="work.sector" [name]="'sec_' + $index" maxlength="100">
+                                <select [(ngModel)]="work.sector" [name]="'sec_' + $index">
+                                    <option value="" disabled selected>Select Sector</option>
+                                    <option *ngFor="let s of sectorOptions" [value]="s">{{ s }}</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Work Location</label>

@@ -330,6 +330,11 @@ export class AdminMembers implements OnInit {
       isMobilePublic: member.isMobilePublic,
       isEmailPublic: member.isEmailPublic,
       isAddressPublic: member.isAddressPublic,
+      isNIDPublic: member.isNIDPublic,
+      tShirtSize: member.tShirtSize,
+      emergencyContactName: member.emergencyContactName,
+      emergencyContactRelation: member.emergencyContactRelation,
+      emergencyContactPhone: member.emergencyContactPhone,
       academicHistory: member.academicHistory,
       professionalHistory: member.professionalHistory
     }).subscribe({

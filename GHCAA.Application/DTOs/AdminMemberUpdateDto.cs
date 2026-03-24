@@ -12,5 +12,8 @@ namespace GHCAA.Application.DTOs
         
         public string? ECChangeReason { get; set; }
         public string? MembershipChangeReason { get; set; }
+
+        public bool IsVerified { get; set; }
+        public int ContributionPoints { get; set; }
     }
 }

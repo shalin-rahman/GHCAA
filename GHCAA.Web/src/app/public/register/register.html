@@ -283,7 +283,10 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Functional Sector</label>
-                                            <input type="text" [(ngModel)]="p.sector" [name]="'sec_' + $index" maxlength="100" list="sector-list">
+                                            <select [(ngModel)]="p.sector" [name]="'sec_' + $index">
+                                                <option value="" disabled selected>Select Sector</option>
+                                                <option *ngFor="let sec of sectorOptions" [value]="sec">{{ sec }}</option>
+                                            </select>
                                         </div>
                                         <div class="form-group">
                                             <label>Work Location</label>

@@ -1041,8 +1041,12 @@ namespace GHCAA.Infrastructure.Services
             }
 
             member.IsMobilePublic = dto.IsMobilePublic;
+            member.IsNIDPublic = dto.IsNIDPublic;
+
             member.IsEmailPublic = dto.IsEmailPublic;
             member.IsAddressPublic = dto.IsAddressPublic;
+            member.IsVerified = dto.IsVerified;
+            member.ContributionPoints = dto.ContributionPoints;
             member.LastUpdateDate = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);

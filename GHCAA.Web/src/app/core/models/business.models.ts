@@ -32,6 +32,7 @@ export interface Member {
     emergencyContactRelation: string;
     emergencyContactPhone: string;
     tShirtSize?: string;
+    isNIDPublic?: boolean;
 
     photoPath?: string;
     status: MembershipStatus;
@@ -403,6 +404,7 @@ export interface MemberProfile {
     emergencyContactRelation?: string;
     emergencyContactPhone?: string;
     tShirtSize?: string;
+    isNIDPublic?: boolean;
 
     // Info
     photoPath?: string;
