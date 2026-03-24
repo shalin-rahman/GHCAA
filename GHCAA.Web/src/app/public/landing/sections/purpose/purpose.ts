@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { APP_CONFIG } from '../../../../core/constants/app.constants';
 
 @Component({
     selector: 'landing-purpose',
@@ -6,5 +7,7 @@ import { Component } from '@angular/core';
     templateUrl: './purpose.html',
     styleUrl: './purpose.scss',
 })
-export class LandingPurpose { }
+export class LandingPurpose {
+    appConfig = APP_CONFIG;
+}
 

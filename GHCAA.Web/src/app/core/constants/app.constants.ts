@@ -4,15 +4,12 @@ export const EC_ROLES = [
     'Vice President',
     'General Secretary',
     'Office Secretary',
-    'Joint Secretary -1',
-    'Joint Secretary -2',
-    'Treasurer',
-    'Media Cultural & Sports Secretary',
     'Organizational Secretary',
     'Information and Technology Secretary',
+    'Law Secretary',
+    'Media Cultural & Sports Secretary',    
     'Member-1',
     'Member-2',
-    'Law Secretary',
     'Immediate Past President',
     'Institutional Representative'
 ] as const;
@@ -462,3 +459,22 @@ export const API_ENDPOINTS = {
         PUBLIC: '/api/payment-config/active'
     }
 } as const;
+
+export const APP_CONFIG = {
+    shortName: 'GHCAA',
+    fullName: 'Govt. Haraganga College Alumni Association',
+    tagline: 'Sharing Heritage, Aligning Lives, Integrating Networks',
+    bengaliTagline: 'ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন',
+    approvalSeal: 'GHC APPROVED',
+    logoUrl: '/assets/logo.jpg',
+    memberNickname: 'Haragangian',
+    institutionName: 'Govt. Haraganga College',
+    institutionAcronym: 'GHC',
+    registeredOffice: 'Govt. Haraganga College Campus, Munshiganj, Bangladesh.',
+    contactEmail: 'haragangian@gmail.com',
+    socialLinks: {
+        facebook: '#',
+        whatsapp: '#',
+        youtube: '#'
+    }
+};

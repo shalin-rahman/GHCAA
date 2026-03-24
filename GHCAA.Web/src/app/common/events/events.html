@@ -175,9 +175,8 @@
 
                         <form [formGroup]="regForm" (ngSubmit)="submitRegistration()" class="space-y-6">
                             @if (isGuest()) {
-                            <div
-                                class="guest-info-block grid grid-cols-1 md:grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
-                                <div class="input-group">
+                            <div class="guest-info-block form-grid bg-white/5 p-6 rounded-xl border border-white/5 mb-6">
+                                <div class="form-group">
                                     <label>Guest Full Name *</label>
                                     <input type="text" formControlName="guestName" placeholder="Full Name"
                                         [class.border-red-500]="regForm.get('guestName')?.invalid && regForm.get('guestName')?.touched">
@@ -186,7 +185,7 @@
                                         Identity Verification Required
                                     </div>
                                 </div>
-                                <div class="input-group">
+                                <div class="form-group">
                                     <label>Guest Email *</label>
                                     <input type="email" formControlName="guestEmail" placeholder="email@example.com"
                                         [class.border-red-500]="regForm.get('guestEmail')?.invalid && regForm.get('guestEmail')?.touched">
@@ -195,7 +194,7 @@
                                         Valid Email Required
                                     </div>
                                 </div>
-                                <div class="input-group">
+                                <div class="form-group full">
                                     <label>Guest Mobile *</label>
                                     <input type="text" formControlName="guestMobile" placeholder="01XXXXXXXXX"
                                         [class.border-red-500]="regForm.get('guestMobile')?.invalid && regForm.get('guestMobile')?.touched">
@@ -204,17 +203,17 @@
                                         Mobile Number Required
                                     </div>
                                 </div>
+                                <p class="text-[10px] text-muted italic full mb-0">Registering as a non-member requires valid
+                                    contact info for verification.</p>
                             </div>
-                            <p class="text-[10px] text-muted italic mb-4">Registering as a non-member requires valid
-                                contact info for verification.</p>
                             }
 
                             @if (selectedEvent()?.requiresPayment) {
                             <div *ngIf="!(selectedEvent()?.registrationFee)"
-                                class="input-group bg-accent/5 p-4 rounded-xl border border-accent/10 mb-4">
+                                class="form-group bg-accent/5 p-6 rounded-xl border border-accent/10 mb-6">
                                 <label class="text-accent underline">Contribution Amount (Minimum Support) *</label>
                                 <input type="number" formControlName="contributionAmount"
-                                    placeholder="Enter amount to contribute" class="text-xl font-black text-accent">
+                                    placeholder="Enter amount to contribute" class="text-xl font-black text-accent mt-2">
                                 <div *ngIf="regForm.get('contributionAmount')?.invalid && regForm.get('contributionAmount')?.touched"
                                     class="text-[9px] text-red-500 font-bold uppercase mt-1">
                                     Amount Must Be Defined

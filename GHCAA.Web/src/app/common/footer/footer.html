@@ -1,9 +1,9 @@
 <footer class="footer">
     <div class="container footer-grid">
         <div class="footer-brand">
-            <img src="/assets/logo.jpg" alt="GHCAA Official Seal" class="footer-logo mb-6">
-            <p class="motto">"Sharing Heritage, Aligning Lives, Integrating Networks"</p>
-            <p class="bengali-motto hide-mobile">ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন</p>
+            <img [src]="appConfig.logoUrl" alt="Official Seal" class="footer-logo mb-6">
+            <p class="motto">"{{ appConfig.tagline }}"</p>
+            <p class="bengali-motto hide-mobile">{{ appConfig.bengaliTagline }}</p>
         </div>
 
         <div class="footer-links">
@@ -19,7 +19,7 @@
 
         <div class="footer-links">
             <h4>Institution</h4>
-            <a href="https://www.haragangacollege.edu.bd/en" target="_blank">College Website</a>
+            <a href="https://www.haragangacollege.edu.bd/en" target="_blank">{{ appConfig.institutionName }} Website</a>
             <a href="/#vision">Purpose & Objectives</a>
             <a href="#">Code of Ethics</a>
             <a href="#">Privacy Policy</a>
@@ -27,19 +27,19 @@
 
         <div class="footer-contact">
             <h4>Secretariat</h4>
-            <p><strong>Registered Office:</strong> Govt. Haraganga College Campus, Munshiganj, Bangladesh.</p>
-            <p><strong>Enquiries:</strong> haragangian&#64;gmail.com</p>
+            <p><strong>Registered Office:</strong> {{ appConfig.registeredOffice }}</p>
+            <p><strong>Enquiries:</strong> {{ appConfig.contactEmail }}</p>
             <div class="social-icons">
-                <a href="#" class="social-icon">FB</a>
-                <a href="#" class="social-icon">WA</a>
-                <a href="#" class="social-icon">YT</a>
+                <a [href]="appConfig.socialLinks.facebook" class="social-icon">FB</a>
+                <a [href]="appConfig.socialLinks.whatsapp" class="social-icon">WA</a>
+                <a [href]="appConfig.socialLinks.youtube" class="social-icon">YT</a>
             </div>
         </div>
     </div>
     <div class="footer-bottom">
         <div class="container flex items-center justify-center gap-4">
-            <img src="/assets/logo.jpg" alt="GHC" class="footer-bot-logo">
-            <p>&copy; {{ currentYear }} | Govt. Haraganga College Alumni Association <span class="footer-tag">(HARAGANGIAN)</span>. 
+            <img [src]="appConfig.logoUrl" alt="Logo" class="footer-bot-logo">
+            <p>&copy; {{ currentYear }} | {{ appConfig.fullName }} <span class="footer-tag">({{ appConfig.memberNickname | uppercase }})</span>. 
                 <br class="show-mobile"> 
                 Registered under the Registrar of Societies.
             </p>

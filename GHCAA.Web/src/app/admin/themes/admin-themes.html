@@ -102,41 +102,41 @@
             <div class="form-inputs space-y-12">
                 <!-- Configuration Section -->
                 <div class="space-y-10">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="input-group">
+                    <div class="form-grid mb-8">
+                        <div class="form-group">
                             <label>Theme / Event Title <span class="text-red-500">*</span></label>
                             <input type="text" [(ngModel)]="selectedTheme.title"
                                 placeholder="e.g. Independence Day 2024" [class.border-red-500]="!selectedTheme.title">
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="input-group">
+                            <div class="form-group">
                                 <label>Start Date</label>
                                 <input type="date" [(ngModel)]="selectedTheme.startDate">
                             </div>
-                            <div class="input-group">
+                            <div class="form-group">
                                 <label>End Date</label>
                                 <input type="date" [(ngModel)]="selectedTheme.endDate">
                             </div>
                         </div>
                     </div>
 
-                    <div class="input-group">
+                    <div class="form-group full mb-8">
                         <label>Announcement Ticker Text</label>
                         <textarea [(ngModel)]="selectedTheme.announcementText" rows="2"
                             placeholder="Message appearing in the navigation menu..."></textarea>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+                    <div class="form-grid items-end mb-8">
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="input-group">
+                            <div class="form-group">
                                 <label>Background Color</label>
                                 <div class="color-picker-group">
                                     <input type="color" [(ngModel)]="selectedTheme.backgroundColor">
                                     <code>{{ selectedTheme.backgroundColor }}</code>
                                 </div>
                             </div>
-                            <div class="input-group">
+                            <div class="form-group">
                                 <label>Text / Icon Color</label>
                                 <div class="color-picker-group">
                                     <input type="color" [(ngModel)]="selectedTheme.textColor">
@@ -145,7 +145,7 @@
                             </div>
                         </div>
 
-                        <div class="input-group pb-1">
+                        <div class="form-group pb-1">
                             <label class="premium-checkbox-label">
                                 <input type="checkbox" [(ngModel)]="selectedTheme.isEnabled">
                                 <span class="checkmark"></span>
@@ -159,13 +159,13 @@
                 <div class="space-y-10 border-t border-white/10 pt-8 mt-8">
                     <h3 class="text-sm font-black text-accent uppercase tracking-widest">Enhanced Identity Options</h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                        <div class="input-group">
+                    <div class="form-grid items-start mb-8">
+                        <div class="form-group">
                             <label>Banner Image URL (Overrides Text)</label>
                             <input type="text" [(ngModel)]="selectedTheme.imageUrl" placeholder="https://example.com/eid_banner.png" class="w-full">
                         </div>
 
-                        <div class="input-group">
+                        <div class="form-group">
                             <label>Text Animation Style</label>
                             <select [(ngModel)]="selectedTheme.animationStyle" class="select-field">
                                 <option value="None">None (Static)</option>
@@ -176,7 +176,7 @@
                             </select>
                         </div>
                         
-                        <div class="input-group">
+                        <div class="form-group">
                             <label>Sidebar Color Panel</label>
                             <div class="color-picker-group">
                                 <input type="color" [(ngModel)]="selectedTheme.sidebarColor">
@@ -184,7 +184,7 @@
                             </div>
                         </div>
 
-                        <div class="input-group mt-6">
+                        <div class="form-group mt-6">
                             <label class="premium-checkbox-label inline-flex">
                                 <input type="checkbox" [(ngModel)]="selectedTheme.enableGradientFading">
                                 <span class="checkmark"></span>

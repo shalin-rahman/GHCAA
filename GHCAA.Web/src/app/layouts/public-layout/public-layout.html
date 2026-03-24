@@ -26,10 +26,10 @@
 <nav class="glass-nav" [class.with-banner]="activeTheme">
     <div class="container nav-content">
         <div class="logo">
-            <img src="/assets/logo.jpg" alt="GHC" class="mini-logo">
+            <img [src]="appConfig.logoUrl" alt="Logo" class="mini-logo">
             <div class="logo-text">
-                <span class="abbr">GHCAA</span>
-                <span class="full hide-mobile hidden md:block">Govt. Haraganga College Alumni Association</span>
+                <span class="abbr">{{ appConfig.shortName }}</span>
+                <span class="full hide-mobile hidden md:block">{{ appConfig.fullName }}</span>
             </div>
         </div>
 

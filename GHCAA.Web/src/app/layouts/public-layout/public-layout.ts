@@ -1,11 +1,11 @@
-import { Component, inject, OnDestroy, ChangeDetectorRef, HostBinding } from '@angular/core';
+import { Component, inject, OnDestroy, ChangeDetectorRef, HostBinding, effect } from '@angular/core';
 import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
 import { AppFooter } from '../../common/footer/footer';
 import { ThemeService } from '../../core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { filter } from 'rxjs';
-import { effect } from '@angular/core';
+import { APP_CONFIG } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-public-layout',
@@ -19,12 +19,12 @@ export class PublicLayout implements OnDestroy {
   private titleService = inject(Title);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  
+  appConfig = APP_CONFIG;
 
   @HostBinding('style.background')
   get hostBackground(): string {
     const theme = this.themeService.activeSpecialTheme();
-    // Only override with sidebarColor if it is explicitly configured;
-    // otherwise return '' so the SCSS var(--page-bg, #000) / theme default applies.
     if (!theme || !theme.sidebarColor) return '';
     return theme.sidebarColor;
   }
@@ -33,14 +33,11 @@ export class PublicLayout implements OnDestroy {
   get hostTransition(): string { return 'background 0.6s ease'; }
 
   isMobileMenuOpen = false;
-
-  // Typewriter display state
   displayedText = '';
   private _typewriterInterval: ReturnType<typeof setInterval> | null = null;
   private _typewriterTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
-    // React to active theme changes
     effect(() => {
       const theme = this.themeService.activeSpecialTheme();
       this._clearTimers();
@@ -50,14 +47,10 @@ export class PublicLayout implements OnDestroy {
         return;
       }
 
-      const fullText = theme.announcementText;
-
       if (theme.animationStyle === 'Typewriter') {
-        // Typewriter: type it out char-by-char, then restart
-        this._runTypewriter(fullText);
+        this._runTypewriter(theme.announcementText);
       } else {
-        // Fade / 3D / Scroll — just show the full text and let CSS do the work
-        this.displayedText = fullText;
+        this.displayedText = theme.announcementText;
       }
     });
 
@@ -68,14 +61,14 @@ export class PublicLayout implements OnDestroy {
       const url = this.router.url;
       let title = 'Home';
       if (url.includes('login')) title = 'Members Login';
-      else if (url.includes('register')) title = 'Join GHCAA';
+      else if (url.includes('register')) title = `Join ${this.appConfig.shortName}`;
       else if (url.includes('about')) title = 'About Us';
       else if (url.includes('contact')) title = 'Contact Us';
       else if (url.includes('gallery')) title = 'Event Gallery';
       else if (url.includes('events')) title = 'Association Events';
       else if (url.includes('news')) title = 'Latest News';
 
-      this.titleService.setTitle(`${title} | Govt. Haraganga College Alumni Association`);
+      this.titleService.setTitle(`${title} | ${this.appConfig.fullName}`);
     });
   }
 

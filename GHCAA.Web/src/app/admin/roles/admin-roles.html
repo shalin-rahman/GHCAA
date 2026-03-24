@@ -20,8 +20,8 @@
             </div>
             <div class="modal-body">
                 <p class="text-xs uppercase font-bold text-muted mb-6 tracking-widest">Generating non-member administrative node</p>
-                <form [formGroup]="createForm" (ngSubmit)="createAdmin()" class="space-y-6">
-                    <div class="input-group">
+                <form [formGroup]="createForm" (ngSubmit)="createAdmin()" class="form-grid mb-8">
+                    <div class="form-group">
                         <label>Unique System Username *</label>
                         <input type="text" formControlName="username" 
                                [class.border-red-500]="createForm.get('username')?.touched && createForm.get('username')?.invalid"
@@ -30,7 +30,7 @@
                             Username is required (min 3 chars)
                         </div>
                     </div>
-                    <div class="input-group">
+                    <div class="form-group">
                         <label>Secure Cipher / Password *</label>
                         <div class="password-input relative flex items-center">
                             <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" 
@@ -44,7 +44,7 @@
                             Password is required (min 6 chars)
                         </div>
                     </div>
-                    <div class="input-group">
+                    <div class="form-group full">
                         <label>Initial Privilege Level</label>
                         <select formControlName="role">
                             @for (r of roles(); track r.name) {

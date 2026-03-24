@@ -68,54 +68,54 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="input-group">
+                <div class="form-grid mb-8">
+                    <div class="form-group">
                         <label>Engagement Title <span class="text-red-500">*</span></label>
                         <input type="text" formControlName="title" placeholder="Annual Reunion 2024" [class.border-red-500]="eventForm.get('title')?.invalid && eventForm.get('title')?.touched">
                         <div *ngIf="eventForm.get('title')?.invalid && eventForm.get('title')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Title is required</div>
                     </div>
-                    <div class="input-group">
+                    <div class="form-group">
                         <label>Scheduled Date & Time <span class="text-red-500">*</span></label>
                         <input type="datetime-local" formControlName="date" [class.border-red-500]="eventForm.get('date')?.invalid && eventForm.get('date')?.touched">
                         <div *ngIf="eventForm.get('date')?.invalid && eventForm.get('date')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Event date is required</div>
                     </div>
                 </div>
 
-                <div class="input-group">
+                <div class="form-group full mb-8">
                     <label>Venue / Location <span class="text-red-500">*</span></label>
                     <input type="text" formControlName="location" placeholder="Main Campus Auditorium" [class.border-red-500]="eventForm.get('location')?.invalid && eventForm.get('location')?.touched">
                     <div *ngIf="eventForm.get('location')?.invalid && eventForm.get('location')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Venue is required</div>
                 </div>
 
-                <div class="input-group">
+                <div class="form-group full mb-8">
                     <label>Project Brief / Description <span class="text-red-500">*</span></label>
                     <textarea formControlName="description" rows="5"
                         placeholder="Describe the purpose and plan for this event..." [class.border-red-500]="eventForm.get('description')?.invalid && eventForm.get('description')?.touched"></textarea>
                     <div *ngIf="eventForm.get('description')?.invalid && eventForm.get('description')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Description is required</div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="input-group">
+                <div class="form-grid mb-8">
+                    <div class="form-group">
                         <label>Registration Opens</label>
                         <input type="datetime-local" formControlName="registrationStartDate">
                     </div>
-                    <div class="input-group">
+                    <div class="form-group">
                         <label>Registration Closes (Deadline)</label>
                         <input type="datetime-local" formControlName="registrationEndDate">
                     </div>
-                    <div class="input-group">
+                    <div class="form-group full">
                         <label>Public Secretariat Note</label>
                         <input type="text" formControlName="adminNote"
                             placeholder="Public instruction or status update...">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="input-group">
+                <div class="form-grid mb-8">
+                    <div class="form-group">
                         <label>Endowment Fee (BDT)</label>
                         <input type="number" formControlName="registrationFee" placeholder="0.00">
                     </div>
-                    <div class="input-group">
+                    <div class="form-group">
                         <label>Visibility & Asset Access</label>
                         <div class="flex flex-col gap-4 py-2">
                             <label class="premium-checkbox-label">
@@ -445,11 +445,11 @@
                     
                     <div class="card-header">
                         <div class="card-logo">
-                            <img src="/assets/logo.jpg" alt="Logo">
+                            <img [src]="appConfig.logoUrl" alt="Logo">
                         </div>
                         <div class="org-info">
-                            <h1 class="text-green-800">Govt. Haraganga College Alumni Association</h1>
-                            <p class="subtitle text-green-700">Connecting Hearts, Building Legacy</p>
+                            <h1 class="text-green-800">{{ appConfig.fullName }}</h1>
+                            <p class="subtitle text-green-700">{{ appConfig.tagline }}</p>
                         </div>
                     </div>
 
@@ -490,13 +490,13 @@
                         <div class="security-row">
                             <div class="qr-placeholder">
                                 <div class="barcode">
-                                    <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]" class="bar" [style.width.px]="(i % 3 + 1) * 2"></div>
+                                    <div *ngFor="let char of (invitationData()?.id?.toString() || '1234567890').split('')" class="bar" [style.width.px]="((char * 1) % 3 + 1) * 2"></div>
                                 </div>
                                 <span class="text-[8px] font-mono mt-1">E-CERTIFIED PASS</span>
                             </div>
                             <div class="approval-seal">
                                 <div class="seal">
-                                    <span class="seal-txt">GHC APPROVED</span>
+                                    <span class="seal-txt">{{ appConfig.approvalSeal }}</span>
                                 </div>
                                 <p class="seal-date">Validated on {{ invitationData()?.registeredAt | date:'shortDate' }}</p>
                             </div>

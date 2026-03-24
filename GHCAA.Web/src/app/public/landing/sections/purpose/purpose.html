@@ -58,12 +58,12 @@
             <!-- 2. Logo Column -->
             <div class="column-logo">
                 <div class="logo-wrapper">
-                    <img src="/assets/logo.jpg" alt="GHCAA Logo" class="main-logo-unified">
+                    <img [src]="appConfig.logoUrl" alt="Logo" class="main-logo-unified">
                     <div class="logo-glow"></div>
                 </div>
                 <div class="logo-caption-compact">
-                    <h3>Haragangian</h3>
-                    <p>Sharing Heritage, Aligning Lives, Integrating Networks.</p>
+                    <h3>{{ appConfig.memberNickname }}</h3>
+                    <p>{{ appConfig.tagline }}</p>
                     <p class="history-note" style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8; font-style: italic;">
                         Upholding the visionary legacy of Mr. Ashutosh Ganguly since 1938.
                     </p>
