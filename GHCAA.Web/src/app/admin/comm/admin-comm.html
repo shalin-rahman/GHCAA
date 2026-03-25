@@ -1,7 +1,7 @@
 <div class="admin-feature">
     <div class="page-header">
         <div class="header-text">
-            <h2>Association Communications</h2>
+            <h2>Communications</h2>
             <p>Broadcast announcements and manage email ecosystem.</p>
         </div>
         <div class="header-actions"></div>
@@ -246,7 +246,9 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
-                <button class="btn btn-accent" (click)="saveTemplate()">Save Template</button>
+                <button class="btn btn-accent" (click)="saveTemplate()" [disabled]="isSaving()">
+                    {{ isSaving() ? 'Saving...' : (editingTemplate()?.id ? 'Update' : 'Save') }}
+                </button>
             </div>
         </div>
     </div>

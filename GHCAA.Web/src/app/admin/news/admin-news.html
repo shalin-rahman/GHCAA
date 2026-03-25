@@ -2,7 +2,7 @@
     @if (!showForm()) {
     <div class="page-header">
         <div class="header-text">
-            <h2>News Management</h2>
+            <h2>News Posts</h2>
             <small>Create, edit, and publish institutional news articles</small>
         </div>
         <div class="header-actions">
@@ -90,9 +90,9 @@
                 </div>
 
                 <div class="form-actions flex gap-4">
-                    <button type="button" class="btn btn-secondary px-8 h-12" (click)="cancelForm()">Discard Draft</button>
-                    <button type="submit" class="btn btn-accent shadow-gold px-12 h-12 font-black">
-                        {{ saving() ? 'Transmitting...' : (editingId() ? 'Update Article' : 'Publish Article') }}
+                    <button type="button" class="btn btn-secondary px-8 h-12" (click)="cancelForm()">Cancel</button>
+                    <button type="submit" class="btn btn-accent shadow-gold px-12 h-14 font-black">
+                        {{ saving() ? 'Saving...' : (editingId() ? 'Update' : 'Save') }}
                     </button>
                 </div>
             </div>

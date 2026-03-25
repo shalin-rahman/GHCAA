@@ -1,7 +1,7 @@
 <div class="admin-feature">
     <div class="page-header">
         <div class="header-text">
-            <h2>Gallery Management</h2>
+            <h2>Gallery Albums</h2>
             <small>{{ galleries().length }} albums available</small>
         </div>
         <div class="header-actions">
@@ -44,12 +44,9 @@
                 <textarea [(ngModel)]="newGallery.description" name="description" rows="3"></textarea>
             </div>
             <div class="mt-8 flex justify-end gap-3">
-                @if (editingId()) {
-                    <button type="button" (click)="toggleForm()" class="btn btn-secondary">Cancel</button>
-                }
+                <button type="button" (click)="toggleForm()" class="btn btn-secondary">Cancel</button>
                 <button type="submit" class="btn btn-accent" [disabled]="isSubmitting()">
-                    @if (isSubmitting()) { <span>⏳ Transmitting...</span> }
-                    @else { <span>{{ editingId() ? 'Save Configuration' : 'Create Album' }}</span> }
+                    {{ isSubmitting() ? 'Saving...' : (editingId() ? 'Update' : 'Save') }}
                 </button>
             </div>
         </form>
@@ -141,11 +138,11 @@
                 </div>
                 <div class="flex gap-4">
                     <label class="btn btn-secondary btn-sm cursor-pointer">
-                        {{ uploadedFiles().length > 0 ? 'Selected: ' + uploadedFiles().length : '📁 Select Photos' }}
+                        {{ uploadedFiles().length > 0 ? 'Selected: ' + uploadedFiles().length : 'Select Photos' }}
                         <input type="file" multiple (change)="onPhotosSelected($event)" class="hidden" accept="image/*">
                     </label>
                     <button class="btn btn-accent btn-sm" [disabled]="uploadedFiles().length === 0 || isUploading()" (click)="uploadSelectedPhotos()">
-                        {{ isUploading() ? '⏳ Uploading...' : '🚀 Upload Now' }}
+                        {{ isUploading() ? 'Saving...' : 'Upload' }}
                     </button>
                 </div>
             </div>

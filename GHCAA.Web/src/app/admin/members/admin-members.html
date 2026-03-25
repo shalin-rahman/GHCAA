@@ -1,7 +1,7 @@
 <div class="admin-feature">
     <div class="page-header">
         <div class="header-text">
-            <h2>Member Registry</h2>
+            <h2>All Members</h2>
             <small>{{ totalItems() }} total members</small>
         </div>
         <div class="header-actions flex items-center gap-3">
@@ -170,7 +170,7 @@
             <div class="flex justify-between items-center mb-8 border-b pb-4">
                 <div class="flex gap-4">
                     <button class="btn btn-secondary btn-sm" (click)="toggleEdit()">
-                        {{ isEditing() ? '❌ Discard Changes' : '✏️ Edit Profile' }}
+                        {{ isEditing() ? 'Cancel' : '✏️ Edit Profile' }}
                     </button>
                     @if (!isEditing()) {
                     <button class="btn btn-secondary btn-sm" (click)="sendResetLink(selectedMember().id)">
@@ -572,8 +572,8 @@
 
         @if (isEditing()) {
         <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="toggleEdit()">Discard Changes</button>
-            <button class="btn btn-accent" (click)="saveMember()">🚀 Synchronize Information</button>
+            <button class="btn btn-secondary" (click)="toggleEdit()">Cancel</button>
+            <button class="btn btn-accent" (click)="saveMember()">{{ submitting() ? 'Saving...' : 'Update' }}</button>
         </div>
         }
     </div>
@@ -598,7 +598,7 @@
                             <label class="block mb-4 font-black text-xs uppercase opacity-70">Excel Master Record (.xlsx)</label>
                             <input type="file" accept=".xlsx" (change)="onFileSelected($event)" class="hidden" id="excelUpload">
                             <button class="btn btn-secondary w-full" onclick="document.getElementById('excelUpload').click()">
-                                {{ importFile() ? '✅ ' + importFile()?.name : '📄 Select Spreadsheet' }}
+                                {{ importFile() ? '✅ ' + importFile()?.name : 'Select Spreadsheet' }}
                             </button>
                         </div>
                         <div class="upload-zone p-8 border-2 border-dashed border-gold rounded-xl text-center cursor-pointer">
@@ -606,7 +606,7 @@
                             <input type="file" multiple webkitdirectory directory accept="image/*"
                                 (change)="onPhotosSelected($event)" class="hidden" id="photoUpload">
                             <button class="btn btn-secondary w-full" onclick="document.getElementById('photoUpload').click()">
-                                {{ photoFiles().length > 0 ? '✅ ' + photoFiles().length + ' Images' : '📸 Select Folder' }}
+                                {{ photoFiles().length > 0 ? '✅ ' + photoFiles().length + ' Images' : 'Select Folder' }}
                             </button>
                         </div>
                     </div>
@@ -646,9 +646,9 @@
             <button class="btn btn-accent px-10 shadow-gold" [disabled]="!importFile() || isImporting()"
                 (click)="executeImport()">
                 @if (isImporting()) {
-                    <span class="spinner">⏳</span> Optimizing Data...
+                    <span class="spinner">⏳</span> Importing...
                 } @else {
-                    <span class="icon">🚀</span> Execute Migration
+                    Import
                 }
             </button>
         </div>

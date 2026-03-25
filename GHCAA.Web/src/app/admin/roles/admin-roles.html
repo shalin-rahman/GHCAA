@@ -1,7 +1,7 @@
 <div class="admin-feature reveal-top">
     <div class="page-header">
         <div class="header-text">
-            <h2>Identity & Authorization</h2>
+            <h2>User Roles</h2>
             <small>Manage security boundaries and administrative privilege levels for the entire ecosystem.</small>
         </div>
         <div class="header-actions">
@@ -54,10 +54,10 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" (click)="showCreateForm.set(false)" class="btn btn-secondary">Abort</button>
+            <div class="form-actions mt-6 flex gap-4">
+                <button type="button" (click)="showCreateForm.set(false)" class="btn btn-secondary">Cancel</button>
                 <button type="submit" (click)="createAdmin()" [disabled]="submitting() || createForm.invalid" class="btn btn-accent shadow-gold">
-                    {{ submitting() ? 'Compiling...' : 'Execute Creation' }}
+                    {{ submitting() ? 'Saving...' : 'Save' }}
                 </button>
             </div>
         </div>
@@ -121,7 +121,7 @@
                                 }
                             </select>
                             <button class="btn btn-accent btn-sm !py-1.5" (click)="assignRole(user.id, roleSelect.value)">
-                                Inject
+                                Assign
                             </button>
                         </div>
                     </td>

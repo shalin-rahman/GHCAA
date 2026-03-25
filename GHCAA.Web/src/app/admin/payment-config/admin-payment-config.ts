@@ -139,6 +139,29 @@ export class AdminPaymentConfig implements OnInit {
       }
     });
   }
+
+  getIconPath(icon: string): string {
+    if (!icon) return '';
+    if (icon.includes('/') || icon.includes('.')) return icon;
+    
+    const term = icon.toLowerCase().trim();
+    if (term === 'bkash') return '/assets/images/bkash.png';
+    if (term === 'nagad') return '/assets/images/nagad.png';
+    if (term === 'rocket') return '/assets/images/rocket.png';
+    if (term === 'sslcommerz') return '/assets/images/sslcommerz.png';
+    if (term === 'visa') return '/assets/images/visa.png';
+    if (term === 'master' || term === 'mastercard') return '/assets/images/master.png';
+    if (term === 'card') return '/assets/images/card.png';
+    if (term === 'visa-master') return '/assets/images/visa-master.png';
+    
+    return '';
+  }
+
+  isImageIcon(icon: string): boolean {
+    if (!icon) return false;
+    return icon.includes('/') || icon.includes('.') || 
+           ['bkash', 'nagad', 'rocket', 'sslcommerz', 'visa', 'master', 'mastercard', 'card', 'visa-master'].includes(icon.toLowerCase().trim());
+  }
 }
 
 

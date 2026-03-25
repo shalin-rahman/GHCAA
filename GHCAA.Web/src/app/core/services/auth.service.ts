@@ -18,7 +18,37 @@ export class AuthService {
     public currentUser = computed(() => this._currentUser());
     public isAuthenticated = computed(() => !!this._currentUser());
 
-    constructor() { }
+    private inactivityTimer: any;
+    private readonly TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+
+    constructor() { 
+        this.initActivityTracking();
+    }
+
+    private initActivityTracking() {
+        if (typeof window !== 'undefined') {
+            ['mousemove', 'keydown', 'click', 'scroll'].forEach(e => 
+                window.addEventListener(e, () => this.resetTimer(), { passive: true })
+            );
+            this.resetTimer();
+        }
+    }
+
+    private resetTimer() {
+        if (this.inactivityTimer) {
+            clearTimeout(this.inactivityTimer);
+        }
+        
+        if (!this.isAuthenticated()) return;
+        
+        this.inactivityTimer = setTimeout(() => {
+            if (this.isAuthenticated()) {
+                this._currentUser.set(null);
+                localStorage.removeItem('user_session');
+                this.router.navigate(['/login'], { queryParams: { expired: true } });
+            }
+        }, this.TIMEOUT_MS);
+    }
 
     login(credentials: LoginDto): Observable<User> {
         return this.http.post<TokenResponseDto>(API_ENDPOINTS.AUTH.LOGIN, credentials).pipe(
@@ -48,6 +78,7 @@ export class AuthService {
     private setSession(user: User) {
         this._currentUser.set(user);
         localStorage.setItem('user_session', JSON.stringify(user));
+        this.resetTimer();
     }
 
     private getUserFromStorage(): User | null {

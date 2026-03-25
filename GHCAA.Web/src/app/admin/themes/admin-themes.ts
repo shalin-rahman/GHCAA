@@ -50,7 +50,11 @@ export class AdminThemes implements OnInit {
 
     openEdit(theme: SpecialDayTheme) {
         this.isEditing.set(true);
-        this.selectedTheme = { ...theme };
+        this.selectedTheme = { 
+            ...theme,
+            startDate: theme.startDate ? new Date(theme.startDate).toISOString().split('T')[0] : '',
+            endDate: theme.endDate ? new Date(theme.endDate).toISOString().split('T')[0] : ''
+        };
         this.showForm.set(true);
     }
 

@@ -2,15 +2,15 @@
   @if (!showForm()) {
   <div class="page-header">
     <div class="header-text">
-      <h2>Finance Routing Profiles</h2>
+      <h2>Payment Settings</h2>
       <small>Manage payment gateways and manual receiving channels for the portal.</small>
     </div>
     <div class="header-actions flex gap-4">
         <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
-            New Routing Asset
+            <span class="icon">✨</span> Add Payment Method
         </button>
         <button *ngIf="configs().length === 0" (click)="seedDefaults()" class="btn btn-secondary">
-            System Seed Defaults
+            Restore Defaults
         </button>
     </div>
   </div>
@@ -35,7 +35,8 @@
               <tr class="animate-fade-in" [class.opacity-50]="!config.isEnabled">
                   <td>
                       <div class="flex items-center gap-3">
-                          <span class="text-2xl">{{ config.icon || '💸' }}</span>
+                          <img *ngIf="isImageIcon(config.icon)" [src]="getIconPath(config.icon)" alt="Logo" class="w-10 h-10 object-contain rounded">
+                          <span *ngIf="!isImageIcon(config.icon)" class="text-2xl">{{ config.icon || '💸' }}</span>
                           <span class="badge badge-secondary">{{ config.method }}</span>
                       </div>
                   </td>
@@ -54,8 +55,10 @@
                       </span>
                   </td>
                   <td class="actions-cell">
-                      <button class="icon-btn edit" (click)="openEditForm(config)" title="Configure Routing">✏️</button>
-                      <button class="icon-btn archive" [class.text-red-500]="config.isEnabled" [class.text-green-500]="!config.isEnabled" (click)="toggleStatus(config.id)" [title]="config.isEnabled ? 'Deactivate' : 'Enable'">
+                      <button class="action-btn edit" (click)="openEditForm(config)">
+                          <span>✏️</span> Edit
+                      </button>
+                      <button class="action-btn delete" [class.text-red-500]="config.isEnabled" [class.text-green-500]="!config.isEnabled" (click)="toggleStatus(config.id)" [title]="config.isEnabled ? 'Deactivate' : 'Enable'">
                           {{ config.isEnabled ? '⏳' : '✅' }}
                       </button>
                   </td>
@@ -64,9 +67,9 @@
               <tr>
                   <td colspan="5" class="empty-state py-20">
                       <span>⚠️</span>
-                      <h3>No Routing Profiles</h3>
-                      <p>No financial routing profiles exist in the system core.</p>
-                      <button class="btn btn-accent mt-4 shadow-gold" (click)="seedDefaults()">Execute Initial Generation Routine</button>
+                      <h3>No Payment Methods</h3>
+                      <p>No payment methods exist in the system core.</p>
+                      <button class="btn btn-accent mt-4 shadow-gold" (click)="seedDefaults()">Restore Defaults</button>
                   </td>
               </tr>
               }
@@ -80,8 +83,8 @@
                   <span>←</span>
               </button>
               <div>
-                  <h2 class="text-2xl font-black text-accent tracking-tighter">Edit Routing Parameters</h2>
-                  <p class="text-xs uppercase font-black tracking-widest text-muted">Configuring network payload and constraints</p>
+                  <h2 class="text-2xl font-black text-accent tracking-tighter">{{ editingId() ? 'Update' : 'Add' }} Payment Method</h2>
+                  <p class="text-xs uppercase font-black tracking-widest text-muted">Configure payment gateway and account details</p>
               </div>
           </div>
 
@@ -93,8 +96,9 @@
                       <div *ngIf="form.get('displayName')?.invalid && form.get('displayName')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Display name is required</div>
                   </div>
                   <div class="form-group">
-                      <label>Network Emoji/Icon</label>
-                      <input type="text" formControlName="icon">
+                      <label>Network Emoji or Logo Path</label>
+                      <input type="text" formControlName="icon" placeholder="e.g. 📱 or /assets/images/payment/bkash.svg">
+                      <p class="text-[9px] text-muted uppercase font-black px-2 mt-1">Accepts Emoji or relative path to SVG/PNG asset.</p>
                   </div>
               </div>
 
@@ -199,10 +203,10 @@
                   </label>
               </div>
 
-              <div class="flex gap-4 pt-4 border-t border-white/5">
-                  <button type="button" (click)="showForm.set(false)" class="btn btn-secondary flex-1 py-4 h-14">Abort Sequence</button>
+              <div class="flex gap-4 pt-10 mt-10 border-t border-white/5">
+                  <button type="button" (click)="showForm.set(false)" class="btn btn-secondary flex-1 py-4 h-14">Cancel</button>
                   <button type="submit" [disabled]="submitting() || form.invalid" class="btn btn-accent flex-1 py-4 h-14 shadow-gold font-black">
-                      {{ submitting() ? 'Compiling...' : 'Apply Overrides' }}
+                      {{ submitting() ? 'Saving...' : (editingId() ? 'Update' : 'Save') }}
                   </button>
               </div>
           </form>

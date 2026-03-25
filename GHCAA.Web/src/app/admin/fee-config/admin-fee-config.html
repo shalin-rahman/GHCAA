@@ -2,7 +2,7 @@
   @if (!showForm()) {
   <div class="page-header">
     <div class="header-text">
-        <h2>Financial Policy Configurations</h2>
+        <h2>Fee Policy</h2>
         <small>Manage membership subscription and induction fee schedules historically.</small>
     </div>
     <div class="header-actions flex gap-4">
@@ -51,8 +51,12 @@
                       </span>
                   </td>
                   <td class="actions-cell">
-                      <button class="icon-btn edit" (click)="openEditForm(c)" title="Edit Policy">✏️</button>
-                      <button class="icon-btn archive text-red-500" (click)="deleteConfig(c.id)" title="Deactivate Policy">⏳</button>
+                      <button class="action-btn edit" (click)="openEditForm(c)">
+                          <span>✏️</span> Edit
+                      </button>
+                      <button class="action-btn archive text-red-500" (click)="deleteConfig(c.id)" title="Deactivate Policy">
+                          <span>⏳</span> Archive
+                      </button>
                   </td>
               </tr>
               } @empty {
@@ -128,7 +132,7 @@
               <div class="form-actions border-t pt-8 mt-4 flex gap-4">
                   <button type="button" class="btn btn-secondary flex-1" (click)="showForm.set(false)">Cancel</button>
                   <button type="submit" class="btn btn-accent flex-1 shadow-gold" [disabled]="form.invalid || submitting()">
-                      {{ submitting() ? 'Filing Policy...' : (editingId() ? 'Apply Changes' : 'Publish Schedule') }}
+                      {{ submitting() ? 'Saving...' : (editingId() ? 'Update' : 'Save') }}
                   </button>
               </div>
           </form>

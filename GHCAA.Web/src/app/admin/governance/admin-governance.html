@@ -1,7 +1,7 @@
 <div class="admin-feature">
     <div class="page-header">
         <div class="header-text">
-            <h2>Governance Management</h2>
+            <h2>Executive Committee</h2>
             <small>Manage Executive Committee Periods and Role Assignments</small>
         </div>
         <div class="header-actions">
@@ -144,7 +144,7 @@
         <div class="modal-footer">
             <button class="btn btn-outline" (click)="showPeriodModal.set(false)">Cancel</button>
             <button class="btn btn-accent shadow-gold" (click)="savePeriod()" [disabled]="isSavingPeriod()">
-                {{ isSavingPeriod() ? 'Saving...' : (editPeriodData().id ? 'Update Period' : 'Save Period') }}
+                {{ isSavingPeriod() ? 'Saving...' : (editPeriodData().id ? 'Update' : 'Save') }}
             </button>
         </div>
     </div>
@@ -200,7 +200,9 @@
         </div>
         <div class="modal-footer">
             <button class="btn btn-outline" (click)="showAssignModal.set(false)">Cancel</button>
-            <button class="btn btn-accent shadow-gold" (click)="assignRole()" [disabled]="!assignData().memberId || posInput.invalid">Assign Role</button>
+            <button class="btn btn-accent shadow-gold" (click)="assignRole()" [disabled]="!assignData().memberId || posInput.invalid">
+                Assign Role
+            </button>
         </div>
     </div>
 </div>

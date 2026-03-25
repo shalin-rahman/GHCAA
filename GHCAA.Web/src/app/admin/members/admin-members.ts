@@ -32,6 +32,7 @@ export class AdminMembers implements OnInit {
   categoryFilter = signal('all');
   selectedMember = signal<any>(null);
   isEditing = signal(false);
+  submitting = signal(false);
   certToUpload: File | null = null;
   payToUpload: File | null = null;
   photoToUpload: File | null = null;
@@ -239,7 +240,16 @@ export class AdminMembers implements OnInit {
   }
 
   openDetail(member: any) { 
-    this.selectedMember.set({ ...member }); 
+    const mappedMember = { ...member };
+    if (mappedMember.dateOfBirth) mappedMember.dateOfBirth = new Date(mappedMember.dateOfBirth).toISOString().split('T')[0];
+    if (mappedMember.professionalHistory) {
+        mappedMember.professionalHistory = mappedMember.professionalHistory.map((ph: any) => ({
+            ...ph,
+            startDate: ph.startDate ? new Date(ph.startDate).toISOString().split('T')[0] : ''
+        }));
+    }
+    
+    this.selectedMember.set(mappedMember); 
     this.isEditing.set(false); 
     this.photoToUpload = null; 
     this.photoPreview.set(null); 
@@ -299,6 +309,7 @@ export class AdminMembers implements OnInit {
 
     ensureValidAcademicData(member);
 
+    this.submitting.set(true);
     this.adminService.updateMember(member.id, {
       fullName: member.fullName,
       fatherName: member.fatherName,
@@ -353,11 +364,15 @@ export class AdminMembers implements OnInit {
           this.finalizeSave();
         }
       },
-      error: () => this.notify.error('Update failed.')
+      error: () => {
+        this.notify.error('Update failed.');
+        this.submitting.set(false);
+      }
     });
   }
 
   private finalizeSave() {
+    this.submitting.set(false);
     const memberId = this.selectedMember()?.id;
     this.isEditing.set(false);
     this.certToUpload = null;

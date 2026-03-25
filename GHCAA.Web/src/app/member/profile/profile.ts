@@ -42,8 +42,15 @@ export class Profile implements OnInit {
         this.profileService.getProfile().subscribe({
             next: (p) => {
                 this.profile = { ...p };
+                if (this.profile.dateOfBirth) this.profile.dateOfBirth = new Date(this.profile.dateOfBirth).toISOString().split('T')[0];
                 if (!this.profile.academicHistory) this.profile.academicHistory = [];
                 if (!this.profile.professionalHistory) this.profile.professionalHistory = [];
+                else {
+                    this.profile.professionalHistory = this.profile.professionalHistory.map((ph: any) => ({
+                        ...ph,
+                        startDate: ph.startDate ? new Date(ph.startDate).toISOString().split('T')[0] : ''
+                    }));
+                }
                 this.loading.set(false);
             },
             error: () => this.loading.set(false)

@@ -2,7 +2,7 @@
     @if (!showForm()) {
     <div class="page-header">
         <div class="header-text">
-            <h2>Special Day Themes</h2>
+            <h2>Special Themes</h2>
             <small>Manage dynamic navigation bar appearance for specific dates.</small>
         </div>
         <div class="header-actions">
@@ -218,11 +218,11 @@
             <!-- Footer Buttons -->
             <div class="flex gap-4 pt-10 mt-10 border-t border-white/5">
                 <button (click)="showForm.set(false)" class="btn btn-secondary flex-1 py-4 h-14">
-                    Discard
+                    Cancel
                 </button>
                 <button (click)="saveTheme()" [disabled]="isSaving()"
                     class="btn btn-accent flex-1 py-4 h-14 shadow-gold font-black">
-                    {{ isSaving() ? 'Saving...' : (isEditing() ? 'Commit Configuration' : 'Initialize Asset') }}
+                    {{ isSaving() ? 'Saving...' : (isEditing() ? 'Update' : 'Save') }}
                 </button>
             </div>
         </div>
