@@ -152,6 +152,27 @@ export class MemberArticles implements OnInit {
   }
 
 
+  deleteArticle(id: number) {
+    const article = this.mySubmissions().find(a => a.id === id);
+    if (!article) return;
+    
+    // Only allow deleting drafts or pending submissions. Approved ones are permanent.
+    if (article.status === SUBMISSION_STATUS.APPROVED) {
+        this.notify.warning('Published articles cannot be deleted directly. Contact admin.');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to delete this submission?')) return;
+
+    this.newsService.deleteMySubmission(id).subscribe({
+      next: () => {
+        this.notify.success('Article deleted');
+        this.loadMySubmissions();
+      },
+      error: () => this.notify.error('Failed to delete article')
+    });
+  }
+
   getCategoryLabel(val: string) {
     return getArticleCategoryLabel(val);
   }

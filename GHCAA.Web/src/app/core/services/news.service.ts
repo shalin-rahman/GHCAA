@@ -72,4 +72,8 @@ export class NewsService {
     rejectSubmission(id: number, reason: string): Observable<any> {
         return this.http.post(`${this.apiUrl}/${id}/reject`, { reason });
     }
+
+    deleteMySubmission(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/my-submissions/${id}`);
+    }
 }
