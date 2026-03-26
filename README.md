@@ -80,6 +80,38 @@ The following features and integrations have been prioritized for the next phase
 - **Automatic Session Invalidation**: Real-time invalidation of all JWT tokens for a user if their status changes to "Terminated" or "Inactive".
 - **Real-time Notifications**: SignalR integration for instant alerts on approvals, messages, and event updates.
 
+**6. Mobile App (Flutter) Development**
+- [ ] **Phase 1: Project Setup & Architecture**
+  - [ ] Initialize new Flutter project (`GHCAA.Mobile`).
+  - [ ] Configure Android and iOS native settings (set logo as app icon, bundle IDs).
+  - [ ] Setup state management (e.g., Riverpod or Provider), routing (e.g., go_router), and HTTP client (e.g., Dio).
+  - [ ] Create base aesthetic and theme ("Midnight Gold": dark base, royal gold highlights, glassmorphic panels, fast list rendering).
+- [ ] **Phase 2: Authentication & Onboarding Strategy**
+  - [ ] Design App Home Screen as the initial launch point before login.
+  - [ ] Implement the 5-step registration wizard accessible directly from the App Home screen.
+  - [ ] Implement secure login screen accessible from the App Home (with Member/Admin context selection).
+  - [ ] Implement JWT token storage using secure storage.
+- [ ] **Phase 3: Member Portal Features (Full Feature Parity)**
+  - [ ] Develop Personal Dashboard (Status, Notifications, Stats).
+  - [ ] Build profile management, privacy toggles, and digital ID card (SVG/PDF/QR).
+  - [ ] Implement Alumni Directory with "Infinite Scroll" and filtering functionality.
+  - [ ] Develop Event listing, detail, and registration screens (with payment gateway hooks).
+  - [ ] Real-time tracking of Membership Dues and Payment History.
+- [ ] **Phase 4: Admin Command Center (Full Feature Parity)**
+  - [ ] Develop Admin Dashboard (Global Analytics).
+  - [ ] Implement Membership Governance screen (Approve/Reject requests).
+  - [ ] Create UI for EC Management, Event Management, and Payment Config.
+  - [ ] Implement Communication Hub (mass-messaging) and Media Gallery CMS capabilities.
+  - [ ] Include advanced reporting and member search tools.
+- [ ] **Phase 5: Networking & Advanced Features**
+  - [ ] Integrate Peer-to-Peer messaging feature.
+  - [ ] Integrate Job & Mentorship Hub.
+  - [ ] Integrate Haraganga AI Assistant chat UI.
+- [ ] **Phase 6: Quality Assurance & Polish**
+  - [ ] End-to-end testing of Member and Admin flows.
+  - [ ] Add micro-animations and polish glassmorphic UI components.
+  - [ ] Finalize build for Android (APK/AAB) and iOS (IPA).
+
 ---
 
 ## 🛠️ Development Handover Checklist
