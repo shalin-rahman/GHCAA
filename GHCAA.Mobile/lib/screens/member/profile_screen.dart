@@ -6,6 +6,8 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../features/auth/auth_service.dart';
+import '../../core/services/device_info_service.dart';
+
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -51,11 +53,21 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
 
                 _buildSection(context, 'About GHCAA Portal', [
+                  Consumer(builder: (context, ref, _) {
+                    final deviceAsync = ref.watch(deviceInfoProvider);
+                    final deviceStr = deviceAsync.when(
+                      data: (d) => d.toString(),
+                      loading: () => 'Detecting device...',
+                      error: (_, __) => 'Device info unavailable',
+                    );
+                    return _buildActionTile(context, Icons.phone_android_outlined, deviceStr, null, color: AppTheme.textSecondaryDark);
+                  }),
                   _buildActionTile(context, Icons.info_outline, 'Version Info (1.0.0 Dev)', null),
                   _buildActionTile(context, Icons.gavel, 'Terms & Privacy Policy', null),
                   _buildActionTile(context, Icons.developer_mode, 'Lead Dev: Shalin Rahman', null),
-                  _buildActionTile(context, Icons.business_outlined, 'Partnership: Nifty Coders', null, color: AppTheme.royalGold.withOpacity(0.5)),
+                  _buildActionTile(context, Icons.business_outlined, 'Partnership: GHCAA', null, color: AppTheme.royalGold.withOpacity(0.5)),
                 ]),
+
                 const SizedBox(height: 48),
 
                 SizedBox(

@@ -25,9 +25,9 @@ class GHCAAMobileApp extends ConsumerWidget {
     
     return MaterialApp.router(
       title: 'GHCAA Mobile',
-      theme: AppTheme.lightTheme,
+      theme: AppTheme.darkTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
     );

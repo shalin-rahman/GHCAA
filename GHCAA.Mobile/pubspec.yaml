@@ -24,6 +24,7 @@ dependencies:
   pdf: ^3.10.8
   printing: ^5.11.1
   package_info_plus: ^8.1.0
+  device_info_plus: ^10.1.0
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.0
   shimmer: ^3.0.0

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/password_field.dart';
 import '../../features/auth/auth_service.dart';
-
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -22,9 +22,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _handleLogin() async {
     setState(() => _isLoading = true);
     final success = await ref.read(authServiceProvider).login(
-      _identifierController.text,
-      _passwordController.text,
-    );
+          _identifierController.text,
+          _passwordController.text,
+        );
     setState(() => _isLoading = false);
 
     if (success) {
@@ -35,7 +35,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         context.go('/dashboard');
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login Failed. Check credentials.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login Failed. Check credentials.')));
     }
   }
 
@@ -62,29 +63,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppTheme.royalGold.withOpacity(0.2)),
+                    border:
+                        Border.all(color: AppTheme.royalGold.withOpacity(0.2)),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
-                      'assets/logo.jpg', 
+                      'assets/logo.jpg',
                       height: 100,
                       width: 100,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.school, size: 60, color: AppTheme.royalGold),
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.school,
+                          size: 60,
+                          color: AppTheme.royalGold),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text('GHCAA', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: 2, color: Colors.white)),
+                Text(AppConfig.organizationAcronym,
+                    style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2,
+                        color: Colors.white)),
                 const SizedBox(height: 4),
-                const Text(
-                  'Sharing Heritage, Aligning Lives, Integrating Networks', 
-                  style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic, color: AppTheme.royalGold, letterSpacing: 0.5),
+                Text(
+                  AppConfig.organizationTagline,
+                  style: const TextStyle(
+                      fontSize: 10,
+                      fontStyle: FontStyle.italic,
+                      color: AppTheme.royalGold,
+                      letterSpacing: 0.5),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
-                const Text('Government Haraganga College Alumni Association', style: TextStyle(fontSize: 12, color: AppTheme.textSecondaryDark)),
+                Text(AppConfig.organizationName,
+                    style: const TextStyle(
+                        fontSize: 12, color: AppTheme.textSecondaryDark)),
                 const SizedBox(height: 48),
                 GlassContainer(
                   padding: const EdgeInsets.all(24.0),
@@ -92,33 +108,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       TextField(
                         controller: _identifierController,
-                        decoration: const InputDecoration(labelText: 'Mobile, NID or Email', prefixIcon: Icon(Icons.person_outline)),
+                        decoration: const InputDecoration(
+                            labelText: 'User Name',
+                            prefixIcon: Icon(Icons.person_outline)),
                       ),
                       const SizedBox(height: 16),
                       PasswordField(
                         controller: _passwordController,
-                        labelText: 'Secure Password',
+                        labelText: 'Password',
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _handleLogin(),
                       ),
-
                       const SizedBox(height: 32),
                       _isLoading
-                        ? const CircularProgressIndicator(color: AppTheme.royalGold)
-                        : SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(onPressed: _handleLogin, child: const Text('AUTHENTICATE')),
-                          ),
+                          ? const CircularProgressIndicator(
+                              color: AppTheme.royalGold)
+                          : SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                  onPressed: _handleLogin,
+                                  child: const Text('AUTHENTICATE')),
+                            ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
                 TextButton(
                   onPressed: () => context.push('/register'),
-                  child: const Text('Request Enrollment Membership', style: TextStyle(color: AppTheme.royalGold)),
+                  child: const Text('Request Enrollment Membership',
+                      style: TextStyle(color: AppTheme.royalGold)),
                 ),
                 const SizedBox(height: 32),
-                const Text('v1.0.0 (Gold Edition)', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                Text(AppConfig.appVersion,
+                    style: const TextStyle(fontSize: 10, color: Colors.grey)),
               ],
             ),
           ),

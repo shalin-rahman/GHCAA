@@ -32,7 +32,10 @@ class GlassContainer extends StatelessWidget {
               width: 1.5,
             ),
           ),
-          child: child,
+          child: DefaultTextStyle(
+            style: const TextStyle(color: AppTheme.textPrimaryDark, fontFamily: 'Outfit'),
+            child: child,
+          ),
         ),
       ),
     );

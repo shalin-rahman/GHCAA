@@ -89,12 +89,13 @@ class AppScaffold extends ConsumerWidget {
         }
         
         final List<Color> gradientColors = isAdmin 
-          ? (isDark ? [AppTheme.adminMidnightSurface, AppTheme.adminMidnightBase] : [AppTheme.adminDaylightSurface, AppTheme.adminDaylightBase])
-          : (isDark ? [AppTheme.midnightSurface, AppTheme.midnightBase] : [AppTheme.daylightSurface, AppTheme.daylightBase]);
+          ? [AppTheme.adminMidnightSurface, AppTheme.adminMidnightBase]
+          : [AppTheme.midnightSurface, AppTheme.midnightBase];
         return buildBody(gradientColors);
       },
-      loading: () => buildBody(isDark ? [AppTheme.midnightSurface, AppTheme.midnightBase] : [AppTheme.daylightSurface, AppTheme.daylightBase]),
-      error: (e, s) => buildBody(isDark ? [AppTheme.midnightSurface, AppTheme.midnightBase] : [AppTheme.daylightSurface, AppTheme.daylightBase]),
+      loading: () => buildBody([AppTheme.midnightSurface, AppTheme.midnightBase]),
+      error: (e, s) => buildBody([AppTheme.midnightSurface, AppTheme.midnightBase]),
+
     );
   }
 }

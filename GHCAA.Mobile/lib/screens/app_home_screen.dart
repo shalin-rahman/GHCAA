@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../core/config/app_config.dart';
 import '../core/theme/app_theme.dart';
 import '../core/widgets/glass_container.dart';
 
@@ -54,22 +55,22 @@ class AppHomeScreen extends StatelessWidget {
                   ).animate().scale(duration: 800.ms, curve: Curves.elasticOut).fadeIn(),
                 ),
                 const SizedBox(height: 48),
-                const Text(
-                  'GHCAA PORTAL',
+                Text(
+                  AppConfig.portalTitle,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 3, color: Colors.white),
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 3, color: Colors.white),
                 ).animate().slideY(begin: 0.3, duration: 600.ms).fadeIn(),
                 const SizedBox(height: 8),
-                const Text(
-                  'Sharing Heritage, Aligning Lives, Integrating Networks',
+                Text(
+                  AppConfig.organizationTagline,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic, color: AppTheme.royalGold, letterSpacing: 0.5),
+                  style: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic, color: AppTheme.royalGold, letterSpacing: 0.5),
                 ).animate().fadeIn(delay: 400.ms),
                 const SizedBox(height: 24),
-                const Text(
-                  'Connecting Government Haraganga College Alumni through secure membership and integrated financial governance.',
+                Text(
+                  AppConfig.portalDescription,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: AppTheme.textSecondaryDark, height: 1.5),
+                  style: const TextStyle(fontSize: 13, color: AppTheme.textSecondaryDark, height: 1.5),
                 ).animate().fadeIn(delay: 600.ms),
                 const Spacer(flex: 3),
                 
