@@ -95,6 +95,10 @@ class AuthService {
   }
 }
 
+final roleProvider = FutureProvider.autoDispose<String?>((ref) async {
+  return ref.read(authServiceProvider).getRole();
+});
+
 final userProfileProvider = FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
   try {
     final dio = ref.read(dioProvider);

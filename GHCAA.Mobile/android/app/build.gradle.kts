@@ -27,9 +27,23 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            val keystoreBase64 = System.getenv("ANDROID_KEYSTORE_BASE64")
+            if (keystoreBase64 != null) {
+                val keystoreFile = file("keystore.jks")
+                keystoreFile.writeBytes(java.util.Base64.getDecoder().decode(keystoreBase64))
+                storeFile = keystoreFile
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
             minifyEnabled = true
             shrinkResources = true
             proguardFiles(

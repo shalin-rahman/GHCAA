@@ -6,9 +6,16 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
+	<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Haragangian requires access to your camera to capture profile photos and article images.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

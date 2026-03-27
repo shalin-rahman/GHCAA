@@ -23,11 +23,14 @@ namespace GHCAA.Infrastructure.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task LogActivityAsync(int? memberId, string type, string description, int? actorId = null, string? ipAddress = null, string? userAgent = null, string? metadata = null, CancellationToken cancellationToken = default)
+        public async Task LogActivityAsync(int? memberId, string type, string description, int? actorId = null, string? ipAddress = null, string? userAgent = null, string? source = null, string? metadata = null, CancellationToken cancellationToken = default)
         {
             var ctx = _httpContextAccessor.HttpContext;
             var ip = ipAddress ?? ctx?.Connection?.RemoteIpAddress?.ToString();
             var ua = userAgent ?? ctx?.Request?.Headers["User-Agent"].ToString();
+
+            // Auto-detect source if not provided
+            var src = source ?? (ua?.ToLower().Contains("mobile") == true ? "Mobile" : "Web");
 
             var log = new ActivityLog
             {
@@ -37,6 +40,7 @@ namespace GHCAA.Infrastructure.Services
                 Description = description,
                 IPAddress = ip,
                 UserAgent = ua,
+                Source = src,
                 Metadata = metadata,
                 Timestamp = DateTime.UtcNow
             };

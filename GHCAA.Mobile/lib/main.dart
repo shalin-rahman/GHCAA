@@ -7,7 +7,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'core/config/app_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
-import 'features/notifications/push_notification_service.dart';
+import 'features/notifications/push_notification_service.dart'; // Keep this import
 
 void main() async {
   // 1. Ensure Flutter binding is valid
@@ -16,29 +16,46 @@ void main() async {
   // 2. Load Environment Config
   await dotenv.load(fileName: ".env");
 
-  // 3. Initialize Sentry Observability (Industry Standard)
-  await SentryFlutter.init(
-    (options) {
-      options.dsn = dotenv.env['SENTRY_DSN'] ?? 'https://example@sentry.io/project';
-      options.tracesSampleRate = 1.0; // Captures all performance traces for development
-      options.environment = AppConfig.environment;
-    },
-    appRunner: () async {
-      // 4. Initialize Cloud Infrastructure (Firebase)
+  final dsn = dotenv.env['SENTRY_DSN'];
+  
+  if (dsn != null && dsn.isNotEmpty && dsn != 'https://example@sentry.io/project') {
+    // 3. Initialize Sentry Observability (Industry Standard)
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = dsn;
+        options.tracesSampleRate = 1.0; // Captures all performance traces for development
+        options.environment = AppConfig.environment;
+      },
+      appRunner: () => _initAndRunApp(),
+    );
+  } else {
+    // Graceful fallback for local development or missing config
+    debugPrint('Sentry Observability Offline: No valid DSN provided.');
+    _initAndRunApp();
+  }
+}
+
+Future<void> _initAndRunApp() async {
+  // 4. Initialize Cloud Infrastructure (Firebase)
+  const bool isWeb = bool.fromEnvironment('dart.library.js_util'); // Simple web check
+  
+  if (!isWeb) {
+    try {
+      await Firebase.initializeApp();
       try {
-        await Firebase.initializeApp();
         FirebaseMessaging.onBackgroundMessage(PushNotificationService.firebaseMessagingBackgroundHandler);
-      } catch (e) {
-        debugPrint('Cloud Notification Service Initialization Failed: $e');
-        // This fails if google-services.json is missing, but app continues for local testing
-      }
-      
-      runApp(
-        const ProviderScope(
-          child: HaragangianApp(),
-        ),
-      );
-    },
+      } catch (_) {}
+    } catch (e) {
+      debugPrint('Cloud Notification Service Initialization Failed: $e');
+    }
+  } else {
+    debugPrint('Native Cloud Services Skipped for Web Platform.');
+  }
+  
+  runApp(
+    const ProviderScope(
+      child: HaragangianApp(),
+    ),
   );
 }
 
@@ -49,8 +66,12 @@ class HaragangianApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     
-    // 5. Initialize Push Notifications on startup
-    ref.read(pushNotificationServiceProvider).initialize();
+    // 5. Initialize Push Notifications on startup (Defensive check)
+    try {
+      if (Firebase.apps.isNotEmpty) {
+        ref.read(pushNotificationServiceProvider).initialize();
+      }
+    } catch (_) {}
     
     return MaterialApp.router(
       title: AppConfig.appName,

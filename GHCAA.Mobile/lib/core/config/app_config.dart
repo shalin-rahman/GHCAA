@@ -1,8 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
   static String get apiBaseUrl {
-    return dotenv.env['BASE_API_URL'] ?? 'http://127.0.0.1:5000/api';
+    // Universal Bridge Logic: 
+    // Web browsers use localhost. Android emulators use 10.0.2.2.
+    if (kIsWeb) {
+      return 'http://localhost:5087/api';
+    }
+    return dotenv.env['BASE_API_URL'] ?? 'http://10.0.2.2:5087/api';
   }
 
   static String get environment {

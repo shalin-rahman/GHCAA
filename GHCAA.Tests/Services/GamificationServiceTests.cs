@@ -43,7 +43,7 @@ public class GamificationServiceTests : TestBase
         // Assert
         var updatedMember = await _context.Members.FindAsync(member.Id);
         updatedMember!.ContributionPoints.Should().Be(50);
-        _activityMock.Verify(x => x.LogActivityAsync(member.Id, "PointsAwarded", It.Is<string>(s => s.Contains("50 pts")), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
+        _activityMock.Verify(x => x.LogActivityAsync(member.Id, "PointsAwarded", It.Is<string>(s => s.Contains("50 pts")), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]

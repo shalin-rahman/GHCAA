@@ -3,7 +3,7 @@
         <div class="admin-brand">
             <img src="/assets/logo.jpg" alt="GHC" class="logo">
             <div class="brand-text">
-                <span class="brand-name">GHCAA Admin Portal</span>
+                <span class="brand-name">Admin Portal</span>
                 <span class="brand-sub">Admin Control</span>
             </div>
         </div>
@@ -13,7 +13,8 @@
             <div class="nav-section">
                 <span class="nav-section-label">{{ section.name }}</span>
                 @for (item of section.items; track item.path) {
-                <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.path === '/admin/dashboard' || item.path === '/admin/members' || item.path === '/admin/payments'}"
+                <a [routerLink]="item.path" routerLinkActive="active"
+                    [routerLinkActiveOptions]="{exact: item.path === '/admin/dashboard' || item.path === '/admin/members' || item.path === '/admin/payments'}"
                     class="nav-item">
                     <span class="nav-icon">{{ item.icon }}</span>
                     <span class="nav-label">{{ item.label }}</span>

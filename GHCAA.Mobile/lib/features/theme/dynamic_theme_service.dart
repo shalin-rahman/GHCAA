@@ -63,8 +63,8 @@ class ThemeService {
       if (response.statusCode == 200 && response.data != null) {
         return SpecialTheme.fromJson(response.data);
       }
-    } catch (e) {
-      print('Theme Service Error: $e');
+    } catch (_) {
+      // Background failure is acceptable in production
     }
     return null;
   }

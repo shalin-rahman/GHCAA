@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../../features/theme/dynamic_theme_service.dart';
 import '../session/session_manager.dart';
+import 'app_drawer.dart';
 
 class AppScaffold extends ConsumerWidget {
   final Widget child;
@@ -13,6 +16,7 @@ class AppScaffold extends ConsumerWidget {
   final bool isAdmin;
   final bool showAppBar;
   final Widget? leading;
+  final String? breadcrumb;
 
   const AppScaffold({
     super.key,
@@ -24,6 +28,7 @@ class AppScaffold extends ConsumerWidget {
     this.isAdmin = false,
     this.showAppBar = true,
     this.leading,
+    this.breadcrumb,
   });
 
   @override
@@ -31,19 +36,44 @@ class AppScaffold extends ConsumerWidget {
     final specialThemeAsync = ref.watch(activeSpecialThemeProvider);
 
     Widget buildBody(List<Color> gradientColors, {String? announcement, Color? textColor}) {
+      final canPop = GoRouter.of(context).canPop();
+
       return Scaffold(
         extendBodyBehindAppBar: true,
         appBar: showAppBar 
           ? AppBar(
-              title: title != null ? Text(title!, style: TextStyle(color: textColor)) : null,
-              backgroundColor: Colors.transparent,
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (title != null) Text(title!, style: TextStyle(color: textColor ?? Colors.white, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1)),
+                  if (breadcrumb != null) Text(breadcrumb!.toUpperCase(), style: const TextStyle(fontSize: 9, color: AppTheme.royalGold, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                ],
+              ),
+              backgroundColor: Colors.black.withValues(alpha: 0.4),
               elevation: 0,
               centerTitle: false,
               actions: actions,
-              leading: leading,
-              iconTheme: textColor != null ? IconThemeData(color: textColor) : null,
+              leading: leading ?? (canPop 
+                ? IconButton(
+                    icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: textColor ?? AppTheme.royalGold),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      context.pop();
+                    },
+                  )
+                : Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.menu_rounded, size: 24, color: textColor ?? AppTheme.royalGold),
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        Scaffold.of(context).openDrawer();
+                      },
+                    ),
+                  )),
+              iconTheme: IconThemeData(color: textColor ?? Colors.white),
             )
           : null,
+        drawer: const AppDrawer(),
         body: Listener(
           onPointerDown: (_) => ref.read(sessionProvider.notifier).userActivityDetected(),
           child: Container(
@@ -93,7 +123,6 @@ class AppScaffold extends ConsumerWidget {
       },
       loading: () => buildBody([AppTheme.midnightSurface, AppTheme.midnightBase]),
       error: (e, s) => buildBody([AppTheme.midnightSurface, AppTheme.midnightBase]),
-
     );
   }
 }

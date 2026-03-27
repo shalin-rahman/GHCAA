@@ -12,19 +12,42 @@ class AdminService {
 
   Future<List<dynamic>> getPendingApprovals() async {
     try {
-      final response = await _dio.get('/admin/members/pending');
+      final response = await _dio.get('/admin/members', queryParameters: {
+        'statusFilter': 'pending',
+        'page': 1,
+        'pageSize': 100,
+      });
+      return response.data['items'] ?? [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<dynamic>> getContactMessages() async {
+    try {
+      final response = await _dio.get('/admin/contact-messages');
       return response.data as List<dynamic>;
     } catch (e) {
       return [];
     }
   }
 
+  Future<bool> markMessageAsRead(int messageId) async {
+    try {
+      final response = await _dio.post('/admin/contact-messages/$messageId/read');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<bool> resolveApproval(int memberId, bool approve, {String? reason}) async {
     try {
-      final response = await _dio.post('/admin/members/resolve', data: {
-        'memberId': memberId,
-        'isApproved': approve,
-        'rejectionReason': reason,
+      final endpoint = approve ? 'approve' : 'reject';
+      final response = await _dio.post('/admin/members/$memberId/$endpoint', data: {
+        'approvedByAdminId': 1, // Placeholder: map to current session
+        'rejectedByAdminId': 1,
+        'reason': reason ?? (approve ? 'Approved' : 'Rejected'),
       });
       return response.statusCode == 200;
     } catch (e) {

@@ -1,4 +1,2 @@
 @echo off
-echo Running run-app.ps1...
-powershell.exe -ExecutionPolicy Bypass -File "%~dp0run-app.ps1" %*
-pause
+powershell -ExecutionPolicy Bypass -File "GHCAA.Tools\run-app.ps1" %*

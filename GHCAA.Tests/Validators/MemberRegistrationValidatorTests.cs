@@ -33,9 +33,10 @@ public class MemberRegistrationValidatorTests
             EmergencyContactName = "Emergency Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01812345678",
-//             HSCAdmissionYear = 2005,
-//             GHCAdmissionYear = 2005,
-//             HighestCertificate="HSC", HighestCertificateGroup="Science", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="Science", GHCLastCertificateSubject="None",
+            AcademicHistory = new System.Collections.Generic.List<AcademicRecordDto>
+            {
+                new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true }
+            },
             HasAcceptedTerms = true,
             HasAcceptedGdpr = true,
             PaymentMethodId = 1

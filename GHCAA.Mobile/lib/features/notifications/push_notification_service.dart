@@ -6,40 +6,44 @@ import 'dart:developer' as developer;
 final pushNotificationServiceProvider = Provider<PushNotificationService>((ref) => PushNotificationService());
 
 class PushNotificationService {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-
   Future<void> initialize() async {
-    // 1. Request Permission
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    try {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      developer.log('User granted notification permission');
+      // 1. Request Permission
+      NotificationSettings settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        developer.log('User granted notification permission');
+      }
+
+      // 2. Get Token
+      String? token = await messaging.getToken();
+      developer.log('Registration Token: $token');
+
+      // 3. Listeners
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        developer.log('Received foreground message: ${message.notification?.title}');
+      });
+
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        developer.log('App opened via notification: ${message.data}');
+      });
+    } catch (e) {
+      developer.log('Push Notification initialization bypassed: $e');
     }
-
-    // 2. Get Token (Send this to your backend api/notifications/token)
-    String? token = await messaging.getToken();
-    developer.log('Registration Token: $token');
-
-    // 3. Handle Foreground Messages
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      developer.log('Received foreground message: ${message.notification?.title}');
-      // You can show a local snackbar or alert here
-    });
-
-    // 4. Handle Interaction when app is in background but opened via notification
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      developer.log('App opened via notification: ${message.data}');
-      // Navigation logic can be added here
-    });
   }
 
-  // Mandatory background handler (static/top-level)
   static Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-    await Firebase.initializeApp();
-    developer.log('Handling background message: ${message.messageId}');
+    try {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp();
+      }
+      developer.log('Handling background message: ${message.messageId}');
+    } catch (_) {}
   }
 }

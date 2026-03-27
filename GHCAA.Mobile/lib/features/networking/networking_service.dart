@@ -10,14 +10,20 @@ class NetworkingService {
   final Dio _dio;
   NetworkingService(this._dio);
 
-  Future<List<dynamic>> searchAlumni({String query = '', String? batch, String? department}) async {
+  Future<List<dynamic>> searchAlumni({String query = '', String? batch, String? department, int pageNumber = 1, int pageSize = 20}) async {
     try {
       final response = await _dio.get('/networking/search', queryParameters: {
-        'query': query,
-        'batch': batch,
-        'department': department,
+        if (query.isNotEmpty) 'query': query,
+        if (batch != null) 'passingYear': batch,
+        if (department != null) 'category': department,
+        'pageNumber': pageNumber,
+        'pageSize': pageSize,
       });
-      return response.data as List<dynamic>;
+      
+      if (response.data is Map && response.data.containsKey('items')) {
+        return response.data['items'] as List<dynamic>;
+      }
+      return (response.data as List<dynamic>?) ?? [];
     } catch (e) {
       return [];
     }
@@ -29,6 +35,28 @@ class NetworkingService {
       return response.data as Map<String, dynamic>;
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<List<dynamic>> getECPeriods() async {
+    try {
+      final response = await _dio.get('/networking/periods');
+      final data = response.data;
+      if (data is Map && data.containsKey('items')) {
+        return data['items'] as List<dynamic>;
+      }
+      return (data as List<dynamic>?) ?? [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<dynamic>> getExecutiveCommittee({int? periodId}) async {
+    try {
+      final response = await _dio.get('/networking/committee', queryParameters: periodId != null ? {'periodId': periodId} : {});
+      return response.data as List<dynamic>;
+    } catch (e) {
+      return [];
     }
   }
 

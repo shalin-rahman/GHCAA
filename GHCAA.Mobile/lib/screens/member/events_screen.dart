@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/app_scaffold.dart';
@@ -7,9 +9,9 @@ import '../../core/widgets/async_value_widget.dart';
 import '../../features/events/events_service.dart';
 import '../../features/financials/gateway_service.dart';
 import '../financials/payment_web_page.dart';
+import '../../core/config/app_config.dart';
 
-final eventsListProvider =
-    FutureProvider.autoDispose<List<dynamic>>((ref) async {
+final eventsListProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(eventsServiceProvider).getUpcomingEvents();
 });
 
@@ -31,144 +33,141 @@ class EventsScreen extends ConsumerWidget {
     final eventsAsync = ref.watch(eventsListProvider);
 
     return AppScaffold(
-      title: 'Events',
+      title: 'Alumni Gatherings',
+      breadcrumb: 'Member Portal > Events & Reunions',
       child: AsyncValueWidget<List<dynamic>>(
         value: eventsAsync,
         loadingMessage: 'Synchronizing upcoming celebrations...',
         onRetry: () => ref.invalidate(eventsListProvider),
-        data: (events) => events.isEmpty
-            ? const Center(
-                child: Text('No upcoming events found.',
-                    style: TextStyle(color: AppTheme.textSecondaryDark)))
-            : RefreshIndicator(
-                color: AppTheme.royalGold,
-                onRefresh: () async => ref.invalidate(eventsListProvider),
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(24),
+        data: (events) => RefreshIndicator(
+          color: AppTheme.royalGold,
+          onRefresh: () async {
+            HapticFeedback.mediumImpact();
+            ref.invalidate(eventsListProvider);
+          },
+          child: events.isEmpty
+              ? const Center(child: Text('No upcoming celebrations found in the registry.', style: TextStyle(color: AppTheme.textSecondaryDark)))
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   itemCount: events.length,
                   itemBuilder: (context, index) {
-                    final event = events[index];
+                    final ev = events[index];
+                    final isOpen = _isRegistrationOpen(ev);
+                    final coverUrl = ev['coverImageUrl'] ?? ev['imageUrl'];
+                    final fullImgUrl = coverUrl != null 
+                        ? (coverUrl.toString().startsWith('http') 
+                            ? coverUrl 
+                            : '${AppConfig.apiBaseUrl}/$coverUrl'.replaceAll('//', '/'))
+                        : null;
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 24.0),
-                      child: GlassContainer(
-                        padding: EdgeInsets.zero,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Container(
-                              height: 180,
-                              decoration: BoxDecoration(
-                                color:
-                                    AppTheme.royalGold.withValues(alpha: 0.05),
-                                image: event['coverImageUrl'] != null
-                                    ? DecorationImage(
-                                        image: NetworkImage(
-                                            event['coverImageUrl']),
-                                        fit: BoxFit.cover)
-                                    : null,
-                              ),
-                              child: event['coverImageUrl'] == null
-                                  ? Center(
-                                      child: Icon(Icons.celebration_outlined,
-                                          size: 64,
-                                          color: AppTheme.royalGold
-                                              .withValues(alpha: 0.2)))
-                                  : Stack(
-                                      children: [
-                                        Positioned(
-                                          top: 16,
-                                          right: 16,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 12, vertical: 4),
-                                            decoration: BoxDecoration(
-                                                color: Colors.black54,
-                                                borderRadius:
-                                                    BorderRadius.circular(20)),
-                                            child: Text(
-                                                event['eventDate'] ??
-                                                    'Date TBD',
-                                                style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 10,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                          ),
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/events/${ev['id']}');
+                        },
+                        child: GlassContainer(
+                          padding: EdgeInsets.zero,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Container(
+                                height: 190,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.royalGold.withOpacity(0.05),
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                  image: fullImgUrl != null ? DecorationImage(image: NetworkImage(fullImgUrl), fit: BoxFit.cover) : null,
+                                ),
+                                child: Stack(
+                                  children: [
+                                    if (fullImgUrl == null)
+                                      Center(child: Icon(Icons.celebration_outlined, size: 64, color: AppTheme.royalGold.withOpacity(0.1))),
+                                    Positioned(
+                                      top: 16,
+                                      right: 16,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                        decoration: BoxDecoration(color: isOpen ? Colors.green.withOpacity(0.9) : Colors.redAccent.withOpacity(0.9), borderRadius: BorderRadius.circular(6)),
+                                        child: Text(isOpen ? 'REGISTRATION OPEN' : 'REGISTRY CLOSED', style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      left: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [Colors.black.withOpacity(0.8), Colors.transparent])),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.pin_drop_outlined, size: 14, color: AppTheme.royalGold),
+                                            const SizedBox(width: 8),
+                                            Text(ev['location']?.toString().toUpperCase() ?? 'VENUE TBD', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                                          ],
                                         ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(ev['startDate']?.toString().split('T')[0] ?? 'DATE TBD', style: const TextStyle(color: AppTheme.royalGold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                                        if (ev['registrationFee'] != null && ev['registrationFee'] > 0)
+                                          Text('${ev['registrationFee']} BDT', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900))
+                                        else
+                                          const Text('FREE ENTRY', style: TextStyle(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
                                       ],
                                     ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(24.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    event['title']?.toUpperCase() ??
-                                        'ALUMNI REUNION',
-                                    style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 1.2),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    event['description'] ??
-                                        'No description available for this event.',
-                                    style: const TextStyle(
-                                        height: 1.5,
-                                        fontSize: 13,
-                                        color: AppTheme.textSecondaryDark),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 24),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Text('REGISTRATION FEE',
-                                              style: TextStyle(
-                                                  fontSize: 10,
-                                                  color: AppTheme.royalGold,
-                                                  fontWeight: FontWeight.bold)),
-                                          Text(
-                                              '${event['registrationFee'] ?? 0} BDT',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.w900,
-                                                  fontSize: 16)),
-                                        ],
-                                      ),
-                                      ElevatedButton.icon(
-                                        onPressed: () => handleEventPayment(
-                                            (event['registrationFee'] ?? 0)
-                                                .toDouble(),
-                                            event['title'] ?? 'Event'),
-                                        icon: const Icon(
-                                            Icons.how_to_reg_outlined,
-                                            size: 18),
-                                        label: const Text('JOIN EVENT'),
+                                    const SizedBox(height: 14),
+                                    Text(ev['title'] ?? 'Alumni Reunion Event', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white, height: 1.3, letterSpacing: -0.2)),
+                                    const SizedBox(height: 10),
+                                    Text(ev['description'] ?? 'No description provided in the registry.', style: const TextStyle(fontSize: 13, height: 1.6, color: AppTheme.textSecondaryDark), maxLines: 3, overflow: TextOverflow.ellipsis),
+                                    const SizedBox(height: 24),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton.icon(
+                                        onPressed: isOpen ? () {
+                                          HapticFeedback.lightImpact();
+                                          handleEventPayment((ev['registrationFee'] ?? 0).toDouble(), ev['title'] ?? 'Event');
+                                        } : null,
+                                        icon: Icon(isOpen ? Icons.how_to_reg_rounded : Icons.lock_clock_outlined, size: 16),
+                                        label: Text(isOpen ? 'PARTICIPATE NOW' : 'REGISTRY CLOSED', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1)),
                                         style: ElevatedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 24, vertical: 12)),
+                                          backgroundColor: isOpen ? AppTheme.royalGold : Colors.white10,
+                                          foregroundColor: isOpen ? Colors.black : Colors.white38,
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        ),
                                       ),
-                                    ],
-                                  ),
-                                ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
                   },
                 ),
-              ),
+        ),
       ),
     );
+  }
+
+  bool _isRegistrationOpen(Map<String, dynamic> ev) {
+    if (ev['isActive'] == false) return false;
+    final now = DateTime.now();
+    if (ev['registrationStartDate'] != null && DateTime.parse(ev['registrationStartDate']).isAfter(now)) return false;
+    if (ev['registrationEndDate'] != null && DateTime.parse(ev['registrationEndDate']).isBefore(now)) return false;
+    return true;
   }
 }

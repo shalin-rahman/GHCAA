@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace GHCAA.Infrastructure.Services
 {
-    public class MemberService : IMemberService
+    public partial class MemberService : IMemberService
     {
         private readonly ApplicationDbContext _db;
         private readonly IFileStorageService _storage;

@@ -24,7 +24,6 @@ class _AdminDashboardState extends ConsumerState<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final analyticsAsync = ref.watch(adminAnalyticsProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
       isAdmin: true,

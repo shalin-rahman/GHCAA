@@ -34,23 +34,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
     
-    final error = await ref.read(authServiceProvider).login(
-          identifier,
-          password,
-        );
-        
-    if (!mounted) return;
-    setState(() => _isLoading = false);
+    try {
+      final error = await ref.read(authServiceProvider).login(
+            identifier,
+            password,
+          );
+          
+      if (!mounted) return;
 
-    if (error == null) {
-      final role = await ref.read(authServiceProvider).getRole();
-      if (role == 'SuperAdmin' || role == 'Admin') {
-        context.go('/admin_dashboard');
+      if (error == null) {
+        final role = await ref.read(authServiceProvider).getRole();
+        if (!context.mounted) return; // Added check
+        if (role == 'SuperAdmin' || role == 'Admin') {
+          context.go('/admin_dashboard');
+        } else {
+          context.go('/dashboard');
+        }
       } else {
-        context.go('/dashboard');
+        setState(() => _errorMessage = error);
+        if (!context.mounted) return; // Added check
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed. Please check your credentials.')),
+        );
       }
-    } else {
-      setState(() => _errorMessage = error);
+    } catch (e) {
+      if (!context.mounted) return; // Added check
+      setState(() => _errorMessage = 'An unexpected error occurred: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An unexpected error occurred during login.')),
+      );
+    } finally {
+      if (context.mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -82,18 +98,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      'assets/logo.png',
-                      height: 120,
-                      width: 120,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.school,
-                          size: 72,
-                          color: AppTheme.royalGold),
-                    ),
+                  child: Image.asset(
+                    'assets/logo.png',
+                    height: 120,
+                    width: 120,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.school,
+                        size: 72,
+                        color: AppTheme.royalGold),
                   ),
                 ),
+              ),
                 const SizedBox(height: 24),
                 Text(AppConfig.organizationAcronym,
                     style: const TextStyle(

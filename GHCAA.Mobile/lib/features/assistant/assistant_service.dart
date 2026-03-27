@@ -2,11 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
-import '../../core/config/app_config.dart';
-
-final assistantServiceProvider = Provider<AssistantService>((ref) {
-  return AssistantService(ref.read(dioProvider));
-});
+final assistantServiceProvider = Provider<AssistantService>((ref) => AssistantService(ref.read(dioProvider)));
 
 class AssistantService {
   final Dio _dio;
@@ -14,13 +10,13 @@ class AssistantService {
 
   Future<String?> ask(String question) async {
     try {
-      final response = await _dio.post('/assistant/ask', data: {'question': question});
+      final response = await _dio.post('/api/assistant/ask', data: {'question': question});
       if (response.statusCode == 200) {
         return response.data['answer'] as String?;
       }
-    } catch (e) {
-      print('AI Assistant Error: $e');
+    } catch (_) {
+      return 'The assistant is temporarily offline. Please try again later.';
     }
-    return 'I apologize, but I am having trouble connecting to the ${AppConfig.organizationName} network right now.';
+    return 'I am currently unable to process your request. Please try again.';
   }
 }

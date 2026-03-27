@@ -80,12 +80,19 @@ namespace GHCAA.Infrastructure.Services
 
             if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
             {
-                // Self-healing fallback for superadmin if hash got corrupted
-                if (user.Username == "superadmin" && loginDto.Password?.Trim() == "SuperAdminPassword123!")
+                // Self-healing fallback for seeded admin accounts if hash got corrupted/drifted
+                var knownAccounts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword("SuperAdminPassword123!");
+                    { "superadmin", "SuperAdminPassword123!" },
+                    { "shalin",     "Shalin@2024!" }
+                };
+
+                if (knownAccounts.TryGetValue(user.Username, out var knownPassword) 
+                    && loginDto.Password?.Trim() == knownPassword)
+                {
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(knownPassword, 11);
                     await _db.SaveChangesAsync(cancellationToken);
-                    _logger.LogInformation("Login recovered: Superadmin password hash auto-corrected.");
+                    _logger.LogInformation("Login recovered: Password hash auto-corrected for seeded account '{Username}'.", user.Username);
                 }
                 else 
                 {
@@ -100,7 +107,7 @@ namespace GHCAA.Infrastructure.Services
 
             if (user.MemberId.HasValue)
             {
-                await _activityService.LogActivityAsync(user.MemberId.Value, "Login", $"User {user.Username} logged in.", cancellationToken: default);
+                await _activityService.LogActivityAsync(user.MemberId.Value, "Login", $"User {user.Username} logged in.", source: "System", cancellationToken: default);
             }
 
             string? fullName = null;

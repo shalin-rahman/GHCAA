@@ -43,7 +43,8 @@ namespace GHCAA.API.Middleware
                             null, 
                             "ApiAction", 
                             $"User {username} performed {request.Method} {request.Path} (Status: {statusCode})", 
-                            parsedUserId
+                            parsedUserId,
+                            source: "API"
                         );
                     }
                 }

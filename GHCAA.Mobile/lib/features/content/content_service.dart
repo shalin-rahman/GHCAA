@@ -17,6 +17,15 @@ class NewsService {
     }
   }
 
+  Future<List<dynamic>> getMySubmissions() async {
+    try {
+      final response = await _dio.get('/news/my-submissions');
+      return response.data as List<dynamic>;
+    } catch (e) {
+      return [];
+    }
+  }
+
   Future<List<dynamic>> getGalleryItems() async {
     try {
       final response = await _dio.get('/gallery');

@@ -5,6 +5,7 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -17,6 +18,7 @@ public class FamilyLinkServiceTests : TestBase
     private Mock<INotificationService> _mockNotifications = null!;
     private Mock<ICommunicationService> _mockCommunication = null!;
     private Mock<ILogger<FamilyLinkService>> _mockLogger = null!;
+    private Mock<IConfiguration> _mockConfig = null!;
     private FamilyLinkService _service = null!;
 
     [SetUp]
@@ -25,12 +27,14 @@ public class FamilyLinkServiceTests : TestBase
         _mockNotifications = new Mock<INotificationService>();
         _mockCommunication = new Mock<ICommunicationService>();
         _mockLogger = new Mock<ILogger<FamilyLinkService>>();
+        _mockConfig = new Mock<IConfiguration>();
 
         _service = new FamilyLinkService(
             _context,
             _mockLogger.Object,
             _mockNotifications.Object,
-            _mockCommunication.Object
+            _mockCommunication.Object,
+            _mockConfig.Object
         );
     }
 

@@ -12,7 +12,8 @@ class AdminLedgerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return AppScaffold(
       isAdmin: true,
-      title: 'Global Ledger',
+      title: 'Executive Ledger',
+      breadcrumb: 'Executive Console > Financial Registry',
       child: Column(
         children: [
           Padding(

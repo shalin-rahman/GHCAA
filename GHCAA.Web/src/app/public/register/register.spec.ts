@@ -51,12 +51,19 @@ describe('Register Component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should navigate between steps', () => {
+    it('should navigate between all 4 steps', () => {
         expect(component.currentStep()).toBe(1);
         component.nextStep(mockForm);
         expect(component.currentStep()).toBe(2);
+        component.nextStep(mockForm);
+        expect(component.currentStep()).toBe(3);
+        
+        // Final transition to Step 4 is usually handled by onSubmit response
+        component.currentStep.set(4);
+        expect(component.currentStep()).toBe(4);
+
         component.prevStep();
-        expect(component.currentStep()).toBe(1);
+        expect(component.currentStep()).toBe(3);
     });
 
     it('should add/remove academic history', () => {

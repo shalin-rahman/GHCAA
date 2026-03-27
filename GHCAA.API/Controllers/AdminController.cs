@@ -27,6 +27,21 @@ namespace GHCAA.API.Controllers
             return Ok(stats);
         }
 
+        [HttpGet("analytics")]
+        public async Task<IActionResult> GetAnalytics(CancellationToken cancellationToken)
+        {
+            // Same as stats but mapped to specific route requested by frontend
+            var stats = await _memberService.GetDashboardStatsAsync(cancellationToken);
+            return Ok(stats);
+        }
+
+        [HttpPost("sync-members")]
+        public async Task<IActionResult> SyncMembers(CancellationToken cancellationToken)
+        {
+            var count = await _memberService.SyncAlumniAsync(cancellationToken);
+            return Ok(new { Message = $"Successfully synchronized {count} alumni.", Count = count });
+        }
+
         [HttpGet("members")]
         public async Task<IActionResult> GetAllMembers(
             [FromQuery] int page = 1,

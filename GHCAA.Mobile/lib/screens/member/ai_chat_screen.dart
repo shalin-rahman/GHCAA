@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/glass_container.dart';
@@ -55,12 +56,13 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
-      title: 'Official AI',
+      title: 'Haragangian AI',
+      breadcrumb: 'Executive Hub > Alumni Intelligence',
       child: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 return _buildMessage(context, messages[index].text, messages[index].isMe);
@@ -68,9 +70,19 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
             ),
           ),
           if (_isTyping)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
-              child: Align(alignment: Alignment.centerLeft, child: Text('AI is synthesizing...', style: TextStyle(fontSize: 10, color: AppTheme.royalGold))),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
+              child: Row(
+                children: [
+                  const SizedBox(
+                    width: 10,
+                    height: 10,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.royalGold),
+                  ),
+                  const SizedBox(width: 8),
+                  Text('SYNTHESIZING...', style: TextStyle(fontSize: 9, color: AppTheme.royalGold.withValues(alpha: 0.7), fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                ],
+              ),
             ),
           _buildInputArea(context, isDark),
         ],
@@ -80,15 +92,27 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
 
   Widget _buildMessage(BuildContext context, String text, bool isMe) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.only(bottom: 16.0),
       child: Align(
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
         child: GlassContainer(
           padding: const EdgeInsets.all(16),
-          opacity: isMe ? 0.3 : 0.08,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
-            child: Text(text, style: TextStyle(color: isMe ? Colors.white : Colors.white70)),
+          child: Column(
+            crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              Text(
+                isMe ? 'YOU' : 'HARAGANGIAN AI', 
+                style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: isMe ? Colors.white38 : AppTheme.royalGold, letterSpacing: 1)
+              ),
+              const SizedBox(height: 6),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                child: Text(
+                  text, 
+                  style: TextStyle(color: isMe ? Colors.white : Colors.white.withValues(alpha: 0.9), fontSize: 13, height: 1.5)
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -97,15 +121,41 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
 
   Widget _buildInputArea(BuildContext context, bool isDark) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.midnightSurface : AppTheme.daylightSurface,
-        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+        color: Colors.black.withValues(alpha: 0.2),
+        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
       ),
       child: Row(
         children: [
-          Expanded(child: TextField(controller: _controller, onSubmitted: (_) => _sendMessage(), decoration: const InputDecoration(hintText: 'Type your question...', border: InputBorder.none))),
-          IconButton(icon: const Icon(Icons.send, color: AppTheme.royalGold), onPressed: _sendMessage),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              ),
+              child: TextField(
+                controller: _controller, 
+                onSubmitted: (_) => _sendMessage(), 
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: const InputDecoration(
+                  hintText: 'Ask the association intelligence...', 
+                  hintStyle: TextStyle(color: AppTheme.textSecondaryDark, fontSize: 13),
+                  border: InputBorder.none
+                )
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              _sendMessage();
+            },
+            icon: const Icon(Icons.send_rounded, color: AppTheme.royalGold),
+          ),
         ],
       ),
     );

@@ -18,6 +18,13 @@ namespace GHCAA.Application.Validators
             RuleFor(x => x.Email).NotEmpty().EmailAddress();
             RuleFor(x => x.DateOfBirth).NotEmpty().LessThan(DateTime.UtcNow.Date).WithMessage("Invalid DOB");
             RuleFor(x => x.PaymentMethodId).GreaterThan(0).WithMessage("Please select a valid payment method");
+
+            RuleFor(x => x.AcademicHistory).NotEmpty().WithMessage("At least one academic record is required");
+            RuleForEach(x => x.AcademicHistory).ChildRules(academic => {
+                academic.RuleFor(a => a.InstitutionName).NotEmpty().MaximumLength(200);
+                academic.RuleFor(a => a.Degree).NotEmpty();
+                academic.RuleFor(a => a.PassingYear).GreaterThan(1950).LessThanOrEqualTo(DateTime.UtcNow.Year);
+            });
         }
     }
 }

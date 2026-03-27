@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
@@ -19,15 +20,19 @@ class DigitalIDScreen extends ConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
     
     return AppScaffold(
-      title: 'Digital ID Card',
+      title: 'Digital ID Registry',
+      breadcrumb: 'Executive Hub > Digital ID Card',
       child: profileAsync.when(
         data: (profile) {
           final data = profile;
-          if (data == null) return const Center(child: Text('Profile not found.', style: TextStyle(color: Colors.white)));
+          if (data == null) return const Center(child: Text('Profile not found in registry.', style: TextStyle(color: Colors.white)));
           
+          final photoPath = data['photoPath'];
+          final photoUrl = photoPath != null ? '${AppConfig.apiBaseUrl}/$photoPath'.replaceAll('//', '/') : null;
+
           return Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -38,37 +43,43 @@ class DigitalIDScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Container(height: 12, color: AppTheme.royalGold),
+                          Container(height: 14, color: AppTheme.royalGold),
                           Padding(
-                            padding: const EdgeInsets.all(32.0),
+                            padding: const EdgeInsets.fromLTRB(32, 24, 32, 32),
                             child: Column(
                               children: [
-                                Row(
+                                const Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Icon(Icons.school, size: 32, color: AppTheme.royalGold),
-                                    Text('${AppConfig.organizationAcronym} OFFICIAL'.toUpperCase(), 
-                                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.2, color: AppTheme.textSecondaryDark.withValues(alpha: 0.5))),
+                                    Icon(Icons.school_outlined, size: 28, color: AppTheme.royalGold),
+                                    Text('Haragangian Alumni Digital Pass', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2)),
                                   ],
                                 ),
                                 const SizedBox(height: 32),
-                                CircleAvatar(
-                                  radius: 60,
-                                  backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1),
-                                  child: Text(data['fullName']?[0] ?? '?', style: const TextStyle(fontSize: 40, color: AppTheme.royalGold, fontWeight: FontWeight.w900)),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppTheme.royalGold, width: 2),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 64,
+                                    backgroundColor: Colors.black,
+                                    backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+                                    child: photoUrl == null ? Text(data['fullName']?[0] ?? '?', style: const TextStyle(fontSize: 48, color: AppTheme.royalGold, fontWeight: FontWeight.w900)) : null,
+                                  ),
                                 ),
                                 const SizedBox(height: 24),
-                                Text(data['fullName'] ?? 'N/A', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white), textAlign: TextAlign.center),
+                                Text(data['fullName'] ?? 'N/A', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white, height: 1.2), textAlign: TextAlign.center),
                                 const SizedBox(height: 8),
-                                Text('${data['currentDesignation'] ?? 'Alumnus'} • ${data['passingYear'] ?? ''}', style: const TextStyle(fontSize: 14, color: AppTheme.textSecondaryDark), textAlign: TextAlign.center),
-                                const SizedBox(height: 40),
+                                Text('${data['currentDesignation'] ?? 'Alumnus'} • BATCH ${data['batch'] ?? ''}', style: const TextStyle(fontSize: 13, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+                                const SizedBox(height: 48),
                                 Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-                                  child: const Icon(Icons.qr_code_2, size: 100, color: Colors.black),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(12)),
+                                  child: const Icon(Icons.qr_code_2, size: 90, color: Colors.black),
                                 ),
                                 const SizedBox(height: 16),
-                                Text('MEMBER ID: ${data['membershipId'] ?? 'PENDING'}'.toUpperCase(), style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.w900, fontSize: 12, color: Colors.white)),
+                                Text('ID: ${data['membershipId'] ?? 'PENDING'}'.toUpperCase(), style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: 2)),
                               ],
                             ),
                           ),
@@ -76,24 +87,34 @@ class DigitalIDScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 40),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      SizedBox(
-                        width: (MediaQuery.of(context).size.width - 64) / 2.2,
+                      Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () => _handlePrint(data), 
-                          icon: const Icon(Icons.picture_as_pdf), 
-                          label: const Text('Export PDF')
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            _handlePrint(data);
+                          },
+                          icon: const Icon(Icons.file_download_outlined, size: 18), 
+                          label: const Text('PORTABLE PDF', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                          style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
                         ),
                       ),
-                      SizedBox(
-                        width: (MediaQuery.of(context).size.width - 64) / 2.2,
+                      const SizedBox(width: 16),
+                      Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () => Share.share('My ${AppConfig.organizationAcronym} Membership: ${data['membershipId'] ?? 'Pending'}'),
-                          icon: const Icon(Icons.share_outlined), 
-                          label: const Text('Share')
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            Share.share('Alumni Registry ID: ${data['membershipId'] ?? 'Pending'}\n${data['fullName']}');
+                          },
+                          icon: const Icon(Icons.share_outlined, size: 18), 
+                          label: const Text('SHARE ID', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: const BorderSide(color: AppTheme.royalGold, width: 2),
+                          ),
                         ),
                       ),
                     ],

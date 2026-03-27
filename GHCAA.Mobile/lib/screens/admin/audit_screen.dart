@@ -18,7 +18,8 @@ class AdminAuditScreen extends ConsumerWidget {
 
     return AppScaffold(
       isAdmin: true,
-      title: 'Global Audit Trail',
+      title: 'System Audit Trail',
+      breadcrumb: 'Executive Console > System Audit',
       child: AsyncValueWidget<List<dynamic>>(
         value: auditAsync,
         loadingMessage: 'Synchronizing system audit logs...',
@@ -71,6 +72,8 @@ class AdminAuditScreen extends ConsumerWidget {
             _detailRow('Timestamp', log['createdAt']),
             _detailRow('Member ID', log['memberId']?.toString()),
             _detailRow('IP Address', log['ipAddress']),
+            _detailRow('Source', log['source']),
+            _detailRow('User Agent', log['userAgent']),
           ],
         ),
         actions: [
