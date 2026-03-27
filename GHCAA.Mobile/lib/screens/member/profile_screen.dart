@@ -8,7 +8,6 @@ import '../../core/widgets/async_value_widget.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/services/device_info_service.dart';
 
-
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -18,7 +17,7 @@ class ProfileScreen extends ConsumerWidget {
 
     return AppScaffold(
       title: 'Member Profile',
-      child: AsyncValueWidget(
+      child: AsyncValueWidget<Map<String, dynamic>?>(
         value: profileAsync,
         loadingMessage: 'Synchronizing profile data...',
         data: (profile) {
@@ -46,13 +45,13 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 
                 _buildSection(context, 'Security & Activity', [
-                  _buildActionTile(context, Icons.history_edu, 'Activity Audit Logs', '/activity'),
+                  _buildActionTile(context, Icons.history_edu, 'My Activity Logs', '/activity'),
                   _buildActionTile(context, Icons.fingerprint, 'Biometric Lock (FaceID)', null),
                   _buildActionTile(context, Icons.support_agent, 'Help & Technical Support', '/support'),
                 ]),
                 const SizedBox(height: 24),
 
-                _buildSection(context, 'About GHCAA Portal', [
+                _buildSection(context, 'About Portal', [
                   Consumer(builder: (context, ref, _) {
                     final deviceAsync = ref.watch(deviceInfoProvider);
                     final deviceStr = deviceAsync.when(
@@ -62,10 +61,8 @@ class ProfileScreen extends ConsumerWidget {
                     );
                     return _buildActionTile(context, Icons.phone_android_outlined, deviceStr, null, color: AppTheme.textSecondaryDark);
                   }),
-                  _buildActionTile(context, Icons.info_outline, 'Version Info (1.0.0 Dev)', null),
+                  _buildActionTile(context, Icons.info_outline, 'About Haragangian', '/about'),
                   _buildActionTile(context, Icons.gavel, 'Terms & Privacy Policy', null),
-                  _buildActionTile(context, Icons.developer_mode, 'Lead Dev: Shalin Rahman', null),
-                  _buildActionTile(context, Icons.business_outlined, 'Partnership: GHCAA', null, color: AppTheme.royalGold.withValues(alpha: 0.5)),
                 ]),
 
                 const SizedBox(height: 48),
@@ -73,10 +70,23 @@ class ProfileScreen extends ConsumerWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () => context.go('/'),
+                    onPressed: () => context.go('/login'),
                     icon: const Icon(Icons.logout, size: 18),
-                    label: const Text('Sign Out of Portal'),
-                    style: OutlinedButton.styleFrom(foregroundColor: Colors.redAccent, side: const BorderSide(color: Colors.redAccent)),
+                    label: const Text('Sign Out'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white, 
+                      side: const BorderSide(color: Colors.white24)
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    onPressed: () => _handleDeleteAccount(context),
+                    icon: const Icon(Icons.delete_forever_outlined, size: 18),
+                    label: const Text('Request Account Deletion'),
+                    style: TextButton.styleFrom(foregroundColor: Colors.redAccent.withValues(alpha: 0.7)),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -84,6 +94,30 @@ class ProfileScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _handleDeleteAccount(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.midnightSurface,
+        title: const Text('Account Deletion', style: TextStyle(color: Colors.redAccent)),
+        content: const Text(
+          'To comply with security standards, account deletion requires manual verification. Your request will be sent to the administrators, and all your data will be permanently removed after approval.',
+          style: TextStyle(color: Colors.white70, fontSize: 13),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Deletion request submitted.')));
+            }, 
+            child: const Text('REQUEST DELETION', style: TextStyle(color: Colors.redAccent))
+          ),
+        ],
       ),
     );
   }

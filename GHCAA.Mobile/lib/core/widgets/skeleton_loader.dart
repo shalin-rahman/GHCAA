@@ -35,18 +35,18 @@ class SkeletonLoader extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.all(24),
       itemCount: 6,
-      itemBuilder: (context, index) => Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+      itemBuilder: (context, index) => const Padding(
+        padding: EdgeInsets.only(bottom: 16),
         child: Row(
           children: [
-            const SkeletonLoader(width: 60, height: 60, borderRadius: 12),
-            const SizedBox(width: 16),
+            SkeletonLoader(width: 60, height: 60, borderRadius: 12),
+            SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SkeletonLoader(width: double.infinity, height: 16, borderRadius: 4),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   SkeletonLoader(width: 150, height: 12, borderRadius: 4),
                 ],
               ),

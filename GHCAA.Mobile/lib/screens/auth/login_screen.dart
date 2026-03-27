@@ -15,6 +15,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  String? _errorMessage;
   final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -24,21 +25,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final password = _passwordController.text;
 
     if (identifier.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter both identifier and password.')),
-      );
+      setState(() => _errorMessage = 'Please enter both identifier and password.');
       return;
     }
 
-    setState(() => _isLoading = true);
-    final success = await ref.read(authServiceProvider).login(
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    
+    final error = await ref.read(authServiceProvider).login(
           identifier,
           password,
         );
+        
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (success) {
+    if (error == null) {
       final role = await ref.read(authServiceProvider).getRole();
       if (role == 'SuperAdmin' || role == 'Admin') {
         context.go('/admin_dashboard');
@@ -46,8 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         context.go('/dashboard');
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login Failed. Check credentials.')));
+      setState(() => _errorMessage = error);
     }
   }
 
@@ -74,19 +77,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(24),
-                    border:
-                        Border.all(color: AppTheme.royalGold.withValues(alpha: 0.2)),
+                    border: Border.all(
+                        color: AppTheme.royalGold.withValues(alpha: 0.2)),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
-                      'assets/logo.jpg',
-                      height: 100,
-                      width: 100,
+                      'assets/logo.png',
+                      height: 120,
+                      width: 120,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => const Icon(
                           Icons.school,
-                          size: 60,
+                          size: 72,
                           color: AppTheme.royalGold),
                     ),
                   ),
@@ -112,7 +115,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(AppConfig.organizationName,
                     style: const TextStyle(
                         fontSize: 12, color: AppTheme.textSecondaryDark)),
-                const SizedBox(height: 48),
+                const SizedBox(height: 32),
+                
+                if (_errorMessage != null)
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.redAccent, size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 GlassContainer(
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
@@ -138,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               width: double.infinity,
                               child: ElevatedButton(
                                   onPressed: _handleLogin,
-                                  child: const Text('AUTHENTICATE')),
+                                  child: const Text('Login')),
                             ),
                     ],
                   ),
@@ -146,7 +174,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 24),
                 TextButton(
                   onPressed: () => context.push('/register'),
-                  child: const Text('Request Enrollment Membership',
+                  child: const Text('Register',
                       style: TextStyle(color: AppTheme.royalGold)),
                 ),
                 const SizedBox(height: 32),

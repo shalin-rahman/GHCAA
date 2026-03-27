@@ -46,7 +46,7 @@ class AppHomeScreen extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(28),
                         child: Image.asset(
-                          'assets/logo.jpg', 
+                          'assets/logo.png', 
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => const Icon(Icons.school, size: 60, color: AppTheme.royalGold),
                         ),

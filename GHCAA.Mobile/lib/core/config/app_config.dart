@@ -10,7 +10,7 @@ class AppConfig {
   }
 
   static String get appName {
-    return dotenv.env['APP_NAME'] ?? 'GHCAA Mobile';
+    return dotenv.env['APP_NAME'] ?? 'Haragangian';
   }
 
   static String get organizationName {
@@ -26,14 +26,18 @@ class AppConfig {
   }
 
   static String get portalTitle {
-    return dotenv.env['PORTAL_TITLE'] ?? '${organizationAcronym} PORTAL';
+    return dotenv.env['PORTAL_TITLE'] ?? 'Haragangian Portal';
   }
 
   static String get portalDescription {
-    return dotenv.env['PORTAL_DESCRIPTION'] ?? 'Connecting $organizationName members through secure membership and integrated financial governance.';
+    return dotenv.env['PORTAL_DESCRIPTION'] ?? 'Connecting Haraganga College members through secure membership and integrated financial governance.';
   }
 
   static String get appVersion {
     return dotenv.env['APP_VERSION'] ?? 'v1.0.0 (Gold Edition)';
+  }
+
+  static String get memberNoun {
+    return dotenv.env['MEMBER_NOUN'] ?? 'Haragangian';
   }
 }

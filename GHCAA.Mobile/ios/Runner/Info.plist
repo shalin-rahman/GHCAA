@@ -10,13 +10,13 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>GHCAA requires access to your camera to capture profile photos and article images.</string>
+	<string>Haragangian requires access to your camera to capture profile photos and article images.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>GHCAA requires gallery access to upload media for news and community articles.</string>
+	<string>Haragangian requires gallery access to upload media for news and community articles.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Ghcaa Mobile</string>
+	<string>Haragangian</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,7 +24,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>ghcaa_mobile</string>
+	<string>Haragangian</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

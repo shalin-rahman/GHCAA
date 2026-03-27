@@ -57,6 +57,14 @@ if (-not $PortsOnly) {
     Write-Host "  Stopping Node processes (Angular frontend)..." -ForegroundColor Yellow
     Stop-ByName "node" "Node/Angular"
 
+    Write-Host "  Stopping Flutter and Dart processes (Mobile)..." -ForegroundColor Yellow
+    Stop-ByName "flutter" "Flutter Engine"
+    Stop-ByName "dart" "Dart VM"
+
+    Write-Host "  Stopping browser sessions (Chrome/Edge)..." -ForegroundColor Yellow
+    Stop-ByName "chrome" "Google Chrome"
+    Stop-ByName "msedge" "Microsoft Edge"
+
     Start-Sleep -Milliseconds 500
 }
 

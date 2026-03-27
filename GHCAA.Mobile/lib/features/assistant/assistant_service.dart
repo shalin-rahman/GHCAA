@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
+import '../../core/config/app_config.dart';
+
 final assistantServiceProvider = Provider<AssistantService>((ref) {
   return AssistantService(ref.read(dioProvider));
 });
@@ -19,6 +21,6 @@ class AssistantService {
     } catch (e) {
       print('AI Assistant Error: $e');
     }
-    return 'I apologize, but I am having trouble connecting to the Haraganga network right now.';
+    return 'I apologize, but I am having trouble connecting to the ${AppConfig.organizationName} network right now.';
   }
 }

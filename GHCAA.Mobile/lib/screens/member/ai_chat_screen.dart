@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/app_scaffold.dart';
 import '../../features/assistant/assistant_service.dart';
 
 class Message {
@@ -11,7 +12,7 @@ class Message {
 }
 
 final chatMessagesProvider = StateProvider<List<Message>>((ref) => [
-  Message('Hi! I am Haraganga AI. How can I assist you with alumni connections today?', false),
+  Message('Hi! I am the Haragangian AI. How can I assist you with alumni connections today?', false),
 ]);
 
 class AIChatScreen extends ConsumerStatefulWidget {
@@ -43,7 +44,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
     final response = await ref.read(assistantServiceProvider).ask(text);
     
     if (mounted) {
-      ref.read(chatMessagesProvider.notifier).update((state) => [...state, Message(response ?? 'No reply', false)]);
+      ref.read(chatMessagesProvider.notifier).update((state) => [...state, Message(response ?? 'Synchronization interrupted. Please try again.', false)]);
       setState(() => _isTyping = false);
     }
   }
@@ -53,37 +54,26 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
     final messages = ref.watch(chatMessagesProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Haraganga AI'), backgroundColor: Colors.transparent, elevation: 0),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: const Alignment(0, -1.0),
-            radius: 1.5,
-            colors: isDark 
-              ? [AppTheme.midnightSurface, AppTheme.midnightBase]
-              : [AppTheme.daylightSurface, AppTheme.daylightBase],
-          ),
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(24),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  return _buildMessage(context, messages[index].text, messages[index].isMe);
-                },
-              ),
+    return AppScaffold(
+      title: 'Official AI',
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(24),
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                return _buildMessage(context, messages[index].text, messages[index].isMe);
+              },
             ),
-            if (_isTyping)
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
-                child: Align(alignment: Alignment.centerLeft, child: Text('AI is typing...', style: TextStyle(fontSize: 10, color: AppTheme.royalGold))),
-              ),
-            _buildInputArea(context, isDark),
-          ],
-        ),
+          ),
+          if (_isTyping)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
+              child: Align(alignment: Alignment.centerLeft, child: Text('AI is synthesizing...', style: TextStyle(fontSize: 10, color: AppTheme.royalGold))),
+            ),
+          _buildInputArea(context, isDark),
+        ],
       ),
     );
   }
@@ -95,10 +85,10 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
         child: GlassContainer(
           padding: const EdgeInsets.all(16),
-          opacity: isMe ? 0.3 : 0.1,
+          opacity: isMe ? 0.3 : 0.08,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
-            child: Text(text),
+            child: Text(text, style: TextStyle(color: isMe ? Colors.white : Colors.white70)),
           ),
         ),
       ),

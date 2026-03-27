@@ -1,4 +1,4 @@
-﻿param (
+param (
     [switch]$SkipTests,
     [switch]$NoTest,
     [ValidateSet("PgSql","MySql","Sqlite","")]
@@ -61,6 +61,11 @@ if (-not $skipAllTests) {
     Write-Host "  Running Backend Unit Tests..." -ForegroundColor Yellow
     Push-Location $RootPath
     dotnet test GHCAA.Tests/GHCAA.Tests.csproj --logger "console;verbosity=normal"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  [!!] Backend unit tests failed! Aborting startup sequence." -ForegroundColor Red
+        Pop-Location
+        exit $LASTEXITCODE
+    }
     Pop-Location
     Write-Host ""
 }
@@ -75,6 +80,10 @@ Start-Sleep -Seconds 5
 Write-Host "  Launching Frontend    (http://localhost:4200)..." -ForegroundColor Yellow
 Start-Process cmd -ArgumentList "/c npm start" -WorkingDirectory "$RootPath\GHCAA.Web"
 
+# ── Launch Mobile Portal ────────────────────────────────────────────────────
+Write-Host "  Launching Mobile App  (Flutter Emulator/Device)..." -ForegroundColor Yellow
+Start-Process cmd -ArgumentList "/c detect-and-run-mobile.bat" -WorkingDirectory $RootPath
+
 # ── Summary ─────────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "  ============================================================" -ForegroundColor DarkCyan
@@ -82,6 +91,7 @@ Write-Host "    Services are starting in separate windows." -ForegroundColor Gre
 Write-Host "  ============================================================" -ForegroundColor DarkCyan
 Write-Host "    API      : https://localhost:7214/swagger"
 Write-Host "    Web      : http://localhost:4200"
+Write-Host "    Mobile   : Deployed via GHCAA.Mobile Engine"
 Write-Host "    Admin    : shalin / shalin" -ForegroundColor Yellow
 Write-Host "  ============================================================" -ForegroundColor DarkCyan
 Write-Host ""

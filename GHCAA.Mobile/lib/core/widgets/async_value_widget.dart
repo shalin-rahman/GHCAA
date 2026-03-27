@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
+import '../theme/app_theme.dart';
 import 'skeleton_loader.dart';
 
 class AsyncValueWidget<T> extends StatelessWidget {
@@ -23,25 +25,61 @@ class AsyncValueWidget<T> extends StatelessWidget {
     return value.when(
       data: data,
       loading: () => loadingWidget ?? SkeletonLoader.listStub(),
-      error: (e, s) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
-              const SizedBox(height: 16),
-              const Text('Something went wrong', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-              const SizedBox(height: 8),
-              Text(e.toString(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              if (onRetry != null) ...[
+      error: (e, s) {
+        String displayError = 'Unknown Synchronization Error';
+        if (e is DioException) {
+          displayError = e.message ?? e.toString();
+        } else {
+          displayError = e.toString();
+        }
+
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(40.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.wifi_off_rounded, 
+                  size: 64, 
+                  color: AppTheme.royalGold.withValues(alpha: 0.3)
+                ),
                 const SizedBox(height: 24),
-                ElevatedButton(onPressed: onRetry!, child: const Text('Connect to API Engine')),
+                const Text(
+                  'SYNC INTERRUPTED', 
+                  style: TextStyle(
+                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.w900, 
+                    color: Colors.white,
+                    fontSize: 14
+                  )
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  displayError, 
+                  textAlign: TextAlign.center, 
+                  style: const TextStyle(
+                    fontSize: 12, 
+                    color: AppTheme.textSecondaryDark,
+                    height: 1.5
+                  )
+                ),
+                if (onRetry != null) ...[
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: 200,
+                    child: ElevatedButton.icon(
+                      onPressed: onRetry!, 
+                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                      label: const Text('RETRY CONNECTION'),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -19,7 +19,7 @@ class NotificationScreen extends ConsumerWidget {
 
     return AppScaffold(
       title: 'Alerts & Messages',
-      child: AsyncValueWidget(
+      child: AsyncValueWidget<List<dynamic>>(
         value: notificationsAsync,
         loadingMessage: 'Fetching system alerts...',
         onRetry: () => ref.invalidate(notificationsListProvider),
@@ -65,7 +65,7 @@ class NotificationScreen extends ConsumerWidget {
                             ),
                           ),
                           title: Text(alert['title'] ?? 'System Update', style: TextStyle(fontSize: 14, fontWeight: isRead ? FontWeight.normal : FontWeight.w900, color: Colors.white)),
-                          subtitle: Text(alert['message'] ?? '', style: TextStyle(fontSize: 12, color: AppTheme.textSecondaryDark)),
+                          subtitle: Text(alert['message'] ?? '', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondaryDark)),
                           trailing: Text(alert['sentAt'] ?? '', style: TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark.withValues(alpha: 0.5))),
                           onTap: () {
                             if (!isRead) {

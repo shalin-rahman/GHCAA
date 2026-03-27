@@ -8,11 +8,18 @@ import '../../core/constants/app_constants.dart';
 import '../../features/auth/register_wizard_provider.dart';
 import '../../features/auth/auth_service.dart';
 
-class RegisterScreen extends ConsumerWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
     final registerState = ref.watch(registerWizardProvider);
 
 
@@ -53,22 +60,40 @@ class RegisterScreen extends ConsumerWidget {
                     const SizedBox(height: AppConstants.paddingExtraLarge),
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          if (registerState.step < 5) {
-                            ref.read(registerWizardProvider.notifier).nextStep();
-                          } else {
-                            final success = await ref.read(authServiceProvider).register(registerState.data);
-                            if (success && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Submitted for approval!')));
-                              context.go('/');
-                            } else if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Submission failed.')));
-                            }
-                          }
-                        },
-                        child: Text(registerState.step == 5 ? 'Finish' : 'Continue'),
-                      ),
+                      child: _isLoading 
+                        ? const Center(child: CircularProgressIndicator(color: AppTheme.royalGold))
+                        : ElevatedButton(
+                            onPressed: () async {
+                              if (registerState.step < 5) {
+                                ref.read(registerWizardProvider.notifier).nextStep();
+                              } else {
+                                setState(() => _isLoading = true);
+                                final error = await ref.read(authServiceProvider).register(registerState.data);
+                                if (!mounted) return;
+                                setState(() => _isLoading = false);
+                                
+                                if (error == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration submitted for approval!')));
+                                  context.go('/');
+                                } else {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Submission Error'),
+                                      content: Text(error),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx),
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            child: Text(registerState.step == 5 ? 'Finish' : 'Continue'),
+                          ),
                     ),
                   ],
                 ),

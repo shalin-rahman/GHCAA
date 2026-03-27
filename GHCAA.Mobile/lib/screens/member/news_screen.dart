@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -19,7 +20,7 @@ class NewsScreen extends ConsumerWidget {
 
     return AppScaffold(
       title: 'Haraganga News',
-      child: AsyncValueWidget(
+      child: AsyncValueWidget<List<dynamic>>(
         value: newsAsync,
         loadingMessage: 'Streaming latest headlines...',
         onRetry: () => ref.invalidate(newsListProvider),
@@ -39,7 +40,7 @@ class NewsScreen extends ConsumerWidget {
                 child: GestureDetector(
                   onLongPress: () {
                     HapticFeedback.heavyImpact();
-                    Share.share('Read this on GHCAA: ${article['title']}\n${article['summary'] ?? ''}');
+                    Share.share('Read this on ${AppConfig.organizationAcronym}: ${article['title']}\n${article['summary'] ?? ''}');
                   },
                   child: GlassContainer(
                     padding: EdgeInsets.zero,
@@ -58,7 +59,7 @@ class NewsScreen extends ConsumerWidget {
                             children: [
                               Text(article['title'] ?? 'Headline Missing', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
                               const SizedBox(height: 12),
-                              Text(article['summary'] ?? 'Summary not available.', style: TextStyle(fontSize: 13, height: 1.5, color: AppTheme.textSecondaryDark)),
+                              Text(article['summary'] ?? 'Summary not available.', style: const TextStyle(fontSize: 13, height: 1.5, color: AppTheme.textSecondaryDark)),
                               const SizedBox(height: 16),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

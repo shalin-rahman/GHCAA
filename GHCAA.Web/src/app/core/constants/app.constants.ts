@@ -466,7 +466,7 @@ export const APP_CONFIG = {
     tagline: 'Sharing Heritage, Aligning Lives, Integrating Networks',
     bengaliTagline: 'ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন',
     approvalSeal: 'GHC APPROVED',
-    logoUrl: '/assets/logo.jpg',
+    logoUrl: '/assets/logo.png',
     memberNickname: 'Haragangian',
     institutionName: 'Govt. Haraganga College',
     institutionAcronym: 'GHC',

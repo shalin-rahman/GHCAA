@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -20,7 +21,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: 'Contact GHCAA',
+      title: 'Contact ${AppConfig.organizationAcronym}',
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.paddingLarge),
         child: Column(

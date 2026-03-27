@@ -25,6 +25,22 @@ if %errorlevel%==0 (
     echo   [--] No Node processes were running
 )
 
+:: ── Stop Flutter / Dart (Mobile) ──────────────────────────────
+echo   Stopping Flutter and Dart processes...
+taskkill /F /IM flutter.exe >nul 2>&1
+taskkill /F /IM dart.exe >nul 2>&1
+if %errorlevel%==0 (
+    echo   [OK] Flutter/Dart processes stopped
+) else (
+    echo   [--] No mobile processes were running
+)
+
+:: ── Stop Chrome / Edge (Browsers) ──────────────────────────────
+echo   Stopping browser sessions (Chrome/Edge)...
+taskkill /F /IM chrome.exe >nul 2>&1
+taskkill /F /IM msedge.exe >nul 2>&1
+echo   [OK] Browsers cleared
+
 :: ── Release locked ports 7084 / 4200 (optional cleanup) ───────
 echo   Releasing ports 7084 and 4200...
 for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":7084 " 2^>nul') do (

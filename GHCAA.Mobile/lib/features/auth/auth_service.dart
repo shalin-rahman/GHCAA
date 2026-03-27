@@ -18,7 +18,7 @@ class AuthService {
   AuthService(this._dio, this._storage, this._ref);
 
 
-  Future<bool> login(String identifier, String password) async {
+  Future<String?> login(String identifier, String password) async {
     try {
       DeviceInfo? device;
       try {
@@ -40,22 +40,41 @@ class AuthService {
         await _storage.saveToken(token);
         await _storage.saveRole(role);
 
-        return true;
+        return null; // Success
       }
     } catch (e) {
-      print('Login Error: $e');
+      if (e is DioException) {
+        if (e.response?.statusCode == 401) {
+          return "Invalid username or password.";
+        }
+        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+          return "Server connection timed out.";
+        }
+      }
+      return "An unexpected error occurred. Please try again.";
     }
-    return false;
+    return "Login failed. Please check your credentials.";
   }
 
-  Future<bool> register(Map<String, dynamic> data) async {
+  Future<String?> register(Map<String, dynamic> data) async {
     try {
       final response = await _dio.post('/auth/register', data: data);
-      return response.statusCode == 200 || response.statusCode == 201;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return null; // Success
+      }
     } catch (e) {
-      print('Registration Error: $e');
-      return false;
+      if (e is DioException) {
+        if (e.response?.statusCode == 400) {
+          final msg = e.response?.data?['message'] ?? e.response?.data?['error'] ?? "Individual details already registered or data mismatch.";
+          return msg;
+        }
+        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+          return "Connection timed out. Please try again.";
+        }
+      }
+      return "An unexpected error occurred during submission.";
     }
+    return "Submission failed. Please check your data.";
   }
 
   Future<bool> forgotPassword(String identifier) async {

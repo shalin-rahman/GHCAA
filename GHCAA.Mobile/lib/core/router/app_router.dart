@@ -20,6 +20,7 @@ import '../../screens/member/family_link_screen.dart';
 import '../../screens/member/support_screen.dart';
 import '../../screens/member/articles_screen.dart';
 import '../../screens/member/magazine_screen.dart';
+import '../../screens/member/about_screen.dart';
 import '../../screens/admin/admin_dashboard_screen.dart';
 import '../../screens/admin/approval_queue_screen.dart';
 import '../../screens/admin/admin_modules.dart';
@@ -69,6 +70,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/support', name: 'support', builder: (context, state) => const SupportScreen()),
       GoRoute(path: '/articles', name: 'articles', builder: (context, state) => const MemberArticlesScreen()),
       GoRoute(path: '/magazine', name: 'magazine', builder: (context, state) => const MagazineScreen()),
+      GoRoute(path: '/about', name: 'about', builder: (context, state) => const AboutScreen()),
       
       // Admin Routes
       GoRoute(path: '/admin_dashboard', name: 'admin_dashboard', builder: (context, state) => const AdminDashboardScreen()),

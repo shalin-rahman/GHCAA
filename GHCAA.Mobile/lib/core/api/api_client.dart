@@ -28,16 +28,33 @@ final dioProvider = Provider<Dio>((ref) {
         return handler.next(options);
       },
       onError: (DioException e, handler) {
-        String message = 'System encountered an unexpected error.';
-        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
-          message = 'Network timeout. Check your connectivity.';
+        String message = 'The GHCAA portal encountered a connection hiccup.';
+        
+        if (e.type == DioExceptionType.connectionTimeout || 
+            e.type == DioExceptionType.receiveTimeout) {
+          message = 'The server is taking too long to respond. Please check your internet.';
+        } else if (e.type == DioExceptionType.connectionError) {
+          message = 'Unable to reach the GHCAA API Engine. Is it running?';
         } else if (e.response?.statusCode == 401) {
-          message = 'Session Expired. Please re-authenticate.';
+          message = 'Your session has expired. Please sign in again for security.';
         } else if (e.response?.statusCode == 403) {
-          message = 'Access Denied: High-privilege access required.';
+          message = 'You do not have the required permissions for this action.';
+        } else if (e.response?.statusCode == 404) {
+          message = 'The requested information was not found on the server.';
+        } else if (e.response?.statusCode == 500) {
+          message = 'Our servers are experiencing a temporary issue. We are on it!';
         }
-        print('API ERROR: $message | ${e.message}');
-        return handler.next(e);
+
+        // Create a new exception with the friendly message
+        final friendlyException = DioException(
+          requestOptions: e.requestOptions,
+          response: e.response,
+          type: e.type,
+          error: message,
+          message: message,
+        );
+        
+        return handler.next(friendlyException);
       },
     ),
   );
