@@ -20,11 +20,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
 
   Future<void> _handleLogin() async {
+    final identifier = _identifierController.text.trim();
+    final password = _passwordController.text;
+
+    if (identifier.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter both identifier and password.')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     final success = await ref.read(authServiceProvider).login(
-          _identifierController.text,
-          _passwordController.text,
+          identifier,
+          password,
         );
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
     if (success) {
@@ -61,10 +72,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(24),
                     border:
-                        Border.all(color: AppTheme.royalGold.withOpacity(0.2)),
+                        Border.all(color: AppTheme.royalGold.withValues(alpha: 0.2)),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/app_scaffold.dart';
@@ -18,9 +17,9 @@ class EventsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Future<void> _handleEventPayment(double amount, String eventTitle) async {
+    Future<void> handleEventPayment(double amount, String eventTitle) async {
        final gateway = ref.read(gatewayServiceProvider);
-       final res = await gateway.initiate(amount, PaymentGateway.SSLCommerz, 'EVT-REG-$eventTitle');
+       final res = await gateway.initiate(amount, PaymentGateway.sslCommerz, 'EVT-REG-$eventTitle');
        if (res.success && res.gatewayUrl != null && context.mounted) {
          Navigator.of(context).push(MaterialPageRoute(builder: (_) => PaymentWebPage(url: res.gatewayUrl!)));
        }
@@ -54,13 +53,13 @@ class EventsScreen extends ConsumerWidget {
                           Container(
                             height: 180,
                             decoration: BoxDecoration(
-                              color: AppTheme.royalGold.withOpacity(0.05),
+                              color: AppTheme.royalGold.withValues(alpha: 0.05),
                               image: event['coverImageUrl'] != null 
                                 ? DecorationImage(image: NetworkImage(event['coverImageUrl']), fit: BoxFit.cover)
                                 : null,
                             ),
                             child: event['coverImageUrl'] == null 
-                              ? Center(child: Icon(Icons.celebration_outlined, size: 64, color: AppTheme.royalGold.withOpacity(0.2)))
+                              ? Center(child: Icon(Icons.celebration_outlined, size: 64, color: AppTheme.royalGold.withValues(alpha: 0.2)))
                               : Stack(
                                   children: [
                                     Positioned(
@@ -102,7 +101,7 @@ class EventsScreen extends ConsumerWidget {
                                       ],
                                     ),
                                     ElevatedButton.icon(
-                                      onPressed: () => _handleEventPayment((event['registrationFee'] ?? 0).toDouble(), event['title'] ?? 'Event'),
+                                      onPressed: () => handleEventPayment((event['registrationFee'] ?? 0).toDouble(), event['title'] ?? 'Event'),
                                       icon: const Icon(Icons.how_to_reg_outlined, size: 18),
                                       label: const Text('JOIN EVENT'),
                                       style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),

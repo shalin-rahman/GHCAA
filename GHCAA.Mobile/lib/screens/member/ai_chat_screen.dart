@@ -110,7 +110,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: isDark ? AppTheme.midnightSurface : AppTheme.daylightSurface,
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1))),
+        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
       ),
       child: Row(
         children: [

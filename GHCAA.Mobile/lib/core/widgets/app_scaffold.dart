@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/app_theme.dart';
-import '../constants/app_constants.dart';
 import '../../features/theme/dynamic_theme_service.dart';
 import '../session/session_manager.dart';
 
@@ -29,7 +28,6 @@ class AppScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final specialThemeAsync = ref.watch(activeSpecialThemeProvider);
 
     Widget buildBody(List<Color> gradientColors, {String? announcement, Color? textColor}) {
@@ -65,7 +63,7 @@ class AppScaffold extends ConsumerWidget {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       child: Text(announcement, style: TextStyle(color: textColor ?? Colors.white, fontSize: 12, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     ),
                   Expanded(child: child),
@@ -83,7 +81,7 @@ class AppScaffold extends ConsumerWidget {
       data: (st) {
         if (st != null) {
           final colors = st.gradientEnabled 
-            ? [st.backgroundColor, st.backgroundColor.withOpacity(0.7)] 
+            ? [st.backgroundColor, st.backgroundColor.withValues(alpha: 0.7)] 
             : [st.backgroundColor, st.backgroundColor];
           return buildBody(colors, announcement: st.announcement, textColor: st.textColor);
         }

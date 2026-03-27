@@ -29,7 +29,7 @@ class MagazineScreen extends StatelessWidget {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppTheme.royalGold.withOpacity(0.1),
+                      color: AppTheme.royalGold.withValues(alpha: 0.1),
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                       image: const DecorationImage(
                         image: NetworkImage('https://via.placeholder.com/300x400?text=Magazine+Cover'),

@@ -29,7 +29,7 @@ class DashboardScreen extends StatelessWidget {
                 children: [
                    CircleAvatar(
                      radius: 30,
-                     backgroundColor: AppTheme.royalGold.withOpacity(0.1),
+                     backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1),
                      child: const Icon(Icons.person, color: AppTheme.royalGold),
                    ),
                    const SizedBox(width: AppConstants.paddingMedium),

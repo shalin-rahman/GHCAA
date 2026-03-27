@@ -31,7 +31,7 @@ class ContactMessagesScreen extends ConsumerWidget {
                 subtitle: const Text('Problem with registration payment', maxLines: 1),
                 trailing: Chip(
                   label: Text(isResolved ? 'Resolved' : 'Pending', style: const TextStyle(fontSize: 10, color: Colors.white)),
-                  backgroundColor: isResolved ? Colors.green.withOpacity(0.5) : Colors.orange.withOpacity(0.5),
+                  backgroundColor: isResolved ? Colors.green.withValues(alpha: 0.5) : Colors.orange.withValues(alpha: 0.5),
                   padding: EdgeInsets.zero,
                 ),
                 onTap: () {},

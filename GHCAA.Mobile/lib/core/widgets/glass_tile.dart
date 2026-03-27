@@ -29,13 +29,13 @@ class GlassTile extends StatelessWidget {
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppTheme.royalGold.withOpacity(0.1),
+              color: AppTheme.royalGold.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: AppTheme.royalGold, size: 20),
           ),
           title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-          subtitle: subtitle != null ? Text(subtitle!, style: TextStyle(fontSize: 12, color: AppTheme.textSecondaryDark.withOpacity(0.8))) : null,
+          subtitle: subtitle != null ? Text(subtitle!, style: TextStyle(fontSize: 12, color: AppTheme.textSecondaryDark.withValues(alpha: 0.8))) : null,
           trailing: trailing ?? const Icon(Icons.chevron_right, size: 16, color: AppTheme.royalGold),
           onTap: onTap,
         ),
@@ -66,7 +66,7 @@ class StatTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title.toUpperCase(), style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w800, color: AppTheme.textSecondaryDark.withOpacity(0.6))),
+            Text(title.toUpperCase(), style: TextStyle(fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.w800, color: AppTheme.textSecondaryDark.withValues(alpha: 0.6))),
             const SizedBox(height: 8),
             ShaderMask(
               shaderCallback: (bounds) => LinearGradient(

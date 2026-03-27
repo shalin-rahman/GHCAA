@@ -37,7 +37,7 @@ class MainShell extends StatelessWidget {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppTheme.midnightBase,
-          border: Border(top: BorderSide(color: AppTheme.royalGold.withOpacity(0.1), width: 0.5)),
+          border: Border(top: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.1), width: 0.5)),
         ),
         child: BottomNavigationBar(
           currentIndex: calculateSelectedIndex(location),

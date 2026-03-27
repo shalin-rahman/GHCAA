@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';

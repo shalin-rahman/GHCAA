@@ -63,7 +63,7 @@ class NewsScreen extends ConsumerWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(article['publishedAt'] ?? 'Today', style: TextStyle(fontSize: 10, color: AppTheme.royalGold.withOpacity(0.6))),
+                                  Text(article['publishedAt'] ?? 'Today', style: TextStyle(fontSize: 10, color: AppTheme.royalGold.withValues(alpha: 0.6))),
                                   const Icon(Icons.arrow_forward, size: 14, color: AppTheme.royalGold),
                                 ],
                               ),

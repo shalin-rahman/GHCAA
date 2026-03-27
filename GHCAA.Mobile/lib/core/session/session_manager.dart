@@ -1,19 +1,16 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sessionProvider = StateNotifierProvider<SessionManager, DateTime>((ref) => SessionManager(ref));
 
 class SessionManager extends StateNotifier<DateTime> {
-  final Ref _ref;
-  Timer? _timer;
+    Timer? _timer;
   
   // Set inactivity limit to 15 minutes by default
   static const Duration inactivityLimit = Duration(minutes: 15);
 
-  SessionManager(this._ref) : super(DateTime.now()) {
+  SessionManager(Ref ref) : super(DateTime.now()) {
     _startTimer();
   }
 

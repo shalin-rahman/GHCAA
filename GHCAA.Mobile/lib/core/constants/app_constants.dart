@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 class AppConstants {
   // Spacing & Padding
@@ -19,5 +18,5 @@ class AppConstants {
   static const Duration durationSlow = Duration(milliseconds: 600);
 
   // Layout
-  static const double IDCardAspectRatio = 0.63;
+  static const double idCardAspectRatio = 0.63;
 }

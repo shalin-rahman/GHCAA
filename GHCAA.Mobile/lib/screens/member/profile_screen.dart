@@ -22,7 +22,7 @@ class ProfileScreen extends ConsumerWidget {
         value: profileAsync,
         loadingMessage: 'Synchronizing profile data...',
         data: (profile) {
-          final data = profile as Map<String, dynamic>?;
+          final data = profile;
           if (data == null) return const Center(child: Text('Profile not found.', style: TextStyle(color: Colors.white)));
           
           return SingleChildScrollView(
@@ -31,12 +31,12 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   radius: 54,
-                  backgroundColor: AppTheme.royalGold.withOpacity(0.1),
+                  backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1),
                   child: Text(data['fullName']?[0] ?? '?', style: const TextStyle(fontSize: 40, color: AppTheme.royalGold, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(height: 16),
                 Text(data['fullName'] ?? 'Full Name', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white)),
-                Text('Membership ID: ${data['membershipId'] ?? 'Pending'}', style: TextStyle(color: AppTheme.textSecondaryDark, fontSize: 12)),
+                Text('Membership ID: ${data['membershipId'] ?? 'Pending'}', style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 12)),
                 const SizedBox(height: 32),
                 
                 _buildSection(context, 'Privacy Preferences', [
@@ -65,7 +65,7 @@ class ProfileScreen extends ConsumerWidget {
                   _buildActionTile(context, Icons.info_outline, 'Version Info (1.0.0 Dev)', null),
                   _buildActionTile(context, Icons.gavel, 'Terms & Privacy Policy', null),
                   _buildActionTile(context, Icons.developer_mode, 'Lead Dev: Shalin Rahman', null),
-                  _buildActionTile(context, Icons.business_outlined, 'Partnership: GHCAA', null, color: AppTheme.royalGold.withOpacity(0.5)),
+                  _buildActionTile(context, Icons.business_outlined, 'Partnership: GHCAA', null, color: AppTheme.royalGold.withValues(alpha: 0.5)),
                 ]),
 
                 const SizedBox(height: 48),
@@ -106,7 +106,7 @@ class ProfileScreen extends ConsumerWidget {
       title: Text(label, style: const TextStyle(fontSize: 14, color: Colors.white)),
       value: value,
       onChanged: (v) {},
-      activeColor: AppTheme.royalGold,
+      activeThumbColor: AppTheme.royalGold,
     );
   }
 

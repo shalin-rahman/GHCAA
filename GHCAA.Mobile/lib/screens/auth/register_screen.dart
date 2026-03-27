@@ -7,8 +7,6 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/constants/app_constants.dart';
 import '../../features/auth/register_wizard_provider.dart';
 import '../../features/auth/auth_service.dart';
-import '../../features/financials/gateway_service.dart';
-import '../../screens/financials/payment_web_page.dart';
 
 class RegisterScreen extends ConsumerWidget {
   const RegisterScreen({super.key});
@@ -17,15 +15,7 @@ class RegisterScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final registerState = ref.watch(registerWizardProvider);
 
-    Future<void> _handlePayment(double amount, String refId) async {
-       final gateway = ref.read(gatewayServiceProvider);
-       final res = await gateway.initiate(amount, PaymentGateway.SSLCommerz, refId);
-       if (res.success && res.gatewayUrl != null && context.mounted) {
-         Navigator.of(context).push(MaterialPageRoute(builder: (_) => PaymentWebPage(url: res.gatewayUrl!)));
-       } else {
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment Gateway Unavailable.')));
-       }
-    }
+
 
     return AppScaffold(
       title: 'Member Registration',

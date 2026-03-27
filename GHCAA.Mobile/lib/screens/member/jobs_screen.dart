@@ -79,7 +79,7 @@ class JobsScreen extends ConsumerWidget {
                                 ElevatedButton(
                                   onPressed: () {},
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppTheme.royalGold.withOpacity(0.1),
+                                    backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1),
                                     foregroundColor: AppTheme.royalGold,
                                     side: const BorderSide(color: AppTheme.royalGold),
                                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),

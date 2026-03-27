@@ -19,6 +19,11 @@ class AppTheme {
   static const Color adminDaylightBase = Color(0xFFFAF5FF);
   static const Color adminDaylightSurface = Color(0xFFFDFBFF);
 
+  // --- Daylight Palette ---
+  static const Color daylightBase = Color(0xFFF1F5F9);
+  static const Color daylightSurface = Color(0xFFFFFFFF);
+  static const Color textSecondaryLight = Color(0xFF475569);
+
   // --- Shared Text Style Defaults ---
   // Used in any widget that renders on our dark background.
   static const TextStyle bodyOnDark = TextStyle(color: textPrimaryDark);
@@ -65,7 +70,7 @@ class AppTheme {
       // TextField / FormField
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white.withOpacity(0.06),
+        fillColor: Colors.white.withValues(alpha: 0.06),
         hintStyle: const TextStyle(color: textSecondaryDark),
         labelStyle: const TextStyle(color: textSecondaryDark),
         prefixIconColor: royalGold,
@@ -113,11 +118,11 @@ class AppTheme {
       // Switch / Toggle
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? royalGold : textSecondaryDark),
-        trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? royalGold.withOpacity(0.3) : Colors.white12),
+        trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? royalGold.withValues(alpha: 0.3) : Colors.white12),
       ),
       // Chips
       chipTheme: ChipThemeData(
-        backgroundColor: Colors.white.withOpacity(0.08),
+        backgroundColor: Colors.white.withValues(alpha: 0.08),
         labelStyle: const TextStyle(color: textPrimaryDark, fontSize: 12),
         side: const BorderSide(color: Colors.white12),
       ),

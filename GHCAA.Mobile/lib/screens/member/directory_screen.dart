@@ -52,7 +52,7 @@ class DirectoryScreen extends ConsumerWidget {
                           children: [
                             CircleAvatar(
                               radius: 24,
-                              backgroundColor: AppTheme.royalGold.withOpacity(0.1),
+                              backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1),
                               child: Text(member['fullName']?[0] ?? '?', style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold)),
                             ),
                             const SizedBox(width: 16),
@@ -66,7 +66,7 @@ class DirectoryScreen extends ConsumerWidget {
                                 ],
                               ),
                             ),
-                            Icon(Icons.chevron_right, size: 16, color: AppTheme.royalGold.withOpacity(0.5))
+                            Icon(Icons.chevron_right, size: 16, color: AppTheme.royalGold.withValues(alpha: 0.5))
                           ],
                         ),
                       ),

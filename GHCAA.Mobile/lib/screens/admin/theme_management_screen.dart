@@ -37,7 +37,7 @@ class ThemeManagementScreen extends ConsumerWidget {
                 trailing: Switch(
                   value: theme != null,
                   onChanged: (val) {},
-                  activeColor: AppTheme.royalGold,
+                  activeThumbColor: AppTheme.royalGold,
                 ),
               ),
             ),

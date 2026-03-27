@@ -58,7 +58,7 @@ class AdminCMS extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Container(width: 80, height: 60, color: AppTheme.royalGold.withOpacity(0.1), child: const Icon(Icons.image)),
+                  Container(width: 80, height: 60, color: AppTheme.royalGold.withValues(alpha: 0.1), child: const Icon(Icons.image)),
                   const SizedBox(width: AppConstants.paddingMedium),
                   const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Gallery Item #12', style: TextStyle(fontWeight: FontWeight.bold)), Text('Mar 24, 2026', style: TextStyle(fontSize: 10))])),
                   IconButton(icon: const Icon(Icons.edit, size: 16), onPressed: () {}),

@@ -42,7 +42,7 @@ class NotificationScreen extends ConsumerWidget {
                       direction: DismissDirection.endToStart,
                       background: Container(
                         padding: const EdgeInsets.only(right: 20),
-                        decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(16)),
+                        decoration: BoxDecoration(color: Colors.redAccent.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(16)),
                         alignment: Alignment.centerRight,
                         child: const Icon(Icons.delete_outline, color: Colors.redAccent),
                       ),
@@ -57,7 +57,7 @@ class NotificationScreen extends ConsumerWidget {
                         child: ListTile(
                           leading: Container(
                             padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(color: isRead ? Colors.transparent : AppTheme.royalGold.withOpacity(0.1), shape: BoxShape.circle),
+                            decoration: BoxDecoration(color: isRead ? Colors.transparent : AppTheme.royalGold.withValues(alpha: 0.1), shape: BoxShape.circle),
                             child: Icon(
                               isRead ? Icons.notifications_none : Icons.notifications_active,
                               color: isRead ? AppTheme.textSecondaryDark : AppTheme.royalGold,
@@ -66,7 +66,7 @@ class NotificationScreen extends ConsumerWidget {
                           ),
                           title: Text(alert['title'] ?? 'System Update', style: TextStyle(fontSize: 14, fontWeight: isRead ? FontWeight.normal : FontWeight.w900, color: Colors.white)),
                           subtitle: Text(alert['message'] ?? '', style: TextStyle(fontSize: 12, color: AppTheme.textSecondaryDark)),
-                          trailing: Text(alert['sentAt'] ?? '', style: TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark.withOpacity(0.5))),
+                          trailing: Text(alert['sentAt'] ?? '', style: TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark.withValues(alpha: 0.5))),
                           onTap: () {
                             if (!isRead) {
                               ref.read(notificationServiceProvider).markAsRead(alert['id']);

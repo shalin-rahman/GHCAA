@@ -12,8 +12,6 @@ class DigitalIDScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return AppScaffold(
       title: 'Digital ID Card',
       child: profileAsync.when(
@@ -42,13 +40,13 @@ class DigitalIDScreen extends ConsumerWidget {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     const Icon(Icons.school, size: 32, color: AppTheme.royalGold),
-                                    Text('GHCAA MEMBER', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.2, color: AppTheme.textSecondaryDark.withOpacity(0.5))),
+                                    Text('GHCAA MEMBER', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.2, color: AppTheme.textSecondaryDark.withValues(alpha: 0.5))),
                                   ],
                                 ),
                                 const SizedBox(height: 32),
                                 CircleAvatar(
                                   radius: 60,
-                                  backgroundColor: AppTheme.royalGold.withOpacity(0.1),
+                                  backgroundColor: AppTheme.royalGold.withValues(alpha: 0.1),
                                   child: Text(data['fullName']?[0] ?? '?', style: const TextStyle(fontSize: 40, color: AppTheme.royalGold, fontWeight: FontWeight.w900)),
 
                                 ),

@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
-enum PaymentGateway { SSLCommerz, Bkash, Aamarpay, Stripe }
+enum PaymentGateway { sslCommerz, bkash, aamarpay, stripe }
 
 class PaymentInitiationResponse {
   final bool success;
