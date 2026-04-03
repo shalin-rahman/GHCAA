@@ -21,10 +21,30 @@ class FinancialService {
 
   Future<double> getOutstandingDues() async {
     try {
-      final response = await _dio.get('/financial/dues');
+      final response = await _dio.get('/financials/my-dues');
       return (response.data['amount'] ?? 0.0).toDouble();
     } catch (e) {
       return 0.0;
     }
+  }
+
+  Future<List<dynamic>> getSavedMethods() async {
+    try {
+      final response = await _dio.get('/financials/saved-methods');
+      return response.data as List<dynamic>;
+    } catch (_) { return []; }
+  }
+
+  Future<bool> deleteSavedMethod(int id) async {
+    try {
+      final response = await _dio.delete('/financials/saved-methods/$id');
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
+
+  Future<String?> getReceiptUrl(int paymentId) async {
+    // Usually we would return binary, but for mobile we might trigger a browser download 
+    // or use a specialized file downloader.
+    return '${_dio.options.baseUrl}/financials/receipt/$paymentId';
   }
 }

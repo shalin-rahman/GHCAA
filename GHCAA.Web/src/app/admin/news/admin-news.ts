@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NewsService } from '../../core/services/news.service';
@@ -19,6 +19,18 @@ export class AdminNews implements OnInit {
 
     categories = ARTICLE_CATEGORIES;
     newsList = signal<NewsPost[]>([]);
+    searchQuery = signal('');
+    
+    filteredNews = computed(() => {
+        const query = this.searchQuery().toLowerCase();
+        if (!query) return this.newsList();
+        
+        return this.newsList().filter(post => 
+            post.title.toLowerCase().includes(query) || 
+            getArticleCategoryLabel(post.articleCategory).toLowerCase().includes(query)
+        );
+    });
+
     loading = signal(true);
     showForm = signal(false);
     selectedPost = signal<NewsPost | null>(null);

@@ -15,11 +15,12 @@ class ThemeManagementScreen extends ConsumerWidget {
 
     return AppScaffold(
       isAdmin: true,
-      title: 'Theme Branding',
+      title: 'Special Themes',
+      breadcrumb: 'ADMIN > THEMES',
       child: ListView(
         padding: const EdgeInsets.all(AppConstants.paddingLarge),
         children: [
-          const Text('Special Day Configurations', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          const Text('Theme Configurations', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           const SizedBox(height: 16),
           activeThemeAsync.when(
             data: (theme) => GlassContainer(

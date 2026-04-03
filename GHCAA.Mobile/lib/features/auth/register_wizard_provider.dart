@@ -11,6 +11,18 @@ class RegisterModel {
   final String permanentAddress;
   final List<Map<String, dynamic>> academicHistory;
   final String? profileImagePath;
+  final String? nidPhotoPath;
+  final String membershipType;
+  final String bloodGroup;
+  final String? dateOfBirth;
+  final String? degree;
+  final String? subject;
+  final String? designation;
+  final bool hasAcceptedTerms;
+  final bool notifyEventCreation;
+  final bool notifyParticipationApproval;
+  final bool notifyRegistrationUpdate;
+  final bool notifyRelevantUpdates;
 
   const RegisterModel({
     this.fullName = '',
@@ -22,6 +34,18 @@ class RegisterModel {
     this.permanentAddress = '',
     this.academicHistory = const [],
     this.profileImagePath,
+    this.nidPhotoPath,
+    this.membershipType = 'General',
+    this.bloodGroup = 'APositive',
+    this.dateOfBirth,
+    this.degree = 'HSC',
+    this.subject,
+    this.designation = '',
+    this.hasAcceptedTerms = false,
+    this.notifyEventCreation = true,
+    this.notifyParticipationApproval = true,
+    this.notifyRegistrationUpdate = true,
+    this.notifyRelevantUpdates = true,
   });
 
   RegisterModel copyWith({
@@ -34,6 +58,18 @@ class RegisterModel {
     String? permanentAddress,
     List<Map<String, dynamic>>? academicHistory,
     String? profileImagePath,
+    String? nidPhotoPath,
+    String? membershipType,
+    String? bloodGroup,
+    String? dateOfBirth,
+    String? degree,
+    String? subject,
+    String? designation,
+    bool? hasAcceptedTerms,
+    bool? notifyEventCreation,
+    bool? notifyParticipationApproval,
+    bool? notifyRegistrationUpdate,
+    bool? notifyRelevantUpdates,
   }) {
     return RegisterModel(
       fullName: fullName ?? this.fullName,
@@ -45,25 +81,47 @@ class RegisterModel {
       permanentAddress: permanentAddress ?? this.permanentAddress,
       academicHistory: academicHistory ?? this.academicHistory,
       profileImagePath: profileImagePath ?? this.profileImagePath,
+      nidPhotoPath: nidPhotoPath ?? this.nidPhotoPath,
+      membershipType: membershipType ?? this.membershipType,
+      bloodGroup: bloodGroup ?? this.bloodGroup,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      degree: degree ?? this.degree,
+      subject: subject ?? this.subject,
+      designation: designation ?? this.designation,
+      hasAcceptedTerms: hasAcceptedTerms ?? this.hasAcceptedTerms,
+      notifyEventCreation: notifyEventCreation ?? this.notifyEventCreation,
+      notifyParticipationApproval: notifyParticipationApproval ?? this.notifyParticipationApproval,
+      notifyRegistrationUpdate: notifyRegistrationUpdate ?? this.notifyRegistrationUpdate,
+      notifyRelevantUpdates: notifyRelevantUpdates ?? this.notifyRelevantUpdates,
     );
   }
 
-  /// Converts to the payload expected by the backend registration endpoint.
   Map<String, dynamic> toJson() => {
         'fullName': fullName,
         'email': email,
         'mobileNo': mobileNo,
         'nid': nid,
-        'passingYear': passingYear,
+        'passingYear': int.tryParse(passingYear),
         'presentAddress': presentAddress,
         'permanentAddress': permanentAddress,
         'academicHistory': academicHistory,
+        'membershipType': membershipType,
+        'bloodGroup': bloodGroup,
+        'dateOfBirth': dateOfBirth,
+        'degree': degree,
+        'subject': subject,
+        'designation': designation,
+        'profileImagePath': profileImagePath,
+        'nidPhotoPath': nidPhotoPath,
+        'notifyEventCreation': notifyEventCreation,
+        'notifyParticipationApproval': notifyParticipationApproval,
+        'notifyRegistrationUpdate': notifyRegistrationUpdate,
+        'notifyRelevantUpdates': notifyRelevantUpdates,
+        'hasAcceptedTerms': hasAcceptedTerms,
       };
 }
 
-// ── State ─────────────────────────────────────────────────────────────────
 class RegisterState {
-  /// 0-indexed, matching PageController index and test contract.
   final int currentStep;
   final RegisterModel model;
 
@@ -72,14 +130,9 @@ class RegisterState {
     this.model = const RegisterModel(),
   });
 
-  /// True when user is on the final confirmation step (step 3, index 2).
   bool get isLastStep => currentStep == 2;
-
-  /// Legacy 1-indexed getter for any UI code still using [step].
   int get step => currentStep + 1;
 
-  /// Backwards-compatible flat-map view of the model for the register_screen UI.
-  /// New code should prefer accessing [model] directly.
   Map<String, dynamic> get data => {
         'FullName': model.fullName,
         'Email': model.email,
@@ -88,12 +141,19 @@ class RegisterState {
         'PassingYear': model.passingYear.isEmpty ? null : int.tryParse(model.passingYear),
         'PresentAddress': model.presentAddress,
         'PermanentAddress': model.permanentAddress,
-        'Degree': null, // stored separately via updateData
-        'Subject': null,
-        'Designation': null,
-        'BloodGroup': 'APositive',
-        'MembershipType': 'General',
-        'HasAcceptedTerms': false,
+        'Degree': model.degree,
+        'Subject': model.subject,
+        'Designation': model.designation,
+        'BloodGroup': model.bloodGroup,
+        'MembershipType': model.membershipType,
+        'HasAcceptedTerms': model.hasAcceptedTerms,
+        'DateOfBirth': model.dateOfBirth,
+        'ProfileImagePath': model.profileImagePath,
+        'NidPhotoPath': model.nidPhotoPath,
+        'NotifyEventCreation': model.notifyEventCreation,
+        'NotifyParticipationApproval': model.notifyParticipationApproval,
+        'NotifyRegistrationUpdate': model.notifyRegistrationUpdate,
+        'NotifyRelevantUpdates': model.notifyRelevantUpdates,
       };
 
   RegisterState copyWith({int? currentStep, RegisterModel? model}) {
@@ -104,13 +164,11 @@ class RegisterState {
   }
 }
 
-// ── Notifier ─────────────────────────────────────────────────────────────
 class RegisterWizardNotifier extends StateNotifier<RegisterState> {
   static const int _totalSteps = 3;
 
   RegisterWizardNotifier() : super(const RegisterState());
 
-  // -- Navigation -----------------------------------------------------------
   void nextPage() {
     if (state.currentStep < _totalSteps - 1) {
       state = state.copyWith(currentStep: state.currentStep + 1);
@@ -123,11 +181,9 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
     }
   }
 
-  /// Legacy aliases preserved for register_screen UI compatibility.
   void nextStep() => nextPage();
   void prevStep() => prevPage();
 
-  // -- Model mutation -------------------------------------------------------
   void updateModel({
     String? fullName,
     String? email,
@@ -138,6 +194,18 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
     String? permanentAddress,
     List<Map<String, dynamic>>? academicHistory,
     String? profileImagePath,
+    String? nidPhotoPath,
+    String? membershipType,
+    String? bloodGroup,
+    String? dateOfBirth,
+    String? degree,
+    String? subject,
+    String? designation,
+    bool? hasAcceptedTerms,
+    bool? notifyEventCreation,
+    bool? notifyParticipationApproval,
+    bool? notifyRegistrationUpdate,
+    bool? notifyRelevantUpdates,
   }) {
     state = state.copyWith(
       model: state.model.copyWith(
@@ -150,21 +218,85 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
         permanentAddress: permanentAddress,
         academicHistory: academicHistory,
         profileImagePath: profileImagePath,
+        nidPhotoPath: nidPhotoPath,
+        membershipType: membershipType,
+        bloodGroup: bloodGroup,
+        dateOfBirth: dateOfBirth,
+        degree: degree,
+        subject: subject,
+        designation: designation,
+        hasAcceptedTerms: hasAcceptedTerms,
+        notifyEventCreation: notifyEventCreation,
+        notifyParticipationApproval: notifyParticipationApproval,
+        notifyRegistrationUpdate: notifyRegistrationUpdate,
+        notifyRelevantUpdates: notifyRelevantUpdates,
       ),
     );
   }
 
-  /// Legacy key-value setter kept for backwards compatibility.
   void updateData(String key, dynamic value) {
-    updateModel(
-      fullName: key == 'fullName' ? value as String : null,
-      email: key == 'email' ? value as String : null,
-      mobileNo: key == 'mobileNo' ? value as String : null,
-      nid: key == 'nid' ? value as String : null,
-      passingYear: key == 'passingYear' ? value as String : null,
-      presentAddress: key == 'presentAddress' ? value as String : null,
-      permanentAddress: key == 'permanentAddress' ? value as String : null,
-    );
+    switch (key) {
+      case 'FullName':
+        updateModel(fullName: value as String);
+        break;
+      case 'Email':
+        updateModel(email: value as String);
+        break;
+      case 'MobileNo':
+        updateModel(mobileNo: value as String);
+        break;
+      case 'NID':
+        updateModel(nid: value as String);
+        break;
+      case 'PassingYear':
+        updateModel(passingYear: value?.toString());
+        break;
+      case 'PresentAddress':
+        updateModel(presentAddress: value as String);
+        break;
+      case 'PermanentAddress':
+        updateModel(permanentAddress: value as String);
+        break;
+      case 'Degree':
+        updateModel(degree: value as String);
+        break;
+      case 'Subject':
+        updateModel(subject: value as String);
+        break;
+      case 'Designation':
+        updateModel(designation: value as String);
+        break;
+      case 'BloodGroup':
+        updateModel(bloodGroup: value as String);
+        break;
+      case 'MembershipType':
+        updateModel(membershipType: value as String);
+        break;
+      case 'HasAcceptedTerms':
+        updateModel(hasAcceptedTerms: value as bool);
+        break;
+      case 'DateOfBirth':
+        updateModel(dateOfBirth: value as String);
+        break;
+      case 'ProfileImagePath':
+        updateModel(profileImagePath: value as String?);
+        break;
+      case 'NidPhotoPath':
+        updateModel(nidPhotoPath: value as String?);
+        break;
+      case 'NotifyEventCreation':
+        updateModel(notifyEventCreation: value as bool);
+        break;
+      case 'NotifyParticipationApproval':
+        updateModel(notifyParticipationApproval: value as bool);
+        break;
+      case 'NotifyRegistrationUpdate':
+        updateModel(notifyRegistrationUpdate: value as bool);
+        break;
+      case 'NotifyRelevantUpdates':
+        updateModel(notifyRelevantUpdates: value as bool);
+        break;
+    }
   }
 
   void reset() => state = const RegisterState();

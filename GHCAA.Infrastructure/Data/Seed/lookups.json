@@ -1,4 +1,4 @@
-﻿[
+[
   {
     "Id": 1,
     "LookupGroup": "Degree",
@@ -750,5 +750,59 @@
     "Label": "3XL",
     "IsActive": true,
     "DisplayOrder": 106
+  },
+  {
+    "Id": 2001,
+    "LookupGroup": "NotificationType",
+    "Value": "NotifyEventCreation",
+    "Label": "Event Creations",
+    "Description": "Alerts when new alumni events are announced.",
+    "IsActive": true,
+    "DisplayOrder": 201
+  },
+  {
+    "Id": 2002,
+    "LookupGroup": "NotificationType",
+    "Value": "NotifyParticipationApproval",
+    "Label": "Participation Updates",
+    "Description": "Notifications for your event registration approvals.",
+    "IsActive": true,
+    "DisplayOrder": 202
+  },
+  {
+    "Id": 2003,
+    "LookupGroup": "NotificationType",
+    "Value": "NotifyRegistrationUpdate",
+    "Label": "Registry Updates",
+    "Description": "Updates regarding your membership status.",
+    "IsActive": true,
+    "DisplayOrder": 203
+  },
+  {
+    "Id": 2004,
+    "LookupGroup": "NotificationType",
+    "Value": "NotifyRelevantUpdates",
+    "Label": "Relevant Announcements",
+    "Description": "General association news and system updates.",
+    "IsActive": true,
+    "DisplayOrder": 204
+  },
+  {
+    "Id": 3001,
+    "LookupGroup": "BroadcastChannel",
+    "Value": "push",
+    "Label": "PUSH",
+    "Description": "In-app real-time notifications.",
+    "IsActive": true,
+    "DisplayOrder": 301
+  },
+  {
+    "Id": 3002,
+    "LookupGroup": "BroadcastChannel",
+    "Value": "email",
+    "Label": "EMAIL",
+    "Description": "Official communication via verified inbox.",
+    "IsActive": true,
+    "DisplayOrder": 302
   }
 ]

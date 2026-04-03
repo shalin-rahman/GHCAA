@@ -63,4 +63,52 @@ class AdminService {
       return {'totalMembers': 0, 'pendingApprovals': 0, 'totalEvents': 0};
     }
   }
+
+  // Governance logic
+  Future<List<dynamic>> getECPeriods() async {
+    try {
+      final response = await _dio.get('/admin/governance/periods');
+      return response.data as List<dynamic>;
+    } catch (_) { return []; }
+  }
+
+  Future<bool> createECPeriod(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post('/admin/governance/periods', data: data);
+      return response.statusCode == 201 || response.statusCode == 200;
+    } catch (_) { return false; }
+  }
+
+  Future<bool> updateECPeriod(int id, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.put('/admin/governance/periods/$id', data: data);
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
+
+  // Financial Ledger
+  Future<List<dynamic>> getLedgerRecords({String? search, int page = 1}) async {
+    try {
+      final response = await _dio.get('/ledger', queryParameters: {
+        'search': search,
+        'page': page,
+        'pageSize': 200, // Batch fetch for admin view
+      });
+      return response.data['items'] ?? [];
+    } catch (_) { return []; }
+  }
+
+  Future<Map<String, dynamic>> getLedgerSummary(int year) async {
+    try {
+      final response = await _dio.get('/ledger/summary', queryParameters: {'year': year});
+      return response.data as Map<String, dynamic>;
+    } catch (_) { return {'totalRevenue': 0, 'totalExpenses': 0, 'netPosition': 0}; }
+  }
+
+  Future<bool> updateMember(int id, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.put('/admin/members/$id', data: data);
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
 }

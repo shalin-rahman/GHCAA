@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
@@ -76,7 +77,20 @@ class DigitalIDScreen extends ConsumerWidget {
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(12)),
-                                  child: const Icon(Icons.qr_code_2, size: 90, color: Colors.black),
+                                  child: QrImageView(
+                                    data: data['membershipId']?.toString() ?? 'PENDING',
+                                    version: QrVersions.auto,
+                                    size: 90,
+                                    gapless: false,
+                                    eyeStyle: const QrEyeStyle(
+                                      eyeShape: QrEyeShape.square,
+                                      color: Colors.black,
+                                    ),
+                                    dataModuleStyle: const QrDataModuleStyle(
+                                      dataModuleShape: QrDataModuleShape.square,
+                                      color: Colors.black,
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
                                 Text('ID: ${data['membershipId'] ?? 'PENDING'}'.toUpperCase(), style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: 2)),

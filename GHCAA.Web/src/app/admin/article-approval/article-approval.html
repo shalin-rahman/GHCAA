@@ -2,9 +2,21 @@
     <header class="page-header">
         <div class="header-text">
             <h2>Submission Review</h2>
-            <small>Review and manage articles submitted by members for verification and publication.</small>
+            <small>Showing {{ filteredArticles().length }} of {{ pendingArticles().length }} pending submissions</small>
         </div>
     </header>
+
+    <!-- Search Bar -->
+    <div class="filter-bar">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                placeholder="Search by title, author or category…" class="search-input">
+            @if (searchQuery()) {
+            <button class="clear-search" (click)="searchQuery.set('')" title="Clear search">×</button>
+            }
+        </div>
+    </div>
 
     @if (loading()) {
     <div class="loading-state glass-card py-20 text-center">
@@ -24,11 +36,13 @@
                 </tr>
             </thead>
             <tbody>
-                @for (article of pendingArticles(); track article.id) {
+                @for (article of filteredArticles(); track article.id) {
                 <tr>
                     <td>
                         <div class="article-info">
-                            <div class="thumb" [style.background-image]="'url(' + (article.imageUrl || '/assets/placeholder.jpg') + ')'"></div>
+                            <div class="thumb"
+                                [style.background-image]="'url(' + (article.imageUrl || '/assets/placeholder.jpg') + ')'">
+                            </div>
                             <div class="txt">
                                 <strong>{{ article.title }}</strong>
                                 <p>{{ article.content | slice:0:60 }}...</p>
@@ -37,7 +51,8 @@
                     </td>
                     <td><span class="badge">{{ article.articleCategory }}</span></td>
                     <td>{{ article.authorName }}</td>
-                    <td>{{ article.createdAt | date:'shortTime' }} <br> <small>{{ article.createdAt | date:'mediumDate' }}</small></td>
+                    <td>{{ article.createdAt | date:'shortTime' }} <br> <small>{{ article.createdAt | date:'mediumDate'
+                            }}</small></td>
                     <td>
                         <button class="btn btn-secondary btn-sm" (click)="viewArticle(article)">Review Article</button>
                     </td>
@@ -45,7 +60,7 @@
                 } @empty {
                 <tr>
                     <td colspan="5" class="py-20 text-center italic opacity-50">
-                        No pending submissions found.
+                        {{ searchQuery() ? 'No submissions match your search.' : 'No pending submissions found.' }}
                     </td>
                 </tr>
                 }
@@ -76,10 +91,11 @@
                 <div class="preview-body mt-8">
                     {{ selectedArticle()?.content }}
                 </div>
-                
+
                 <div class="rejection-box mt-10 p-6 glass-card bg-white/5">
                     <label class="text-xs uppercase font-black mb-4 block">Rejection Note (Only if rejecting)</label>
-                    <textarea [(ngModel)]="rejectReason" placeholder="Explain why this article is being rejected..."></textarea>
+                    <textarea [(ngModel)]="rejectReason"
+                        placeholder="Explain why this article is being rejected..."></textarea>
                 </div>
             </div>
         </div>

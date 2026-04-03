@@ -44,7 +44,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (error == null) {
         final role = await ref.read(authServiceProvider).getRole();
-        if (!context.mounted) return; // Added check
+        if (!mounted) return;
         if (role == 'SuperAdmin' || role == 'Admin') {
           context.go('/admin_dashboard');
         } else {
@@ -52,13 +52,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         }
       } else {
         setState(() => _errorMessage = error);
-        if (!context.mounted) return; // Added check
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login failed. Please check your credentials.')),
         );
       }
     } catch (e) {
-      if (!context.mounted) return; // Added check
+      if (!mounted) return;
       setState(() => _errorMessage = 'An unexpected error occurred: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('An unexpected error occurred during login.')),

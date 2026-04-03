@@ -9,6 +9,7 @@ using GHCAA.API.Extensions;
 using GHCAA.API.Middleware;
 using GHCAA.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
 
 // Load environment variables from .env file (useful for local overrides)
 DotNetEnv.Env.Load();
@@ -17,13 +18,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 var configuration = builder.Configuration;
 
+ValidateJwtConfiguration(configuration, builder.Environment);
+
+var keyRingPath = configuration["DataProtection:KeyRingPath"];
+if (!string.IsNullOrWhiteSpace(keyRingPath))
+{
+    Directory.CreateDirectory(keyRingPath);
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(keyRingPath))
+        .SetApplicationName("GHCAA");
+}
+
 // Register layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(configuration);
 builder.Services.AddMemoryCache();
 
 // Configure JWT Authentication
-builder.Services.AddJwtAuthentication(configuration);
+builder.Services.AddJwtAuthentication(configuration, builder.Environment);
 builder.Services.AddAppAuthorization();
 
 // 1. Configure Rate Limiting (Fixed Window)
@@ -65,9 +77,10 @@ builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServe
 });
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x =>
 {
-    x.ValueLengthLimit = int.MaxValue;
+    var capped = Math.Min(maxBodySize, 128L * 1024 * 1024);
+    x.ValueLengthLimit = (int)Math.Min(capped, int.MaxValue);
     x.MultipartBodyLengthLimit = maxBodySize;
-    x.MemoryBufferThreshold = (int)maxBodySize;
+    x.MemoryBufferThreshold = (int)Math.Min(maxBodySize, int.MaxValue);
 });
 
 builder.Services.AddControllers()
@@ -77,7 +90,6 @@ builder.Services.AddControllers()
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDirectoryBrowser();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<GHCAA.Application.Interfaces.IRealTimeService, GHCAA.API.Services.RealTimeService>();
@@ -149,10 +161,41 @@ app.UseMiddleware<AuditLogMiddleware>();
 app.UseRateLimiter(); // Apply Rate Limiting
 
 app.UseWebSockets();
-app.UseStaticFiles(); // serve wwwroot/uploads
+
+app.UseStaticFiles(); // serve wwwroot at the root /
+
+// Map /api/ paths to wwwroot so the frontend can retrieve the physical images 
+// when it concatenates the API base URL with the database's relative 'uploads/...' path.
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "uploads")),
+    RequestPath = "/api/uploads"
+});
+
 app.UseAuthentication();
 app.UseMiddleware<SecurityStampMiddleware>(); // Invalidates sessions on status change
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/hubs/chat");
 app.Run();
+
+static void ValidateJwtConfiguration(IConfiguration configuration, IHostEnvironment environment)
+{
+    var key = configuration["Jwt:Key"];
+    if (environment.IsDevelopment())
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return;
+        if (key.Length < 32)
+            throw new InvalidOperationException("Jwt:Key must be at least 32 characters when set.");
+        return;
+    }
+
+    if (string.IsNullOrWhiteSpace(key) || key.Length < 32)
+    {
+        throw new InvalidOperationException(
+            "Jwt:Key must be configured to a strong secret (minimum 32 characters) outside Development. " +
+            "Set the Jwt__Key environment variable, User Secrets, or your host's secret store.");
+    }
+}

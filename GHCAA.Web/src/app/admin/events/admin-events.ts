@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { EventsService } from '../../core/services/events.service';
@@ -42,6 +42,16 @@ export class AdminEvents implements OnInit {
     showInvitation = signal<boolean>(false);
     invitationData = signal<any | null>(null);
     formError = signal<string | null>(null);
+
+    filteredEvents = computed(() => {
+        const query = this.searchQuery().toLowerCase();
+        const all = this.events();
+        if (!query) return all;
+        return all.filter(e => 
+            e.title?.toLowerCase()?.includes(query) || 
+            e.location?.toLowerCase()?.includes(query)
+        );
+    });
     
     // Receipt Preview
     showReceiptModal = signal<boolean>(false);

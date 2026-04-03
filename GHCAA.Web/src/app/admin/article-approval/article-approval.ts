@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NewsService } from '../../core/services/news.service';
@@ -22,6 +22,17 @@ export class ArticleApproval implements OnInit {
   selectedArticle = signal<NewsPost | null>(null);
   rejectReason = signal('');
   isProcessing = signal(false);
+  searchQuery = signal('');
+
+  filteredArticles = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return this.pendingArticles();
+    return this.pendingArticles().filter(a =>
+      (a.title || '').toLowerCase().includes(q) ||
+      ((a as any).authorName || '').toLowerCase().includes(q) ||
+      ((a as any).articleCategory || '').toLowerCase().includes(q)
+    );
+  });
 
   ngOnInit() {
     this.loadPending();

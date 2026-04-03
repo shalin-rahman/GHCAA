@@ -93,12 +93,23 @@ namespace GHCAA.Infrastructure.Services
                 IsEmailPublic = dto.IsEmailPublic,
                 IsAddressPublic = dto.IsAddressPublic,
                 IsNIDPublic = dto.IsNIDPublic,
+                NotifyEventCreation = dto.NotifyEventCreation,
+                NotifyParticipationApproval = dto.NotifyParticipationApproval,
+                NotifyRegistrationUpdate = dto.NotifyRegistrationUpdate,
+                NotifyRelevantUpdates = dto.NotifyRelevantUpdates,
                 HasAcceptedTerms = dto.HasAcceptedTerms,
                 HasAcceptedGdpr = dto.HasAcceptedGdpr,
                 GdprAcceptedAt = dto.HasAcceptedGdpr ? DateTime.UtcNow : null,
                 MembershipType = dto.MembershipType,
+                Category = dto.Category,
                 IsVerified = false
             };
+
+            // Registry Validation: Only Founding members can be Lifelong Patrons
+            if (member.Category == Enums.MemberCategory.LifelongPatron && member.MembershipType != Enums.MembershipType.Founding)
+            {
+                throw new InvalidOperationException("Lifelong Patron status is only available for Founding Membership tier.");
+            }
 
             // Generate Membership Number: GHC + YY + MM + (last 3 digit max + 1)
             var now = DateTime.UtcNow;
@@ -393,7 +404,7 @@ namespace GHCAA.Infrastructure.Services
                 await _communicationService.SendIndividualEmailAsync(memberId, "WELCOME_EMAIL", customVars, cancellationToken);
                 
                 // Add System Notification
-                await _notificationService.CreateNotificationAsync(memberId, "Welcome to GHCAA!", "Your membership has been approved. You can now access the full portal.", "Approval", "/portal/dashboard", cancellationToken);
+                await _notificationService.CreateNotificationAsync(memberId, "Welcome to GHCAA!", "Your membership has been approved. You can now access the full portal.", Enums.NotificationType.RegistrationUpdate, "/portal/dashboard", cancellationToken);
             }
             catch (Exception ex)
             {
@@ -433,7 +444,6 @@ namespace GHCAA.Infrastructure.Services
             // Remove registry filing
             _db.Members.Remove(member);
             await _db.SaveChangesAsync(cancellationToken);
-
             _logger.LogWarning("Admin {AdminId} rejected application {MemberId} for: {Reason}", adminId, id, reason);
             return true;
         }
@@ -452,7 +462,7 @@ namespace GHCAA.Infrastructure.Services
                 .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             
             if (member == null) return null;
-
+            
             var gains = await GetMemberGainsAsync(member.Id, member.ContributionPoints, cancellationToken);
             var dto = new MemberProfileDto
             {
@@ -481,17 +491,30 @@ namespace GHCAA.Infrastructure.Services
                 IsEmailPublic = member.IsEmailPublic,
                 IsAddressPublic = member.IsAddressPublic,
                 HasAcceptedTerms = member.HasAcceptedTerms,
+                NotifyEventCreation = member.NotifyEventCreation,
+                NotifyParticipationApproval = member.NotifyParticipationApproval,
+                NotifyRegistrationUpdate = member.NotifyRegistrationUpdate,
+                NotifyRelevantUpdates = member.NotifyRelevantUpdates,
                 AppliedDate = DateTime.SpecifyKind(member.AppliedDate, DateTimeKind.Utc),
                 // Gamification & Health
                 ContributionPoints = member.ContributionPoints,
                 Rank = gains.rank,
                 ProfileCompletionPercentage = CalculateProfileCompletion(member),
                 // Family members from Request system
-                FamilyMembers = new List<MemberFamilyDto>()
+                FamilyMembers = new List<MemberFamilyDto>(),
+
+                // Summary Data for easier display
+                CategoryBadge = member.Category.ToString(),
+                PassingYear = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.PassingYear,
+                Degree = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Degree,
+                Subject = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Subject,
+                Designation = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Designation,
+                OrganizationName = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.OrganizationName,
+                ProfessionalSector = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Sector,
+                Location = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Location
             };
 
             // Populate Family links from both sent and received requests
-            // (Note: Admin view ignores IsFamilyPublic so they can manage all)
             if (member.SentFamilyLinkRequests != null)
             {
                 foreach (var r in member.SentFamilyLinkRequests)
@@ -614,30 +637,32 @@ namespace GHCAA.Infrastructure.Services
             member.IsAddressPublic = dto.IsAddressPublic;
             member.IsNIDPublic = dto.IsNIDPublic;
 
+            // Notification Preferences
+            member.NotifyEventCreation = dto.NotifyEventCreation;
+            member.NotifyParticipationApproval = dto.NotifyParticipationApproval;
+            member.NotifyRegistrationUpdate = dto.NotifyRegistrationUpdate;
+
             // Handle Academic History
             if (dto.AcademicHistory != null && dto.AcademicHistory.Any())
             {
                 // Validation: At least one must be from Govt. Haraganga College
-                if (!dto.AcademicHistory.Any(a => a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase)))
+                if (!dto.AcademicHistory.Any(a => a.IsGHC || (a.InstitutionName != null && a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase))))
                 {
                     throw new InvalidOperationException("At least one academic record must be from Govt. Haraganga College.");
                 }
 
-                // Simple approach: Clear and re-add (for complex logic, use tracking)
-                var existingAcademic = await _db.AcademicRecords.Where(a => a.MemberId == memberId).ToListAsync(cancellationToken);
-                _db.AcademicRecords.RemoveRange(existingAcademic);
-
+                // Clear existing and replace with new history
+                member.AcademicHistory.Clear();
                 foreach (var a in dto.AcademicHistory)
                 {
-                    _db.AcademicRecords.Add(new AcademicRecord
+                    member.AcademicHistory.Add(new AcademicRecord
                     {
-                        MemberId = memberId,
                         InstitutionName = a.InstitutionName,
                         Degree = a.Degree,
                         Subject = a.Subject,
                         AdmissionYear = a.AdmissionYear,
                         PassingYear = a.PassingYear,
-                        IsGHC = a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase),
+                        IsGHC = a.IsGHC || (a.InstitutionName != null && a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase)),
                         Result = a.Result
                     });
                 }
@@ -646,14 +671,11 @@ namespace GHCAA.Infrastructure.Services
             // Handle Professional History
             if (dto.ProfessionalHistory != null)
             {
-                var existingProfessional = await _db.ProfessionalRecords.Where(p => p.MemberId == memberId).ToListAsync(cancellationToken);
-                _db.ProfessionalRecords.RemoveRange(existingProfessional);
-
+                member.ProfessionalHistory.Clear();
                 foreach (var p in dto.ProfessionalHistory)
                 {
-                    _db.ProfessionalRecords.Add(new ProfessionalRecord
+                    member.ProfessionalHistory.Add(new ProfessionalRecord
                     {
-                        MemberId = memberId,
                         OrganizationName = p.OrganizationName,
                         Designation = p.Designation,
                         Sector = p.Sector,
@@ -666,14 +688,14 @@ namespace GHCAA.Infrastructure.Services
             }
 
             await _db.SaveChangesAsync(cancellationToken);
-            _logger.LogInformation("Profile updated for member {MemberId}", memberId);
-            await _activityService.LogActivityAsync(memberId, "ProfileUpdate", "Member updated their profile information.", memberId, cancellationToken: cancellationToken);
+            await _activityService.LogActivityAsync(memberId, "Updated", "Member updated profile details and history.", cancellationToken: cancellationToken);
+            _logger.LogInformation("Member {MemberId} updated profile and history", memberId);
             return true;
         }
 
         public async Task<bool> ArchiveMemberAsync(int memberId, CancellationToken cancellationToken = default)
         {
-            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
             if (member == null) return false;
 
             member.IsArchived = true;
@@ -738,7 +760,6 @@ namespace GHCAA.Infrastructure.Services
         public async Task<object?> GetMemberDocumentsAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
-            if (member == null) return null;
 
             return new
             {
@@ -772,9 +793,11 @@ namespace GHCAA.Infrastructure.Services
             };
         }
 
-        public async Task<object> GetAllMembersAsync(int page = 1, int pageSize = 10, string searchQuery = "", string statusFilter = "all", string categoryFilter = "all", bool includeArchived = false, bool isPrivileged = false, CancellationToken cancellationToken = default)
+        public async Task<object> GetAllMembersAsync(int page = 1, int pageSize = 10, string searchQuery = "", string statusFilter = "all", string categoryFilter = "all", string membershipTypeFilter = "all", bool includeArchived = false, bool isPrivileged = false, CancellationToken cancellationToken = default)
         {
             IQueryable<Member> query = _db.Members
+                .AsNoTracking()
+                .AsSplitQuery() // Prevent duplicates from collection includes
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
                 .Include(m => m.AcademicHistory)
@@ -809,7 +832,7 @@ namespace GHCAA.Infrastructure.Services
                     }
                 }
             }
-            
+
             // Apply status filter
             if (!string.IsNullOrWhiteSpace(statusFilter) && statusFilter != "all")
             {
@@ -839,6 +862,20 @@ namespace GHCAA.Infrastructure.Services
                 {
                     var casted = (Enums.MemberCategory)catInt;
                     query = query.Where(m => m.Category == casted);
+                }
+            }
+
+            // Apply membership type filter
+            if (!string.IsNullOrWhiteSpace(membershipTypeFilter) && membershipTypeFilter != "all")
+            {
+                if (Enum.TryParse<Enums.MembershipType>(membershipTypeFilter, true, out var typeEnum))
+                {
+                    query = query.Where(m => m.MembershipType == typeEnum);
+                }
+                else if (int.TryParse(membershipTypeFilter, out var typeInt))
+                {
+                    var casted = (Enums.MembershipType)typeInt;
+                    query = query.Where(m => m.MembershipType == casted);
                 }
             }
 
@@ -1115,12 +1152,36 @@ namespace GHCAA.Infrastructure.Services
             return path;
         }
 
-        public async Task<bool> SendAdminPasswordResetLinkAsync(int memberId, CancellationToken cancellationToken = default)
+        public async Task<string> UpdateMemberSignatureAsync(int memberId, UploadedFileDto signature, CancellationToken cancellationToken = default)
+        {
+            var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
+            if (member == null) throw new KeyNotFoundException($"Member {memberId} not found.");
+
+            // Delete old file if exists
+            if (!string.IsNullOrEmpty(member.SignaturePath))
+            {
+                try { await _storage.DeleteFileAsync(member.SignaturePath, cancellationToken); }
+                catch (Exception ex) { _logger.LogWarning(ex, "Failed to delete old signature {Path}", member.SignaturePath); }
+            }
+
+            var path = await _storage.SaveFileAsync(signature.Content, signature.FileName, memberId, Enums.FileUploadType.Signature, cancellationToken);
+            var fu = new FileUpload { MemberId = memberId, UploadType = Enums.FileUploadType.Signature, FileName = signature.FileName, FilePath = path, SizeBytes = signature.Length };
+            await _db.FileUploads.AddAsync(fu, cancellationToken);
+
+            member.SignaturePath = path;
+            member.LastUpdateDate = DateTime.UtcNow;
+            await _db.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Signature updated for member {MemberId}", memberId);
+            return path;
+        }
+
+        public async Task<(bool Success, string? ResetUrl)> SendAdminPasswordResetLinkAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
             var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
             
-            if (user == null || member == null) return false;
+            if (user == null || member == null) return (false, null);
 
             // Generate a secure token
             var token = Guid.NewGuid().ToString("N");
@@ -1164,8 +1225,17 @@ namespace GHCAA.Infrastructure.Services
                 </div>";
             }
 
-            await _email.SendEmailAsync(member.Email, subject, body);
-            return true;
+            try
+            {
+                await _email.SendEmailAsync(member.Email, subject, body);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send password reset email to {Email}", member.Email);
+                // We still return true and the link so the admin can copy it manually
+            }
+
+            return (true, resetUrl);
         }
         public async Task<int> BulkArchiveInactiveMembersAsync(CancellationToken cancellationToken = default)
         {

@@ -44,41 +44,85 @@
     <!-- Payment History -->
     <div class="section">
         <h3>Recent Transactions</h3>
-        <div class="glass-card table-wrap reveal-bottom">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Purpose</th>
-                        <th>Transaction ID</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (p of history(); track p.id) {
-                    <tr>
-                        <td>{{ p.paidAt | date:'mediumDate' }}</td>
-                        <td><span class="badge">{{ getCategoryLabel(p.financialCategory) }}</span></td>
-                        <td><code>{{ p.transactionId }}</code></td>
-                        <td class="amount">৳ {{ p.amount | number }}</td>
-                        <td>
-                            <span class="status-pill" [class]="getStatusClass(p.status)">
-                                {{ getStatusLabel(p.status) }}
-                            </span>
-                        </td>
-                        <td class="notes">{{ p.notes || '—' }}</td>
-                    </tr>
-                    } @empty {
-                    <tr>
-                        <td colspan="5" class="empty-row">No payment history found.</td>
-                    </tr>
-                    }
-                </tbody>
-            </table>
+            <div class="glass-card history-card reveal-card">
+                <div class="card-header pb-6 border-b border-white/5 flex justify-between items-center">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-muted">Archived Transactions</h3>
+                    <div class="badges flex gap-2">
+                         <span class="badge badge-outline text-[10px]">Tax Deductible</span>
+                    </div>
+                </div>
+                <div class="table-container pt-6">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Transaction</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th class="text-right">Proof</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of history(); track item.transactionId) {
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td>
+                                    <span class="text-[11px] font-bold">{{ getCategoryLabel(item.financialCategory) }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-[10px] font-mono text-muted">{{ item.transactionId }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-[10px]">{{ item.paidAt | date:'mediumDate' }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-white font-black">৳{{ item.amount }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge" [ngClass]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
+                                </td>
+                                <td class="text-right">
+                                    <button class="btn btn-outline btn-sm !py-1 !px-3 !text-[10px]" (click)="downloadReceipt(item.id)" *ngIf="item.status === 'Completed' || item.status === 1">
+                                        📜 Receipt
+                                    </button>
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center py-12 text-muted italic">No community contributions found.</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <div class="sidebar lg:col-span-1 space-y-8 reveal-right">
+            <!-- Saved Identity Wallet -->
+            <div class="glass-card wallet-card !bg-accent/5 !border-accent/10">
+                <div class="card-header mb-6">
+                    <h4 class="text-[10px] font-black uppercase tracking-widest text-accent">Identity Wallet</h4>
+                    <p class="text-[9px] text-muted uppercase font-bold mt-1">Faster Checkout for Haragangians</p>
+                </div>
+
+                <div class="wallet-items space-y-4">
+                    @for (m of savedMethods(); track m.id) {
+                        <div class="wallet-item bg-white/5 p-4 rounded-xl border border-white/5 flex justify-between items-center">
+                            <div class="method-info">
+                                <span class="block text-[10px] font-black">{{ m.methodName }}</span>
+                                <span class="block text-[9px] text-muted">{{ m.accountIdentifier }}</span>
+                            </div>
+                            <button class="text-red-500/50 hover:text-red-500 text-xs" (click)="removeMethod(m.id)">Deregister</button>
+                        </div>
+                    } @empty {
+                        <div class="empty-wallet text-center p-6 border border-dashed border-white/10 rounded-2xl">
+                             <span class="text-2xl opacity-20 block mb-2">💳</span>
+                             <p class="text-[10px] text-muted italic">Secure your first payment method to see it here.</p>
+                        </div>
+                    }
+                </div>
+            </div>
     }
 </div>
 

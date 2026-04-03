@@ -81,7 +81,7 @@ namespace GHCAA.Infrastructure.Services
                 payment.MemberId,
                 "Payment Recorded",
                 $"Your payment of {payment.Amount:N2} (TrxID: {payment.TransactionId}) has been received and is pending verification.",
-                "Payment",
+                Enums.NotificationType.GeneralSystem,
                 "/portal/payments",
                 cancellationToken);
 
@@ -117,7 +117,7 @@ namespace GHCAA.Infrastructure.Services
                 payment.MemberId,
                 "Payment Status Updated",
                 $"The status of your transaction {payment.TransactionId} has been updated to {status}.",
-                "Payment",
+                Enums.NotificationType.GeneralSystem,
                 "/portal/payments",
                 cancellationToken);
 

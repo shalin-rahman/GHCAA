@@ -26,5 +26,6 @@ namespace GHCAA.Application.DTOs
         public string? TargetMethod { get; set; }
         public string? TargetValue { get; set; }
         public List<string>? TargetValues { get; set; } // Support multiple
+        public string Channel { get; set; } = "email"; // "email", "push", "sms", "both"
     }
 }

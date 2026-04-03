@@ -11,7 +11,7 @@ namespace GHCAA.Domain
         public enum Degree { HSC, Bachelor, Masters, PhD, Other }
 
         // File / OTP / Payment support enums
-        public enum FileUploadType { Photo, Certificate, PaymentProof, GalleryPhoto, NewsImage }
+        public enum FileUploadType { Photo, Certificate, PaymentProof, Signature, GalleryPhoto, NewsImage }
         public enum FileUploadStatus { Pending, Approved, Rejected }
         public enum OtpPurpose { Registration, PasswordReset }
         public enum PaymentStatus { Pending, Completed, Failed, Refunded }
@@ -46,5 +46,7 @@ namespace GHCAA.Domain
 
         // Volunteer Enums
         public enum VolunteerRole { EventOrganizer, GuestManagement, ContentCreator, Mentor, TechnicalSupport, Other }
+
+        public enum NotificationType { EventCreation, ParticipationApproval, RegistrationUpdate, GeneralSystem, DirectMessage }
     }
 }

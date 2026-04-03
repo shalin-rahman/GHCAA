@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -21,6 +21,16 @@ export class AdminRoles implements OnInit {
     loading = signal(true);
     showCreateForm = signal(false);
     submitting = signal(false);
+    searchQuery = signal('');
+
+    filteredUsers = computed(() => {
+        const q = this.searchQuery().toLowerCase().trim();
+        if (!q) return this.users();
+        return this.users().filter(u =>
+            (u.userName || '').toLowerCase().includes(q) ||
+            (u.email || '').toLowerCase().includes(q)
+        );
+    });
 
     createForm = this.fb.group({
         username: ['', [Validators.required, Validators.minLength(3)]],

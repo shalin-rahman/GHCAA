@@ -2,12 +2,24 @@
     <div class="page-header">
         <div class="header-text">
             <h2>System Audit Logs</h2>
-            <small>Monitor administrative actions and system-wide modifications</small>
+            <small>Showing {{ filteredLogs().length }} of {{ logs().length }} activity records</small>
         </div>
         <div class="header-actions">
             <button class="btn btn-secondary btn-sm" (click)="loadLogs()">
                 <span class="icon">🔄</span> Refresh Activity
             </button>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="filter-bar">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                placeholder="Search by action, user, IP address…" class="search-input">
+            @if (searchQuery()) {
+            <button class="clear-search" (click)="searchQuery.set('')" title="Clear search">×</button>
+            }
         </div>
     </div>
 
@@ -19,7 +31,7 @@
         </div>
         } @else {
         <div class="audit-timeline">
-            @for (log of logs(); track log.id) {
+            @for (log of filteredLogs(); track log.id) {
             <div class="audit-item">
                 <div class="audit-marker">
                     <span class="icon">{{ getActionIcon(log.action) }}</span>
@@ -41,10 +53,11 @@
             } @empty {
             <div class="empty-state">
                 <span>📜</span>
-                <p>No audit logs found for the current period.</p>
+                <p>{{ searchQuery() ? 'No logs match your search.' : 'No audit logs found for the current period.' }}</p>
             </div>
             }
         </div>
         }
     </div>
+
 </div>

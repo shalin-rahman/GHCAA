@@ -26,6 +26,7 @@ namespace GHCAA.Domain.Models
 
         // D. Attachments & System Logic (2.1 D & Section 4)
         public string? PhotoPath { get; set; }
+        public string? SignaturePath { get; set; }
         public string? TShirtSize { get; set; }
 
         // Workflow & Status
@@ -44,6 +45,12 @@ namespace GHCAA.Domain.Models
         public bool HasAcceptedTerms { get; set; } = false;
         public bool HasAcceptedGdpr { get; set; } = false;
         public DateTime? GdprAcceptedAt { get; set; }
+
+        // Notification Preferences
+        public bool NotifyEventCreation { get; set; } = true;
+        public bool NotifyParticipationApproval { get; set; } = true;
+        public bool NotifyRegistrationUpdate { get; set; } = true;
+        public bool NotifyRelevantUpdates { get; set; } = true;
 
         public bool IsArchived { get; set; } = false;
         public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow;

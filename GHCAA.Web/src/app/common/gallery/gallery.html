@@ -1,8 +1,62 @@
 <div class="gallery-page">
     <div class="header">
-        <h2>Event Gallery</h2>
-        <p>Capturing the spirit of Haragangians across generations</p>
+        <div class="title-group">
+            <h2>Legacy Archive & Moments</h2>
+            <p>Visual journey through Haragangian heritage</p>
+        </div>
+        <button class="btn btn-accent" (click)="showUpload.set(true)" *ngIf="!showUpload() && auth.isAuthenticated()">
+            <span class="icon">📸</span> Share Legacy Moment
+        </button>
     </div>
+
+    <!-- Legacy Upload Form -->
+    @if (showUpload()) {
+    <div class="glass-card upload-box animate-reveal-top mb-12">
+        <div class="form-header flex justify-between items-center mb-6">
+            <h3 class="text-accent font-black tracking-widest text-sm uppercase">Share with Alumni Community</h3>
+            <button class="close-btn text-muted hover:text-white" (click)="showUpload.set(false)">✕</button>
+        </div>
+        
+        <form (submit)="submitMemory()" class="memory-form grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="input-side space-y-6">
+                <div class="form-group">
+                    <label class="block text-[10px] uppercase font-bold text-muted mb-2">Moment Title *</label>
+                    <input type="text" [(ngModel)]="newMemory.title" name="title" placeholder="e.g. Reunion 2024 / Batch Picnic" class="w-full" required>
+                </div>
+                <div class="form-group">
+                    <label class="block text-[10px] uppercase font-bold text-muted mb-2">Short Context</label>
+                    <textarea [(ngModel)]="newMemory.description" name="desc" rows="3" placeholder="Tell the story behind this moment..." class="w-full"></textarea>
+                </div>
+            </div>
+            
+            <div class="upload-side flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-3xl p-8 bg-white/5">
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden">
+                @if (!newMemory.photo) {
+                    <div class="upload-trigger text-center cursor-pointer" (click)="fileInput.click()">
+                        <div class="icon text-3xl mb-4 opacity-50">🖼️</div>
+                        <p class="text-xs font-bold uppercase tracking-widest opacity-80">Select Photographic Proof</p>
+                        <p class="text-[9px] opacity-40 mt-2">JPG, PNG up to 10MB</p>
+                    </div>
+                } @else {
+                    <div class="preview-box relative w-full h-40">
+                        <img [src]="" class="w-full h-full object-cover rounded-xl opacity-50"> <!-- Preview logic needed if really want complex -->
+                        <div class="preview-info absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-accent text-xs font-black">{{ newMemory.photo.name }}</span>
+                            <button type="button" class="mt-4 text-[9px] underline uppercase font-black" (click)="newMemory.photo = null">Change Photo</button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="form-footer col-span-full flex gap-4 pt-6 mt-6 border-t border-white/5">
+                <button type="submit" class="btn btn-accent px-8" [disabled]="submitting()">
+                    {{ submitting() ? 'Archiving...' : '🚀 Submit to Heritage Hub' }}
+                </button>
+                <button type="button" class="btn btn-secondary px-8" (click)="showUpload.set(false)">Discard</button>
+            </div>
+        </form>
+    </div>
+    }
 
     @if (loading()) {
     <div class="loading-state">

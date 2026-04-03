@@ -58,14 +58,35 @@ class AuthService {
 
   Future<String?> register(Map<String, dynamic> data) async {
     try {
-      final response = await _dio.post('/auth/register', data: data);
+      final String? photoPath = data['ProfileImagePath'];
+      final String? nidPath = data['NidPhotoPath'];
+
+      // Remove local paths from JSON as they are irrelevant for the server
+      data.remove('ProfileImagePath');
+      data.remove('NidPhotoPath');
+
+      final formData = FormData.fromMap(data);
+
+      if (photoPath != null && photoPath.isNotEmpty) {
+        formData.files.add(MapEntry(
+            'photo', await MultipartFile.fromFile(photoPath, filename: 'profile_photo.jpg')));
+      }
+
+      if (nidPath != null && nidPath.isNotEmpty) {
+        formData.files.add(MapEntry(
+            'certificate', await MultipartFile.fromFile(nidPath, filename: 'nid_document.jpg')));
+      }
+
+      final response = await _dio.post('/auth/register', data: formData);
       if (response.statusCode == 200 || response.statusCode == 201) {
         return null; // Success
       }
     } catch (e) {
       if (e is DioException) {
         if (e.response?.statusCode == 400) {
-          final msg = e.response?.data?['message'] ?? e.response?.data?['error'] ?? "Individual details already registered or data mismatch.";
+          final msg = e.response?.data?['message'] ??
+              e.response?.data?['error'] ??
+              "Individual details already registered or data mismatch.";
           return msg;
         }
         if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
@@ -93,6 +114,15 @@ class AuthService {
   Future<String?> getRole() async {
     return _storage.getRole();
   }
+
+  Future<bool> updateProfile(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.put('/profile', data: data);
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 final roleProvider = FutureProvider.autoDispose<String?>((ref) async {
@@ -100,14 +130,17 @@ final roleProvider = FutureProvider.autoDispose<String?>((ref) async {
 });
 
 final userProfileProvider = FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
+  final storage = ref.read(storageServiceProvider);
   try {
     final dio = ref.read(dioProvider);
-    final response = await dio.get('/members/profile');
+    final response = await dio.get('/profile');
     if (response.statusCode == 200 && response.data != null) {
-      return Map<String, dynamic>.from(response.data);
+      final profile = Map<String, dynamic>.from(response.data);
+      await storage.saveProfile(profile);
+      return profile;
     }
-    return null;
+    return await storage.getProfile();
   } catch (_) {
-    return null;
+    return await storage.getProfile();
   }
 });

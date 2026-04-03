@@ -2,7 +2,15 @@
     <div class="page-header">
         <div class="header-text">
             <h2>Communications</h2>
-            <p>Broadcast announcements and manage email ecosystem.</p>
+            <small>
+                @if (activeTab() === 'templates') {
+                    Showing {{ filteredTemplates().length }} of {{ templates().length }} email templates
+                } @else if (activeTab() === 'logs') {
+                    Showing {{ filteredLogs().length }} of {{ logs().length }} communication records
+                } @else {
+                    Broadcast announcements and manage email ecosystem.
+                }
+            </small>
         </div>
         <div class="header-actions"></div>
     </div>
@@ -147,7 +155,14 @@
     <div class="glass-card reveal-top">
         <div class="panel-header mb-6">
             <h3>📄 Email Templates</h3>
-            <button class="btn btn-accent" (click)="addNewTemplate()">+ New Template</button>
+            <div class="flex gap-3">
+                <div class="search-wrap sm">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" [ngModel]="templateSearch()" (ngModelChange)="templateSearch.set($event)"
+                        placeholder="Filter templates...">
+                </div>
+                <button class="btn btn-accent" (click)="addNewTemplate()">+ New Template</button>
+            </div>
         </div>
 
         <div class="table-wrap">
@@ -161,7 +176,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (temp of templates(); track temp.id) {
+                    @for (temp of filteredTemplates(); track temp.id) {
                     <tr>
                         <td class="font-bold text-accent">{{ temp.code }}</td>
                         <td>{{ temp.description }}</td>
@@ -169,6 +184,15 @@
                         <td class="actions-cell">
                             <button class="btn btn-outline btn-sm" (click)="editTemplate(temp)">Edit ↗</button>
                             <button class="icon-btn" (click)="deleteTemplate(temp)" title="Delete">🗑️</button>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state py-12">
+                                <span class="text-3xl mb-2 block">📄</span>
+                                <p class="text-muted italic">{{ templateSearch() ? 'No templates match your search.' : 'No communication templates found.' }}</p>
+                            </div>
                         </td>
                     </tr>
                     }
@@ -183,7 +207,14 @@
     <div class="glass-card reveal-top">
         <div class="panel-header mb-6">
             <h3>📜 Communication History</h3>
-            <button class="btn btn-outline btn-sm" (click)="loadLogs()">🔄 Refresh</button>
+            <div class="flex gap-3">
+                <div class="search-wrap sm">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" [ngModel]="logSearch()" (ngModelChange)="logSearch.set($event)"
+                        placeholder="Filter history logs...">
+                </div>
+                <button class="btn btn-outline btn-sm" (click)="loadLogs()">🔄 Refresh</button>
+            </div>
         </div>
 
         <div class="table-wrap">
@@ -197,7 +228,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (log of logs(); track log.id) {
+                    @for (log of filteredLogs(); track log.id) {
                     <tr>
                         <td>{{ log.sentDate | date:'short' }}</td>
                         <td><small>{{ log.recipientEmail }}</small></td>
@@ -207,6 +238,15 @@
                                 [class.inactive]="log.status !== 'Sent'">
                                 {{ log.status }}
                             </span>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state py-12">
+                                <span class="text-3xl mb-2 block">📜</span>
+                                <p class="text-muted italic">{{ logSearch() ? 'No activity logs match your search.' : 'No communication history found.' }}</p>
+                            </div>
                         </td>
                     </tr>
                     }

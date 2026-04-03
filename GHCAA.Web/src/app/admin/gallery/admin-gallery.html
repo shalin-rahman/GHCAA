@@ -2,7 +2,7 @@
     <div class="page-header">
         <div class="header-text">
             <h2>Gallery Albums</h2>
-            <small>{{ galleries().length }} albums available</small>
+            <small>Showing {{ filteredGalleries().length }} of {{ galleries().length }} albums</small>
         </div>
         <div class="header-actions">
             <button class="btn btn-accent btn-md" (click)="showForm.set(!showForm())">
@@ -53,19 +53,31 @@
     </div>
     }
 
+    <!-- Search Bar -->
+    <div class="filter-bar">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                placeholder="Search albums by title or location…" class="search-input">
+            @if (searchQuery()) {
+            <button class="clear-search" (click)="searchQuery.set('')" title="Clear search">×</button>
+            }
+        </div>
+    </div>
+
     <div class="album-grid mt-4">
         @if (loading()) {
         <div class="loading-state full">
             <span>⏳</span>
             <p>Gathering your visual legacy...</p>
         </div>
-        } @else if (galleries().length === 0) {
+        } @else if (filteredGalleries().length === 0) {
         <div class="empty-state full">
             <span>🖼️</span>
-            <p>No albums captured yet. Start by creating a new visual asset.</p>
+            <p>{{ searchQuery() ? 'No albums match your search.' : 'No albums captured yet. Start by creating a new visual asset.' }}</p>
         </div>
         } @else {
-        @for (gallery of galleries(); track gallery.id) {
+        @for (gallery of filteredGalleries(); track gallery.id) {
         <div class="album-card reveal-top" [style.animation-delay]="($index * 50) + 'ms'">
             <div class="album-preview" (click)="selectGallery(gallery)">
                 @if (gallery.photos && gallery.photos.length > 0) {
@@ -79,7 +91,8 @@
                     {{ gallery.photos.length }} Photos
                 </div>
                 <div class="album-badges">
-                    <span class="status-badge" [class.active]="gallery.isActive" (click)="toggleActive(gallery.id); $event.stopPropagation()">
+                    <span class="status-badge" [class.active]="gallery.isActive"
+                        (click)="toggleActive(gallery.id); $event.stopPropagation()">
                         {{ gallery.isActive ? 'Public' : 'Hidden' }}
                     </span>
                     @if (gallery.isFeatured) {
@@ -92,7 +105,7 @@
                 <div class="flex justify-between items-start mb-2">
                     <h4>{{ gallery.title }}</h4>
                 </div>
-                
+
                 <div class="album-meta">
                     <div>📅 {{ gallery.eventDate | date:'mediumDate' }}</div>
                     @if (gallery.location) {
@@ -134,14 +147,16 @@
         <div class="p-10 p-mobile-6">
             <div class="flex justify-between items-center mb-8">
                 <div>
-                    <h4 class="text-sm font-black uppercase tracking-widest text-white/40">Album Photos ({{ (gallery.photos || []).length }})</h4>
+                    <h4 class="text-sm font-black uppercase tracking-widest text-white/40">Album Photos ({{
+                        (gallery.photos || []).length }})</h4>
                 </div>
                 <div class="flex gap-4">
                     <label class="btn btn-secondary btn-sm cursor-pointer">
                         {{ uploadedFiles().length > 0 ? 'Selected: ' + uploadedFiles().length : 'Select Photos' }}
                         <input type="file" multiple (change)="onPhotosSelected($event)" class="hidden" accept="image/*">
                     </label>
-                    <button class="btn btn-accent btn-sm" [disabled]="uploadedFiles().length === 0 || isUploading()" (click)="uploadSelectedPhotos()">
+                    <button class="btn btn-accent btn-sm" [disabled]="uploadedFiles().length === 0 || isUploading()"
+                        (click)="uploadSelectedPhotos()">
                         {{ isUploading() ? 'Saving...' : 'Upload' }}
                     </button>
                 </div>
@@ -168,4 +183,4 @@
         </div>
     </div>
 </div>
-}
+}

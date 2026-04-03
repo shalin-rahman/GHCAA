@@ -59,4 +59,14 @@ export class GalleryService {
     removePhoto(photoId: number): Observable<boolean> {
         return this.http.delete<boolean>(`${this.apiUrl}/admin/photos/${photoId}`);
     }
+
+    submitMemory(memory: any): Observable<any> {
+        const formData = new FormData();
+        formData.append('title', memory.title);
+        formData.append('description', memory.description);
+        if (memory.photo) {
+            formData.append('photo', memory.photo);
+        }
+        return this.http.post(`${this.apiUrl}`, formData);
+    }
 }

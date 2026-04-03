@@ -4,6 +4,7 @@ using GHCAA.Domain;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace GHCAA.Infrastructure.Gateways
 {
@@ -12,12 +13,14 @@ namespace GHCAA.Infrastructure.Gateways
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _db;
         private readonly ILogger<NagadGateway> _logger;
+        private readonly IConfiguration _config;
 
-        public NagadGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<NagadGateway> logger)
+        public NagadGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<NagadGateway> logger, IConfiguration config)
         {
             _httpClient = httpClient;
             _db = db;
             _logger = logger;
+            _config = config;
         }
 
         public Enums.PaymentGateway GatewayType => Enums.PaymentGateway.NagadGateway;

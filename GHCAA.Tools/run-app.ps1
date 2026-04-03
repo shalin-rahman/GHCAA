@@ -1,6 +1,5 @@
 param (
-    [switch]$SkipTests,
-    [switch]$NoTest,
+    [switch]$RunTests,
     [ValidateSet("PgSql","MySql","Sqlite","")]
     [string]$DatabaseProvider = ""
 )
@@ -57,8 +56,7 @@ Pop-Location
 Write-Host ""
 
 # ── Unit Tests ──────────────────────────────────────────────────────────────
-$skipAllTests = $SkipTests -or $NoTest
-if (-not $skipAllTests) {
+if ($RunTests) {
     Write-Host "  Running Backend Unit Tests..." -ForegroundColor Yellow
     Push-Location $RootPath
     dotnet test GHCAA.Tests/GHCAA.Tests.csproj --logger "console;verbosity=normal"

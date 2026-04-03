@@ -24,6 +24,7 @@ export class Payments implements OnInit {
 
     history = signal<PaymentRecord[]>([]);
     dues = signal<MembershipDue[]>([]);
+    savedMethods = signal<any[]>([]);
     loading = signal(true);
     showPayModal = signal(false);
     categoryOptions = FINANCIAL_CATEGORY_OPTIONS;
@@ -49,8 +50,26 @@ export class Payments implements OnInit {
             this.dues.set(dues);
             this.financialService.getMyHistory().subscribe(history => {
                 this.history.set(history);
-                this.loading.set(false);
+                this.financialService.getSavedMethods().subscribe(methods => {
+                    this.savedMethods.set(methods);
+                    this.loading.set(false);
+                });
             });
+        });
+    }
+
+    downloadReceipt(id: number) {
+        window.open(this.financialService.getReceiptUrl(id), '_blank');
+        this.notify.info('Accessing secure receipt registry...');
+    }
+
+    removeMethod(id: number) {
+        if (!confirm('Deregister this payment method from your identity wallet?')) return;
+        this.financialService.deleteSavedMethod(id).subscribe({
+            next: () => {
+                this.notify.success('Identity wallet updated.');
+                this.loadData();
+            }
         });
     }
 

@@ -211,11 +211,37 @@
                     📷 Choose New Photo
                     <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhotoSelected($event)" class="hidden">
                 </label>
-                @if (photoPreview()) {
-                <button class="btn btn-accent" (click)="uploadPhoto()" [disabled]="uploadingPhoto()">
-                    @if (uploadingPhoto()) { ⏳ Uploading... } @else { 🚀 Save Photo }
-                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signature Upload Card -->
+    <div class="glass-card mb-12 p-12">
+        <h4 class="section-label mb-6">Digital Signature (Optional)</h4>
+        <div class="flex items-center gap-8">
+            <div class="photo-preview-wrap relative signature-wrap">
+                @if (signaturePreview()) {
+                <img [src]="signaturePreview()" class="photo-preview rounded-2xl object-contain !bg-white/10" alt="Signature Preview">
+                } @else if (profile.signaturePath) {
+                <img [src]="'/' + profile.signaturePath" class="photo-preview rounded-2xl object-contain !bg-white/10" alt="Current Signature">
+                } @else {
+                <div class="photo-placeholder rounded-2xl flex items-center justify-center text-2xl border-dashed border-2 border-white/20">
+                    🖋️
+                </div>
                 }
+                
+                @if (profile.signaturePath || signaturePreview()) {
+                    <button type="button" (click)="removeSignature()" class="remove-photo-btn" title="Remove Signature">
+                        🗑️
+                    </button>
+                }
+            </div>
+            <div class="flex flex-col gap-4">
+                <p class="text-sm opacity-60">Upload your handwritten signature (JPG, PNG, WebP — max 2MB)</p>
+                <label class="btn btn-secondary cursor-pointer !mb-0">
+                    🖊️ Choose Signature
+                    <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onSignatureSelected($event)" class="hidden">
+                </label>
             </div>
         </div>
     </div>

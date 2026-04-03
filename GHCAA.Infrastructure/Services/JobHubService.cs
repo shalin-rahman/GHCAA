@@ -104,7 +104,7 @@ namespace GHCAA.Infrastructure.Services
                 memberId,
                 "Job Posted",
                 $"Your job posting '{job.Title}' at {job.Company} has been published successfully.",
-                "Career",
+                Enums.NotificationType.GeneralSystem,
                 "/portal/jobs",
                 cancellationToken);
 

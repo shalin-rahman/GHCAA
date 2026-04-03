@@ -8,6 +8,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using GHCAA.Domain;
 using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Infrastructure.Services
@@ -18,13 +19,15 @@ namespace GHCAA.Infrastructure.Services
         private readonly ICommunicationService _communicationService;
         private readonly IFileStorageService _fileStorageService;
         private readonly IGamificationService _gamificationService;
+        private readonly INotificationService _notificationService;
 
-        public EventService(ApplicationDbContext context, ICommunicationService communicationService, IFileStorageService fileStorageService, IGamificationService gamificationService)
+        public EventService(ApplicationDbContext context, ICommunicationService communicationService, IFileStorageService fileStorageService, IGamificationService gamificationService, INotificationService notificationService)
         {
             _context = context;
             _communicationService = communicationService;
             _fileStorageService = fileStorageService;
             _gamificationService = gamificationService;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<EventDto>> GetActiveEventsAsync(CancellationToken cancellationToken = default)
@@ -126,6 +129,18 @@ namespace GHCAA.Infrastructure.Services
 
             _context.AlumniEvents.Add(alumniEvent);
             await _context.SaveChangesAsync(cancellationToken);
+
+            if (alumniEvent.IsActive)
+            {
+                await _notificationService.BroadcastNotificationAsync(
+                    "New Event Created!",
+                    $"Registration is now open for: {alumniEvent.Title}. Join us at {alumniEvent.Location} on {alumniEvent.StartDate:dd MMM}.",
+                    Enums.NotificationType.EventCreation,
+                    $"/portal/events/{alumniEvent.Id}",
+                    cancellationToken
+                );
+            }
+
             return alumniEvent;
         }
 
@@ -379,6 +394,17 @@ namespace GHCAA.Infrastructure.Services
             if (approve)
             {
                 await SendEventEmailAsync(registration, "EVENT_PARTICIPATION_APPROVED", cancellationToken);
+                
+                if (registration.MemberId.HasValue)
+                {
+                    await _notificationService.CreateNotificationAsync(
+                        registration.MemberId.Value,
+                        "Participation Approved!",
+                        $"Your request to join '{registration.Event?.Title}' has been approved. See you there!",
+                        Enums.NotificationType.ParticipationApproval,
+                        $"/portal/events/{registration.EventId}",
+                        cancellationToken);
+                }
             }
             return true;
         }

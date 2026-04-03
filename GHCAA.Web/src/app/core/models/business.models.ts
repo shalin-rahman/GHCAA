@@ -35,6 +35,7 @@ export interface Member {
     isNIDPublic?: boolean;
 
     photoPath?: string;
+    signaturePath?: string;
     status: MembershipStatus;
     appliedDate: string | Date;
     approvedDate?: string | Date;
@@ -408,6 +409,7 @@ export interface MemberProfile {
 
     // Info
     photoPath?: string;
+    signaturePath?: string;
     presentAddress: string;
     permanentAddress: string;
 

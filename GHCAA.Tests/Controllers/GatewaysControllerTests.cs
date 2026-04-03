@@ -167,5 +167,41 @@ namespace GHCAA.Tests.Controllers
             var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.PaymentReference == "EVT-REG-COMPLEX-99");
             Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
         }
+
+        [Test]
+        public async Task BkashCallbackGet_AutoApprovesRegistration_WhenValid()
+        {
+            var txnId = "BKASH123";
+            var ev = new AlumniEvent { Title = "Bkash Event", Description = "Desc", Location = "Loc", RegistrationFee = 200 };
+            _context.AlumniEvents.Add(ev);
+            await _context.SaveChangesAsync();
+            
+            var registration = new EventRegistration 
+            { 
+                EventId = ev.Id, 
+                PaymentReference = "EVT-REG-BK", 
+                Status = Enums.EventRegistrationStatus.Pending 
+            };
+            _context.EventRegistrations.Add(registration);
+            await _context.SaveChangesAsync();
+
+            var payment = new PaymentHistory
+            {
+                MemberId = _testMember.Id,
+                Amount = 200,
+                TransactionId = txnId,
+                Status = Enums.PaymentStatus.Pending,
+                Notes = "Initiated via BkashGateway. Ref: EVT-REG-BK"
+            };
+            _context.PaymentHistories.Add(payment);
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.BkashCallbackGet(txnId, "success", CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<RedirectResult>());
+            
+            var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.Id == registration.Id);
+            Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
+        }
     }
 }

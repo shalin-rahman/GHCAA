@@ -26,5 +26,15 @@ namespace GHCAA.Application.DTOs
         
         public bool HasAcceptedTerms { get; set; }
         public bool HasAcceptedGdpr { get; set; }
+
+        // Summary Data for easier display
+        public int? PassingYear { get; set; }
+        public string? Degree { get; set; }
+        public string? Subject { get; set; }
+        public string? Designation { get; set; }
+        public string? OrganizationName { get; set; }
+        public string? ProfessionalSector { get; set; }
+        public string? Location { get; set; }
+        public string? CategoryBadge { get; set; }
     }
 }

@@ -12,8 +12,7 @@ final dioProvider = Provider<Dio>((ref) {
       headers: {
         'Content-Type': 'application/json',
       },
-      // Keep memory usage low by not storing entire response bodies in case of multi-MB logs
-      validateStatus: (status) => status != null && status < 500,
+      // Rely on Dio's default validateStatus (200-299) to ensure 4xx errors throw correctly and trigger catch blocks
     ),
   );
 

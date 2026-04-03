@@ -1,5 +1,6 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using System.Linq;
 using GHCAA.Domain;
 using GHCAA.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -44,6 +45,20 @@ namespace GHCAA.API.Controllers
             if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var mid))
             {
                 memberId = mid;
+            }
+
+            var enabledGateways = _config.GetSection("PaymentGateways:EnabledMethods").Get<string[]>() ?? Array.Empty<string>();
+            if (!enabledGateways.Contains(request.Gateway.ToString()))
+            {
+                _logger.LogWarning("Blocked initiation of disabled gateway: {Gateway}", request.Gateway);
+                return BadRequest("This payment method is temporarily unavailable via system configuration.");
+            }
+
+            var dbConfig = await _db.PaymentConfigurations.FirstOrDefaultAsync(p => p.Gateway == request.Gateway && p.IsEnabled, cancellationToken);
+            if (dbConfig == null)
+            {
+                _logger.LogWarning("Blocked initiation of disabled gateway (DB): {Gateway}", request.Gateway);
+                return BadRequest("This payment method is not active in the registry.");
             }
 
             var gatewayService = _gatewayFactory.GetGateway(request.Gateway);
@@ -107,12 +122,31 @@ namespace GHCAA.API.Controllers
             return Redirect($"{GetClientUrl()}/payment/failed?trxId={trunkTrxId}");
         }
 
-        [HttpPost("callback/bkash")]
+        [HttpGet("callback/bkashgateway")]
         [AllowAnonymous]
-        public async Task<IActionResult> BkashCallback([FromBody] IDictionary<string, string> data, CancellationToken cancellationToken)
+        public async Task<IActionResult> BkashCallbackGet([FromQuery] string paymentID, [FromQuery] string status, CancellationToken cancellationToken)
         {
-            // bKash usually returns paymentID and status.
-            return Ok();
+            var trunkTrxId = paymentID;
+            _logger.LogInformation("Bkash Callback Received: {PaymentID}, Status: {Status}", paymentID, status);
+
+            if (string.IsNullOrEmpty(status) || status.ToLower() != "success")
+            {
+                 return Redirect($"{GetClientUrl()}/payment/failed?trxId={paymentID}");
+            }
+
+            var gateway = _gatewayFactory.GetGateway(Enums.PaymentGateway.BkashGateway);
+            var callbackData = new Dictionary<string, string> { { "paymentID", paymentID }, { "status", status } };
+            
+            var isValid = await gateway.VerifyCallbackAsync(callbackData, cancellationToken);
+            
+            if (isValid)
+            {
+                await HandleSuccessfulPayment(trunkTrxId, cancellationToken);
+                return Redirect($"{GetClientUrl()}/payment/success?trxId={trunkTrxId}");
+            }
+
+            _logger.LogWarning("bKash Callback Verification/Execution FAILED for {PaymentID}", trunkTrxId);
+            return Redirect($"{GetClientUrl()}/payment/failed?trxId={trunkTrxId}");
         }
 
         private async Task HandleSuccessfulPayment(string transactionId, CancellationToken cancellationToken, decimal confirmedAmount = 0)

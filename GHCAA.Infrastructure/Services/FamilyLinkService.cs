@@ -1,5 +1,6 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -64,7 +65,7 @@ namespace GHCAA.Infrastructure.Services
                 target.Id,
                 "Family Link Request",
                 $"A member has sent you a family link request ({dto.Relationship}). Please review it in your profile.",
-                "FamilyLink",
+                Enums.NotificationType.GeneralSystem,
                 cancellationToken: ct);
 
             // Notify via Email
@@ -104,7 +105,7 @@ namespace GHCAA.Infrastructure.Services
             var message = dto.Approve
                 ? "Your family link request has been approved."
                 : "Your family link request was declined.";
-            await _notifications.CreateNotificationAsync(request.RequesterId, "Family Link Update", message, "FamilyLinkResult", cancellationToken: ct);
+            await _notifications.CreateNotificationAsync(request.RequesterId, "Family Link Update", message, Enums.NotificationType.GeneralSystem, cancellationToken: ct);
 
             if (dto.Approve)
             {

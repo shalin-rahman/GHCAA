@@ -35,6 +35,16 @@ export class AdminGovernance implements OnInit {
     memberSearchResults = signal<any[]>([]);
     isSearching = signal(false);
 
+    committeeSearch = signal('');
+    filteredMembers = computed(() => {
+        const q = this.committeeSearch().toLowerCase();
+        return this.committeeMembers().filter(m =>
+            m.member?.fullName?.toLowerCase().includes(q) ||
+            m.member?.membershipNumber?.toLowerCase().includes(q) ||
+            this.getRoleName(m.position).toLowerCase().includes(q)
+        );
+    });
+
     ecPositions = EC_ROLES.map((label, index) => ({ value: index, label }));
 
     ngOnInit() {

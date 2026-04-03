@@ -132,6 +132,15 @@ export class Jobs implements OnInit {
     if (!user) return false;
     return user.role === 'Admin' || user.role === 'SuperAdmin' || job.postedByMemberId === user.memberId;
   }
+
+  deleteJob(id: number) {
+    if (!confirm('Are you sure you want to remove this opportunity permanently?')) return;
+    this.jobService.deleteJob(id).subscribe({
+        next: () => {
+            this.notify.success('Post removed from community hub.');
+            this.loadJobs();
+        },
+        error: () => this.notify.error('Failed to remove post.')
+    });
+  }
 }
-
-

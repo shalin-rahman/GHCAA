@@ -2,7 +2,7 @@
     <div class="page-header">
         <div class="header-text">
             <h2>Executive Committee</h2>
-            <small>Manage Executive Committee Periods and Role Assignments</small>
+            <small>Showing {{ filteredMembers().length }} of {{ committeeMembers().length }} assignments for {{ selectedPeriod()?.title || 'selected term' }}</small>
         </div>
         <div class="header-actions">
             <button class="btn btn-accent btn-md" (click)="openNewPeriod()">
@@ -42,7 +42,20 @@
             <div class="committee-header">
                 <div class="title-wrap">
                     <h3>{{ selectedPeriod().title }}</h3>
-                    <div class="actions">
+                    <div class="filter-bar">
+                        <div class="search-wrap">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" [ngModel]="committeeSearch()" (ngModelChange)="committeeSearch.set($event)"
+                                placeholder="Search users by name or email…" class="search-input">
+                            @if (committeeSearch()) {
+                            <button class="clear-search" (click)="committeeSearch.set('')" title="Clear search">×</button>
+                            }
+                        </div>
+                        <div class="record-meta">
+                            Showing {{ filteredMembers().length }} of {{ committeeMembers().length }} assignments
+                        </div>
+                    </div>
+                    <div class="actions flex items-center gap-3">
                         @if (!selectedPeriod().isActive) {
                         <button class="btn btn-accent btn-sm" (click)="activatePeriod(selectedPeriod().id)">
                             Activate Period
@@ -71,7 +84,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (em of committeeMembers(); track em.id) {
+                        @for (em of filteredMembers(); track em.id) {
                         <tr>
                             <td class="member-cell">
                                 <div class="avatar">{{ em.member?.fullName?.[0] }}</div>
@@ -90,9 +103,13 @@
                             </td>
                         </tr>
                         } @empty {
-                        <tr class="empty-row">
-                            <td colspan="4" style="text-align: center; padding: 4rem; color: var(--text-muted);">No
-                                roles assigned to this period yet.</td>
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-state py-12">
+                                    <span class="text-3xl mb-2 block">🎗️</span>
+                                    <p class="text-muted italic">{{ committeeSearch() ? 'No assignments match your search.' : 'No roles assigned to this period yet.' }}</p>
+                                </div>
+                            </td>
                         </tr>
                         }
                     </tbody>

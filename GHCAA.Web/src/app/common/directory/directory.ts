@@ -58,7 +58,8 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
         year: null as number | null,
         sector: '',
         bloodGroup: '',
-        category: '' as any
+        category: '' as any,
+        membershipType: ''
     };
 
     ngOnInit() {
@@ -127,6 +128,7 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
                 professionalSector: this.filters.sector || undefined,
                 bloodGroup: this.filters.bloodGroup || undefined,
                 category: this.filters.category || undefined,
+                membershipType: this.filters.membershipType || undefined,
                 page,
                 pageSize: this.PAGE_SIZE
             };

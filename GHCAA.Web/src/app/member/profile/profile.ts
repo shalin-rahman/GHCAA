@@ -25,8 +25,11 @@ export class Profile implements OnInit {
     loading = signal(true);
     saving = signal(false);
     uploadingPhoto = signal(false);
+    uploadingSignature = signal(false);
     photoPreview = signal<string | null>(null);
+    signaturePreview = signal<string | null>(null);
     private photoFile: File | null = null;
+    private signatureFile: File | null = null;
     profile: any = {};
     ACADEMIC = ACADEMIC_DATA;
     yearsList = this.ACADEMIC.getYears();
@@ -147,6 +150,14 @@ export class Profile implements OnInit {
                 this.photoPreview.set(null);
             }
 
+            // 1b. Sync signature if pending
+            if (this.signatureFile) {
+                const res = await firstValueFrom(this.profileService.uploadSignature(this.signatureFile));
+                this.profile.signaturePath = res.signaturePath;
+                this.signatureFile = null;
+                this.signaturePreview.set(null);
+            }
+
             // 2. Sync Metadata
             await firstValueFrom(this.profileService.updateProfile(this.profile));
             
@@ -192,5 +203,22 @@ export class Profile implements OnInit {
                 this.notify.error(err?.error?.message || 'Photo upload failed.');
             }
         });
+    }
+
+    onSignatureSelected(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+        this.signatureFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => this.signaturePreview.set(e.target?.result as string);
+        reader.readAsDataURL(file);
+    }
+
+    removeSignature() {
+        if (!confirm('Remove your signature?')) return;
+        this.profile.signaturePath = null;
+        this.signatureFile = null;
+        this.signaturePreview.set(null);
     }
 }

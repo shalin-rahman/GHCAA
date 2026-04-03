@@ -65,11 +65,16 @@ class NewsDetailsScreen extends ConsumerWidget {
           if (article == null) return const Center(child: Text('Story corrupted or missing.', style: TextStyle(color: Colors.red)));
 
           final thumbnailUrl = article['imageUrl'] ?? article['thumbnailUrl'];
-          final fullImgUrl = thumbnailUrl != null 
-              ? (thumbnailUrl.toString().startsWith('http') 
-                  ? thumbnailUrl 
-                  : '${AppConfig.apiBaseUrl}/$thumbnailUrl'.replaceAll('//', '/'))
-              : null;
+          String? fullImgUrl;
+          if (thumbnailUrl != null && thumbnailUrl.toString().isNotEmpty) {
+            if (thumbnailUrl.toString().startsWith('http')) {
+              fullImgUrl = thumbnailUrl.toString();
+            } else {
+              final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
+              final cleanP = thumbnailUrl.toString().startsWith('/') ? thumbnailUrl.toString().substring(1) : thumbnailUrl.toString();
+              fullImgUrl = '$base/$cleanP';
+            }
+          }
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),

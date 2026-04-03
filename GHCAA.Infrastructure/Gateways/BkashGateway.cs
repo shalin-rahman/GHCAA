@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Configuration;
 
 namespace GHCAA.Infrastructure.Gateways
 {
@@ -14,12 +15,14 @@ namespace GHCAA.Infrastructure.Gateways
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _db;
         private readonly ILogger<BkashGateway> _logger;
+        private readonly IConfiguration _config;
 
-        public BkashGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<BkashGateway> logger)
+        public BkashGateway(HttpClient httpClient, ApplicationDbContext db, ILogger<BkashGateway> logger, IConfiguration config)
         {
             _httpClient = httpClient;
             _db = db;
             _logger = logger;
+            _config = config;
         }
 
         public Enums.PaymentGateway GatewayType => Enums.PaymentGateway.BkashGateway;
@@ -40,8 +43,8 @@ namespace GHCAA.Infrastructure.Gateways
 
                 // 2. Create Payment
                 var baseUrl = config.IsSandbox 
-                    ? "https://checkout.sandbox.bka.sh/v1.2.0-beta/checkout" 
-                    : "https://checkout.pay.bka.sh/v1.2.0-beta/checkout"; // Note: Production URL might differ slightly based on version
+                    ? _config["PaymentGateways:Bkash:SandboxUrl"] ?? "https://checkout.sandbox.bka.sh/v1.2.0-beta/checkout" 
+                    : _config["PaymentGateways:Bkash:ProductionUrl"] ?? "https://checkout.pay.bka.sh/v1.2.0-beta/checkout";
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Add("Authorization", token);
                 _httpClient.DefaultRequestHeaders.Add("X-APP-Key", config.GatewayPublicKey);
@@ -77,21 +80,57 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
-        public Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
+        public async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
-            // bKash callback usually involves an "Execute" call after the user pays.
-            // This would be handled in the controller.
-            return Task.FromResult(true);
+            if (!callbackData.TryGetValue("paymentID", out var paymentId) || string.IsNullOrEmpty(paymentId)) return false;
+            if (!callbackData.TryGetValue("status", out var status) || status != "success") return false;
+
+            var config = await _db.PaymentConfigurations
+                .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled, cancellationToken);
+
+            if (config == null) return false;
+
+            try
+            {
+                var token = await GetTokenAsync(config, cancellationToken);
+                if (token == null) return false;
+
+                var baseUrl = config.IsSandbox 
+                    ? _config["PaymentGateways:Bkash:SandboxUrl"] ?? "https://checkout.sandbox.bka.sh/v1.2.0-beta/checkout" 
+                    : _config["PaymentGateways:Bkash:ProductionUrl"] ?? "https://checkout.pay.bka.sh/v1.2.0-beta/checkout";
+                
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("Authorization", token);
+                _httpClient.DefaultRequestHeaders.Add("X-APP-Key", config.GatewayPublicKey);
+
+                var executePayload = new { paymentID = paymentId };
+                var response = await _httpClient.PostAsJsonAsync($"{baseUrl}/payment/execute", executePayload, cancellationToken);
+                var result = await response.Content.ReadFromJsonAsync<BkashExecuteResponse>(cancellationToken: cancellationToken);
+
+                // StatusCode 0000 and TransactionStatus Completed indicate success
+                return result?.StatusCode == "0000" && result?.TransactionStatus == "Completed";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "bKash Execute Failed for PaymentID {PaymentID}", paymentId);
+                return false;
+            }
         }
 
         private async Task<string?> GetTokenAsync(Domain.Models.PaymentConfiguration config, CancellationToken cancellationToken)
         {
             var baseUrl = config.IsSandbox 
-                ? "https://checkout.sandbox.bka.sh/v1.2.0-beta/checkout" 
-                : "https://checkout.pay.bka.sh/v1.2.0-beta/checkout";
+                ? _config["PaymentGateways:Bkash:SandboxUrl"] ?? "https://checkout.sandbox.bka.sh/v1.2.0-beta/checkout" 
+                : _config["PaymentGateways:Bkash:ProductionUrl"] ?? "https://checkout.pay.bka.sh/v1.2.0-beta/checkout";
+            
             _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("username", config.WalletNumber ?? "sandbox_user"); // Usually username
-            _httpClient.DefaultRequestHeaders.Add("password", "sandbox_pass"); // Usually password
+            _httpClient.DefaultRequestHeaders.Add("username", config.WalletNumber ?? _config["PaymentGateways:Bkash:Username"] ?? "sandbox_user");
+            
+            var password = config.IsSandbox 
+                ? _config["PaymentGateways:Bkash:SandboxPassword"] ?? "sandbox_pass" 
+                : _config["PaymentGateways:Bkash:ProductionPassword"] ?? "";
+            
+            _httpClient.DefaultRequestHeaders.Add("password", password);
 
             var payload = new { app_key = config.GatewayPublicKey, app_secret = config.GatewaySecretKey };
             var response = await _httpClient.PostAsJsonAsync($"{baseUrl}/token/grant", payload, cancellationToken);
@@ -106,6 +145,14 @@ namespace GHCAA.Infrastructure.Gateways
             public string? StatusMessage { get; set; } 
             public string? BkashURL { get; set; } 
             public string? PaymentID { get; set; } 
+        }
+        private class BkashExecuteResponse {
+            public string? StatusCode { get; set; }
+            public string? StatusMessage { get; set; }
+            public string? PaymentID { get; set; }
+            public string? TrxID { get; set; }
+            public string? TransactionStatus { get; set; }
+            public string? Amount { get; set; }
         }
     }
 }

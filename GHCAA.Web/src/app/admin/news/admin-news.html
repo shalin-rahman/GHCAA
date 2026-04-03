@@ -3,12 +3,24 @@
     <div class="page-header">
         <div class="header-text">
             <h2>News Posts</h2>
-            <small>Create, edit, and publish institutional news articles</small>
+            <small>Showing {{ filteredNews().length }} of {{ newsList().length }} news entries</small>
         </div>
         <div class="header-actions">
             <button class="btn btn-accent shadow-gold" (click)="openForm()">
                 <span class="icon">✍️</span> Draft New Story
             </button>
+        </div>
+    </div>
+
+    <!-- Toolbar for Search and Filters -->
+    <div class="filter-bar">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                placeholder="Search headlines or categories…" class="search-input">
+            @if (searchQuery()) {
+            <button class="clear-search" (click)="searchQuery.set('')" title="Clear search">×</button>
+            }
         </div>
     </div>
     } @else {
@@ -31,13 +43,14 @@
         <form #newsForm="ngForm" (ngSubmit)="saveNews(newsForm)" class="news-form space-y-8">
             <div class="form-group">
                 <label>Article Headline <span class="required-star">*</span></label>
-                <input type="text" [(ngModel)]="form.title" name="title" required minlength="5" maxlength="300" 
-                    #titleInput="ngModel"
-                    [class.border-red-500]="titleInput.invalid && titleInput.touched"
+                <input type="text" [(ngModel)]="form.title" name="title" required minlength="5" maxlength="300"
+                    #titleInput="ngModel" [class.border-red-500]="titleInput.invalid && titleInput.touched"
                     placeholder="Enter a compelling title..." class="text-xl font-black">
                 <div class="field-error mt-1" *ngIf="titleInput.touched && titleInput.invalid">
-                    <span class="text-xs text-red-500" *ngIf="titleInput.errors?.['required']">Headline is required.</span>
-                    <span class="text-xs text-red-500" *ngIf="titleInput.errors?.['minlength']">Headline must be at least 5 characters.</span>
+                    <span class="text-xs text-red-500" *ngIf="titleInput.errors?.['required']">Headline is
+                        required.</span>
+                    <span class="text-xs text-red-500" *ngIf="titleInput.errors?.['minlength']">Headline must be at
+                        least 5 characters.</span>
                 </div>
             </div>
 
@@ -60,7 +73,8 @@
                             @if (!uploadingImage()) { <span class="icon">📁</span> }
                             @if (uploadingImage()) { <span class="icon animate-spin">⏳</span> }
                             {{ uploadingImage() ? 'Uploading...' : 'Upload' }}
-                            <input type="file" style="display: none;" accept="image/*" (change)="onImageSelect($event)" [disabled]="uploadingImage()">
+                            <input type="file" style="display: none;" accept="image/*" (change)="onImageSelect($event)"
+                                [disabled]="uploadingImage()">
                         </label>
                     </div>
                 </div>
@@ -68,12 +82,14 @@
 
             <div class="form-group">
                 <label>Article Content <span class="required-star">*</span></label>
-                <textarea [(ngModel)]="form.content" name="content" rows="12" required minlength="20" #contentInput="ngModel"
-                    [class.border-red-500]="contentInput.invalid && contentInput.touched"
+                <textarea [(ngModel)]="form.content" name="content" rows="12" required minlength="20"
+                    #contentInput="ngModel" [class.border-red-500]="contentInput.invalid && contentInput.touched"
                     placeholder="Compose your article here..."></textarea>
                 <div class="field-error mt-1" *ngIf="contentInput.touched && contentInput.invalid">
-                    <span class="text-xs text-red-500" *ngIf="contentInput.errors?.['required']">Content is required.</span>
-                    <span class="text-xs text-red-500" *ngIf="contentInput.errors?.['minlength']">Content must be at least 20 characters.</span>
+                    <span class="text-xs text-red-500" *ngIf="contentInput.errors?.['required']">Content is
+                        required.</span>
+                    <span class="text-xs text-red-500" *ngIf="contentInput.errors?.['minlength']">Content must be at
+                        least 20 characters.</span>
                 </div>
             </div>
 
@@ -108,10 +124,10 @@
             <span>⌛</span>
             <p>Loading news posts...</p>
         </div>
-        } @else if (newsList().length === 0) {
+        } @else if (filteredNews().length === 0) {
         <div class="empty-state">
             <span>📰</span>
-            <p>No news articles yet.</p>
+            <p>{{ searchQuery() ? 'No news articles match your search.' : 'No news articles yet.' }}</p>
         </div>
         } @else {
         <table class="data-table">
@@ -125,7 +141,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (post of newsList(); track post.id) {
+                @for (post of filteredNews(); track post.id) {
                 <tr>
                     <td class="title-cell">{{ post.title }}</td>
                     <td><span class="pill">{{ getCategoryLabel(post.articleCategory) }}</span></td>
@@ -153,7 +169,9 @@
         <div class="modal-box" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <div>
-                    <span class="px-3 py-1 bg-accent/10 text-accent rounded-full text-[10px] uppercase font-black tracking-widest">{{ getCategoryLabel(post.articleCategory) }}</span>
+                    <span
+                        class="px-3 py-1 bg-accent/10 text-accent rounded-full text-[10px] uppercase font-black tracking-widest">{{
+                        getCategoryLabel(post.articleCategory) }}</span>
                     <h3 class="mt-2">{{ post.title }}</h3>
                     <p class="text-xs opacity-50 font-bold mt-1">Published on {{ post.createdAt | date:'longDate' }}</p>
                 </div>
@@ -161,14 +179,16 @@
             </div>
             <div class="modal-body">
                 @if (post.imageUrl) {
-                    <img [src]="post.imageUrl" class="w-full h-80 object-cover rounded-2xl mb-10 border border-primary/5 shadow-2xl">
+                <img [src]="post.imageUrl"
+                    class="w-full h-80 object-cover rounded-2xl mb-10 border border-primary/5 shadow-2xl">
                 }
                 <div class="prose prose-invert max-w-none">
                     <p class="text-lg leading-relaxed font-light" style="white-space: pre-wrap;">{{ post.content }}</p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button (click)="editPost(post); selectedPost.set(null)" class="btn btn-secondary">Edit Original Assets</button>
+                <button (click)="editPost(post); selectedPost.set(null)" class="btn btn-secondary">Edit Original
+                    Assets</button>
                 <button (click)="selectedPost.set(null)" class="btn btn-accent px-8">Dismiss</button>
             </div>
         </div>

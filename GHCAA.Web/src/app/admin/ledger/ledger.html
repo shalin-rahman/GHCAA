@@ -2,16 +2,11 @@
     <div class="page-header">
         <div class="header-text">
             <h2>Financial Ledger</h2>
-            <small>{{ totalItems() }} records found</small>
+            <small>Showing {{ transactions().length }} of {{ totalItems() }} financial records</small>
         </div>
         <div class="header-actions flex items-center gap-3">
-            <app-export-buttons 
-                [data]="transactions()" 
-                fileName="ghcaa_ledger"
-                [pdfHeaders]="pdfHeaders"
-                [pdfDataMapper]="pdfMapper"
-                [exporting]="isExporting()"
-                (exportStart)="handleExport($event)"
+            <app-export-buttons [data]="transactions()" fileName="ghcaa_ledger" [pdfHeaders]="pdfHeaders"
+                [pdfDataMapper]="pdfMapper" [exporting]="isExporting()" (exportStart)="handleExport($event)"
                 title="Financial Ledger Export">
             </app-export-buttons>
             <button class="btn btn-accent" (click)="showForm.set(!showForm())">
@@ -91,8 +86,9 @@
             <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
                 placeholder="Search description or reference...">
         </div>
-        
-        <select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event); onFilterChange()" class="status-select">
+
+        <select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event); onFilterChange()"
+            class="status-select">
             <option [value]="null">All Types</option>
             <option value="Income">Income (Credit)</option>
             <option value="Expense">Expense (Debit)</option>
@@ -102,7 +98,10 @@
     <!-- Transaction Table -->
     <div class="glass-card table-section" *ngIf="!showForm()">
         @if (loading()) {
-        <div class="loading">Loading ledger...</div>
+        <div class="loading-state">
+            <span class="spinner">⏳</span>
+            <p>Gathering financial legacy...</p>
+        </div>
         } @else {
         <table class="admin-table">
             <thead>
@@ -130,16 +129,21 @@
                     </td>
 
                 </tr>
+                } @empty {
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state py-12">
+                            <span class="text-3xl mb-2 block">💸</span>
+                            <p class="text-muted italic">{{ searchQuery() ? 'No records match your search.' : 'No financial records found.' }}</p>
+                        </div>
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>
-        
-        <app-pagination
-            [currentPage]="currentPage()"
-            [totalPages]="totalPages()"
-            [totalItems]="totalItems()"
-            [pageSize]="pageSize()"
-            (pageChange)="currentPage.set($event); loadData()">
+
+        <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [totalItems]="totalItems()"
+            [pageSize]="pageSize()" (pageChange)="currentPage.set($event); loadData()">
         </app-pagination>
         }
     </div>

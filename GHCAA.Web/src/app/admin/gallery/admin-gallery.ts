@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -23,6 +23,17 @@ export class AdminGallery implements OnInit {
     isSubmitting = signal(false);
     isUploading = signal(false);
     uploadedFiles = signal<File[]>([]);
+    searchQuery = signal('');
+
+    filteredGalleries = computed(() => {
+        const q = this.searchQuery().toLowerCase().trim();
+        if (!q) return this.galleries();
+        return this.galleries().filter(g =>
+            (g.title || '').toLowerCase().includes(q) ||
+            (g.location || '').toLowerCase().includes(q) ||
+            (g.description || '').toLowerCase().includes(q)
+        );
+    });
 
     // Form State
     showForm = signal(false);

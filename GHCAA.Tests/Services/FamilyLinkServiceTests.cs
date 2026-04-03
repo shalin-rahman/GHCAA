@@ -65,7 +65,7 @@ public class FamilyLinkServiceTests : TestBase
         request.TargetMemberId.Should().Be(target.Id);
 
         _mockNotifications.Verify(x => x.CreateNotificationAsync(
-            target.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), null, It.IsAny<CancellationToken>()), Times.Once);
+            target.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<GHCAA.Domain.Enums.NotificationType>(), null, It.IsAny<CancellationToken>()), Times.Once);
             
         _mockCommunication.Verify(x => x.SendIndividualEmailAsync(
             target.Id, "FAMILY_LINK_REQUEST", It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()), Times.Once);

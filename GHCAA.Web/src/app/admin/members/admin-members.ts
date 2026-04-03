@@ -30,13 +30,16 @@ export class AdminMembers implements OnInit {
   searchQuery = signal('');
   statusFilter = signal('all');
   categoryFilter = signal('all');
+  membershipTypeFilter = signal('all');
   selectedMember = signal<any>(null);
   isEditing = signal(false);
   submitting = signal(false);
   certToUpload: File | null = null;
   payToUpload: File | null = null;
   photoToUpload: File | null = null;
+  signatureToUpload: File | null = null;
   photoPreview = signal<string | null>(null);
+  signaturePreview = signal<string | null>(null);
   memberPayments = signal<any[]>([]);
 
   // Pagination state
@@ -150,7 +153,7 @@ export class AdminMembers implements OnInit {
 
   handleExport(format: string) {
     this.isExporting.set(true);
-    this.adminService.getAllForExport(this.searchQuery(), this.statusFilter(), this.categoryFilter()).subscribe({
+    this.adminService.getAllForExport(this.searchQuery(), this.statusFilter(), this.categoryFilter(), this.membershipTypeFilter()).subscribe({
       next: async (res: any) => {
         const rawData = res.items || res;
         
@@ -185,7 +188,7 @@ export class AdminMembers implements OnInit {
 
   loadMembers() {
     this.loading.set(true);
-    this.adminService.getMembers(this.currentPage(), this.pageSize(), this.searchQuery(), this.statusFilter(), this.categoryFilter(), false).subscribe({
+    this.adminService.getMembers(this.currentPage(), this.pageSize(), this.searchQuery(), this.statusFilter(), this.categoryFilter(), this.membershipTypeFilter(), false).subscribe({
       next: (res: any) => {
         this.allMembers.set(res.items);
         this.totalPages.set(res.totalPages || 1);
@@ -234,8 +237,22 @@ export class AdminMembers implements OnInit {
   sendResetLink(id: number) {
     if (!confirm('Send a password reset link to this member?')) return;
     this.adminService.sendPasswordResetLink(id).subscribe({
-      next: () => this.notify.success('Password reset link sent.'),
-      error: () => this.notify.error('Failed to send reset link.')
+      next: (res: any) => {
+        if (res.resetUrl) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(res.resetUrl).then(() => {
+                    this.notify.success('Link copied to dashboard clipboard automatically.');
+                }).catch(() => {
+                    prompt('Password Reset Link:', res.resetUrl);
+                });
+            } else {
+                prompt('Password Reset Link:', res.resetUrl);
+            }
+        } else {
+            this.notify.success(res.message || 'Password reset link sent.');
+        }
+      },
+      error: (err: any) => this.notify.error(err.error?.message || 'Failed to send reset link.')
     });
   }
 
@@ -289,6 +306,31 @@ export class AdminMembers implements OnInit {
         this.loadMembers();
       },
       error: (err) => this.notify.error(err?.error?.message || 'Photo upload failed.')
+    });
+  }
+
+  onAdminSignatureSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.signatureToUpload = file;
+    const reader = new FileReader();
+    reader.onload = (e) => this.signaturePreview.set(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  uploadMemberSignature() {
+    const member = this.selectedMember();
+    if (!member || !this.signatureToUpload) return;
+    this.adminService.updateMemberSignature(member.id, this.signatureToUpload).subscribe({
+      next: (res) => {
+        this.selectedMember.update(m => ({ ...m, signaturePath: res.signaturePath }));
+        this.signatureToUpload = null;
+        this.signaturePreview.set(null);
+        this.notify.success('Signature updated successfully!');
+        this.loadMembers();
+      },
+      error: (err) => this.notify.error(err?.error?.message || 'Signature upload failed.')
     });
   }
 

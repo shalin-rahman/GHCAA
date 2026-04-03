@@ -27,4 +27,11 @@ class JobService {
       return false;
     }
   }
+
+  Future<bool> deleteJob(int id) async {
+    try {
+      final response = await _dio.delete('/jobs/$id');
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
 }

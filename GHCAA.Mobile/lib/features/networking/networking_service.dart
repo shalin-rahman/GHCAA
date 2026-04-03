@@ -10,22 +10,33 @@ class NetworkingService {
   final Dio _dio;
   NetworkingService(this._dio);
 
-  Future<List<dynamic>> searchAlumni({String query = '', String? batch, String? department, int pageNumber = 1, int pageSize = 20}) async {
+  Future<Map<String, dynamic>> searchAlumni({
+    String? query, 
+    String? batch, 
+    String? department, 
+    String? membershipType,
+    String? category,
+    int pageNumber = 1, 
+    int pageSize = 20
+  }) async {
     try {
-      final response = await _dio.get('/networking/search', queryParameters: {
-        if (query.isNotEmpty) 'query': query,
-        if (batch != null) 'passingYear': batch,
-        if (department != null) 'category': department,
-        'pageNumber': pageNumber,
-        'pageSize': pageSize,
-      });
+      final params = {
+        if (query?.isNotEmpty ?? false) 'query': query,
+        if (batch?.isNotEmpty ?? false) 'passingYear': batch,
+        if (department?.isNotEmpty ?? false) 'subject': department,
+        if (membershipType?.isNotEmpty ?? false) 'membershipType': membershipType,
+        if (category?.isNotEmpty ?? false) 'category': category,
+        'page': pageNumber.toString(),
+        'pageSize': pageSize.toString(),
+      };
+      final response = await _dio.get('/networking/search', queryParameters: params);
       
-      if (response.data is Map && response.data.containsKey('items')) {
-        return response.data['items'] as List<dynamic>;
+      if (response.data is Map) {
+        return response.data as Map<String, dynamic>;
       }
-      return (response.data as List<dynamic>?) ?? [];
+      return { 'items': (response.data as List<dynamic>?) ?? [], 'totalItems': 0 };
     } catch (e) {
-      return [];
+      return { 'items': [], 'totalItems': 0 };
     }
   }
 

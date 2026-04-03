@@ -7,6 +7,9 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/api/api_client.dart';
+import '../../features/lookups/dropdown_service.dart';
+import '../../features/files/file_service.dart';
+import '../../core/config/app_config.dart';
 
 class SubmitArticleScreen extends ConsumerStatefulWidget {
   const SubmitArticleScreen({super.key});
@@ -92,18 +95,20 @@ class _SubmitArticleScreenState extends ConsumerState<SubmitArticleScreen> {
                     const Divider(color: Colors.white12, height: 32),
                     _buildInputField('Full Editorial Content', _contentController, 'Share your detailed insights and thoughts here...', maxLines: 8),
                     const Divider(color: Colors.white12, height: 32),
-                    DropdownButtonFormField<String>(
-                    initialValue: _selectedCategory,
-                      decoration: const InputDecoration(labelText: 'Focus Category', border: InputBorder.none, labelStyle: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 10)),
-                      dropdownColor: AppTheme.midnightSurface,
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                      items: const [
-                        DropdownMenuItem(value: 'Article', child: Text('Alumni Article')),
-                        DropdownMenuItem(value: 'News', child: Text('Campus News')),
-                        DropdownMenuItem(value: 'Magazine', child: Text('Journal Entry')),
-                      ],
-                      onChanged: (v) {
-                        if (v != null && mounted) setState(() => _selectedCategory = v);
+                    FutureBuilder<List<Map<String, String>>>(
+                      future: ref.read(dropdownDataProvider).getOptions('ArticleCategory'),
+                      builder: (context, snapshot) {
+                        final options = snapshot.data ?? [];
+                        return DropdownButtonFormField<String>(
+                          initialValue: options.any((e) => e['value'] == _selectedCategory) ? _selectedCategory : (options.isNotEmpty ? options.first['value'] : null),
+                          decoration: const InputDecoration(labelText: 'Focus Category', border: InputBorder.none, labelStyle: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 10)),
+                          dropdownColor: AppTheme.midnightSurface,
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          items: options.map((o) => DropdownMenuItem(value: o['value']!, child: Text(o['label']!))).toList(),
+                          onChanged: (v) {
+                            if (v != null && mounted) setState(() => _selectedCategory = v);
+                          },
+                        );
                       },
                     ),
                   ],
@@ -131,22 +136,51 @@ class _SubmitArticleScreenState extends ConsumerState<SubmitArticleScreen> {
 
   Widget _buildImageUploader() {
     return GlassContainer(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('COVER IMAGE URL', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-          const SizedBox(height: 8),
-          TextFormField(
-            onChanged: (v) => _imageUrl = v,
-            style: const TextStyle(color: Colors.white, fontSize: 13),
-            decoration: InputDecoration(
-              hintText: 'https://example.com/image.jpg (optional)',
-              hintStyle: TextStyle(color: AppTheme.textSecondaryDark.withValues(alpha: 0.5), fontSize: 12),
-              border: InputBorder.none,
-              prefixIcon: const Icon(Icons.link_rounded, color: AppTheme.royalGold, size: 18),
-            ),
-          ),
-        ],
+      child: InkWell(
+        onTap: () async {
+          final file = await ref.read(fileServiceProvider).pickImage();
+          if (file != null) {
+            // In a real scenario, you'd upload now or send the file path
+            // For news, let's assume we upload it via a dedicated endpoint if available
+            // but for now we'll just show the user it's selected.
+            // Actually, usually we'd upload to get a temp URL or multipart post later.
+            // Let's assume we have an upload endpoint like the profile one.
+            final uploadedPath = await ref.read(fileServiceProvider).uploadArticleImage(file);
+            if (uploadedPath != null) {
+              setState(() => _imageUrl = uploadedPath);
+            }
+          }
+        },
+        child: SizedBox(
+          width: double.infinity,
+          height: 140,
+          child: _imageUrl == null 
+            ? const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add_photo_alternate_outlined, color: AppTheme.royalGold, size: 40),
+                  SizedBox(height: 12),
+                  Text('TAP TO ATTACH COVER IMAGE', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                  Text('(MAX 5MB | JPG/PNG/WEBP)', style: TextStyle(color: Colors.white30, fontSize: 8)),
+                ],
+              )
+            : Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      _imageUrl!.startsWith('http') ? _imageUrl! : '${AppConfig.apiBaseUrl}/$_imageUrl'.replaceAll('//', '/'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(color: Colors.black38, borderRadius: BorderRadius.circular(12)),
+                    child: const Center(child: Icon(Icons.edit_outlined, color: Colors.white, size: 30)),
+                  ),
+                ],
+              ),
+        ),
       ),
     );
   }

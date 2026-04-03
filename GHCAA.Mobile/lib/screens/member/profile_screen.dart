@@ -17,13 +17,13 @@ class ProfileScreen extends ConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
 
     return AppScaffold(
-      title: 'Member Profile',
-      breadcrumb: 'Member Portal > Identity Registry',
+      title: 'My Profile',
+      breadcrumb: 'PORTAL > MY PROFILE',
       child: AsyncValueWidget<Map<String, dynamic>?>(
         value: profileAsync,
-        loadingMessage: 'Synchronizing with registry...',
+        loadingMessage: 'Loading profile...',
         data: (profile) {
-          if (profile == null) return const Center(child: Text('Profile not synchronized.', style: TextStyle(color: AppTheme.textSecondaryDark)));
+          if (profile == null) return const Center(child: Text('Profile data unavailable.', style: TextStyle(color: AppTheme.textSecondaryDark)));
           
           return RefreshIndicator(
             color: AppTheme.royalGold,
@@ -39,33 +39,51 @@ class ProfileScreen extends ConsumerWidget {
                   _buildDigitalIDCard(context, profile),
                   const SizedBox(height: 32),
                   
-                  _buildSectionHeader('Haragangian Academic History'),
-                  _buildAcademicTimeline(profile['academicHistory'] ?? []),
-                  const SizedBox(height: 32),
-
-                  _buildSectionHeader('Professional Career Legacy'),
-                  _buildProfessionalTimeline(profile['professionalHistory'] ?? []),
-                  const SizedBox(height: 32),
-
-                  _buildSectionHeader('Privacy & Directory Visibility'),
+                  _buildSectionHeader('Personal Particulars'),
                   GlassContainer(
-                    padding: EdgeInsets.zero,
                     child: Column(
                       children: [
-                        _buildToggle('EXPOSE MOBILE IDENTITY', profile['isMobilePublic'] ?? true),
-                        const Divider(color: Colors.white10, height: 1),
-                        _buildToggle('EXPOSE PROFESSIONAL DATA', profile['isprofessionalInfoPublic'] ?? true),
+                        _buildInfoRow(Icons.person_outline, "Father's Name", profile['fatherName']),
+                        const Divider(color: Colors.white10),
+                        _buildInfoRow(Icons.person_outline, "Mother's Name", profile['motherName']),
+                        const Divider(color: Colors.white10),
+                        _buildInfoRow(Icons.badge_outlined, 'NID Number', profile['nid']),
+                        const Divider(color: Colors.white10),
+                        _buildInfoRow(Icons.phone_outlined, 'Mobile', profile['mobileNo']),
+                        const Divider(color: Colors.white10),
+                        _buildInfoRow(Icons.email_outlined, 'Email', profile['email']),
                       ],
                     ),
                   ),
                   const SizedBox(height: 32),
 
-                  _buildSectionHeader('Security & Audit Log'),
+                  _buildSectionHeader('Academic Timeline'),
+                  _buildAcademicTimeline(profile['academicHistory'] ?? []),
+                  const SizedBox(height: 32),
+
+                  _buildSectionHeader('Professional Career Milestones'),
+                  _buildProfessionalTimeline(profile['professionalHistory'] ?? []),
+                  const SizedBox(height: 32),
+
+                  _buildSectionHeader('Privacy Settings'),
                   GlassContainer(
                     padding: EdgeInsets.zero,
                     child: Column(
                       children: [
-                        _buildActionTile(context, Icons.history_edu_outlined, 'Security Activity Logs', '/activity'),
+                        _buildToggle('EXPOSE MOBILE PUBLICLY', profile['isMobilePublic'] ?? true),
+                        const Divider(color: Colors.white10, height: 1),
+                        _buildToggle('EXPOSE PROFESSION PUBLICLY', profile['isprofessionalInfoPublic'] ?? true),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  _buildSectionHeader('Security & Audits'),
+                  GlassContainer(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      children: [
+                        _buildActionTile(context, Icons.history_edu_outlined, 'Access Logs', '/activity'),
                         const Divider(color: Colors.white10, height: 1),
                         _buildActionTile(context, Icons.devices_outlined, 'Registered Device Metadata', null),
                       ],
@@ -119,12 +137,19 @@ class ProfileScreen extends ConsumerWidget {
                         border: Border.all(color: isVerified ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3)),
                       ),
                       child: Text(
-                        isVerified ? 'VERIFIED ACTIVE ✅' : 'AUDIT PENDING ⏳',
+                        isVerified ? 'ACTIVE ✅' : 'PENDING ⏳',
                         style: TextStyle(color: isVerified ? Colors.green : Colors.orange, fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.push('/profile/edit');
+                },
+                icon: const Icon(Icons.edit_note_rounded, color: AppTheme.royalGold, size: 28),
               ),
             ],
           ),
@@ -138,7 +163,16 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildMemberPhoto(String? path, String name) {
-    final fullUrl = path != null ? '${AppConfig.apiBaseUrl}/$path'.replaceAll('//', '/') : null;
+    String? fullUrl;
+    if (path != null && path.toString().isNotEmpty) {
+      if (path.toString().startsWith('http')) {
+        fullUrl = path.toString();
+      } else {
+        final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
+        final cleanP = path.toString().startsWith('/') ? path.toString().substring(1) : path.toString();
+        fullUrl = '$base/$cleanP';
+      }
+    }
     
     return Container(
       width: 80,
@@ -162,7 +196,7 @@ class ProfileScreen extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Registry Data Health', style: TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10, fontWeight: FontWeight.bold)),
+            const Text('Profile Completion', style: TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10, fontWeight: FontWeight.bold)),
             Text('$percentage%', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold)),
           ],
         ),
@@ -249,6 +283,28 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildInfoRow(IconData icon, String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: AppTheme.royalGold),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label.toUpperCase(), style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                const SizedBox(height: 2),
+                Text(value ?? 'N/A', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildToggle(String label, bool value) {
     return SwitchListTile(
       title: Text(label, style: const TextStyle(fontSize: 14, color: Colors.white)),
@@ -279,7 +335,7 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        child: const Text('SECURITY LOGOUT', style: TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
+        child: const Text('LOGOUT', style: TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
       ),
     );
   }

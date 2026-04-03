@@ -59,8 +59,6 @@ if (-not $PortsOnly) {
     taskkill /F /IM flutter.bat /T 2>$null
     taskkill /F /IM java.exe /T 2>$null
     taskkill /F /IM qemu-system-x86_64.exe /T 2>$null
-    taskkill /F /IM chrome.exe /T 2>$null
-    taskkill /F /IM msedge.exe /T 2>$null
 
     Start-Sleep -Milliseconds 1500
 }

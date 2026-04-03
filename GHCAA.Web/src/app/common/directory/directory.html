@@ -55,6 +55,18 @@
                     }
                 </select>
             </div>
+            <div class="filter-group">
+                <label>Membership Type</label>
+                <select [(ngModel)]="filters.membershipType" (change)="search()">
+                    <option value="">All Types</option>
+                    <option value="Founding">Founding Member</option>
+                    <option value="Executive">Executive Member</option>
+                    <option value="General">General Member</option>
+                    <option value="Associate">Associate Member</option>
+                    <option value="Honorary">Honorary Member</option>
+                    <option value="Advisory">Advisory Member</option>
+                </select>
+            </div>
         </div>
         <div class="results-summary" *ngIf="!loading() && totalItems() > 0">
             <span>Showing <strong>{{ members().length }}</strong> of <strong>{{ totalItems() }}</strong> members</span>

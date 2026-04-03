@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../../features/theme/dynamic_theme_service.dart';
 import '../session/session_manager.dart';
+import '../../features/auth/auth_service.dart';
 import 'app_drawer.dart';
 
 class AppScaffold extends ConsumerWidget {
@@ -107,6 +108,9 @@ class AppScaffold extends ConsumerWidget {
       );
     }
 
+    final roleAsync = ref.watch(roleProvider);
+    final isUserAdmin = isAdmin || roleAsync.value == 'Admin' || roleAsync.value == 'SuperAdmin';
+
     return specialThemeAsync.when(
       data: (st) {
         if (st != null) {
@@ -116,7 +120,7 @@ class AppScaffold extends ConsumerWidget {
           return buildBody(colors, announcement: st.announcement, textColor: st.textColor);
         }
         
-        final List<Color> gradientColors = isAdmin 
+        final List<Color> gradientColors = isUserAdmin 
           ? [AppTheme.adminMidnightSurface, AppTheme.adminMidnightBase]
           : [AppTheme.midnightSurface, AppTheme.midnightBase];
         return buildBody(gradientColors);

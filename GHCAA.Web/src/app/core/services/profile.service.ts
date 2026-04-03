@@ -67,6 +67,12 @@ export class ProfileService {
         return this.http.post<any>(`${this.apiUrl}/photo`, formData);
     }
 
+    uploadSignature(file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('signature', file);
+        return this.http.post<any>(`${this.apiUrl}/signature`, formData);
+    }
+
     getCertificate(): Observable<{ dataUri: string }> {
         return this.http.get<{ dataUri: string }>(`${this.apiUrl}/certificate`);
     }

@@ -34,10 +34,10 @@ namespace GHCAA.Tests.Controllers
         public async Task GetAllMembers_ReturnsOk_WithData()
         {
             var fakeResult = new { TotalItems = 1, Items = new object[] { } };
-            _memberServiceMock.Setup(x => x.GetAllMembersAsync(1, 10, "", "Applied", "all", false, true, It.IsAny<CancellationToken>()))
+            _memberServiceMock.Setup(x => x.GetAllMembersAsync(1, 10, "", "Applied", "all", "all", false, true, It.IsAny<CancellationToken>()))
                               .ReturnsAsync(fakeResult);
 
-            var result = await _controller.GetAllMembers(1, 10, "", "Applied", "all", false, CancellationToken.None);
+            var result = await _controller.GetAllMembers(1, 10, "", "Applied", "all", "all", false, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
@@ -94,7 +94,7 @@ namespace GHCAA.Tests.Controllers
         public async Task ResetPasswordAdmin_ReturnsOk_OnSuccess()
         {
             _memberServiceMock.Setup(x => x.SendAdminPasswordResetLinkAsync(100, It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(true);
+                              .ReturnsAsync((true, "http://reset"));
 
             var result = await _controller.ResetPasswordAdmin(100, CancellationToken.None);
 

@@ -74,7 +74,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
         ),
         elevation: 8,
-        shadowColor: royalGold.withOpacity(0.4),
+        shadowColor: royalGold.withValues(alpha: 0.4),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(

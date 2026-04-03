@@ -110,6 +110,31 @@ namespace GHCAA.API.Controllers
             return Ok(new { Message = "Photo updated successfully.", PhotoPath = photoPath });
         }
 
+        [HttpPost("signature")]
+        public async Task<IActionResult> UploadSignature(IFormFile signature, CancellationToken cancellationToken)
+        {
+            var memberId = GetMemberId();
+            if (memberId == 0) return Unauthorized();
+            if (signature == null || signature.Length == 0) return BadRequest(new { Message = "No file provided." });
+
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+            if (!allowedTypes.Contains(signature.ContentType.ToLower()))
+                return BadRequest(new { Message = "Only JPG, PNG, or WebP images are allowed." });
+
+            if (signature.Length > 2 * 1024 * 1024)
+                return BadRequest(new { Message = "Signature must be under 2MB." });
+
+            var dto = new UploadedFileDto
+            {
+                FileName = signature.FileName,
+                Length = signature.Length,
+                Content = signature.OpenReadStream()
+            };
+
+            var signaturePath = await _memberService.UpdateMemberSignatureAsync(memberId, dto, cancellationToken);
+            return Ok(new { Message = "Signature updated successfully.", SignaturePath = signaturePath });
+        }
+
         private int GetMemberId()
         {
             var memberIdStr = User.FindFirst("MemberId")?.Value;

@@ -12,17 +12,18 @@ class FeeConfigScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return AppScaffold(
       isAdmin: true,
-      title: 'Fee Structure',
+      title: 'Fee Policy',
+      breadcrumb: 'ADMIN > FEES',
       child: ListView(
         padding: const EdgeInsets.all(AppConstants.paddingLarge),
         children: [
-          _buildFeeCategory(context, 'Core Membership', [
+          _buildFeeCategory(context, 'MEMBERSHIP FEES', [
             _buildFeeItem('Admission Fee', '৳ 1000', 'One-time'),
             _buildFeeItem('Monthly Dues', '৳ 100', 'Recurring'),
             _buildFeeItem('Life Member', '৳ 10000', 'One-time'),
           ]),
           const SizedBox(height: 24),
-          _buildFeeCategory(context, 'Processing Fees', [
+          _buildFeeCategory(context, 'ADDITIONAL CHARGES', [
             _buildFeeItem('Card Printing', '৳ 150', 'On-demand'),
             _buildFeeItem('Courier Charge', '৳ 100', 'Standard'),
           ]),

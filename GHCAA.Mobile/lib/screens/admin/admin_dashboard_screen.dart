@@ -27,7 +27,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboardScreen> {
 
     return AppScaffold(
       isAdmin: true,
-      title: 'Command Center',
+      title: 'Dashboard',
       actions: [
         IconButton(icon: const Icon(Icons.notifications_outlined), onPressed: () {}),
         IconButton(icon: const Icon(Icons.logout), onPressed: () => context.go('/login')),
@@ -38,22 +38,22 @@ class _AdminDashboardState extends ConsumerState<AdminDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('SYSTEM HEALTH & GROWTH', 
+            const Text('OVERVIEW', 
               style: TextStyle(letterSpacing: 1.5, fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.royalGold)),
             const SizedBox(height: 16),
             analyticsAsync.when(
               data: (analytics) => Row(
                 children: [
-                  _buildStatCard('TOTAL MEMBERS', '${analytics['totalMembers'] ?? 0}', Icons.people, Colors.blueAccent),
+                  _buildStatCard('MEMBERS', '${analytics['totalMembers'] ?? 0}', Icons.people, Colors.blueAccent),
                   const SizedBox(width: 12),
-                  _buildStatCard('PENDING ACTION', '${analytics['pendingApprovals'] ?? 0}', Icons.priority_high, Colors.orangeAccent),
+                  _buildStatCard('APPROVALS', '${analytics['pendingApprovals'] ?? 0}', Icons.priority_high, Colors.orangeAccent),
                 ],
               ),
               loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
               error: (e, s) => Center(child: Text('Sync Error: $e')),
             ),
             const SizedBox(height: 32),
-            const Text('STRATEGIC MANAGEMENT', 
+            const Text('ADMINISTRATIVE MODULES', 
               style: TextStyle(letterSpacing: 1.5, fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.royalGold)),
             const SizedBox(height: 16),
             GridView.count(
@@ -64,20 +64,22 @@ class _AdminDashboardState extends ConsumerState<AdminDashboardScreen> {
               crossAxisSpacing: 12,
               childAspectRatio: 1.4,
               children: [
-                _buildQuickAction(context, Icons.gavel, 'Approvals', '/admin/approvals'),
-                _buildQuickAction(context, Icons.history_edu, 'Audit Logs', '/admin/audit'),
-                _buildQuickAction(context, Icons.receipt_long, 'Ledger', '/admin/ledger'),
-                _buildQuickAction(context, Icons.campaign, 'Broadcast', '/admin/communication'),
-                _buildQuickAction(context, Icons.business, 'Directory', '/directory'),
-                _buildQuickAction(context, Icons.settings, 'Config', '/admin/fees'),
+                _buildQuickAction(context, Icons.gavel, 'APPROVAL QUEUE', '/admin/approvals'),
+                _buildQuickAction(context, Icons.history_edu, 'AUDIT TRAILS', '/admin/audit'),
+                _buildQuickAction(context, Icons.receipt_long, 'LEDGER & DUES', '/admin/ledger'),
+                _buildQuickAction(context, Icons.campaign, 'COMMUNICATIONS', '/admin/communication'),
+                _buildQuickAction(context, Icons.business, 'MEMBER DIRECTORY', '/directory'),
+                _buildQuickAction(context, Icons.rate_review_outlined, 'ARTICLE REVIEW', '/admin/articles'),
+                _buildQuickAction(context, Icons.qr_code_scanner, 'GATEKEEPER', '/admin/gatekeeper'),
               ],
             ),
             const SizedBox(height: 32),
-            const Text('OPERATIONAL CMS', 
+            const Text('MANAGEMENT SYSTEM', 
               style: TextStyle(letterSpacing: 1.5, fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.royalGold)),
             const SizedBox(height: 12),
-            GlassTile(icon: Icons.collections, title: 'Media Manager', subtitle: 'Manage news & gallery', onTap: () => context.go('/admin/cms')),
-            GlassTile(icon: Icons.support_agent, title: 'Inbound Support', subtitle: 'Global message queue', onTap: () => context.go('/admin/messages')),
+            GlassTile(icon: Icons.groups_outlined, title: 'EXECUTIVE COMMITTEE', subtitle: 'Manage Institutional Periods', onTap: () => context.go('/admin/governance')),
+            GlassTile(icon: Icons.collections, title: 'CONTENT MANAGEMENT', subtitle: 'Manage news & gallery assets', onTap: () => context.go('/admin/cms')),
+            GlassTile(icon: Icons.support_agent, title: 'CONTACT MESSAGES', subtitle: 'Global support queue', onTap: () => context.go('/admin/messages')),
           ],
         ),
       ),

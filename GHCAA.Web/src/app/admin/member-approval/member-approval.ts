@@ -26,6 +26,17 @@ export class MemberApproval implements OnInit {
   });
   loading = signal(true);
   selectedMember = signal<any | null>(null);
+  searchQuery = signal('');
+
+  filteredRequests = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return this.pendingRequests();
+    return this.pendingRequests().filter(r =>
+      (r.fullName || '').toLowerCase().includes(q) ||
+      (r.email || '').toLowerCase().includes(q) ||
+      (r.membershipNumber || '').toLowerCase().includes(q)
+    );
+  });
   years = getAcademicYears();
   certificateOptions = ACADEMIC_CERTIFICATES;
   subjectOptions = ACADEMIC_SUBJECTS;

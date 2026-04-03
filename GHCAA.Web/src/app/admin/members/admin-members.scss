@@ -265,3 +265,66 @@
         .sys-prop { font-weight: 700; font-size: 0.85rem; }
     }
 }
+
+/* Search Integration with Clear Button */
+.search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    max-width: 400px;
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 2.5rem;
+        background: rgba(var(--primary-rgb), 0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        color: var(--text-main);
+        font-size: 0.9rem;
+        transition: 0.15s ease-in-out;
+
+        &:focus {
+            background: var(--surface-color);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
+        }
+    }
+
+    .clear-search {
+        position: absolute;
+        right: 0.75rem;
+        background: rgba(var(--primary-rgb), 0.1);
+        border: none;
+        color: var(--text-muted);
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.2s;
+        padding: 0;
+        line-height: 1;
+        z-index: 2;
+
+        &:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        &:active {
+            transform: scale(0.95);
+        }
+    }
+}

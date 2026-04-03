@@ -49,6 +49,7 @@ namespace GHCAA.API.Controllers
             [FromQuery] string searchQuery = "",
             [FromQuery] string statusFilter = "all",
             [FromQuery] string categoryFilter = "all",
+            [FromQuery] string membershipTypeFilter = "all",
             [FromQuery] bool includeArchived = false, 
             CancellationToken cancellationToken = default)
         {
@@ -59,7 +60,7 @@ namespace GHCAA.API.Controllers
             }
 
             var isPrivileged = User.IsInRole("SuperAdmin");
-            var result = await _memberService.GetAllMembersAsync(page, pageSize, searchQuery, statusFilter, categoryFilter, includeArchived, isPrivileged, cancellationToken);
+            var result = await _memberService.GetAllMembersAsync(page, pageSize, searchQuery, statusFilter, categoryFilter, membershipTypeFilter, includeArchived, isPrivileged, cancellationToken);
             return Ok(result);
         }
 
@@ -176,6 +177,15 @@ namespace GHCAA.API.Controllers
             return Ok(new { Message = "Photo updated.", PhotoPath = path });
         }
 
+        [HttpPost("members/{id}/signature")]
+        public async Task<IActionResult> UpdateMemberSignature(int id, IFormFile signature, CancellationToken cancellationToken)
+        {
+            if (signature == null || signature.Length == 0) return BadRequest(new { Message = "No file provided." });
+            var dto = new UploadedFileDto { FileName = signature.FileName, Length = signature.Length, Content = signature.OpenReadStream() };
+            var path = await _memberService.UpdateMemberSignatureAsync(id, dto, cancellationToken);
+            return Ok(new { Message = "Signature updated.", SignaturePath = path });
+        }
+
         [HttpPatch("members/{id}/documents")]
         public async Task<IActionResult> UpdateMemberDocuments(int id, IFormFile? certificate, IFormFile? paymentProof, CancellationToken cancellationToken)
         {
@@ -218,9 +228,12 @@ namespace GHCAA.API.Controllers
         {
             try
             {
-                var success = await _memberService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
-                if (!success) return NotFound(new { Message = "Member or user account not found. Please ensure the member is approved and active." });
-                return Ok(new { Message = "Password reset link sent to the member's registered email." });
+                var result = await _memberService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
+                if (!result.Success) return NotFound(new { Message = "Member or user account not found. Please ensure the member is approved and active." });
+                return Ok(new { 
+                    Message = "Password reset link generated. If the email is not received, you can manually share the link below.",
+                    ResetUrl = result.ResetUrl 
+                });
             }
             catch (Exception ex)
             {

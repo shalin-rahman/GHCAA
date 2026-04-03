@@ -71,6 +71,9 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrEmpty(filter.Category) && System.Enum.TryParse<Enums.MemberCategory>(filter.Category, true, out var cat))
                 query = query.Where(m => m.Category == cat);
 
+            if (!string.IsNullOrEmpty(filter.MembershipType) && System.Enum.TryParse<Enums.MembershipType>(filter.MembershipType, true, out var type))
+                query = query.Where(m => m.MembershipType == type);
+
             var totalItems = await query.CountAsync(cancellationToken);
             var pageSize = Math.Clamp(filter.PageSize, 1, 100);
             var page = Math.Max(filter.Page, 1);
@@ -198,7 +201,17 @@ namespace GHCAA.Infrastructure.Services
                 Category = m.Category,
                 IsFamilyPublic = m.IsFamilyPublic,
                 ECHistory = new List<ECHistoryDto>(),
-                FamilyMembers = new List<MemberFamilyDto>()
+                FamilyMembers = new List<MemberFamilyDto>(),
+
+                // Summary Data for easier display
+                CategoryBadge = m.Category.ToString(),
+                PassingYear = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.PassingYear,
+                Degree = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Degree,
+                Subject = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Subject,
+                Designation = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Designation,
+                OrganizationName = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.OrganizationName,
+                ProfessionalSector = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Sector,
+                Location = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Location
             };
 
             // Populate Family links from both sent and received requests

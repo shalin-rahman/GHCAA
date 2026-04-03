@@ -51,6 +51,26 @@ export class AdminComm implements OnInit {
         return this.years.filter(y => y.toString().includes(q));
     });
 
+    templateSearch = signal('');
+    filteredTemplates = computed(() => {
+        const q = this.templateSearch().toLowerCase();
+        return this.templates().filter(t =>
+            t.code.toLowerCase().includes(q) ||
+            t.description.toLowerCase().includes(q) ||
+            t.subject.toLowerCase().includes(q)
+        );
+    });
+
+    logSearch = signal('');
+    filteredLogs = computed(() => {
+        const q = this.logSearch().toLowerCase();
+        return this.logs().filter(l =>
+            l.recipientEmail.toLowerCase().includes(q) ||
+            l.subject.toLowerCase().includes(q) ||
+            l.status.toLowerCase().includes(q)
+        );
+    });
+
 
 
     ngOnInit() {

@@ -60,6 +60,10 @@ export class FinancialService {
         return this.http.delete(`${this.apiUrl}/saved-methods/${id}`);
     }
 
+    getReceiptUrl(paymentId: number): string {
+        return `${this.apiUrl}/my-receipt/${paymentId}`;
+    }
+
     // Admin: Membership/Registration Fee Configs
     getFeeConfigs(): Observable<any[]> {
         return this.http.get<any[]>(`${this.apiUrl}/fees/config`);

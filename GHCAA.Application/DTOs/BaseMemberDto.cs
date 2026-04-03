@@ -44,6 +44,7 @@ namespace GHCAA.Application.DTOs
         public Gender Gender { get; set; } = Gender.Male;
         public BloodGroup BloodGroup { get; set; } = BloodGroup.APositive;
         public MembershipType MembershipType { get; set; } = MembershipType.General;
+        public MemberCategory Category { get; set; } = MemberCategory.None;
 
         // ── Address ───────────────────────────────────────────────────────────────
         [Required(ErrorMessage = "Present address is required.")]
@@ -75,9 +76,16 @@ namespace GHCAA.Application.DTOs
         public bool IsEmailPublic { get; set; }
         public bool IsAddressPublic { get; set; }
         public bool IsNIDPublic { get; set; }
+        
+        // Notification Preferences
+        public bool NotifyEventCreation { get; set; } = true;
+        public bool NotifyParticipationApproval { get; set; } = true;
+        public bool NotifyRegistrationUpdate { get; set; } = true;
+        public bool NotifyRelevantUpdates { get; set; } = true;
 
         // ── Attachments & history ─────────────────────────────────────────────────
         public string? PhotoPath { get; set; }
+        public string? SignaturePath { get; set; }
 
         [MinLength(1, ErrorMessage = "At least one academic record is required.")]
         public List<AcademicRecordDto> AcademicHistory { get; set; } = new();

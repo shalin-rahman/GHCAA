@@ -7654,7 +7654,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 500px;'><h2 style='color: #2c3e50;'>Verification Code</h2><p>Hello <strong>{{FullName}}</strong> metallic,</p><p>Your security code is:</p><div style='font-size: 24px; font-weight: bold; background: #f8f9fa; padding: 15px; text-align: center; border-radius: 5px; color: #c5a059; border: 1px solid #eee;'>{{OtpCode}}</div><p>Valid for 10 minutes. Do not share this code.</p></div>",
                             Code = "OTP_EMAIL",
                             Description = "OTP verification email",
-                            LastUpdated = new DateTime(2026, 3, 27, 11, 29, 30, 42, DateTimeKind.Utc).AddTicks(3336),
+                            LastUpdated = new DateTime(2026, 4, 1, 19, 55, 19, 451, DateTimeKind.Utc).AddTicks(2940),
                             Subject = "GHCAA Verification Code: {{OtpCode}}",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -7664,7 +7664,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Welcome to GHCAA</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your membership has been approved! We are excited to have you as part of our community.</p><div style='background: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db;'><p><strong>Membership No:</strong> {{MembershipNumber}}</p><p><strong>Default Password:</strong> <code style='background:#fff; padding:2px 5px;'>{{DefaultPassword}}</code></p></div><p>Please log in and change your password immediately.</p></div>",
                             Code = "WELCOME_EMAIL",
                             Description = "Welcome email",
-                            LastUpdated = new DateTime(2026, 3, 27, 11, 29, 30, 42, DateTimeKind.Utc).AddTicks(9978),
+                            LastUpdated = new DateTime(2026, 4, 1, 19, 55, 19, 451, DateTimeKind.Utc).AddTicks(9234),
                             Subject = "Welcome to GHC Alumni Association!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                         },
@@ -7674,7 +7674,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #c5a059;'>Password Reset</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>An administrator has initiated a password reset for your GHCAA account. Click below to set a new password — the link is valid for 24 hours.</p><div style='text-align: center; margin: 30px 0;'><a href='{{ResetUrl}}' style='background: #111; color: #c5a059; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; border: 1px solid #c5a059;'>Reset My Password</a></div><p style='color: #666; font-size: 0.9rem;'>If you did not request this, please ignore this email.</p></div>",
                             Code = "PASSWORD_RESET",
                             Description = "Password reset email",
-                            LastUpdated = new DateTime(2026, 3, 27, 11, 29, 30, 43, DateTimeKind.Utc).AddTicks(47),
+                            LastUpdated = new DateTime(2026, 4, 1, 19, 55, 19, 451, DateTimeKind.Utc).AddTicks(9303),
                             Subject = "GHCAA Account Password Reset",
                             Variables = "['FullName', 'ResetUrl']"
                         },
@@ -7684,7 +7684,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #e74c3c;'>Application Status Update</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Thank you for your interest in the GHC Alumni Association. After reviewing your application, we regret to inform you that we cannot approve it at this time.</p><div style='background: #fdf2f2; padding: 15px; border-radius: 5px; border-left: 5px solid #e74c3c;'><p><strong>Reason:</strong> {{Reason}}</p></div><p>If you believe this is an error, please contact the association office.</p></div>",
                             Code = "APPLICATION_REJECTED",
                             Description = "Application rejection email",
-                            LastUpdated = new DateTime(2026, 3, 27, 11, 29, 30, 43, DateTimeKind.Utc).AddTicks(160),
+                            LastUpdated = new DateTime(2026, 4, 1, 19, 55, 19, 451, DateTimeKind.Utc).AddTicks(9437),
                             Subject = "Update on your GHCAA Membership Application",
                             Variables = "['FullName', 'Reason']"
                         },
@@ -7694,7 +7694,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Payment Received</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>We have successfully received your payment. It is currently under verification.</p><div style='background: #f8f9fa; padding: 15px; border-radius: 5px;'><p><strong>Amount:</strong> {{Amount}} BDT</p><p><strong>Transaction ID:</strong> {{TrxID}}</p></div><p>You will be notified once the payment is verified.</p></div>",
                             Code = "PAYMENT_RECEIVED",
                             Description = "Payment received acknowledgment",
-                            LastUpdated = new DateTime(2026, 3, 27, 11, 29, 30, 43, DateTimeKind.Utc).AddTicks(207),
+                            LastUpdated = new DateTime(2026, 4, 1, 19, 55, 19, 451, DateTimeKind.Utc).AddTicks(9489),
                             Subject = "Payment Received: {{Amount}} BDT",
                             Variables = "['FullName', 'Amount', 'TrxID']"
                         },
@@ -7704,7 +7704,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Payment Status Update</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>The status of your transaction <strong>{{TrxID}}</strong> has been updated to <strong>{{Status}}</strong>.</p><p>Thank you for your contribution.</p></div>",
                             Code = "PAYMENT_STATUS_UPDATED",
                             Description = "Payment status update email",
-                            LastUpdated = new DateTime(2026, 3, 27, 11, 29, 30, 43, DateTimeKind.Utc).AddTicks(240),
+                            LastUpdated = new DateTime(2026, 4, 1, 19, 55, 19, 451, DateTimeKind.Utc).AddTicks(9519),
                             Subject = "Payment Status Updated: {{Status}}",
                             Variables = "['FullName', 'TrxID', 'Status']"
                         },
@@ -7714,7 +7714,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Family Link Request</h2><p>Hello <strong>{{FullName}}</strong>,</p><p><strong>{{RequesterName}}</strong> has requested to link their account with yours as a <strong>{{Relationship}}</strong>.</p><div style='text-align: center; margin: 30px 0;'><a href='{{ProfileUrl}}' style='background: #c5a059; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; border: 1px solid #c5a059;'>Review Request</a></div><p>Please log in to your profile to accept or decline this request.</p></div>",
                             Code = "FAMILY_LINK_REQUEST",
                             Description = "Family link request email",
-                            LastUpdated = new DateTime(2026, 3, 27, 11, 29, 30, 43, DateTimeKind.Utc).AddTicks(265),
+                            LastUpdated = new DateTime(2026, 4, 1, 19, 55, 19, 451, DateTimeKind.Utc).AddTicks(9543),
                             Subject = "New Family Link Request from {{RequesterName}}",
                             Variables = "['FullName', 'RequesterName', 'Relationship', 'ProfileUrl']"
                         },
@@ -7724,7 +7724,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #27ae60;'>Link Request Accepted</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>Your family link request to <strong>{{TargetName}}</strong> has been accepted.</p><p>You are now connected in the GHCAA network.</p></div>",
                             Code = "FAMILY_LINK_ACCEPTED",
                             Description = "Family link acceptance confirmation",
-                            LastUpdated = new DateTime(2026, 3, 27, 11, 29, 30, 43, DateTimeKind.Utc).AddTicks(295),
+                            LastUpdated = new DateTime(2026, 4, 1, 19, 55, 19, 451, DateTimeKind.Utc).AddTicks(9572),
                             Subject = "Family Link Request Accepted",
                             Variables = "['FullName', 'TargetName']"
                         });
@@ -8282,6 +8282,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("integer");
@@ -9157,6 +9161,66 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Label = "3XL",
                             LookupGroup = "TShirtSize",
                             Value = "3XL"
+                        },
+                        new
+                        {
+                            Id = 2001,
+                            Description = "Alerts when new alumni events are announced.",
+                            DisplayOrder = 201,
+                            IsActive = true,
+                            Label = "Event Creations",
+                            LookupGroup = "NotificationType",
+                            Value = "NotifyEventCreation"
+                        },
+                        new
+                        {
+                            Id = 2002,
+                            Description = "Notifications for your event registration approvals.",
+                            DisplayOrder = 202,
+                            IsActive = true,
+                            Label = "Participation Updates",
+                            LookupGroup = "NotificationType",
+                            Value = "NotifyParticipationApproval"
+                        },
+                        new
+                        {
+                            Id = 2003,
+                            Description = "Updates regarding your membership status.",
+                            DisplayOrder = 203,
+                            IsActive = true,
+                            Label = "Registry Updates",
+                            LookupGroup = "NotificationType",
+                            Value = "NotifyRegistrationUpdate"
+                        },
+                        new
+                        {
+                            Id = 2004,
+                            Description = "General association news and system updates.",
+                            DisplayOrder = 204,
+                            IsActive = true,
+                            Label = "Relevant Announcements",
+                            LookupGroup = "NotificationType",
+                            Value = "NotifyRelevantUpdates"
+                        },
+                        new
+                        {
+                            Id = 3001,
+                            Description = "In-app real-time notifications.",
+                            DisplayOrder = 301,
+                            IsActive = true,
+                            Label = "PUSH",
+                            LookupGroup = "BroadcastChannel",
+                            Value = "push"
+                        },
+                        new
+                        {
+                            Id = 3002,
+                            Description = "Official communication via verified inbox.",
+                            DisplayOrder = 302,
+                            IsActive = true,
+                            Label = "EMAIL",
+                            LookupGroup = "BroadcastChannel",
+                            Value = "email"
                         });
                 });
 
@@ -9271,6 +9335,18 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("NotifyEventCreation")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NotifyParticipationApproval")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NotifyRegistrationUpdate")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NotifyRelevantUpdates")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("PermanentAddress")
                         .IsRequired()
                         .HasColumnType("text");
@@ -9280,6 +9356,9 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.Property<string>("PresentAddress")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SignaturePath")
                         .HasColumnType("text");
 
                     b.Property<int>("Status")
@@ -9335,6 +9414,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01700000001",
                             MotherName = "Mother",
                             NID = "0000000001",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PresentAddress = "Munshiganj",
                             Status = 1,
@@ -9373,6 +9456,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01700000002",
                             MotherName = "Mother",
                             NID = "0000000002",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PresentAddress = "Munshiganj",
                             Status = 1,
@@ -9411,6 +9498,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715008225",
                             MotherName = "Aleya Begum",
                             NID = "2512003",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512003.jpg",
                             PresentAddress = "Munshiganj",
@@ -9450,6 +9541,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716115454",
                             MotherName = "Shamim Ara Begum",
                             NID = "2512005",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512005.jpg",
                             PresentAddress = "Munshiganj",
@@ -9489,6 +9584,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01731912802",
                             MotherName = "Sabita das",
                             NID = "2512006",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512006.jpg",
                             PresentAddress = "Munshiganj",
@@ -9528,6 +9627,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911040375",
                             MotherName = "Halima Begum",
                             NID = "2512012",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512012.jpg",
                             PresentAddress = "Munshiganj",
@@ -9567,6 +9670,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01713062170",
                             MotherName = "Saraswati Das",
                             NID = "2512017",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512017.jpg",
                             PresentAddress = "Munshiganj",
@@ -9606,6 +9713,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711671526",
                             MotherName = "Late Sajeda begum",
                             NID = "2512019",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512019.jpg",
                             PresentAddress = "Munshiganj",
@@ -9645,6 +9756,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01882544274",
                             MotherName = "Badrun Nesa",
                             NID = "2512020",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512020.jpg",
                             PresentAddress = "Munshiganj",
@@ -9684,6 +9799,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711934205",
                             MotherName = "Monowara Khanam",
                             NID = "2512022",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512022.jpg",
                             PresentAddress = "Munshiganj",
@@ -9723,6 +9842,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01777750718",
                             MotherName = "Rowson Ara Begum",
                             NID = "2512023",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512023.jpg",
                             PresentAddress = "Munshiganj",
@@ -9762,6 +9885,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01719655526",
                             MotherName = "ROUSHAN ARA BEGUM",
                             NID = "2512027",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512027.jpg",
                             PresentAddress = "Munshiganj",
@@ -9801,6 +9928,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01779515036",
                             MotherName = "Rina Begum",
                             NID = "2512028",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512028.jpg",
                             PresentAddress = "Munshiganj",
@@ -9840,6 +9971,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01746125646",
                             MotherName = "Nelofar Farhad",
                             NID = "2512029",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512029.jpg",
                             PresentAddress = "Munshiganj",
@@ -9879,6 +10014,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01732969542",
                             MotherName = "SAFIUDDIN SARDAR",
                             NID = "2512030",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512030.jpg",
                             PresentAddress = "Munshiganj",
@@ -9918,6 +10057,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712575658",
                             MotherName = "SAHAR BANU",
                             NID = "2512031",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512031.jpg",
                             PresentAddress = "Munshiganj",
@@ -9957,6 +10100,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01731095406",
                             MotherName = "Alo Mukherjee",
                             NID = "2512032",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512032.jpg",
                             PresentAddress = "Munshiganj",
@@ -9996,6 +10143,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01708698165",
                             MotherName = "Rajkumari Mukherjee",
                             NID = "2512033",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512033.jpg",
                             PresentAddress = "Munshiganj",
@@ -10035,6 +10186,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711533637",
                             MotherName = "Asmar Ara Begum",
                             NID = "2512034",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512034.jpg",
                             PresentAddress = "Munshiganj",
@@ -10074,6 +10229,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01713236007",
                             MotherName = "Rowshon Ara Begum",
                             NID = "2512035",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512035.jpg",
                             PresentAddress = "Munshiganj",
@@ -10113,6 +10272,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01922596263",
                             MotherName = "Haji Anwara Begum",
                             NID = "2512036",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512036.jpg",
                             PresentAddress = "Munshiganj",
@@ -10152,6 +10315,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01751796688",
                             MotherName = "Lotifa begum",
                             NID = "2512038",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512038.jpg",
                             PresentAddress = "Munshiganj",
@@ -10191,6 +10358,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819243596",
                             MotherName = "MOLUDA BEGUM",
                             NID = "2512040",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512040.jpg",
                             PresentAddress = "Munshiganj",
@@ -10230,6 +10401,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715812859",
                             MotherName = "Late Rajia Begum",
                             NID = "2512043",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512043.jpg",
                             PresentAddress = "Munshiganj",
@@ -10269,6 +10444,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01556311001",
                             MotherName = "Johura Begum",
                             NID = "2512044",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512044.jpg",
                             PresentAddress = "Munshiganj",
@@ -10308,6 +10487,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711615948",
                             MotherName = "JAMINA KHATUN",
                             NID = "2512046",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512046.jpg",
                             PresentAddress = "Munshiganj",
@@ -10347,6 +10530,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712615920",
                             MotherName = "ASMAT ARA BEGUM",
                             NID = "2512047",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512047.jpg",
                             PresentAddress = "Munshiganj",
@@ -10386,6 +10573,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01713016276",
                             MotherName = "Late Asmot Ara Begum",
                             NID = "2512049",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512049.jpg",
                             PresentAddress = "Munshiganj",
@@ -10425,6 +10616,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01727408208",
                             MotherName = "Ambiya Begum",
                             NID = "2512050",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512050.jpg",
                             PresentAddress = "Munshiganj",
@@ -10464,6 +10659,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01930178100",
                             MotherName = "মরহুমা মরিয়ম বেগম",
                             NID = "2512051",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512051.jpg",
                             PresentAddress = "Munshiganj",
@@ -10503,6 +10702,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711988634",
                             MotherName = "Most. Nazma Akther",
                             NID = "2512052",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512052.jpg",
                             PresentAddress = "Munshiganj",
@@ -10542,6 +10745,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01718188327",
                             MotherName = "Sayeda Mobashera",
                             NID = "2512053",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512053.jpg",
                             PresentAddress = "Munshiganj",
@@ -10581,6 +10788,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819525120",
                             MotherName = "Ayesha Akter",
                             NID = "2512054",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512054.jpg",
                             PresentAddress = "Munshiganj",
@@ -10620,6 +10831,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01818032059",
                             MotherName = "Mamataj Begum",
                             NID = "2512055",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512055.jpg",
                             PresentAddress = "Munshiganj",
@@ -10659,6 +10874,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01743377477",
                             MotherName = "Swati Chakraborty",
                             NID = "2512056",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512056.jpg",
                             PresentAddress = "Munshiganj",
@@ -10698,6 +10917,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712262610",
                             MotherName = "Jibon Nesa",
                             NID = "2512057",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512057.jpg",
                             PresentAddress = "Munshiganj",
@@ -10737,6 +10960,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01732338199",
                             MotherName = "Hajera Begum",
                             NID = "2512058",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512058.jpg",
                             PresentAddress = "Munshiganj",
@@ -10776,6 +11003,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715966754",
                             MotherName = "Maleka Begum",
                             NID = "2512059",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512059.jpg",
                             PresentAddress = "Munshiganj",
@@ -10815,6 +11046,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01777969672",
                             MotherName = "FATEMA BEGUM",
                             NID = "2512060",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512060.jpg",
                             PresentAddress = "Munshiganj",
@@ -10854,6 +11089,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01833373146",
                             MotherName = "RAHIMA BEGUM",
                             NID = "2512061",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512061.jpg",
                             PresentAddress = "Munshiganj",
@@ -10893,6 +11132,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913214338",
                             MotherName = "Hosneara Begum",
                             NID = "2512064",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512064.jpg",
                             PresentAddress = "Munshiganj",
@@ -10932,6 +11175,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712963230",
                             MotherName = "Rejina Sultana",
                             NID = "2512065",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512065.jpg",
                             PresentAddress = "Munshiganj",
@@ -10971,6 +11218,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711033155",
                             MotherName = "Rezia Begum",
                             NID = "2512066",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512066.jpg",
                             PresentAddress = "Munshiganj",
@@ -11010,6 +11261,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "5624747693",
                             MotherName = "Rashida Akter",
                             NID = "2512067",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512067.jpg",
                             PresentAddress = "Munshiganj",
@@ -11049,6 +11304,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819977204",
                             MotherName = "Sayera Khatun",
                             NID = "2512069",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512069.jpg",
                             PresentAddress = "Munshiganj",
@@ -11088,6 +11347,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01923418685",
                             MotherName = "Lutfon Nesa",
                             NID = "2512070",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512070.jpg",
                             PresentAddress = "Munshiganj",
@@ -11127,6 +11390,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711531740",
                             MotherName = "JAMINA KHATUN",
                             NID = "2512071",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512071.jpg",
                             PresentAddress = "Munshiganj",
@@ -11166,6 +11433,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712251113",
                             MotherName = "JAMINA KHATUN",
                             NID = "2512072",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512072.jpg",
                             PresentAddress = "Munshiganj",
@@ -11205,6 +11476,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01717244433",
                             MotherName = "JAMINA KHATUN",
                             NID = "2512073",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512073.jpg",
                             PresentAddress = "Munshiganj",
@@ -11244,6 +11519,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01756334466",
                             MotherName = "Hasina Begum",
                             NID = "2512074",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512074.jpg",
                             PresentAddress = "Munshiganj",
@@ -11283,6 +11562,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911741747",
                             MotherName = "NASIMA  BEGUM",
                             NID = "2512075",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512075.jpg",
                             PresentAddress = "Munshiganj",
@@ -11322,6 +11605,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01937016732",
                             MotherName = "JARINA BEGUM",
                             NID = "2512078",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512078.jpg",
                             PresentAddress = "Munshiganj",
@@ -11361,6 +11648,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01747896804",
                             MotherName = "HASINA BEGUM",
                             NID = "2512079",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512079.jpg",
                             PresentAddress = "Munshiganj",
@@ -11400,6 +11691,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913013593",
                             MotherName = "JAYEDA VANU",
                             NID = "2512080",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512080.jpg",
                             PresentAddress = "Munshiganj",
@@ -11439,6 +11734,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716174546",
                             MotherName = "RUBY KHURSHED",
                             NID = "2512082",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512082.jpg",
                             PresentAddress = "Munshiganj",
@@ -11478,6 +11777,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01978303210",
                             MotherName = "RESHIA BEGUM",
                             NID = "2512083",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512083.jpg",
                             PresentAddress = "Munshiganj",
@@ -11517,6 +11820,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01816403189",
                             MotherName = "Momotaz Begum",
                             NID = "2512084",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512084.jpg",
                             PresentAddress = "Munshiganj",
@@ -11556,6 +11863,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "018192435961",
                             MotherName = "SALEHA BEGUM",
                             NID = "2512087",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512087.jpg",
                             PresentAddress = "Munshiganj",
@@ -11595,6 +11906,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711784933",
                             MotherName = "ANWARA BEGUM",
                             NID = "2512088",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512088.jpg",
                             PresentAddress = "Munshiganj",
@@ -11634,6 +11949,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01714047414",
                             MotherName = "MS Nazma Masuda",
                             NID = "2512089",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512089.jpg",
                             PresentAddress = "Munshiganj",
@@ -11673,6 +11992,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712586195",
                             MotherName = "Khadija Begum",
                             NID = "2512091",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512091.jpg",
                             PresentAddress = "Munshiganj",
@@ -11712,6 +12035,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716580462",
                             MotherName = "Hazi Rosonara Akther",
                             NID = "2512092",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512092.jpg",
                             PresentAddress = "Munshiganj",
@@ -11751,6 +12078,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913906539",
                             MotherName = "Halima Begum",
                             NID = "2512093",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512093.jpg",
                             PresentAddress = "Munshiganj",
@@ -11790,6 +12121,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01922537859",
                             MotherName = "Umme Kulsum",
                             NID = "2512094",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512094.jpg",
                             PresentAddress = "Munshiganj",
@@ -11829,6 +12164,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912147293",
                             MotherName = "Fatema Begum",
                             NID = "2512095",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512095.jpg",
                             PresentAddress = "Munshiganj",
@@ -11868,6 +12207,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913968469",
                             MotherName = "KARFULEN NESA",
                             NID = "2512096",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512096.jpg",
                             PresentAddress = "Munshiganj",
@@ -11907,6 +12250,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01908834513",
                             MotherName = "FATEMA AKTER BIPA",
                             NID = "2512097",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512097.jpg",
                             PresentAddress = "Munshiganj",
@@ -11946,6 +12293,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01999300099",
                             MotherName = "BASIRUN NESA",
                             NID = "2512098",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512098.jpg",
                             PresentAddress = "Munshiganj",
@@ -11985,6 +12336,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01736391393",
                             MotherName = "Lutfa Begum",
                             NID = "2512099",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512099.jpg",
                             PresentAddress = "Munshiganj",
@@ -12024,6 +12379,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711895730",
                             MotherName = "Faizun Nahar Majid",
                             NID = "2512101",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512101.jpg",
                             PresentAddress = "Munshiganj",
@@ -12063,6 +12422,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913143281",
                             MotherName = "Sultana Nazim",
                             NID = "2512102",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512102.jpg",
                             PresentAddress = "Munshiganj",
@@ -12102,6 +12465,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716256470",
                             MotherName = "FARIDA BEGUM",
                             NID = "2512103",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512103.jpg",
                             PresentAddress = "Munshiganj",
@@ -12141,6 +12508,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01921428799",
                             MotherName = "NURUN NAHAR",
                             NID = "2512105",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512105.jpg",
                             PresentAddress = "Munshiganj",
@@ -12180,6 +12551,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01818044719",
                             MotherName = "Shahera Begum",
                             NID = "2512106",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512106.jpg",
                             PresentAddress = "Munshiganj",
@@ -12219,6 +12594,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913025640",
                             MotherName = "Momotaz Begum",
                             NID = "2512107",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512107.jpg",
                             PresentAddress = "Munshiganj",
@@ -12258,6 +12637,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01720836533",
                             MotherName = "Khorshada Begum",
                             NID = "2512108",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512108.jpg",
                             PresentAddress = "Munshiganj",
@@ -12297,6 +12680,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711405166",
                             MotherName = "Nilufa Begum",
                             NID = "2512110",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512110.jpg",
                             PresentAddress = "Munshiganj",
@@ -12336,6 +12723,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01609124434",
                             MotherName = "Rina Begum",
                             NID = "2512111",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512111.jpg",
                             PresentAddress = "Munshiganj",
@@ -12375,6 +12766,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01792486972",
                             MotherName = "ROWSON ARA BEGUM",
                             NID = "2512112",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512112.jpg",
                             PresentAddress = "Munshiganj",
@@ -12414,6 +12809,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01787021624",
                             MotherName = "Rowson Ara Begum",
                             NID = "2512113",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512113.jpg",
                             PresentAddress = "Munshiganj",
@@ -12453,6 +12852,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01313408775",
                             MotherName = "RINA BEGUM",
                             NID = "2512114",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512114.jpg",
                             PresentAddress = "Munshiganj",
@@ -12492,6 +12895,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01965288929",
                             MotherName = "AYESHA SIDDIKA",
                             NID = "2512115",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512115.jpg",
                             PresentAddress = "Munshiganj",
@@ -12531,6 +12938,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715134866",
                             MotherName = "Zohara Khatun",
                             NID = "2512116",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512116.jpg",
                             PresentAddress = "Munshiganj",
@@ -12570,6 +12981,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01822898988",
                             MotherName = "FULMOTI BEGOM",
                             NID = "2512117",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512117.jpg",
                             PresentAddress = "Munshiganj",
@@ -12609,6 +13024,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715223114",
                             MotherName = "Md. Shamsuddin Ahmed",
                             NID = "2512118",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512118.jpg",
                             PresentAddress = "Munshiganj",
@@ -12648,6 +13067,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01876070033",
                             MotherName = "Hafiz Akter",
                             NID = "2512120",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512120.jpg",
                             PresentAddress = "Munshiganj",
@@ -12687,6 +13110,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01673416825",
                             MotherName = "Anowara Begum",
                             NID = "2512123",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512123.jpg",
                             PresentAddress = "Munshiganj",
@@ -12726,6 +13153,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711678401",
                             MotherName = "MOMOTAJ SIRIN",
                             NID = "2512125",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512125.jpg",
                             PresentAddress = "Munshiganj",
@@ -12765,6 +13196,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01974033599",
                             MotherName = "Sheree Vanu",
                             NID = "2512126",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512126.jpg",
                             PresentAddress = "Munshiganj",
@@ -12804,6 +13239,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711116000",
                             MotherName = "ASIA KHATUN",
                             NID = "2512127",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512127.jpg",
                             PresentAddress = "Munshiganj",
@@ -12843,6 +13282,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01866744146",
                             MotherName = "HALIMA BEGAM",
                             NID = "2512128",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512128.jpg",
                             PresentAddress = "Munshiganj",
@@ -12882,6 +13325,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01846811476",
                             MotherName = "JOBIADA KHATUN",
                             NID = "2512129",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512129.jpg",
                             PresentAddress = "Munshiganj",
@@ -12921,6 +13368,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711472728",
                             MotherName = "JOYNUB BANU",
                             NID = "2512131",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512131.jpg",
                             PresentAddress = "Munshiganj",
@@ -12960,6 +13411,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01816669713",
                             MotherName = "Rahima Khatun",
                             NID = "2512135",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512135.jpg",
                             PresentAddress = "Munshiganj",
@@ -12999,6 +13454,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819185861",
                             MotherName = "Anwara Begum",
                             NID = "2512136",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512136.jpg",
                             PresentAddress = "Munshiganj",
@@ -13038,6 +13497,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01678022546",
                             MotherName = "Rahima Khanam",
                             NID = "2512137",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512137.jpg",
                             PresentAddress = "Munshiganj",
@@ -13077,6 +13540,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01756148074",
                             MotherName = "LAXMI RANI BANERJEE",
                             NID = "2512138",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512138.jpg",
                             PresentAddress = "Munshiganj",
@@ -13116,6 +13583,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "016780225461",
                             MotherName = "Shamsun Nahar Begum",
                             NID = "2512139",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512139.jpg",
                             PresentAddress = "Munshiganj",
@@ -13155,6 +13626,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01973329553",
                             MotherName = "Hasida Begum",
                             NID = "2512140",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512140.jpg",
                             PresentAddress = "Munshiganj",
@@ -13194,6 +13669,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913079165",
                             MotherName = "Fatema Islam",
                             NID = "2512141",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512141.jpg",
                             PresentAddress = "Munshiganj",
@@ -13233,6 +13712,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911218956",
                             MotherName = "Nasima Parvin",
                             NID = "2512142",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512142.jpg",
                             PresentAddress = "Munshiganj",
@@ -13272,6 +13755,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911825564",
                             MotherName = "Sayeda Rahman",
                             NID = "2512143",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512143.jpg",
                             PresentAddress = "Munshiganj",
@@ -13311,6 +13798,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712830429",
                             MotherName = "JOYGUN NESA",
                             NID = "2512144",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512144.jpg",
                             PresentAddress = "Munshiganj",
@@ -13350,6 +13841,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01762593572",
                             MotherName = "Momotaj Begum",
                             NID = "2512145",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512145.jpg",
                             PresentAddress = "Munshiganj",
@@ -13389,6 +13884,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01625087184",
                             MotherName = "Shipra Mandal",
                             NID = "2512146",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512146.jpg",
                             PresentAddress = "Munshiganj",
@@ -13428,6 +13927,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01720644967",
                             MotherName = "Saleha Begum",
                             NID = "2512147",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512147.jpg",
                             PresentAddress = "Munshiganj",
@@ -13467,6 +13970,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01732805330",
                             MotherName = "MAJEDA BEGUM",
                             NID = "2512148",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512148.jpg",
                             PresentAddress = "Munshiganj",
@@ -13506,6 +14013,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01767430023",
                             MotherName = "Late, Murshida Begum",
                             NID = "2512149",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512149.jpg",
                             PresentAddress = "Munshiganj",
@@ -13545,6 +14056,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01816403188",
                             MotherName = "Rafika Banu",
                             NID = "2512150",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512150.jpg",
                             PresentAddress = "Munshiganj",
@@ -13584,6 +14099,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01817095345",
                             MotherName = "Aleya Begum",
                             NID = "2512151",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512151.jpg",
                             PresentAddress = "Munshiganj",
@@ -13623,6 +14142,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716594407",
                             MotherName = "Toyabur Nesa",
                             NID = "2512152",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512152.jpg",
                             PresentAddress = "Munshiganj",
@@ -13662,6 +14185,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01937655831",
                             MotherName = "MAMTAJ BEGUM",
                             NID = "2512153",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512153.jpg",
                             PresentAddress = "Munshiganj",
@@ -13701,6 +14228,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01929723574",
                             MotherName = "TAHERUN NESA",
                             NID = "2512154",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512154.jpg",
                             PresentAddress = "Munshiganj",
@@ -13740,6 +14271,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913790468",
                             MotherName = "Mst. Nazma Begum",
                             NID = "2512155",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512155.jpg",
                             PresentAddress = "Munshiganj",
@@ -13779,6 +14314,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911373703",
                             MotherName = "Rajia Begum",
                             NID = "2512156",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512156.jpg",
                             PresentAddress = "Munshiganj",
@@ -13818,6 +14357,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01312345882",
                             MotherName = "Momotaj Begum",
                             NID = "2512157",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512157.jpg",
                             PresentAddress = "Munshiganj",
@@ -13857,6 +14400,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01914420850",
                             MotherName = "Nazma begum",
                             NID = "2512158",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512158.jpg",
                             PresentAddress = "Munshiganj",
@@ -13896,6 +14443,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711541216",
                             MotherName = "Late.Nirmala Ghosh",
                             NID = "2512159",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512159.jpg",
                             PresentAddress = "Munshiganj",
@@ -13935,6 +14486,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01916828320",
                             MotherName = "Rahima Begum",
                             NID = "2512160",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512160.jpg",
                             PresentAddress = "Munshiganj",
@@ -13974,6 +14529,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01725528878",
                             MotherName = "Late.Vaghoboti Ghosh",
                             NID = "2512161",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512161.jpg",
                             PresentAddress = "Munshiganj",
@@ -14013,6 +14572,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911069311",
                             MotherName = "Johura Begum",
                             NID = "2512162",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512162.jpg",
                             PresentAddress = "Munshiganj",
@@ -14052,6 +14615,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01976828320",
                             MotherName = "Mukta Begum",
                             NID = "2512163",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512163.jpg",
                             PresentAddress = "Munshiganj",
@@ -14091,6 +14658,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01790130514",
                             MotherName = "Momena Begum",
                             NID = "2512164",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512164.jpg",
                             PresentAddress = "Munshiganj",
@@ -14130,6 +14701,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716369076",
                             MotherName = "Mrs Jahanara Begum",
                             NID = "2512165",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512165.jpg",
                             PresentAddress = "Munshiganj",
@@ -14169,6 +14744,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01811500500",
                             MotherName = "Khadiza Begum",
                             NID = "2512171",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512171.jpg",
                             PresentAddress = "Munshiganj",
@@ -14208,6 +14787,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911032095",
                             MotherName = "ASHRAFUN NESSA",
                             NID = "2512172",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512172.jpg",
                             PresentAddress = "Munshiganj",
@@ -14247,6 +14830,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01722123199",
                             MotherName = "JULEKHA BEGUM",
                             NID = "2512173",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512173.jpg",
                             PresentAddress = "Munshiganj",
@@ -14286,6 +14873,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01977771851",
                             MotherName = "Momtaj Shirin",
                             NID = "2512174",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512174.jpg",
                             PresentAddress = "Munshiganj",
@@ -14325,6 +14916,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01735829174",
                             MotherName = "JAKIA RAHMAN",
                             NID = "2512175",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512175.jpg",
                             PresentAddress = "Munshiganj",
@@ -14364,6 +14959,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01741163677",
                             MotherName = "NAZMA BEGUM",
                             NID = "2512176",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512176.jpg",
                             PresentAddress = "Munshiganj",
@@ -14403,6 +15002,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01728212450",
                             MotherName = "PARVIN AKTER",
                             NID = "2512177",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512177.jpg",
                             PresentAddress = "Munshiganj",
@@ -14442,6 +15045,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711393074",
                             MotherName = "MS Nazma Masuda",
                             NID = "2512179",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512179.jpg",
                             PresentAddress = "Munshiganj",
@@ -14481,6 +15088,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01834353485",
                             MotherName = "Sofia",
                             NID = "2512180",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512180.jpg",
                             PresentAddress = "Munshiganj",
@@ -14520,6 +15131,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819122880",
                             MotherName = "NAZMA PASHA",
                             NID = "2512181",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512181.jpg",
                             PresentAddress = "Munshiganj",
@@ -14559,6 +15174,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913694640",
                             MotherName = "Late-Basana Rani Das",
                             NID = "2512182",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512182.jpg",
                             PresentAddress = "Munshiganj",
@@ -14598,6 +15217,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711039878",
                             MotherName = "MS HOSENARA BEGUM",
                             NID = "2512183",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512183.jpg",
                             PresentAddress = "Munshiganj",
@@ -14637,6 +15260,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01967679000",
                             MotherName = "AMINA BEGUM",
                             NID = "2512184",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512184.jpg",
                             PresentAddress = "Munshiganj",
@@ -14676,6 +15303,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01730709022",
                             MotherName = "Jharna Begum",
                             NID = "2512185",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512185.jpg",
                             PresentAddress = "Munshiganj",
@@ -14715,6 +15346,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01967941020",
                             MotherName = "Maksuda Mosharraf",
                             NID = "2512187",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512187.jpg",
                             PresentAddress = "Munshiganj",
@@ -14754,6 +15389,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01922537863",
                             MotherName = "Saleha Begum",
                             NID = "2512188",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512188.jpg",
                             PresentAddress = "Munshiganj",
@@ -14793,6 +15432,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01744271399",
                             MotherName = "Mrs.Mumtaz Begum",
                             NID = "2512189",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512189.jpg",
                             PresentAddress = "Munshiganj",
@@ -14832,6 +15475,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01710884717",
                             MotherName = "Jahura Begum",
                             NID = "2512190",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512190.jpg",
                             PresentAddress = "Munshiganj",
@@ -14871,6 +15518,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01749898021",
                             MotherName = "ছলিমা চৌধুরী",
                             NID = "2512191",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512191.jpg",
                             PresentAddress = "Munshiganj",
@@ -14910,6 +15561,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01714324674",
                             MotherName = "Begum Shamsun Nahar",
                             NID = "2512192",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512192.jpg",
                             PresentAddress = "Munshiganj",
@@ -14949,6 +15604,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01772508275",
                             MotherName = "Nasima Begum",
                             NID = "2512195",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512195.jpg",
                             PresentAddress = "Munshiganj",
@@ -14988,6 +15647,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912065810",
                             MotherName = "Haji Mst. Masuda Begum",
                             NID = "2512196",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512196.jpg",
                             PresentAddress = "Munshiganj",
@@ -15027,6 +15690,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01537640415",
                             MotherName = "Aleya Begam",
                             NID = "2512197",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512197.jpg",
                             PresentAddress = "Munshiganj",
@@ -15066,6 +15733,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711608905",
                             MotherName = "Late Hazera Begum",
                             NID = "2512198",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512198.jpg",
                             PresentAddress = "Munshiganj",
@@ -15105,6 +15776,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01731504223",
                             MotherName = "Nirmala Ghosh",
                             NID = "2512201",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512201.jpg",
                             PresentAddress = "Munshiganj",
@@ -15144,6 +15819,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712116559",
                             MotherName = "Nazma Masuda",
                             NID = "2512204",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512204.jpg",
                             PresentAddress = "Munshiganj",
@@ -15183,6 +15862,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01921696470",
                             MotherName = "Nazma Masuda",
                             NID = "2512205",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512205.jpg",
                             PresentAddress = "Munshiganj",
@@ -15222,6 +15905,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01918177239",
                             MotherName = "Nasima Alom",
                             NID = "2512208",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512208.jpg",
                             PresentAddress = "Munshiganj",
@@ -15261,6 +15948,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912181285",
                             MotherName = "Farhana Islam",
                             NID = "2512210",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512210.jpg",
                             PresentAddress = "Munshiganj",
@@ -15300,6 +15991,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01552410556",
                             MotherName = "Nirmala Ghosh",
                             NID = "2512213",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512213.jpg",
                             PresentAddress = "Munshiganj",
@@ -15339,6 +16034,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01820582838",
                             MotherName = "Halima Khatun",
                             NID = "2512214",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512214.jpg",
                             PresentAddress = "Munshiganj",
@@ -15378,6 +16077,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911199117",
                             MotherName = "Asia Khatun",
                             NID = "2512215",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512215.jpg",
                             PresentAddress = "Munshiganj",
@@ -15417,6 +16120,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715009338",
                             MotherName = "EAMON",
                             NID = "2512216",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512216.jpg",
                             PresentAddress = "Munshiganj",
@@ -15456,6 +16163,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01915371832",
                             MotherName = "SALEHA BEGUM",
                             NID = "2512217",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512217.jpg",
                             PresentAddress = "Munshiganj",
@@ -15495,6 +16206,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01798885888",
                             MotherName = "SALEHA BEGUM",
                             NID = "2512218",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512218.jpg",
                             PresentAddress = "Munshiganj",
@@ -15534,6 +16249,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01959505110",
                             MotherName = "SHAHANA BEGUM",
                             NID = "2512219",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512219.jpg",
                             PresentAddress = "Munshiganj",
@@ -15573,6 +16292,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712766277",
                             MotherName = "MARY HOSSAIN",
                             NID = "2512220",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512220.jpg",
                             PresentAddress = "Munshiganj",
@@ -15612,6 +16335,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712944717",
                             MotherName = "AMENA BEGUM",
                             NID = "2512221",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512221.jpg",
                             PresentAddress = "Munshiganj",
@@ -15651,6 +16378,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712953667",
                             MotherName = "PRIOBALA CHAKRABORTY",
                             NID = "2512222",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512222.jpg",
                             PresentAddress = "Munshiganj",
@@ -15690,6 +16421,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01714449929",
                             MotherName = "Late Rokeya Begum",
                             NID = "2512223",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512223.jpg",
                             PresentAddress = "Munshiganj",
@@ -15729,6 +16464,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711456352",
                             MotherName = "KARIMON NESA",
                             NID = "2512224",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512224.jpg",
                             PresentAddress = "Munshiganj",
@@ -15768,6 +16507,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01921886844",
                             MotherName = "Jakia Rahman",
                             NID = "2512228",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512228.jpg",
                             PresentAddress = "Munshiganj",
@@ -15807,6 +16550,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911299318",
                             MotherName = "JAHURA BEGUM",
                             NID = "2512229",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512229.jpg",
                             PresentAddress = "Munshiganj",
@@ -15846,6 +16593,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711903240",
                             MotherName = "Late Rowshan Ara Begum",
                             NID = "2512230",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512230.jpg",
                             PresentAddress = "Munshiganj",
@@ -15885,6 +16636,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01829372749",
                             MotherName = "Biful Begum",
                             NID = "2512231",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512231.jpg",
                             PresentAddress = "Munshiganj",
@@ -15924,6 +16679,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715876840",
                             MotherName = "SETARA BEGUM",
                             NID = "2512235",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512235.jpg",
                             PresentAddress = "Munshiganj",
@@ -15963,6 +16722,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01990009022",
                             MotherName = "SAFURA KHATUN",
                             NID = "2512236",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512236.jpg",
                             PresentAddress = "Munshiganj",
@@ -16002,6 +16765,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01580353864",
                             MotherName = "Amina Begum",
                             NID = "2512237",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512237.jpg",
                             PresentAddress = "Munshiganj",
@@ -16041,6 +16808,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913876578",
                             MotherName = "HASIA BEGUM",
                             NID = "2512238",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512238.jpg",
                             PresentAddress = "Munshiganj",
@@ -16080,6 +16851,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711958622",
                             MotherName = "ROHIMA BEGUME",
                             NID = "2512239",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512239.jpg",
                             PresentAddress = "Munshiganj",
@@ -16119,6 +16894,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819030830",
                             MotherName = "Hamida Begum",
                             NID = "2512240",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512240.jpg",
                             PresentAddress = "Munshiganj",
@@ -16158,6 +16937,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01924012580",
                             MotherName = "Anjuma Begum",
                             NID = "2512243",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512243.jpg",
                             PresentAddress = "Munshiganj",
@@ -16197,6 +16980,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711386127",
                             MotherName = "Ambia Khatun",
                             NID = "2512245",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "",
                             PresentAddress = "Munshiganj",
@@ -16236,6 +17023,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711536307",
                             MotherName = "Amena Begum",
                             NID = "2512246",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512246.jpg",
                             PresentAddress = "Munshiganj",
@@ -16275,6 +17066,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715013379",
                             MotherName = "LUTFUNNESA BEGUM",
                             NID = "2512247",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512247.jpg",
                             PresentAddress = "Munshiganj",
@@ -16314,6 +17109,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01815150452",
                             MotherName = "Amena Begum",
                             NID = "2512248",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512248.jpg",
                             PresentAddress = "Munshiganj",
@@ -16353,6 +17152,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711261591",
                             MotherName = "Mahbuba Begum",
                             NID = "2512249",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512249.jpg",
                             PresentAddress = "Munshiganj",
@@ -16392,6 +17195,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913370432",
                             MotherName = "SAMSUN NAHAR",
                             NID = "2512250",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512250.jpg",
                             PresentAddress = "Munshiganj",
@@ -16431,6 +17238,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "1927144279",
                             MotherName = "HASINA BANU",
                             NID = "2512251",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512251.jpg",
                             PresentAddress = "Munshiganj",
@@ -16470,6 +17281,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01849605274",
                             MotherName = "Monowara Begum",
                             NID = "2512252",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512252.jpg",
                             PresentAddress = "Munshiganj",
@@ -16509,6 +17324,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711126376",
                             MotherName = "MORIOM BEGUM",
                             NID = "2512253",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512253.jpg",
                             PresentAddress = "Munshiganj",
@@ -16548,6 +17367,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01747000190",
                             MotherName = "GOLAPI BIBI",
                             NID = "2512254",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512254.jpg",
                             PresentAddress = "Munshiganj",
@@ -16587,6 +17410,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913025609",
                             MotherName = "JOHARA BEGUM",
                             NID = "2512255",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512255.jpg",
                             PresentAddress = "Munshiganj",
@@ -16626,6 +17453,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712124195",
                             MotherName = "JOHARA BEGUM",
                             NID = "2512256",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512256.jpg",
                             PresentAddress = "Munshiganj",
@@ -16665,6 +17496,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01816854399",
                             MotherName = "Sahanaj Begum",
                             NID = "2512257",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512257.jpg",
                             PresentAddress = "Munshiganj",
@@ -16704,6 +17539,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01886789345",
                             MotherName = "Murtoza Begum",
                             NID = "2512258",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512258.jpg",
                             PresentAddress = "Munshiganj",
@@ -16743,6 +17582,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01780446611",
                             MotherName = "ZORIINA BEGUM",
                             NID = "2512259",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512259.jpg",
                             PresentAddress = "Munshiganj",
@@ -16782,6 +17625,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911777984",
                             MotherName = "Taibun Nesha",
                             NID = "2512260",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512260.jpg",
                             PresentAddress = "Munshiganj",
@@ -16821,6 +17668,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01817088265",
                             MotherName = "Saherun Nesa",
                             NID = "2512261",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512261.jpg",
                             PresentAddress = "Munshiganj",
@@ -16860,6 +17711,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712222234",
                             MotherName = "Momtaz Begum",
                             NID = "2512262",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512262.jpg",
                             PresentAddress = "Munshiganj",
@@ -16899,6 +17754,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819556600",
                             MotherName = "Delowara Begum",
                             NID = "2512263",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512263.jpg",
                             PresentAddress = "Munshiganj",
@@ -16938,6 +17797,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911586037",
                             MotherName = "Nazma Begum",
                             NID = "2512264",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512264.jpg",
                             PresentAddress = "Munshiganj",
@@ -16977,6 +17840,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819219471",
                             MotherName = "Late Hazera Akhter",
                             NID = "2512265",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512265.jpg",
                             PresentAddress = "Munshiganj",
@@ -17016,6 +17883,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "1927144270",
                             MotherName = "HASINA BANU",
                             NID = "2512266",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512266.jpg",
                             PresentAddress = "Munshiganj",
@@ -17055,6 +17926,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01927144278",
                             MotherName = "HASINA BANU",
                             NID = "2512267",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512267.jpg",
                             PresentAddress = "Munshiganj",
@@ -17094,6 +17969,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01945240290",
                             MotherName = "MOTIA BANU",
                             NID = "2512268",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512268.jpg",
                             PresentAddress = "Munshiganj",
@@ -17133,6 +18012,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01758095985",
                             MotherName = "JOBEDA KHATUN",
                             NID = "2512269",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512269.jpg",
                             PresentAddress = "Munshiganj",
@@ -17172,6 +18055,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01918311080",
                             MotherName = "NAZMA BEGUM",
                             NID = "2512272",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512272.jpg",
                             PresentAddress = "Munshiganj",
@@ -17211,6 +18098,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01917188578",
                             MotherName = "HAJI SABERA BEGUM",
                             NID = "2512273",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512273.jpg",
                             PresentAddress = "Munshiganj",
@@ -17250,6 +18141,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01817076530",
                             MotherName = "NURJAHAN AKTER",
                             NID = "2512275",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512275.jpg",
                             PresentAddress = "Munshiganj",
@@ -17289,6 +18184,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01732042325",
                             MotherName = "ROKEYA BEGUM",
                             NID = "2512278",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512278.jpg",
                             PresentAddress = "Munshiganj",
@@ -17328,6 +18227,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819238814",
                             MotherName = "Ms Tahuron Nesa",
                             NID = "2512279",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512279.jpg",
                             PresentAddress = "Munshiganj",
@@ -17367,6 +18270,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01779885113",
                             MotherName = "Late Shayera Khatun",
                             NID = "2512280",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512280.jpg",
                             PresentAddress = "Munshiganj",
@@ -17406,6 +18313,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01777403922",
                             MotherName = "LUTFUNNESA",
                             NID = "2512281",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512281.jpg",
                             PresentAddress = "Munshiganj",
@@ -17445,6 +18356,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01928309208",
                             MotherName = "REHANA BEGUM",
                             NID = "2512283",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512283.jpg",
                             PresentAddress = "Munshiganj",
@@ -17484,6 +18399,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01846632292",
                             MotherName = "Beauty Begum",
                             NID = "2512284",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512284.jpg",
                             PresentAddress = "Munshiganj",
@@ -17523,6 +18442,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01903572187",
                             MotherName = "Noyon Moni Mondol",
                             NID = "2512285",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512285.jpg",
                             PresentAddress = "Munshiganj",
@@ -17562,6 +18485,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01764429428",
                             MotherName = "LATE FATEMA KHATUN",
                             NID = "2512286",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512286.jpg",
                             PresentAddress = "Munshiganj",
@@ -17601,6 +18528,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01916665955",
                             MotherName = "RAJIA BEGUM",
                             NID = "2512287",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512287.jpg",
                             PresentAddress = "Munshiganj",
@@ -17640,6 +18571,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01713012346",
                             MotherName = "HAJI KHUSHIA BEGUM",
                             NID = "2512288",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512288.jpg",
                             PresentAddress = "Munshiganj",
@@ -17679,6 +18614,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01312212292",
                             MotherName = "Beauty Begum",
                             NID = "2512290",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512290.jpg",
                             PresentAddress = "Munshiganj",
@@ -17718,6 +18657,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01971113807",
                             MotherName = "Mrs Rokeya Begum",
                             NID = "2512291",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512291.jpg",
                             PresentAddress = "Munshiganj",
@@ -17757,6 +18700,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712262288",
                             MotherName = "MRS. Momotaz Begum",
                             NID = "2512292",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512292.jpg",
                             PresentAddress = "Munshiganj",
@@ -17796,6 +18743,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01707010712",
                             MotherName = "Samsun Nahar",
                             NID = "2512293",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512293.jpg",
                             PresentAddress = "Munshiganj",
@@ -17835,6 +18786,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911202296",
                             MotherName = "Mrs Samchunnahar",
                             NID = "2512294",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512294.jpg",
                             PresentAddress = "Munshiganj",
@@ -17874,6 +18829,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01942862354",
                             MotherName = "Nirmala Ghosh",
                             NID = "2512295",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512295.jpg",
                             PresentAddress = "Munshiganj",
@@ -17913,6 +18872,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01826153456",
                             MotherName = "Shanti Begum",
                             NID = "2512296",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512296.jpg",
                             PresentAddress = "Munshiganj",
@@ -17952,6 +18915,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01841310300",
                             MotherName = "HAZI SABERA BEGUM",
                             NID = "2512298",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512298.jpg",
                             PresentAddress = "Munshiganj",
@@ -17991,6 +18958,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01747527656",
                             MotherName = "প্রভাবতী রায়",
                             NID = "2512299",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512299.jpg",
                             PresentAddress = "Munshiganj",
@@ -18030,6 +19001,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912538992",
                             MotherName = "HASINA AKTER",
                             NID = "2512300",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512300.jpg",
                             PresentAddress = "Munshiganj",
@@ -18069,6 +19044,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01714737012",
                             MotherName = "LAILA AKTER",
                             NID = "2512301",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512301.jpg",
                             PresentAddress = "Munshiganj",
@@ -18108,6 +19087,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711893690",
                             MotherName = "JOGUNA BIBI",
                             NID = "2512302",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512302.jpg",
                             PresentAddress = "Munshiganj",
@@ -18147,6 +19130,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912601429",
                             MotherName = "Late Rezia Begum",
                             NID = "2512303",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512303.jpg",
                             PresentAddress = "Munshiganj",
@@ -18186,6 +19173,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01730021085",
                             MotherName = "Sufia Begum",
                             NID = "2512305",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512305.jpg",
                             PresentAddress = "Munshiganj",
@@ -18225,6 +19216,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01720196803",
                             MotherName = "HASNA HENA",
                             NID = "2512306",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512306.jpg",
                             PresentAddress = "Munshiganj",
@@ -18264,6 +19259,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711105503",
                             MotherName = "LATE CHINU RANI SAHA",
                             NID = "2512308",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512308.jpg",
                             PresentAddress = "Munshiganj",
@@ -18303,6 +19302,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01916823179",
                             MotherName = "Rina Begum",
                             NID = "2512309",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512309.jpg",
                             PresentAddress = "Munshiganj",
@@ -18342,6 +19345,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01629718883",
                             MotherName = "Peara Begum",
                             NID = "2512311",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512311.jpg",
                             PresentAddress = "Munshiganj",
@@ -18381,6 +19388,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01612101130",
                             MotherName = "Rahima Begum",
                             NID = "2512312",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512312.jpg",
                             PresentAddress = "Munshiganj",
@@ -18420,6 +19431,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "017117849331",
                             MotherName = "Rokeya Begum",
                             NID = "2512313",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512313.jpg",
                             PresentAddress = "Munshiganj",
@@ -18459,6 +19474,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01717843520",
                             MotherName = "Ambia Begum",
                             NID = "2512314",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512314.jpg",
                             PresentAddress = "Munshiganj",
@@ -18498,6 +19517,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01713066534",
                             MotherName = "Aysha Begum",
                             NID = "2512315",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512315.jpg",
                             PresentAddress = "Munshiganj",
@@ -18537,6 +19560,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01915339900",
                             MotherName = "Nazma Pasha",
                             NID = "2512316",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512316.jpg",
                             PresentAddress = "Munshiganj",
@@ -18576,6 +19603,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01915930111",
                             MotherName = "Nurzahan Begum",
                             NID = "2512319",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512319.jpg",
                             PresentAddress = "Munshiganj",
@@ -18615,6 +19646,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01965226704",
                             MotherName = "Mabiea Begum",
                             NID = "2512320",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512320.jpg",
                             PresentAddress = "Munshiganj",
@@ -18654,6 +19689,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819430123",
                             MotherName = "Mrs Nurjahan Begum",
                             NID = "2512323",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512323.jpg",
                             PresentAddress = "Munshiganj",
@@ -18693,6 +19732,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01828636355",
                             MotherName = "Selina Begum",
                             NID = "2512324",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512324.jpg",
                             PresentAddress = "Munshiganj",
@@ -18732,6 +19775,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715100310",
                             MotherName = "Hamida Begum",
                             NID = "2512325",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512325.jpg",
                             PresentAddress = "Munshiganj",
@@ -18771,6 +19818,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819899834",
                             MotherName = "JULEKHA  BEGUM",
                             NID = "2512326",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512326.jpg",
                             PresentAddress = "Munshiganj",
@@ -18810,6 +19861,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01726887113",
                             MotherName = "HIRON NESHA",
                             NID = "2512333",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512333.jpg",
                             PresentAddress = "Munshiganj",
@@ -18849,6 +19904,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01845003833",
                             MotherName = "Lutfan Nahar",
                             NID = "2512334",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512334.jpg",
                             PresentAddress = "Munshiganj",
@@ -18888,6 +19947,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01722110315",
                             MotherName = "Anowara begum",
                             NID = "2512336",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512336.jpg",
                             PresentAddress = "Munshiganj",
@@ -18927,6 +19990,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715530371",
                             MotherName = "DOLY BEGUM",
                             NID = "2512337",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512337.jpg",
                             PresentAddress = "Munshiganj",
@@ -18966,6 +20033,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913520772",
                             MotherName = "DIN MOHAMMAD",
                             NID = "2512338",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512338.jpg",
                             PresentAddress = "Munshiganj",
@@ -19005,6 +20076,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01818383474",
                             MotherName = "Maksuda Begam",
                             NID = "2512339",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512339.jpg",
                             PresentAddress = "Munshiganj",
@@ -19044,6 +20119,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01914565906",
                             MotherName = "Gulnahar",
                             NID = "2512340",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512340.jpg",
                             PresentAddress = "Munshiganj",
@@ -19083,6 +20162,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715067079",
                             MotherName = "Hamida Begum",
                             NID = "2512341",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512341.jpg",
                             PresentAddress = "Munshiganj",
@@ -19122,6 +20205,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711151377",
                             MotherName = "Sayedunnessa",
                             NID = "2512342",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512342.jpg",
                             PresentAddress = "Munshiganj",
@@ -19161,6 +20248,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01921572556",
                             MotherName = "Hamida Begum",
                             NID = "2512344",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512344.jpg",
                             PresentAddress = "Munshiganj",
@@ -19200,6 +20291,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911531319",
                             MotherName = "NURJAHAN BEGUM",
                             NID = "2512345",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512345.jpg",
                             PresentAddress = "Munshiganj",
@@ -19239,6 +20334,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711446019",
                             MotherName = "RAZIA BEGUM",
                             NID = "2512346",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512346.jpg",
                             PresentAddress = "Munshiganj",
@@ -19278,6 +20377,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01920978634",
                             MotherName = "NURJAHAN BEGUM",
                             NID = "2512347",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512347.jpg",
                             PresentAddress = "Munshiganj",
@@ -19317,6 +20420,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01717434423",
                             MotherName = "Momtaj Begum",
                             NID = "2512348",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512348.jpg",
                             PresentAddress = "Munshiganj",
@@ -19356,6 +20463,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01917016780",
                             MotherName = "Jahanara Begum",
                             NID = "2512350",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512350.jpg",
                             PresentAddress = "Munshiganj",
@@ -19395,6 +20506,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01914336405",
                             MotherName = "SALMA BEGUM",
                             NID = "2512351",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512351.jpg",
                             PresentAddress = "Munshiganj",
@@ -19434,6 +20549,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01977720047",
                             MotherName = "Sayeda Rahman",
                             NID = "2512352",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512352.jpg",
                             PresentAddress = "Munshiganj",
@@ -19473,6 +20592,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01936288752",
                             MotherName = "Hira Akter",
                             NID = "2512353",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512353.jpg",
                             PresentAddress = "Munshiganj",
@@ -19512,6 +20635,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715538377",
                             MotherName = "Begum Faizun Nahar Majid",
                             NID = "2512354",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512354.jpg",
                             PresentAddress = "Munshiganj",
@@ -19551,6 +20678,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01341772566",
                             MotherName = "Afsana Begum",
                             NID = "2512355",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512355.jpg",
                             PresentAddress = "Munshiganj",
@@ -19590,6 +20721,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01918169130",
                             MotherName = "Salina Begum",
                             NID = "2512357",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512357.jpg",
                             PresentAddress = "Munshiganj",
@@ -19629,6 +20764,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01959999482",
                             MotherName = "RAHANA BEGUM",
                             NID = "2512362",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512362.jpg",
                             PresentAddress = "Munshiganj",
@@ -19668,6 +20807,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01817098300",
                             MotherName = "DUD BAHAR",
                             NID = "2512363",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512363.jpg",
                             PresentAddress = "Munshiganj",
@@ -19707,6 +20850,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01797659838",
                             MotherName = "HAFIZA BEGUM",
                             NID = "2512364",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512364.jpg",
                             PresentAddress = "Munshiganj",
@@ -19746,6 +20893,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01782250252",
                             MotherName = "NURJAHAN BEGUM",
                             NID = "2512365",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512365.jpg",
                             PresentAddress = "Munshiganj",
@@ -19785,6 +20936,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01568257359",
                             MotherName = "Parul begum",
                             NID = "2512366",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512366.jpg",
                             PresentAddress = "Munshiganj",
@@ -19824,6 +20979,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01713538611",
                             MotherName = "HAFIZA BEGUM",
                             NID = "2512367",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512367.jpg",
                             PresentAddress = "Munshiganj",
@@ -19863,6 +21022,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715330483",
                             MotherName = "HOSNE ARA BEGUM",
                             NID = "2512368",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512368.jpg",
                             PresentAddress = "Munshiganj",
@@ -19902,6 +21065,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "017153304831",
                             MotherName = "NOORJAHAN BEGUM",
                             NID = "2512369",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512369.jpg",
                             PresentAddress = "Munshiganj",
@@ -19941,6 +21108,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01743829188",
                             MotherName = "LUTFA SAMAD",
                             NID = "2512370",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512370.jpg",
                             PresentAddress = "Munshiganj",
@@ -19980,6 +21151,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716008009",
                             MotherName = "Jahanara Begum",
                             NID = "2512371",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512371.jpg",
                             PresentAddress = "Munshiganj",
@@ -20019,6 +21194,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01974633032",
                             MotherName = "Salena awal",
                             NID = "2512372",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512372.jpg",
                             PresentAddress = "Munshiganj",
@@ -20058,6 +21237,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715751552",
                             MotherName = "PARUL RANI DAS",
                             NID = "2512373",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512373.jpg",
                             PresentAddress = "Munshiganj",
@@ -20097,6 +21280,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711133705",
                             MotherName = "Hasina Begum",
                             NID = "2512374",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512374.jpg",
                             PresentAddress = "Munshiganj",
@@ -20136,6 +21323,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913779345",
                             MotherName = "ZAYEDA BEGUM",
                             NID = "2512376",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512376.jpg",
                             PresentAddress = "Munshiganj",
@@ -20175,6 +21366,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01919489855",
                             MotherName = "Taslima Akter",
                             NID = "2512377",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512377.jpg",
                             PresentAddress = "Munshiganj",
@@ -20214,6 +21409,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01953212158",
                             MotherName = "শামসুন্নাহার",
                             NID = "2512378",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512378.jpg",
                             PresentAddress = "Munshiganj",
@@ -20253,6 +21452,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01731414107",
                             MotherName = "আব্দুল আউয়াল",
                             NID = "2512379",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512379.jpg",
                             PresentAddress = "Munshiganj",
@@ -20292,6 +21495,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911687136",
                             MotherName = "SUFIA BEGUM",
                             NID = "2512380",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512380.jpg",
                             PresentAddress = "Munshiganj",
@@ -20331,6 +21538,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01532303611",
                             MotherName = "YEAMON NESSA",
                             NID = "2512381",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512381.jpg",
                             PresentAddress = "Munshiganj",
@@ -20370,6 +21581,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01733499470",
                             MotherName = "Mazeda Begum",
                             NID = "2512383",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512383.jpg",
                             PresentAddress = "Munshiganj",
@@ -20409,6 +21624,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01922544927",
                             MotherName = "Rabeya Begum",
                             NID = "2512384",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512384.jpg",
                             PresentAddress = "Munshiganj",
@@ -20448,6 +21667,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01720636259",
                             MotherName = "SHEFALY BEGUM",
                             NID = "2512385",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512385.jpg",
                             PresentAddress = "Munshiganj",
@@ -20487,6 +21710,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711622363",
                             MotherName = "MOST.HAZARA KHATUN",
                             NID = "2512386",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512386.jpg",
                             PresentAddress = "Munshiganj",
@@ -20526,6 +21753,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711581587",
                             MotherName = "SYEDA HASINA BEGUM",
                             NID = "2512387",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512387.jpg",
                             PresentAddress = "Munshiganj",
@@ -20565,6 +21796,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712846042",
                             MotherName = "FATEMA AKTER",
                             NID = "2512388",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512388.jpg",
                             PresentAddress = "Munshiganj",
@@ -20604,6 +21839,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01785716290",
                             MotherName = "SHAHAJADI BEGUM",
                             NID = "2512389",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512389.jpg",
                             PresentAddress = "Munshiganj",
@@ -20643,6 +21882,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711046911",
                             MotherName = "Badana Ghosh",
                             NID = "2512390",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512390.jpg",
                             PresentAddress = "Munshiganj",
@@ -20682,6 +21925,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01988898998",
                             MotherName = "Late Rawshanara Begum",
                             NID = "2512391",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512391.jpg",
                             PresentAddress = "Munshiganj",
@@ -20721,6 +21968,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819198077",
                             MotherName = "MST. KHADIZA BEGUM",
                             NID = "2512392",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512392.jpg",
                             PresentAddress = "Munshiganj",
@@ -20760,6 +22011,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01742201797",
                             MotherName = "MRS SALEHA BEGUM",
                             NID = "2512393",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512393.jpg",
                             PresentAddress = "Munshiganj",
@@ -20799,6 +22054,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01817509597",
                             MotherName = "Meherunnesa",
                             NID = "2512394",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512394.jpg",
                             PresentAddress = "Munshiganj",
@@ -20838,6 +22097,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01926182782",
                             MotherName = "HASHINA BANU",
                             NID = "2512395",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512395.jpg",
                             PresentAddress = "Munshiganj",
@@ -20877,6 +22140,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01935284622",
                             MotherName = "KHURSHEDA BEGUM",
                             NID = "2512396",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512396.jpg",
                             PresentAddress = "Munshiganj",
@@ -20916,6 +22183,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01737288722",
                             MotherName = "Salina Akter",
                             NID = "2512397",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512397.jpg",
                             PresentAddress = "Munshiganj",
@@ -20955,6 +22226,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01732138866",
                             MotherName = "Rahima Khatun",
                             NID = "2512398",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512398.jpg",
                             PresentAddress = "Munshiganj",
@@ -20994,6 +22269,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01714255118",
                             MotherName = "Anima Rani Podder",
                             NID = "2512400",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512400.jpg",
                             PresentAddress = "Munshiganj",
@@ -21033,6 +22312,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01822888072",
                             MotherName = "Fatema khatun",
                             NID = "2512401",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512401.jpg",
                             PresentAddress = "Munshiganj",
@@ -21072,6 +22355,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01740948547",
                             MotherName = "Mohasun nesa",
                             NID = "2512402",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512402.jpg",
                             PresentAddress = "Munshiganj",
@@ -21111,6 +22398,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01972571741",
                             MotherName = "AMENA BEGUM",
                             NID = "2512403",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512403.jpg",
                             PresentAddress = "Munshiganj",
@@ -21150,6 +22441,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01788768546",
                             MotherName = "Begum Faizun Nahar Majid",
                             NID = "2512407",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512407.jpg",
                             PresentAddress = "Munshiganj",
@@ -21189,6 +22484,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01853338702",
                             MotherName = "Rashida Begum",
                             NID = "2512408",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512408.jpg",
                             PresentAddress = "Munshiganj",
@@ -21228,6 +22527,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01581169646",
                             MotherName = "RAOSHAN ARA",
                             NID = "2512409",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512409.jpg",
                             PresentAddress = "Munshiganj",
@@ -21267,6 +22570,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819476291",
                             MotherName = "Akhter Jahan",
                             NID = "2512413",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512413.jpg",
                             PresentAddress = "Munshiganj",
@@ -21306,6 +22613,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711828060",
                             MotherName = "LATE DAVE MONGALA DAS",
                             NID = "2512414",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512414.jpg",
                             PresentAddress = "Munshiganj",
@@ -21345,6 +22656,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01730709126",
                             MotherName = "Kad Bhanu",
                             NID = "2512415",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512415.jpg",
                             PresentAddress = "Munshiganj",
@@ -21384,6 +22699,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712244201",
                             MotherName = "Shanaj Begum",
                             NID = "2512416",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512416.jpg",
                             PresentAddress = "Munshiganj",
@@ -21423,6 +22742,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01730709127",
                             MotherName = "Rahima Haque",
                             NID = "2512418",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512418.jpg",
                             PresentAddress = "Munshiganj",
@@ -21462,6 +22785,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01567942957",
                             MotherName = "Jahanara Begum",
                             NID = "2512419",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512419.jpg",
                             PresentAddress = "Munshiganj",
@@ -21501,6 +22828,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01314749039",
                             MotherName = "Shova Rani Day",
                             NID = "2512420",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512420.jpg",
                             PresentAddress = "Munshiganj",
@@ -21540,6 +22871,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01727328115",
                             MotherName = "Mohsena Begum",
                             NID = "2512421",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512421.jpg",
                             PresentAddress = "Munshiganj",
@@ -21579,6 +22914,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01924781960",
                             MotherName = "Amina Khatun",
                             NID = "2512422",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512422.jpg",
                             PresentAddress = "Munshiganj",
@@ -21618,6 +22957,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712775988",
                             MotherName = "NASIMA BEGUM",
                             NID = "2512423",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512423.jpg",
                             PresentAddress = "Munshiganj",
@@ -21657,6 +23000,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01811003300",
                             MotherName = "MST. HASIA BEGUM",
                             NID = "2512424",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512424.jpg",
                             PresentAddress = "Munshiganj",
@@ -21696,6 +23043,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712128802",
                             MotherName = "MRS SUFIYA BEGUM",
                             NID = "2512425",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512425.jpg",
                             PresentAddress = "Munshiganj",
@@ -21735,6 +23086,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01943752952",
                             MotherName = "Mrs. Peari Begum",
                             NID = "2512426",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512426.jpg",
                             PresentAddress = "Munshiganj",
@@ -21774,6 +23129,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01930482141",
                             MotherName = "Taslima Hajary",
                             NID = "2512427",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512427.jpg",
                             PresentAddress = "Munshiganj",
@@ -21813,6 +23172,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01671820152",
                             MotherName = "Renu Bala Mudi",
                             NID = "2512428",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512428.jpg",
                             PresentAddress = "Munshiganj",
@@ -21852,6 +23215,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01919933223",
                             MotherName = "NAZMA BEGUM",
                             NID = "2512429",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512429.jpg",
                             PresentAddress = "Munshiganj",
@@ -21891,6 +23258,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01733055998",
                             MotherName = "Mst Rezia Akter",
                             NID = "2512430",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512430.jpg",
                             PresentAddress = "Munshiganj",
@@ -21930,6 +23301,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01680841019",
                             MotherName = "SUFIA BEGAM",
                             NID = "2512431",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512431.jpg",
                             PresentAddress = "Munshiganj",
@@ -21969,6 +23344,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01710990220",
                             MotherName = "Razia Khatun",
                             NID = "2512432",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512432.jpg",
                             PresentAddress = "Munshiganj",
@@ -22008,6 +23387,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712621397",
                             MotherName = "Hosne Ara",
                             NID = "2512433",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512433.jpg",
                             PresentAddress = "Munshiganj",
@@ -22047,6 +23430,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01923966775",
                             MotherName = "Arafatun nesa",
                             NID = "2512434",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512434.jpg",
                             PresentAddress = "Munshiganj",
@@ -22086,6 +23473,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712901614",
                             MotherName = "Salma bagum",
                             NID = "2512435",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512435.jpg",
                             PresentAddress = "Munshiganj",
@@ -22125,6 +23516,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01745694440",
                             MotherName = "Begum Nurjahan",
                             NID = "2512436",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512436.jpg",
                             PresentAddress = "Munshiganj",
@@ -22164,6 +23559,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911332776",
                             MotherName = "SUBHA RANI SAHA",
                             NID = "2512438",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512438.jpg",
                             PresentAddress = "Munshiganj",
@@ -22203,6 +23602,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712957792",
                             MotherName = "Hasina Akter",
                             NID = "2512439",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512439.jpg",
                             PresentAddress = "Munshiganj",
@@ -22242,6 +23645,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01818840193",
                             MotherName = "Nurun Nahar",
                             NID = "2512440",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512440.jpg",
                             PresentAddress = "Munshiganj",
@@ -22281,6 +23688,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01979998076",
                             MotherName = "Alo Begum",
                             NID = "2512441",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512441.jpg",
                             PresentAddress = "Munshiganj",
@@ -22320,6 +23731,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01945239748",
                             MotherName = "Late Firuza Begom",
                             NID = "2512442",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512442.jpg",
                             PresentAddress = "Munshiganj",
@@ -22359,6 +23774,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712857885",
                             MotherName = "Sufia Begum",
                             NID = "2512443",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512443.jpg",
                             PresentAddress = "Munshiganj",
@@ -22398,6 +23817,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711401018",
                             MotherName = "Late salma begom",
                             NID = "2512444",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512444.jpg",
                             PresentAddress = "Munshiganj",
@@ -22437,6 +23860,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01600274797",
                             MotherName = "Khaleda Begum",
                             NID = "2512446",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512446.jpg",
                             PresentAddress = "Munshiganj",
@@ -22476,6 +23903,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01744342852",
                             MotherName = "RAZIA SULTANA",
                             NID = "2512447",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512447.jpg",
                             PresentAddress = "Munshiganj",
@@ -22515,6 +23946,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01682709141",
                             MotherName = "HASINA BEGUM",
                             NID = "2512448",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512448.jpg",
                             PresentAddress = "Munshiganj",
@@ -22554,6 +23989,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01717318649",
                             MotherName = "Mohsena Begum",
                             NID = "2512449",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512449.jpg",
                             PresentAddress = "Munshiganj",
@@ -22593,6 +24032,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "019239667751",
                             MotherName = "Fatima khatun",
                             NID = "2512450",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512450.jpg",
                             PresentAddress = "Munshiganj",
@@ -22632,6 +24075,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912411064",
                             MotherName = "RAZIA SULTANA",
                             NID = "2512452",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512452.jpg",
                             PresentAddress = "Munshiganj",
@@ -22671,6 +24118,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01733456785",
                             MotherName = "ROKEYA BEGUM",
                             NID = "2512454",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512454.jpg",
                             PresentAddress = "Munshiganj",
@@ -22710,6 +24161,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01552325256",
                             MotherName = "Anowara Khanom",
                             NID = "2512455",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512455.jpg",
                             PresentAddress = "Munshiganj",
@@ -22749,6 +24204,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01847171767",
                             MotherName = "FAKURUN NESA",
                             NID = "2512456",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512456.jpg",
                             PresentAddress = "Munshiganj",
@@ -22788,6 +24247,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819919682",
                             MotherName = "ROUSHAN ARA BEGUM",
                             NID = "2512457",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512457.jpg",
                             PresentAddress = "Munshiganj",
@@ -22827,6 +24290,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01817097725",
                             MotherName = "MCS SOHORBANU",
                             NID = "2512458",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512458.jpg",
                             PresentAddress = "Munshiganj",
@@ -22866,6 +24333,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01732648291",
                             MotherName = "HAZI ANOWARA BEGUM",
                             NID = "2512459",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512459.jpg",
                             PresentAddress = "Munshiganj",
@@ -22905,6 +24376,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911847465",
                             MotherName = "Shahanaj Begum",
                             NID = "2512461",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512461.jpg",
                             PresentAddress = "Munshiganj",
@@ -22944,6 +24419,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01951527688",
                             MotherName = "Fatema Begum",
                             NID = "2512462",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512462.jpg",
                             PresentAddress = "Munshiganj",
@@ -22983,6 +24462,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01737227765",
                             MotherName = "MALUNCHA BEGUM",
                             NID = "2512463",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512463.jpg",
                             PresentAddress = "Munshiganj",
@@ -23022,6 +24505,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711906582",
                             MotherName = "KHUSIMON NESA",
                             NID = "2512465",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512465.jpg",
                             PresentAddress = "Munshiganj",
@@ -23061,6 +24548,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716290877",
                             MotherName = "Nurun nahar",
                             NID = "2512466",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512466.jpg",
                             PresentAddress = "Munshiganj",
@@ -23100,6 +24591,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01936413985",
                             MotherName = "BILATUNNESA",
                             NID = "2512467",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512467.jpg",
                             PresentAddress = "Munshiganj",
@@ -23139,6 +24634,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01717218114",
                             MotherName = "Nurun nahar",
                             NID = "2512468",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512468.jpg",
                             PresentAddress = "Munshiganj",
@@ -23178,6 +24677,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715399205",
                             MotherName = "JUBEDA KHATUN",
                             NID = "2512469",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512469.jpg",
                             PresentAddress = "Munshiganj",
@@ -23217,6 +24720,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01868036707",
                             MotherName = "Rowahon Ara",
                             NID = "2512471",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512471.jpg",
                             PresentAddress = "Munshiganj",
@@ -23256,6 +24763,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01775085326",
                             MotherName = "NOOR JAHAN",
                             NID = "2512472",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512472.jpg",
                             PresentAddress = "Munshiganj",
@@ -23295,6 +24806,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911040365",
                             MotherName = "Majeda begum",
                             NID = "2512473",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512473.jpg",
                             PresentAddress = "Munshiganj",
@@ -23334,6 +24849,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911760812",
                             MotherName = "Hayatun Nessa",
                             NID = "2512474",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512474.jpg",
                             PresentAddress = "Munshiganj",
@@ -23373,6 +24892,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711227331",
                             MotherName = "Late Sufia Begum",
                             NID = "2512475",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512475.jpg",
                             PresentAddress = "Munshiganj",
@@ -23412,6 +24935,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01798887437",
                             MotherName = "Late Hosne Ara Begum",
                             NID = "2512476",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512476.jpg",
                             PresentAddress = "Munshiganj",
@@ -23451,6 +24978,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01927649290",
                             MotherName = "Rahima khatun",
                             NID = "2512477",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512477.jpg",
                             PresentAddress = "Munshiganj",
@@ -23490,6 +25021,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01929627050",
                             MotherName = "Shahina Begum",
                             NID = "2512478",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512478.jpg",
                             PresentAddress = "Munshiganj",
@@ -23529,6 +25064,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712226266",
                             MotherName = "BEGUM AYESHA KHATUN",
                             NID = "2512479",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512479.jpg",
                             PresentAddress = "Munshiganj",
@@ -23568,6 +25107,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716828151",
                             MotherName = "Late Zakiya Begum",
                             NID = "2512480",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512480.jpg",
                             PresentAddress = "Munshiganj",
@@ -23607,6 +25150,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716435288",
                             MotherName = "Sakhina Begum",
                             NID = "2512481",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512481.jpg",
                             PresentAddress = "Munshiganj",
@@ -23646,6 +25193,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712153443",
                             MotherName = "ফজিলাতুন",
                             NID = "2512482",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512482.jpg",
                             PresentAddress = "Munshiganj",
@@ -23685,6 +25236,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01841475588",
                             MotherName = "Momotaz Begum",
                             NID = "2512484",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512484.jpg",
                             PresentAddress = "Munshiganj",
@@ -23724,6 +25279,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711336178",
                             MotherName = "Hazi Jamina Khatun",
                             NID = "2512485",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512485.jpg",
                             PresentAddress = "Munshiganj",
@@ -23763,6 +25322,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01916840088",
                             MotherName = "Fardusi Ahmed",
                             NID = "2512486",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512486.jpg",
                             PresentAddress = "Munshiganj",
@@ -23802,6 +25365,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01818371864",
                             MotherName = "Ambia Khatun",
                             NID = "2512487",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512487.jpg",
                             PresentAddress = "Munshiganj",
@@ -23841,6 +25408,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01727025317",
                             MotherName = "Sakhina Begum",
                             NID = "2512488",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512488.jpg",
                             PresentAddress = "Munshiganj",
@@ -23880,6 +25451,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01713168744",
                             MotherName = "Peara Begum",
                             NID = "2512489",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512489.jpg",
                             PresentAddress = "Munshiganj",
@@ -23919,6 +25494,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01616526800",
                             MotherName = "MOHASUN NESA",
                             NID = "2512490",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512490.jpg",
                             PresentAddress = "Munshiganj",
@@ -23958,6 +25537,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01722215452",
                             MotherName = "Mambas Begum",
                             NID = "2512491",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512491.jpg",
                             PresentAddress = "Munshiganj",
@@ -23997,6 +25580,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711940087",
                             MotherName = "হাসিনা আক্তার",
                             NID = "2512492",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512492.jpg",
                             PresentAddress = "Munshiganj",
@@ -24036,6 +25623,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711248984",
                             MotherName = "Anowara begum",
                             NID = "2512493",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512493.jpg",
                             PresentAddress = "Munshiganj",
@@ -24075,6 +25666,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01980055149",
                             MotherName = "Rowson Ara Begum",
                             NID = "2512494",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512494.jpg",
                             PresentAddress = "Munshiganj",
@@ -24114,6 +25709,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01720424444",
                             MotherName = "হোসেন আরা বেগম",
                             NID = "2512495",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512495.jpg",
                             PresentAddress = "Munshiganj",
@@ -24153,6 +25752,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911205294",
                             MotherName = "HASIA BEGUM",
                             NID = "2512496",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512496.jpg",
                             PresentAddress = "Munshiganj",
@@ -24192,6 +25795,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01719368493",
                             MotherName = "Nurun Nesa",
                             NID = "2512497",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512497.jpg",
                             PresentAddress = "Munshiganj",
@@ -24231,6 +25838,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715700797",
                             MotherName = "Shansia Begum",
                             NID = "2512498",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512498.jpg",
                             PresentAddress = "Munshiganj",
@@ -24270,6 +25881,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01726955235",
                             MotherName = "Begum Fatema Aktet",
                             NID = "2512500",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512500.jpg",
                             PresentAddress = "Munshiganj",
@@ -24309,6 +25924,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01937090330",
                             MotherName = "AMBIA KHATUN",
                             NID = "2512501",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512501.jpg",
                             PresentAddress = "Munshiganj",
@@ -24348,6 +25967,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01922906371",
                             MotherName = "Badana Rani Das",
                             NID = "2512502",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512502.jpg",
                             PresentAddress = "Munshiganj",
@@ -24387,6 +26010,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913370686",
                             MotherName = "Aysha Begum",
                             NID = "2512503",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512503.jpg",
                             PresentAddress = "Munshiganj",
@@ -24426,6 +26053,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711937030",
                             MotherName = "Majeda Khatun",
                             NID = "2512504",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512504.jpg",
                             PresentAddress = "Munshiganj",
@@ -24465,6 +26096,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01925000219",
                             MotherName = "HASINA BEGUM",
                             NID = "2512505",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512505.jpg",
                             PresentAddress = "Munshiganj",
@@ -24504,6 +26139,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712108435",
                             MotherName = "Firoza Begum",
                             NID = "2512506",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512506.jpg",
                             PresentAddress = "Munshiganj",
@@ -24543,6 +26182,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01736858909",
                             MotherName = "MALOTI RANI",
                             NID = "2512507",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512507.jpg",
                             PresentAddress = "Munshiganj",
@@ -24582,6 +26225,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01725510791",
                             MotherName = "ROWSHAN ARA BEGUM",
                             NID = "2512508",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512508.jpg",
                             PresentAddress = "Munshiganj",
@@ -24621,6 +26268,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01736898220",
                             MotherName = "Shah Shorifun Nessa",
                             NID = "2512509",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512509.jpg",
                             PresentAddress = "Munshiganj",
@@ -24660,6 +26311,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01974662559",
                             MotherName = "RAJIA BEGUM",
                             NID = "2512510",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512510.jpg",
                             PresentAddress = "Munshiganj",
@@ -24699,6 +26354,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01816928071",
                             MotherName = "Hosneara Begum",
                             NID = "2512512",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512512.jpg",
                             PresentAddress = "Munshiganj",
@@ -24738,6 +26397,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01713039710",
                             MotherName = "MOST. AMENA BEGUM",
                             NID = "2512513",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512513.jpg",
                             PresentAddress = "Munshiganj",
@@ -24777,6 +26440,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01745660542",
                             MotherName = "CHYA RANI BISWAS",
                             NID = "2512514",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512514.jpg",
                             PresentAddress = "Munshiganj",
@@ -24816,6 +26483,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912980488",
                             MotherName = "Piara Begum",
                             NID = "2512515",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512515.jpg",
                             PresentAddress = "Munshiganj",
@@ -24855,6 +26526,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01956839369",
                             MotherName = "ZARINA BEGUM",
                             NID = "2512516",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512516.jpg",
                             PresentAddress = "Munshiganj",
@@ -24894,6 +26569,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01921215950",
                             MotherName = "Mamataz Begum",
                             NID = "2512517",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512517.jpg",
                             PresentAddress = "Munshiganj",
@@ -24933,6 +26612,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01816711959",
                             MotherName = "Begum Shamsun Nahar",
                             NID = "2512518",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512518.jpg",
                             PresentAddress = "Munshiganj",
@@ -24972,6 +26655,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01867071995",
                             MotherName = "RAYHANA JESMEEN MARRY",
                             NID = "2512519",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512519.jpg",
                             PresentAddress = "Munshiganj",
@@ -25011,6 +26698,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01918169123",
                             MotherName = "Alanoor Begum",
                             NID = "2512520",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512520.jpg",
                             PresentAddress = "Munshiganj",
@@ -25050,6 +26741,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912525169",
                             MotherName = "ROUSNARA BEGUM",
                             NID = "2512521",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512521.jpg",
                             PresentAddress = "Munshiganj",
@@ -25089,6 +26784,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712931445",
                             MotherName = "Jahanara Begum",
                             NID = "2512522",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512522.jpg",
                             PresentAddress = "Munshiganj",
@@ -25128,6 +26827,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01977024124",
                             MotherName = "Alanoor Begum",
                             NID = "2512524",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512524.jpg",
                             PresentAddress = "Munshiganj",
@@ -25167,6 +26870,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01913447075",
                             MotherName = "জহুরা বেগম",
                             NID = "2512525",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512525.jpg",
                             PresentAddress = "Munshiganj",
@@ -25206,6 +26913,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712547405",
                             MotherName = "Jasmin Begum",
                             NID = "2512526",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512526.jpg",
                             PresentAddress = "Munshiganj",
@@ -25245,6 +26956,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01675709121",
                             MotherName = "Rowshan Ara Begum",
                             NID = "2512527",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512527.jpg",
                             PresentAddress = "Munshiganj",
@@ -25284,6 +26999,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01924891112",
                             MotherName = "Hamida rahman",
                             NID = "2512531",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512531.jpg",
                             PresentAddress = "Munshiganj",
@@ -25323,6 +27042,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716594287",
                             MotherName = "HASINA AKTER",
                             NID = "2512532",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512532.jpg",
                             PresentAddress = "Munshiganj",
@@ -25362,6 +27085,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01921070220",
                             MotherName = "Hosne ara Begum",
                             NID = "2512533",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512533.jpg",
                             PresentAddress = "Munshiganj",
@@ -25401,6 +27128,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01799201892",
                             MotherName = "SHEULY BEGUM",
                             NID = "2512534",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512534.jpg",
                             PresentAddress = "Munshiganj",
@@ -25440,6 +27171,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01724023970",
                             MotherName = "Aleya Begum",
                             NID = "2512537",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512537.jpg",
                             PresentAddress = "Munshiganj",
@@ -25479,6 +27214,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912955741",
                             MotherName = "JAHANARA BEGUM",
                             NID = "2512538",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512538.jpg",
                             PresentAddress = "Munshiganj",
@@ -25518,6 +27257,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911398431",
                             MotherName = "JOYNAB BEGUM",
                             NID = "2512539",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512539.jpg",
                             PresentAddress = "Munshiganj",
@@ -25557,6 +27300,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911825294",
                             MotherName = "JOVADA BEGUM",
                             NID = "2512541",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512541.jpg",
                             PresentAddress = "Munshiganj",
@@ -25596,6 +27343,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01752905590",
                             MotherName = "Shimu Akter",
                             NID = "2512542",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512542.jpg",
                             PresentAddress = "Munshiganj",
@@ -25635,6 +27386,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711561409",
                             MotherName = "Sanowara Mattin",
                             NID = "2512545",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512545.jpg",
                             PresentAddress = "Munshiganj",
@@ -25674,6 +27429,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01730052792",
                             MotherName = "Mrs Monowara Begum",
                             NID = "2512547",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512547.jpg",
                             PresentAddress = "Munshiganj",
@@ -25713,6 +27472,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01728711984",
                             MotherName = "Julekha Begum",
                             NID = "2512549",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512549.jpg",
                             PresentAddress = "Munshiganj",
@@ -25752,6 +27515,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715687934",
                             MotherName = "Halima Begum",
                             NID = "2512550",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512550.jpg",
                             PresentAddress = "Munshiganj",
@@ -25791,6 +27558,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01954313645",
                             MotherName = "ZAKIA RAHMAN",
                             NID = "2512551",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512551.jpg",
                             PresentAddress = "Munshiganj",
@@ -25830,6 +27601,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716108353",
                             MotherName = "Jahanara Begum",
                             NID = "2512552",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512552.jpg",
                             PresentAddress = "Munshiganj",
@@ -25869,6 +27644,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01673997819",
                             MotherName = "Nurbanu",
                             NID = "2512553",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512553.jpg",
                             PresentAddress = "Munshiganj",
@@ -25908,6 +27687,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01778667755",
                             MotherName = "Mrs.Sakhina Begum",
                             NID = "2512554",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512554.jpg",
                             PresentAddress = "Munshiganj",
@@ -25947,6 +27730,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912147294",
                             MotherName = "Halima Begum",
                             NID = "2512555",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512555.jpg",
                             PresentAddress = "Munshiganj",
@@ -25986,6 +27773,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01902363496",
                             MotherName = "Anwara Begum",
                             NID = "2512556",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512556.jpg",
                             PresentAddress = "Munshiganj",
@@ -26025,6 +27816,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01707969824",
                             MotherName = "মেহেরুন নেছা",
                             NID = "2512557",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512557.jpg",
                             PresentAddress = "Munshiganj",
@@ -26064,6 +27859,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716247015",
                             MotherName = "মেহেরুন নেছা",
                             NID = "2512558",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512558.jpg",
                             PresentAddress = "Munshiganj",
@@ -26103,6 +27902,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01717792385",
                             MotherName = "Nazma Begum",
                             NID = "2512559",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512559.jpg",
                             PresentAddress = "Munshiganj",
@@ -26142,6 +27945,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819192064",
                             MotherName = "Marium Begum",
                             NID = "2512560",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512560.jpg",
                             PresentAddress = "Munshiganj",
@@ -26181,6 +27988,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01720078857",
                             MotherName = "SADARJAN BIBI",
                             NID = "2512561",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512561.jpg",
                             PresentAddress = "Munshiganj",
@@ -26220,6 +28031,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01935306330",
                             MotherName = "RAHIMA BEGUM",
                             NID = "2512562",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512562.jpg",
                             PresentAddress = "Munshiganj",
@@ -26259,6 +28074,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01552418091",
                             MotherName = "Hasina Begum",
                             NID = "2512563",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512563.jpg",
                             PresentAddress = "Munshiganj",
@@ -26298,6 +28117,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01731663617",
                             MotherName = "Juhara Khatun",
                             NID = "2512564",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512564.jpg",
                             PresentAddress = "Munshiganj",
@@ -26337,6 +28160,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01944158393",
                             MotherName = "Rashida Begum",
                             NID = "2512565",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512565.jpg",
                             PresentAddress = "Munshiganj",
@@ -26376,6 +28203,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01314930811",
                             MotherName = "Nazma Begum",
                             NID = "2512566",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512566.jpg",
                             PresentAddress = "Munshiganj",
@@ -26415,6 +28246,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715028321",
                             MotherName = "MAHMUDA HAQUE",
                             NID = "2512567",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512567.jpg",
                             PresentAddress = "Munshiganj",
@@ -26454,6 +28289,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712905742",
                             MotherName = "Nurjahan Begum",
                             NID = "2512568",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512568.jpg",
                             PresentAddress = "Munshiganj",
@@ -26493,6 +28332,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01721071340",
                             MotherName = "Rahima Akter",
                             NID = "2512570",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512570.jpg",
                             PresentAddress = "Munshiganj",
@@ -26532,6 +28375,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01903572113",
                             MotherName = "JOSNA BEGUM",
                             NID = "2512571",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512571.jpg",
                             PresentAddress = "Munshiganj",
@@ -26571,6 +28418,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911480052",
                             MotherName = "Nurunnahr khanom",
                             NID = "2512572",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512572.jpg",
                             PresentAddress = "Munshiganj",
@@ -26610,6 +28461,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712277597",
                             MotherName = "MAZEDA AKTER KHANOM",
                             NID = "2512573",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512573.jpg",
                             PresentAddress = "Munshiganj",
@@ -26649,6 +28504,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01552314957",
                             MotherName = "Jahanara Begum",
                             NID = "2512574",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512574.jpg",
                             PresentAddress = "Munshiganj",
@@ -26688,6 +28547,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01719954568",
                             MotherName = "Maksuda begum",
                             NID = "2512575",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512575.jpg",
                             PresentAddress = "Munshiganj",
@@ -26727,6 +28590,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911282375",
                             MotherName = "BANU BEGUM",
                             NID = "2512578",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512578.jpg",
                             PresentAddress = "Munshiganj",
@@ -26766,6 +28633,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716520042",
                             MotherName = "Gouri Das",
                             NID = "2512579",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512579.jpg",
                             PresentAddress = "Munshiganj",
@@ -26805,6 +28676,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711365622",
                             MotherName = "MRS. RAZIA BEGUM",
                             NID = "2512581",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512581.jpg",
                             PresentAddress = "Munshiganj",
@@ -26844,6 +28719,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01985305901",
                             MotherName = "MD. KAYUM MOLLA",
                             NID = "2512582",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512582.jpg",
                             PresentAddress = "Munshiganj",
@@ -26883,6 +28762,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01978888522",
                             MotherName = "SAMSUNNAHAR",
                             NID = "2512583",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512583.jpg",
                             PresentAddress = "Munshiganj",
@@ -26922,6 +28805,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01905916544",
                             MotherName = "RINA BEGUM",
                             NID = "2512584",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512584.jpg",
                             PresentAddress = "Munshiganj",
@@ -26961,6 +28848,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716450197",
                             MotherName = "DELOWARA BEGUM",
                             NID = "2512585",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512585.jpg",
                             PresentAddress = "Munshiganj",
@@ -27000,6 +28891,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01883989315",
                             MotherName = "MUHAMMAD JANE ALAM",
                             NID = "2512586",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512586.jpg",
                             PresentAddress = "Munshiganj",
@@ -27039,6 +28934,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01993808291",
                             MotherName = "LATE HASINA KHANAM",
                             NID = "2512587",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512587.jpg",
                             PresentAddress = "Munshiganj",
@@ -27078,6 +28977,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911007765",
                             MotherName = "HASINA KHANAM",
                             NID = "2512588",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512588.jpg",
                             PresentAddress = "Munshiganj",
@@ -27117,6 +29020,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01919426350",
                             MotherName = "Mosammad morjina Begum",
                             NID = "2512589",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512589.jpg",
                             PresentAddress = "Munshiganj",
@@ -27156,6 +29063,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01927468746",
                             MotherName = "NOWSEDA BEGUM",
                             NID = "2512591",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512591.jpg",
                             PresentAddress = "Munshiganj",
@@ -27195,6 +29106,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01726449437",
                             MotherName = "Akimun  Nessa",
                             NID = "2512592",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512592.jpg",
                             PresentAddress = "Munshiganj",
@@ -27234,6 +29149,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715019129",
                             MotherName = "Halima Begum",
                             NID = "2512593",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512593.jpg",
                             PresentAddress = "Munshiganj",
@@ -27273,6 +29192,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911555890",
                             MotherName = "KIRON BALA DATTA",
                             NID = "2512594",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512594.jpg",
                             PresentAddress = "Munshiganj",
@@ -27312,6 +29235,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01732348451",
                             MotherName = "NURJAHAN BEGUM",
                             NID = "2512595",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512595.jpg",
                             PresentAddress = "Munshiganj",
@@ -27351,6 +29278,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01731492016",
                             MotherName = "LATE. AYTUN NESSA",
                             NID = "2512596",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512596.jpg",
                             PresentAddress = "Munshiganj",
@@ -27390,6 +29321,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01641380433",
                             MotherName = "Alea Begum",
                             NID = "2512597",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512597.jpg",
                             PresentAddress = "Munshiganj",
@@ -27429,6 +29364,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01983933581",
                             MotherName = "Late Shamima Begum",
                             NID = "2512598",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512598.jpg",
                             PresentAddress = "Munshiganj",
@@ -27468,6 +29407,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01731839782",
                             MotherName = "আয়শা বেগম",
                             NID = "2512599",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512599.jpg",
                             PresentAddress = "Munshiganj",
@@ -27507,6 +29450,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911310403",
                             MotherName = "Khodeja Begum",
                             NID = "2512600",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512600.jpg",
                             PresentAddress = "Munshiganj",
@@ -27546,6 +29493,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01979177695",
                             MotherName = "DILARA AKTHER",
                             NID = "2512601",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512601.jpg",
                             PresentAddress = "Munshiganj",
@@ -27585,6 +29536,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01919836265",
                             MotherName = "Rabiya Begum",
                             NID = "2512602",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512602.jpg",
                             PresentAddress = "Munshiganj",
@@ -27624,6 +29579,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711319662",
                             MotherName = "Nazia Alam",
                             NID = "2512604",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512604.jpg",
                             PresentAddress = "Munshiganj",
@@ -27663,6 +29622,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911309050",
                             MotherName = "Nazma Begum",
                             NID = "2512605",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512605.jpg",
                             PresentAddress = "Munshiganj",
@@ -27702,6 +29665,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01673908073",
                             MotherName = "Firoza Begum",
                             NID = "2512607",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512607.jpg",
                             PresentAddress = "Munshiganj",
@@ -27741,6 +29708,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912469792",
                             MotherName = "ZAIFUNNESSA",
                             NID = "2512609",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512609.jpg",
                             PresentAddress = "Munshiganj",
@@ -27780,6 +29751,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01915359882",
                             MotherName = "PARVIN AKTER",
                             NID = "2512610",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512610.jpg",
                             PresentAddress = "Munshiganj",
@@ -27819,6 +29794,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711190443",
                             MotherName = "Hamida begum",
                             NID = "2512611",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512611.jpg",
                             PresentAddress = "Munshiganj",
@@ -27858,6 +29837,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01700988806",
                             MotherName = "Azufa begum",
                             NID = "2512612",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512612.jpg",
                             PresentAddress = "Munshiganj",
@@ -27897,6 +29880,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01872206921",
                             MotherName = "Morzina Begum",
                             NID = "2512614",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512614.jpg",
                             PresentAddress = "Munshiganj",
@@ -27936,6 +29923,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711165629",
                             MotherName = "Safiya Jalil",
                             NID = "2512615",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512615.jpg",
                             PresentAddress = "Munshiganj",
@@ -27975,6 +29966,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01517943448",
                             MotherName = "JIBON NESA",
                             NID = "2512616",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512616.jpg",
                             PresentAddress = "Munshiganj",
@@ -28014,6 +30009,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01731507778",
                             MotherName = "Madhabi Rani Dhar",
                             NID = "2512617",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512617.jpg",
                             PresentAddress = "Munshiganj",
@@ -28053,6 +30052,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01756438866",
                             MotherName = "MST. TARA BANU",
                             NID = "2512618",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512618.jpg",
                             PresentAddress = "Munshiganj",
@@ -28092,6 +30095,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01916058956",
                             MotherName = "মৃত নাফিছা বেগম",
                             NID = "2512619",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512619.jpg",
                             PresentAddress = "Munshiganj",
@@ -28131,6 +30138,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715824232",
                             MotherName = "Rubia khatun",
                             NID = "2512620",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512620.jpg",
                             PresentAddress = "Munshiganj",
@@ -28170,6 +30181,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01776506677",
                             MotherName = "FEROZA BEGUM",
                             NID = "2512621",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512621.jpg",
                             PresentAddress = "Munshiganj",
@@ -28209,6 +30224,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "019124697921",
                             MotherName = "Zaifunnesa shikder",
                             NID = "2512623",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512623.jpg",
                             PresentAddress = "Munshiganj",
@@ -28248,6 +30267,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711176473",
                             MotherName = "KHODEJA BEGUM",
                             NID = "2512625",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512625.jpg",
                             PresentAddress = "Munshiganj",
@@ -28287,6 +30310,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01764855548",
                             MotherName = "AMENA BEGUM",
                             NID = "2512626",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512626.jpg",
                             PresentAddress = "Munshiganj",
@@ -28326,6 +30353,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01939293971",
                             MotherName = "FARIDA BAGUM",
                             NID = "2512627",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512627.jpg",
                             PresentAddress = "Munshiganj",
@@ -28365,6 +30396,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01863237015",
                             MotherName = "BEGUM MAHMUDA AKTER",
                             NID = "2512628",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512628.jpg",
                             PresentAddress = "Munshiganj",
@@ -28404,6 +30439,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01885843424",
                             MotherName = "AKLIMA BEGUM",
                             NID = "2512629",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512629.jpg",
                             PresentAddress = "Munshiganj",
@@ -28443,6 +30482,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01611478828",
                             MotherName = "LUTFA BEGUM",
                             NID = "2512630",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512630.jpg",
                             PresentAddress = "Munshiganj",
@@ -28482,6 +30525,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01612003020",
                             MotherName = "Saleha Hoque",
                             NID = "2512631",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512631.jpg",
                             PresentAddress = "Munshiganj",
@@ -28521,6 +30568,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715048245",
                             MotherName = "Fatema  Begum",
                             NID = "2512632",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512632.jpg",
                             PresentAddress = "Munshiganj",
@@ -28560,6 +30611,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "017165944071",
                             MotherName = "HERRUN NESSA",
                             NID = "2512633",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512633.jpg",
                             PresentAddress = "Munshiganj",
@@ -28599,6 +30654,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01717825711",
                             MotherName = "খায়রুন নেছা",
                             NID = "2512634",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512634.jpg",
                             PresentAddress = "Munshiganj",
@@ -28638,6 +30697,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911491997",
                             MotherName = "ZAKIA RAHMAN",
                             NID = "2512635",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512635.jpg",
                             PresentAddress = "Munshiganj",
@@ -28677,6 +30740,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01907427053",
                             MotherName = "ASMA AKTER JUNU",
                             NID = "2512636",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512636.jpg",
                             PresentAddress = "Munshiganj",
@@ -28716,6 +30783,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715969601",
                             MotherName = "Md Abdul Motin",
                             NID = "2512637",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512637.jpg",
                             PresentAddress = "Munshiganj",
@@ -28755,6 +30826,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01987885610",
                             MotherName = "PARVIN BEGUM",
                             NID = "2512638",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512638.jpg",
                             PresentAddress = "Munshiganj",
@@ -28794,6 +30869,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01306830854",
                             MotherName = "Jayeda Begum",
                             NID = "2512639",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512639.jpg",
                             PresentAddress = "Munshiganj",
@@ -28833,6 +30912,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01925842939",
                             MotherName = "SURACHI RANI SAHA",
                             NID = "2512640",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512640.jpg",
                             PresentAddress = "Munshiganj",
@@ -28872,6 +30955,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01916895747",
                             MotherName = "Nasima Begum",
                             NID = "2512641",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512641.jpg",
                             PresentAddress = "Munshiganj",
@@ -28911,6 +30998,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01939746503",
                             MotherName = "Razia Begum",
                             NID = "2512642",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512642.jpg",
                             PresentAddress = "Munshiganj",
@@ -28950,6 +31041,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912043211",
                             MotherName = "Shorifun Begum",
                             NID = "2512643",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512643.jpg",
                             PresentAddress = "Munshiganj",
@@ -28989,6 +31084,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01714091813",
                             MotherName = "Amina Begum",
                             NID = "2512644",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512644.jpg",
                             PresentAddress = "Munshiganj",
@@ -29028,6 +31127,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01671021116",
                             MotherName = "ANWARA BEGUM",
                             NID = "2512645",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512645.jpg",
                             PresentAddress = "Munshiganj",
@@ -29067,6 +31170,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01979027844",
                             MotherName = "Hashnu Begum",
                             NID = "2512647",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512647.jpg",
                             PresentAddress = "Munshiganj",
@@ -29106,6 +31213,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01921098949",
                             MotherName = "Ava Rani Ghosh",
                             NID = "2512648",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512648.jpg",
                             PresentAddress = "Munshiganj",
@@ -29145,6 +31256,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01853338721",
                             MotherName = "Jahanara Begum",
                             NID = "2512651",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512651.jpg",
                             PresentAddress = "Munshiganj",
@@ -29184,6 +31299,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01956019568",
                             MotherName = "Hajera Begum",
                             NID = "2512653",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512653.jpg",
                             PresentAddress = "Munshiganj",
@@ -29223,6 +31342,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01816254545",
                             MotherName = "Hasina Akhter",
                             NID = "2512654",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512654.jpg",
                             PresentAddress = "Munshiganj",
@@ -29262,6 +31385,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01997809936",
                             MotherName = "Nazma Begum",
                             NID = "2512655",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512655.jpg",
                             PresentAddress = "Munshiganj",
@@ -29301,6 +31428,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01921698511",
                             MotherName = "Saleha Begum",
                             NID = "2512656",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512656.jpg",
                             PresentAddress = "Munshiganj",
@@ -29340,6 +31471,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01917708235",
                             MotherName = "SHIRIN ARA BEGUM",
                             NID = "2512657",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512657.jpg",
                             PresentAddress = "Munshiganj",
@@ -29379,6 +31514,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01917708214",
                             MotherName = "MAKSUDA BEGUM",
                             NID = "2512658",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512658.jpg",
                             PresentAddress = "Munshiganj",
@@ -29418,6 +31557,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01718334087",
                             MotherName = "GITA MUKHERZI",
                             NID = "2512659",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512659.jpg",
                             PresentAddress = "Munshiganj",
@@ -29457,6 +31600,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01917558794",
                             MotherName = "LUTFA BEGUM",
                             NID = "2512660",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512660.jpg",
                             PresentAddress = "Munshiganj",
@@ -29496,6 +31643,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01918876633",
                             MotherName = "HAZI MD BORHAN UDDIN",
                             NID = "2512661",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512661.jpg",
                             PresentAddress = "Munshiganj",
@@ -29535,6 +31686,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01629394962",
                             MotherName = "Osima Akter",
                             NID = "2512662",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512662.jpg",
                             PresentAddress = "Munshiganj",
@@ -29574,6 +31729,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01831839128",
                             MotherName = "ULFOT BEGUM",
                             NID = "2512663",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512663.jpg",
                             PresentAddress = "Munshiganj",
@@ -29613,6 +31772,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01977755844",
                             MotherName = "Rani sarkar",
                             NID = "2512664",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512664.jpg",
                             PresentAddress = "Munshiganj",
@@ -29652,6 +31815,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01868211832",
                             MotherName = "Halima Begum",
                             NID = "2512665",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512665.jpg",
                             PresentAddress = "Munshiganj",
@@ -29691,6 +31858,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711705109",
                             MotherName = "MOSHAMMAD FATEMA BEGUM",
                             NID = "2512666",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512666.jpg",
                             PresentAddress = "Munshiganj",
@@ -29730,6 +31901,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912402712",
                             MotherName = "MOSHAMMAD FATEMA BEGUM",
                             NID = "2512667",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512667.jpg",
                             PresentAddress = "Munshiganj",
@@ -29769,6 +31944,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01686205098",
                             MotherName = "Fatema Begum",
                             NID = "2512669",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512669.jpg",
                             PresentAddress = "Munshiganj",
@@ -29808,6 +31987,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01760878639",
                             MotherName = "HANUFA BEGUM",
                             NID = "2512670",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512670.jpg",
                             PresentAddress = "Munshiganj",
@@ -29847,6 +32030,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01996532440",
                             MotherName = "Begum Rahima Shikder",
                             NID = "2512671",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512671.jpg",
                             PresentAddress = "Munshiganj",
@@ -29886,6 +32073,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01716930161",
                             MotherName = "FATEMA BEGUM",
                             NID = "2512672",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512672.jpg",
                             PresentAddress = "Munshiganj",
@@ -29925,6 +32116,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "019965324401",
                             MotherName = "Rubi Begum",
                             NID = "2512673",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512673.jpg",
                             PresentAddress = "Munshiganj",
@@ -29964,6 +32159,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01313560055",
                             MotherName = "Mosa.Habibun Nessa",
                             NID = "2512674",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512674.jpg",
                             PresentAddress = "Munshiganj",
@@ -30003,6 +32202,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715166312",
                             MotherName = "Parboti Bala Saha",
                             NID = "2512675",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512675.jpg",
                             PresentAddress = "Munshiganj",
@@ -30042,6 +32245,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01775676869",
                             MotherName = "SALEHA BEGUM",
                             NID = "2512676",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512676.jpg",
                             PresentAddress = "Munshiganj",
@@ -30081,6 +32288,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01818179584",
                             MotherName = "MD CHAND MIAH",
                             NID = "2512677",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512677.jpg",
                             PresentAddress = "Munshiganj",
@@ -30120,6 +32331,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01977202554",
                             MotherName = "JARINA KHATUN",
                             NID = "2512678",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512678.jpg",
                             PresentAddress = "Munshiganj",
@@ -30159,6 +32374,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911296125",
                             MotherName = "Tahera Begum",
                             NID = "2512679",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512679.jpg",
                             PresentAddress = "Munshiganj",
@@ -30198,6 +32417,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01717302332",
                             MotherName = "Neyamutun Nesa",
                             NID = "2512681",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512681.jpg",
                             PresentAddress = "Munshiganj",
@@ -30237,6 +32460,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01723768109",
                             MotherName = "Jayeda Begum",
                             NID = "2512682",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512682.jpg",
                             PresentAddress = "Munshiganj",
@@ -30276,6 +32503,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01776662140",
                             MotherName = "SAMIRUN NESSA",
                             NID = "2512683",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512683.jpg",
                             PresentAddress = "Munshiganj",
@@ -30315,6 +32546,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01912916865",
                             MotherName = "ARJUARA BEGUM",
                             NID = "2512684",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512684.jpg",
                             PresentAddress = "Munshiganj",
@@ -30354,6 +32589,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911737830",
                             MotherName = "NAZMA BEGUM",
                             NID = "2512685",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512685.jpg",
                             PresentAddress = "Munshiganj",
@@ -30393,6 +32632,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "017729834991",
                             MotherName = "Saleha Begum",
                             NID = "2512707",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512707.jpg",
                             PresentAddress = "Munshiganj",
@@ -30432,6 +32675,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715422126",
                             MotherName = "FAZILATUN NESSA",
                             NID = "2512686",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512686.jpg",
                             PresentAddress = "Munshiganj",
@@ -30471,6 +32718,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712026186",
                             MotherName = "DUD BAHAR",
                             NID = "2512687",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512687.jpg",
                             PresentAddress = "Munshiganj",
@@ -30510,6 +32761,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01940829629",
                             MotherName = "Nilufa yeasmin",
                             NID = "2512688",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512688.jpg",
                             PresentAddress = "Munshiganj",
@@ -30549,6 +32804,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01554444477",
                             MotherName = "Sahana Begum",
                             NID = "2512689",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512689.jpg",
                             PresentAddress = "Munshiganj",
@@ -30588,6 +32847,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715067198",
                             MotherName = "Begum Hasna",
                             NID = "2512690",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512690.jpg",
                             PresentAddress = "Munshiganj",
@@ -30627,6 +32890,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "017113196621",
                             MotherName = "HAMIDA BEGUM",
                             NID = "2512691",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512691.jpg",
                             PresentAddress = "Munshiganj",
@@ -30666,6 +32933,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711319667",
                             MotherName = "Rezia Khanam",
                             NID = "2512692",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512692.jpg",
                             PresentAddress = "Munshiganj",
@@ -30705,6 +32976,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711708946",
                             MotherName = "Dil Jahan Begom",
                             NID = "2512693",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512693.jpg",
                             PresentAddress = "Munshiganj",
@@ -30744,6 +33019,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01923936166",
                             MotherName = "Rakiba Khanam",
                             NID = "2512694",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512694.jpg",
                             PresentAddress = "Munshiganj",
@@ -30783,6 +33062,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01717173816",
                             MotherName = "Shahida Begum",
                             NID = "2512695",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512695.jpg",
                             PresentAddress = "Munshiganj",
@@ -30822,6 +33105,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01919807925",
                             MotherName = "Hosne Ara Begum",
                             NID = "2512696",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512696.jpg",
                             PresentAddress = "Munshiganj",
@@ -30861,6 +33148,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01924541756",
                             MotherName = "Runu Begum",
                             NID = "2512698",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512698.jpg",
                             PresentAddress = "Munshiganj",
@@ -30900,6 +33191,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01817031278",
                             MotherName = "AYSHA BEGUM",
                             NID = "2512701",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512701.jpg",
                             PresentAddress = "Munshiganj",
@@ -30939,6 +33234,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01722211711",
                             MotherName = "LUCKY BEGUM",
                             NID = "2512702",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512702.jpg",
                             PresentAddress = "Munshiganj",
@@ -30978,6 +33277,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01714275098",
                             MotherName = "Joy Lakshmi Halder",
                             NID = "2512703",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512703.jpg",
                             PresentAddress = "Munshiganj",
@@ -31017,6 +33320,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01917312214",
                             MotherName = "Anjuman Ara",
                             NID = "2512704",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512704.jpg",
                             PresentAddress = "Munshiganj",
@@ -31056,6 +33363,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01772983499",
                             MotherName = "Arifa sultana",
                             NID = "2512705",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512705.jpg",
                             PresentAddress = "Munshiganj",
@@ -31095,6 +33406,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01676178787",
                             MotherName = "Nigar parvin",
                             NID = "2512706",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512706.jpg",
                             PresentAddress = "Munshiganj",
@@ -31134,6 +33449,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819470288",
                             MotherName = "FATEMA AKTER",
                             NID = "2512708",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512708.jpg",
                             PresentAddress = "Munshiganj",
@@ -31173,6 +33492,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01673650456",
                             MotherName = "Shahera",
                             NID = "2512709",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512709.jpg",
                             PresentAddress = "Munshiganj",
@@ -31212,6 +33535,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711113453",
                             MotherName = "Late Anowara Begum",
                             NID = "2512710",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512710.jpg",
                             PresentAddress = "Munshiganj",
@@ -31251,6 +33578,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711048631",
                             MotherName = "SALEHA BEGUM",
                             NID = "2512711",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512711.jpg",
                             PresentAddress = "Munshiganj",
@@ -31290,6 +33621,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01981411079",
                             MotherName = "Rokeya Auyal",
                             NID = "2512712",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512712.jpg",
                             PresentAddress = "Munshiganj",
@@ -31329,6 +33664,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01918921427",
                             MotherName = "Johora Khatun",
                             NID = "2512713",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512713.jpg",
                             PresentAddress = "Munshiganj",
@@ -31368,6 +33707,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01407538271",
                             MotherName = "Suruti khatun",
                             NID = "2512714",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512714.jpg",
                             PresentAddress = "Munshiganj",
@@ -31407,6 +33750,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01710673990",
                             MotherName = "Sajada Rahman",
                             NID = "2512715",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512715.jpg",
                             PresentAddress = "Munshiganj",
@@ -31446,6 +33793,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01916156688",
                             MotherName = "MAHBUB ALAM BEPARY",
                             NID = "2512716",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512716.jpg",
                             PresentAddress = "Munshiganj",
@@ -31485,6 +33836,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "017106739901",
                             MotherName = "Nurtaj Begum",
                             NID = "2512718",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512718.jpg",
                             PresentAddress = "Munshiganj",
@@ -31524,6 +33879,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911711945",
                             MotherName = "JAYEDA KHATUN",
                             NID = "2512719",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512719.jpg",
                             PresentAddress = "Munshiganj",
@@ -31563,6 +33922,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01915462726",
                             MotherName = "ROKEYA BEGUM",
                             NID = "2512722",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512722.jpg",
                             PresentAddress = "Munshiganj",
@@ -31602,6 +33965,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01819431273",
                             MotherName = "Khorsheda Begun.",
                             NID = "2512723",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512723.jpg",
                             PresentAddress = "Munshiganj",
@@ -31641,6 +34008,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01715121327",
                             MotherName = "LATE. SURUCHI DATTA",
                             NID = "2512724",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512724.jpg",
                             PresentAddress = "Munshiganj",
@@ -31680,6 +34051,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01407499565",
                             MotherName = "Shahid Begum",
                             NID = "2512725",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512725.jpg",
                             PresentAddress = "Munshiganj",
@@ -31719,6 +34094,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01857876395",
                             MotherName = "Vulu Rani Pal",
                             NID = "2512726",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512726.jpg",
                             PresentAddress = "Munshiganj",
@@ -31758,6 +34137,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01712093677",
                             MotherName = "SHIREEN AKHTER",
                             NID = "2512728",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512728.jpg",
                             PresentAddress = "Munshiganj",
@@ -31797,6 +34180,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01727431263",
                             MotherName = "LAILA AKTER",
                             NID = "2512729",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512729.jpg",
                             PresentAddress = "Munshiganj",
@@ -31836,6 +34223,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01911134491",
                             MotherName = "Salina Akter",
                             NID = "2512730",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512730.jpg",
                             PresentAddress = "Munshiganj",
@@ -31875,6 +34266,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01752504005",
                             MotherName = "SURAYA BEGUM",
                             NID = "2512731",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512731.jpg",
                             PresentAddress = "Munshiganj",
@@ -31914,6 +34309,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01918447655",
                             MotherName = "Abida Sultana",
                             NID = "2512732",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512732.jpg",
                             PresentAddress = "Munshiganj",
@@ -31953,6 +34352,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "017274312631",
                             MotherName = "Sanzida Huq",
                             NID = "2512734",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512734.jpg",
                             PresentAddress = "Munshiganj",
@@ -31992,6 +34395,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01786984562",
                             MotherName = "SANZIDA HUQ",
                             NID = "2512735",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512735.jpg",
                             PresentAddress = "Munshiganj",
@@ -32031,6 +34438,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01711276230",
                             MotherName = "Ayesha Akhter",
                             NID = "2512737",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512737.jpg",
                             PresentAddress = "Munshiganj",
@@ -32070,6 +34481,10 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MobileNo = "01918799780",
                             MotherName = "LATE NURUN NAHAR",
                             NID = "2512740",
+                            NotifyEventCreation = true,
+                            NotifyParticipationApproval = true,
+                            NotifyRegistrationUpdate = true,
+                            NotifyRelevantUpdates = true,
                             PermanentAddress = "Munshiganj",
                             PhotoPath = "uploads/members/seed/2512740.jpg",
                             PresentAddress = "Munshiganj",
@@ -53517,7 +55932,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 1,
                             MustChangePassword = false,
                             PasswordHash = "$2a$11$yUryc8gFlef8/.jJugVivORnhn76z3IW1HsiAiRjrIvZfPltqSlaC",
-                            SecurityStamp = "21e8c25cd3b34c64b6a0e3b6496574f7",
+                            SecurityStamp = "e8f90e1b0b3c4d01ae4072a8e1c52de7",
                             Username = "superadmin"
                         },
                         new
@@ -53529,7 +55944,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 200,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bgubY.ogZhVPp1a9u1gOGO.TcAj/i.YL2cPSPlJwpxVZlD0MLMOQW",
-                            SecurityStamp = "98ff61e571684e4c8ffc42a2e11eb599",
+                            SecurityStamp = "3fd28cc8850f466ba7dfeee9fe49beea",
                             Username = "2512003"
                         },
                         new
@@ -53541,7 +55956,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 201,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GswHdfsQ2UU.u9HTVWOABO34k6NqHcbA62P0PvOwJj3x0fpSnSmwO",
-                            SecurityStamp = "8efafdff10a04b6ba1e06b783af7f691",
+                            SecurityStamp = "858e8ff8353849c68ca6bc5ff8d412bc",
                             Username = "2512005"
                         },
                         new
@@ -53553,7 +55968,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 202,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ot6i0lsF.4cOAQR9ywj4weyLdnsozY9kjyxvL/j3DK7IxQdX/mPsO",
-                            SecurityStamp = "47cc6af6d3ba400dac388b42bbcc07c7",
+                            SecurityStamp = "42786abc5ac74d36a9550560ef4a8dd1",
                             Username = "2512006"
                         },
                         new
@@ -53565,7 +55980,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 203,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SH3DYAgJF5VK7EmjDzKKb./Ni/EEGzYwN9V9uhgVxQECQmut6Njcm",
-                            SecurityStamp = "33d2a2b96d754ade929dd6211db08c60",
+                            SecurityStamp = "8ad9e37f3f284d88b0ffb3b1176d6231",
                             Username = "2512012"
                         },
                         new
@@ -53577,7 +55992,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 204,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yzia1Wp2nkIOyVSVJkFzxuXZcmTbBc4HpfJAsj0Bd0sUGzkbx08LC",
-                            SecurityStamp = "e39e667fd9b04ebcb64fc5ac5c9d3a68",
+                            SecurityStamp = "1eb484e41ab941c0bd7b3c746a6f2f34",
                             Username = "2512017"
                         },
                         new
@@ -53589,7 +56004,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 205,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FroDWG5yM7eKy1UIMyVJDOaCViX5MCKCqFNJ2Y.on7a5.pJitrGGe",
-                            SecurityStamp = "b9ea6c141c444d2799fa4547b85a2334",
+                            SecurityStamp = "445b27c16d8a47a5b16fcc06625d7481",
                             Username = "2512019"
                         },
                         new
@@ -53601,7 +56016,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 206,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sjAYFMX9Xx7waH1veUkMnuuye0Y2KtmxLP4f5aViETDuZrjR8exs2",
-                            SecurityStamp = "a8c929766df04112bc25a8faaa4319ac",
+                            SecurityStamp = "58b37ba5ebbd4ba99e9c358a89412949",
                             Username = "2512020"
                         },
                         new
@@ -53613,7 +56028,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 207,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BObIOXSpydLB2Pivmn.9Q.Sm4kibw5I.JGPSFCo9Px6Z.n5pRq3We",
-                            SecurityStamp = "13bb74c12b704a458355ec45001f971f",
+                            SecurityStamp = "e165ceacb48f4ff184b9a2468ff969ce",
                             Username = "2512022"
                         },
                         new
@@ -53625,7 +56040,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 208,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3fPqklIq.onxVlEe4etzyOYKM7dto6t4ErV/S7SGebeGzzNASG0C.",
-                            SecurityStamp = "91bea8d5448d4516be5c245fd49ac519",
+                            SecurityStamp = "aa66aa936b124701958b4f981a8f318f",
                             Username = "2512023"
                         },
                         new
@@ -53637,7 +56052,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 209,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c8qJ6DVCCZ9GwnXfLCmchuijnaHBazZ0dSI53RAbiV9B.AVM7yAcC",
-                            SecurityStamp = "e7ce5f79a0bd425b844f2862e2f4c82b",
+                            SecurityStamp = "3ac2dd6ad8fd449a8861dc48b9214795",
                             Username = "2512027"
                         },
                         new
@@ -53649,7 +56064,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 210,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jkrkiQFBxvdP2mB1ZMVJ8ublLVTSG4zvAMy4JirXV62u9pkXH1RJa",
-                            SecurityStamp = "3cace72133a44fd7a1d2fe6d7c88444e",
+                            SecurityStamp = "befda44e313d49e99e97568f44fb0ff4",
                             Username = "2512028"
                         },
                         new
@@ -53661,7 +56076,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 211,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FOIsMTT98frgxV2VHeTDou7EqFzUCtdxoPdzHMFW/qTCxoJ7vLBEi",
-                            SecurityStamp = "2cc1f8583b0d4929a601a122c1b2def6",
+                            SecurityStamp = "828df5c8ff134862933224802765500a",
                             Username = "2512029"
                         },
                         new
@@ -53673,7 +56088,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 212,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sd/4srhUSAUbYH.uhdRS6OD7pZ.35Oq.jErojcr7CbBAXa2U5mYWi",
-                            SecurityStamp = "231107a7a37e488dbba9cbbc4bec65f8",
+                            SecurityStamp = "7a7c0b356c03497cac0f81f5bb81b21f",
                             Username = "2512030"
                         },
                         new
@@ -53685,7 +56100,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 213,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Vvvr0eq.g.2duX8iRqKSyO6G4upeGvQ0Swf/0zwc1xI8q1np67Yze",
-                            SecurityStamp = "a5ffdadcc34c40b79519e5d3e6812788",
+                            SecurityStamp = "c41507b6c5c6438c89cd712a4b051744",
                             Username = "2512031"
                         },
                         new
@@ -53697,7 +56112,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 214,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Q/HX3VYn8onko1hpqVIEvOHWxFpk6gQPdfPjQDxBg7iRhqtl2HU26",
-                            SecurityStamp = "e174522f25474f3cbc31c5fbe010b700",
+                            SecurityStamp = "0ae77dfb7f664398b6e3e63e418875df",
                             Username = "2512032"
                         },
                         new
@@ -53709,7 +56124,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 215,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3IBC46Jz4XRmo2djZtySL.pi2khNr3vDno5MuhbJy9mpMWI2Qo.AS",
-                            SecurityStamp = "458243ec901347d7aae9cee1c6011f1e",
+                            SecurityStamp = "10d3ecb8f1384d8fb579680e45294700",
                             Username = "2512033"
                         },
                         new
@@ -53721,7 +56136,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 216,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hbigLerJb5XN9wR9ldlvIuY31FMG41TCIXmouS45t8DP9bseQAjmu",
-                            SecurityStamp = "7c292aaea47240508703ef40c6169180",
+                            SecurityStamp = "6b64757ad1854b23a56f04045d351797",
                             Username = "2512034"
                         },
                         new
@@ -53733,7 +56148,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 217,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6yL/0jYdnQeXDzQYCPKDUe07IMhlwoX/WiAasKTHm4m2wqZENEud6",
-                            SecurityStamp = "400d7cf30f7d40418a0921d2e95cefa8",
+                            SecurityStamp = "76969b9bac5b43e5b2b08e7c2aa656e2",
                             Username = "2512035"
                         },
                         new
@@ -53745,7 +56160,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 218,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ecFyIwzmUwW355fXnvPchOOnAuhD6kjOb983y8efFaUoe0BBOBfFC",
-                            SecurityStamp = "e45ba39509f5417aba694071d4d96900",
+                            SecurityStamp = "1746a9d4c6ec43ca95eda0037a993400",
                             Username = "2512036"
                         },
                         new
@@ -53757,7 +56172,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 219,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qBLPEMDxHccS3JZ00A5HhuEHt/crwfRJ.Ww71ebbfXw8GsL6/Tzqq",
-                            SecurityStamp = "73676ccb20164afba61e82ed9fc24098",
+                            SecurityStamp = "7b6d8711431f484b8372a8e3d63ee4de",
                             Username = "2512038"
                         },
                         new
@@ -53769,7 +56184,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 220,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Tfzzp/ndua.KqkZpDAHujuXUP8gMlWonyYFFm5zLvFO4glM95oKXO",
-                            SecurityStamp = "de53cf45bad447af88ce36ae48585f44",
+                            SecurityStamp = "c8df01252a264bb98bbfb095c272f8e1",
                             Username = "2512040"
                         },
                         new
@@ -53781,7 +56196,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 221,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lBML/L8BfT93.lPjK74XieeHlezjfW/YQbbf3a2Ux35OyFSiTzCoK",
-                            SecurityStamp = "1c74b3075af94f04bb27f90d957b7f2b",
+                            SecurityStamp = "d8d428f4e2ad46969e69b108f76bf357",
                             Username = "2512043"
                         },
                         new
@@ -53793,7 +56208,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 222,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IYI5nC8pXeC/ILLKxDSlrO79.go6w9zNd7Bfxl.6k5inDGugVDYMq",
-                            SecurityStamp = "b58af16812664bdf976072c92346beba",
+                            SecurityStamp = "60b5b1c7a64448348d1e0e8b583a8d21",
                             Username = "2512044"
                         },
                         new
@@ -53805,7 +56220,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 223,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IdHcoYSrZnybG5.4f5Puaun5T7wabOwbM6csvPonQA5lo/NzVnFO6",
-                            SecurityStamp = "fb0630e3e0174c55b7506c117cb9f52e",
+                            SecurityStamp = "bacca2efca4648caaad5290c13bd32aa",
                             Username = "2512046"
                         },
                         new
@@ -53817,7 +56232,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 224,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2peWn1OG6FBJGuimYZ0i7uGqBTZO.OCw3nb.u2Kr0GoA5IuLx6pMO",
-                            SecurityStamp = "0ce3ffaaf0794796b97b9f90b50a6bd1",
+                            SecurityStamp = "691879bec550484fa675e7fe382e87e8",
                             Username = "2512047"
                         },
                         new
@@ -53829,7 +56244,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 225,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$l2RCWgEBOsjemOK9K8afm.MWd.r0WO4UyRPSXqb.c5t6tWx8gVp5C",
-                            SecurityStamp = "f2c10b54bf784a81b314ab22933164f0",
+                            SecurityStamp = "55449cac4384494d97f2fccbc4abc1cb",
                             Username = "2512049"
                         },
                         new
@@ -53841,7 +56256,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 226,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$huagvDMeI.38NroiYG1A8.OsUO0HgUw96.hmlq/5eCu/oMXN4ejqi",
-                            SecurityStamp = "7cf2c07f73d745a5bd3aca3a7900e7d0",
+                            SecurityStamp = "245c027522454dfb84f15fa5f81d9973",
                             Username = "2512050"
                         },
                         new
@@ -53853,7 +56268,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 227,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DAnoVijefS0kepPjQP33jeT.Rd/w91.JhsL9WLIvXIbBaHPFm6KJW",
-                            SecurityStamp = "8106e81d6f404f6d90dfe6ed5c38f39a",
+                            SecurityStamp = "c7ba147acf9548308030b3f4117427c0",
                             Username = "2512051"
                         },
                         new
@@ -53865,7 +56280,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 228,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TswhKg4wsZpaf24GbxzsseoG8i4UpSVBYvwqMsEgNIIDE0n2tbz96",
-                            SecurityStamp = "94b3a24c714b49979dec9b356ce055dc",
+                            SecurityStamp = "1bc92e4df71f4a559abfc071afd9bbd2",
                             Username = "2512052"
                         },
                         new
@@ -53877,7 +56292,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 229,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0T.Z4xzwPqsmTk9HP1w0pebWFXb4dGLc3Q3sFSBjn/mPNjz3pPAM2",
-                            SecurityStamp = "bdad43c27a0d4d76b56bebc2cc29d5b9",
+                            SecurityStamp = "fef00c86359945e78dd5b61154358a64",
                             Username = "2512053"
                         },
                         new
@@ -53889,7 +56304,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 230,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IAo2Q35WqBJ0RaPhhqXpT.Bgf6.zDYAXeJ4RQ.8lVMC.J4Vet.xme",
-                            SecurityStamp = "d387ea42367549c18d97eac7fb93b067",
+                            SecurityStamp = "b4ae2af98ae4460eb2fea58a7eb0e3c2",
                             Username = "2512054"
                         },
                         new
@@ -53901,7 +56316,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 231,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$R8xhLpPU8G8/rUhqeqz19.cG5vhjcr1LBsKl77rtJqVa4zPOmrBbK",
-                            SecurityStamp = "14ad07f9451846a2a6a1c872cf6ca0c5",
+                            SecurityStamp = "478bd7f83a7147a0a8481e8635b6771a",
                             Username = "2512055"
                         },
                         new
@@ -53913,7 +56328,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 232,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hzr1aVzQNOcQbgHc.egDIuFX4obw5OZiYRiJL6Ij.1o50iHnJhm1i",
-                            SecurityStamp = "b378744384e64520b46ec5291b23d9a0",
+                            SecurityStamp = "3eb935caa5b549698fa880b4bdaadccc",
                             Username = "2512056"
                         },
                         new
@@ -53925,7 +56340,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 233,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$p5eGZKVa.dmM0vG0I8g64.G7T13MTpz2T4EDWSpjA5GbFCqc3J0J.",
-                            SecurityStamp = "839465fb36214d07976cc8bf78e61b25",
+                            SecurityStamp = "d212a700af714e0f8d8dc14e70b80ee5",
                             Username = "2512057"
                         },
                         new
@@ -53937,7 +56352,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 234,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UooJ6nrRTmbCtU82hEkYtOFUOCdkgI/Py/excA3FBE6qiOnM0iQ7u",
-                            SecurityStamp = "fd9d50f2bb0e424995a171da10e9c260",
+                            SecurityStamp = "6d64c2eab44d4e67b1a3c8624db79fff",
                             Username = "2512058"
                         },
                         new
@@ -53949,7 +56364,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 235,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jgNnEUENo5RNNuZpHjCpxOe1dIC3JniRylfrfn0aWKZLEWjXDb2MG",
-                            SecurityStamp = "3f0b7bb10188484885e58dd08b1af99d",
+                            SecurityStamp = "3d0c8da5117f449683cca1644eacb84d",
                             Username = "2512059"
                         },
                         new
@@ -53961,7 +56376,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 236,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fvzwdO4mI3BgkeFmNDrxsef2NGaWt/dbgA7eclxQFBjDc1/wiCgZW",
-                            SecurityStamp = "1525a4bc67c74a2a8ee2fe5d60801170",
+                            SecurityStamp = "7ed245492a5f4a1399cb467772aff675",
                             Username = "2512060"
                         },
                         new
@@ -53973,7 +56388,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 237,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uuwk1ykQe3lq3MC0ODv5l.MM6pSFvZ6V7BCMG5eQAVfbu9.JNW6fq",
-                            SecurityStamp = "e12827d63d1c48d1ae3ed60496f2d091",
+                            SecurityStamp = "4606ae04cecf4047a2842d7569d41837",
                             Username = "2512061"
                         },
                         new
@@ -53985,7 +56400,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 238,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PHWcZ854H9Pxa6DKmeriFOQtp/wjAfmR2d4NiSfF47EL4OkrDwPOO",
-                            SecurityStamp = "e91ed29818a642baac146cb2d24ad48a",
+                            SecurityStamp = "708d51f6e1df486cb694b9ae1fd0c22c",
                             Username = "2512064"
                         },
                         new
@@ -53997,7 +56412,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 239,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$z1GAxLd4qHnOakhUwxujH.xQPsYH8frZYcfslqY0jVbHW.k1xZd4y",
-                            SecurityStamp = "1d3e76c811b04dccbdaa1177ad039c84",
+                            SecurityStamp = "67373f06f34f41c19ae0e3297ba9f6e1",
                             Username = "2512065"
                         },
                         new
@@ -54009,7 +56424,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 240,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$99HHq/mtvBHPm1RCrY04me3cPvjeQxDud09pE.Z2T1bIdYzGDyfjO",
-                            SecurityStamp = "64430f8310794e419e55b55e88dde27d",
+                            SecurityStamp = "dc1a1028264d4099a870aa89d3fd464f",
                             Username = "2512066"
                         },
                         new
@@ -54021,7 +56436,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 241,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nLCQdYoxUHLBSZ/LnEsxCugKrHN1driQ4iILiI60QoAaD8gk3G3oi",
-                            SecurityStamp = "926664c0eb6f4627969d2e803582ed1e",
+                            SecurityStamp = "2bdf7c6bd9b4418782336c1898affdf3",
                             Username = "2512067"
                         },
                         new
@@ -54033,7 +56448,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 242,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mR1RwTm7zczFiy/mJFWQuunhicDun8HqQ8kql2uTg7I/IE3XG4DnC",
-                            SecurityStamp = "886874b90c9740a0896065e09b7403ed",
+                            SecurityStamp = "10de7cb71f8f430fbb14f6985748d56d",
                             Username = "2512069"
                         },
                         new
@@ -54045,7 +56460,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 243,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yEDpD8jrOd/jKUnyD.zEHu0FmvjnlhWkrWQ.GF5Aacp/vjm.gw/EC",
-                            SecurityStamp = "49ec6deba8934667b6ef51d7314874e3",
+                            SecurityStamp = "e55c28d1b8734268950335138cde78ce",
                             Username = "2512070"
                         },
                         new
@@ -54057,7 +56472,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 244,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yTrtbtEpElLgkuLm5W6w/u0cykzKjbRozU2Vaj4CbU6tyyqlJsSae",
-                            SecurityStamp = "163f9512deb442938b24257f9590d544",
+                            SecurityStamp = "20fee06d750c4da2b179921bad3533fb",
                             Username = "2512071"
                         },
                         new
@@ -54069,7 +56484,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 245,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wB3InvMG4zC5T8fJgVype.o5rA.X5wrJWb5rgaQL8uazaeIek5S6e",
-                            SecurityStamp = "1c70abd6efe8421ba30aee1704ff957f",
+                            SecurityStamp = "314ea7f974624dd288795d89bc19d509",
                             Username = "2512072"
                         },
                         new
@@ -54081,7 +56496,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 246,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Jiw8jBRBQvkGAbNIKSvZd.ijCgv5CEeGJB5/9PKZ4Gwi6YV167vqS",
-                            SecurityStamp = "c7bcdeb10b7240f9bb324856e67a8cce",
+                            SecurityStamp = "0ba04d7f93c543e791318509f094c141",
                             Username = "2512073"
                         },
                         new
@@ -54093,7 +56508,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 247,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/jPyJxAceF7BwXolL8EA3.aqEPKVDIKT9KYFqk.W8fUT8.UsLN7tW",
-                            SecurityStamp = "1b2d93d0331a47dc8def20da5975990e",
+                            SecurityStamp = "7d97f6e3f7fd414b96a24a989c75d531",
                             Username = "2512074"
                         },
                         new
@@ -54105,7 +56520,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 248,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hQX.YOIqWapiLMkpyg8APuGzDeDlIgxR.6MXVKHZ2o56h6Heo.4Fa",
-                            SecurityStamp = "1e17ce7717184865ba447937aa24cd10",
+                            SecurityStamp = "7f332d256c3e451f9a26a699d14e7a7a",
                             Username = "2512075"
                         },
                         new
@@ -54117,7 +56532,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 249,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$iQ13/1tKF80UAJveLDLFguh4Lc4RbZwJw192pLuplII3WGoF5s09i",
-                            SecurityStamp = "c6e5e8b2b455462d9de14ed60ab09ae7",
+                            SecurityStamp = "8491d4cb84ea4316a51ad1a2410b7353",
                             Username = "2512078"
                         },
                         new
@@ -54129,7 +56544,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 250,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Js4IcDp9uQJ8rne5Rrc5uu6PJNKcIbwnQ1RF6jRZ2Az.75.wXZ4Ly",
-                            SecurityStamp = "3f58c70e28f047fdbd2e7396df260615",
+                            SecurityStamp = "f3516c4085d34f76abc6d426e269aa50",
                             Username = "2512079"
                         },
                         new
@@ -54141,7 +56556,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 251,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uBn.12b6og8EiTdh8CETU.pPvTAfym3ZAf44m1LWNYFeAmyP/67ne",
-                            SecurityStamp = "89108a8357f247f4ae38cb0b4335342f",
+                            SecurityStamp = "1b79bb0314e346858ad9218cd1a92a60",
                             Username = "2512080"
                         },
                         new
@@ -54153,7 +56568,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 252,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Q0X1/3rETAQVIKU82qnORuMwgAWqHxTnLfDgP0B6m1BiFo49QmR/q",
-                            SecurityStamp = "1cfd63bfc1a1440e81d137ea85615d5b",
+                            SecurityStamp = "86eca4cd0af54a47b45aa3f81ced215f",
                             Username = "2512082"
                         },
                         new
@@ -54165,7 +56580,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 253,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$QNURF1eYiLroyKonTNtN/.jdA5valfh9.OaTnoJ914G7Q4tAU/rO6",
-                            SecurityStamp = "b62f22a66e164ffaa9bd9bb0d176809b",
+                            SecurityStamp = "97ac0e6134ee4b3e8cae938095320f30",
                             Username = "2512083"
                         },
                         new
@@ -54177,7 +56592,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 2,
                             MustChangePassword = false,
                             PasswordHash = "$2a$11$CQ4KnTDZ7qUQMNre86iruOpgOx8fEoMe2G3RF/1U4cCLa5ltYtE1O",
-                            SecurityStamp = "c0696771fd9a4891829140da5e7c3028",
+                            SecurityStamp = "436a903a017a4a4fb9f1eca1ee5065f8",
                             Username = "shalin"
                         },
                         new
@@ -54189,7 +56604,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 254,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YggMlVwR2YYI63Fh/g7ZXO4ehlF3pF7DtF4dLYntImT0DdyhjNoC2",
-                            SecurityStamp = "debd87ab7a52485793b2e039c4986ccc",
+                            SecurityStamp = "a0160de30e67478fa489d1f5bb810b5b",
                             Username = "2512084"
                         },
                         new
@@ -54201,7 +56616,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 255,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7c1B1sXuKhQ5RObsq/Qy5equot2piRcX6yuDequm/YBAVBG9Xyc3q",
-                            SecurityStamp = "c217bdb2abb64c32b85a4c4ca3fafdae",
+                            SecurityStamp = "f9400865d1e2486697cd107b14b8e167",
                             Username = "2512087"
                         },
                         new
@@ -54213,7 +56628,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 256,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e6qToIGQ/8boC.vNZOEWSOIWQPVQhfAuXwm216ftYrjppSJ63zYKe",
-                            SecurityStamp = "a0fff76bd26c405ea83bb337b506feb1",
+                            SecurityStamp = "a968c12ec9ab4733b7d5778ec8ed2905",
                             Username = "2512088"
                         },
                         new
@@ -54225,7 +56640,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 257,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZmW2bUHD19R1nn3jWTgMZ.vdSHZvhVxxH7048Nm/HV4eYOHxip8sO",
-                            SecurityStamp = "b9232979b4d6461fae54622903fe415d",
+                            SecurityStamp = "dd268041d536474196f8b3d749b11cd8",
                             Username = "2512089"
                         },
                         new
@@ -54237,7 +56652,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 258,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nvQpIFK2KEFZS5z1wL4vAO/OgBfjG96G3X8soOtxBK8VL7BDxqj8O",
-                            SecurityStamp = "30676933b0284b818ce0872ba2f1f995",
+                            SecurityStamp = "847c78539bfe4d078abed6d7857a8f40",
                             Username = "2512091"
                         },
                         new
@@ -54249,7 +56664,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 259,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pryB1BU30ZR5IDdvBTgcr.IQ6yYlWoYxhOSQirA3aImkMdu.wzpXO",
-                            SecurityStamp = "f7dd0f9c9aa745388674618a18df096a",
+                            SecurityStamp = "429e173a24ee421fa7b6c43ea9715ea9",
                             Username = "2512092"
                         },
                         new
@@ -54261,7 +56676,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 260,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$64Gpwh5gd9lK/Qa/M7T0GeuDsjET7V2HmlxL0zoDa3Ab0QNZNTIru",
-                            SecurityStamp = "08e473884de743e5b7684a93dff30ae5",
+                            SecurityStamp = "56cf4b9577e642a79c80cb28d29efb50",
                             Username = "2512093"
                         },
                         new
@@ -54273,7 +56688,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 261,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5nVU/BWRCh5XVs1W8qj7z.pftPt62rWB8lQOZowFXap3K9Al4jrXa",
-                            SecurityStamp = "54702f4f1bb94de3a042de2180883489",
+                            SecurityStamp = "ad6316432c484a02989bcc0152c3a873",
                             Username = "2512094"
                         },
                         new
@@ -54285,7 +56700,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 262,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Xg8kewDW11gXSe4ry3Ot3uEy3OHuNCq52dC2.lhyjwI4HxqWMoc/y",
-                            SecurityStamp = "2a865d83b0644859848dee1dc682b413",
+                            SecurityStamp = "ca8c2897d14d46da8abb225b8c0ad000",
                             Username = "2512095"
                         },
                         new
@@ -54297,7 +56712,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 263,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RmcwCsxIINqn7yDGq6qWV.PVYTilAXr9AFqn3iyOgpbumwcKqrtRW",
-                            SecurityStamp = "86314ffbe9a741d9a32e1a13393a6b00",
+                            SecurityStamp = "476f003b135c4b70b74e6b3a703be5f2",
                             Username = "2512096"
                         },
                         new
@@ -54309,7 +56724,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 264,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vV0OA1REbWKvf4R78R7dru1XFTyHhMlNIdJbkc6OjiWRRtnbYkJCe",
-                            SecurityStamp = "8e93b1fc460145eb9a7dd53b1a5421a1",
+                            SecurityStamp = "e0741fe0f5e44fd3be730cfac5c1ecd2",
                             Username = "2512097"
                         },
                         new
@@ -54321,7 +56736,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 265,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IyLCepNGcnHtp0MHIfKEC.kE8SNRXCfoWFweCaBPDA09LE.8Q.BB.",
-                            SecurityStamp = "c156780c114a463ab0ac4d1af85f5bf7",
+                            SecurityStamp = "9bfd30f3028c47c699bdfbbde095e855",
                             Username = "2512098"
                         },
                         new
@@ -54333,7 +56748,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 266,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aIPOPlEEqZKqsr7HdHpfPeeNM8OgKu7M2SQlKH0MfsbOIeKIIfqN.",
-                            SecurityStamp = "3e54ed96ee464b26bd11161d1dc09213",
+                            SecurityStamp = "46cbe4b1f8a1429682e2d0f4b7540c05",
                             Username = "2512099"
                         },
                         new
@@ -54345,7 +56760,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 267,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7AXJ/cZfy2B05wJzhMX/7uwEiWNDIew0de6qdZ79BQ6TpHYbbvRNy",
-                            SecurityStamp = "68aa8987296b4c45b6514e9281a61d2c",
+                            SecurityStamp = "453c9f97dfcd470b9145f97b289ba7d1",
                             Username = "2512101"
                         },
                         new
@@ -54357,7 +56772,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 268,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fq3X2HYr.3w7LqwWK/vebekGsnhak246dx1UEMnmxalwd5yxbHioa",
-                            SecurityStamp = "f1517b3df8a1414a822d14d5cc4db083",
+                            SecurityStamp = "77575fbd73ed4eaf841e8ae63dd25f3f",
                             Username = "2512102"
                         },
                         new
@@ -54369,7 +56784,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 269,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$b4hLTu.hzeB8uSAGXZvlyuvCUyJNSxSdLmSdmbOVeUEk/TmtXPOzK",
-                            SecurityStamp = "cbdb4add0fb14f91b4c83e948bada2f5",
+                            SecurityStamp = "dd1be77cdf62457087e5d0560c534f50",
                             Username = "2512103"
                         },
                         new
@@ -54381,7 +56796,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 270,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c/ZVnrJFjAjnrYVBGLmTmOfS667ykLC/MUZSIrLJeZlpSInZQ11nC",
-                            SecurityStamp = "644a3e9025364cd2a5cc3fde2c208468",
+                            SecurityStamp = "de22b9b8bb8c496c8465604206309024",
                             Username = "2512105"
                         },
                         new
@@ -54393,7 +56808,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 271,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jW52iwpE30og6RKdkHCDVurYSv9OFiHgove74JvCDRQ4TruvaDOcu",
-                            SecurityStamp = "b6205c3b7f4f484697847e0d7f752dc4",
+                            SecurityStamp = "c8fc36dbd4814b8384245be1d704875b",
                             Username = "2512106"
                         },
                         new
@@ -54405,7 +56820,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 272,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yLQYQTx20ue7UbAxRr/TEe/UBoPc8U65Sj4uwr0BnRcS.pSt5E.xW",
-                            SecurityStamp = "19af41d322d348b586ff579ecd5d6449",
+                            SecurityStamp = "c8c2afe6845348ffa0264a7551a19019",
                             Username = "2512107"
                         },
                         new
@@ -54417,7 +56832,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 273,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$itzxkWW7WGwL.StbpIJhXeUFlAjxopyXh17rcss8dnb44zNrS4e22",
-                            SecurityStamp = "d96d1c14a7c746e79a73eb40f317f7fe",
+                            SecurityStamp = "d1d0737d71654d008bd1d48e0ace1d72",
                             Username = "2512108"
                         },
                         new
@@ -54429,7 +56844,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 274,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IaSy98P3YocAUHiTQUFXce8VP0pqncb5GLc7wjVKMdKkfLYSsvTE.",
-                            SecurityStamp = "8085e6f81431433abc6d183cdfba69d6",
+                            SecurityStamp = "2564469f230b4262860b1e64ce765dfa",
                             Username = "2512110"
                         },
                         new
@@ -54441,7 +56856,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 275,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rl3PmUybSdEhWFcsBECms.VE4ZtoAnr48CQ90.n.rOm72jV1AeFpS",
-                            SecurityStamp = "1ffade5d9c794928b867037728f5e662",
+                            SecurityStamp = "75ef7fffee454a02b270b653572f04f3",
                             Username = "2512111"
                         },
                         new
@@ -54453,7 +56868,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 276,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wjim..rbcPH4Y3MVRxseoubvxcINUu8DSu3yxdo.Y4910zB3fDtfi",
-                            SecurityStamp = "04f37a6aa4b844bca0bb66490984af2e",
+                            SecurityStamp = "d74494ff0cd14cd1866fb49074cc6631",
                             Username = "2512112"
                         },
                         new
@@ -54465,7 +56880,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 277,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sWtqEtdLNN2/0/BSzj4I9uvxHzg0k9Ws2MyQXEXWg1EQqY4M6PYYm",
-                            SecurityStamp = "030feb94bf724654a821131bb4f45467",
+                            SecurityStamp = "267c85b4de1f4564a6f1f5ad4dfa4dbc",
                             Username = "2512113"
                         },
                         new
@@ -54477,7 +56892,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 278,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KUtYtBNvqfzNJPnQtsiyYuz7aK816q1ur7fSLasU90.WOEt1kaCd.",
-                            SecurityStamp = "e17ebb3acc5e49d79ecb5fdb0c09959c",
+                            SecurityStamp = "c8dbfd3890074abc872c9cca8738f4b5",
                             Username = "2512114"
                         },
                         new
@@ -54489,7 +56904,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 279,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xClAYLs9M6WydVmErgmHBuq2Qqn5Z61qwSeSLxShWFjJQUI6ByOw2",
-                            SecurityStamp = "b9b300293243428ebde578872cbf0b6e",
+                            SecurityStamp = "5a0ffd3aa2a64135a6a8a7ab67b5d4eb",
                             Username = "2512115"
                         },
                         new
@@ -54501,7 +56916,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 280,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$R0qmzqSL2OC0ss93ksVl/ekEEd7nCUbw0M.cu52PYzy3xSw/aWOD6",
-                            SecurityStamp = "6f880eb612544854ba64d93f30d40552",
+                            SecurityStamp = "6e98aa85d2154fc2b7c94489b7ca409e",
                             Username = "2512116"
                         },
                         new
@@ -54513,7 +56928,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 281,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pwpz9EeC0tCvl6lCrHcT8.R4XKH9slsFx0MXfn69y4WsdmFt9x2gm",
-                            SecurityStamp = "9a7d66f707ee478fae0c56247309f472",
+                            SecurityStamp = "92dc91aa52a243faa7845e176ab63ac8",
                             Username = "2512117"
                         },
                         new
@@ -54525,7 +56940,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 282,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$j2e8X5Wdk7zuTlZqO96.f.Dry4.sz/zgQdJ.uGzU1x/G/lKAJJ1Ja",
-                            SecurityStamp = "3da0c810fa6144a6be6c61844993e01c",
+                            SecurityStamp = "d0755ed72db24abb9df9858ed5e1fb83",
                             Username = "2512118"
                         },
                         new
@@ -54537,7 +56952,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 283,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yrEr4UEk89Awlfgeiwlw8.uxT1Mw11Knu1RtGvBlTJaL2S0ojHgvW",
-                            SecurityStamp = "30c1a8be21ad40b0ac64178766726eb0",
+                            SecurityStamp = "aca459d5336e49f3a3c1c151eee2c1bb",
                             Username = "2512120"
                         },
                         new
@@ -54549,7 +56964,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 284,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$flwErxwZJKqIxYRAH5fihOptgWH84PpmpfluQE7LtPfxM9jJdR3ei",
-                            SecurityStamp = "467ec3a463ba423f84dadd3c2c1f3006",
+                            SecurityStamp = "1f008972f4664d56b9aef272f252e552",
                             Username = "2512123"
                         },
                         new
@@ -54561,7 +56976,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 285,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g7LqgKpY2YnlkX0e1ULDru5DbxxPYWixTTzqq.sPwSuMkC.fMyGyW",
-                            SecurityStamp = "d6e91c41f51e4ad3937b81e396ec387d",
+                            SecurityStamp = "34c13a742bdc4603884c48da9c4d2452",
                             Username = "2512125"
                         },
                         new
@@ -54573,7 +56988,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 286,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y4GWcYhw/AJVlHZgF/Ng1.sbcDBwiIdHs19tXkw.XYjugJBOiocGq",
-                            SecurityStamp = "0afb95ce2d5c49cb9939cb7f8a384023",
+                            SecurityStamp = "dad8670cfc5742d48836e5e87d215785",
                             Username = "2512126"
                         },
                         new
@@ -54585,7 +57000,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 287,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yWvLF.41EyRSgxEA5nOB6eRf1ZhR65irB4.nlS8msij6SwcK6shu6",
-                            SecurityStamp = "97749ebfced048c7ac713e0c5982bc53",
+                            SecurityStamp = "711e1b629aa946b39e0cc99a075db411",
                             Username = "2512127"
                         },
                         new
@@ -54597,7 +57012,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 288,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Afrra9xYamfSLqLD64/1Fep5T8ADPVecZXDVExV.ErgUx98OEiwbi",
-                            SecurityStamp = "06ffb70c47324082aa543b7643f8645d",
+                            SecurityStamp = "f74075daa8ce459dbbcef4a216f68fe8",
                             Username = "2512128"
                         },
                         new
@@ -54609,7 +57024,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 289,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ihU04rgMDkCYz94ZEjDH5OnfkuIYrlcCvHFk.HABM/3pIjCOvOOpa",
-                            SecurityStamp = "ad58871774894956b4791305d02f2523",
+                            SecurityStamp = "a7468495867d42cea18ba54e9f866edf",
                             Username = "2512129"
                         },
                         new
@@ -54621,7 +57036,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 290,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ntlxuzUOhakNlNs78a5ma.GxtWbC2SYxb/uIVY8PE73.EDTSnUjki",
-                            SecurityStamp = "eb461f14fe114bf1b5edf377216bfa4e",
+                            SecurityStamp = "2b3de48fb35a4c2596db0817634c09b8",
                             Username = "2512131"
                         },
                         new
@@ -54633,7 +57048,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 291,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XwydG761vljik4h0i9B8uOGvojLRSzH37F5WXtygO/W3VVUoGxDZ6",
-                            SecurityStamp = "f25c1621c7a44c039d5ac2d1f1390a81",
+                            SecurityStamp = "92393b4db73f44d4b3d96fef50a7afbb",
                             Username = "2512135"
                         },
                         new
@@ -54645,7 +57060,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 292,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3nnYTCwMBwXxhLKCQ2N1UOUeJZx5WVpKQ588RYYOqBYTsKiHW0YBS",
-                            SecurityStamp = "376334f5af9a4474b9c1a98fb135c9f7",
+                            SecurityStamp = "f6a5272696164fc3b565372b4ed65340",
                             Username = "2512136"
                         },
                         new
@@ -54657,7 +57072,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 293,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JiOBqgTHgU9MZxDN5vgXie3K6l/5rmjIt8PDxgONBNVmEDzOgLYJq",
-                            SecurityStamp = "62f5778a2b584ae1a36c347535ae81c0",
+                            SecurityStamp = "cb42639c208f4325ae0c49136050ed2e",
                             Username = "2512137"
                         },
                         new
@@ -54669,7 +57084,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 294,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$8.Giv6B3xhOjqZFaK7pakO7mLpHkpV3XdjDLnt.hktr3bjd2gH70W",
-                            SecurityStamp = "1fbba2dc84bb4e999a8653e0c3c9cead",
+                            SecurityStamp = "2e8649bf7bfd46d698e91f80a6fd1867",
                             Username = "2512138"
                         },
                         new
@@ -54681,7 +57096,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 295,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cv8mxB9aBEaapcK7EvNjBeGzj3f/ydOsC43sKk8pxScOZaNWHixz6",
-                            SecurityStamp = "a4684601a4454972a9c57fb6d84b5f0e",
+                            SecurityStamp = "aafbc8a18a474cca86f62a9adf8bc0cb",
                             Username = "2512139"
                         },
                         new
@@ -54693,7 +57108,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 296,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dLIktPjSPCEmiAfMKHElK./4u6m0iEec0nG7dW6QFstuJBou00hzm",
-                            SecurityStamp = "c1b6d9b672544c33bda9dea3a7af07fd",
+                            SecurityStamp = "86160270f431463f805794afeb751f3a",
                             Username = "2512140"
                         },
                         new
@@ -54705,7 +57120,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 297,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jww3ymGNLLFJ5d4JBR9JdeaeFOE/rUjOYNsCs0lXcvIzBy.Rq9Rjq",
-                            SecurityStamp = "1d2721c86d8a46c58af5ac2f79cac9ca",
+                            SecurityStamp = "17914036a9524a128f603d15fe2493a7",
                             Username = "2512141"
                         },
                         new
@@ -54717,7 +57132,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 298,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IQo7AM8JPh5m7FvmHLTiK.OkKxcwBbUY5Ja.1mDgdoMvwHKqRM2x6",
-                            SecurityStamp = "25c7579ffcf8490084b62f999e35ac2f",
+                            SecurityStamp = "d530533bad0a49d38b8009e4ed3b42d8",
                             Username = "2512142"
                         },
                         new
@@ -54729,7 +57144,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 299,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KhAkvj5Lmwy4W87T7qcEpOAqzR2AWVGe2sdIYu.tp7jg.UqYqk8/q",
-                            SecurityStamp = "33058b835de840fa9f6b043522ae9877",
+                            SecurityStamp = "73131425ba194fdc8ca902fd7fc5aced",
                             Username = "2512143"
                         },
                         new
@@ -54741,7 +57156,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 300,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JL.bQJiJFTC0oxSCGzhrtu0RCR0wd5Wjofii7ddNSguVKjxEW6TOy",
-                            SecurityStamp = "d6109236c54247e1a3c0d4d5230af8ff",
+                            SecurityStamp = "b78285f38b53419a9869a886a8f20318",
                             Username = "2512144"
                         },
                         new
@@ -54753,7 +57168,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 301,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oa4jAGIzJ2b3KlvePmdZT.R2Ps9XaVA4oC5xZ.wATitNeXQtZD7o6",
-                            SecurityStamp = "f6fc173ba3a14b7299b52442e23bc7c2",
+                            SecurityStamp = "6216816853c2433eba8ecbb9535abd45",
                             Username = "2512145"
                         },
                         new
@@ -54765,7 +57180,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 302,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BbBjxlPc.mMWtFraAvgLoeg0geSIdSSlaYKjBmSn9Tq5BRueWV6Ei",
-                            SecurityStamp = "71b6de2417bd44b397ccf1431b79f7d1",
+                            SecurityStamp = "4df328b5458643d18a1b3fa6cc3367fe",
                             Username = "2512146"
                         },
                         new
@@ -54777,7 +57192,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 303,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PF6QKMVB9a1NZKzhbyjRL.WJ9p5zD9f/s3pZiL04aaHZxMFXg5Yum",
-                            SecurityStamp = "bc5eb9f97e70425d843656400a59f949",
+                            SecurityStamp = "0920edcdafa9430eb36f6e7ef8c50910",
                             Username = "2512147"
                         },
                         new
@@ -54789,7 +57204,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 304,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y7pe2YC.TooaU6E6E0ofSeeiRgAv8/6rypdXpRDTEDkqSfeNAbsEy",
-                            SecurityStamp = "d31540ddc99d48ab95e3e5cdfda66e45",
+                            SecurityStamp = "000854a6947b47c9a7b94a043dbb15da",
                             Username = "2512148"
                         },
                         new
@@ -54801,7 +57216,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 305,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gSACwLQRnwAoXr/3.5c0DuTJyLQAQYzBjGWHi26QYUTa7pVdnHBXm",
-                            SecurityStamp = "efa457c484d14e9b99c6e8621c20e784",
+                            SecurityStamp = "3c33985aeb2d41378bd84a4718c08aa6",
                             Username = "2512149"
                         },
                         new
@@ -54813,7 +57228,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 306,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$QNOjD/wSLKXdogUx1D8TAuWjq8OMnaowqV.ornJSVb0F0RaNiN.J2",
-                            SecurityStamp = "90e8bf45a19b4a32a3570ce78733a16f",
+                            SecurityStamp = "118f475932224cd88f3c8e5e24fbd8f4",
                             Username = "2512150"
                         },
                         new
@@ -54825,7 +57240,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 307,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5bu7vDRWeFabXUJ1DgfKn.xi6RJFmiz85f.rp/J1dWbZuiwSfQ3qO",
-                            SecurityStamp = "aa96b472be104367a86697c64c7dd36b",
+                            SecurityStamp = "801efa288d9b4c8db9dfea508fb8d89e",
                             Username = "2512151"
                         },
                         new
@@ -54837,7 +57252,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 308,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/g3SVnZEITVGsvqWMTKMTe..vya1R3n8q7mkYewDFsWpU6BaDRYP.",
-                            SecurityStamp = "01fb4540655645d690e0984efde645f1",
+                            SecurityStamp = "d21335425f4b4083bbee49c700b22c29",
                             Username = "2512152"
                         },
                         new
@@ -54849,7 +57264,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 309,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3wJ9HiEXRAKOJX/p9mhnwO9SQkzTlvi7z9WwBb88IHGFfoDvQn0wO",
-                            SecurityStamp = "18a3a99c356d4527930b58788c885279",
+                            SecurityStamp = "506303ffb87d4b3e8f7a4647ca5e5eb5",
                             Username = "2512153"
                         },
                         new
@@ -54861,7 +57276,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 310,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e3cfrRqN39Rfj4Xcjmav6ejNjkBWbXfKR9..nNDYiRM7lPsHz4xwa",
-                            SecurityStamp = "b69123d8c7574c6c9fe680d667d87665",
+                            SecurityStamp = "2256ef2d86c34212a08ac4a49ca4defa",
                             Username = "2512154"
                         },
                         new
@@ -54873,7 +57288,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 311,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Uk10O52q3J/P1ZRhOTMf9.YBQ794fJvHUEgIFNqA6C8gNwExEsYDq",
-                            SecurityStamp = "ad3ac6cd73f1476f94272b3b9f919b3f",
+                            SecurityStamp = "8b2ae74b974c4569a461b9e18db451e5",
                             Username = "2512155"
                         },
                         new
@@ -54885,7 +57300,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 312,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OqGesYKJ6Hk7lp6zDlcKfu8wZsH3BOyRGgFBF/JtSq0Osa4NUhtIu",
-                            SecurityStamp = "ae86a70488a94afb9b30e3c43e27112b",
+                            SecurityStamp = "4c7da60402de415983654bd22d02663f",
                             Username = "2512156"
                         },
                         new
@@ -54897,7 +57312,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 313,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tSyAXkROSs7.Gz8qfZ4HJ.xE1ezdWBRaRE8JSoglvhIyGGZpm6tUi",
-                            SecurityStamp = "e3397fefd160484087ffe12de5f31655",
+                            SecurityStamp = "8d44b918e90e401084fbd679e527014c",
                             Username = "2512157"
                         },
                         new
@@ -54909,7 +57324,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 314,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1LvHigvbuk26MAaYj.LL0eVUsXCrVC3fNjfiANVs8fR5QczSznFZa",
-                            SecurityStamp = "2b7aec996b2248f7a66ede2ec3eb7e98",
+                            SecurityStamp = "a83d5082306440dc95970e8ad799fa5e",
                             Username = "2512158"
                         },
                         new
@@ -54921,7 +57336,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 315,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5RBN2wolSQJg0OcZ.hOkou.wenzIYcAz.Uv9HHsgnS6Bb8LKjHWMK",
-                            SecurityStamp = "5680d8f4f6a2444bb32efc7fd5438e81",
+                            SecurityStamp = "f9dfbe2fbef34f97b5edc73345e2ed3d",
                             Username = "2512159"
                         },
                         new
@@ -54933,7 +57348,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 316,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$b9nmbrT4C7l9jxY0e1GHQeds/gtWOazoBO/b5jHYVrOmJLFt..k4W",
-                            SecurityStamp = "fdff16bd3de9434b99187555eb76a0c8",
+                            SecurityStamp = "4f26603c110d401daa08f99a08f9aef1",
                             Username = "2512160"
                         },
                         new
@@ -54945,7 +57360,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 317,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$v1eoWGx6myROHBO1xVjL7./GkSnJ.F3vq0/7rtdHtg.pOU3o91FJq",
-                            SecurityStamp = "d607544549674bcda649c8170dc957bd",
+                            SecurityStamp = "d559115ee0654cd6b88b1b00407124a7",
                             Username = "2512161"
                         },
                         new
@@ -54957,7 +57372,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 318,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$HpjcJBMM4dSe/Yfx4DaNee9rjFhd4Gw/o1mCKnE9YKXjbVq3ueA/6",
-                            SecurityStamp = "fc4181124d944252a43a94bdc4caa03c",
+                            SecurityStamp = "d3da05ccbccc42aab9d72a387a3f4ba5",
                             Username = "2512162"
                         },
                         new
@@ -54969,7 +57384,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 319,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4LNiwzjmXBx1ltsVrm9fA.9NK5cOTI/VdLvqN2jttyjoAysIqyRkG",
-                            SecurityStamp = "8188e0edf5b64a0cbfbcd7bfadd22697",
+                            SecurityStamp = "50eab8180cf7443184c4d7f7c6e4d85a",
                             Username = "2512163"
                         },
                         new
@@ -54981,7 +57396,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 320,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g8P8ooTnGOm/IoRgf5VaWupIe6jhQU.B7ULlNq8mu3qjop3C/KQM6",
-                            SecurityStamp = "19fecec2520045c483a0ee13ac6dc3cc",
+                            SecurityStamp = "6fbeb077bd414f85ba642f26b34e3dda",
                             Username = "2512164"
                         },
                         new
@@ -54993,7 +57408,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 321,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oWZ/kJ9JgxrZuMU2r1MOdOs43/oDoSpxtB6S1iXFrVJ3amsp1YZUS",
-                            SecurityStamp = "55bf5ff36e57410ca58b188b858a3a22",
+                            SecurityStamp = "d73ca96157dc44dd839e84508a747a5c",
                             Username = "2512165"
                         },
                         new
@@ -55005,7 +57420,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 322,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DYnnZ6.1DtaRVBhJ2x3gAe2CpOFt0baT9bJfR.LdLIYvzdo218gpK",
-                            SecurityStamp = "fe77092077c84ed79da7bbb4261c9f77",
+                            SecurityStamp = "d1fe527232d2410889a1845eb16b4000",
                             Username = "2512171"
                         },
                         new
@@ -55017,7 +57432,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 323,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FfmszMKvDdboDPgjRPiJ5u57tx7RsrNRTQID1Tcg94ALsdWAI8vGG",
-                            SecurityStamp = "4bb9be8ad34b45e693f3dcfcf02e1a42",
+                            SecurityStamp = "d7b95d738682489782c364ee41cb82fe",
                             Username = "2512172"
                         },
                         new
@@ -55029,7 +57444,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 324,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WILy31Hfsqw5d7jLZ7W.zeUaAYF1i1cVPS1dfolXLE8g.pRpUXCUC",
-                            SecurityStamp = "03e94679c76f468a97782a8841964c3d",
+                            SecurityStamp = "bda377a38ec74852b28872a89bc65cb2",
                             Username = "2512173"
                         },
                         new
@@ -55041,7 +57456,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 325,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rjR4iVMohY3L0haCcrjzK.Y7P/mO8LRu7qEmIjW5pfv43Zg94kjZa",
-                            SecurityStamp = "2c77c6da77d24e3dad15961c1e9837d4",
+                            SecurityStamp = "cf431073fa144779b89df79c5e7a8fb5",
                             Username = "2512174"
                         },
                         new
@@ -55053,7 +57468,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 326,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bLEvBa4jusNM9quOjGYxR.bhX74MC2JmgB23aHlCe4yPTGUgfcW2K",
-                            SecurityStamp = "4c4ec54b2b8d4bc8ae7a3e3bb90e5521",
+                            SecurityStamp = "2d67d8b116694e0991ed29cf9b44a62d",
                             Username = "2512175"
                         },
                         new
@@ -55065,7 +57480,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 327,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2vtBt3d5TLy4velV6Zedd.Va9oqUdxR0zSrI0IcDIbwafcxllCzr.",
-                            SecurityStamp = "655bf4fe622e46bc85c973f499984191",
+                            SecurityStamp = "6c5266a621084219a747b8a6cb9b4dce",
                             Username = "2512176"
                         },
                         new
@@ -55077,7 +57492,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 328,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LeThzfvd99p4swMjRCpZCu0VZTWH/1D40v.qW85fvnowhKOtnhVO.",
-                            SecurityStamp = "1552f5249eb04b638b7dba59fef334a6",
+                            SecurityStamp = "d617489aaaec424d984cf3706ce0abbb",
                             Username = "2512177"
                         },
                         new
@@ -55089,7 +57504,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 329,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/Ev../gVh6Sp/US3frfkCOFiXsfxyrFcE4yImUfCMW9mb/A4LtPi2",
-                            SecurityStamp = "c10ee51c29134b569239ea17d608e8a6",
+                            SecurityStamp = "890e600d23e14db2aa82030260d773f9",
                             Username = "2512179"
                         },
                         new
@@ -55101,7 +57516,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 330,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/JP.ufTdNBrIl.I.Kl.FWeuWsqQ0WS5AYC7iF4VKrc8S.DvtgX9Gu",
-                            SecurityStamp = "f50d7a66efab4e3d9f23f818c079f016",
+                            SecurityStamp = "0fc57ce82280436c8994764328d1ad7f",
                             Username = "2512180"
                         },
                         new
@@ -55113,7 +57528,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 331,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FOS3n8c7eYD7spdiQ/X33.NI.HqDnVPvmjCEqm/kZyyQ/zg0Ko8aO",
-                            SecurityStamp = "d6ede8ddc4494819bf408dd1b2df085a",
+                            SecurityStamp = "1b9a1f580c87496ea9c63c9a663cab2a",
                             Username = "2512181"
                         },
                         new
@@ -55125,7 +57540,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 332,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fl/Pbyrk7t6/o91g46s9Uuo8PrdWUib/lTvG0PAUBr458O6c6yJe6",
-                            SecurityStamp = "8138e4c036814a568753afb6fb1f0c94",
+                            SecurityStamp = "d1d873f7a7ce4c8a89b60614c4105fea",
                             Username = "2512182"
                         },
                         new
@@ -55137,7 +57552,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 333,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$x57kRs3d26QwFMJmWP.xaOsZYWCkbii/28IHbzbV5WRE1BghT4Iau",
-                            SecurityStamp = "3c6068a510214015ae561018ec0fb6c5",
+                            SecurityStamp = "812ffffd0a954b3aa79d9bb7c81a15cf",
                             Username = "2512183"
                         },
                         new
@@ -55149,7 +57564,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 334,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tRQ3.NKmMl.GfF2MdSh6pOsg3492QJBg.gtrbwP/mWhYJPgZ5FcM6",
-                            SecurityStamp = "d175ed4a6fda486a91f281fd41149ed6",
+                            SecurityStamp = "42de0297203d4e588f4c9bc5459a9ec4",
                             Username = "2512184"
                         },
                         new
@@ -55161,7 +57576,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 335,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KoHJoP1m5QOveLxT21t5RepknI1UPUQvqXVQ.LG4qfoVZYBr7RGIS",
-                            SecurityStamp = "c072f6e4a1a940bf8e6b0aed2d3d2fce",
+                            SecurityStamp = "ef6faba5d5564162a6dcc317a905782b",
                             Username = "2512185"
                         },
                         new
@@ -55173,7 +57588,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 336,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y.jiQ1yZ0nu/8e7726Yy/.Exbe7PyvPktVTcbUPkQt4E9CL38FxOe",
-                            SecurityStamp = "e25f2b10d22242a0bc592a6e41f1cc14",
+                            SecurityStamp = "a3c54cbf881d4cb8b809fe0d5322fd94",
                             Username = "2512187"
                         },
                         new
@@ -55185,7 +57600,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 337,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MmiUFRAtW00qAwUjPhIeE.7XZKUDyJBzsGYf2Hs9d4Yol0oWms2.W",
-                            SecurityStamp = "f2324aeb11e3429590db54e6d7e8e775",
+                            SecurityStamp = "88f4f54c14e946879857ec2a650ee528",
                             Username = "2512188"
                         },
                         new
@@ -55197,7 +57612,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 338,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vZxettA5BgLNmqbAptxGquaxRS7Z2vSkoB1upn7q9Lev7jAijAu1m",
-                            SecurityStamp = "a6670efcb4964204b5563119fa382997",
+                            SecurityStamp = "9883f0a92f91481582308c2e7e59ffaf",
                             Username = "2512189"
                         },
                         new
@@ -55209,7 +57624,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 339,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oQuwOQB4XM1kpaLMbvi2HujUWZCevJOrgPVKHDvOFqcSve0UE2GBW",
-                            SecurityStamp = "faa8422da574473da5a9679838d79cdb",
+                            SecurityStamp = "5e5fa8d37ab5475da279da786521a786",
                             Username = "2512190"
                         },
                         new
@@ -55221,7 +57636,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 340,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6SrXg4MuGZ5kp9q1gNtj4uvFRQiacvehrxVh3EeRlngN0iQmUWoly",
-                            SecurityStamp = "7b2ad6b79048463d8556b8a6451a886b",
+                            SecurityStamp = "795711f2c8b244a69a213e83e1d7a540",
                             Username = "2512191"
                         },
                         new
@@ -55233,7 +57648,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 341,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JC/7QSa2x5Ui4bghnGT2AOwbZunCfklnD3z/ClfeU2WVOsE1OgfW6",
-                            SecurityStamp = "9eed1c7d86ad42f0983c9287cde9bd1f",
+                            SecurityStamp = "45932787b81d47bea45664c150872d0f",
                             Username = "2512192"
                         },
                         new
@@ -55245,7 +57660,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 342,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0uSDhEHT9iG0vsHHpyrAD.e9an8Nw4Qxpy3dGYqXKDQ0XNowVT5/G",
-                            SecurityStamp = "711686db2b9d4a53b3147a6581049d54",
+                            SecurityStamp = "4b2ad894d51244c28911db0be8e6f43e",
                             Username = "2512195"
                         },
                         new
@@ -55257,7 +57672,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 343,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z4ZRHARi7AbU60lHdA41zOC5y4N360BDbJV7QDgaDrFB9pfDQ5mWi",
-                            SecurityStamp = "727d514249794dfa9eec599355fcc4ee",
+                            SecurityStamp = "6e33fbc1473c41e89382d9a46e655b69",
                             Username = "2512196"
                         },
                         new
@@ -55269,7 +57684,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 344,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xO5ySDBoI.tEYWUHU35c.OnXY0xYgjt63wNSqX4D7.Q55PX.sxccW",
-                            SecurityStamp = "41fea3d652b84c138886d2409f1617f3",
+                            SecurityStamp = "f4979ddddbd04485bc0c5fa3cb2d2daf",
                             Username = "2512197"
                         },
                         new
@@ -55281,7 +57696,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 345,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Eg2nP3bQbv8hqbpD332PPeIclAdbiu575bwrbQkxK1XTOsphU6Qtu",
-                            SecurityStamp = "1021738ce98448ed9b7020968c1dd632",
+                            SecurityStamp = "a3c52a0dfd1c48bf99aa4f8f16a6f07f",
                             Username = "2512198"
                         },
                         new
@@ -55293,7 +57708,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 346,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pw3oZwP4tcYa5wmxhbpZSeKfmsR7CCNNBx0nVcLjvGE5EA1rlDIo2",
-                            SecurityStamp = "14e3df34514a4bc4bf3e5c77bc612e38",
+                            SecurityStamp = "dc3290d8500d4c16aabeea10442ac20b",
                             Username = "2512201"
                         },
                         new
@@ -55305,7 +57720,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 347,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sNEeEfrSjONipCwuuoIQKu4rptd3OPipMHKpprl2TmXX8B3VDVGAO",
-                            SecurityStamp = "bb48fe853fc3487bb09870b278b81902",
+                            SecurityStamp = "c27f602ad13b4604a7244c8db288ae87",
                             Username = "2512204"
                         },
                         new
@@ -55317,7 +57732,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 348,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$C91MxjRA0CuJeXzrJFGB0O4f4kxcIl9AbKQWyTiRP.n063ki3bh0K",
-                            SecurityStamp = "6bc870339b694485adab2f3efaeebf57",
+                            SecurityStamp = "504de8fd8d614a7288d14ce53a9f6be9",
                             Username = "2512205"
                         },
                         new
@@ -55329,7 +57744,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 349,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4UHNM6pSctneMe2XJ.PPnOflp7EH4V82tq7KpVS3UH.Hj8zirc/MK",
-                            SecurityStamp = "54df09de5cef4580acaaccc23406509f",
+                            SecurityStamp = "54f63fd8ae1c435bbd3ef21f3593b050",
                             Username = "2512208"
                         },
                         new
@@ -55341,7 +57756,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 350,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UifSbj6M6XIevy./0voXW.k6ai9B7pdG0NuIjq/A9f8d/dYuPKova",
-                            SecurityStamp = "367f96253c7642a59aacf58497150de4",
+                            SecurityStamp = "a204d566200846c28f56259cd3a797aa",
                             Username = "2512210"
                         },
                         new
@@ -55353,7 +57768,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 351,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YHO1l3zMp3V4qZ/adt8C7ekI0WOVje9D.8VF4o9keWk4a5c4L4Of2",
-                            SecurityStamp = "94a04eb3446546c2a0adf1363764822c",
+                            SecurityStamp = "041aca65142143d5a8b1195a62894b45",
                             Username = "2512213"
                         },
                         new
@@ -55365,7 +57780,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 352,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$x7ClRastaJ/HI64dufPN/uAWnbQaRAQ6OhdqBEVukLiDjAVN4p2.C",
-                            SecurityStamp = "e2e3f3f45cdc4a0aaa1bc1b24272d44e",
+                            SecurityStamp = "4cd543e8c7b744b388000f94d9066293",
                             Username = "2512214"
                         },
                         new
@@ -55377,7 +57792,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 353,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2KUVmnkc8GCAW0tBOxLLyeNqseT3P9r/I3fR7Kjrn8cuI1pFtklI.",
-                            SecurityStamp = "76e7e42f41c5411994753465e4f64e4c",
+                            SecurityStamp = "234f8d065e414224966d025f31bbec5d",
                             Username = "2512215"
                         },
                         new
@@ -55389,7 +57804,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 354,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.Y0q8bGQE7u3Sxybc96YLuSjntyAV1bumIzoB7EFwt.ptX/VKOgaG",
-                            SecurityStamp = "3bd2fd362f384fb2829cef6119c0dd06",
+                            SecurityStamp = "8a26f66bf101468bad7492f04b289c78",
                             Username = "2512216"
                         },
                         new
@@ -55401,7 +57816,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 355,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7NSpQNt8FKtFkTxFxKmlyOUuIStxovSjb9fxljeiy3JJuyUe64FT6",
-                            SecurityStamp = "b8e514355a234b8a9ac6c579bbdb727d",
+                            SecurityStamp = "2857cfbae4eb4e08a243490af4a44398",
                             Username = "2512217"
                         },
                         new
@@ -55413,7 +57828,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 356,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jO.2fElE8OmWfXkpzciz1ePaNYIXh/zOlXhIHmpHIVgpkloV4J2Wy",
-                            SecurityStamp = "5c64201344a349f2ab89e4fc59b9258f",
+                            SecurityStamp = "5794dde7b0364dc4b0aae9255a52022e",
                             Username = "2512218"
                         },
                         new
@@ -55425,7 +57840,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 357,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ny2gLg/SdI6K53vjQMBHIeiK55QPFUS7Ts7sYFTxp6/3zdAFdTPs6",
-                            SecurityStamp = "6779dea7106940a9bc4bd68be66eb833",
+                            SecurityStamp = "e4c2dc5a32d04dde96d794d105ac2938",
                             Username = "2512219"
                         },
                         new
@@ -55437,7 +57852,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 358,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RZpu4tYS9/ESP9i/vfAL6Otu29eqCrzkKZ5iO1W2ztU5QQqvgtBtC",
-                            SecurityStamp = "dcd6e0d93e0d4c5fbf115bda5ab3c2cc",
+                            SecurityStamp = "3015514985164df590b06729763f86e2",
                             Username = "2512220"
                         },
                         new
@@ -55449,7 +57864,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 359,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XsdnEJZFrWwQ76aLY4mKG.MtaKHP6QpccxufNAjIcPqBNJrG55EHi",
-                            SecurityStamp = "c4213dcc8f704cb78d6a4119cec89c8f",
+                            SecurityStamp = "194679b284d54a629ee990226de0d993",
                             Username = "2512221"
                         },
                         new
@@ -55461,7 +57876,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 360,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jwbmAEkD8x62ll7/DYTOresak9mQytYL/i0oL5k3fCOBP6wopf8qm",
-                            SecurityStamp = "b55240cae73c4a40a40fe0e498eee3b0",
+                            SecurityStamp = "cd32c83890774e1189929c5b921b054c",
                             Username = "2512222"
                         },
                         new
@@ -55473,7 +57888,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 361,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oiqoqkAFN84H7CFmMAg2kOqbZvE4UWj/KfC7RCxuoI4GcjGHUDAC6",
-                            SecurityStamp = "403b6c56731947c6b7ba0c91ddebecd5",
+                            SecurityStamp = "a4f4755c50fb4254923302fa9063fa2d",
                             Username = "2512223"
                         },
                         new
@@ -55485,7 +57900,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 362,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.4UDsbS9QdcdT5T0Za8Q9eqWF2xFeUoMzr4QEI3fzNWWtymOspPH.",
-                            SecurityStamp = "f8d877d8418541ccb402ecd334262a83",
+                            SecurityStamp = "c4f9060d930046029737859c7e4483dd",
                             Username = "2512224"
                         },
                         new
@@ -55497,7 +57912,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 363,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mn0XlZ6p4I.tflQiMnOXHOdWBuFVU5KWRI9UdxLZZhLP7lra8gXUS",
-                            SecurityStamp = "989315eabc244124b263a51fa82d6816",
+                            SecurityStamp = "5aa1a94e23044bf7b5566fda12f4d990",
                             Username = "2512228"
                         },
                         new
@@ -55509,7 +57924,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 364,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OUKkyBrAIueHfCLGLokE5.uesNI/kKvkR4zeudjEdADwcuaIlDIP6",
-                            SecurityStamp = "53225afee2a244a1bf19b056222d2827",
+                            SecurityStamp = "54899f1dac4941649b774cb9655ad93a",
                             Username = "2512229"
                         },
                         new
@@ -55521,7 +57936,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 365,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VvZoR500GfkS6OuvvX7mO.OS/ESFYWJ/qUCl45AVqKSsDHtuv9b8W",
-                            SecurityStamp = "bff3c2514b834ace96ca582765126bb6",
+                            SecurityStamp = "0c82f58be8af4d4e8a1befce3ca59613",
                             Username = "2512230"
                         },
                         new
@@ -55533,7 +57948,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 366,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PC0dKCZpjFX9B2Q5Hb4lN.1Hsi5lN8LylIB7M65eaFjcCH83ApLGu",
-                            SecurityStamp = "9aeefd475b3b4ebf95cd40cabd45bb1f",
+                            SecurityStamp = "aa0a0fcf2a8d45abbca92a7a0f0633fa",
                             Username = "2512231"
                         },
                         new
@@ -55545,7 +57960,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 367,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wUxSo6TJUXWmnxDTKdLJYe497KWU4zKtlAngQTfsTXFg4QpVDUbwK",
-                            SecurityStamp = "e2b2b424e07f4e5aab7e1889a8a3b494",
+                            SecurityStamp = "1314ab78551e45fbb3d36ceaeb4baa60",
                             Username = "2512235"
                         },
                         new
@@ -55557,7 +57972,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 368,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$USnH9WqHx7kq.CwugKJxQ.CYdBzGACb0blj7yjJS6XMPt4v/eRVAq",
-                            SecurityStamp = "138f1c120f99428c92d8b200fbb1bfeb",
+                            SecurityStamp = "492d5ef31e6847d182df428ba89ab19f",
                             Username = "2512236"
                         },
                         new
@@ -55569,7 +57984,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 369,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dWqhygaZ432BqBBHBvVtxOfp3YD/X43i5GVpewUTa/aAeRWi47OY2",
-                            SecurityStamp = "7b8ca9788dbd4c0c839c2c9c3f16f7af",
+                            SecurityStamp = "d57df8e5b1b9483d8fc821ff33b3f47f",
                             Username = "2512237"
                         },
                         new
@@ -55581,7 +57996,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 370,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$94qdHJr5qC4c8wiQJTCeXeW4LFzRdUxRPhGDVXJuE95gn6MD9XlYS",
-                            SecurityStamp = "b3d17a418f9b407b918ca409033e6eb6",
+                            SecurityStamp = "e7255327fe2e4ddaa566a285ca113584",
                             Username = "2512238"
                         },
                         new
@@ -55593,7 +58008,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 371,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xFcuSsIBCgP.IphIV280GOW1E0LyXxXGhM/IWdcR5tRHPibKz/w8q",
-                            SecurityStamp = "746a79922cc645b09baeb1aabd9abf6c",
+                            SecurityStamp = "7fd585b3421449acbefe2a49410ef74d",
                             Username = "2512239"
                         },
                         new
@@ -55605,7 +58020,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 372,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4vL3.K5doQ.LqrUkphkNpufLItgkfSH8q8Ry4rwliQt.l8VXq2Zia",
-                            SecurityStamp = "a0fde44343414639bf0f5a0476435d0d",
+                            SecurityStamp = "852e436c00294386b13cf01d4442fd7e",
                             Username = "2512240"
                         },
                         new
@@ -55617,7 +58032,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 373,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$20Vzezw2uGCpZ4wvIeCUVe4mlwn/wh9HwqnEOhJ6DtxOcBi7fDeq.",
-                            SecurityStamp = "fda52191c650416994e993754f57b1fa",
+                            SecurityStamp = "91cafb29a2584ef6b26731c0f6d9bdd1",
                             Username = "2512243"
                         },
                         new
@@ -55629,7 +58044,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 374,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oEpMeHdho6XsTTByWWmAeecSdGqc7ay1ALkT7djLWiEApxtTTbH3u",
-                            SecurityStamp = "8c0b962d4ffc442784d95fbc81584e26",
+                            SecurityStamp = "8f43532ce5fc4b8683323bae1b47792a",
                             Username = "2512245"
                         },
                         new
@@ -55641,7 +58056,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 375,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MK.MX4X.okdfBXMGrbXT3.vls1z3Oi9m.qc82m.g9vzlpFxEIhcJW",
-                            SecurityStamp = "ded3ef0929fe40e9ac7db01e6cdae360",
+                            SecurityStamp = "cb936c18614d4930b600be3ffa01bab0",
                             Username = "2512246"
                         },
                         new
@@ -55653,7 +58068,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 376,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$buXYSUYfV7.hJGJ..psT7eZnLpdmgLKREjUFF3sWVY1HsP.9m48Cu",
-                            SecurityStamp = "ff592c2b4fd346bbb8ab27b102d9d23f",
+                            SecurityStamp = "458bd4ea74aa45a0b6085428c790df83",
                             Username = "2512247"
                         },
                         new
@@ -55665,7 +58080,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 377,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z1u51ERSwpNLEq/ZgTPo/.iYx14NVz815s54pCMwEcNwBOIlQkSle",
-                            SecurityStamp = "93bd15ff051d416c98bc5a9e6aafe7c0",
+                            SecurityStamp = "22b7a386306347f8b2dedbad2f0fbd71",
                             Username = "2512248"
                         },
                         new
@@ -55677,7 +58092,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 378,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.twDnwVeqLAoN2GP4NNWCOv9TyOFTCdHIZaWUZws0Xa.9ZnQPcJaq",
-                            SecurityStamp = "4d87644b0f9d4aafa000ecfe14ca4f25",
+                            SecurityStamp = "708a13797760492696bdfa66b4a60ae2",
                             Username = "2512249"
                         },
                         new
@@ -55689,7 +58104,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 379,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$B4NykYx3nbTLOtZCz1tPa.KWF1i6u9wpVSSZnr0.0hb.zfwqPmbOq",
-                            SecurityStamp = "4e903ad17af04a9c9fc7e9d1b9647552",
+                            SecurityStamp = "0deaa7a0b576402794eb7de9b85193c7",
                             Username = "2512250"
                         },
                         new
@@ -55701,7 +58116,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 380,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DWWOJ9NO2ucTOnilpPq55uH2mNK0sFAbrFtjFwCQpZxSFeku4.Nxu",
-                            SecurityStamp = "c06c027fdc47455a8394f2baff563543",
+                            SecurityStamp = "600a6b6810684ba8ac3e342429c5fac0",
                             Username = "2512251"
                         },
                         new
@@ -55713,7 +58128,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 381,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yqKIIJuPGKteficUIUUKnO9GrxyBAEKYUE8qBEWXUDa4PzTy7lzW2",
-                            SecurityStamp = "e0a646f4cb5d4e5c889c863fa047dae1",
+                            SecurityStamp = "5ee29ffc2a124f4aa8f479a9086ecb03",
                             Username = "2512252"
                         },
                         new
@@ -55725,7 +58140,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 382,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rqbOpZiR/g8kV.u6AgQkp.l2ssvOIqfh4VUkjO91IlL8JQDQCmy56",
-                            SecurityStamp = "01788c55fa3945d79d86e72442ddad09",
+                            SecurityStamp = "21f8c04484f34a8bb190149ffd61f20c",
                             Username = "2512253"
                         },
                         new
@@ -55737,7 +58152,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 383,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lAHSG8azRbE.lsQJ6XXsTuXvZUNKtLPQVZTE0pBGcj/f2NAIXBLGu",
-                            SecurityStamp = "32e34ed0ebd94856bb4297e905508492",
+                            SecurityStamp = "3d38ef94e2114e77aacf48c340ed8965",
                             Username = "2512254"
                         },
                         new
@@ -55749,7 +58164,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 384,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$H8SYiW5Dtt39seI0r.MBpui7Ztwzy0XMxoP9Y0YnNcD0rKTle6b1G",
-                            SecurityStamp = "35c20dbb799d4c50885793cc595cfbda",
+                            SecurityStamp = "025d5da39574489b83dbbfd9e3177ffe",
                             Username = "2512255"
                         },
                         new
@@ -55761,7 +58176,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 385,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$siqrN00r9RpE/r3QgUgS2eqVfjVPG4A2A7ZEtG/d3BTJlUa93E/Xq",
-                            SecurityStamp = "7ccba72651f9412b9d511e2fc35629ba",
+                            SecurityStamp = "21cbf4cd1e1740e98f600bc10d36dff3",
                             Username = "2512256"
                         },
                         new
@@ -55773,7 +58188,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 386,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$CvzBAW6tFZnlM6gx7USphe9aUArYekryS2q2/rLeNSP0FRKMfUKg6",
-                            SecurityStamp = "d078103e58f449c38900e95837608cd3",
+                            SecurityStamp = "4e86ecd7f33b44898c6f923543ad2fa3",
                             Username = "2512257"
                         },
                         new
@@ -55785,7 +58200,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 387,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qPYwWp3y.9fmU6Axfnas9eZ7dop/0oAY1pDjgC0VhaaZg2wFfwL0u",
-                            SecurityStamp = "6b9be862773b4e1ea48fd9356d99d62b",
+                            SecurityStamp = "cf141290365249b6a71323c3f6480577",
                             Username = "2512258"
                         },
                         new
@@ -55797,7 +58212,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 388,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$seKBVcd8xOTP7DIZJhpuy.c4ySeN.Ll3Hmu.svSU.cqE7Y0rN.reO",
-                            SecurityStamp = "23075c314ba840fa9ba72bb7a056372d",
+                            SecurityStamp = "2f07b37723124bdbb596612a238912f4",
                             Username = "2512259"
                         },
                         new
@@ -55809,7 +58224,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 389,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DZkBTAazm.xrHcsG/91PvODErc13IKkWdzfexKLm4MkZYjueWlDSu",
-                            SecurityStamp = "ef2a03b7c03842aab213dbfbd7854a7d",
+                            SecurityStamp = "1efa5e5b544b4f989263287c661a1734",
                             Username = "2512260"
                         },
                         new
@@ -55821,7 +58236,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 390,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ty7zHtN.ldFhM0lC/9LPa.DvJElqUfa90CpVwPBqlHhDQgPSBbXvK",
-                            SecurityStamp = "6a3c2b5b58f14d86a6d065df77c60eb9",
+                            SecurityStamp = "980195067cd94f789580f928026a5186",
                             Username = "2512261"
                         },
                         new
@@ -55833,7 +58248,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 391,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XW30hM5Ozst46kLXB7QKkeOGq7VfaJychgPQo6Gm2I05ToAPD6b0K",
-                            SecurityStamp = "c0decf66da4346188128f59ae0edca18",
+                            SecurityStamp = "4b2b238765394f6ebe2f6e9d369a4f20",
                             Username = "2512262"
                         },
                         new
@@ -55845,7 +58260,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 392,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ySDDwRcK0egdl72sutoJ2uej2xlxTyoNBsu67NHnGv0oqiYOpvu/S",
-                            SecurityStamp = "58639c10117748f8b840e8258936eac2",
+                            SecurityStamp = "36ba9d46b3a64204a402a18b31cb8751",
                             Username = "2512263"
                         },
                         new
@@ -55857,7 +58272,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 393,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SZba8wypkEHdCblbs83xH.Z4vCn3p0pvFlIaNfzoOsz6uJSbXBbfC",
-                            SecurityStamp = "fab4682f547646458b7b3b5db33d8beb",
+                            SecurityStamp = "4a589d42386f45229966f3808d382cdd",
                             Username = "2512264"
                         },
                         new
@@ -55869,7 +58284,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 394,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qszh03I2rX.dq8b9u0jY6u91hkWBqAj4aVrJXU3CYESNQO35NVPMq",
-                            SecurityStamp = "67b0db6070eb44ee80d0ab844d990f4b",
+                            SecurityStamp = "0cc772287480429fa7e54cdd57378c1d",
                             Username = "2512265"
                         },
                         new
@@ -55881,7 +58296,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 395,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2JJSLpVeIodVQ3qPrNZzGetNWY0EVCAaAOAK8NbxMDeGUQDmttnE2",
-                            SecurityStamp = "1b045294560a4e22b3acf7f954c19025",
+                            SecurityStamp = "cb422936ecf04744815524d785dc1e63",
                             Username = "2512266"
                         },
                         new
@@ -55893,7 +58308,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 396,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9SbKWVyWisSKsbGa/7lLou.zd33hOxPPJDlGCLhViPWbVavfnJKBu",
-                            SecurityStamp = "cbaed13f36cf41e1a17447a6e0d3e31c",
+                            SecurityStamp = "ed30525079d542a387e4e7d02472b880",
                             Username = "2512267"
                         },
                         new
@@ -55905,7 +58320,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 397,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e0HQURNiiDfPFYsr6eHgC.iqWRMeOulRETKpOUMH25fg2f.yG9IEu",
-                            SecurityStamp = "4c579af6db13483aa6f50e50d0498b3e",
+                            SecurityStamp = "c5d2a4ea9ed848bf906957762cffc103",
                             Username = "2512268"
                         },
                         new
@@ -55917,7 +58332,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 398,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$udKiAG39G0MD7XdQ6SZh1OyXIHhCtKFp5q26KoLtCVg8Y9wt/0FnK",
-                            SecurityStamp = "a16e050a7e314198a4b8841d85a08f39",
+                            SecurityStamp = "60c06cd1d9124023aa7a80c0ed863ecd",
                             Username = "2512269"
                         },
                         new
@@ -55929,7 +58344,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 399,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aHte3ZZ7vMaDDUFGfKAMtu6tFjDlEc9nUg6iA0g3YhZqNt/4DMzKG",
-                            SecurityStamp = "c5be7e3400174b8c98f1668203a58a91",
+                            SecurityStamp = "cd64c573249f46be8fa38232449ba41f",
                             Username = "2512272"
                         },
                         new
@@ -55941,7 +58356,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 400,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$P2wb4SXViXxTyqDO7LLF1.FDpOjBM8So9h983jtv2.bP5OLu/STuK",
-                            SecurityStamp = "9007a9599f01434ea3a13daea694c09c",
+                            SecurityStamp = "863da8619a6143b9b8b22378c3cabd9c",
                             Username = "2512273"
                         },
                         new
@@ -55953,7 +58368,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 401,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Efq4d0R0n/NXIWXREYUsoe6Da6pwVun4Ye6Z2hA/1FI2bnjarCPjm",
-                            SecurityStamp = "1c741452e0bb4d54894e94cdfdf817ae",
+                            SecurityStamp = "d687ff66c19949749d06839b14e4d3dc",
                             Username = "2512275"
                         },
                         new
@@ -55965,7 +58380,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 402,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1qpHf4JrhdAY.sW8.xTokuF3p3uIG9PbVIGKTYVxp9JFTihgYrPNu",
-                            SecurityStamp = "0457e63c9e7b4b05912bfc3673bbcb6a",
+                            SecurityStamp = "8c88ab93e3694ca5b585166797a8d688",
                             Username = "2512278"
                         },
                         new
@@ -55977,7 +58392,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 403,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fT1KjuKZNKC40io6FYAVJOSoszbWHFpuNr/GiXlUvw0KpWO8563Ga",
-                            SecurityStamp = "7408a216b8b7493298cb348cd0c179aa",
+                            SecurityStamp = "581dafbbe66546f792e003da1bede037",
                             Username = "2512279"
                         },
                         new
@@ -55989,7 +58404,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 404,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9rDuI/ySZNWTpOS.8bk5IO7HtaSQDJ7WYSOnABfvH3VfeFKc96ByC",
-                            SecurityStamp = "0b9d9708237b4c299192126beb100697",
+                            SecurityStamp = "8425482d54be4e96a9323b70d1ed7852",
                             Username = "2512280"
                         },
                         new
@@ -56001,7 +58416,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 405,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gc2wWpqn2W0/4jRxudKcIeTH0y/NkPVU3lLPKoaeBs5QudXcgnY8K",
-                            SecurityStamp = "639d4d86e33b4919b71a2f5846c6abf6",
+                            SecurityStamp = "e0a1ebca7d164effa2c152bb53aa35a3",
                             Username = "2512281"
                         },
                         new
@@ -56013,7 +58428,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 406,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YHHuAhhPWVFhDar1kx0nC.v6OTytbzho0jrzNXLaIx1QDaHzH6iUO",
-                            SecurityStamp = "fc5d91fd76d64d6eaf5636590353db8d",
+                            SecurityStamp = "0bbb4f7f91824ad6b934a2b93df40c5f",
                             Username = "2512283"
                         },
                         new
@@ -56025,7 +58440,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 407,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$i7rUCp3tYDe9pVJbwONWO.1qKxKJT8i5TsWFIjRjCogJ4tg8CvmX2",
-                            SecurityStamp = "f7e41a292e504f4eb1e00bd8e05b0ec5",
+                            SecurityStamp = "b4a4aa0beb2a4cb4b309633568251d70",
                             Username = "2512284"
                         },
                         new
@@ -56037,7 +58452,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 408,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qlZMHgkDOejvcfgGdO8N6e8sbaj.Yyt0t4btywYWOUQIsTsjwMCIK",
-                            SecurityStamp = "df0160c3286f47748163ee8d28362c71",
+                            SecurityStamp = "034db81bdeaf4289845804bb49931c1e",
                             Username = "2512285"
                         },
                         new
@@ -56049,7 +58464,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 409,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lBYvik6PGW/twkT8rGD1Z.Ktjseg4ptHAXBEBQzq4Ul2Hpj1jwSb.",
-                            SecurityStamp = "35bbe8e079df48fc8ca39f6c5b324fe4",
+                            SecurityStamp = "c102784bf73045d58d856f39cd557d4d",
                             Username = "2512286"
                         },
                         new
@@ -56061,7 +58476,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 410,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5fTobSJCB1Yhixaocxed/uzDdlekW5zb5ihH.M79oz2/FMhH9SAqe",
-                            SecurityStamp = "014306d7faea4eb58d1350179c1416e2",
+                            SecurityStamp = "7f124903d2494601b98e311356e61bcc",
                             Username = "2512287"
                         },
                         new
@@ -56073,7 +58488,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 411,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VnxSr3KjIJ1BqNNE6waHA.ZFtmPLOAZ1MiWtQGvc7E6uo0tXh9/Km",
-                            SecurityStamp = "31bbf969fd174a5fa92207c221abb957",
+                            SecurityStamp = "cb00766661f244cbb8027ee4f44cc5e5",
                             Username = "2512288"
                         },
                         new
@@ -56085,7 +58500,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 412,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7XCdUpm7tAx9gx9/cVACwOlv2p4RpUPrtZc/pEryDcC6yfi0Rd7VK",
-                            SecurityStamp = "63e12194f88b45a7927753eaed284ebe",
+                            SecurityStamp = "a18674c94af4429e8b077c7667c11b2b",
                             Username = "2512290"
                         },
                         new
@@ -56097,7 +58512,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 413,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LQrRxM1gtYc3nrA5Q3tM5uqU7oZNEKjyerEo/mgBbeRiK0zIV.sVK",
-                            SecurityStamp = "3c46468b2f67453b88bdcbce6faa6a5a",
+                            SecurityStamp = "c69fca9bffbf42be8f97bdd07976f69f",
                             Username = "2512291"
                         },
                         new
@@ -56109,7 +58524,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 414,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$H7Vn3EE8Usx8iLXo0smt.OR/NyZ751.DCs0y6Hhm811tbe/aO3xCO",
-                            SecurityStamp = "ed00a570a825495fb8453002e57499bb",
+                            SecurityStamp = "3c1ec46cbf60488c887b6e3dc1fd45c4",
                             Username = "2512292"
                         },
                         new
@@ -56121,7 +58536,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 415,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1r.lxCXbb69GNUXmE6QlROIk01zExZIBCIXjJA/BfZr4znNvc4p4m",
-                            SecurityStamp = "8b4a8c4500b94ab9b225683a3f7edcc9",
+                            SecurityStamp = "eb7142fe223b41fc94317d5038a25ff0",
                             Username = "2512293"
                         },
                         new
@@ -56133,7 +58548,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 416,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aeQ4NKwonDgoUbyAjClw4eURIbNd0dDunYi9e93jlAJLZN0tchnaS",
-                            SecurityStamp = "b5d7deb3463e4c3da0a63299b955033f",
+                            SecurityStamp = "8bf8508663984749a5550665d918555f",
                             Username = "2512294"
                         },
                         new
@@ -56145,7 +58560,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 417,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NbbyXQEntWteNnzSplMKgeogwMazdgizP/F4RXYhpccBuGJIO9OJ6",
-                            SecurityStamp = "7d425b1bffeb447a8a8689cabe3feb7d",
+                            SecurityStamp = "dfd4c67900ab459cac653aa90a1ded24",
                             Username = "2512295"
                         },
                         new
@@ -56157,7 +58572,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 418,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4DIR/UqXFjbM1PjZ.newjOqNLv6MG8SLUF5c//CehsVM5M4CR6lAW",
-                            SecurityStamp = "18e461103a924e869e964ce0d914174f",
+                            SecurityStamp = "f4c705fd6e4c457ea83c9e98b6cb0d41",
                             Username = "2512296"
                         },
                         new
@@ -56169,7 +58584,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 419,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y6RM0r8mQdj/ABgFGuEZnekYPn7iDgDyWrWcqtxIgOBKMdHONZdw6",
-                            SecurityStamp = "3be187596e2044eeb7c3ce0fbb061a48",
+                            SecurityStamp = "82119c18ad5b4783991452d8596d9da3",
                             Username = "2512298"
                         },
                         new
@@ -56181,7 +58596,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 420,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aSWvYW.yYQjUUallT.xC3uplaZXzBiUng4FtLWoO7jv61wZwGWCne",
-                            SecurityStamp = "ca29005d3c8146b086d42d31e852408c",
+                            SecurityStamp = "3c80db7ff52649a88824bfc9e1f5c7a5",
                             Username = "2512299"
                         },
                         new
@@ -56193,7 +58608,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 421,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DJrXkPdc7FnW3wUa/qr/JeFFER9Boe6tV21fMiAfNzQJp18msBwoG",
-                            SecurityStamp = "a6654eb1ae5c4333b292797340bb7d3b",
+                            SecurityStamp = "01f57447ac804b3081e28dbb3e9af8fd",
                             Username = "2512300"
                         },
                         new
@@ -56205,7 +58620,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 422,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$le5elWrz/gxfd3w4ObcBR.68fP.SfcMhzNLmNkHvPl.YjVVRPyTMu",
-                            SecurityStamp = "02996cb213a4418ca0d979ce272dfec0",
+                            SecurityStamp = "74cfae94f5db4b80a3651117c9d85461",
                             Username = "2512301"
                         },
                         new
@@ -56217,7 +58632,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 423,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$A5Qd1ZqlstRwyWxMYwDuKOfkL5rL/PR.9i3xBx6MLmV0hSD9I0jhu",
-                            SecurityStamp = "56b426526b944460aa8eeb5f30a869e1",
+                            SecurityStamp = "2840c426bfd14254a19fe97b86ddc79c",
                             Username = "2512302"
                         },
                         new
@@ -56229,7 +58644,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 424,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D9so8bQDXafUgiprCTMTq.PJvqLPFJXVd5IBzZ7Fr37IQX4YeVVmy",
-                            SecurityStamp = "af7eebd9eb9f4c45b324200d821e0791",
+                            SecurityStamp = "e328af982fd048d7809adcd2931f2126",
                             Username = "2512303"
                         },
                         new
@@ -56241,7 +58656,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 425,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Fi8RtJXQp9B7KCmS4GPpO.NGJn8q6ve/vbJbiD3IhrURfMQB14qty",
-                            SecurityStamp = "e9bff2739e7a473da7f5e341b633dfbc",
+                            SecurityStamp = "ff8abf9ff1b34381859b9d86fe1887c9",
                             Username = "2512305"
                         },
                         new
@@ -56253,7 +58668,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 426,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.LItXhBebIZf9RsVqucCZe3Aw4Uqv61AYz3IjREmMwjq3jA0VyD9i",
-                            SecurityStamp = "0248d273cd2347d2b82464bd7b68ea4e",
+                            SecurityStamp = "db1cc88823da4e34a62e58066c83e413",
                             Username = "2512306"
                         },
                         new
@@ -56265,7 +58680,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 427,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6wum.GAI2WTEFHqDELYnJeYWQ5L6AEmFjgXd6FdxECoTjo0r..tqu",
-                            SecurityStamp = "40da4de2c15e4b27ba09cb0223cfbc16",
+                            SecurityStamp = "5c9bbcfc92c54959a15bc0c843cd8626",
                             Username = "2512308"
                         },
                         new
@@ -56277,7 +58692,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 428,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$If94NoQugW9m/8JlNfsx0uTObjgCFTWfWjN0gqVIdUvigeocS.5o.",
-                            SecurityStamp = "6bc1c6df992c4193935f0b2071241d1f",
+                            SecurityStamp = "827db685350349e5a19f6f5414e01840",
                             Username = "2512309"
                         },
                         new
@@ -56289,7 +58704,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 429,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vmktKdLQwm4jkFxXWy6EguFCKnJ7I3bNsEthFcSetpN1.BQhzXEd6",
-                            SecurityStamp = "e3721bc978444731b6ca7675cfcf024f",
+                            SecurityStamp = "549a15b71bd3403786fa6de415a9a239",
                             Username = "2512311"
                         },
                         new
@@ -56301,7 +58716,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 430,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cKC9uo5qOO1r8JaVYR5a4eT71P.BXmEk1.Q3GXyQPpR0.AdfCXXwK",
-                            SecurityStamp = "26026797e13d4e8c9585268ce9ac449b",
+                            SecurityStamp = "ebcca07113b94862a5ad3f9608b81bb2",
                             Username = "2512312"
                         },
                         new
@@ -56313,7 +58728,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 431,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z5riIO3J/NNe4rFGS1zWqOxhk72hFr.oFHSYcohjFeTu/zuSx2OuK",
-                            SecurityStamp = "77fc105279374f21b3bb6bff9da2d1b3",
+                            SecurityStamp = "0873370a1567432790a371473951ce78",
                             Username = "2512313"
                         },
                         new
@@ -56325,7 +58740,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 432,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y3qtkmE4BQZmCT/PVPkTqOebgD6eNWJ0Q0kfwoiRDafPfUSgPdyii",
-                            SecurityStamp = "476755026f3243cfa587bba55a3c5db4",
+                            SecurityStamp = "1e3513ffd912443abc92e019becf64b5",
                             Username = "2512314"
                         },
                         new
@@ -56337,7 +58752,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 433,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hX0gaCo3g8AoLjoWisWme.T2aNrY93dnmfcbfY09biIaF0eIynnpa",
-                            SecurityStamp = "524fe064b4d34c27a7f247defc5e373f",
+                            SecurityStamp = "402ee673820348f49c9773da186bab49",
                             Username = "2512315"
                         },
                         new
@@ -56349,7 +58764,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 434,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y2DBajoFabP/EJx/Bf3wHe5syaZSvUHVB3djNVUDOPX4zr/huS//i",
-                            SecurityStamp = "28bc9a94116b46cebb1324e0c9b9a463",
+                            SecurityStamp = "0f4725498d7f4d6e80a571a2a71ec513",
                             Username = "2512316"
                         },
                         new
@@ -56361,7 +58776,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 435,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tUVAYFlk9oKLHIi4.F2Htey/DOAlKM7ayyn/iCmLmkUbUJkvYO8Yy",
-                            SecurityStamp = "bd9920c25b234738928556393e14297f",
+                            SecurityStamp = "bd20e8b13b354072b5436e7248b170e3",
                             Username = "2512319"
                         },
                         new
@@ -56373,7 +58788,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 436,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9fRCatiVIzW3I1MHSlvR4.FKe2zzoOUB3Eo8U65bm7xoMvePy.18m",
-                            SecurityStamp = "ded2659aa0a447a886a512a7153748c2",
+                            SecurityStamp = "c1278d00005d43658243377274fde058",
                             Username = "2512320"
                         },
                         new
@@ -56385,7 +58800,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 437,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cx8FV6h0iGqKr5nNkUB5JeozCe6/PGSlSQUEgYgtk2/FbpgvpywhG",
-                            SecurityStamp = "74f9baa72120490cba8dd8a907220b7f",
+                            SecurityStamp = "a0b4a9b8c0a34675bf3eead64ecf78ce",
                             Username = "2512323"
                         },
                         new
@@ -56397,7 +58812,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 438,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oyNpjAYkMp4ESjQQvFs3ceEB/mpsa5TM0RsbodNX6ndEE9iPIUjPi",
-                            SecurityStamp = "b5fbc78b34ba4c40bbe49e3f5676f1d0",
+                            SecurityStamp = "0eced767c5bf4d89861d5d5572c2c314",
                             Username = "2512324"
                         },
                         new
@@ -56409,7 +58824,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 439,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NwG6el1CbHSLisf50Zr8f.DHNdDqruRebPEEdVEe4IkVdtPYSEw8C",
-                            SecurityStamp = "1fe06954bee94f31b26c5dc23849a882",
+                            SecurityStamp = "90af07822e3e48df87845a1d4828a8d1",
                             Username = "2512325"
                         },
                         new
@@ -56421,7 +58836,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 440,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fIfvPp4yRGx.jP5C8i3KcOJ0AddBv3rAxVyWku8.J85xtLodJrpVe",
-                            SecurityStamp = "1c7d20b3394a4e48a529c7f96949742e",
+                            SecurityStamp = "8cd43becfcae4bc98ac6bfc0461b8c3c",
                             Username = "2512326"
                         },
                         new
@@ -56433,7 +58848,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 441,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ybxVUctegNGF/vvw1p6r4ObhswkugpwGB9GetdW.OmVj8gYtHNJX6",
-                            SecurityStamp = "6740d5bbb2a244ca8b6fe7326752a38f",
+                            SecurityStamp = "67b0134de790490f8c67829151e9c34b",
                             Username = "2512333"
                         },
                         new
@@ -56445,7 +58860,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 442,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$zH4sqG82L1ZXFVvdJEz8IOSRdZZNAh04s/3Oxx/t6/vI/wnJdcjtK",
-                            SecurityStamp = "3c45a785f8ba44e897cc08c9cb4e639c",
+                            SecurityStamp = "15b9846ac32a45da8df99988a6e5d851",
                             Username = "2512334"
                         },
                         new
@@ -56457,7 +58872,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 443,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LMsgQn4xJRmn.iyVhrwj2e1VqddvU/XdgE5mRHzDTWDHFT4g6camq",
-                            SecurityStamp = "9cb86640ae394890999b5f4b3d2b60e9",
+                            SecurityStamp = "f4115b6125004c3e905fe8b16aeaa4fc",
                             Username = "2512336"
                         },
                         new
@@ -56469,7 +58884,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 444,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PLHjRdE7FL.GVt9yk6f1r.yEFPscMPM09GA18gdueLOUMbpdgtbZC",
-                            SecurityStamp = "8a7f0c737f92473fb6f2721052ea6c79",
+                            SecurityStamp = "7c48684a18ba4063bd6eda7b72af557d",
                             Username = "2512337"
                         },
                         new
@@ -56481,7 +58896,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 445,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cNw4KoTBvxl8H3W.r7dwHukXgIMYhbT.I.V1Lwgp2APSqJLHLPQae",
-                            SecurityStamp = "01ebf33a1f1d458e96b98df83c80fbf5",
+                            SecurityStamp = "2fdc302c3f954f31b0ec8c4c70012b04",
                             Username = "2512338"
                         },
                         new
@@ -56493,7 +58908,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 446,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$i5n1Q24tsHjPp6oDRW8y1eIdqCtMq4WC/7zVRPZEYpvJzzDzEYjt6",
-                            SecurityStamp = "35ba8bc5f43d4a7791081ffa1ded2478",
+                            SecurityStamp = "03aaf6b157774927bf5cd7e981967e06",
                             Username = "2512339"
                         },
                         new
@@ -56505,7 +58920,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 447,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z0v2DnsEtVdsNjIhB3ymLekqxvxSn/KmDanI.imaKdQMbCix5TbNi",
-                            SecurityStamp = "c820423c3f3b4f45ad6fef6f2809a49e",
+                            SecurityStamp = "20562f55bfb34e5abfca80a2f4129181",
                             Username = "2512340"
                         },
                         new
@@ -56517,7 +58932,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 448,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wA9b1sCAVJMhBBJxDCA.8.j8HYX3Vuq6Fj8mFEqNpU7mkaCH4T/Kq",
-                            SecurityStamp = "b3cf20870c0d4b4aa1c52ba83c1dea71",
+                            SecurityStamp = "6019ee8b53544949b735977cb9c70d0e",
                             Username = "2512341"
                         },
                         new
@@ -56529,7 +58944,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 449,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y3C/.8rxPxzY6H2nfOME3eFhHaBmF5kQN0p2GnQ8uma.sH5S/sq1S",
-                            SecurityStamp = "a210b3bf0768448da16adda4b17ac47e",
+                            SecurityStamp = "516119473033482abf79aecb0f220d75",
                             Username = "2512342"
                         },
                         new
@@ -56541,7 +58956,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 450,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$I1iJSX8IHbGsX9lrINKT7eB1elhhxKuczEYeFgd0qJZWLAlsZzl/q",
-                            SecurityStamp = "30d8c46a0abb4a06936c2665c455080c",
+                            SecurityStamp = "68972b8301ba44be9cebf19fb088623f",
                             Username = "2512344"
                         },
                         new
@@ -56553,7 +58968,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 451,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TYgC2RsKIG2k2JKQLJI3fungXDHppLkuXUys2lhtt.8xrsFP7CQ.i",
-                            SecurityStamp = "e65af1c0ee6544079575339d9cdb4583",
+                            SecurityStamp = "949b8896850c46d88c290d3fb2e73378",
                             Username = "2512345"
                         },
                         new
@@ -56565,7 +58980,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 452,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$I3ZolCd6b9h0nZrDO8ZC4e3lA2HhoZ2BwMUBnfTSz9vZeS1ioDuh6",
-                            SecurityStamp = "8f86d3c4f4504dedb445b632d40ac3e6",
+                            SecurityStamp = "fc753c8d53d54d7e8c673c40a271b8a0",
                             Username = "2512346"
                         },
                         new
@@ -56577,7 +58992,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 453,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$92kuZ1c0D0LwDhGEhM4DtOU5DNTSDzoh947Pw1wj.VfWP8qfUbVfm",
-                            SecurityStamp = "c6b859ffa7984641a617990c25af083d",
+                            SecurityStamp = "756a186abf624bdcaf8b2522cf7f7fe8",
                             Username = "2512347"
                         },
                         new
@@ -56589,7 +59004,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 454,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Nu5Lb3aoCOXKb6PeOsGhP.QAOPIZpUUasoaG66CLKGBURlrjyGuBm",
-                            SecurityStamp = "8ee869f983814104b55c0160e4ef953c",
+                            SecurityStamp = "9baaae73166e4995932129162d71c06b",
                             Username = "2512348"
                         },
                         new
@@ -56601,7 +59016,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 455,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DWv2jjDYi2ywzq8BZ2RHle.RIklSVna7gXi5t3w.c/ZY9pQMl8rOy",
-                            SecurityStamp = "ad7e6b8a054046828f71186611779aa1",
+                            SecurityStamp = "ed6392c77b05454d802ced83c5dfdff3",
                             Username = "2512350"
                         },
                         new
@@ -56613,7 +59028,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 456,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hg5uumPJz7BZyCVIInk5uuNKpL9ASWHN.H.LHa3xj7In2pOsaF2x6",
-                            SecurityStamp = "624539e87eaa45b28596cb5f8530bd6f",
+                            SecurityStamp = "216f30dc50db400fa4665bfab4424244",
                             Username = "2512351"
                         },
                         new
@@ -56625,7 +59040,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 457,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Kbkj7VESGehmi4wCB44nne7.lYEEOW4ABstFIozBQHTzO6JDljzVq",
-                            SecurityStamp = "c4cc80f6a299494b940688336c93f09d",
+                            SecurityStamp = "a51a5355045941399c350dad15194e04",
                             Username = "2512352"
                         },
                         new
@@ -56637,7 +59052,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 458,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7bU41O.RhmZ0Z.ubuGX4d.Sa51a7JHq.LqdgGdt9Tp0HNdVtsPHMm",
-                            SecurityStamp = "e332f9e3926f4122b32489c3ac2fd10e",
+                            SecurityStamp = "5a96ffa15a534c4fbaa108860de19035",
                             Username = "2512353"
                         },
                         new
@@ -56649,7 +59064,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 459,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pCREV8WEHkf5SunPOg.v..K6R8OkQJ92CHzMf7hILXLbqYWmFSiS.",
-                            SecurityStamp = "134548dcec8a457a93d3e0f067201a97",
+                            SecurityStamp = "b4e545273cc84924a432cba762ec9c08",
                             Username = "2512354"
                         },
                         new
@@ -56661,7 +59076,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 460,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ah3i3Ci.mOgsNGpWw9gJz.VTLJE.JYLOprjAlKeAGMkPFqpELG6pK",
-                            SecurityStamp = "685fff75d02c48de947a50e10d4973ed",
+                            SecurityStamp = "a6e36e40535b40c59e0d7127386c3a29",
                             Username = "2512355"
                         },
                         new
@@ -56673,7 +59088,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 461,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yq76skWyJR3pOAPc/kxlJeuMX4sE.a5aVDVa8y/WWvGmHCfkFnCc6",
-                            SecurityStamp = "ee998c6f67eb4dbd8fa605169c557ece",
+                            SecurityStamp = "e80e08db8c69420a8c712ab3886e1c8d",
                             Username = "2512357"
                         },
                         new
@@ -56685,7 +59100,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 462,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$n8udxV9/fdDCpDUwtCrZBO4kz7l./uVyVdlVFYs7rhVPdFTVb20OG",
-                            SecurityStamp = "86d11d3381cf47b883e7f2bcfe8b49db",
+                            SecurityStamp = "e4b1e61a00214a8882ada6e2da1a64ed",
                             Username = "2512362"
                         },
                         new
@@ -56697,7 +59112,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 463,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cPjlk4Ic/4ka3pZXNtlR6uxT8QVNmHZl7NmDZrFbDL08P5MhoPNom",
-                            SecurityStamp = "11c96e5246344c849ad5f99bd2760cd0",
+                            SecurityStamp = "00c36312c61d40f297708ceb063a936c",
                             Username = "2512363"
                         },
                         new
@@ -56709,7 +59124,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 464,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xbQAdwESgUNSe3gvJf1xz.t1inBpSvGJfw6tQXM/2Sd0mP.OqLQpq",
-                            SecurityStamp = "a2cf9946ba694461b3105b213cf193f8",
+                            SecurityStamp = "874d1df806634586b8725b0f594bc0c5",
                             Username = "2512364"
                         },
                         new
@@ -56721,7 +59136,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 465,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6uwKgxOSe.TtgB7Q6nYCT.15rt.gnoMG/kn8k2Rm9Zp5Oxi4D0sD.",
-                            SecurityStamp = "909e5b6f50f2477883007bd5a11637ca",
+                            SecurityStamp = "b547b240c6a64299a8d590db0f932f78",
                             Username = "2512365"
                         },
                         new
@@ -56733,7 +59148,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 466,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gTt/onAEV99hWFTkX6UYRe.3ZgSJNbqFvEdJQiq45meCjbaUIV7VW",
-                            SecurityStamp = "6b1fd39ac126446c86d6468091033fa7",
+                            SecurityStamp = "c82fdf7423c747e3b8abcc59f7b6c490",
                             Username = "2512366"
                         },
                         new
@@ -56745,7 +59160,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 467,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$laxUFjS.qkL2GVZ.hrVYC.Px6HDQuM.igshr1PGAJdaHyb0pu5Uf6",
-                            SecurityStamp = "fa854d74bcfb4551988c38d46c624be3",
+                            SecurityStamp = "08f67fb5c0704793a5c6926f61db637b",
                             Username = "2512367"
                         },
                         new
@@ -56757,7 +59172,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 468,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gML107gdkbxXqMmZS/tguuBRMEQso5/KPpLKEVHYCfzxb0fX80h4a",
-                            SecurityStamp = "f6a8d60e8a824c0e9dce118ed035238f",
+                            SecurityStamp = "61fdfeb835f74e2d8d78996061adf1db",
                             Username = "2512368"
                         },
                         new
@@ -56769,7 +59184,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 469,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Lup3q/CcIc3XLmpRnObI5unPHU2Asr.wtPQ62lT8kJCSsvTqppDhu",
-                            SecurityStamp = "d5f94f2e97d640a9b905d517e944f434",
+                            SecurityStamp = "78087a345f77447e8ff6844a93d84a8c",
                             Username = "2512369"
                         },
                         new
@@ -56781,7 +59196,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 470,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GzB8pX3K8rUgY61U5autJ.bMgnlfVkrsqyjMcPUjVFU09QWL08WTa",
-                            SecurityStamp = "186d00140f3941dea2c93a00dc892d59",
+                            SecurityStamp = "a64bd0bd8f7e4396871a2d0766764f9c",
                             Username = "2512370"
                         },
                         new
@@ -56793,7 +59208,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 471,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$36KdDhFHZGl8ISqvRl2cau51D4et776gqePs9Ar1BMmGs1cGzK4BG",
-                            SecurityStamp = "f22af13ee41f41959863fbdcb6a80b98",
+                            SecurityStamp = "199717391b204a9a9b87b03f9459ccda",
                             Username = "2512371"
                         },
                         new
@@ -56805,7 +59220,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 472,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qScOQ.RLpYDzsAefDrVyUOg6z/DvGf8WAZBO8rkQ0IvDwwPxbUS9.",
-                            SecurityStamp = "bbe1e9f1e3574faabdb54dfa9a63081a",
+                            SecurityStamp = "b5b10c022f0b4908a0bd38ac95db2519",
                             Username = "2512372"
                         },
                         new
@@ -56817,7 +59232,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 473,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pG.uEmliZ.AUEjgZc/sy4eFENpUAoVF0DYgEdzznerCFLENtlXAxu",
-                            SecurityStamp = "f01204a3884e4f258f3a5f0ba443ab65",
+                            SecurityStamp = "40aee4cd0bad49cf8ead64413aae3065",
                             Username = "2512373"
                         },
                         new
@@ -56829,7 +59244,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 474,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/HFkcM5vK0613lhYx9wQiuwypnr/RC63R9c7VabV30LvMuqVGvHbm",
-                            SecurityStamp = "b20a4708726347f9b90dc0c3c5300051",
+                            SecurityStamp = "c0c5103386734ea8b9ff20e139f03513",
                             Username = "2512374"
                         },
                         new
@@ -56841,7 +59256,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 475,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0m9iCc8fS3SQSGBMjTFTQe2D/MMuWlYlPIc45wWIqfDCm.hS/Nm06",
-                            SecurityStamp = "fe90ec304cb2475fa1761480de014dca",
+                            SecurityStamp = "945f53d9f9f04e0e9b34ec8a4e653e7d",
                             Username = "2512376"
                         },
                         new
@@ -56853,7 +59268,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 476,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$E0IvjA90ECierYgaIty/quacXJDj0tkn7d2fs5p2ijFuzJQ5qm1UW",
-                            SecurityStamp = "9270fc3f7ff04227ba5618a6be3c8ba6",
+                            SecurityStamp = "632c1dd9c6ab436d81930709a65b5b55",
                             Username = "2512377"
                         },
                         new
@@ -56865,7 +59280,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 477,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FiXAUjq1tPFWTIRE0SbHSeJEkaQucqU171QItr2GKr3QWxiOAUr4a",
-                            SecurityStamp = "dbf596b1fa474972896646540aeedab7",
+                            SecurityStamp = "e6c1e7c016df4eb2a4f56b9477385f74",
                             Username = "2512378"
                         },
                         new
@@ -56877,7 +59292,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 478,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$s9mLZSkHQlzl4NLbKTrHRupamQT9lT5RFNYaA2QFeVuFR.9dGwwfy",
-                            SecurityStamp = "ed451281d4d64aa5a0adcc66eff00e48",
+                            SecurityStamp = "bf02dcbd64634aca96bb90387a72d7cc",
                             Username = "2512379"
                         },
                         new
@@ -56889,7 +59304,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 479,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2c8gBK/QfQh6gcY7svXtRewGcQJ6pZYNXce0z4xnQIxzC7gJ/Dk3y",
-                            SecurityStamp = "73100e8a62ab4682bb48152b5661dd6c",
+                            SecurityStamp = "1a0188ab0e58488bbe6f5f5a965cc6ec",
                             Username = "2512380"
                         },
                         new
@@ -56901,7 +59316,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 480,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ag0mmlHm/OGRop2e32/RHeC.q1gDdGt.QGvItSpxrClmlU7aZLrdu",
-                            SecurityStamp = "4a2e898d37104d4e94f25fd2ed5e2dc4",
+                            SecurityStamp = "1f912a87818945f1ba263124c72c46cf",
                             Username = "2512381"
                         },
                         new
@@ -56913,7 +59328,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 481,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$q6L/Hvwe1WSU4BWh0GxFBegnOZZJ9sTyIN0ZwEeGRQHBme9HOhdIe",
-                            SecurityStamp = "f415d257454b4ce3b6c9acb4eb8117b6",
+                            SecurityStamp = "c1c3e85d73db447686a986e245d8df5f",
                             Username = "2512383"
                         },
                         new
@@ -56925,7 +59340,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 482,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ga8Yye1pV/CeuqAF5F9bI.2cyLGxN5kLhJD.GZuvjjZQh6/2dsjZm",
-                            SecurityStamp = "bcc996fb0d9b4ab08e7c09c94e177a30",
+                            SecurityStamp = "6f2a67c481ab41fe8ea5a4facd275125",
                             Username = "2512384"
                         },
                         new
@@ -56937,7 +59352,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 483,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5PHQsxTgXlxW8HFeaF1u8ueq1sJPqTTjG8fTau5wt1IYSrunP20M.",
-                            SecurityStamp = "156cf25bd3714e28ab64c883ef174ea3",
+                            SecurityStamp = "bde73a20ff5f41fbad25457b51ca005f",
                             Username = "2512385"
                         },
                         new
@@ -56949,7 +59364,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 484,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wbW4M2GGKjulDaW3M8Rq6e1DiQuriV3DFGZiHWz8xOFcc8DxJlvga",
-                            SecurityStamp = "5ff21683c7bb408980ed65e215f5bd71",
+                            SecurityStamp = "fe3c9b0332db48c8aa2dc8655b2a7240",
                             Username = "2512386"
                         },
                         new
@@ -56961,7 +59376,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 485,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$O8WS/QemOIecVS8GD4A78ORbzoIQz6kaQbF/oiDfcSFMBOsy4mPAa",
-                            SecurityStamp = "8230aed92d2b40829fea8f7a9b183936",
+                            SecurityStamp = "e5e7b0eb06704967b27824c694f4220b",
                             Username = "2512387"
                         },
                         new
@@ -56973,7 +59388,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 486,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c35ioBJYV5mNGCzWuJktxeBo3HveQ2xEfr4k5GIzhDKNg4A/8Zn9K",
-                            SecurityStamp = "320b69e39202477396c71879b103461d",
+                            SecurityStamp = "3548490fdeb84509bd2cb077c54aa09a",
                             Username = "2512388"
                         },
                         new
@@ -56985,7 +59400,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 487,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OZCgN6GwW7FGlm8iwBwiJeBq6bW2KH3sXGvJpdETM44gjeqQEsmLu",
-                            SecurityStamp = "897d7088f7204a1388b37f30be5354fc",
+                            SecurityStamp = "22bb5b6400f245b9b092ef5982720f97",
                             Username = "2512389"
                         },
                         new
@@ -56997,7 +59412,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 488,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ABSBbEItoS5mIu98xAWSk.n6e.GSOUx28PpGHa.ApXR1Z90XpevFK",
-                            SecurityStamp = "454bf4a8bcda4643a6e5eb2994fc39e5",
+                            SecurityStamp = "d2b6e128dbc146c8bc01ffca62e52992",
                             Username = "2512390"
                         },
                         new
@@ -57009,7 +59424,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 489,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xtFlRU96/cClhz4Dp9CY4uq2nqxjyHqWZ6dbi0STkFtegiPrpfVKC",
-                            SecurityStamp = "785eabac418442fcba3b0e5ca378b75a",
+                            SecurityStamp = "48314574ccdc4c989e661db6e7354a7d",
                             Username = "2512391"
                         },
                         new
@@ -57021,7 +59436,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 490,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aVfKj/RVWvTeV5wKct/btOCwdi3smJZcAhnwtqzFKlzjoxnr8r4dS",
-                            SecurityStamp = "e944ff6f9bec44579fe66da46bdde097",
+                            SecurityStamp = "201d2fa3a6f34051beab7f887e8652c6",
                             Username = "2512392"
                         },
                         new
@@ -57033,7 +59448,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 491,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gHebw7bNbf4bCMyLIr8jNelK6O14csjUb5W.KbfqMyTP3OXZpiXKG",
-                            SecurityStamp = "1153660aef764ca08ae08e21746a886e",
+                            SecurityStamp = "d7c8d310d688491eb56dcc75df7c5181",
                             Username = "2512393"
                         },
                         new
@@ -57045,7 +59460,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 492,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YbOiQbdPTsb7OwCqGwi5DeDL/7TALNEZfvCbahuoi/Pe1bsoEa6jO",
-                            SecurityStamp = "4085e0d4a8824a8793f8d53c3b148f5e",
+                            SecurityStamp = "1eb0da1eeccd4d8aa26c04bd0692309c",
                             Username = "2512394"
                         },
                         new
@@ -57057,7 +59472,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 493,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7M71mEz.di2uXDwE1OidCuxuumUgBdONc0XIPOdqYt2sM0oW99qu6",
-                            SecurityStamp = "b542b8fee6724491a5987005aeac5151",
+                            SecurityStamp = "83bbac8aa4d04360abf3922b993be20a",
                             Username = "2512395"
                         },
                         new
@@ -57069,7 +59484,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 494,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MDFt3Muh7v46yPpRzQIbOesgKxaN5DYvEdvDgDil2NxQAU0IbzhZa",
-                            SecurityStamp = "fe7767ff5c6a42d08ae83c07d7bed162",
+                            SecurityStamp = "054b4fa83545424a8bc3cd26a8f8fa36",
                             Username = "2512396"
                         },
                         new
@@ -57081,7 +59496,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 495,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$CgUWiXREJVJqJ3NI6is1bOm11R5aHbPz3Y4Yjpx68ucqxIrO3apGW",
-                            SecurityStamp = "cce79e4635504c63a35a074919988b43",
+                            SecurityStamp = "76e78137625345b7b3f00c746b56bd5b",
                             Username = "2512397"
                         },
                         new
@@ -57093,7 +59508,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 496,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jIjcV6BdPbMZROy3NueWxubCUm1ZPNoypvALeWoYWsGDwa1v8B60.",
-                            SecurityStamp = "4bc4693450574eb7a4b1498411047785",
+                            SecurityStamp = "ae8472f09fbd4123974c8cae7d1bc27e",
                             Username = "2512398"
                         },
                         new
@@ -57105,7 +59520,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 497,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$I8ma8ZtfYAYXK5OQ5S9Ph.zMEOvtFowsL8e64gWlC3RMwGckNZ6d.",
-                            SecurityStamp = "3b55176e2dcd48c0abcfaadf7cc34a93",
+                            SecurityStamp = "e810ed598da648a49ea0378af3935274",
                             Username = "2512400"
                         },
                         new
@@ -57117,7 +59532,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 498,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FrR4/xaxE0TsoQEMGKozueeSd/BdQqDiyKWu9B2JmdA1aGJVRXLJ.",
-                            SecurityStamp = "ee8b27ff841c40b8be08c9daf0f5850b",
+                            SecurityStamp = "c6c5ba1e91524be8b8d7133d1dfff730",
                             Username = "2512401"
                         },
                         new
@@ -57129,7 +59544,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 499,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$QbR1RPJVacdovTYENTRp6.LWBQIUZ.ES28mhdDinGZcfAoaqV0Ym.",
-                            SecurityStamp = "909e6ab32f4142d68f4193df3eb7f7cf",
+                            SecurityStamp = "3a816c8ba5e54f5699db13282e8bbbc6",
                             Username = "2512402"
                         },
                         new
@@ -57141,7 +59556,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 500,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$s/Jq53AyKbnD6H.SGANT5.JYv8GM1gM7fCwpMa0HVp1GgLx9sdpKu",
-                            SecurityStamp = "cfc7433e3aac443492485bc94dd2b3f5",
+                            SecurityStamp = "718f54225c0a4e959b6e316464fbb249",
                             Username = "2512403"
                         },
                         new
@@ -57153,7 +59568,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 501,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$v4XAYUM297a6ZX6h4InBsODlWxqPfYaT1TT1uQ/cP5G63l9XtPKZ6",
-                            SecurityStamp = "9a3061d6163440c9a1040b06583a35ed",
+                            SecurityStamp = "e55b2a062bce4caa996a5521525e8f16",
                             Username = "2512407"
                         },
                         new
@@ -57165,7 +59580,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 502,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SutFSk9rvIa9H2R6ebvGFelGv.fgixu8KYqkYOq9Y9agu6bwunBIu",
-                            SecurityStamp = "27e31ae1358541f6b888150f017a7cc6",
+                            SecurityStamp = "0da9d48d86724e579d7b9513ddfe8e43",
                             Username = "2512408"
                         },
                         new
@@ -57177,7 +59592,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 503,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JXLoF.ijYl.rcjmifYL9xeBwjgS1i2HEkM1I2xLDAA9KYsSB0SbWa",
-                            SecurityStamp = "a3d4041678634e71914b8a1546843f0f",
+                            SecurityStamp = "47fbcc3c20004d88b98ed004697e8914",
                             Username = "2512409"
                         },
                         new
@@ -57189,7 +59604,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 504,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$z9cSAN2Ykc62Vi1gez5wCeqT4SWJZXWmKhyYNzRHCKQ8pNGGzSRnu",
-                            SecurityStamp = "74d46811adae4d3bb51298dde2314dd0",
+                            SecurityStamp = "3b2b7853be9f44e398a4b384e0866fcb",
                             Username = "2512413"
                         },
                         new
@@ -57201,7 +59616,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 505,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TqjvQ2IyNMlRJMLG0UpXwe3OgrfrxTu9N89GP5i3oVr9ogvfWUV7O",
-                            SecurityStamp = "deb563756b3c4245a109561dd3af14b0",
+                            SecurityStamp = "b1dc5de3214642c5af77122e098c7817",
                             Username = "2512414"
                         },
                         new
@@ -57213,7 +59628,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 506,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Vrmk87sUED4q0MzCBKfhVuBWFoetIwrEVCqgdTEvK1dbDCMYJ1RE.",
-                            SecurityStamp = "900a82ba493b498d954dc1629291d8ce",
+                            SecurityStamp = "10c627ad03014ce29469841a676e3456",
                             Username = "2512415"
                         },
                         new
@@ -57225,7 +59640,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 507,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uQF.xWDZfvoT65ZH0ZZdbOntKbanhaak.ZcdpEiRqxKWvDqgWQzHy",
-                            SecurityStamp = "11a6518545394e3587062dd1bfbb681e",
+                            SecurityStamp = "055cfe350e3c463db271563da594671c",
                             Username = "2512416"
                         },
                         new
@@ -57237,7 +59652,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 508,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2O2bv1YFp6AByuTr6/QPMeCiGuZEA7S/QvxHhc/beTxmm0UJhs6.u",
-                            SecurityStamp = "99d872eb72f147a48f624a2e3dc61003",
+                            SecurityStamp = "8b1174df7afe4919907aa6f4af3a3991",
                             Username = "2512418"
                         },
                         new
@@ -57249,7 +59664,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 509,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Yqip2VQD7Z3TShC1ybXaZOSk7g1K46LpM.qNtyvLlEKGwdEopcwn2",
-                            SecurityStamp = "d61d19aee0da4037bac32af5eef83489",
+                            SecurityStamp = "832dd271820b41c3ae31f9e3b0cf9a77",
                             Username = "2512419"
                         },
                         new
@@ -57261,7 +59676,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 510,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JGixB0FYAuxGXuQ2vGGiKO/hosVbWuqeyOvpqwEWigUczYUPJh9vu",
-                            SecurityStamp = "549b7580caa04fdf86ca3f2c54cc465f",
+                            SecurityStamp = "ef6a8fcb072f4352b803cca32ed9563e",
                             Username = "2512420"
                         },
                         new
@@ -57273,7 +59688,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 511,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RXNqq54SMurBhdNASrz4GeJadp.XGWG54VvOlivIWfkIWnpZKdw6C",
-                            SecurityStamp = "e28547f9f4084d1088c53a7d15291898",
+                            SecurityStamp = "44ed45ac288a4b41b25ffc3f23578a3a",
                             Username = "2512421"
                         },
                         new
@@ -57285,7 +59700,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 512,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$h38YlnDxSUPCSOv5glngeOuveakFcrmygvYIfPDaEqBfbQ3We2ipC",
-                            SecurityStamp = "c1f6b7c289104517adac861e3ec27977",
+                            SecurityStamp = "f43e9bee27d64e45be7592a7ab01b785",
                             Username = "2512422"
                         },
                         new
@@ -57297,7 +59712,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 513,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.U8ArrWET0cC1tF/L4Usa.xKkPq3Ta28uP/Lw8LXeyMx5viM2i.FS",
-                            SecurityStamp = "a456d263a13042c78cc073f1351c984c",
+                            SecurityStamp = "4886b3ba246a4dd8ad77d844c4108d9c",
                             Username = "2512423"
                         },
                         new
@@ -57309,7 +59724,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 514,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XLwvGDzYVP3N1/NcR8NY9..BZXsg70bBTT4M/9xYTQr7acLsllLte",
-                            SecurityStamp = "9548c66e387e4233bc7778770894d035",
+                            SecurityStamp = "3cc0f2f654474cf989f3db51c7d78bab",
                             Username = "2512424"
                         },
                         new
@@ -57321,7 +59736,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 515,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mpbQcsVv1sFSJThfag.88uoEwguTSO5EKOqXrY9vZSzkYcuKDwAQy",
-                            SecurityStamp = "ee5624fc0b3a4903960cb0f7a897385f",
+                            SecurityStamp = "3595edafbac14a90a46a82e3a191f769",
                             Username = "2512425"
                         },
                         new
@@ -57333,7 +59748,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 516,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PLy2hzC4D4d52xzymKtUre4JFHJdrhiODSe8m02nSCbngkrmi1VJW",
-                            SecurityStamp = "dad07a044a9b433e9fb620ceafa7f427",
+                            SecurityStamp = "28509fa480584723aee3af5e48b31164",
                             Username = "2512426"
                         },
                         new
@@ -57345,7 +59760,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 517,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$82.5Lrvbuiwj2ClW2I2VteCHJTIJ6MusPl.3aMcQ.wwRdovALhY8a",
-                            SecurityStamp = "44ecdb1fc33c476db847fcb5039f115d",
+                            SecurityStamp = "f805bcb6a5d746a5b3e000a5cfe3d429",
                             Username = "2512427"
                         },
                         new
@@ -57357,7 +59772,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 518,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lcwmDZf3CObDn/lbYOTNBOce3eksBy.WBb5FVKms5ZVGZrYVB.ef2",
-                            SecurityStamp = "4b600d200d154202b9c01f1563357f66",
+                            SecurityStamp = "d8334c843e26490fb69746bf0680764e",
                             Username = "2512428"
                         },
                         new
@@ -57369,7 +59784,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 519,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mV24rDrgIQV/zUhlY/8FauIVCQEMsgHcWmoQ4bqWnTLe1nn7DcSlS",
-                            SecurityStamp = "3d5baced8e0a4a1aac71b7aeb1692386",
+                            SecurityStamp = "4c344d5c249940a4b029cfa82065b191",
                             Username = "2512429"
                         },
                         new
@@ -57381,7 +59796,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 520,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$P7qsWBTHxypmuhacDFynOe285pJ7/39iy92H3nnQM4dj9q2adY0pm",
-                            SecurityStamp = "7d862e67f0974beaa6e4a5b75c004c1b",
+                            SecurityStamp = "3dbc2b1cec864f8d9123c81ea2c94295",
                             Username = "2512430"
                         },
                         new
@@ -57393,7 +59808,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 521,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hdv2QzhAPpS6UczM9ciBiOUk1i1M4l0Hf070.R00j1ESY.9hdaKVe",
-                            SecurityStamp = "4bac46d1833e443a9447803bebf90826",
+                            SecurityStamp = "2a4f7bfafb3a4c008604c136145394f8",
                             Username = "2512431"
                         },
                         new
@@ -57405,7 +59820,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 522,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ubp9OfTEVBDtREq5AWuEGuOQW5RVeMZdQJEUggTumNg.vmycgHsnO",
-                            SecurityStamp = "a1214c4bcd6847c8840330be2b2a5e89",
+                            SecurityStamp = "c52444d5bd9d4442b59a08e9c7d4069e",
                             Username = "2512432"
                         },
                         new
@@ -57417,7 +59832,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 523,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$EAoZ967TCJF3n3oqG1k7EO8gdYul/QGnRL.dtjMe58VwTBfKJH6jG",
-                            SecurityStamp = "fd256edcd9dc439db53f44ef1ae0540b",
+                            SecurityStamp = "f81fa8981c35454f83c0b30d373c8088",
                             Username = "2512433"
                         },
                         new
@@ -57429,7 +59844,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 524,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c0NjMF7OjQbzrdifOk8wG.9X8iVTMAwLuLseOkM4XjXABysKA9H4e",
-                            SecurityStamp = "1f5e5b300dcb4faf98cd04845c2c2cc0",
+                            SecurityStamp = "e457ee14b851494c984c08ca5d02605d",
                             Username = "2512434"
                         },
                         new
@@ -57441,7 +59856,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 525,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D6FvOjwVCQB7nBjNWv3.IeWdMiGwXAKjINB5nVB9iPmwA4RU1UADS",
-                            SecurityStamp = "77d291f29651499d85b52984ea2d35cb",
+                            SecurityStamp = "90affc8128da417d8bc03b8a55b42779",
                             Username = "2512435"
                         },
                         new
@@ -57453,7 +59868,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 526,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vBxaDePnMW28qemIHFF/euTzQv7Da9SAronigEpjVKu817QVZ8/Rq",
-                            SecurityStamp = "16d41e06e18e4be4bd4eed1d82e64196",
+                            SecurityStamp = "be150ea31bb74020969fdb9c030c3ce6",
                             Username = "2512436"
                         },
                         new
@@ -57465,7 +59880,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 527,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rj5tJlPrFti5sUtdONB2XOklvkcXCFnTJXyv44zR6xeyDLn99.RC.",
-                            SecurityStamp = "01b014a58bf04048bcb363109962e86e",
+                            SecurityStamp = "02851240dfa041febd4b78a62e7a5941",
                             Username = "2512438"
                         },
                         new
@@ -57477,7 +59892,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 528,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SsNv4t0CqPW9jChoriu8T.E6nN0SHMg8h67tBKEJ2qONZcThrv1fW",
-                            SecurityStamp = "11e0cc52bd694f1fb10dd21b7203bcdc",
+                            SecurityStamp = "b0c9ff740eed4a7896d2cc64a988c1ec",
                             Username = "2512439"
                         },
                         new
@@ -57489,7 +59904,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 529,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hAT6Wp6PXkusu9PFakv.F.Gv50jiBnpgUGYH7b7FqMpeGk18PBQnu",
-                            SecurityStamp = "4b0227225f2e4817b79f484634600454",
+                            SecurityStamp = "87ca741386c04e2796606ee5266fb70b",
                             Username = "2512440"
                         },
                         new
@@ -57501,7 +59916,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 530,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VXlW0tFFDLYM529mOWsEkOr.ze97Ehad454ClhX4.5lEsi3WHy22q",
-                            SecurityStamp = "9111f06c34cc4712ab5c9a15f83fd96a",
+                            SecurityStamp = "cc4ad53671bd45dcb7b18614a0bdd6b4",
                             Username = "2512441"
                         },
                         new
@@ -57513,7 +59928,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 531,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rx.ctuuhUuUZUo.Saav3PeK0EDYblVlt./TrWQ5fw.mMYGncKXcim",
-                            SecurityStamp = "cf429f14cc3441cf8311083a04d08839",
+                            SecurityStamp = "87fe2cda68014398990823576f755edc",
                             Username = "2512442"
                         },
                         new
@@ -57525,7 +59940,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 532,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FuE5d8Fknl.OJPkZo7R2wesh4GSnbGtNlav/.r6RECim/2hOW9MTa",
-                            SecurityStamp = "5a4690ffb1d44fc6addaf5be41a3c167",
+                            SecurityStamp = "5534ef9314694329aa09d4aa6023593f",
                             Username = "2512443"
                         },
                         new
@@ -57537,7 +59952,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 533,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WCivprkYPjbrttdgmB3bneAjxhM6Ile9nCK4c0w7UZ/gFYGnTGt9.",
-                            SecurityStamp = "32c4ac6b915c4feb9a133b39f4a69f22",
+                            SecurityStamp = "9f42505a6d224644999358eeb273666f",
                             Username = "2512444"
                         },
                         new
@@ -57549,7 +59964,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 534,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$G.exqPChMLRnV.gGPljwTuIAeP6y44OOQEOYSCy3.IZ7.YBlwwW.W",
-                            SecurityStamp = "89553e0ca3514ea3ac1c99b8c0151f14",
+                            SecurityStamp = "1615e5c4ff46481f8435558fabc65885",
                             Username = "2512446"
                         },
                         new
@@ -57561,7 +59976,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 535,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nI4fOHnx0Ekcecsh/SBHtuVuMgc11X0Eh0dDrBE3fxgPtNZeFTxG6",
-                            SecurityStamp = "d1a4c2adb78e45498d6afa849a5fd0fa",
+                            SecurityStamp = "e630206e3e4c424586002087c2ae6241",
                             Username = "2512447"
                         },
                         new
@@ -57573,7 +59988,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 536,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g.UX5CxRNk5tOfoZn1SiQ.hkk2pm7XEJs5LEcngEYUvCojaM3rxrS",
-                            SecurityStamp = "631b688963294541a2523d3d5519af5d",
+                            SecurityStamp = "1459be8bf97c4f758e3ca7141fbcce2c",
                             Username = "2512448"
                         },
                         new
@@ -57585,7 +60000,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 537,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$S.7UzJtXDEqndxysEeXihu4BuK605WCJe10slZYW9KtTHWj7tin8.",
-                            SecurityStamp = "2bcd6359ebb74dffb1d6c2f624ec4bcb",
+                            SecurityStamp = "90235eccd0914f3983db67b77c662e97",
                             Username = "2512449"
                         },
                         new
@@ -57597,7 +60012,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 538,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9.AU5/aD2EBJbNyVk8AZ0eEiBCORYx3aNJ7N8sj/QxDD20lfamTYe",
-                            SecurityStamp = "9264e2fcd2a44b57bf760ef7cd351f93",
+                            SecurityStamp = "dffec5853d214562b37e5b7a654de824",
                             Username = "2512450"
                         },
                         new
@@ -57609,7 +60024,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 539,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rLo36OrgyGyZJZi39LH04uog8QKtrcPLCEXlFz98BHV.5.qRxr0Sa",
-                            SecurityStamp = "b8c63fe26dcb436595a4ca2d0d1c76cf",
+                            SecurityStamp = "778e4f7cca01469bb22e0e5576b5e696",
                             Username = "2512452"
                         },
                         new
@@ -57621,7 +60036,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 540,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dSLzoSSf4pGWCxjuXepriO5tEYCW0RbE1yzLCVRABdrtriqyVNo/i",
-                            SecurityStamp = "f39496000fe1482fac9c550a2a7e6653",
+                            SecurityStamp = "efd964b787374b41b217a3b1cc7b1306",
                             Username = "2512454"
                         },
                         new
@@ -57633,7 +60048,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 541,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$K0BGHEAp8okxdeWmgHkHz.8.I8lYKcGaSUgPsfV0/zC5OyMBp4LTO",
-                            SecurityStamp = "68aa0487234446dd9d2d737cd4650e0d",
+                            SecurityStamp = "e023953700664714a027e077c2379c3c",
                             Username = "2512455"
                         },
                         new
@@ -57645,7 +60060,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 542,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$q2A6SctspRrQDRgurqLFguX9QwxT/CltPHnRjtFEcaIyC7CO3nPhO",
-                            SecurityStamp = "73653feb11f34b2eaacce37322776ba8",
+                            SecurityStamp = "65dad917920b4128b117f96bbf73c915",
                             Username = "2512456"
                         },
                         new
@@ -57657,7 +60072,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 543,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$US7BOiM45eJSu/2LoN3TR.Vkb2XhLkoq9YXuHlzAQRs.CIx5CM.Pa",
-                            SecurityStamp = "f44e13923aa449c28e100e7487acc3da",
+                            SecurityStamp = "7b34056c31254f8285f99904e09d4432",
                             Username = "2512457"
                         },
                         new
@@ -57669,7 +60084,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 544,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dWqxt81XaVrAG6BOCDpnfuAoeiWAD9C84h6QCK2ZNfypU4ozdyiB6",
-                            SecurityStamp = "469336e5de4147e6850500ffacfd9fde",
+                            SecurityStamp = "d3ad415921c84866992fe22105b1640e",
                             Username = "2512458"
                         },
                         new
@@ -57681,7 +60096,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 545,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$U0bsBWyYQHYwte8eZqOb7uUqjzuiBSE62LdrRairZHhzeo2Z4EWyK",
-                            SecurityStamp = "d9298fec5eb2480c9ccf27a2f6534099",
+                            SecurityStamp = "cd87a0d477824eb1b7fb1ad6c319ed25",
                             Username = "2512459"
                         },
                         new
@@ -57693,7 +60108,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 546,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pywfWxseawgCq1EKJ51.teDO8yT9swisPqXg4nEV2eb8w4w3WNs.a",
-                            SecurityStamp = "cc835f5030b1439aa34ab639dec959a0",
+                            SecurityStamp = "bfacc16ebf124fef9b516d3526310098",
                             Username = "2512461"
                         },
                         new
@@ -57705,7 +60120,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 547,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rn5NsvkSOO9EFX0i3e77W.cI35gzAVR40Il34TzVpVKpXmelCj/hK",
-                            SecurityStamp = "6c0eff7edd6d4c8ebff3ac7bd29b31be",
+                            SecurityStamp = "fb6800830f8246e8afdd33a9dfb65ff1",
                             Username = "2512462"
                         },
                         new
@@ -57717,7 +60132,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 548,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uY2s2LHhHpf/7WpB6DJZ8.O.IcA.7Jwzj1RdiwHQrT88N53QZ3a.m",
-                            SecurityStamp = "fdc449a04bcc4d898acd7048e7188cc7",
+                            SecurityStamp = "078ff7e595b8437cb336ca3ca8c8def2",
                             Username = "2512463"
                         },
                         new
@@ -57729,7 +60144,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 549,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e2M0bOUhQBLXn5LJHqB/G.XiZ.00j5aq09A5O12yg926PULbt8DPm",
-                            SecurityStamp = "f9985909878748f0a68beb9cb89db482",
+                            SecurityStamp = "85ce0f2f34784fffbd49b0f1c0f914c9",
                             Username = "2512465"
                         },
                         new
@@ -57741,7 +60156,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 550,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.vm6KIUGZhLmfKtnNYuauOUEknRGg04K6ktW2qrxu6RPPKHDf.mS.",
-                            SecurityStamp = "23e2ca40b1b441fc88deb2d0f7172e4b",
+                            SecurityStamp = "b5cfceb59f28483586bace1b838528b3",
                             Username = "2512466"
                         },
                         new
@@ -57753,7 +60168,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 551,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$EAL0mdRwcod/T.rO4zeOgeHo4ynvyaWrx.DxjcM7.bxYjcORrd9he",
-                            SecurityStamp = "7203a39014a14af995672eaa6d485d4e",
+                            SecurityStamp = "d0f491de1d1743c2a2b7cda4463be12d",
                             Username = "2512467"
                         },
                         new
@@ -57765,7 +60180,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 552,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GG7w8Lj/XBMsGslVzVBnKe0lWNMkGyYSwLY68HEmS4t3AVDsuO9Y6",
-                            SecurityStamp = "bd16a0512fa24822a540a7c0457d303c",
+                            SecurityStamp = "d91602105b434b858e8646fb97bf1eac",
                             Username = "2512468"
                         },
                         new
@@ -57777,7 +60192,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 553,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JQ5YRPblEhfSJ0SezLt7eeu5Llz1AusS2hM5XqqIhLk4U2Gkp4UEq",
-                            SecurityStamp = "58edb1ff9cd548b098c0ed9ee074ff6b",
+                            SecurityStamp = "d7c9d147778642ff908d4bda680bff47",
                             Username = "2512469"
                         },
                         new
@@ -57789,7 +60204,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 554,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PGaqhf8oOT8YdjApClpRIeIEiIGNuCfHGu1J6gwppz8L4qDBH3LnO",
-                            SecurityStamp = "b857a6dd39b841f4b75874b044d0f300",
+                            SecurityStamp = "3f48b584d08e414cbabc99397ed3218b",
                             Username = "2512471"
                         },
                         new
@@ -57801,7 +60216,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 555,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5pR8zJxaQRfiziA4BQ6oq.d3SAblpYir78GpZZb0bAB0PyxGn1bO2",
-                            SecurityStamp = "1ded303998b5488ba8eafbe84c90a4eb",
+                            SecurityStamp = "52325e16134941b891f470e2a6831456",
                             Username = "2512472"
                         },
                         new
@@ -57813,7 +60228,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 556,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vEk0O3KohFdOfMCdn526yunRIHwqbdckxCjTSnt18MY7tZPHrgCd2",
-                            SecurityStamp = "a0c676c9eacd4c3ba8365b9e5a2192eb",
+                            SecurityStamp = "f58cdede1d5e4e1caeb2415704374b5a",
                             Username = "2512473"
                         },
                         new
@@ -57825,7 +60240,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 557,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nqdpKchbaQwm6JUruMS32uhLn2.QVN0QNThIjVM1JeGILwoFO3R.6",
-                            SecurityStamp = "386a9d652c824ed8be37702b25fd81e2",
+                            SecurityStamp = "7ca572e8dc7a4cf88fd08169216e4650",
                             Username = "2512474"
                         },
                         new
@@ -57837,7 +60252,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 558,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Bmukub8ENu.ahnduliPhGuP/jK2LS9P.1YqrPgrSDtytkT/uPOb.C",
-                            SecurityStamp = "7f8f5f2657614df7b7cfa7213edc0115",
+                            SecurityStamp = "604a597a986648299b3c2ffdd0a48a8d",
                             Username = "2512475"
                         },
                         new
@@ -57849,7 +60264,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 559,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VKMmm6Pspe2xiizB4lXpeeEDkiKHqMBUzDRT4rIAk6HWevxiYcA/2",
-                            SecurityStamp = "bc48ea09c7154486972549f377d78dba",
+                            SecurityStamp = "b40fdf7483cd4c159a080014cb4ac6f2",
                             Username = "2512476"
                         },
                         new
@@ -57861,7 +60276,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 560,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$coEjmLh0uCa1T6Fosap4Fu1H.tKytvHjLEzNZhpJQRTzZ04EZjTlW",
-                            SecurityStamp = "48a8fe6b2d58499587063ee0e17df5d2",
+                            SecurityStamp = "612a49ed0377481786e579206709193a",
                             Username = "2512477"
                         },
                         new
@@ -57873,7 +60288,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 561,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$te5vOgpvjz9lSqoaaEZx1uvyDDSOVNu4uCItZqa0n2W2Sx5JNzQJ6",
-                            SecurityStamp = "eb3f9b34b0b74b46bedef0b1b1aa96de",
+                            SecurityStamp = "39191f4b93c54f3191e0cb9a0c026669",
                             Username = "2512478"
                         },
                         new
@@ -57885,7 +60300,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 562,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$orZX6d4ZUjmKLu4HCPeCJOhgTws512Woc4bzoayuubS0UJHG1efsa",
-                            SecurityStamp = "f4fd80c2ffb14f3ca9a00bf08ef32eb8",
+                            SecurityStamp = "8f6df320dd904d38900d5b70d22b97f8",
                             Username = "2512479"
                         },
                         new
@@ -57897,7 +60312,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 563,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9HvpcMgHWw7FlqSVi.E6ieHcPkGiElY.7P.BpHD6oQGFj5oJE/ieq",
-                            SecurityStamp = "0ad2082c7250430b8b5724b3c0e22394",
+                            SecurityStamp = "33c2bd0218c84dad80a31ce5966247f1",
                             Username = "2512480"
                         },
                         new
@@ -57909,7 +60324,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 564,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2IH8MOaOruARyhGkipeMJO.I9sJrWKFPp7uhJ7VihI1vT5l2w7KiK",
-                            SecurityStamp = "4643b499b006486682c947f6a91cb95e",
+                            SecurityStamp = "d822c490d96a4128ac54c0d157cdf823",
                             Username = "2512481"
                         },
                         new
@@ -57921,7 +60336,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 565,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KoC4g2OSsUl0KVxW2t35z.O4H7CGzExSnY5Lv8xymqmsYWQWaP0jK",
-                            SecurityStamp = "99b4526fcf964624aa1fd5b57b82b287",
+                            SecurityStamp = "cb0bfb9ea63f4ac58d445bb9c37dbf81",
                             Username = "2512482"
                         },
                         new
@@ -57933,7 +60348,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 566,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$eQeq78VVv56x4cbYsMDy0em4hjWVqiFbfXYf5j8qm8yvgNhRfqA3u",
-                            SecurityStamp = "ea4912f893914f22aae2110cc26f7d5e",
+                            SecurityStamp = "9e1af367e47f4b74b8af20f0c783eac3",
                             Username = "2512484"
                         },
                         new
@@ -57945,7 +60360,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 567,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5FFBPtFrZWGtGHeeX0ZzE.sGApIS3wzZTiEWL9EL.LdhOiP0VBrX2",
-                            SecurityStamp = "7b3e6b4c5390436a897955faadc04f4e",
+                            SecurityStamp = "92ef7aaa48644e3393e0f306e4408761",
                             Username = "2512485"
                         },
                         new
@@ -57957,7 +60372,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 568,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YO93uk8Z/XvEwrVBWffJv.Hjb54djmL7xblmtlhO1fCZJZMIahgTy",
-                            SecurityStamp = "26109cbb33f0459ea487299c77960d1e",
+                            SecurityStamp = "8f2300810d994ad78e12ac5612fbca41",
                             Username = "2512486"
                         },
                         new
@@ -57969,7 +60384,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 569,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$L5Sic2WSIHXYFS68ExKXWOlGNGoHmV3P8nN9y9l/jrxkWIOgHEuB2",
-                            SecurityStamp = "b9e5335f9c8448ba83200ad8f96ba37e",
+                            SecurityStamp = "758ba04ec7664530bd6e027d2cdf7f28",
                             Username = "2512487"
                         },
                         new
@@ -57981,7 +60396,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 570,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$T4oU86qBSNnRzESt43D7IeNQxU6.VSf6BMBxGcBpBhXByq9wIRbMu",
-                            SecurityStamp = "d8b4a2e6bcf04d85b0cb0805084f80a7",
+                            SecurityStamp = "5ab73cefd9d94a0b870deee8e5c4973f",
                             Username = "2512488"
                         },
                         new
@@ -57993,7 +60408,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 571,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.Pvq3GVux/g2skGropLDcev0Qt0jPbQC62q45t067ld8pnwAgxs9G",
-                            SecurityStamp = "d53812ef0b164202a511f55b8354559e",
+                            SecurityStamp = "0d4b895c32d748f3a467a709c2ff7303",
                             Username = "2512489"
                         },
                         new
@@ -58005,7 +60420,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 572,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y4EX9Wjgksb3G.8.Sptedu22IH.qiQuMOWijTMZJaTPR/FZtYFkq6",
-                            SecurityStamp = "a28fdc1761b34e479cc8313475c46261",
+                            SecurityStamp = "07e3b03902f844b39d2eb0591882e1f9",
                             Username = "2512490"
                         },
                         new
@@ -58017,7 +60432,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 573,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$is33/PGrBIUJTlt7R9FpMO0C8cZS01nkYuv/Gy0.VYoiZa60z2SrC",
-                            SecurityStamp = "a934ff5af8b0424a914e0723df43831a",
+                            SecurityStamp = "795c9420d0cf499ba5da6ed459e2e224",
                             Username = "2512491"
                         },
                         new
@@ -58029,7 +60444,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 574,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6fkm8YjPl.y5GKSSi.k1BezR3PhdnB5GxK/RUQMV06B94IBjGrOHe",
-                            SecurityStamp = "fa028b907b784a58833bd1853233c503",
+                            SecurityStamp = "79c2f67fad384c0fba293b241f6e2f37",
                             Username = "2512492"
                         },
                         new
@@ -58041,7 +60456,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 575,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.iqQKilkfgThwLTeTcb1XenIuoKQ6O08o.d4LoTdN.WwO7Ale1Q4m",
-                            SecurityStamp = "0a7544813028409cb049793cde865168",
+                            SecurityStamp = "d145b44f1752414d92d75a80d8891f54",
                             Username = "2512493"
                         },
                         new
@@ -58053,7 +60468,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 576,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IdMa2IBeMS7Fdc/6gLqjbOFyH76ax8yHxhAmOug3llNEE5yFkow1.",
-                            SecurityStamp = "5736942e006e44029eec350df0a328b2",
+                            SecurityStamp = "3f7369b6a9b34661901dbbd01dd10d98",
                             Username = "2512494"
                         },
                         new
@@ -58065,7 +60480,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 577,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6yh43ujNEehB7grOMLTGj.8O3qXahpDdx0nrIUwaGvHR5.QUpvXEm",
-                            SecurityStamp = "442cc53a6d2a427c8e7f385b1e6d8f0a",
+                            SecurityStamp = "359ccb1975334f44bebc7f6a9b0944b1",
                             Username = "2512495"
                         },
                         new
@@ -58077,7 +60492,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 578,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$T6PAuisvYqjPzr2LgShLEuPY/DcAjJ1F2cWsKh8rxaN46jTFbJLx6",
-                            SecurityStamp = "570f67c5acde4bdda13f82f6c58606f3",
+                            SecurityStamp = "7c0d0158979f4c138e14dc76250c5b54",
                             Username = "2512496"
                         },
                         new
@@ -58089,7 +60504,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 579,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5DjOpOtnBVaMg8ean7piw.jRBdUvOhci7xJI.36kl91IXRIpGoQ32",
-                            SecurityStamp = "4609ddd214a1443d8234eb8a51b41096",
+                            SecurityStamp = "6edf732938be498084d1adf7c477c685",
                             Username = "2512497"
                         },
                         new
@@ -58101,7 +60516,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 580,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VK9XGdXN7VGyIDFzaxlXfe0Xudza6140QJxWlP4h4hyXJZy7S/Ioe",
-                            SecurityStamp = "ea3b7df7be99452784ab52de9e79c378",
+                            SecurityStamp = "06667afff8a74ab2ae309d7ec1c10c69",
                             Username = "2512498"
                         },
                         new
@@ -58113,7 +60528,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 581,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jPNdTW4sYBbe/23SzueH3eYxkT58BE2jBlg86Ae0oAwSnaB15n5WK",
-                            SecurityStamp = "e125d1c1503e4450a36a3c7341c7eb9f",
+                            SecurityStamp = "799364b1ded445eb97d82d848d62335a",
                             Username = "2512500"
                         },
                         new
@@ -58125,7 +60540,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 582,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dUoPNa78i7BUWBEGSuRG.umOBmmCNTzJnLBti9WTKwh0Titq.Q99.",
-                            SecurityStamp = "f9ecf75b3692479984938d6dfb0e08a8",
+                            SecurityStamp = "1e81174e78194a869186c9c393b9a677",
                             Username = "2512501"
                         },
                         new
@@ -58137,7 +60552,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 583,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6Z440vCTpzSji8Tj2q5vLuvLta2JDQRRsrGyyNresoPBlRtgSb.WS",
-                            SecurityStamp = "bc6cf115b12642a78cd967fc27f6acc9",
+                            SecurityStamp = "f6ed40a94c834b829570036fc541f661",
                             Username = "2512502"
                         },
                         new
@@ -58149,7 +60564,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 584,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4MIOH2bzB9.A4F2O3w3Gfeo4n8xONtPNnLEYZWO0xro/O1DZBZPem",
-                            SecurityStamp = "42ae050bb9744fe4b2e1ad3730fc2ff3",
+                            SecurityStamp = "ff8029540e644e8289304ed5f0d1dad0",
                             Username = "2512503"
                         },
                         new
@@ -58161,7 +60576,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 585,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wu6svGuHK5jFf/RahcEef.DlYENvojK6OpIk2Xdk6uPRYpAU0ntx2",
-                            SecurityStamp = "e6ca4c12e55144c8ae5a154372816dc0",
+                            SecurityStamp = "d95451a3677a4054973e5445ee9de73d",
                             Username = "2512504"
                         },
                         new
@@ -58173,7 +60588,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 586,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$p2hPaz8uYh084y1X9.vI3OC/MR3EDSo4BBZT7JNgNA6MeA543tHXy",
-                            SecurityStamp = "558b0e024d8f4e3880f10eafce37e886",
+                            SecurityStamp = "3f486582eb6e45579463d19ccf62a9ae",
                             Username = "2512505"
                         },
                         new
@@ -58185,7 +60600,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 587,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$T4C5sNCTBBzQhowfd69CzOlaDpdztIhhxib91fXiEsI.rTD/lY0f2",
-                            SecurityStamp = "a27ec627ff3945859553832869817e8d",
+                            SecurityStamp = "e9b20a2669f74780b8d0050f45d65d9b",
                             Username = "2512506"
                         },
                         new
@@ -58197,7 +60612,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 588,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2yjqF/6MFlQahZ2RYu25quIejt/X9DPyqkgqpp.Iqk7wbGMjViEC.",
-                            SecurityStamp = "b921bdb281e44c35a4fa7b3fd0a661cd",
+                            SecurityStamp = "42b91714e5d046b9a5ec6ea8732cf076",
                             Username = "2512507"
                         },
                         new
@@ -58209,7 +60624,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 589,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$U7yfRgOGL.LIC1DJRF9Rp.v4kUVXKFBlfjIdmfmwkbryuo45O4H1S",
-                            SecurityStamp = "95280cfff4984037bed17a45acc1fa49",
+                            SecurityStamp = "b2e43654b9fa494798e1fa2e917a0919",
                             Username = "2512508"
                         },
                         new
@@ -58221,7 +60636,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 590,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4oYEySqZf0c9Fdpm9duKB.OzXz90u.Q0OsZ9NiIXXfx0y51z8hI/i",
-                            SecurityStamp = "81caefcc982046edbd522512c34c30e1",
+                            SecurityStamp = "7e6c8979fa004c9c94b74cbdd1c233dd",
                             Username = "2512509"
                         },
                         new
@@ -58233,7 +60648,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 591,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BsuWKrO1Oi7ySOCVnC9S/eDOQkuC6eF.7vixu3tGe0TLD6rQSgssC",
-                            SecurityStamp = "1edb889ae8cd4841a045a653d49179b5",
+                            SecurityStamp = "0cdb8babb5e243d18a4dd95b4f1eb8db",
                             Username = "2512510"
                         },
                         new
@@ -58245,7 +60660,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 592,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nghwivB.mCzQCcMqV58BjuSv5AJLr9SLXcmSEOSmbjQx9IGgS.pWK",
-                            SecurityStamp = "2024ffa9949341dca5493c270b95ec7f",
+                            SecurityStamp = "98092f7a6add4efc91f6ff264179f077",
                             Username = "2512512"
                         },
                         new
@@ -58257,7 +60672,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 593,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RHXSRgE/WDvGP0JWL0Sage15FtJYrHGAvJUORB83R8PM4Wkbg9ehG",
-                            SecurityStamp = "47cfbb9c81674acda4840a4ffb3503e0",
+                            SecurityStamp = "05192a56e5b9432cbd2d67f14bbe4cd5",
                             Username = "2512513"
                         },
                         new
@@ -58269,7 +60684,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 594,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ljPYtbgD.szzKvQvqtW8VeFPz6RT2DULv7fg0JYNFArqv3R3/dypu",
-                            SecurityStamp = "3fafa06df466460383c015b651a0d78c",
+                            SecurityStamp = "a6467d58afd54b869b6607d2a42b0eaa",
                             Username = "2512514"
                         },
                         new
@@ -58281,7 +60696,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 595,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fNVfKMi5rNHiaEEdlMmoJ.zyNLvF8CaCXT66jTNkF8nDur5HBmRDy",
-                            SecurityStamp = "8e8ae0916a7348eb92abee9ff580e038",
+                            SecurityStamp = "f3cdb05b7de14a5ea25323f26e30e938",
                             Username = "2512515"
                         },
                         new
@@ -58293,7 +60708,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 596,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sbtfzTEanxw3dy1/XDPpdOwTB/ZMGkCr913JvOOFSdkUKn1hLsZRa",
-                            SecurityStamp = "8afe01a6edb949caa810b22fe7a09521",
+                            SecurityStamp = "9e16fd79cc094914860ba563138f0664",
                             Username = "2512516"
                         },
                         new
@@ -58305,7 +60720,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 597,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$z.yW7Mnq2gww1mFHf.l9bOOUC29b/B4FAZqCD/72Ftz2bcloYUtCC",
-                            SecurityStamp = "af34382915084915ac2e50d81072c386",
+                            SecurityStamp = "937ce97f9f894fc9ac3eb6598c959f46",
                             Username = "2512517"
                         },
                         new
@@ -58317,7 +60732,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 598,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.vGyGw/6Xc3OpQEEfHUTKOloNKYkVyOtASjs.7B0T7vcZubgMQBf2",
-                            SecurityStamp = "d6724f826cae438c834ca5f35f2bb2ec",
+                            SecurityStamp = "94b49e51923142268fb6a85c9579b954",
                             Username = "2512518"
                         },
                         new
@@ -58329,7 +60744,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 599,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BSn706J4J7tBwWVfxpbqEOimTDL2CizQtR0Am5bu.cgvRSP8WXVoy",
-                            SecurityStamp = "ae05b2c912794cca8638891e6f77dd56",
+                            SecurityStamp = "a84707fa6dd545e48f0a312d0be288c6",
                             Username = "2512519"
                         },
                         new
@@ -58341,7 +60756,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 600,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$j9jz4k2y1ZMoj9CWA5BJm.RDBmbU62DsizsPc85X1FoGt9EcO02sG",
-                            SecurityStamp = "66643d27c322462988dddfd1f65f22f6",
+                            SecurityStamp = "7b5d4fb542d740aba1b22ef27ebabcda",
                             Username = "2512520"
                         },
                         new
@@ -58353,7 +60768,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 601,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$P/irfOyjEKtLP/yhZOvHR.1X25eL6OqYFMGgHHNQT9EYVG6Y/rSvO",
-                            SecurityStamp = "977ab7b654ad43d587b366a3c6dd4ebe",
+                            SecurityStamp = "3909bca4799a41e3952ce83e64d9d8e2",
                             Username = "2512521"
                         },
                         new
@@ -58365,7 +60780,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 602,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1YVHJHF/UIhHtjCnnG/rq.6DTquo5WEfbTaIRzLY1TptY0lKSdHbW",
-                            SecurityStamp = "1aafa89804e34988bb734b088f8bb042",
+                            SecurityStamp = "d5d59d0bcdf64e75924cf386e4e8c464",
                             Username = "2512522"
                         },
                         new
@@ -58377,7 +60792,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 603,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ShHdG7YrOjGXXZ.q2KevDepfxAfpLC2xj79oT5NIKwKy6JAb5znGm",
-                            SecurityStamp = "ee04a7d1cf3441d0a164b0f5894dcc51",
+                            SecurityStamp = "ef3495e8cea248ba836781aa9f2f0445",
                             Username = "2512524"
                         },
                         new
@@ -58389,7 +60804,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 604,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vJhNmytn7sHi3qcudnBTmeK49H5oE/uB00HFe94qYfj9qnuVICbvi",
-                            SecurityStamp = "4add9672002840d99fb5135af0509735",
+                            SecurityStamp = "e942737ccf5c49b3aff15052a5b73545",
                             Username = "2512525"
                         },
                         new
@@ -58401,7 +60816,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 605,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g4v28/NjZ8vKtNu.Mv3wpeLBl8NFYr6HoQKKcgPCq2EnhljUrqexu",
-                            SecurityStamp = "2d8fd503a7074a3d807611352966613e",
+                            SecurityStamp = "3dc28862db714f708778bdedbad1df60",
                             Username = "2512526"
                         },
                         new
@@ -58413,7 +60828,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 606,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$awqptD1jO0R735BT.7x56.Erhl5mU.jCcEsVLSBXFTyiAmXTC3rLm",
-                            SecurityStamp = "8decfae20d3e402ab2bf6d87ff942270",
+                            SecurityStamp = "53ef9ea498d34467bb454098b0ae285b",
                             Username = "2512527"
                         },
                         new
@@ -58425,7 +60840,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 607,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pMqsbqrj/lGx1gNRjWAncu38ePeU75c8dvJRpoH9MrJnlsM12Ook2",
-                            SecurityStamp = "8856dafa423747b3946f97acc84f2c8d",
+                            SecurityStamp = "389db777b8cd4b11ae746fa3f450db74",
                             Username = "2512531"
                         },
                         new
@@ -58437,7 +60852,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 608,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VyKBdodxXBOOTdzur7C9wuA.EEwnLZS5Wh/ma.Wlg/S7CGwVeOO7W",
-                            SecurityStamp = "9b2b9c17321247a58e89681894efa6da",
+                            SecurityStamp = "e1d825573fce4d889fafb192b324b1a0",
                             Username = "2512532"
                         },
                         new
@@ -58449,7 +60864,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 609,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$imzbMBwSLuLRajG4tmIlaezTx4ae65bCYodlU3MxBHGq2uEVqCH9m",
-                            SecurityStamp = "d6405313b73242d1aa97de29b3f7ba1b",
+                            SecurityStamp = "5291a98daf0740e79499b4ccd28a1855",
                             Username = "2512533"
                         },
                         new
@@ -58461,7 +60876,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 610,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GpkekjOmYi.LQGhz7EVDXu9f4cxWW37I5F/LWOcqgQ1qXoWxHZQlO",
-                            SecurityStamp = "ebf11aa95e004e6995a78119716885f8",
+                            SecurityStamp = "4ad68de946fe4499b6061b6de5a16042",
                             Username = "2512534"
                         },
                         new
@@ -58473,7 +60888,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 611,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$CEAKCblDfHl5PtTkIVHgz.YtMQFup1ei59pKbi/yWdpJnn0OaEMZu",
-                            SecurityStamp = "e4fe126fb4ca495db58ba72922557539",
+                            SecurityStamp = "e4ec8a8e391b42eb9c5123e09da4a9e4",
                             Username = "2512537"
                         },
                         new
@@ -58485,7 +60900,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 612,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sJLVKUzqKx2Ps2y90n7IYuh3ACEwncIqI3hjKIO9IWbVVaT.5gg.u",
-                            SecurityStamp = "6135fe80c0194f0dba55fe339a6c8423",
+                            SecurityStamp = "dc4f106738524e21a061fdd0fdafeab8",
                             Username = "2512538"
                         },
                         new
@@ -58497,7 +60912,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 613,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jrpJagywSxgG/Jk7DoBS9.VLgt/HE46Gwtaw0g06PSTURKxsAAGt.",
-                            SecurityStamp = "bfdefdbf417f441da8286848d1536f13",
+                            SecurityStamp = "59e83be5432d4f6ebf1ae68907e9474a",
                             Username = "2512539"
                         },
                         new
@@ -58509,7 +60924,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 614,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yzgrrH/9sfMexOTby1yq7Oe1eM6S//gMXS4POegKSso8iHwoFBu9a",
-                            SecurityStamp = "f7e1d2cef4d748c69f80316a27d0b314",
+                            SecurityStamp = "833e30c340b74fc3a857ffb687c994ac",
                             Username = "2512541"
                         },
                         new
@@ -58521,7 +60936,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 615,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LIYPyxmuKlYF1piI/Hg0xuyUUk3jrfXyX4mPpxUk7zEn45pTgzpDS",
-                            SecurityStamp = "59a16479b13d45188bf254a116faf877",
+                            SecurityStamp = "6bba8e7a2372461b8e48c105de7d05e4",
                             Username = "2512542"
                         },
                         new
@@ -58533,7 +60948,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 616,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$HFFy.g8pigpWLJbRb5UggeTaRuG2X6U2TcLSWHTGjXkZn/fAr9MIe",
-                            SecurityStamp = "20a4bf18ad56456ca946c078aec01883",
+                            SecurityStamp = "763ef382b39c45a59870699f26fd25a4",
                             Username = "2512545"
                         },
                         new
@@ -58545,7 +60960,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 617,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7ogKa5wPdW34NMlEMHRrcOjG4CbZgPI337SW7hghJ5JdC80WBEeF2",
-                            SecurityStamp = "d045ad352fad4fb79c514c4eb4116e38",
+                            SecurityStamp = "34c1881cdca34bd78b23e9111cd59454",
                             Username = "2512547"
                         },
                         new
@@ -58557,7 +60972,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 618,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9vQKYAyCbrFuzIbdlfSrT.6nRxz4eb9D3xtCXCVEsBHwFR56qXBhm",
-                            SecurityStamp = "b97575c8a9314c7a89b20c1f70832ae8",
+                            SecurityStamp = "c684d7194a464ba5ab3d916c3f176f68",
                             Username = "2512549"
                         },
                         new
@@ -58569,7 +60984,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 619,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D6pJl.ZkteCJ2Jd43t6OaOoHPnTtIRf0KSxj.waeouD4JCpj7zoFi",
-                            SecurityStamp = "c05b9708ed3d4d62b1b882984313fbe5",
+                            SecurityStamp = "2fb97c2ef06a4a5e9cd24a547424376a",
                             Username = "2512550"
                         },
                         new
@@ -58581,7 +60996,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 620,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$abBnx7ViwZJ4wfYEe76G5.kdnR3rnL2R.gDDV49CwAv2lCnJbNyOe",
-                            SecurityStamp = "e068c9f5829c47ad8796433ed0797ab0",
+                            SecurityStamp = "2896d18b42fc4d8b91f7e26e21b5b56a",
                             Username = "2512551"
                         },
                         new
@@ -58593,7 +61008,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 621,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Iiv/tX30J9fRgCOAEdcrFeOLRAYzu520giTZewB08JHAEEEgEucDy",
-                            SecurityStamp = "6e83b27819644330a768fe12eb69b3ac",
+                            SecurityStamp = "084be42e97b14412a8f5e6ab599eb76f",
                             Username = "2512552"
                         },
                         new
@@ -58605,7 +61020,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 622,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xE5A9nDJhlqdwuBYQNpIBOKPBXGZ3DZbLvoZkfvvHeCbOjh3XR1qS",
-                            SecurityStamp = "4edc3ab000984034aba7cd21d205e38f",
+                            SecurityStamp = "3ccab10942524d5aa92a12932101be9a",
                             Username = "2512553"
                         },
                         new
@@ -58617,7 +61032,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 623,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/j2vKr/c.nXJ2QI8/j29C.a0mze22H0THoGUtHdPKx9xwnwqcxDom",
-                            SecurityStamp = "6878d44eb24e46f78a055978be5ed4e6",
+                            SecurityStamp = "3a01afa0c3704705932f37c3115118f7",
                             Username = "2512554"
                         },
                         new
@@ -58629,7 +61044,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 624,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$u917YhxG15sjXffU9VGhM.x3Xkg/GhsLuHtmgN7LLiZmALU7SZn8y",
-                            SecurityStamp = "91006c49365549cb9c0739b4a86dc7aa",
+                            SecurityStamp = "2d0d2b99fd744b88a65142ddba8440a3",
                             Username = "2512555"
                         },
                         new
@@ -58641,7 +61056,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 625,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$q7g5YIBIfj7I2qcG2SdbxuiZM.lRqUzw6H8lfAGpHAqPHE.MupMyG",
-                            SecurityStamp = "5aa8b6a92de14588a1f3adf5f188c3c3",
+                            SecurityStamp = "d3ad3b13a26447f5ae10601d1a59b82e",
                             Username = "2512556"
                         },
                         new
@@ -58653,7 +61068,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 626,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2xBETRxeClrC7AUMr1hXKeEi498Bs6FKshVfvKVVpZk8zkyHxrpkq",
-                            SecurityStamp = "a89e2a89047f49f0a91e0f4f848f0f6a",
+                            SecurityStamp = "45c03456270748c7856b160a243b6889",
                             Username = "2512557"
                         },
                         new
@@ -58665,7 +61080,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 627,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$iSYwGrZxzKgKCpSIRVnXj.ojStvLP5rZNK126jV8rthuHXGWE.ZK6",
-                            SecurityStamp = "a5b39daf75ec481c99488c80637f19f9",
+                            SecurityStamp = "3874c34fb4184f8ba60512e2fae3656a",
                             Username = "2512558"
                         },
                         new
@@ -58677,7 +61092,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 628,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WLknfcETrQWekLzUhvKlYOm8LPYcnLfBQQ2Gu.nzlzU/NW4TMx4Nm",
-                            SecurityStamp = "27999d5b126140e0b3d0af00fd9b1809",
+                            SecurityStamp = "979a9854587d4fcfa3a655fc4aa3f850",
                             Username = "2512559"
                         },
                         new
@@ -58689,7 +61104,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 629,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Q7UtttbGbJEIG1lOC2YRquhmbWFszplzxTMCClCIfRqc/qYeUd2DC",
-                            SecurityStamp = "23cf83d687a243b3a483a2e6287e8069",
+                            SecurityStamp = "82d46adf63d34df8930d51620a80d2bd",
                             Username = "2512560"
                         },
                         new
@@ -58701,7 +61116,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 630,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wvARiSv3gpzo0qiYPKfAwumMPJLLvXmvZu9SGW3qroOaZ/w4TOuA.",
-                            SecurityStamp = "6a642e90301f49079ed164f06336e742",
+                            SecurityStamp = "1feaba2b64324cad874b39eef4d49476",
                             Username = "2512561"
                         },
                         new
@@ -58713,7 +61128,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 631,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rf1urUZR9IYLvCx0E8Wj..VoT9.vgKNFXRAITKP9ETCFyE0Wl2eZK",
-                            SecurityStamp = "feed5831bf6c4b74b77086ad408bf953",
+                            SecurityStamp = "70c58f046b194550a1a6da0bd7c23053",
                             Username = "2512562"
                         },
                         new
@@ -58725,7 +61140,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 632,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WTpXCcAgBvjPabxhpqr6uugR63/h3Vvai818tZKMdHKBI4O.rKl2y",
-                            SecurityStamp = "04ae62c0b29b49ac99a5935a33d044ed",
+                            SecurityStamp = "ff5f32f6b4cc4f2ba199afc3214c3083",
                             Username = "2512563"
                         },
                         new
@@ -58737,7 +61152,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 633,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BAJGvYAgwGcv9hkWSLEXkempjxHqvXviE8A75jb6vjfg62g.i6nFq",
-                            SecurityStamp = "4d2392d2653448208693f1ad540cb1f2",
+                            SecurityStamp = "24b05a5f0d1941108afb92b4168a5e65",
                             Username = "2512564"
                         },
                         new
@@ -58749,7 +61164,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 634,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y6d4PwqosuLtqMzrxlhYfOkjOMsxs.IyCmhxq/w1d7nixV25cgbcq",
-                            SecurityStamp = "7cb8bcd1f66a4994b26cc7e1b31ca0f3",
+                            SecurityStamp = "40fba03c6ab24ff186cf109ccd86e0e3",
                             Username = "2512565"
                         },
                         new
@@ -58761,7 +61176,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 635,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xeqdgQ7tedno.LXK/KqkZ.bgtc7MafNnXV2wPwI4U6dwq4gZvuDmi",
-                            SecurityStamp = "d9054e4eee5846cea92f505b7230339b",
+                            SecurityStamp = "fa85a547b62b4374ad35bf92ee4c807f",
                             Username = "2512566"
                         },
                         new
@@ -58773,7 +61188,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 636,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KKbVNissZ.ovtk5WkqGXru8CROrvcWb/br2Pgh3cep0Tpc1Hp9TqS",
-                            SecurityStamp = "08039c1265b74fbf9c13d16bf2727bec",
+                            SecurityStamp = "d02527e0f8b8451d95c5e54ff3e9269d",
                             Username = "2512567"
                         },
                         new
@@ -58785,7 +61200,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 637,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PG8iAlvM1bxtmiPbIjBdkexOz/SAUrNTVxz5Tr4/qroBFaNt.xZKa",
-                            SecurityStamp = "ee1eba69567948288e8387f794865019",
+                            SecurityStamp = "55feac716cc74231a272b66c633d8896",
                             Username = "2512568"
                         },
                         new
@@ -58797,7 +61212,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 638,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ClOPCxR3sfjdpsQFfM4ULuGaEbt1RaavKdHCsiglUpaHQJ3ZBUA1e",
-                            SecurityStamp = "a18a8c23a4174acd9c2a38e0d05375d8",
+                            SecurityStamp = "46de851f466340f48523e16a4587ad73",
                             Username = "2512570"
                         },
                         new
@@ -58809,7 +61224,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 639,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rOc/Cm9hK22ocIVLSat8n.01F5d5LXxt.7Ed2RL4tZoWbwH3kr6Yi",
-                            SecurityStamp = "68c9c0b014434f18b6a4dd657761bd8f",
+                            SecurityStamp = "8a2f2958ad0e463abd62481d84233504",
                             Username = "2512571"
                         },
                         new
@@ -58821,7 +61236,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 640,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D1gt2Wodwt7kcvy8wll.VOUeL7./ki4VHvaufxAIRbUOp2ulLnUZ.",
-                            SecurityStamp = "44e6e539463d453c92a690928332bab4",
+                            SecurityStamp = "6e332823453440bd8fb8c24bccdfd1b5",
                             Username = "2512572"
                         },
                         new
@@ -58833,7 +61248,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 641,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e8DWF9bIilmuekdfy/Nan.zWlFubntAhcxKpzS53MjWjrQCmSGOke",
-                            SecurityStamp = "7c0578042c424285a3d41ea052d0019e",
+                            SecurityStamp = "5498e42ececd443297c7cfb9a88a45d9",
                             Username = "2512573"
                         },
                         new
@@ -58845,7 +61260,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 642,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZpepNBhjHMJtwszxJLTy/e3ZuG71DKhxzAFKHGJ4t3Brw4.9E8w7e",
-                            SecurityStamp = "22b95424d4d4401284e23c5ee1727f8e",
+                            SecurityStamp = "d6e28e6c9a2e45b8a746a548ec4ebffc",
                             Username = "2512574"
                         },
                         new
@@ -58857,7 +61272,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 643,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hrXItZ7Nd35/yjJA8Djtd.CRgxaDFwtvkGtGwBXkm3QnvvYwjGrPu",
-                            SecurityStamp = "11a2d2456c254d4d94097f4462a6bc11",
+                            SecurityStamp = "ed90e74cd03e49f0b989255eaf8112d1",
                             Username = "2512575"
                         },
                         new
@@ -58869,7 +61284,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 644,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$kNPbs6fWNneVMshYuLUcquowbGvi8500crXXyq/9R61IPIt8ocBgS",
-                            SecurityStamp = "bef683b287524facaee01d22406cb4ef",
+                            SecurityStamp = "30c29f4a83cb4e559c6af8860588139d",
                             Username = "2512578"
                         },
                         new
@@ -58881,7 +61296,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 645,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aWyqEGZNmWWRoYaA2STIo.rSnLnR58NoOP.Qb0fSe21f7mPzptUs6",
-                            SecurityStamp = "ec682929c381403f89d873b6aa6a7e91",
+                            SecurityStamp = "449d1e2df70e4c9b838b2275356137b9",
                             Username = "2512579"
                         },
                         new
@@ -58893,7 +61308,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 646,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2jC.NghR5WhNFfxlzUyV5ugrb5RKMt7Fi73ZVxcWGM8c1DvH1rsoO",
-                            SecurityStamp = "1adb7abcd8364449b06d7f529ce252b4",
+                            SecurityStamp = "b4764d46d88d46caa3bc9962400198a8",
                             Username = "2512581"
                         },
                         new
@@ -58905,7 +61320,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 647,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NTz.VGywLSeEeY.ZxDUs7eXllRIdDCsOSHaT/tXRaSmfE3D5RNNGm",
-                            SecurityStamp = "362930a5ff2446f5b27fe219de1e1aef",
+                            SecurityStamp = "c0e9d025ddd84709b14c2375e7f4fa96",
                             Username = "2512582"
                         },
                         new
@@ -58917,7 +61332,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 648,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.9vYZmPbrbhpeDqTSuDFHO6lNsZmlI36Y5iqnT23nz.5XGx81/MP.",
-                            SecurityStamp = "9936d4fae1d04e60b958f0bce398b921",
+                            SecurityStamp = "4c74fc0cd97f4befabc7610f324bb67c",
                             Username = "2512583"
                         },
                         new
@@ -58929,7 +61344,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 649,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pzBHhmLv1G1YW3crosbdeu8vK7zYypmMaAKzE7g5U9J0mHVDiKKJ6",
-                            SecurityStamp = "a7f198cca14d43d7b04ed20d679c8539",
+                            SecurityStamp = "3ebab79b991243329019964e0480daca",
                             Username = "2512584"
                         },
                         new
@@ -58941,7 +61356,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 650,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ISe5ClRDX1BwRhoZIIUVJuW2oZ6hXpuygCz/8d2wN8ZgVeK8PF2LG",
-                            SecurityStamp = "7e1615831ea54bb59d8c7a3379908c73",
+                            SecurityStamp = "2ade9d227d8b43989993f160a7875f2c",
                             Username = "2512585"
                         },
                         new
@@ -58953,7 +61368,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 651,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VdtKp1wcVlYT849Mo5BqNeCowyC/G6/PeWlD7q/3J6Neu65KN0IiK",
-                            SecurityStamp = "c478c95d06944e8fbf83f63f4e6ab319",
+                            SecurityStamp = "30738729b6354f2ba901d3b0611e3688",
                             Username = "2512586"
                         },
                         new
@@ -58965,7 +61380,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 652,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vsQMhOhC2xttV4xyY4ggY.6aZkZ6sHgLSwxkyrVXC26xI2dBtcLha",
-                            SecurityStamp = "484b0195ceb14b80a6461ba7116897da",
+                            SecurityStamp = "e9042abc1e66473ea9e8c6dc1d375c67",
                             Username = "2512587"
                         },
                         new
@@ -58977,7 +61392,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 653,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$K1u37GgloWlRgTbKy2WMqOUus.i7PEy1S59qNyqQ/Wf/F3O3.JOq6",
-                            SecurityStamp = "40477e069d03488e81eab2ba94c312e2",
+                            SecurityStamp = "edfdc50d75554b478f3651f6903cdaf2",
                             Username = "2512588"
                         },
                         new
@@ -58989,7 +61404,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 654,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YqeIagOBaq1qVZLCZ1R9x.7AhixHRqxNR42MyM71GECvXt2A64tvK",
-                            SecurityStamp = "d1c3c03783c34224b128b4717643beac",
+                            SecurityStamp = "b07681e68a454e2db1dd39121c72be24",
                             Username = "2512589"
                         },
                         new
@@ -59001,7 +61416,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 655,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fPg0cLTYSWKquWaml/X/P.ieSum63BtTQvIAbMN2/Pgo95IfDkWl6",
-                            SecurityStamp = "b400665969384427a65a93f18d1dd5f1",
+                            SecurityStamp = "81ff37b490874e85aa4aebceed307918",
                             Username = "2512591"
                         },
                         new
@@ -59013,7 +61428,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 656,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$EWd52NCDIS9bf4.T.c56veH91QcdS.GghRGEwVNZOD5KNDn3o93/K",
-                            SecurityStamp = "25e1e86b036048129c6ad8f1beb6ece8",
+                            SecurityStamp = "d27942d4360c43d9a3c57207a611c896",
                             Username = "2512592"
                         },
                         new
@@ -59025,7 +61440,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 657,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tdmILACpTjzHcG8kH0fya.fdNUAtzao9GZYx9XqRklFU5BKT.jTMa",
-                            SecurityStamp = "7225fab62ddc425f9e824f78dc10ea19",
+                            SecurityStamp = "5cf68b2319204be8989cf7094f2104b7",
                             Username = "2512593"
                         },
                         new
@@ -59037,7 +61452,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 658,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bPWibdXjmoQ3Bz.wBZPCiOwKSuHq008qdSQ2EAqHzH5EB.l1QU6gW",
-                            SecurityStamp = "e52a1621b5b741729538fd2e217d1b97",
+                            SecurityStamp = "ec772572825a4e479b534de9bce034f2",
                             Username = "2512594"
                         },
                         new
@@ -59049,7 +61464,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 659,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/91ZXF2lXgdXdFN22H9icOpZesjlclmfED8BsX2EPjiX7KyL3ANvq",
-                            SecurityStamp = "110d872144a7445e87737604dd8e719b",
+                            SecurityStamp = "e30076ef5cea4c47be562fad11388e79",
                             Username = "2512595"
                         },
                         new
@@ -59061,7 +61476,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 660,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/mq57ur.ARUuhKzF5LHf9.MI8cBjN2UoSKRh4wpTovJwFk.C.EG4K",
-                            SecurityStamp = "0588a58d2c664db697084f6dc520e136",
+                            SecurityStamp = "65ab843ff2504f178b4676bae02fe2bf",
                             Username = "2512596"
                         },
                         new
@@ -59073,7 +61488,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 661,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aLdL7k8muKju7V7omi62Wu4G.szINkbsj0tSBXWQrv9c6ZgSHgKH.",
-                            SecurityStamp = "5ff65a3294524e568ec7a77770e6cd37",
+                            SecurityStamp = "ee3a824015fe4aa49dc3a13cac32ab25",
                             Username = "2512597"
                         },
                         new
@@ -59085,7 +61500,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 662,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9wl36I6JEqOjvjtOqnZXyev16LlXkV4CuLlyfi1uWwoji4r1ZXum6",
-                            SecurityStamp = "e614fc70d0a546d7bafec9036814884d",
+                            SecurityStamp = "4d00fae4fe8044a2a1aade5f3ec28c29",
                             Username = "2512598"
                         },
                         new
@@ -59097,7 +61512,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 663,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$J35lkQDePzO5xBjVh42EjewDtuCMkxcEs6AyaV0rHYob.YD1/3JpW",
-                            SecurityStamp = "f9002556116e4d79a372ff11e1891b40",
+                            SecurityStamp = "1904e5ca8bc34b5583966773c79ec963",
                             Username = "2512599"
                         },
                         new
@@ -59109,7 +61524,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 664,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$C81KqnpvS99HjS9uJxvXiO3eWAYRtNMpYf7XdtKyRcZQTtB.bqfeu",
-                            SecurityStamp = "d3a61bdbd5334b4fa9fa6015f9b26168",
+                            SecurityStamp = "34a5aa001d0e45deb66c35d8f45edfad",
                             Username = "2512600"
                         },
                         new
@@ -59121,7 +61536,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 665,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cBohrvgyZH.BZNTsHmV3nugdOsdiBdE2VX8XGcVyoYPe7AOY5J3DG",
-                            SecurityStamp = "f08d94cd8cc9479a9f5d0ce892ad82ff",
+                            SecurityStamp = "24511ef5bc2b4c909c02acfd10495ea6",
                             Username = "2512601"
                         },
                         new
@@ -59133,7 +61548,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 666,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6gu3ZkxNEBbhq6TIfgMAC.irS254dfPsvOF6aEUv1MJD5/os/ZTlq",
-                            SecurityStamp = "8fbce57d8286451385c1c24bf6140d62",
+                            SecurityStamp = "79dc98b08c5b49ce84f301d5851e85a3",
                             Username = "2512602"
                         },
                         new
@@ -59145,7 +61560,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 667,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9pF/GRYNkpWNCW3M3fpzTef2maA5wdk6i3vd/QPjP3sDZ1EYfjYle",
-                            SecurityStamp = "1355a28247f44db297f43a0e66488087",
+                            SecurityStamp = "79fb99534f194e9daad8015c2c84bb24",
                             Username = "2512604"
                         },
                         new
@@ -59157,7 +61572,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 668,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3UH9Hgf7iXaecoQimuj6Ju6qmRRjp0rkNn/S8rkmmown68yvDRrB2",
-                            SecurityStamp = "0744e9cc8bfc4453be51b8e60b95c8ef",
+                            SecurityStamp = "af07ad0ec5d34fbc841b65712a48c0ae",
                             Username = "2512605"
                         },
                         new
@@ -59169,7 +61584,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 669,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WgSoTWlJA2d1eHDUBWSMSeQY0cg39uC43GfH357xCZsEHzNU3PFba",
-                            SecurityStamp = "023262a45a264694b8f1e7ade4cac1b0",
+                            SecurityStamp = "f5cccf80e21845a4a05a166c21683dbd",
                             Username = "2512607"
                         },
                         new
@@ -59181,7 +61596,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 670,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dZ/Lf/KMlrbPFaUQsBou0..iM1fRzdHuMf9e.G4KmjcHp5fPxlkfO",
-                            SecurityStamp = "8acaa3a9deb94c0a9af8ef7b2e483192",
+                            SecurityStamp = "8f2d01a8745e4524b41ed0973b7ae9e9",
                             Username = "2512609"
                         },
                         new
@@ -59193,7 +61608,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 671,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$HHKA12qT1ReKu1fd3dHasuM3yhccCzznqFIk73ut9E/.K8FT1E.Si",
-                            SecurityStamp = "a304a722868e406481a414853e230d3b",
+                            SecurityStamp = "e00d94a0634d4fa39b9600fb040e9f5f",
                             Username = "2512610"
                         },
                         new
@@ -59205,7 +61620,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 672,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$kCSVXQFh97wUPajakvjcU.n54JNqIV3UI.QTejodJmybW9Hd412Km",
-                            SecurityStamp = "0ea76652e2f04f9c8eeb6963445bf34a",
+                            SecurityStamp = "cff730c7dcbd4430990eb34568cae83b",
                             Username = "2512611"
                         },
                         new
@@ -59217,7 +61632,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 673,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9pXkkPy9ToYIB6zXsyGr7elmriJwx04dtuaHLCmxGQkvW8bilJxeK",
-                            SecurityStamp = "33c2d39894414f1da6f5be6cee7c0834",
+                            SecurityStamp = "835accfb3ca149d39d5e2585773f0820",
                             Username = "2512612"
                         },
                         new
@@ -59229,7 +61644,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 674,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$79K6XBQGCqBd1tF3ugTYz.hReYaSZqzPYN7iufLFo4Yz/09o5cbCy",
-                            SecurityStamp = "c20d406973b249f280e876de00718f12",
+                            SecurityStamp = "474c39924ca44163ad5665b98c1071f7",
                             Username = "2512614"
                         },
                         new
@@ -59241,7 +61656,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 675,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vc/L9F5xaC3zrhwmEL9oQe2xtE9upUMs/efz1C3XV4opyY4UugB2m",
-                            SecurityStamp = "b14fc3772ff94e1f90381ffd3e688f3c",
+                            SecurityStamp = "1905c5a3b9244ddcb4d52b9e5238aa46",
                             Username = "2512615"
                         },
                         new
@@ -59253,7 +61668,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 676,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$d1ACAfO.93ufYeV7VghgAeDTKpIqgXwscrRRzgvrKYiPKrHteWZ3q",
-                            SecurityStamp = "9f1dbd4e426f4a4186e104fa62eb25b7",
+                            SecurityStamp = "e90105b666384744a5db9816fa49e469",
                             Username = "2512616"
                         },
                         new
@@ -59265,7 +61680,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 677,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gFjvNl0IGl6nFvDA2VsUWuZNSMfTmCar6P7Jt8HLL5UiZaUyVqTZK",
-                            SecurityStamp = "2fa9b28e614f446497f6e097c81e09df",
+                            SecurityStamp = "959c11e2759945338f97a33942e8c6a5",
                             Username = "2512617"
                         },
                         new
@@ -59277,7 +61692,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 678,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$43wPdz41od6NJjaC4NzFL.Z4E57w5khPDUkkaiP8EKgoju0RyV4pq",
-                            SecurityStamp = "d9395a342a484c1b8047c536029b42d2",
+                            SecurityStamp = "ac341eb85371410188231cc303be2c94",
                             Username = "2512618"
                         },
                         new
@@ -59289,7 +61704,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 679,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$kK9cVuQ5eFScyqfn9/qYqOWgcKBIIG2i0wAQ4cIwCmUnOeuiAdq9C",
-                            SecurityStamp = "638069675f1043c08b7cd9dde01ed843",
+                            SecurityStamp = "220209765a4b45959dd60badb96086f4",
                             Username = "2512619"
                         },
                         new
@@ -59301,7 +61716,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 680,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dd2/IigRO54Y.I0nqf5vqeMCBHxgYnoLkm0gDni7Ctjx4DYdurIBK",
-                            SecurityStamp = "c99c327c6e134571a3a9884435c41a38",
+                            SecurityStamp = "c139c5df126442ab8afa5332206bc1de",
                             Username = "2512620"
                         },
                         new
@@ -59313,7 +61728,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 681,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ssLosWb.1JmMtFpga96w.uZ/5P4ZRSTRPAW8MrrlHzhk1.OUmFIfO",
-                            SecurityStamp = "b065a9189a1a48d5982f60fe55194823",
+                            SecurityStamp = "554706c7055744b9a01ea2df11690ab4",
                             Username = "2512621"
                         },
                         new
@@ -59325,7 +61740,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 682,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oKeYoZuW5TfdDOY8Sbn5ReEweZhSEF1s0UsJiJp9THr3m0Eswy0.O",
-                            SecurityStamp = "adef0191d5504a45989c9c2390e1396d",
+                            SecurityStamp = "6197a35634fe44aaaa9df2925b111124",
                             Username = "2512623"
                         },
                         new
@@ -59337,7 +61752,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 683,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bJiWhmpo0nPWJ1R9VT/Vwus1y.WrhJLt09t5YOoTr5Q7sBobyanry",
-                            SecurityStamp = "8049e42b3e75421186a8cca0f92e7071",
+                            SecurityStamp = "fd9ccfd6e37a47b283b7d0d513565296",
                             Username = "2512625"
                         },
                         new
@@ -59349,7 +61764,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 684,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MD9SY507BDGLeLigUM6sB.Tn20c4jX1o0HwVqSUsHWfghbC.Fe4uu",
-                            SecurityStamp = "6f6496f5450b49e39e12b231357fb8f8",
+                            SecurityStamp = "7804eabab3db4fbf89ce780514f177f7",
                             Username = "2512626"
                         },
                         new
@@ -59361,7 +61776,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 685,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$h1Gf22oIsEEpsgzgjUE0cuUtQdmsS.MTmeIqaH2TES2MuaCbKsL62",
-                            SecurityStamp = "aebe1d7a7f5f45f0987b234d715add7b",
+                            SecurityStamp = "f0e45ade346741438ca2927a03fff277",
                             Username = "2512627"
                         },
                         new
@@ -59373,7 +61788,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 686,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tk0JFSaOCwS8Xh8BgVW9put/sQMieXPcjp2adtrHxUqUYOxGkBYoe",
-                            SecurityStamp = "55e2a18476774f1383c3cab1d4de5a02",
+                            SecurityStamp = "8ccd66c8e2884b81a795a8ec78243149",
                             Username = "2512628"
                         },
                         new
@@ -59385,7 +61800,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 687,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$E3pa2gPz9r6OY.m8wbviyOi6cmRck/mJd2pwq0n8vU1IyndN1Sspy",
-                            SecurityStamp = "eb61e0f890024b3ca297b2f899e46750",
+                            SecurityStamp = "01f585d4e48146e2b17e352a79226078",
                             Username = "2512629"
                         },
                         new
@@ -59397,7 +61812,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 688,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$B8PagpJ0p9JEujJxWYptHOBlR.B.J7Kn9TkDAuiONPSgrmPpDgady",
-                            SecurityStamp = "c5621846ad5e41438f008b17b77fa06a",
+                            SecurityStamp = "e90874e8b580493cbcde3f2ee059e27f",
                             Username = "2512630"
                         },
                         new
@@ -59409,7 +61824,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 689,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SlhmTN8OPWb5fVwd8ttEAOUj/2MDkdXwnsvKPmm5A07Vi/enjsU0W",
-                            SecurityStamp = "2afdef4233d043bc8221c4792b34dce2",
+                            SecurityStamp = "7cfd7046ae1e4759815130ed71dc0894",
                             Username = "2512631"
                         },
                         new
@@ -59421,7 +61836,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 690,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vRINmmwY9N1DZ9p.vkiBcOkkNXmPbkruhzAEu29zROAIw0Yx3OAlq",
-                            SecurityStamp = "3819b04b164f433691c6f7416a283f89",
+                            SecurityStamp = "fc6ff29816274b3bbaa97c226f1d0786",
                             Username = "2512632"
                         },
                         new
@@ -59433,7 +61848,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 691,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7Xi0tt32CZhJS6oN7JoaJ.XlJfzWk6KyMtithZ1VdF8HBnu/DjPZS",
-                            SecurityStamp = "adda1e3670e04f9196fcd76dcff37980",
+                            SecurityStamp = "59fc5772ccc2475eb0eb3337f97762a9",
                             Username = "2512633"
                         },
                         new
@@ -59445,7 +61860,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 692,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0137IGDcLA5i8r4OBmuTcOOZl/D9mQUYMhsEtkRbS2gveCRThM19S",
-                            SecurityStamp = "de4297d829174293ad2780129d891d5b",
+                            SecurityStamp = "a1818d499c5049479595ec0a9ff14a5f",
                             Username = "2512634"
                         },
                         new
@@ -59457,7 +61872,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 693,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4z909lfkdLlWuNYLibBFI.zs8Xm4q5GQD0ZhnfWb1mcFgks8e0Kem",
-                            SecurityStamp = "78e8f25eaaa140a3b2a13d4c349b4a59",
+                            SecurityStamp = "d9f8e12c5cb54b7b83eaf9e39143e0b1",
                             Username = "2512635"
                         },
                         new
@@ -59469,7 +61884,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 694,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hgyl6KLGPQcQy5oD0Y0jE.8NeqsSwA8DN1xyx0KH.hf/9Iwu6m7hi",
-                            SecurityStamp = "95d6b477239246d58d357a89d1a65046",
+                            SecurityStamp = "5f68d774665249818c739ccf167c9291",
                             Username = "2512636"
                         },
                         new
@@ -59481,7 +61896,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 695,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Gr9X2kc2W1D77mGiG86V7u2nEt3hhEVVjTNwXIYU3oyxyIl5KTM.2",
-                            SecurityStamp = "b5dde2ebb9db416ea74fba83bf28d06b",
+                            SecurityStamp = "8e605572c0864f89a85baf86c7a08f65",
                             Username = "2512637"
                         },
                         new
@@ -59493,7 +61908,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 696,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rP.U0hEsbbUajSYNRYEolevRqbK.EG8v6pPIjo8.Wx2vvwTGzy4/O",
-                            SecurityStamp = "4d8c78eabf4849aabb37e25f4689843a",
+                            SecurityStamp = "07e2b75419d44f0ca212ea80ee577684",
                             Username = "2512638"
                         },
                         new
@@ -59505,7 +61920,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 697,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$za3Y7ixqDWS5ncLHZ7Vjv.LyNnXurpJUlK7rwSIZHRiP3i0Meihi6",
-                            SecurityStamp = "00862bde96b64a8bbbb3127e0ec4fec1",
+                            SecurityStamp = "430cf2dbe17549708062de758c23381f",
                             Username = "2512639"
                         },
                         new
@@ -59517,7 +61932,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 698,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jMg/r9Bt71YXP43hWxYZP.zdY2c5dcNqSNLjWChHbJQSGR1ZU1KhK",
-                            SecurityStamp = "a7361b93607f445488cbb3c3dd06fb02",
+                            SecurityStamp = "67cdab4dec7b4e62918b28fc870af682",
                             Username = "2512640"
                         },
                         new
@@ -59529,7 +61944,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 699,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$s4ysmdnGLkrfywI.A2wFe.SwaryisE2tXvUyaXfn.r1Csoi.RjGgm",
-                            SecurityStamp = "b4dac0c9f7d9411da376423940fd7e80",
+                            SecurityStamp = "f27727e048b14421b24e200834720a09",
                             Username = "2512641"
                         },
                         new
@@ -59541,7 +61956,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 700,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9spDE16jmeYUjKqua9Y5l.eWtvvUClXgjvjNnOTSDIFI.YPZK0dpO",
-                            SecurityStamp = "361b6378da0646029c267a37a3cb7928",
+                            SecurityStamp = "85a51d4ebdf84e3986bc83e74c9cc629",
                             Username = "2512642"
                         },
                         new
@@ -59553,7 +61968,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 701,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DqD69HnixAHh4jNSG28CQeZJO.JMhBHh0FHzxNfTSHkeLx54eEHmS",
-                            SecurityStamp = "92dd0e2e0b69425f8e758eef52cd144a",
+                            SecurityStamp = "79f0373902b444e4831e87efbe150229",
                             Username = "2512643"
                         },
                         new
@@ -59565,7 +61980,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 702,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rhE/2cs.MMgc6mIIMEpyLO4c.lgjo9B5Vu3Xg/4jakzBGmGxSwsda",
-                            SecurityStamp = "8e3ea60c20c548258dfa541dddf6a349",
+                            SecurityStamp = "430c7156d6aa4bb28e85e61b666aa130",
                             Username = "2512644"
                         },
                         new
@@ -59577,7 +61992,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 703,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VXsdT1EU45xigk7UTXf.t..50AAwFGHdSoXBQ2Atji8LmSRqg89ce",
-                            SecurityStamp = "2aed4057ab4542bab8048c4d46b106eb",
+                            SecurityStamp = "0fb8e681eeac4aa79b3c190bef21319d",
                             Username = "2512645"
                         },
                         new
@@ -59589,7 +62004,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 704,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sJ7zF0/wqPNAccT4BFT6AO0yKZ4aR7HlDmG58Vl.u0teX1/NRdm6m",
-                            SecurityStamp = "a23d14da436b45a79986b71897bb6b21",
+                            SecurityStamp = "b2e1cceb46634fb382c58e834f7518bd",
                             Username = "2512647"
                         },
                         new
@@ -59601,7 +62016,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 705,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FsLNbx7ZIUeYzYb4vNC.yOz1YPzStJuJmFI2pI2jB7dX6qs86UySa",
-                            SecurityStamp = "fa3ab90674934963857659a3ed86fdf6",
+                            SecurityStamp = "48d3238a05144573ac3e68aed7497ae5",
                             Username = "2512648"
                         },
                         new
@@ -59613,7 +62028,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 706,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0F.VYGeUMvRDwdjUo7RF1ePckkZ7I3F5ha/D.gODwRyr.vseJibma",
-                            SecurityStamp = "190cb14413ea49848f6293d6d135accc",
+                            SecurityStamp = "86f56d9f1a2645e6b9a4fba1bfd63149",
                             Username = "2512651"
                         },
                         new
@@ -59625,7 +62040,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 707,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VXR4CazHwBrp.Y26ccq0VuPvP3At4FFqT1PWnf9aaboRsgPI7SjJi",
-                            SecurityStamp = "7286091566a049a0bf8f5fe13af04907",
+                            SecurityStamp = "d56cb05f33d941a0b96161c74bcdb1be",
                             Username = "2512653"
                         },
                         new
@@ -59637,7 +62052,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 708,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0HTX01/ED4ulBU8kghb/9.5dCnvkNPuWXAT/qI9egt4XOOh37QhZK",
-                            SecurityStamp = "95e2d63bab6d424fb27278e44f74c842",
+                            SecurityStamp = "3a149f18694e48e58ebc31308217863d",
                             Username = "2512654"
                         },
                         new
@@ -59649,7 +62064,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 709,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Jdn.egDmS2WprpBSdFrRuOhXuFHtsGK44xqPyJi4NMAYwQ4JGlnWi",
-                            SecurityStamp = "f92a5475efc24a899af663df680ccb46",
+                            SecurityStamp = "4c6a3704b0674d80b15f602c7048bf5b",
                             Username = "2512655"
                         },
                         new
@@ -59661,7 +62076,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 710,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BUV8gHqyVPaT7HDe2NQN5.ckOs3y6llGuE.rQnYzwrGDazfyT41L2",
-                            SecurityStamp = "82d7bd05a7404bc5b2367efed2aae3ff",
+                            SecurityStamp = "7265d74a4e384a129a05e95c732c55e0",
                             Username = "2512656"
                         },
                         new
@@ -59673,7 +62088,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 711,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D5ajZ0JW4.BlyuqBQkKyouOA//CHc0op3nwuX9HEeoiJJmMpRMFDG",
-                            SecurityStamp = "02fd004f4f974dd3abf386d8810714fb",
+                            SecurityStamp = "efd5347066604b24afc193d89b399097",
                             Username = "2512657"
                         },
                         new
@@ -59685,7 +62100,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 712,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OWGsA8kdYECo0EbuQtktoeBVx5fCta8DeKO7lA.YzHBsu1kVtKGFS",
-                            SecurityStamp = "74d874b62a7b4e62a92edd87bfc7a30a",
+                            SecurityStamp = "9fbe1fa9b7ea4b088fc37f1d4937a8ab",
                             Username = "2512658"
                         },
                         new
@@ -59697,7 +62112,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 713,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xzO0plLKGAFuJ3JL9CG0sujfrShcuH4LMiltDiqoClhF3Lv6E85lq",
-                            SecurityStamp = "70a0d8c224a649289863f79d56dcdc83",
+                            SecurityStamp = "6170895771a542d6b25ecc018d25c56f",
                             Username = "2512659"
                         },
                         new
@@ -59709,7 +62124,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 714,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3gYwsyqb8nfRKJOCmXNHo.rrQjYU9MEYVsCDGsWHeHz/W2jn8nF/C",
-                            SecurityStamp = "b1aa8edb42264d068bb3ab83ad069859",
+                            SecurityStamp = "6a4f260af68a4ce8bffcf75121eb9c8f",
                             Username = "2512660"
                         },
                         new
@@ -59721,7 +62136,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 715,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bG1NNjdGaxVclB7ZpyVX0OPNbLIbt.L4G91HdICyZ4qLxcJrAhNPq",
-                            SecurityStamp = "1ca885b54181450fb145e94d1881fde6",
+                            SecurityStamp = "4289c1d76a614c2da39228c9b158d113",
                             Username = "2512661"
                         },
                         new
@@ -59733,7 +62148,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 716,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nl22wZhz.JMQdm4CLHDA4u5ogpziKwcYoy2UDrb5CdTjAfMy1Ldg.",
-                            SecurityStamp = "a32cd89254ec47ffad938e1ec71e64cf",
+                            SecurityStamp = "9622bf5c181c4f62a0a94f7352d9c410",
                             Username = "2512662"
                         },
                         new
@@ -59745,7 +62160,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 717,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$atFs2tzll/0MoWIT33AQ4uBsRnmZ6WaYgMlSxYYDAeT8FkanPh.I.",
-                            SecurityStamp = "d7852092a49b4700baefe6c7b481a39f",
+                            SecurityStamp = "2a9ffc8053404c08adce276c59bbc94b",
                             Username = "2512663"
                         },
                         new
@@ -59757,7 +62172,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 718,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NDEqaX2gVwb/yxBA9tvXj.Gis7DkLORiKw4s1QPSpHXLwtFYhyQ/a",
-                            SecurityStamp = "fc9fe05ab7b144bd80771982241f5faa",
+                            SecurityStamp = "70761e65662d484e88e9ce0bfe79035e",
                             Username = "2512664"
                         },
                         new
@@ -59769,7 +62184,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 719,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$X1ire3LrKeAl8EKn8oZZRuVniz7O8eCol0dbwWpovxKREMGRYIEw.",
-                            SecurityStamp = "26b31a67e9904fe2b228b38330b563bb",
+                            SecurityStamp = "7e5c87ce996f46f7a2fe2e898e48d440",
                             Username = "2512665"
                         },
                         new
@@ -59781,7 +62196,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 720,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dnN7QsRv3ESi44lQzfJ/gOY91otEMXxLARTtiIP4PwwNxD15cg3VW",
-                            SecurityStamp = "565ca1fdfa0a4bbf81aa811a61c6dd2e",
+                            SecurityStamp = "bfa31528c7f049149d74ad639801f4b4",
                             Username = "2512666"
                         },
                         new
@@ -59793,7 +62208,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 721,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IVttNVMFbpQPlOIRdJILHOqDXLaKrVkNjshnI9YCIjrXHtVjppsKW",
-                            SecurityStamp = "007d6bf978564710b652384607c74cdb",
+                            SecurityStamp = "cadcb95fdf094c1aacb0843ea16619fa",
                             Username = "2512667"
                         },
                         new
@@ -59805,7 +62220,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 722,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gbwyUrmpHFx7I.JmSOMjXOD1iLi9kGaS32xK/UPuERIwoj53Svp0G",
-                            SecurityStamp = "1f075bb736ed4d46978aee7e44d95446",
+                            SecurityStamp = "81c0b69f5e904460b79c5c3437f9b761",
                             Username = "2512669"
                         },
                         new
@@ -59817,7 +62232,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 723,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MLMVlNjJfMFdm7No7KAVHutz3qu1HfQTCuTWT5etqrZUjtcSvsxfC",
-                            SecurityStamp = "a25459fefbee4c8684fe782783c90408",
+                            SecurityStamp = "ff7e3cf1993641a49d970f6940a1847c",
                             Username = "2512670"
                         },
                         new
@@ -59829,7 +62244,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 724,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Dmhb9.9O/n/5RfNPGGKHvOMvgAWn7rF7nxEv4mqlt2sZhSAM1P1rW",
-                            SecurityStamp = "1d00ab2c71814a46ae99afce9c07dd6c",
+                            SecurityStamp = "e79c23f886964b9d8e1132062bbd6cce",
                             Username = "2512671"
                         },
                         new
@@ -59841,7 +62256,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 725,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0kCwrtkQTEVd75ALMoHfwOFqBr3X6ALRdiZg9V5PNSH33YiuvsDyC",
-                            SecurityStamp = "b45345ed903447f881be17cec0f770a2",
+                            SecurityStamp = "d90d3af3a3574cd7b80de5fc20b95db0",
                             Username = "2512672"
                         },
                         new
@@ -59853,7 +62268,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 726,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.LP0aQVecr5xDF9GrezOk.84r.m3iV/YvHLstA/v5KPgdF4ljSsf.",
-                            SecurityStamp = "3f22805527f649f482f6600d7426d224",
+                            SecurityStamp = "804a57ea1aac4f81954c6a0f79ff8a28",
                             Username = "2512673"
                         },
                         new
@@ -59865,7 +62280,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 727,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NmfQaNj8spWxHeCef3CqHOwh/h1KTv2P05ELEYygd.L6o5Auqam26",
-                            SecurityStamp = "a5254e97ddca4a8a84fc918f87e130c5",
+                            SecurityStamp = "b334ea38550f4942a53e5dea2de1b3c5",
                             Username = "2512674"
                         },
                         new
@@ -59877,7 +62292,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 728,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UQ5JNr5GJm85jsLGbIKAh.765VNKcBTtISApAILDLwhwYF1VKCK6e",
-                            SecurityStamp = "70d2e72f8cdf47e4a8996ce1954abb9c",
+                            SecurityStamp = "32c2fca445494e419b7f761e75a60402",
                             Username = "2512675"
                         },
                         new
@@ -59889,7 +62304,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 729,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2iHzxpoksuDNORsW01wbx.nnu1rEx/yUUd/bocCxZtAh8vBgqdBnq",
-                            SecurityStamp = "259db12004e64f8c9fab53ceaa84597d",
+                            SecurityStamp = "7b0dee9de55543c8be649aa797ca77be",
                             Username = "2512676"
                         },
                         new
@@ -59901,7 +62316,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 730,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0zff1Zf/hbVC9pfTYehgSeI7KIqpHYNPp27KyEAAQqTL9a0qBQd96",
-                            SecurityStamp = "1295568eec9d4b8881a6376306c6286f",
+                            SecurityStamp = "6cd84912363e416c875011afd4078a40",
                             Username = "2512677"
                         },
                         new
@@ -59913,7 +62328,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 731,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$K2wzIq5cRTEoJtI5hjtflOip/6J53buymxBdfPp7V8kHLrkPmPYSK",
-                            SecurityStamp = "a6553f346003461484957e038087e7b0",
+                            SecurityStamp = "70f4505512ea482a9ede01614f1e17e0",
                             Username = "2512678"
                         },
                         new
@@ -59925,7 +62340,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 732,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vDMFszDYNanYC6Gt3sXvaOy6aErz2jQiSzZGHCANwQBLOQ1KbVGMq",
-                            SecurityStamp = "5127790f0ea348dfad7b05538bcbd56e",
+                            SecurityStamp = "501a0a9323084029a0301bb895b134ef",
                             Username = "2512679"
                         },
                         new
@@ -59937,7 +62352,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 733,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UFPix0Yf9cBPkZ6X6d3GsukfSzxLk6T1oE4.0LyE30s2Tb3DlZap2",
-                            SecurityStamp = "4e710bed97744a8ca84369c9bdb7e4bd",
+                            SecurityStamp = "feae7ce1a2f640db9d699451420e8020",
                             Username = "2512681"
                         },
                         new
@@ -59949,7 +62364,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 734,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ppEnOZ/QQRMmA6NCZ29wc.xtDAaJRRjD9sPjl7IlXj8Uqqbb9zUcC",
-                            SecurityStamp = "4cb93bd423b04a84abdead44a66e9687",
+                            SecurityStamp = "8446247b5f7045af81703d1039e19201",
                             Username = "2512682"
                         },
                         new
@@ -59961,7 +62376,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 735,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$USOoXypZJOxKfz/aH.JyIOwJxtTu8zQFndwyCz.qEECLdkkMhz.vq",
-                            SecurityStamp = "6cb919d9358446648db0f7fd141112f8",
+                            SecurityStamp = "ca3541609020429c9f14f92604a9dbf3",
                             Username = "2512683"
                         },
                         new
@@ -59973,7 +62388,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 736,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BJsjzAU9COBOKYZBzin9Fu01v7sNdXVOerovMO.D9U5nXlDbd93oi",
-                            SecurityStamp = "7123c6b1e94f497882081b8477d8b83b",
+                            SecurityStamp = "f72b71e35eea499ca8822b9cac1f1c27",
                             Username = "2512684"
                         },
                         new
@@ -59985,7 +62400,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 737,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZWFeJtfP4sgpf91OKWbrcOUL.q1X2A0urVbY7Wjca4kygnJXnGkgq",
-                            SecurityStamp = "51d8178396594a899f003607c9b71e53",
+                            SecurityStamp = "cbe68d55a682419b97fcb4a4497efa0b",
                             Username = "2512685"
                         },
                         new
@@ -59997,7 +62412,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 738,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1DpbA5WGkHnDbjyWmmSXl.KMjeAPi4sF/vGD0OxPC1e1ZKa6Q3ki6",
-                            SecurityStamp = "53656cb5a493445d81df4b29e17d84aa",
+                            SecurityStamp = "3a0853fd8d8c453391951cf59929b94b",
                             Username = "2512686"
                         },
                         new
@@ -60009,7 +62424,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 739,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JwgDDCx0qCxQcs.ZsOFKCO2lIf12ulkUItEBzdfsZgkYqPDqdCLhy",
-                            SecurityStamp = "c510663349454c44b14aa19f37c0d292",
+                            SecurityStamp = "d7313c1f741b4c78a8909518a03765c6",
                             Username = "2512687"
                         },
                         new
@@ -60021,7 +62436,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 740,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uizD7iJUyaCqdulN1GlzvuZT5sTi5zka28hkHOJ9s0xQpI0nYsla6",
-                            SecurityStamp = "39fbf7bad038408ebe6159d1d43c20a6",
+                            SecurityStamp = "f24d4a72ad4e4c02bddf398cb1c05cc2",
                             Username = "2512688"
                         },
                         new
@@ -60033,7 +62448,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 741,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Qafx.i9Z5EnoiMZZ.p2Oz.7mGqlK5CDQMQ1RYNA6PvwNwKFFuP.dm",
-                            SecurityStamp = "34bb30156ac94c63812c1527498e461b",
+                            SecurityStamp = "81a6780312d544a19357e8d49b858ed6",
                             Username = "2512689"
                         },
                         new
@@ -60045,7 +62460,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 742,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hqAaEY9j4ItcoNg4DBQl9OQsiZVTCDNrwsM.KVzrq4yTTv6chrX3m",
-                            SecurityStamp = "0266fbeb4648406e88e28fc37266219b",
+                            SecurityStamp = "1333110c3ccc46e988387b7c8fc5d048",
                             Username = "2512690"
                         },
                         new
@@ -60057,7 +62472,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 743,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xb2O/oAB59JLwhIplMDUhuFHFDX24S89vxBfYXh03E26W41xcGBwW",
-                            SecurityStamp = "adcc7518195248749d5844d90a76b4af",
+                            SecurityStamp = "dba6c0fc335545fdb1026fb1b8646c7b",
                             Username = "2512691"
                         },
                         new
@@ -60069,7 +62484,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 744,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mtHxd.nblg5aYQ8g6C.4rO5mT8/wexuU2.7kG9Llf3BAqGlMOiTh6",
-                            SecurityStamp = "1be087aff659400caa84f639b5fadd17",
+                            SecurityStamp = "eef398d625e4434389e97132134a3088",
                             Username = "2512692"
                         },
                         new
@@ -60081,7 +62496,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 745,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KZu9qaelDGAZXdDvImknJOaJT1x6koqkMWcPxejKQW5NsmNOaB5a2",
-                            SecurityStamp = "8f4a1c4d8df645aba94a13039ab2cc12",
+                            SecurityStamp = "9c885b7dda9b4a878fb2f4940c795134",
                             Username = "2512693"
                         },
                         new
@@ -60093,7 +62508,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 746,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Df3TERMy1gDub5B0GtQV.O9zKvy6.5LlIpYyS9q627JymuGDHaUpa",
-                            SecurityStamp = "38b39e6835174f96a4be4b5f2d130b19",
+                            SecurityStamp = "0f76b3f1aebe4c84b30131cf1d798e54",
                             Username = "2512694"
                         },
                         new
@@ -60105,7 +62520,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 747,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$iWmugVvDZNYJ9WjdJJl.LO2RrBz1uT5gvcaLT.rv0ZdtoEO8BQfZS",
-                            SecurityStamp = "efb3a5a01cdf4d5d8d7495f009cf4868",
+                            SecurityStamp = "af75b1cc3bd9449a9b79c06e600e9777",
                             Username = "2512695"
                         },
                         new
@@ -60117,7 +62532,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 748,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$AVYrk30urV9Q1HZsDXObF.3tqaHGBLXWKQWa5P8REp7d0pBPKpYXm",
-                            SecurityStamp = "9b922ea5541643d3a7303a880f9e5e8d",
+                            SecurityStamp = "644c15a18f744cbda8bef0008ffd51c6",
                             Username = "2512696"
                         },
                         new
@@ -60129,7 +62544,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 749,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FITmXqn9HXgLNktHdrBMOOqmhuotsKWjLXh9rwJn/pPYyqvZnsO1y",
-                            SecurityStamp = "e92a726677ba4095b01cfbc9dcfa7e58",
+                            SecurityStamp = "5765ffcff7d3490a93035b1250c799c4",
                             Username = "2512698"
                         },
                         new
@@ -60141,7 +62556,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 750,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4YxSIp.yZgwb2bc4aNY2FOWaBUgBcZh13FfzLli89WEi1msUE/W/C",
-                            SecurityStamp = "a311d5fe8fc54ac882e2939567d10e53",
+                            SecurityStamp = "f5c7a58cbd5741458468de255bb1777f",
                             Username = "2512701"
                         },
                         new
@@ -60153,7 +62568,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 751,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$k5u/IPt0hOsJWDvP01tPGu5UCN5VZ8d7t6pSayWbrmdYuliK.rQw2",
-                            SecurityStamp = "71d8663569b24f76bbe22a3d0fa4179b",
+                            SecurityStamp = "3c6a50357e9c48d49c64aa0f2da252b2",
                             Username = "2512702"
                         },
                         new
@@ -60165,7 +62580,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 752,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1fD9FuBcO8n669HPmpajXebjU8IS7Q1exd.ERjY8rkJq4LXxsyc0m",
-                            SecurityStamp = "67060d76b4b44d5094c123c758db8597",
+                            SecurityStamp = "02b4356eb2244d50b8574c303c8c01d5",
                             Username = "2512703"
                         },
                         new
@@ -60177,7 +62592,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 753,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SLd1aFOk2bfu8HXrK8CN1utiPwAgFhRH19oMYN/R0hrrKmUf3q6CW",
-                            SecurityStamp = "a16af6cd84d34224817b0c7d7a9ba2d7",
+                            SecurityStamp = "89a92e4641ae4b91b45e4da04b773c97",
                             Username = "2512704"
                         },
                         new
@@ -60189,7 +62604,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 754,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ub2VcqnzODqYVntoexBAx.8I8K.3qSStGvntqPSd2SOvVpyNkrcSm",
-                            SecurityStamp = "35a201967a4b4a86adca3281a9187784",
+                            SecurityStamp = "f2179dd1c4cc4777a30d975bf6d98339",
                             Username = "2512705"
                         },
                         new
@@ -60201,7 +62616,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 755,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4dsLNKNe9WCXvU30XMlxzuQMTzZ73ecg6Wh2.VORLJuT4A3yLNzgK",
-                            SecurityStamp = "6530dd7b7ec04da5aa5097eb863f8d25",
+                            SecurityStamp = "a2ecce73c6084f578601124f6d209007",
                             Username = "2512706"
                         },
                         new
@@ -60213,7 +62628,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 756,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tnGsoCcQftvGtCiifLBxne3ifeVxJYDIK6kuolItM2bg1y.FQMCMq",
-                            SecurityStamp = "cd7cc729fe3f4275a60f352b3387ee7b",
+                            SecurityStamp = "2522afdc5fdb4fbabe71d393d547bcfa",
                             Username = "2512707"
                         },
                         new
@@ -60225,7 +62640,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 757,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$U/HCSBaI/2B7rSCJsgR16.XVYH8mvc5eVxQ/wgft2o42kNWlnzBO2",
-                            SecurityStamp = "e13ccae9c2f1492880c47529e6c7b940",
+                            SecurityStamp = "8374de8cd42241f1b5ec775f1cef5f91",
                             Username = "2512708"
                         },
                         new
@@ -60237,7 +62652,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 758,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$alxruN0bkr7q4Wo4wHNHquvXSceeNMXJ6Cj4FAbicrLNawvbFXjRe",
-                            SecurityStamp = "3e57b848a37042d6b9b81d76bb2d6f84",
+                            SecurityStamp = "42a1ab01678b44b5abd7c78d96726410",
                             Username = "2512709"
                         },
                         new
@@ -60249,7 +62664,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 759,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xfdmpdfHV4bLIgqe4XTSDeuYkYRpueK14p1n/t5IcNOybjxXNSktK",
-                            SecurityStamp = "bb33677a26ff4c5d8bbe75aee41745bd",
+                            SecurityStamp = "e299925ae53a401f9d27838b29253de8",
                             Username = "2512710"
                         },
                         new
@@ -60261,7 +62676,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 760,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IVHCIk2RU4aEVrTtYNI3hOPS8dpQTIkXl4IkDePXqN1BjDWyswK5u",
-                            SecurityStamp = "bb786e72c9fe49b0bcf1e8e8e46add9f",
+                            SecurityStamp = "98d439e3bffe4d53bae767bcb7cca15f",
                             Username = "2512711"
                         },
                         new
@@ -60273,7 +62688,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 761,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wsTHZdbGReg1eYtZu64q4eLQWvZNLZVoAicCjAUVoPGDHAAyFjmva",
-                            SecurityStamp = "227bca6c8680424baa32bab7a5ab0cfa",
+                            SecurityStamp = "3ba4b4f54b444b52bd088a01ddeb475b",
                             Username = "2512712"
                         },
                         new
@@ -60285,7 +62700,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 762,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VxtJwj0WMqiKOTsul32ysutZ1AgDyUkLcYFOLKFttexOJVcmr9stO",
-                            SecurityStamp = "7ac5da93b12d403c839cfdfa1e783ae6",
+                            SecurityStamp = "89b1507e1e224a5385ec55ed6cd044f2",
                             Username = "2512713"
                         },
                         new
@@ -60297,7 +62712,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 763,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$f5089NTEHlhOu/U63n5F2.QnkWTKXj09GSUT2vzEdrKvtklhSaw6u",
-                            SecurityStamp = "80d183a10d4f49f88f576aadb0e54d01",
+                            SecurityStamp = "12815137d3d04b77be6292b3bacd625c",
                             Username = "2512714"
                         },
                         new
@@ -60309,7 +62724,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 764,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YOeL3ZA1weawpj86/J5jbO2ZWs8RhBMT2M3wxfWWXJDt1Dcy/edym",
-                            SecurityStamp = "4e7d0a6041634bb08bfa2875233dbb04",
+                            SecurityStamp = "4a62bbcf40064f3094f8c82016f3b8a9",
                             Username = "2512715"
                         },
                         new
@@ -60321,7 +62736,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 765,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/unPJQn6k45G0Hb./kFE1.WuMst3/wAETT3mMP2jMDZ4UfOyIyYti",
-                            SecurityStamp = "a70594bef3f34218b55cc5950dd93643",
+                            SecurityStamp = "c5dac15fbe5246e68591f5f047f63e20",
                             Username = "2512716"
                         },
                         new
@@ -60333,7 +62748,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 766,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZquGN7n9v4gEcNjtbkBtReIXgpxdmi6NRrBtWl0LMw8wncG4uWEBC",
-                            SecurityStamp = "165d4c551777445e9c43cb3b77fddb88",
+                            SecurityStamp = "d17215e9c134478cb67379315eb89004",
                             Username = "2512718"
                         },
                         new
@@ -60345,7 +62760,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 767,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cjJBE6JoeCyvjTZtQLZnE.8aPpNc916VV01xs.6eD0MtnXl8Xtt5K",
-                            SecurityStamp = "9c9a2ea03b164415a88cbf27d793c7b7",
+                            SecurityStamp = "24a632481627448992af6390c14d6ef5",
                             Username = "2512719"
                         },
                         new
@@ -60357,7 +62772,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 768,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2.ynZcImdN2cQ62zxXsFWuyGutaGJDgx3bxBealh.RuHlbQyLj./y",
-                            SecurityStamp = "1c7c9d2ab4714c7eabb7b701e0cb3d6c",
+                            SecurityStamp = "82445f06c5b5421f887d4262bee00cb3",
                             Username = "2512722"
                         },
                         new
@@ -60369,7 +62784,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 769,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$t3jx2zoCu8bjgwv.wLMFRu3Of/5g0rFLk4apctHgf/JiadbqOn1CC",
-                            SecurityStamp = "2593fa377c7b4d11b6021512b7582894",
+                            SecurityStamp = "12fa204427f54f7898f7af84ab558708",
                             Username = "2512723"
                         },
                         new
@@ -60381,7 +62796,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 770,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TR1ev90v9W5P9ttcmlOOYekvspGQebDC5xFllNYLDwfuWzdAtlH0q",
-                            SecurityStamp = "1a336d45b8ee48a1b834beef79948852",
+                            SecurityStamp = "2beb19631ad84c9a99c9f390f0902da8",
                             Username = "2512724"
                         },
                         new
@@ -60393,7 +62808,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 771,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BKHVc0SIaD23.1N1DyOCyuFyD4CgbwsF.gw1EFG00pKVtCprPeXNu",
-                            SecurityStamp = "66748030d74147eeb202e8c9a56048ca",
+                            SecurityStamp = "8190542713ae4d3584cb26c91faad416",
                             Username = "2512725"
                         },
                         new
@@ -60405,7 +62820,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 772,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lC79x2afyWkFGhLD1xHOfum1AZkLT7MiOAFIkP9y5wvIWVBMIcgfK",
-                            SecurityStamp = "e6f29b783d5d40af84b3382151d5a92b",
+                            SecurityStamp = "7ec2305b89c34bbbb034277e9e0491c1",
                             Username = "2512726"
                         },
                         new
@@ -60417,7 +62832,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 773,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$a8V3jWtS5OJo5h.q9HaKeejrB1pivA4rt6zzX4KS9HbE9ykGSgNdy",
-                            SecurityStamp = "b24c480e7e4a4cce986b04d0f03ac8cc",
+                            SecurityStamp = "33a5c58d706b4b6a9481ac010193f66e",
                             Username = "2512728"
                         },
                         new
@@ -60429,7 +62844,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 774,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MHgEJJFa0.lkw5LCFR2CIu1kOexVSFiBtbycrBpVXZC55.Hn8yicu",
-                            SecurityStamp = "4e7f78a9f4c4421caac181d7ba690eb0",
+                            SecurityStamp = "86512494a5864033944469ecca2348c4",
                             Username = "2512729"
                         },
                         new
@@ -60441,7 +62856,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 775,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5XUYNdU8KFjnkJ3q78FDau8bjjofXVQbljUyTYYIafCsNrpf5bFe6",
-                            SecurityStamp = "e289e7c303504400af703437e6d24a15",
+                            SecurityStamp = "8094a49b10b247d8a1abaa3356fbe07b",
                             Username = "2512730"
                         },
                         new
@@ -60453,7 +62868,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 776,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bRGETVTcA.KDIcjvEZGG9eLDeNe0.gf8iTBxCsTqBotAityjpssga",
-                            SecurityStamp = "eccfbc8096e54db19e5e3cac34c3b422",
+                            SecurityStamp = "0af86833a3744354a207883dfb3aca07",
                             Username = "2512731"
                         },
                         new
@@ -60465,7 +62880,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 777,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3R/K4QHO7Dy7KnSQDIrWRObLjCm9nC95E9es9DfYRHu.v/wIkH5yi",
-                            SecurityStamp = "cfc5deba2d7140a1973e20ee56c14764",
+                            SecurityStamp = "b1e308ae979a4de688232f36193e048f",
                             Username = "2512732"
                         },
                         new
@@ -60477,7 +62892,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 778,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SQn7t/mYWToJYsXvB/fgle/pLMjspmp.oy4wkdlAvuGhQigIkuJNC",
-                            SecurityStamp = "a7c7b88a928e42c3b2cf2dd3efc91d4c",
+                            SecurityStamp = "b0969f92644344faadd45906e035ae6a",
                             Username = "2512734"
                         },
                         new
@@ -60489,7 +62904,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 779,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UqfiBjOmRYbwIwRAONX7IezPVu6hEf/TM4MI87tQ0iPmfoKNn2i0W",
-                            SecurityStamp = "25ca3bd5af324737b21bdf054dec5e00",
+                            SecurityStamp = "e59a6d8c5e4345289fd2f082a1d24334",
                             Username = "2512735"
                         },
                         new
@@ -60501,7 +62916,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 780,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qdG4fqe7GH7y4weXf/enae6cQCEM85hxn3AdiszkXuWa8I4QBAp0i",
-                            SecurityStamp = "99ece9e7c60c423ebddf763ebfe78a4f",
+                            SecurityStamp = "187c25fd48b94bd6b629ad5f2f096fed",
                             Username = "2512737"
                         },
                         new
@@ -60513,7 +62928,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 781,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$v73TkKTZE4LTYjYq53zHWe2pmcxbJcg.VnppOi1.ws1f23jiUiKOe",
-                            SecurityStamp = "360d95f5690144f09bd0b7c783b593fe",
+                            SecurityStamp = "897d56abe4f744a3bb0ae3b728abc215",
                             Username = "2512740"
                         });
                 });

@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../features/networking/networking_service.dart';
+import '../../features/lookups/dropdown_service.dart';
 import '../../core/config/app_config.dart';
 
 final directorySearchQueryProvider = StateProvider<String>((ref) => '');
@@ -19,77 +20,97 @@ class DirectoryScreen extends ConsumerStatefulWidget {
 
 class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   final ScrollController _scrollController = ScrollController();
-  final List<dynamic> _alumni = [];
+  List<dynamic> _alumni = [];
   bool _isLoading = true;
-  bool _isLoadingMore = false;
-  bool _hasMore = true;
+  String? _selectedBatch;
+  String? _selectedDept;
+  String? _selectedType;
+  String? _selectedCategory;
   int _pageNumber = 1;
   final int _pageSize = 20;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _totalItems = 0;
+  
+
+
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _fetchAlumni();
-    _scrollController.addListener(_onScroll);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+        _fetchMoreAlumni();
+      }
+    });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      if (!_isLoadingMore && _hasMore) {
-        _fetchMoreAlumni();
-      }
-    }
   }
 
   Future<void> _fetchAlumni({bool refresh = false}) async {
     if (refresh) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = true;
-        _pageNumber = 1;
-        _alumni.clear();
-        _hasMore = true;
-      });
+      _pageNumber = 1;
+      _hasMore = true;
+      _alumni = [];
+      setState(() => _isLoading = true);
+    } else {
+      setState(() => _isLoading = true);
     }
-
+    
     final query = ref.read(directorySearchQueryProvider);
     final service = ref.read(networkingServiceProvider);
     
-    final newItems = await service.searchAlumni(query: query, pageNumber: _pageNumber, pageSize: _pageSize);
+    final result = await service.searchAlumni(
+      query: query, 
+      batch: _selectedBatch,
+      department: _selectedDept,
+      membershipType: _selectedType,
+      category: _selectedCategory,
+      pageNumber: _pageNumber, 
+      pageSize: _pageSize
+    );
     
     if (mounted) {
       setState(() {
-        if (newItems.isNotEmpty) {
-          _alumni.addAll(newItems);
-          _hasMore = newItems.length == _pageSize;
-        } else {
-          _hasMore = false;
-        }
+        _alumni = (result['items'] as List<dynamic>?) ?? [];
+        _totalItems = (result['totalItems'] as int?) ?? _alumni.length;
+        _hasMore = _alumni.length < _totalItems;
         _isLoading = false;
       });
     }
   }
 
   Future<void> _fetchMoreAlumni() async {
+    if (_isLoadingMore || !_hasMore) return;
     setState(() => _isLoadingMore = true);
     
     _pageNumber++;
     final query = ref.read(directorySearchQueryProvider);
     final service = ref.read(networkingServiceProvider);
     
-    final newItems = await service.searchAlumni(query: query, pageNumber: _pageNumber, pageSize: _pageSize);
+    final result = await service.searchAlumni(
+      query: query, 
+      batch: _selectedBatch,
+      department: _selectedDept,
+      membershipType: _selectedType,
+      category: _selectedCategory,
+      pageNumber: _pageNumber, 
+      pageSize: _pageSize
+    );
     
     if (mounted) {
       setState(() {
+        final newItems = (result['items'] as List<dynamic>?) ?? [];
         if (newItems.isNotEmpty) {
           _alumni.addAll(newItems);
-          _hasMore = newItems.length == _pageSize;
+          _hasMore = _alumni.length < _totalItems;
         } else {
           _hasMore = false;
         }
@@ -105,27 +126,70 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return AppScaffold(
-      title: 'Alumni Registry',
-      breadcrumb: 'Member Portal > Infinite Registry',
+      title: 'Alumni Directory',
+      breadcrumb: 'PORTAL > ALUMNI DIRECTORY',
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
             TextField(
-              decoration: InputDecoration(
-                hintText: 'Search by Name, Batch, or Industry...',
-                prefixIcon: const Icon(Icons.search, size: 20, color: AppTheme.royalGold),
-                filled: true,
-                fillColor: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.1))),
+              key: const ValueKey('directory_search'),
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: 'Search alumni registry...',
+                prefixIcon: Icon(Icons.search_rounded, size: 20),
               ),
               onChanged: _onSearchChanged,
+            ),
+            if (!_isLoading && _totalItems > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, left: 4.0),
+                child: Row(
+                  children: [
+                    Text(
+                      'Showing ${_alumni.length} of $_totalItems alumni records',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppTheme.royalGold.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 12),
+            // Filter Row 1: Batch & Dept
+            Row(
+              children: [
+                Expanded(
+                  child: FutureBuilder<List<Map<String, String>>>(
+                    future: ref.read(dropdownDataProvider).getOptions('PassingYear'),
+                    builder: (context, snapshot) => _buildFilterDropdown('BATCH', snapshot.data?.map((e) => e['label']!).toList() ?? []),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FutureBuilder<List<Map<String, String>>>(
+                    future: ref.read(dropdownDataProvider).getOptions('Subject'),
+                    builder: (context, snapshot) => _buildFilterDropdown('SUBJECT', snapshot.data?.map((e) => e['label']!).toList() ?? []),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Filter Row 2: Type & Category
+            Row(
+              children: [
+                Expanded(
+                  child: _buildFilterDropdown('TYPE', ['General', 'Founding', 'Executive', 'Associate', 'Honorary', 'Advisory']),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildFilterDropdown('CATEGORY', ['LifelongPatron', 'Sponsor', 'Advisor', 'Mentor', 'Volunteer', 'Student']),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -153,14 +217,23 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                               }
 
                               final m = _alumni[index];
-                              final photoUrl = m['photoPath'] != null 
-                                  ? '${AppConfig.apiBaseUrl}/${m['photoPath']}'.replaceAll('//', '/') 
-                                  : null;
+                              
+                              String? photoUrl;
+                              if (m['photoPath'] != null && m['photoPath'].toString().isNotEmpty) {
+                                final p = m['photoPath'];
+                                if (p.startsWith('http')) {
+                                  photoUrl = p;
+                                } else {
+                                  final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
+                                  final cleanP = p.startsWith('/') ? p.substring(1) : p;
+                                  photoUrl = '$base/$cleanP';
+                                }
+                              }
 
                               return Padding(
-                                padding: const EdgeInsets.only(bottom: 12.0),
+                                padding: const EdgeInsets.only(bottom: 8.0),
                                 child: GlassContainer(
-                                  padding: const EdgeInsets.all(16.0),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
                                   child: InkWell(
                                     onTap: () {
                                       HapticFeedback.lightImpact();
@@ -171,47 +244,74 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                                         Row(
                                           children: [
                                             _buildMemberThumbnail(photoUrl, m['fullName']),
-                                            const SizedBox(width: 16),
+                                            const SizedBox(width: 12),
                                             Expanded(
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   Text(m['fullName'] ?? 'Anonymous Alumnus',
-                                                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.white)),
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    children: [
-                                                      Text(m['membershipNumber'] ?? 'REG-PENDING', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                                                      if (m['rank'] != null) ...[
-                                                        const SizedBox(width: 8),
-                                                        Container(
-                                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                                          decoration: BoxDecoration(color: Colors.amber.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
-                                                          child: Text('#${m['rank']}', style: const TextStyle(color: Colors.amber, fontSize: 9, fontWeight: FontWeight.bold)),
-                                                        ),
-                                                      ],
-                                                      if (m['categoryBadge'] != null) ...[
-                                                        const SizedBox(width: 8),
-                                                        Text(m['categoryBadge'], style: const TextStyle(color: Colors.blueAccent, fontSize: 9, fontWeight: FontWeight.bold)),
-                                                      ],
-                                                    ],
+                                                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: -0.2)),
+                                                  const SizedBox(height: 1),
+                                                  Text(m['membershipNumber'] ?? 'REG-PENDING', style: const TextStyle(color: AppTheme.royalGold, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                                ],
+                                              ),
+                                            ),
+                                            if (m['membershipType'] != null)
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(color: Colors.lightGreen.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
+                                                child: Text(m['membershipType']!, style: const TextStyle(color: Colors.lightGreenAccent, fontSize: 8, fontWeight: FontWeight.bold)),
+                                              ),
+                                            const SizedBox(width: 4),
+                                            const Icon(Icons.chevron_right_rounded, size: 14, color: AppTheme.royalGold)
+                                          ],
+                                        ),
+                                        const SizedBox(height: 10),
+                                        const Divider(color: Colors.white10, height: 1),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 5,
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(Icons.school_outlined, size: 12, color: AppTheme.royalGold),
+                                                  const SizedBox(width: 6),
+                                                  Flexible(
+                                                    child: Text(
+                                                      _getCompactBatch(m),
+                                                      style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
                                                   ),
                                                 ],
                                               ),
                                             ),
-                                            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.royalGold)
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              flex: 4,
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Flexible(
+                                                    child: Text(
+                                                      m['designation'] ?? 'Alumnus',
+                                                      style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500),
+                                                      textAlign: TextAlign.right,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  const Icon(Icons.business_center_outlined, size: 12, color: AppTheme.royalGold),
+                                                ],
+                                              ),
+                                            ),
                                           ],
                                         ),
-                                        const SizedBox(height: 16),
-                                        const Divider(color: Colors.white10, height: 1),
-                                        const SizedBox(height: 12),
-                                        _buildInfoRow(Icons.school_outlined, 'Batch: ${m['passingYear'] ?? 'N/A'} (${m['degree'] ?? 'None'} ${_getMajorDisplay(m['degree'], m['subject'])})'),
-                                        const SizedBox(height: 8),
-                                        _buildInfoRow(Icons.work_outline, '${m['designation'] ?? 'Alumnus'} at ${m['professionalSector'] ?? 'General Industry'}'),
-                                        if (m['bloodGroup'] != null) ...[
-                                          const SizedBox(height: 8),
-                                          _buildInfoRow(Icons.water_drop_outlined, 'Blood Category: ${m['bloodGroup']}', color: Colors.redAccent.withValues(alpha: 0.7)),
-                                        ],
                                       ],
                                     ),
                                   ),
@@ -227,36 +327,75 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
     );
   }
 
-  String _getMajorDisplay(dynamic degree, dynamic subject) {
-    if (degree == null) return '';
-    final major = subject ?? 'None';
-    return (major != 'None') ? 'in $major' : '';
+  String _getCompactBatch(Map<String, dynamic> m) {
+    final degree = m['degree'] ?? 'HSC';
+    final year = m['passingYear']?.toString() ?? '';
+    final shortYear = year.length > 2 ? year.substring(year.length - 2) : year;
+    return '$degree \'$shortYear';
   }
 
-  Widget _buildInfoRow(IconData icon, String text, {Color? color}) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: color ?? AppTheme.royalGold),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(text, style: TextStyle(fontSize: 11, color: color ?? AppTheme.textSecondaryDark, fontWeight: FontWeight.w500)),
+  Widget _buildFilterDropdown(String label, List<String> options) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.1)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: label == 'BATCH' ? _selectedBatch : (label == 'SUBJECT' ? _selectedDept : (label == 'TYPE' ? _selectedType : _selectedCategory)),
+          hint: Text(label, style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 8, fontWeight: FontWeight.bold)),
+          dropdownColor: AppTheme.midnightSurface,
+          icon: const Icon(Icons.arrow_drop_down, color: AppTheme.royalGold, size: 16),
+          isExpanded: true,
+          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+          items: [
+            DropdownMenuItem(value: null, child: Text('ALL $label', style: const TextStyle(fontSize: 10))),
+            ...options.map((o) => DropdownMenuItem(value: o, child: Text(o, style: const TextStyle(fontSize: 10)))),
+          ],
+          onChanged: (v) {
+            setState(() {
+              if (label == 'BATCH') {
+                _selectedBatch = v;
+              } else if (label == 'SUBJECT') {
+                _selectedDept = v;
+              } else if (label == 'TYPE') {
+                _selectedType = v;
+              } else {
+                _selectedCategory = v;
+              }
+            });
+            _fetchAlumni(refresh: true);
+          },
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildMemberThumbnail(String? url, String? name) {
+    String? fullUrl;
+    if (url != null && url.isNotEmpty) {
+      if (url.startsWith('http')) {
+        fullUrl = url;
+      } else {
+        final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
+        final cleanP = url.startsWith('/') ? url.substring(1) : url;
+        fullUrl = '$base/$cleanP';
+      }
+    }
+
     return Container(
-      width: 48,
-      height: 60,
+      width: 44,
+      height: 52,
       decoration: BoxDecoration(
         color: Colors.black,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.1)),
-        image: url != null ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover) : null,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.2)),
+        image: fullUrl != null ? DecorationImage(image: NetworkImage(fullUrl), fit: BoxFit.cover) : null,
       ),
-      child: url == null 
-        ? Center(child: Text(name != null && name.isNotEmpty ? name[0] : '?', style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold)))
+      child: fullUrl == null 
+        ? Center(child: Text(name != null && name.isNotEmpty ? name[0] : '?', style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 16)))
         : null,
     );
   }

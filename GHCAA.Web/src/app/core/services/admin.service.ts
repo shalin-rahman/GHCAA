@@ -73,8 +73,8 @@ export class AdminService {
         return this.http.get<any>(`${this.apiUrl}${params}`);
     }
 
-    getMembers(page: number = 1, pageSize: number = 10, searchQuery: string = '', statusFilter: string = 'all', categoryFilter: string = 'all', includeArchived: boolean = false): Observable<any> {
-        let params = `?page=${page}&pageSize=${pageSize}&includeArchived=${includeArchived}&statusFilter=${statusFilter}&categoryFilter=${categoryFilter}`;
+    getMembers(page: number = 1, pageSize: number = 10, searchQuery: string = '', statusFilter: string = 'all', categoryFilter: string = 'all', membershipTypeFilter: string = 'all', includeArchived: boolean = false): Observable<any> {
+        let params = `?page=${page}&pageSize=${pageSize}&includeArchived=${includeArchived}&statusFilter=${statusFilter}&categoryFilter=${categoryFilter}&membershipTypeFilter=${membershipTypeFilter}`;
         if (searchQuery) params += `&searchQuery=${encodeURIComponent(searchQuery)}`;
         return this.http.get<any>(`${this.apiUrl}${params}`);
     }
@@ -83,9 +83,9 @@ export class AdminService {
         return this.http.get<any>(`${this.apiUrl}/${id}`);
     }
 
-    getAllForExport(searchQuery: string = '', statusFilter: string = 'all', categoryFilter: string = 'all'): Observable<any[]> {
+    getAllForExport(searchQuery: string = '', statusFilter: string = 'all', categoryFilter: string = 'all', membershipTypeFilter: string = 'all'): Observable<any[]> {
         // Fetch a large number or use a specific export endpoint if you add one later
-        let params = `?page=1&pageSize=10000&statusFilter=${statusFilter}&categoryFilter=${categoryFilter}`;
+        let params = `?page=1&pageSize=10000&statusFilter=${statusFilter}&categoryFilter=${categoryFilter}&membershipTypeFilter=${membershipTypeFilter}`;
         if (searchQuery) params += `&searchQuery=${encodeURIComponent(searchQuery)}`;
         return this.http.get<any>(`${this.apiUrl}${params}`);
     }
@@ -130,6 +130,12 @@ export class AdminService {
         const formData = new FormData();
         formData.append('photo', photo);
         return this.http.post<any>(`${this.apiUrl}/${id}/photo`, formData);
+    }
+
+    updateMemberSignature(id: number, signature: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('signature', signature);
+        return this.http.post<any>(`${this.apiUrl}/${id}/signature`, formData);
     }
 
     importMembers(formData: FormData): Observable<any> {

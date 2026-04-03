@@ -39,29 +39,26 @@ class AppDrawer extends ConsumerWidget {
                       return Column(
                         children: [
                           if (isAdmin)
-                            _buildSection(context, 'ADMINISTRATION REGISTRY', [
-                              _MenuItem(Icons.admin_panel_settings_outlined, 'Executive Console', '/dashboard'),
-                              _MenuItem(Icons.gavel_outlined, 'Member Approvals', '/admin/approvals'),
-                              _MenuItem(Icons.history_edu_outlined, 'Audit Trail', '/admin/audit'),
+                            _buildSection(context, 'ADMINISTRATION', [
+                              _MenuItem(Icons.admin_panel_settings_outlined, 'Dashboard', '/dashboard'),
+                              _MenuItem(Icons.gavel_outlined, 'Approvals', '/admin/approvals'),
+                              _MenuItem(Icons.history_edu_outlined, 'Audit Logs', '/admin/audit'),
                             ]),
-                          _buildSection(context, 'EXECUTIVE CONTEXT', [
-                            _MenuItem(Icons.dashboard_outlined, isAdmin ? 'System Overview' : 'Haragangian Dashboard', '/dashboard'),
-                            _MenuItem(Icons.badge_outlined, 'Identity Registry', '/profile'),
+                          _buildSection(context, 'MY ACCOUNT', [
+                            _MenuItem(Icons.badge_outlined, 'My Profile', '/profile'),
+                            _MenuItem(Icons.receipt_long_outlined, 'Payments', '/financials'),
                           ]),
-                          _buildSection(context, 'COMMUNITY INFRASTRUCTURE', [
-                            _MenuItem(Icons.people_outline, 'Alumni Registry', '/directory'),
-                            _MenuItem(Icons.event_note_outlined, 'Events & Gatherings', '/events'),
-                            _MenuItem(Icons.work_outline, 'Career Opportunities', '/jobs'),
-                            _MenuItem(Icons.history_edu_rounded, 'Press & Publications', '/articles'),
+                          _buildSection(context, 'COMMUNITY', [
+                            _MenuItem(Icons.people_outline, 'Alumni Directory', '/directory'),
+                            _MenuItem(Icons.event_note_outlined, 'Events', '/events'),
+                            _MenuItem(Icons.work_outline, 'Job Hub', '/jobs'),
                           ]),
-                          _buildSection(context, 'MEDIA & INTELLIGENCE', [
-                            _MenuItem(Icons.newspaper_outlined, 'Association Bulletins', '/news'),
-                            _MenuItem(Icons.photo_library_outlined, 'Social Memories', '/gallery'),
-                            _MenuItem(Icons.chat_bubble_outline, 'Haragangian AI', '/chat'),
+                          _buildSection(context, 'MEDIA & TOOLS', [
+                            _MenuItem(Icons.newspaper_outlined, 'News', '/news'),
+                            _MenuItem(Icons.photo_library_outlined, 'Event Gallery', '/gallery'),
+                            _MenuItem(Icons.chat_bubble_outline, 'Assistance', '/assistant'),
                           ]),
-                          _buildSection(context, 'FISCAL SERVICES', [
-                            _MenuItem(Icons.receipt_long_outlined, isAdmin ? 'Executive Ledger' : 'Financial Ledger', isAdmin ? '/admin/ledger' : '/financials'),
-                          ]),
+
                         ],
                       );
                     },
@@ -115,7 +112,7 @@ class AppDrawer extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(color: isAdmin ? Colors.redAccent : AppTheme.royalGold, borderRadius: BorderRadius.circular(4)),
-                    child: Text(isAdmin ? 'ADMIN REGISTRY' : 'VERIFIED MEMBER', style: const TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.bold)),
+                    child: Text(isAdmin ? 'ADMINISTRATOR' : 'ALUMNI MEMBER', style: const TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(width: 8),
                   Text('Batch: ${profile?['batch'] ?? 'N/A'}', style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 11)),
@@ -161,7 +158,7 @@ class AppDrawer extends ConsumerWidget {
           builder: (ctx) => AlertDialog(
             backgroundColor: AppTheme.midnightSurface,
             title: const Text('Sign Out', style: TextStyle(color: Colors.white)),
-            content: const Text('Are you sure you want to end your Haragangian session?', style: TextStyle(color: AppTheme.textSecondaryDark)),
+            content: const Text('Are you sure you want to sign out?', style: TextStyle(color: AppTheme.textSecondaryDark)),
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL')),
               TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('LOGOUT', style: TextStyle(color: Colors.redAccent))),

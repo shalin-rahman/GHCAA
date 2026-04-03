@@ -63,7 +63,7 @@ namespace GHCAA.Tests.Workflows
                 gamificationMock.Object,
                 _financialService);
 
-            _eventService = new EventService(_context, _commMock.Object, _storageMock.Object, gamificationMock.Object);
+            _eventService = new EventService(_context, _commMock.Object, _storageMock.Object, gamificationMock.Object, _notificationMock.Object);
         }
 
         [Test]
