@@ -12,7 +12,7 @@ class MainShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).uri.path;
     final roleAsync = ref.watch(roleProvider);
-    final isPageAdmin = roleAsync.value == 'Admin' || roleAsync.value == 'SuperAdmin';
+    final isPageAdmin = roleAsync.value.isStaffAdminRole;
 
     int calculateSelectedIndex(String location) {
       if (isPageAdmin) {

@@ -511,7 +511,34 @@ namespace GHCAA.Infrastructure.Services
                 Designation = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Designation,
                 OrganizationName = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.OrganizationName,
                 ProfessionalSector = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Sector,
-                Location = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Location
+                Location = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Location,
+                
+                // Detailed Collections
+                AcademicHistory = member.AcademicHistory?.Select(a => new AcademicRecordDto
+                {
+                    Id = a.Id,
+                    InstitutionName = a.InstitutionName,
+                    Degree = a.Degree,
+                    Subject = a.Subject,
+                    AdmissionYear = a.AdmissionYear,
+                    PassingYear = a.PassingYear,
+                    IsGHC = a.IsGHC,
+                    Result = a.Result,
+                    CertificatePath = a.CertificatePath
+                }).ToList() ?? new List<AcademicRecordDto>(),
+                
+                ProfessionalHistory = member.ProfessionalHistory?.Select(p => new ProfessionalRecordDto
+                {
+                    Id = p.Id,
+                    OrganizationName = p.OrganizationName,
+                    Designation = p.Designation,
+                    Sector = p.Sector,
+                    StartDate = p.StartDate,
+                    EndDate = p.EndDate,
+                    IsCurrent = p.IsCurrent,
+                    Location = p.Location,
+                    ResponsibilitiesString = p.Responsibilities
+                }).ToList() ?? new List<ProfessionalRecordDto>()
             };
 
             // Populate Family links from both sent and received requests
@@ -994,10 +1021,21 @@ namespace GHCAA.Infrastructure.Services
             member.PresentAddress = dto.PresentAddress;
             member.PermanentAddress = dto.PermanentAddress;
 
+            member.EmergencyContactName = dto.EmergencyContactName;
+            member.EmergencyContactRelation = dto.EmergencyContactRelation;
+            member.EmergencyContactPhone = dto.EmergencyContactPhone;
+            if (!string.IsNullOrWhiteSpace(dto.TShirtSize)) member.TShirtSize = dto.TShirtSize;
+
+            member.NotifyEventCreation = dto.NotifyEventCreation;
+            member.NotifyParticipationApproval = dto.NotifyParticipationApproval;
+            member.NotifyRegistrationUpdate = dto.NotifyRegistrationUpdate;
+            member.NotifyRelevantUpdates = dto.NotifyRelevantUpdates;
+
             member.Gender = dto.Gender;
             member.BloodGroup = dto.BloodGroup;
             member.MembershipNumber = dto.MembershipNumber;
             if (!string.IsNullOrWhiteSpace(dto.PhotoPath)) member.PhotoPath = dto.PhotoPath;
+            if (!string.IsNullOrWhiteSpace(dto.SignaturePath)) member.SignaturePath = dto.SignaturePath;
 
             member.MembershipType = dto.MembershipType;
             member.Status = dto.Status;
@@ -1009,6 +1047,15 @@ namespace GHCAA.Infrastructure.Services
             }
 
             member.Category = dto.Category;
+            member.MembershipChangeReason = dto.MembershipChangeReason;
+            member.ECChangeReason = dto.ECChangeReason;
+            member.IsVerified = dto.IsVerified;
+            member.ContributionPoints = dto.ContributionPoints;
+            member.LastUpdateDate = DateTime.UtcNow;
+
+            // Summary fields sync (for directory/search performance)
+            if (!string.IsNullOrWhiteSpace(dto.CertificatePath)) member.CertificatePath = dto.CertificatePath;
+            if (!string.IsNullOrWhiteSpace(dto.PaymentProofPath)) member.PaymentProofPath = dto.PaymentProofPath;
 
             // Sync Academic History
             if (dto.AcademicHistory != null)

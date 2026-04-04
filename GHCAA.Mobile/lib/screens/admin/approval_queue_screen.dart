@@ -21,7 +21,7 @@ class ApprovalQueueScreen extends ConsumerWidget {
 
     return AppScaffold(
       isAdmin: true,
-      title: 'Approval Registry',
+      title: 'Approvals',
       breadcrumb: 'ADMIN > MEMBER QUEUE',
       child: Column(
         children: [

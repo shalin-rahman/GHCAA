@@ -176,10 +176,27 @@ public class NotificationServiceTests : TestBase
         var notification = _context.Notifications.First(n => n.MemberId == member.Id);
         notification.IsRead.Should().BeFalse();
 
-        await _service.MarkAsReadAsync(notification.Id);
+        var ok = await _service.MarkAsReadAsync(notification.Id, member.Id);
+        ok.Should().BeTrue();
 
         var updated = await _context.Notifications.FindAsync(notification.Id);
         updated!.IsRead.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task MarkAsReadAsync_WhenWrongMember_DoesNotUpdateRow()
+    {
+        var owner = await CreateAndSaveTestMemberAsync("Owner", "o@test.com", "01711111111", "1111111111");
+        var other = await CreateAndSaveTestMemberAsync("Other", "x@test.com", "01722222222", "2222222222");
+        owner.NotifyEventCreation = true;
+        await _context.SaveChangesAsync();
+
+        await _service.CreateNotificationAsync(owner.Id, "Sec", "Msg", Enums.NotificationType.EventCreation);
+        var notification = _context.Notifications.First(n => n.MemberId == owner.Id);
+
+        var ok = await _service.MarkAsReadAsync(notification.Id, other.Id);
+        ok.Should().BeFalse();
+        (await _context.Notifications.FindAsync(notification.Id))!.IsRead.Should().BeFalse();
     }
 
     // ── MarkAllAsReadAsync ────────────────────────────────────────────────────

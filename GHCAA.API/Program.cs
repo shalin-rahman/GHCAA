@@ -1,13 +1,11 @@
-using System.Text;
 using GHCAA.Application;
 using GHCAA.Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using GHCAA.API.Extensions;
 using GHCAA.API.Middleware;
 using GHCAA.Application.Interfaces;
+using GHCAA.Application.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection;
 
@@ -18,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 var configuration = builder.Configuration;
 
-ValidateJwtConfiguration(configuration, builder.Environment);
+JwtSigningKeyResolver.Resolve(configuration, builder.Environment);
 
 var keyRingPath = configuration["DataProtection:KeyRingPath"];
 if (!string.IsNullOrWhiteSpace(keyRingPath))
@@ -179,23 +177,3 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/hubs/chat");
 app.Run();
-
-static void ValidateJwtConfiguration(IConfiguration configuration, IHostEnvironment environment)
-{
-    var key = configuration["Jwt:Key"];
-    if (environment.IsDevelopment())
-    {
-        if (string.IsNullOrWhiteSpace(key))
-            return;
-        if (key.Length < 32)
-            throw new InvalidOperationException("Jwt:Key must be at least 32 characters when set.");
-        return;
-    }
-
-    if (string.IsNullOrWhiteSpace(key) || key.Length < 32)
-    {
-        throw new InvalidOperationException(
-            "Jwt:Key must be configured to a strong secret (minimum 32 characters) outside Development. " +
-            "Set the Jwt__Key environment variable, User Secrets, or your host's secret store.");
-    }
-}

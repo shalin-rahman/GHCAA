@@ -269,47 +269,65 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Gender *</label>
-                    <select [(ngModel)]="selectedMember().gender" [disabled]="!isEditing()" required #genderI="ngModel"
-                        [class.border-red-500]="isEditing() && genderI.invalid && genderI.touched">
-                        @for (g of genderOptions; track g.value) { <option [value]="g.value">{{ g.label }}</option> }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Blood Group *</label>
-                    <select [(ngModel)]="selectedMember().bloodGroup" [disabled]="!isEditing()" required
-                        #bloodI="ngModel" [class.border-red-500]="isEditing() && bloodI.invalid && bloodI.touched">
-                        @for (b of bloodGroupOptions; track b.value) { <option [value]="b.value">{{ b.label }}</option>
+                    <div class="form-group">
+                        <label>Gender</label>
+                        @if (isEditing()) {
+                            <select [(ngModel)]="selectedMember().gender" #genderI="ngModel">
+                                @for (g of genderOptions; track g.value) { <option [value]="g.value">{{ g.label }}</option> }
+                            </select>
+                        } @else {
+                            <div class="view-value">{{ getLabel(genderOptions, selectedMember().gender) }}</div>
                         }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>T-Shirt Size</label>
-                    <select [(ngModel)]="selectedMember().tShirtSize" [disabled]="!isEditing()">
-                        <option value="">Select Size</option>
-                        <option value="S">Small (S)</option>
-                        <option value="M">Medium (M)</option>
-                        <option value="L">Large (L)</option>
-                        <option value="XL">Extra Large (XL)</option>
-                        <option value="XXL">Double Extra Large (XXL)</option>
-                        <option value="XXXL">Triple Extra Large (XXXL)</option>
-                    </select>
-                </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Blood Group</label>
+                        @if (isEditing()) {
+                            <select [(ngModel)]="selectedMember().bloodGroup" #bloodI="ngModel">
+                                @for (bg of bloodGroupOptions; track bg.value) { <option [value]="bg.value">{{ bg.label }}</option> }
+                            </select>
+                        } @else {
+                            <div class="view-value">{{ getLabel(bloodGroupOptions, selectedMember().bloodGroup) }}</div>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label>T-Shirt Size</label>
+                        @if (isEditing()) {
+                            <select [(ngModel)]="selectedMember().tShirtSize">
+                                <option value="">None</option>
+                                <option value="S">Small (S)</option>
+                                <option value="M">Medium (M)</option>
+                                <option value="L">Large (L)</option>
+                                <option value="XL">Extra Large (XL)</option>
+                                <option value="XXL">XXL</option>
+                                <option value="XXXL">XXXL</option>
+                            </select>
+                        } @else {
+                            <div class="view-value">{{ selectedMember().tShirtSize || 'Not Specified' }}</div>
+                        }
+                    </div>
 
                 <!-- Governance & Tier -->
-                <div class="form-group">
-                    <label>Membership Tier</label>
-                    <select [(ngModel)]="selectedMember().membershipType" [disabled]="!isEditing()">
-                        @for (t of membershipTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Special Category</label>
-                    <select [(ngModel)]="selectedMember().category" [disabled]="!isEditing()">
-                        @for (c of memberCategories; track c.value) { <option [value]="c.value">{{ c.label }}</option> }
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label>Membership Tier</label>
+                        @if (isEditing()) {
+                            <select [(ngModel)]="selectedMember().membershipType">
+                                @for (t of membershipTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                            </select>
+                        } @else {
+                            <div class="view-value">{{ getLabel(membershipTypes, selectedMember().membershipType) }}</div>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label>Special Category</label>
+                        @if (isEditing()) {
+                            <select [(ngModel)]="selectedMember().category">
+                                @for (cat of memberCategories; track cat.value) { <option [value]="cat.value">{{ cat.label }}</option> }
+                            </select>
+                        } @else {
+                            <div class="view-value">{{ getLabel(memberCategories, selectedMember().category) }}</div>
+                        }
+                    </div>
 
                 @if (isEditing()) {
                 <div class="form-group full bg-primary/5 p-4 rounded-lg border border-primary/10">
@@ -383,6 +401,61 @@
                             <span class="checkmark"></span>
                             <span class="label-text">Show Address Publicly</span>
                         </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isNIDPublic" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Show NID Publicly</span>
+                        </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isFamilyPublic" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Show Family Publicly</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Notification Preferences -->
+                <div class="full privacy-grid bg-surface p-6 rounded-lg mt-4">
+                    <label class="mb-4 block">Communication Protocols</label>
+                    <div class="checks grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().notifyEventCreation" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Announce New Events</span>
+                        </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().notifyParticipationApproval" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Participation Updates</span>
+                        </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().notifyRegistrationUpdate" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Registry Change Alerts</span>
+                        </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().notifyRelevantUpdates" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">General relevant Community News</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Verification Section -->
+                <div class="full border-t pt-8 mt-4" *ngIf="isEditing()">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black mb-6">Verification & Gamification</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="premium-checkbox-label">
+                                <input type="checkbox" [(ngModel)]="selectedMember().isVerified">
+                                <span class="checkmark"></span>
+                                <span class="label-text">Verified Alumni (Blue Tick)</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Contribution Points</label>
+                            <input type="number" [(ngModel)]="selectedMember().contributionPoints">
+                        </div>
                     </div>
                 </div>
 

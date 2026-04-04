@@ -64,6 +64,7 @@ export const BLOOD_GROUPS = [
 ];
 
 export const BLOOD_GROUP_OPTIONS = [
+    { value: 'Unknown', label: 'Not Specified' },
     { value: 'APositive', label: 'A+' },
     { value: 'ANegative', label: 'A-' },
     { value: 'BPositive', label: 'B+' },
@@ -79,6 +80,7 @@ export const GENDERS = [
 ];
 
 export const GENDER_OPTIONS = [
+    { value: 'None', label: 'Not Specified' },
     { value: 'Male', label: 'Male' },
     { value: 'Female', label: 'Female' },
     { value: 'Other', label: 'Other' }

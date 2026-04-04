@@ -13,7 +13,7 @@ class AdminService {
   Future<List<dynamic>> getPendingApprovals() async {
     try {
       final response = await _dio.get('/admin/members', queryParameters: {
-        'statusFilter': 'pending',
+        'statusFilter': 'Applied',
         'page': 1,
         'pageSize': 100,
       });

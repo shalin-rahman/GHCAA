@@ -27,10 +27,10 @@ class JobDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailsAsync = ref.watch(jobDetailsProvider(jobId));
     final roleAsync = ref.watch(roleProvider);
-    final isAdmin = roleAsync.value == 'Admin' || roleAsync.value == 'SuperAdmin';
+    final isAdmin = roleAsync.value.isStaffAdminRole;
 
     return AppScaffold(
-      title: 'Career Opportunity',
+      title: 'Job Details',
       breadcrumb: 'Career Link > Job Details',
       actions: isAdmin ? [
         IconButton(

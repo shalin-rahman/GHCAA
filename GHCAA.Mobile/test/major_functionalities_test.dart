@@ -30,15 +30,11 @@ class FakeStorage extends StorageService {
   Future<void> clearAll() async => _store.clear();
 }
 
-class FakeRef extends ProviderRef<AuthService> {
-  // Simplistic fake for testing
+class FakeRef extends Fake implements Ref {
   @override
-  T read<T>(ProviderBase<T> provider) {
+  T read<T>(ProviderListenable<T> provider) {
     throw UnimplementedError();
   }
-  
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class FakeDio extends Fake implements Dio {

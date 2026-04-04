@@ -2,8 +2,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using GHCAA.Application.Interfaces;
+using GHCAA.Application.Security;
 using GHCAA.Domain.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace GHCAA.Infrastructure.Services
@@ -13,15 +15,10 @@ namespace GHCAA.Infrastructure.Services
         private readonly SymmetricSecurityKey _key;
         private readonly IConfiguration _config;
 
-        public TokenService(IConfiguration config)
+        public TokenService(IConfiguration config, IHostEnvironment environment)
         {
             _config = config;
-            var secret = _config["Jwt:Key"];
-            if (string.IsNullOrEmpty(secret))
-            {
-                // Fallback for development if not configured
-                secret = "super_secret_key_that_is_at_least_32_characters_long_for_hs256";
-            }
+            var secret = JwtSigningKeyResolver.Resolve(config, environment);
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         }
 

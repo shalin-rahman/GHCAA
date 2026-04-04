@@ -47,7 +47,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
-      title: 'Economic Portal',
+      title: 'Fees & Dues',
       breadcrumb: 'Member Portal > Payment Portal',
       child: RefreshIndicator(
         color: AppTheme.royalGold,

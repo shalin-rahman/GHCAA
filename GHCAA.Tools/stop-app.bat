@@ -4,7 +4,8 @@ echo  ============================================================
 echo    GHCAA Platform  ^|  Stop All Services
 echo  ============================================================
 echo.
-echo   Stopping GHCAA services...
+echo   Stopping GHCAA services (API, Web, Mobile dev)...
+echo   See GHCAA.Tools\README.md for PowerShell options (-IncludeBrowsers, -PortsOnly).
 echo.
 
 :: ── Stop .NET API ─────────────────────────────────────────────
@@ -35,13 +36,7 @@ if %errorlevel%==0 (
     echo   [--] No mobile processes were running
 )
 
-:: ── Stop Chrome / Edge (Browsers) ──────────────────────────────
-echo   Stopping browser sessions (Chrome/Edge)...
-taskkill /F /IM chrome.exe >nul 2>&1
-taskkill /F /IM msedge.exe >nul 2>&1
-echo   [OK] Browsers cleared
-
-:: ── Release locked ports 7214 / 5087 / 4200 (optional cleanup) ───────
+:: ── Release locked ports 7214 / 5087 / 4200 ───────────────────
 echo   Releasing ports 7214, 5087 and 4200...
 for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":7214 " 2^>nul') do (
     taskkill /F /PID %%P >nul 2>&1
@@ -58,5 +53,6 @@ echo.
 echo  ============================================================
 echo    All GHCAA services stopped.
 echo  ============================================================
+echo    Restart: GHCAA.Tools\run-app.bat
 echo.
 pause

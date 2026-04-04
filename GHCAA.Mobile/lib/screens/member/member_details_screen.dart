@@ -12,14 +12,21 @@ import '../../features/admin/admin_service.dart';
 
 final isAdminProvider = FutureProvider.autoDispose<bool>((ref) async {
   final role = await ref.read(authServiceProvider).getRole();
-  return role == 'SuperAdmin' || role == 'Admin';
+  return role.isStaffAdminRole;
 });
+
+String? _memberDobDisplay(Map<String, dynamic> profile) {
+  final v = profile['dateOfBirth'] ?? profile['dob'];
+  if (v == null) return null;
+  final s = v.toString();
+  return s.contains('T') ? s.split('T')[0] : s;
+}
 
 final memberDetailsProvider = FutureProvider.family<Map<String, dynamic>?, int>((ref, memberId) async {
   try {
     final dio = ref.read(dioProvider);
     final role = await ref.read(authServiceProvider).getRole();
-    final isAdmin = role == 'SuperAdmin' || role == 'Admin';
+    final isAdmin = role.isStaffAdminRole;
     
     // Admins fetch from the privileged endpoint to see masked/hidden fields
     final endpoint = isAdmin ? '/admin/members/$memberId' : '/networking/member/$memberId';
@@ -41,25 +48,40 @@ class MemberDetailsScreen extends ConsumerWidget {
     final adminAsync = ref.watch(isAdminProvider);
     final isAdmin = adminAsync.value ?? false;
 
-    return AppScaffold(
-      title: 'Member Details',
-      breadcrumb: 'Management > Profile',
-      actions: [
-        if (isAdmin)
-          IconButton(
-            icon: const Icon(Icons.edit_outlined, color: AppTheme.royalGold),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              context.pushNamed('profile_edit', extra: detailsAsync.value);
-            },
-          ),
-      ],
-      child: detailsAsync.when(
-        data: (profile) {
-          if (profile == null) {
-            return const Center(child: Text('Profile dossier not found.', style: TextStyle(color: Colors.red)));
-          }
+    return detailsAsync.when(
+      data: (profile) {
+        return AppScaffold(
+          title: 'Member Details',
+          breadcrumb: 'Management > Profile',
+          actions: [
+            if (isAdmin && profile != null)
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, color: AppTheme.royalGold),
+                tooltip: 'Edit member',
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.pushNamed('profile_edit', extra: profile);
+                },
+              ),
+          ],
+          child: profile == null
+              ? const Center(child: Text('Profile dossier not found.', style: TextStyle(color: Colors.red)))
+              : _buildLoadedBody(context, ref, profile, isAdmin),
+        );
+      },
+      loading: () => const AppScaffold(
+        title: 'Member Details',
+        breadcrumb: 'Management > Profile',
+        child: Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      ),
+      error: (e, s) => AppScaffold(
+        title: 'Member Details',
+        child: Center(child: Text('Sync Error: $e', style: const TextStyle(color: Colors.red))),
+      ),
+    );
+  }
 
+  Widget _buildLoadedBody(BuildContext context, WidgetRef ref, Map<String, dynamic> profile, bool isAdmin) {
           String? photoUrl;
           if (profile['photoPath'] != null && profile['photoPath'].toString().isNotEmpty) {
             final p = profile['photoPath'];
@@ -101,27 +123,36 @@ class MemberDetailsScreen extends ConsumerWidget {
                       _buildChip(profile['categoryBadge'], Colors.blueAccent, Colors.blue),
                     if (profile['bloodGroup'] != null)
                       _buildChip('Blood: ${profile['bloodGroup']}', Colors.redAccent, Colors.red),
+                    if (profile['isVerified'] == true)
+                      _buildChip('VERIFIED ALUMNI', Colors.cyanAccent, Colors.blueGrey),
                   ],
                 ),
                 const SizedBox(height: 32),
                 _buildSectionCard('ACADEMIC HISTORY', [
-                  _InfoRow(icon: Icons.school_outlined, label: 'Graduation Year', value: profile['passingYear']?.toString()),
-                  _InfoRow(icon: Icons.menu_book_outlined, label: 'Qualification', value: profile['degree']),
-                  _InfoRow(icon: Icons.class_outlined, label: 'Department', value: profile['subject']),
+                  ... (profile['academicHistory'] as List? ?? []).map((a) => _InfoRow(
+                    icon: Icons.school_outlined, 
+                    label: '${a['degree']} in ${a['subject']}', 
+                    value: '${a['institutionName']} (${a['passingYear']})'
+                  )),
                 ]),
                 const SizedBox(height: 16),
                 _buildSectionCard('PROFESSIONAL HISTORY', [
-                  _InfoRow(icon: Icons.work_outline, label: 'Designation', value: profile['designation']),
-                  _InfoRow(icon: Icons.business_outlined, label: 'Organization', value: profile['organizationName']),
-                  _InfoRow(icon: Icons.category_outlined, label: 'Professional Sector', value: profile['professionalSector']),
-                  _InfoRow(icon: Icons.location_city_outlined, label: 'Location', value: profile['location']),
+                  ... (profile['professionalHistory'] as List? ?? []).map((p) => _InfoRow(
+                    icon: Icons.work_outline, 
+                    label: '${p['designation']} at ${p['organizationName']}', 
+                    value: '${p['sector']} (${p['location']}) - ${p['isCurrent'] == true ? 'CURRENT' : (p['endDate'] ?? 'N/A')}'
+                  )),
                 ]),
                 if (isAdmin) ...[
                   const SizedBox(height: 16),
                   _buildSectionCard('PERSONAL INFORMATION', [
                     _InfoRow(icon: Icons.badge_outlined, label: "Father's Name", value: profile['fatherName']),
                     _InfoRow(icon: Icons.badge_outlined, label: "Mother's Name", value: profile['motherName']),
-                    _InfoRow(icon: Icons.cake_outlined, label: 'Date of Birth', value: profile['dob'] != null ? profile['dob'].toString().split('T')[0] : null),
+                    _InfoRow(
+                      icon: Icons.cake_outlined,
+                      label: 'Date of Birth',
+                      value: _memberDobDisplay(profile),
+                    ),
                     _InfoRow(icon: Icons.fingerprint, label: 'National ID', value: profile['nid']),
                   ]),
                 ],
@@ -133,7 +164,7 @@ class MemberDetailsScreen extends ConsumerWidget {
                 if (isAdmin) ...[
                   const SizedBox(height: 16),
                   _buildSectionCard('MEMBERSHIP DETAILS', [
-                    _InfoRow(icon: Icons.auto_awesome, label: 'Merit Score', value: profile['meritPoints']?.toString() ?? 'Zero'),
+                    _InfoRow(icon: Icons.auto_awesome, label: 'Merit Score', value: (profile['contributionPoints'] ?? profile['meritPoints'] ?? 0).toString()),
                     _InfoRow(icon: Icons.file_present, label: 'Application Date', value: profile['createdAt'] != null ? profile['createdAt'].toString().split('T')[0] : null),
                     _InfoRow(icon: Icons.verified_user, label: 'Approval Date', value: profile['approvalDate'] != null ? profile['approvalDate'].toString().split('T')[0] : 'Pending'),
                   ]),
@@ -169,11 +200,6 @@ class MemberDetailsScreen extends ConsumerWidget {
               ],
             ),
           );
-        },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
-        error: (e, s) => Center(child: Text('Sync Error: $e', style: const TextStyle(color: Colors.red))),
-      ),
-    );
   }
 
   Widget _buildChip(String label, Color textColor, Color bgColor) {

@@ -109,7 +109,7 @@ class AppScaffold extends ConsumerWidget {
     }
 
     final roleAsync = ref.watch(roleProvider);
-    final isUserAdmin = isAdmin || roleAsync.value == 'Admin' || roleAsync.value == 'SuperAdmin';
+    final isUserAdmin = isAdmin || roleAsync.value.isStaffAdminRole;
 
     return specialThemeAsync.when(
       data: (st) {

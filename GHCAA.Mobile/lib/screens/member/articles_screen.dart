@@ -80,7 +80,7 @@ class _MemberArticlesScreenState extends ConsumerState<MemberArticlesScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
-      title: 'Haragangian Press',
+      title: 'Articles & Submissions',
       breadcrumb: 'PORTAL > CONTENT HUB',
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

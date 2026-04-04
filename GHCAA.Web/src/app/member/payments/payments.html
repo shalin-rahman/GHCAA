@@ -82,9 +82,11 @@
                                     <span class="badge" [ngClass]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
                                 </td>
                                 <td class="text-right">
-                                    <button class="btn btn-outline btn-sm !py-1 !px-3 !text-[10px]" (click)="downloadReceipt(item.id)" *ngIf="item.status === 'Completed' || item.status === 1">
-                                        📜 Receipt
-                                    </button>
+                                    @if (isCompleted(item.status)) {
+                                        <button class="btn btn-outline btn-sm !py-1 !px-3 !text-[10px]" (click)="downloadReceipt(item.id)">
+                                            📜 Receipt
+                                        </button>
+                                    }
                                 </td>
                             </tr>
                             } @empty {
@@ -123,6 +125,7 @@
                     }
                 </div>
             </div>
+        </div>
     }
 </div>
 

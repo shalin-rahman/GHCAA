@@ -36,6 +36,7 @@ namespace GHCAA.Application.DTOs
         public string? Notes { get; set; }
 
         public int? MemberId { get; set; }
+        public Microsoft.AspNetCore.Http.IFormFile? Receipt { get; set; }
     }
 
     public class MembershipHistoryDto

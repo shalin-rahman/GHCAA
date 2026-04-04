@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,15 +22,15 @@ using NUnit.Framework;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    [TestFixture]
     public class GatewaysControllerTests : ControllerTestBase
     {
-        private Mock<IPaymentGatewayFactory> _gatewayFactoryMock;
-        private Mock<IFinancialService> _financialServiceMock;
-        private Mock<IMemberService> _memberServiceMock;
-        private Mock<ILogger<GatewaysController>> _loggerMock;
-        private GatewaysController _controller;
-        private Member _testMember;
+        private Mock<IPaymentGatewayFactory> _gatewayFactoryMock = null!;
+        private Mock<IFinancialService> _financialServiceMock = null!;
+        private Mock<IMemberService> _memberServiceMock = null!;
+        private Mock<ILogger<GatewaysController>> _loggerMock = null!;
+        private IConfiguration _gatewayTestConfig = null!;
+        private GatewaysController _controller = null!;
+        private Member _testMember = null!;
 
         [SetUp]
         public async Task Setup()
@@ -37,7 +39,15 @@ namespace GHCAA.Tests.Controllers
             _financialServiceMock = new Mock<IFinancialService>();
             _memberServiceMock = new Mock<IMemberService>();
             _loggerMock = new Mock<ILogger<GatewaysController>>();
-            var configMock = new Mock<IConfiguration>();
+            var json = """
+{
+  "PaymentGateways": { "EnabledMethods": [ "SSLCommerz", "BkashGateway" ] },
+  "GeneralSettings": { "AssociationNamePrefix": "TEST-", "Currency": "BDT" }
+}
+""";
+            _gatewayTestConfig = new ConfigurationBuilder()
+                .AddJsonStream(new MemoryStream(Encoding.UTF8.GetBytes(json)))
+                .Build();
 
             var defaultGatewayMock = new Mock<IPaymentGatewayService>();
             defaultGatewayMock.Setup(x => x.VerifyCallbackAsync(It.IsAny<IDictionary<string, string>>(), It.IsAny<CancellationToken>()))
@@ -50,11 +60,41 @@ namespace GHCAA.Tests.Controllers
                 _memberServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                configMock.Object);
+                _gatewayTestConfig);
 
             _testMember = await CreateAndSaveTestMemberAsync("Test Member", "test@test.com", "123", "123");
+
+            await EnsureSslCommerzPaymentConfigExistsAsync();
             
             SetMemberContext(_controller, _testMember.Id);
+        }
+
+        private async Task EnsureSslCommerzPaymentConfigExistsAsync()
+        {
+            var ssl = await _context.PaymentConfigurations.FirstOrDefaultAsync(p => p.Gateway == Enums.PaymentGateway.SSLCommerz);
+            if (ssl == null)
+            {
+                _context.PaymentConfigurations.Add(new PaymentConfiguration
+                {
+                    Method = Enums.PaymentMethod.CreditCard,
+                    DisplayName = "SSLCommerz",
+                    Gateway = Enums.PaymentGateway.SSLCommerz,
+                    IsEnabled = true,
+                    GatewayPublicKey = "test_store",
+                    GatewaySecretKey = "test_secret",
+                    IsSandbox = true,
+                    RequiresReceipt = false,
+                    RequiresReference = false
+                });
+                await _context.SaveChangesAsync();
+                return;
+            }
+
+            if (ssl.IsEnabled) return;
+            ssl.IsEnabled = true;
+            ssl.GatewayPublicKey ??= "test_store";
+            ssl.GatewaySecretKey ??= "test_secret";
+            await _context.SaveChangesAsync();
         }
 
         [TearDown]
@@ -84,6 +124,58 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             _financialServiceMock.Verify(x => x.RecordPaymentAsync(It.IsAny<CreatePaymentHistoryDto>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        public async Task InitiatePayment_ReturnsUnauthorized_WhenMembershipPaymentAndAnonymous()
+        {
+            _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+
+            var request = new GatewaysController.InitiatePaymentRequest
+            {
+                Amount = 100,
+                Gateway = Enums.PaymentGateway.SSLCommerz,
+                Reference = "Registration",
+                BaseUrl = "http://api.com"
+            };
+
+            var result = await _controller.InitiatePayment(request, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            _financialServiceMock.Verify(x => x.RecordPaymentAsync(It.IsAny<CreatePaymentHistoryDto>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
+        public async Task InitiatePayment_ReturnsBadRequest_WhenEventAmountDoesNotMatch()
+        {
+            _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+
+            var ev = new AlumniEvent { Title = "Paid Event", Description = "D", Location = "L", RegistrationFee = 500 };
+            _context.AlumniEvents.Add(ev);
+            await _context.SaveChangesAsync();
+
+            var registration = new EventRegistration
+            {
+                EventId = ev.Id,
+                PaymentReference = "EVT-REG-AMT-TEST",
+                Status = Enums.EventRegistrationStatus.Pending,
+                IsNonMember = true
+            };
+            _context.EventRegistrations.Add(registration);
+            await _context.SaveChangesAsync();
+
+            var request = new GatewaysController.InitiatePaymentRequest
+            {
+                Amount = 99,
+                Gateway = Enums.PaymentGateway.SSLCommerz,
+                Reference = "EVT-REG-AMT-TEST",
+                BaseUrl = "http://api.com"
+            };
+
+            var result = await _controller.InitiatePayment(request, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            _financialServiceMock.Verify(x => x.RecordPaymentAsync(It.IsAny<CreatePaymentHistoryDto>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Test]

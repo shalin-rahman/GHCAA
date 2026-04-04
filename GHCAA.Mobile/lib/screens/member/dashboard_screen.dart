@@ -51,7 +51,7 @@ class DashboardScreen extends ConsumerWidget {
         data: (profile) {
           final fullName = profile?['fullName'] ?? 'Distinguished Alumnus';
           final firstName = fullName.split(' ').first;
-          final isAdmin = roleAsync.value == 'Admin' || roleAsync.value == 'SuperAdmin';
+          final isAdmin = roleAsync.value.isStaffAdminRole;
           
           String? photoUrl;
           if (profile?['photoPath'] != null && profile!['photoPath'].toString().isNotEmpty) {

@@ -4,6 +4,7 @@ using FluentAssertions;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
 using NUnit.Framework;
@@ -14,6 +15,7 @@ namespace GHCAA.Tests.Services
     public class TokenServiceTests
     {
         private Mock<IConfiguration> _mockConfig = null!;
+        private Mock<IHostEnvironment> _mockEnv = null!;
         private TokenService _service = null!;
         private string _key = "super_secret_key_that_is_at_least_32_characters_long_for_hs256";
 
@@ -24,8 +26,10 @@ namespace GHCAA.Tests.Services
             _mockConfig.Setup(x => x["Jwt:Key"]).Returns(_key);
             _mockConfig.Setup(x => x["Jwt:Issuer"]).Returns("GHCAA");
             _mockConfig.Setup(x => x["Jwt:Audience"]).Returns("GHCAA");
+            _mockEnv = new Mock<IHostEnvironment>();
+            _mockEnv.Setup(e => e.EnvironmentName).Returns(Environments.Production);
 
-            _service = new TokenService(_mockConfig.Object);
+            _service = new TokenService(_mockConfig.Object, _mockEnv.Object);
         }
 
         [Test]

@@ -98,23 +98,34 @@ export class Payments implements OnInit {
     }
 
     submitPayment() {
-        if (!this.paymentForm.transactionId && this.selectedPaymentMethod()?.requiresReference) {
-            this.notify.error('Transaction ID is required for this payment method.');
-            return;
+        if (!this.paymentForm.transactionId) return;
+
+        this.loading.set(true);
+        
+        // Build FormData for multipart upload (sync with Backend [FromForm])
+        const formData = new FormData();
+        formData.append('transactionId', this.paymentForm.transactionId);
+        formData.append('amount', this.paymentForm.amount.toString());
+        formData.append('paidAt', new Date().toISOString());
+        formData.append('financialCategory', this.paymentForm.financialCategory.toString());
+        formData.append('paymentMethod', this.paymentForm.paymentMethod.toString());
+        if (this.paymentForm.notes) formData.append('notes', this.paymentForm.notes);
+        
+        if (this.selectedReceiptFile) {
+            formData.append('receipt', this.selectedReceiptFile, this.selectedReceiptFile.name);
         }
 
-        const formData = new FormData();
-        formData.append('amount', this.paymentForm.amount.toString()); // Wait, this might need adjustment
-        // Actually financialService.recordPayment likely expects an object.
-        // Let's check financialService.ts
-
-        this.financialService.recordPayment(this.paymentForm).subscribe({
-            next: () => {
-                this.notify.success('Payment information submitted correctly.');
+        this.financialService.recordPayment(formData).subscribe({
+            next: (res) => {
+                this.notify.success('Payment recorded successfully!');
                 this.showPayModal.set(false);
                 this.loadData();
+                this.loading.set(false);
             },
-            error: () => this.notify.error('Failed to submit payment.')
+            error: () => {
+                this.notify.error('Error recording payment');
+                this.loading.set(false);
+            }
         });
     }
 
@@ -128,5 +139,9 @@ export class Payments implements OnInit {
 
     getCategoryLabel(val: any): string {
         return getFinancialCategoryLabel(val);
+    }
+
+    isCompleted(status: any): boolean {
+        return status === 'Completed' || status === 1 || status === '1';
     }
 }

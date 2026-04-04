@@ -33,7 +33,7 @@ namespace GHCAA.Application.DTOs
         public string NID { get; set; } = null!;
 
         [Required(ErrorMessage = "Mobile number is required.")]
-        [RegularExpression(@"^01[3-9]\d{8}$", ErrorMessage = "Enter a valid Bangladeshi mobile number (e.g. 01XXXXXXXXX).")]
+        [RegularExpression(@"^(\+88)?01[3-9][\s-]*\d{8}$", ErrorMessage = "Enter a valid Bangladeshi mobile number (e.g. 01XXXXXXXXX).")]
         public string MobileNo { get; set; } = null!;
 
         [Required(ErrorMessage = "Email address is required.")]
@@ -41,8 +41,8 @@ namespace GHCAA.Application.DTOs
         [MaxLength(200, ErrorMessage = "Email must not exceed 200 characters.")]
         public string Email { get; set; } = null!;
 
-        public Gender Gender { get; set; } = Gender.Male;
-        public BloodGroup BloodGroup { get; set; } = BloodGroup.APositive;
+        public Gender Gender { get; set; } = Gender.None;
+        public BloodGroup BloodGroup { get; set; } = BloodGroup.Unknown;
         public MembershipType MembershipType { get; set; } = MembershipType.General;
         public MemberCategory Category { get; set; } = MemberCategory.None;
 
@@ -68,7 +68,7 @@ namespace GHCAA.Application.DTOs
         public string EmergencyContactRelation { get; set; } = null!;
 
         [Required(ErrorMessage = "Emergency contact phone is required.")]
-        [RegularExpression(@"^01[3-9]\d{8}$", ErrorMessage = "Enter a valid Bangladeshi mobile number for the emergency contact.")]
+        [RegularExpression(@"^(\+88)?01[3-9][\s-]*\d{8}$", ErrorMessage = "Enter a valid Bangladeshi mobile number for the emergency contact.")]
         public string EmergencyContactPhone { get; set; } = null!;
 
         // ── Privacy flags ─────────────────────────────────────────────────────────
@@ -76,12 +76,39 @@ namespace GHCAA.Application.DTOs
         public bool IsEmailPublic { get; set; }
         public bool IsAddressPublic { get; set; }
         public bool IsNIDPublic { get; set; }
+        public bool IsVerified { get; set; }
+        public int ContributionPoints { get; set; }
+        public DateTime? LastUpdateDate { get; set; }
+        public string? ApprovedByName { get; set; }
+        public DateTime? ApprovedDate { get; set; }
         
         // Notification Preferences
         public bool NotifyEventCreation { get; set; } = true;
         public bool NotifyParticipationApproval { get; set; } = true;
         public bool NotifyRegistrationUpdate { get; set; } = true;
         public bool NotifyRelevantUpdates { get; set; } = true;
+
+        // Flattened Academic/Professional (for high-level UI/Imports/Directory)
+        public string? HighestCertificate { get; set; }
+        public string? HighestCertificateGroup { get; set; }
+        public string? HighestCertificateSubject { get; set; }
+        public int? HighestCertificatePassingYear { get; set; }
+        public int? HSCAdmissionYear { get; set; }
+
+        public string? GHCLastCertificate { get; set; }
+        public string? GHCLastCertificateGroup { get; set; }
+        public string? GHCLastCertificateSubject { get; set; }
+        public int? GHCLastCertificatePassingYear { get; set; }
+        public int? GHCAdmissionYear { get; set; }
+
+        public string? ProfessionalSector { get; set; }
+        public string? Designation { get; set; }
+        public string? OrganizationName { get; set; }
+        public string? Location { get; set; } // Current job location
+
+        // Summary Path (Flattened for UI convenience)
+        public string? CertificatePath { get; set; }
+        public string? PaymentProofPath { get; set; }
 
         // ── Attachments & history ─────────────────────────────────────────────────
         public string? PhotoPath { get; set; }

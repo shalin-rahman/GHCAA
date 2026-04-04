@@ -14,6 +14,7 @@ describe('Payments Component', () => {
         financialServiceMock = {
             getMyDues: vi.fn().mockReturnValue(of([])),
             getMyHistory: vi.fn().mockReturnValue(of([])),
+            getSavedMethods: vi.fn().mockReturnValue(of([])),
             recordPayment: vi.fn().mockReturnValue(of({ success: true }))
         };
 

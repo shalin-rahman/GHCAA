@@ -34,7 +34,7 @@ class _AdminAuditScreenState extends ConsumerState<AdminAuditScreen> {
 
     return AppScaffold(
       isAdmin: true,
-      title: 'Audit Logs',
+      title: 'System Audit Logs',
       breadcrumb: 'ADMIN > AUDIT',
       child: Column(
         children: [

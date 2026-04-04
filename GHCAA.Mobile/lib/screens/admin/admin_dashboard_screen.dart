@@ -64,9 +64,9 @@ class _AdminDashboardState extends ConsumerState<AdminDashboardScreen> {
               crossAxisSpacing: 12,
               childAspectRatio: 1.4,
               children: [
-                _buildQuickAction(context, Icons.gavel, 'APPROVAL QUEUE', '/admin/approvals'),
-                _buildQuickAction(context, Icons.history_edu, 'AUDIT TRAILS', '/admin/audit'),
-                _buildQuickAction(context, Icons.receipt_long, 'LEDGER & DUES', '/admin/ledger'),
+                _buildQuickAction(context, Icons.gavel, 'APPROVALS', '/admin/approvals'),
+                _buildQuickAction(context, Icons.history_edu, 'AUDIT LOGS', '/admin/audit'),
+                _buildQuickAction(context, Icons.receipt_long, 'FINANCIAL LEDGER', '/admin/ledger'),
                 _buildQuickAction(context, Icons.campaign, 'COMMUNICATIONS', '/admin/communication'),
                 _buildQuickAction(context, Icons.business, 'MEMBER DIRECTORY', '/directory'),
                 _buildQuickAction(context, Icons.rate_review_outlined, 'ARTICLE REVIEW', '/admin/articles'),

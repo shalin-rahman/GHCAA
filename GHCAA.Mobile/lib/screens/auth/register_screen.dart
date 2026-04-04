@@ -21,7 +21,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
 
-  static const _stepLabels = ['Identity & Contact', 'Academic & Media', 'Preferences & Submit'];
+  static const _stepLabels = [
+    'Identity & Reachability',
+    'Background & Milestones',
+    'Registry Filing & Subscription'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +33,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final currentStep = registerState.currentStep; // 0-indexed
 
     return AppScaffold(
-      title: 'Alumni Enrollment',
-      breadcrumb: 'Executive Onboarding > Membership Enrollment',
+      title: 'Member Registry',
+      breadcrumb: 'PORTAL > REGISTRATION',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
@@ -91,7 +95,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 }
                               },
                               child: Text(
-                                registerState.isLastStep ? 'Submit Application' : 'Continue',
+                                registerState.isLastStep ? 'Finalize Registry' : 'Continue Assessment →',
                                 style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
                               ),
                             ),
@@ -111,33 +115,45 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget _buildStepContent(BuildContext context, RegisterState state) {
     switch (state.currentStep) {
       case 0: return _buildStep1Identity(context, state);
-      case 1: return _buildStep2AcademicMedia(context, state);
-      case 2: return _buildStep3PreferencesVerification(context, state);
+      case 1: return _buildStep2Background(context, state);
+      case 2: return _buildStep3Registry(context, state);
       default: return const SizedBox.shrink();
     }
   }
 
-  // ─── Step 1: Identity & Contact ───────────────────────────────────────────
+  // ─── Step 1: Identity & Reachability ─────────────────────────────────────
   Widget _buildStep1Identity(BuildContext context, RegisterState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle('Bio & Identity'),
+        _sectionTitle('Identity & Reachability'),
         _buildTextField(
-          label: 'Full Name *',
+          label: 'Full Legal Name (SSC/HSC Record) *',
           initialValue: state.data['FullName'],
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('FullName', v),
         ),
         _gap(),
         _buildTextField(
-          label: 'NID Number *',
+          label: "Father's Name *",
+          initialValue: state.data['FatherName'],
+          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('FatherName', v),
+        ),
+        _gap(),
+        _buildTextField(
+          label: "Mother's Name *",
+          initialValue: state.data['MotherName'],
+          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('MotherName', v),
+        ),
+        _gap(),
+        _buildTextField(
+          label: 'National ID (NID) *',
           initialValue: state.data['NID'],
           keyboardType: TextInputType.number,
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('NID', v),
         ),
         _gap(),
         _buildTextField(
-          label: 'Mobile Number *',
+          label: 'Verified Mobile *',
           initialValue: state.data['MobileNo'],
           keyboardType: TextInputType.phone,
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('MobileNo', v),
@@ -149,7 +165,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
         _gap(),
         _buildTextField(
-          label: 'Email Address *',
+          label: 'Primary Email (Login) *',
           initialValue: state.data['Email'],
           keyboardType: TextInputType.emailAddress,
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('Email', v),
@@ -200,14 +216,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('BloodGroup', v),
         ),
         _gap(),
+        _buildAsyncDropdown(
+          label: 'T-Shirt Size *',
+          group: 'TShirtSize',
+          value: state.data['TShirtSize'],
+          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('TShirtSize', v),
+        ),
+        _gap(),
         _buildTextField(
-          label: 'Present Address *',
+          label: 'Present Resident Address *',
           initialValue: state.data['PresentAddress'],
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('PresentAddress', v),
         ),
         _gap(),
         _buildTextField(
-          label: 'Permanent Address *',
+          label: 'Permanent Family Residence *',
           initialValue: state.data['PermanentAddress'],
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('PermanentAddress', v),
         ),
@@ -215,15 +238,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  // ─── Step 2: Academic & Media ─────────────────────────────────────────────
-  Widget _buildStep2AcademicMedia(BuildContext context, RegisterState state) {
+  // ─── Step 2: Background & Milestones ─────────────────────────────────────
+  Widget _buildStep2Background(BuildContext context, RegisterState state) {
     final degree = state.data['Degree'] ?? 'HSC';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle('Academic Career'),
+        _sectionTitle('Academic Records'),
         _buildAsyncDropdown(
-          label: 'Highest Degree from GHC *',
+          label: 'Degree Conferred *',
           group: 'Degree',
           value: degree,
           onChanged: (v) {
@@ -233,7 +256,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
         _gap(),
         _buildAsyncDropdown(
-          label: 'Focus / Subject *',
+          label: 'Major Cluster / Subject *',
           group: degree == 'HSC' ? 'HSCSubject' : 'GeneralSubject',
           value: state.data['Subject'],
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('Subject', v),
@@ -247,29 +270,42 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
         _gap(),
         _buildTextField(
-          label: 'Current Designation',
+          label: 'Current Profession / Designation',
           initialValue: state.data['Designation'],
           required: false,
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('Designation', v),
         ),
         _gap(),
-        _buildAsyncDropdown(
-          label: 'Membership Category *',
-          group: 'MembershipType',
-          value: state.data['MembershipType'] ?? 'General',
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('MembershipType', v),
+        _sectionTitle('Emergency Protocol Personnel'),
+        _buildTextField(
+          label: 'Emergency Contact Person Legal Name *',
+          initialValue: state.data['EmergencyContactName'],
+          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('EmergencyContactName', v),
         ),
-        const SizedBox(height: AppConstants.paddingLarge),
-        _sectionTitle('Identity Documents'),
+        _gap(),
+        _buildTextField(
+          label: 'Consanguinity / Relationship *',
+          initialValue: state.data['EmergencyContactRelation'],
+          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('EmergencyContactRelation', v),
+        ),
+        _gap(),
+        _buildTextField(
+          label: 'Direct Phone Channel *',
+          initialValue: state.data['EmergencyContactPhone'],
+          keyboardType: TextInputType.phone,
+          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('EmergencyContactPhone', v),
+        ),
+        const SizedBox(height: AppConstants.paddingExtraLarge),
+        _sectionTitle('Registry Filing & Subscription'),
         _buildPickerField(
-          label: 'Profile Photo',
+          label: 'Formal Profile Photo *',
           icon: Icons.person_outline,
           value: state.data['ProfileImagePath'],
           onPicked: (path) => ref.read(registerWizardProvider.notifier).updateData('ProfileImagePath', path),
         ),
         _gap(),
         _buildPickerField(
-          label: 'NID Scan / Photo',
+          label: 'Academic Certificate Proof',
           icon: Icons.badge_outlined,
           value: state.data['NidPhotoPath'],
           onPicked: (path) => ref.read(registerWizardProvider.notifier).updateData('NidPhotoPath', path),
@@ -278,14 +314,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  // ─── Step 3: Preferences & Verification ──────────────────────────────────
-  Widget _buildStep3PreferencesVerification(BuildContext context, RegisterState state) {
+  // ─── Step 3: Registry Filing & Subscription ──────────────────────────────
+  Widget _buildStep3Registry(BuildContext context, RegisterState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle('Notification Preferences'),
+        _sectionTitle('Membership Type'),
+        _buildAsyncDropdown(
+          label: 'Membership Category *',
+          group: 'MembershipType',
+          value: state.data['MembershipType'] ?? 'General',
+          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('MembershipType', v),
+        ),
+        _gap(),
+        _sectionTitle('Notification Protocols'),
         const Text(
-          'Choose which updates you want to receive. All are enabled by default — you can change these later from your profile.',
+          'Choose which updates you want to receipt into your digital channel. All are active by default.',
           style: TextStyle(fontSize: 12, color: Colors.white54),
         ),
         const SizedBox(height: AppConstants.paddingMedium),
@@ -295,14 +339,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator(color: AppTheme.royalGold));
             }
-            // Fallback to hardcoded defaults if API fails or returns empty
             final preferences = snapshot.data?.isNotEmpty == true
                 ? snapshot.data!
                 : [
-                    {'value': 'NotifyEventCreation', 'label': 'New Event Announcements', 'description': 'Get notified when new events are published'},
-                    {'value': 'NotifyParticipationApproval', 'label': 'Participation Approvals', 'description': 'Updates on your event registration status'},
-                    {'value': 'NotifyRegistrationUpdate', 'label': 'Registration Updates', 'description': 'Status changes on your membership application'},
-                    {'value': 'NotifyRelevantUpdates', 'label': 'General Announcements', 'description': 'Alumni news and community updates'},
+                    {'value': 'NotifyEventCreation', 'label': 'Event Announcements', 'description': 'When new events are published'},
+                    {'value': 'NotifyParticipationApproval', 'label': 'Participation Approvals', 'description': 'Updates on event attendance status'},
+                    {'value': 'NotifyRegistrationUpdate', 'label': 'Registry Updates', 'description': 'Status changes on membership application'},
+                    {'value': 'NotifyRelevantUpdates', 'label': 'Official Bulletins', 'description': 'News and relevant alumni updates'},
                   ];
 
             return Column(
@@ -322,30 +365,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           },
         ),
         const Divider(color: Colors.white10, height: 40),
-        _sectionTitle('Terms & Submission'),
-        const Icon(Icons.verified_user_outlined, size: 48, color: AppTheme.royalGold),
+        _sectionTitle('Constitution & Consent'),
+        const Center(child: Icon(Icons.gavel_rounded, size: 48, color: AppTheme.royalGold)),
         const SizedBox(height: 12),
-        const Text(
-          'By submitting, you confirm that all information provided is accurate and you agree to the Haragangian Alumni Association terms and privacy policy.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, color: Colors.white54),
+        _buildConsentCheckbox(
+          'I have read and understood the constitution and the Broadened Terms and Conditions of Registration, and I irrevocably agree to be bound by them.',
+          state.data['HasAcceptedTerms'] ?? false,
+          (v) => ref.read(registerWizardProvider.notifier).updateData('HasAcceptedTerms', v),
         ),
-        const SizedBox(height: 8),
-        CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('I accept the Terms & Privacy Policy', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-          value: state.data['HasAcceptedTerms'] ?? false,
-          activeColor: AppTheme.royalGold,
-          controlAffinity: ListTileControlAffinity.leading,
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('HasAcceptedTerms', v),
+        _buildConsentCheckbox(
+          "I explicitly consent to the Association's Data Privacy & GDPR protocols for processing my personal information as described in the directory and privacy sections.",
+          state.data['HasAcceptedGdpr'] ?? false,
+          (v) => ref.read(registerWizardProvider.notifier).updateData('HasAcceptedGdpr', v),
         ),
-        // Inline validation hint
-        if (state.data['HasAcceptedTerms'] != true)
-          const Padding(
-            padding: EdgeInsets.only(left: 8, top: 4),
-            child: Text('You must accept the terms to submit', style: TextStyle(color: Colors.redAccent, fontSize: 11)),
-          ),
+        _buildConsentCheckbox(
+          'I solemnly affirm that the data provided is accurate. I pledge to uphold the GHCAA Constitution and maintain association decorum.',
+          state.data['HasAcceptedTerms'] ?? false,
+          (v) => ref.read(registerWizardProvider.notifier).updateData('HasAcceptedTerms', v),
+        ),
       ],
+    );
+  }
+
+  Widget _buildConsentCheckbox(String label, bool value, Function(bool?) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: CheckboxListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(label, style: const TextStyle(fontSize: 11, color: Colors.white70, height: 1.4)),
+        value: value,
+        activeColor: AppTheme.royalGold,
+        controlAffinity: ListTileControlAffinity.leading,
+        onChanged: onChanged,
+      ),
     );
   }
 
@@ -414,7 +466,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         final options = snapshot.data ?? [];
         final validValue = options.any((e) => e['value'] == value) ? value : null;
         return DropdownButtonFormField<String>(
-          initialValue: validValue,
+          value: validValue,
           decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
           dropdownColor: AppTheme.midnightSurface,
           items: options.map((o) => DropdownMenuItem(value: o['value'], child: Text(o['label']!))).toList(),
@@ -444,9 +496,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _submitRegistration(RegisterState registerState) async {
     // Enforce terms acceptance before advancing
-    if (registerState.data['HasAcceptedTerms'] != true) {
+    if (registerState.data['HasAcceptedTerms'] != true || registerState.data['HasAcceptedGdpr'] != true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please accept the Terms & Privacy Policy to continue.'), backgroundColor: Colors.redAccent),
+        const SnackBar(content: Text('Please accept all terms and privacy policies to continue.'), backgroundColor: Colors.redAccent),
       );
       return;
     }
@@ -459,7 +511,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (error == null) {
         ref.read(registerWizardProvider.notifier).reset();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Application submitted! Check your email for the OTP verification link.')),
+          const SnackBar(content: Text('Application submitted! Check your email for verification.')),
         );
         context.go('/login');
       } else {

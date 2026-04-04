@@ -5,15 +5,10 @@ namespace GHCAA.Application.DTOs
 {
     public class AdminMemberUpdateDto : BaseMemberDto
     {
-        // Membership Status & Type
+        // Membership Status & Other Metadata 
         public MembershipStatus Status { get; set; }
-        public MemberCategory Category { get; set; }
         public string? MembershipNumber { get; set; }
-        
         public string? ECChangeReason { get; set; }
         public string? MembershipChangeReason { get; set; }
-
-        public bool IsVerified { get; set; }
-        public int ContributionPoints { get; set; }
     }
 }

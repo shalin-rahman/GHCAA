@@ -49,7 +49,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     final eventsAsync = ref.watch(eventsListProvider);
     final searchQuery = ref.watch(eventSearchQueryProvider);
     final roleAsync = ref.watch(FutureProvider((ref) => ref.read(authServiceProvider).getRole()));
-    final isAdmin = roleAsync.value == 'Admin' || roleAsync.value == 'SuperAdmin';
+    final isAdmin = roleAsync.value.isStaffAdminRole;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(

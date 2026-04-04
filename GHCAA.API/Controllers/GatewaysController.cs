@@ -40,11 +40,73 @@ namespace GHCAA.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> InitiatePayment([FromBody] InitiatePaymentRequest request, CancellationToken cancellationToken)
         {
+            if (request.Amount <= 0 || request.Amount > 10_000_000m)
+                return BadRequest(new { message = "Payment amount is out of the allowed range." });
+
+            if (string.IsNullOrWhiteSpace(request.Reference) || string.IsNullOrWhiteSpace(request.BaseUrl))
+                return BadRequest(new { message = "Reference and API base URL are required." });
+
             int? memberId = null;
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
-            if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var mid))
+            if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var midClaim))
             {
-                memberId = mid;
+                memberId = midClaim;
+            }
+
+            var isEventOnlinePayment = request.Reference.StartsWith("EVT-REG", StringComparison.OrdinalIgnoreCase);
+
+            if (!isEventOnlinePayment)
+            {
+                // Require a linked member (MemberId claim from validated JWT). Do not rely on IsAuthenticated here:
+                // unit tests and some host integrations build ClaimsPrincipal without the auth middleware pipeline.
+                if (!memberId.HasValue)
+                {
+                    _logger.LogWarning("Blocked payment initiation without MemberId claim for reference {Ref}", request.Reference);
+                    return Unauthorized(new { message = "Sign in is required to start this payment." });
+                }
+            }
+            else
+            {
+                var registration = await _db.EventRegistrations
+                    .Include(r => r.Event)
+                    .FirstOrDefaultAsync(
+                        r => r.PaymentReference == request.Reference && r.Status == Enums.EventRegistrationStatus.Pending,
+                        cancellationToken);
+
+                if (registration?.Event == null)
+                {
+                    _logger.LogWarning("Event payment initiation failed: unknown or non-pending registration {Ref}", request.Reference);
+                    return BadRequest(new { message = "Unknown or inactive event registration reference." });
+                }
+
+                var regFee = registration.Event.RegistrationFee ?? 0;
+                var expected = regFee > 0 ? regFee : (registration.ContributionAmount ?? 0);
+
+                if (expected <= 0 && request.Amount > 0.01m)
+                    return BadRequest(new { message = "This registration does not require an online payment." });
+
+                if (expected > 0 && Math.Abs(request.Amount - expected) > 0.01m)
+                {
+                    _logger.LogWarning(
+                        "Event payment amount mismatch for {Ref}. Expected {Expected}, got {Actual}",
+                        request.Reference,
+                        expected,
+                        request.Amount);
+                    return BadRequest(new { message = $"Amount must match the event fee ({expected})." });
+                }
+
+                if (registration.MemberId.HasValue)
+                {
+                    if (!memberId.HasValue || memberId.Value != registration.MemberId.Value)
+                    {
+                        _logger.LogWarning("Event payment member mismatch for {Ref}", request.Reference);
+                        return Unauthorized(new { message = "Sign in as the member who registered to complete payment." });
+                    }
+                }
+                else
+                {
+                    memberId = null;
+                }
             }
 
             var enabledGateways = _config.GetSection("PaymentGateways:EnabledMethods").Get<string[]>() ?? Array.Empty<string>();
@@ -172,10 +234,11 @@ namespace GHCAA.API.Controllers
                 var fullRef = "EVT-REG-" + regRef;
                 var registration = await _db.EventRegistrations.Include(r => r.Event).FirstOrDefaultAsync(r => r.PaymentReference == fullRef, cancellationToken);
                 
-                if (registration != null && registration.Status == Enums.EventRegistrationStatus.Pending)
+                if (registration != null && registration.Status == Enums.EventRegistrationStatus.Pending && registration.Event != null)
                 {
                     // Verify sufficient amount paid for the event
-                    var expectedAmount = (registration.Event.RegistrationFee > 0) ? (registration.Event.RegistrationFee ?? 0) : registration.ContributionAmount;
+                    var ev = registration.Event;
+                    var expectedAmount = (ev.RegistrationFee ?? 0) > 0 ? (ev.RegistrationFee ?? 0) : (registration.ContributionAmount ?? 0);
                     if (payment.Amount >= expectedAmount)
                     {
                         var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";

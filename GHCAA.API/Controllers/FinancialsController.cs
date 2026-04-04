@@ -46,7 +46,8 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("record-payment")]
-        public async Task<IActionResult> RecordPayment([FromBody] CreatePaymentHistoryDto dto, CancellationToken cancellationToken)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> RecordPayment([FromForm] CreatePaymentHistoryDto dto, CancellationToken cancellationToken)
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
             if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var memberId))

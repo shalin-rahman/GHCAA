@@ -25,7 +25,7 @@ namespace GHCAA.Application.DTOs
 
         [Required(ErrorMessage = "Passing year is required.")]
         [Range(1900, 2100, ErrorMessage = "Passing year must be between 1900 and 2100.")]
-        public int PassingYear { get; set; }
+        public int? PassingYear { get; set; }
 
         public bool IsGHC { get; set; }
 

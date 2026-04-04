@@ -45,7 +45,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (error == null) {
         final role = await ref.read(authServiceProvider).getRole();
         if (!mounted) return;
-        if (role == 'SuperAdmin' || role == 'Admin') {
+        if (role.isStaffAdminRole) {
           context.go('/admin_dashboard');
         } else {
           context.go('/dashboard');

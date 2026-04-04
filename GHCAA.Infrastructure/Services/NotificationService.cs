@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Domain;
 using GHCAA.Application.Interfaces;
@@ -20,10 +22,9 @@ namespace GHCAA.Infrastructure.Services
             _realTime = realTime;
         }
 
-        public async Task CreateNotificationAsync(int userId, string title, string message, Enums.NotificationType type, string? targetUrl = null, CancellationToken cancellationToken = default)
+        public async Task CreateNotificationAsync(int memberId, string title, string message, Enums.NotificationType type, string? targetUrl = null, CancellationToken cancellationToken = default)
         {
-            // Check member notification preferences
-            var member = await _db.Members.FindAsync(new object[] { userId }, cancellationToken);
+            var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
             if (member != null)
             {
                 bool shouldNotify = type switch
@@ -32,7 +33,7 @@ namespace GHCAA.Infrastructure.Services
                     Enums.NotificationType.ParticipationApproval => member.NotifyParticipationApproval,
                     Enums.NotificationType.RegistrationUpdate => member.NotifyRegistrationUpdate,
                     Enums.NotificationType.GeneralSystem => member.NotifyRelevantUpdates,
-                    _ => true // Direct messages always notify
+                    _ => true
                 };
 
                 if (!shouldNotify) return;
@@ -40,7 +41,7 @@ namespace GHCAA.Infrastructure.Services
 
             var notification = new Notification
             {
-                MemberId = userId,
+                MemberId = memberId,
                 Title = title,
                 Message = message,
                 Type = type.ToString(),
@@ -52,34 +53,32 @@ namespace GHCAA.Infrastructure.Services
             _db.Notifications.Add(notification);
             await _db.SaveChangesAsync(cancellationToken);
             
-            // Broadcast in real-time
-            await _realTime.SendNotificationToUserAsync(userId, notification);
+            await _realTime.SendNotificationToUserAsync(memberId, notification);
         }
 
-        public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(int userId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(int memberId, CancellationToken cancellationToken = default)
         {
             return await _db.Notifications
-                .Where(n => n.MemberId == userId)
+                .Where(n => n.MemberId == memberId)
                 .OrderByDescending(n => n.CreatedAt)
                 .Take(50)
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task MarkAsReadAsync(int notificationId, CancellationToken cancellationToken = default)
+        public async Task<bool> MarkAsReadAsync(int notificationId, int memberId, CancellationToken cancellationToken = default)
         {
-            var n = await _db.Notifications.FindAsync(new object[] { notificationId }, cancellationToken);
-            if (n != null)
-            {
-                n.IsRead = true;
-                await _db.SaveChangesAsync(cancellationToken);
-            }
+            var n = await _db.Notifications
+                .FirstOrDefaultAsync(x => x.Id == notificationId && x.MemberId == memberId, cancellationToken);
+            if (n == null) return false;
+            n.IsRead = true;
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
         }
 
         public async Task BroadcastNotificationAsync(string title, string message, Enums.NotificationType type, string? targetUrl = null, CancellationToken cancellationToken = default)
         {
             IQueryable<Member> targetMembers = _db.Members.Where(m => !m.IsArchived);
 
-            // Filter by preference
             targetMembers = type switch
             {
                 Enums.NotificationType.EventCreation => targetMembers.Where(m => m.NotifyEventCreation),
@@ -89,20 +88,33 @@ namespace GHCAA.Infrastructure.Services
                 _ => targetMembers
             };
 
-            var membersIndices = await targetMembers.Select(m => m.Id).ToListAsync(cancellationToken);
+            var memberIds = await targetMembers.Select(m => m.Id).ToListAsync(cancellationToken);
+            if (memberIds.Count == 0) return;
 
-            foreach (var memberId in membersIndices)
+            var now = DateTime.UtcNow;
+            var typeString = type.ToString();
+            var entities = memberIds.Select(mid => new Notification
             {
-                // Note: we're reusing the already tuned CreateNotificationAsync for consistent real-time broadcast.
-                // In huge systems, we'd use background jobs or batch signals.
-                await CreateNotificationAsync(memberId, title, message, type, targetUrl, cancellationToken);
-            }
+                MemberId = mid,
+                Title = title,
+                Message = message,
+                Type = typeString,
+                TargetUrl = targetUrl,
+                CreatedAt = now,
+                IsRead = false
+            }).ToList();
+
+            _db.Notifications.AddRange(entities);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            var sendTasks = entities.Select(n => _realTime.SendNotificationToUserAsync(n.MemberId, n));
+            await Task.WhenAll(sendTasks);
         }
 
-        public async Task MarkAllAsReadAsync(int userId, CancellationToken cancellationToken = default)
+        public async Task MarkAllAsReadAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var notifications = await _db.Notifications
-                .Where(n => n.MemberId == userId && !n.IsRead)
+                .Where(n => n.MemberId == memberId && !n.IsRead)
                 .ToListAsync(cancellationToken);
             
             foreach (var n in notifications) n.IsRead = true;

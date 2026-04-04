@@ -104,7 +104,18 @@ export class AdminMembers implements OnInit {
     { value: 'MembershipType', label: 'Membership Type' },
     { value: 'Category', label: 'Member Category' },
     // System
-    { value: 'ID', label: 'System/External ID (For Photos)' }
+    { value: 'ID', label: 'System/External ID (For Photos)' },
+    // Privacy & Notifications
+    { value: 'IsMobilePublic', label: 'Expose Mobile' },
+    { value: 'IsEmailPublic', label: 'Expose Email' },
+    { value: 'IsAddressPublic', label: 'Expose Address' },
+    { value: 'IsNIDPublic', label: 'Expose NID' },
+    { value: 'IsFamilyPublic', label: 'Expose Family' },
+    { value: 'NotifyEventCreation', label: 'Notify Events' },
+    { value: 'NotifyRelevantUpdates', label: 'Notify Relevant News' },
+    // Status
+    { value: 'IsVerified', label: 'Verified Alumni (True/False)' },
+    { value: 'ContributionPoints', label: 'Merit Points' }
   ];
 
   // Constants for dropdowns
@@ -144,7 +155,6 @@ export class AdminMembers implements OnInit {
       error: () => this.ecPeriods.set([])
     });
   }
-
 
   onFilterChange() {
     this.currentPage.set(1);
@@ -384,6 +394,13 @@ export class AdminMembers implements OnInit {
       isEmailPublic: member.isEmailPublic,
       isAddressPublic: member.isAddressPublic,
       isNIDPublic: member.isNIDPublic,
+      isFamilyPublic: member.isFamilyPublic,
+      isVerified: member.isVerified,
+      contributionPoints: member.contributionPoints,
+      notifyEventCreation: member.notifyEventCreation,
+      notifyParticipationApproval: member.notifyParticipationApproval,
+      notifyRegistrationUpdate: member.notifyRegistrationUpdate,
+      notifyRelevantUpdates: member.notifyRelevantUpdates,
       tShirtSize: member.tShirtSize,
       emergencyContactName: member.emergencyContactName,
       emergencyContactRelation: member.emergencyContactRelation,
@@ -450,6 +467,7 @@ export class AdminMembers implements OnInit {
   getCategoryLabel = getCategoryLabel;
   getMembershipTypeLabel = getMembershipTypeLabel;
   getECPositionName = getECPositionName;
+  
   getCurrentPosition(member: any) {
     const pos = getCurrentECPosition(member.ecHistory);
     return getECPositionName(pos);
@@ -458,6 +476,7 @@ export class AdminMembers implements OnInit {
   getCurrentPeriod(member: any) {
     return getCurrentECPeriod(member.ecHistory);
   }
+  
   getBloodGroupName = getBloodGroupName;
 
   // --- Import Actions ---
@@ -583,36 +602,48 @@ export class AdminMembers implements OnInit {
   }
 
   addAcademic() {
-    if (!this.selectedMember().academicHistory) this.selectedMember().academicHistory = [];
-    this.selectedMember().academicHistory.unshift({
-      institutionName: '',
-      degree: '',
-      subject: '',
-      admissionYear: new Date().getFullYear() - 4,
-      passingYear: new Date().getFullYear(),
-      isGHC: false,
-      result: ''
+    this.selectedMember.update(m => {
+      if (!m.academicHistory) m.academicHistory = [];
+      m.academicHistory.unshift({
+        institutionName: '',
+        degree: '',
+        subject: '',
+        admissionYear: new Date().getFullYear() - 4,
+        passingYear: new Date().getFullYear(),
+        isGHC: false,
+        result: ''
+      });
+      return { ...m };
     });
   }
 
   removeAcademic(index: number) {
-    this.selectedMember().academicHistory.splice(index, 1);
+    this.selectedMember.update(m => {
+      m.academicHistory.splice(index, 1);
+      return { ...m };
+    });
   }
 
   addProfessional() {
-    if (!this.selectedMember().professionalHistory) this.selectedMember().professionalHistory = [];
-    this.selectedMember().professionalHistory.unshift({
-      organizationName: '',
-      designation: '',
-      sector: '',
-      location: '',
-      startDate: new Date().toISOString().split('T')[0],
-      isCurrent: true
+    this.selectedMember.update(m => {
+      if (!m.professionalHistory) m.professionalHistory = [];
+      m.professionalHistory.unshift({
+        organizationName: '',
+        designation: '',
+        sector: '',
+        location: '',
+        startDate: new Date().toISOString().split('T')[0],
+        isCurrent: true
+      });
+      return { ...m };
     });
   }
 
   removeProfessional(index: number) {
-    this.selectedMember().professionalHistory.splice(index, 1);
+    this.selectedMember.update(m => {
+      m.professionalHistory.splice(index, 1);
+      return { ...m };
+    });
   }
 
   addECHistory() {
@@ -648,6 +679,9 @@ export class AdminMembers implements OnInit {
       error: () => this.notify.error('Failed to delete history.')
     });
   }
+
+  getLabel(options: any[], value: any): string {
+    const option = options.find(o => o.value === value);
+    return option ? option.label : (value || 'Not Specified');
+  }
 }
-
-

@@ -21,7 +21,7 @@ class DigitalIDScreen extends ConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
     
     return AppScaffold(
-      title: 'Digital ID Registry',
+      title: 'Member Credentials',
       breadcrumb: 'Executive Hub > Digital ID Card',
       child: profileAsync.when(
         data: (profile) {

@@ -29,7 +29,6 @@ import '../../screens/member/magazine_screen.dart';
 import '../../screens/member/about_screen.dart';
 import '../../screens/admin/approval_queue_screen.dart';
 import '../../screens/admin/audit_screen.dart';
-import '../../screens/admin/ledger_screen.dart';
 import '../../screens/admin/theme_management_screen.dart';
 import '../../screens/admin/fee_config_screen.dart';
 import '../../screens/admin/contact_messages_screen.dart';
@@ -37,6 +36,9 @@ import '../../screens/admin/admin_dashboard_screen.dart';
 import '../../screens/admin/governance_registry_screen.dart';
 import '../../screens/admin/article_approval_screen.dart';
 import '../../screens/admin/gatekeeper_screen.dart';
+import '../../screens/admin/ledger_screen.dart';
+import '../../screens/admin/admin_modules.dart';
+import '../../screens/member/ai_chat_screen.dart';
 import '../../core/widgets/main_shell.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -110,6 +112,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/gatekeeper', name: 'admin_gatekeeper', builder: (context, state) => const GatekeeperScreen()),
           GoRoute(path: '/admin/governance', name: 'admin_governance', builder: (context, state) => const AdminGovernanceScreen()),
           GoRoute(path: '/admin/articles', name: 'admin_articles', builder: (context, state) => const ArticleApprovalScreen()),
+          GoRoute(path: '/admin/cms', name: 'admin_cms', builder: (context, state) => const AdminCMS()),
+          GoRoute(path: '/assistant', name: 'assistant', builder: (context, state) => const AIChatScreen()),
         ],
       ),
     ],

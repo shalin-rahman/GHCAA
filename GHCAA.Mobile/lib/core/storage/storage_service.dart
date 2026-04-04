@@ -1,23 +1,54 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final storageServiceProvider = Provider<StorageService>((ref) => StorageService());
 
 class StorageService {
+  static const _jwtKey = 'jwt_token';
+  static const _legacyJwtPrefsKey = 'jwt_token';
+
+  final FlutterSecureStorage _secure = const FlutterSecureStorage();
+
   Future<void> saveToken(String token) async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_legacyJwtPrefsKey, token);
+      return;
+    }
+    await _secure.write(key: _jwtKey, value: token);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('jwt_token', token);
+    await prefs.remove(_legacyJwtPrefsKey);
   }
 
   Future<String?> getToken() async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_legacyJwtPrefsKey);
+    }
+    var token = await _secure.read(key: _jwtKey);
+    if (token != null && token.isNotEmpty) return token;
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('jwt_token');
+    final legacy = prefs.getString(_legacyJwtPrefsKey);
+    if (legacy != null && legacy.isNotEmpty) {
+      await _secure.write(key: _jwtKey, value: legacy);
+      await prefs.remove(_legacyJwtPrefsKey);
+      return legacy;
+    }
+    return null;
   }
 
   Future<void> removeToken() async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_legacyJwtPrefsKey);
+      return;
+    }
+    await _secure.delete(key: _jwtKey);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('jwt_token');
+    await prefs.remove(_legacyJwtPrefsKey);
   }
 
   Future<void> saveRole(String role) async {
@@ -55,6 +86,7 @@ class StorageService {
   }
 
   Future<void> clearAll() async {
+    await removeToken();
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
   }

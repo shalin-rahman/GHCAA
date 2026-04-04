@@ -28,10 +28,10 @@ class EventDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailsAsync = ref.watch(eventDetailsProvider(eventId));
     final roleAsync = ref.watch(roleProvider);
-    final isAdmin = roleAsync.value == 'Admin' || roleAsync.value == 'SuperAdmin';
+    final isAdmin = roleAsync.value.isStaffAdminRole;
 
     return AppScaffold(
-      title: 'Timeline Dossier',
+      title: 'Event Details',
       breadcrumb: 'Timeline > Event Details',
       actions: isAdmin ? [
         IconButton(

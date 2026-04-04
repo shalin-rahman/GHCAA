@@ -13,6 +13,16 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
+if defined GHCA_API_ALREADY_STARTED (
+    echo [GHCAA] Full-stack mode: API already running from run-app.ps1 — skipping second dotnet run.
+    echo [GHCAA] Stopping prior Flutter/Dart only ^(not Chrome/Edge; Angular may be open^)...
+    taskkill /F /IM flutter.exe 2>nul
+    taskkill /F /IM dart.exe 2>nul
+    echo [GHCAA] Brief wait for API warmup...
+    timeout /t 2 /nobreak >nul
+    goto :sync_mobile
+)
+
 echo [GHCAA] Sanitizing development environment...
 taskkill /F /IM flutter.exe 2>nul
 taskkill /F /IM dart.exe 2>nul
@@ -25,6 +35,7 @@ start "GHCAA API Engine" dotnet run --project ../GHCAA.API --launch-profile http
 echo [GHCAA] Waiting for API to stabilize...
 timeout /t 5 /nobreak >nul
 
+:sync_mobile
 echo [GHCAA] Synchronizing Mobile Portal Dependencies...
 cd ../GHCAA.Mobile
 call flutter pub get

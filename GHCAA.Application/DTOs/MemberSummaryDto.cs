@@ -11,7 +11,6 @@ namespace GHCAA.Application.DTOs
         public MembershipStatus Status { get; set; }
         public bool IsVerified { get; set; }
         public DateTime AppliedDate { get; set; }
-        public MemberCategory Category { get; set; }
         public bool IsFamilyPublic { get; set; }
         public List<MemberFamilyDto> FamilyMembers { get; set; } = new();
 
@@ -27,5 +26,8 @@ namespace GHCAA.Application.DTOs
         public int ContributionPoints { get; set; }
         public int Rank { get; set; }
         public string? CategoryBadge { get; set; }
+
+        public string? CertificatePath { get; set; }
+        public string? PaymentProofPath { get; set; }
     }
 }

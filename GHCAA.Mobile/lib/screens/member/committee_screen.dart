@@ -16,7 +16,13 @@ final ecPeriodsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async 
 final selectedECPeriodProvider = StateProvider.autoDispose<int?>((ref) => null);
 
 final committeeListProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
-  final periodId = ref.watch(selectedECPeriodProvider);
+  final periods = await ref.watch(ecPeriodsProvider.future);
+  var periodId = ref.watch(selectedECPeriodProvider);
+  // Auto-select the first (current) period if none chosen yet
+  if (periodId == null && periods.isNotEmpty) {
+    periodId = periods.first['id'] as int?;
+    Future.microtask(() => ref.read(selectedECPeriodProvider.notifier).state = periodId);
+  }
   return ref.read(networkingServiceProvider).getExecutiveCommittee(periodId: periodId);
 });
 
@@ -47,7 +53,7 @@ class _CommitteeScreenState extends ConsumerState<CommitteeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
-      title: 'Executive Council',
+      title: 'Executive Committee',
       breadcrumb: 'Association Hub > Governance Registry',
       child: Column(
         children: [

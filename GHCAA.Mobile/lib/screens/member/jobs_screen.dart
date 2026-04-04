@@ -40,7 +40,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
     final myMemberId = selfProfile?['id'];
 
     return AppScaffold(
-      title: 'Job Hub',
+      title: 'Opportunities Hub',
       breadcrumb: 'PORTAL > JOB HUB',
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

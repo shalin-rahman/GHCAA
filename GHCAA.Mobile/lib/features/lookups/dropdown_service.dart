@@ -27,7 +27,7 @@ class DropdownService {
   ];
 
   static const List<String> defaultBloodGroups = [
-    'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'
+    'Unknown', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'
   ];
 
   static const List<String> defaultMembershipTypes = [
@@ -52,6 +52,7 @@ class DropdownService {
   ];
 
   static const Map<String, String> bloodGroupMap = {
+    'Unknown': 'Not Specified',
     'APositive': 'A+', 'ANegative': 'A-', 'BPositive': 'B+', 'BNegative': 'B-',
     'OPositive': 'O+', 'ONegative': 'O-', 'ABPositive': 'AB+', 'ABNegative': 'AB-'
   };
@@ -99,6 +100,27 @@ class DropdownService {
         return defaultArticleCategories;
       case 'JobCategory':
         return jobCategoryMap.entries.map((e) => {'value': e.key, 'label': e.value}).toList();
+      case 'Gender':
+        return [
+          {'value': 'None', 'label': 'Not Specified'},
+          {'value': 'Male', 'label': 'Male'},
+          {'value': 'Female', 'label': 'Female'},
+          {'value': 'Other', 'label': 'Other'},
+        ];
+      case 'MemberCategory':
+        return [
+          {'value': 'None', 'label': 'None'},
+          {'value': 'LifelongPatron', 'label': 'Lifelong Patron'},
+          {'value': 'Sponsor', 'label': 'Sponsor'},
+          {'value': 'Advisor', 'label': 'Advisor'},
+          {'value': 'Mentor', 'label': 'Mentor'},
+          {'value': 'Recruiter', 'label': 'Recruiter'},
+          {'value': 'Active', 'label': 'Active Member'},
+          {'value': 'Volunteer', 'label': 'Volunteer'},
+          {'value': 'Contributor', 'label': 'Contributor'},
+          {'value': 'Guest', 'label': 'Guest'},
+          {'value': 'Student', 'label': 'Student'},
+        ];
       case 'PassingYear':
         final currentYear = DateTime.now().year;
         return List.generate(currentYear - 1950 + 1, (i) => (currentYear - i).toString())

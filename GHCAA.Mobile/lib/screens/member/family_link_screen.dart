@@ -9,6 +9,46 @@ import '../../features/family/family_service.dart';
 class FamilyLinkScreen extends ConsumerWidget {
   const FamilyLinkScreen({super.key});
 
+  void _showAddFamilyDialog(BuildContext context, WidgetRef ref) {
+    final nameCtrl = TextEditingController();
+    final relationCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.midnightSurface,
+        title: const Text('ADD FAMILY LINK', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: nameCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Name', labelStyle: TextStyle(color: Colors.white38))),
+            const SizedBox(height: 12),
+            TextField(controller: relationCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Relation (e.g., Sibling, Spouse)', labelStyle: TextStyle(color: Colors.white38))),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: Colors.white54))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
+            onPressed: () async {
+              if (nameCtrl.text.isNotEmpty && relationCtrl.text.isNotEmpty) {
+                final success = await ref.read(familyServiceProvider).addFamilyMember({
+                  'name': nameCtrl.text,
+                  'relation': relationCtrl.text,
+                });
+                if (success) {
+                  ref.invalidate(familyListProvider);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                }
+              }
+            },
+            child: const Text('ADD', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final familyAsync = ref.watch(familyListProvider);
@@ -19,6 +59,7 @@ class FamilyLinkScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           HapticFeedback.lightImpact();
+          _showAddFamilyDialog(context, ref);
         },
         backgroundColor: AppTheme.royalGold,
         child: const Icon(Icons.add_link_rounded, color: Colors.black),

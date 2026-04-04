@@ -9,6 +9,12 @@ class RegisterModel {
   final String passingYear;
   final String presentAddress;
   final String permanentAddress;
+  final String fatherName;
+  final String motherName;
+  final String emergencyContactName;
+  final String emergencyContactRelation;
+  final String emergencyContactPhone;
+  final String? tShirtSize;
   final List<Map<String, dynamic>> academicHistory;
   final String? profileImagePath;
   final String? nidPhotoPath;
@@ -19,6 +25,7 @@ class RegisterModel {
   final String? subject;
   final String? designation;
   final bool hasAcceptedTerms;
+  final bool hasAcceptedGdpr;
   final bool notifyEventCreation;
   final bool notifyParticipationApproval;
   final bool notifyRegistrationUpdate;
@@ -32,6 +39,12 @@ class RegisterModel {
     this.passingYear = '',
     this.presentAddress = '',
     this.permanentAddress = '',
+    this.fatherName = '',
+    this.motherName = '',
+    this.emergencyContactName = '',
+    this.emergencyContactRelation = '',
+    this.emergencyContactPhone = '',
+    this.tShirtSize = 'M',
     this.academicHistory = const [],
     this.profileImagePath,
     this.nidPhotoPath,
@@ -42,6 +55,7 @@ class RegisterModel {
     this.subject,
     this.designation = '',
     this.hasAcceptedTerms = false,
+    this.hasAcceptedGdpr = false,
     this.notifyEventCreation = true,
     this.notifyParticipationApproval = true,
     this.notifyRegistrationUpdate = true,
@@ -56,6 +70,12 @@ class RegisterModel {
     String? passingYear,
     String? presentAddress,
     String? permanentAddress,
+    String? fatherName,
+    String? motherName,
+    String? emergencyContactName,
+    String? emergencyContactRelation,
+    String? emergencyContactPhone,
+    String? tShirtSize,
     List<Map<String, dynamic>>? academicHistory,
     String? profileImagePath,
     String? nidPhotoPath,
@@ -66,6 +86,7 @@ class RegisterModel {
     String? subject,
     String? designation,
     bool? hasAcceptedTerms,
+    bool? hasAcceptedGdpr,
     bool? notifyEventCreation,
     bool? notifyParticipationApproval,
     bool? notifyRegistrationUpdate,
@@ -79,6 +100,12 @@ class RegisterModel {
       passingYear: passingYear ?? this.passingYear,
       presentAddress: presentAddress ?? this.presentAddress,
       permanentAddress: permanentAddress ?? this.permanentAddress,
+      fatherName: fatherName ?? this.fatherName,
+      motherName: motherName ?? this.motherName,
+      emergencyContactName: emergencyContactName ?? this.emergencyContactName,
+      emergencyContactRelation: emergencyContactRelation ?? this.emergencyContactRelation,
+      emergencyContactPhone: emergencyContactPhone ?? this.emergencyContactPhone,
+      tShirtSize: tShirtSize ?? this.tShirtSize,
       academicHistory: academicHistory ?? this.academicHistory,
       profileImagePath: profileImagePath ?? this.profileImagePath,
       nidPhotoPath: nidPhotoPath ?? this.nidPhotoPath,
@@ -89,6 +116,7 @@ class RegisterModel {
       subject: subject ?? this.subject,
       designation: designation ?? this.designation,
       hasAcceptedTerms: hasAcceptedTerms ?? this.hasAcceptedTerms,
+      hasAcceptedGdpr: hasAcceptedGdpr ?? this.hasAcceptedGdpr,
       notifyEventCreation: notifyEventCreation ?? this.notifyEventCreation,
       notifyParticipationApproval: notifyParticipationApproval ?? this.notifyParticipationApproval,
       notifyRegistrationUpdate: notifyRegistrationUpdate ?? this.notifyRegistrationUpdate,
@@ -101,6 +129,12 @@ class RegisterModel {
         'email': email,
         'mobileNo': mobileNo,
         'nid': nid,
+        'fatherName': fatherName,
+        'motherName': motherName,
+        'emergencyContactName': emergencyContactName,
+        'emergencyContactRelation': emergencyContactRelation,
+        'emergencyContactPhone': emergencyContactPhone,
+        'tShirtSize': tShirtSize,
         'passingYear': int.tryParse(passingYear),
         'presentAddress': presentAddress,
         'permanentAddress': permanentAddress,
@@ -118,6 +152,7 @@ class RegisterModel {
         'notifyRegistrationUpdate': notifyRegistrationUpdate,
         'notifyRelevantUpdates': notifyRelevantUpdates,
         'hasAcceptedTerms': hasAcceptedTerms,
+        'hasAcceptedGdpr': hasAcceptedGdpr,
       };
 }
 
@@ -138,6 +173,12 @@ class RegisterState {
         'Email': model.email,
         'MobileNo': model.mobileNo,
         'NID': model.nid,
+        'FatherName': model.fatherName,
+        'MotherName': model.motherName,
+        'EmergencyContactName': model.emergencyContactName,
+        'EmergencyContactRelation': model.emergencyContactRelation,
+        'EmergencyContactPhone': model.emergencyContactPhone,
+        'TShirtSize': model.tShirtSize,
         'PassingYear': model.passingYear.isEmpty ? null : int.tryParse(model.passingYear),
         'PresentAddress': model.presentAddress,
         'PermanentAddress': model.permanentAddress,
@@ -147,6 +188,7 @@ class RegisterState {
         'BloodGroup': model.bloodGroup,
         'MembershipType': model.membershipType,
         'HasAcceptedTerms': model.hasAcceptedTerms,
+        'HasAcceptedGdpr': model.hasAcceptedGdpr,
         'DateOfBirth': model.dateOfBirth,
         'ProfileImagePath': model.profileImagePath,
         'NidPhotoPath': model.nidPhotoPath,
@@ -192,6 +234,12 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
     String? passingYear,
     String? presentAddress,
     String? permanentAddress,
+    String? fatherName,
+    String? motherName,
+    String? emergencyContactName,
+    String? emergencyContactRelation,
+    String? emergencyContactPhone,
+    String? tShirtSize,
     List<Map<String, dynamic>>? academicHistory,
     String? profileImagePath,
     String? nidPhotoPath,
@@ -202,6 +250,7 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
     String? subject,
     String? designation,
     bool? hasAcceptedTerms,
+    bool? hasAcceptedGdpr,
     bool? notifyEventCreation,
     bool? notifyParticipationApproval,
     bool? notifyRegistrationUpdate,
@@ -216,6 +265,12 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
         passingYear: passingYear,
         presentAddress: presentAddress,
         permanentAddress: permanentAddress,
+        fatherName: fatherName,
+        motherName: motherName,
+        emergencyContactName: emergencyContactName,
+        emergencyContactRelation: emergencyContactRelation,
+        emergencyContactPhone: emergencyContactPhone,
+        tShirtSize: tShirtSize,
         academicHistory: academicHistory,
         profileImagePath: profileImagePath,
         nidPhotoPath: nidPhotoPath,
@@ -226,6 +281,7 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
         subject: subject,
         designation: designation,
         hasAcceptedTerms: hasAcceptedTerms,
+        hasAcceptedGdpr: hasAcceptedGdpr,
         notifyEventCreation: notifyEventCreation,
         notifyParticipationApproval: notifyParticipationApproval,
         notifyRegistrationUpdate: notifyRegistrationUpdate,
@@ -257,6 +313,24 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
       case 'PermanentAddress':
         updateModel(permanentAddress: value as String);
         break;
+      case 'FatherName':
+        updateModel(fatherName: value as String);
+        break;
+      case 'MotherName':
+        updateModel(motherName: value as String);
+        break;
+      case 'EmergencyContactName':
+        updateModel(emergencyContactName: value as String);
+        break;
+      case 'EmergencyContactRelation':
+        updateModel(emergencyContactRelation: value as String);
+        break;
+      case 'EmergencyContactPhone':
+        updateModel(emergencyContactPhone: value as String);
+        break;
+      case 'TShirtSize':
+        updateModel(tShirtSize: value as String);
+        break;
       case 'Degree':
         updateModel(degree: value as String);
         break;
@@ -274,6 +348,9 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
         break;
       case 'HasAcceptedTerms':
         updateModel(hasAcceptedTerms: value as bool);
+        break;
+      case 'HasAcceptedGdpr':
+        updateModel(hasAcceptedGdpr: value as bool);
         break;
       case 'DateOfBirth':
         updateModel(dateOfBirth: value as String);

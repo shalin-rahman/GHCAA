@@ -44,6 +44,7 @@ export class FinancialService {
     }
 
     recordPayment(dto: any): Observable<any> {
+        // Correcting the endpoint use-case: if it's FormData, let HttpClient handle headers
         return this.http.post(`${this.apiUrl}/record-payment`, dto);
     }
 

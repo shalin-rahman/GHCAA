@@ -117,11 +117,64 @@ The following features and integrations have been prioritized for the next phase
 
 ## 🛠️ Development Handover Checklist
 Outgoing developers should ensure the following are transferred:
-- [ ] **SSLCommerz/bKash Keys**: Sandbox and Production credentials.
+- [ ] **SSLCommerz/bKash Keys**: Sandbox and Production credentials (store in environment variables or a secret manager, not in committed configuration).
 - [ ] **Gemini API Key**: For the Haraganga AI Assistant.
-- [ ] **SMTP Credentials**: Gmail app password for system notifications.
-- [ ] **CORS Configuration**: Update `appsettings.json` with new frontend URLs.
+- [ ] **SMTP Credentials**: Gmail app password for system notifications (`GmailSettings__Email`, `GmailSettings__AppPassword`).
+- [ ] **JWT signing key**: Set `Jwt__Key` to a random string of at least 32 characters in every non-Development environment.
+- [ ] **CORS Configuration**: See [CORS and deployment checklist](#cors-and-deployment-checklist) below.
 - [ ] **NND (New Node Deployment)**: Ensure the database-on-startup migration scripts are intact.
+
+### Secrets and configuration
+
+Do not commit real passwords, API keys, or production connection strings. Base settings live in [`GHCAA.API/appsettings.json`](GHCAA.API/appsettings.json) with placeholders.
+
+#### Local development (pick one or combine)
+
+1. **`.env` in the API project** (loaded by `DotNetEnv` at startup — see [`Program.cs`](GHCAA.API/Program.cs)):
+   - Copy [`GHCAA.API/.env.example`](GHCAA.API/.env.example) to `GHCAA.API/.env`.
+   - Fill in `Jwt__Key` (≥32 characters), database, and Gmail fields as needed.
+   - Run the API with **working directory = `GHCAA.API`** (e.g. `dotnet run` from that folder) so `.env` is found; or set the same variables in your IDE launch profile / system environment.
+
+2. **.NET User Secrets** (already wired via `UserSecretsId` in [`GHCAA.API.csproj`](GHCAA.API/GHCAA.API.csproj)):
+   ```bash
+   cd GHCAA.API
+   dotnet user-secrets set "Jwt:Key" "YOUR_SECRET_AT_LEAST_32_CHARACTERS_LONG"
+   dotnet user-secrets set "ConnectionStrings:PgSqlConnection" "Host=...;Database=...;Username=...;Password=...;SslMode=Prefer"
+   dotnet user-secrets set "GmailSettings:Email" "you@gmail.com"
+   dotnet user-secrets set "GmailSettings:AppPassword" "your-gmail-app-password"
+   ```
+   List what is stored: `dotnet user-secrets list`
+
+3. **[`appsettings.Development.json`](GHCAA.API/appsettings.Development.json)** — non-secret defaults only; avoid committing real production passwords here if the repo is shared.
+
+#### Production / hosted (Render, Docker, etc.)
+
+Set **environment variables** in the host UI or compose file, for example: `Jwt__Key`, `ConnectionStrings__PgSqlConnection` or `DATABASE_URL` (`postgres://...` is parsed in [`DependencyInjection`](GHCAA.Infrastructure/DependencyInjection.cs)), `GmailSettings__Email`, `GmailSettings__AppPassword`, `AppSettings__AllowedOrigins__0`, `DataProtection__KeyRingPath` (with a persistent volume).
+
+Optional: run [`GHCAA.Tools/configure-local-env.ps1`](GHCAA.Tools/configure-local-env.ps1) once to copy `.env.example` to `.env` under `GHCAA.API`.
+
+### Local tooling (`GHCAA.Tools`)
+
+| Script | Purpose |
+|--------|---------|
+| [`run-app.ps1`](GHCAA.Tools/run-app.ps1) / [`run-app.bat`](GHCAA.Tools/run-app.bat) | Migrate DB, optionally test, start API (**cwd `GHCAA.API`** for `.env`), Angular, mobile helper; use **`-NoWeb`** / **`-NoMobile`** to skip frontends |
+| [`stop-app.ps1`](GHCAA.Tools/stop-app.ps1) / [`stop-app.bat`](GHCAA.Tools/stop-app.bat) | Stop processes and free ports **7214**, **5087**, **4200** |
+| [`configure-local-env.ps1`](GHCAA.Tools/configure-local-env.ps1) | Create `GHCAA.API/.env` from `.env.example` |
+
+Full parameters and notes: **[`GHCAA.Tools/README.md`](GHCAA.Tools/README.md)**.
+
+### ASP.NET Data Protection (production)
+
+When the API runs in containers without a persistent disk, DataProtection keys default to an ephemeral path and cookies or protected payloads may break after redeploys. Set `DataProtection:KeyRingPath` to a **mounted volume** path (see [`appsettings.Production.json`](GHCAA.API/appsettings.Production.json)) so key material survives restarts.
+
+### CORS and deployment checklist
+
+On each release that changes host URLs:
+
+1. Add every **browser origin** that will call the API (scheme + host + port) to `AppSettings:AllowedOrigins` or the `AppSettings__AllowedOrigins__*` environment variable array.
+2. Deploy the **API** and **web** apps so the web app’s origin matches the allow list exactly (`https://` vs `http://`, `www` vs bare domain).
+3. Confirm preflight: from the browser devtools, a login or authenticated request should not log `CORS policy execution failed`.
+4. For SignalR (`/hubs/chat`), ensure clients use the same allowed origins and HTTPS where the API enforces TLS.
 
 ## 💻 Powered By
 

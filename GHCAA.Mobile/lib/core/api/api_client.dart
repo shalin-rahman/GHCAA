@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
+import '../storage/storage_service.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
@@ -16,11 +16,12 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
+  final storage = ref.read(storageServiceProvider);
+
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString('jwt_token');
+        final token = await storage.getToken();
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }

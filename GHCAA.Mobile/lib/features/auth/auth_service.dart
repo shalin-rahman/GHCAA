@@ -144,3 +144,11 @@ final userProfileProvider = FutureProvider.autoDispose<Map<String, dynamic>?>((r
     return await storage.getProfile();
   }
 });
+
+/// Admin / SuperAdmin checks for mobile UI (case-insensitive; tolerant of API casing).
+extension UserRoleExt on String? {
+  bool get isStaffAdminRole {
+    final r = this?.trim().toLowerCase();
+    return r == 'superadmin' || r == 'admin';
+  }
+}

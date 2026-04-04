@@ -56,7 +56,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
-      title: 'Haragangian AI',
+      title: 'GHC AI Assistant',
       breadcrumb: 'Executive Hub > Alumni Intelligence',
       child: Column(
         children: [

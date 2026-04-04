@@ -35,13 +35,21 @@ class AppDrawer extends ConsumerWidget {
                 children: [
                   roleAsync.when(
                     data: (role) {
-                      final isAdmin = role == 'SuperAdmin' || role == 'Admin';
+                      final isAdmin = role.isStaffAdminRole;
                       return Column(
                         children: [
                           if (isAdmin)
                             _buildSection(context, 'ADMINISTRATION', [
-                              _MenuItem(Icons.admin_panel_settings_outlined, 'Dashboard', '/dashboard'),
+                              _MenuItem(Icons.admin_panel_settings_outlined, 'Dashboard', '/admin_dashboard'),
                               _MenuItem(Icons.gavel_outlined, 'Approvals', '/admin/approvals'),
+                              _MenuItem(Icons.account_tree_outlined, 'Governance', '/admin/governance'),
+                              _MenuItem(Icons.account_balance_wallet_outlined, 'Ledger', '/admin/ledger'),
+                              _MenuItem(Icons.collections_outlined, 'CMS / Content', '/admin/cms'),
+                              _MenuItem(Icons.article_outlined, 'Article Review', '/admin/articles'),
+                              _MenuItem(Icons.attach_money_outlined, 'Fee Config', '/admin/fees'),
+                              _MenuItem(Icons.palette_outlined, 'Themes', '/admin/themes'),
+                              _MenuItem(Icons.mail_outlined, 'Messages', '/admin/messages'),
+                              _MenuItem(Icons.security_outlined, 'Gatekeeper', '/admin/gatekeeper'),
                               _MenuItem(Icons.history_edu_outlined, 'Audit Logs', '/admin/audit'),
                             ]),
                           _buildSection(context, 'MY ACCOUNT', [
@@ -52,11 +60,18 @@ class AppDrawer extends ConsumerWidget {
                             _MenuItem(Icons.people_outline, 'Alumni Directory', '/directory'),
                             _MenuItem(Icons.event_note_outlined, 'Events', '/events'),
                             _MenuItem(Icons.work_outline, 'Job Hub', '/jobs'),
+                            _MenuItem(Icons.account_tree_outlined, 'Committee', '/committee'),
+                            _MenuItem(Icons.family_restroom_outlined, 'Family Links', '/family'),
                           ]),
                           _buildSection(context, 'MEDIA & TOOLS', [
                             _MenuItem(Icons.newspaper_outlined, 'News', '/news'),
                             _MenuItem(Icons.photo_library_outlined, 'Event Gallery', '/gallery'),
-                            _MenuItem(Icons.chat_bubble_outline, 'Assistance', '/assistant'),
+                            _MenuItem(Icons.article_outlined, 'Articles', '/articles'),
+                            _MenuItem(Icons.menu_book_outlined, 'Magazine', '/magazine'),
+                            _MenuItem(Icons.chat_bubble_outline, 'AI Assistant', '/assistant'),
+                            _MenuItem(Icons.notifications_outlined, 'Notifications', '/notifications'),
+                            _MenuItem(Icons.contact_support_outlined, 'Support', '/support'),
+                            _MenuItem(Icons.info_outline, 'About', '/about'),
                           ]),
 
                         ],
@@ -92,7 +107,7 @@ class AppDrawer extends ConsumerWidget {
           final photoPath = profile?['photoPath'];
           final photoUrl = photoPath != null ? '${AppConfig.apiBaseUrl}/$photoPath'.replaceAll('//', '/') : null;
           final role = roleAsync.value ?? 'Member';
-          final isAdmin = role == 'SuperAdmin' || role == 'Admin';
+          final isAdmin = role.isStaffAdminRole;
           
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

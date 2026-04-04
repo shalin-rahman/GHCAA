@@ -1,15 +1,17 @@
 using System.Text;
+using GHCAA.Application.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace GHCAA.API.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
         {
             var jwt = configuration.GetSection("Jwt");
-            var secret = jwt["Key"] ?? "super_secret_key_that_is_at_least_32_characters_long_for_hs256";
+            var secret = JwtSigningKeyResolver.Resolve(configuration, environment);
 
             services.AddAuthentication(options =>
             {

@@ -28,6 +28,8 @@ namespace GHCAA.Domain.Models
         public string? PhotoPath { get; set; }
         public string? SignaturePath { get; set; }
         public string? TShirtSize { get; set; }
+        public string? CertificatePath { get; set; } // Summary or current qualification
+        public string? PaymentProofPath { get; set; } // Summary or latest receipt
 
         // Workflow & Status
         public MembershipStatus Status { get; set; }
@@ -58,6 +60,8 @@ namespace GHCAA.Domain.Models
         // Membership details
         public MembershipType MembershipType { get; set; } = MembershipType.General;
         public MemberCategory Category { get; set; } = MemberCategory.None;
+        public string? MembershipChangeReason { get; set; }
+        public string? ECChangeReason { get; set; }
         public bool IsVerified { get; set; } = false; // Blue Tick / Verification Status
         public int ContributionPoints { get; set; } = 0;
 

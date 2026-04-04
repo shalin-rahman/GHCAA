@@ -21,12 +21,14 @@ namespace GHCAA.Infrastructure.Services
         private readonly ApplicationDbContext _db;
         private readonly ICommunicationService _communication;
         private readonly INotificationService _notification;
+        private readonly IFileStorageService _storage;
 
-        public FinancialService(ApplicationDbContext db, ICommunicationService communication, INotificationService notification)
+        public FinancialService(ApplicationDbContext db, ICommunicationService communication, INotificationService notification, IFileStorageService storage)
         {
             _db = db;
             _communication = communication;
             _notification = notification;
+            _storage = storage;
         }
 
         public async Task<IEnumerable<PaymentHistoryDto>> GetMemberPaymentHistoryAsync(int memberId, CancellationToken cancellationToken = default)
@@ -58,6 +60,31 @@ namespace GHCAA.Infrastructure.Services
 
             await _db.PaymentHistories.AddAsync(payment, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
+
+            // Handle Receipt Upload if present
+            if (dto.Receipt != null)
+            {
+                using var ms = new MemoryStream();
+                await dto.Receipt.CopyToAsync(ms, cancellationToken);
+                ms.Position = 0;
+                
+                var path = await _storage.SaveFileAsync(ms, dto.Receipt.FileName, payment.MemberId, Enums.FileUploadType.PaymentProof, cancellationToken);
+                
+                payment.ReceiptPath = path;
+                
+                // Track in FileUploads table too
+                var fu = new FileUpload 
+                { 
+                    MemberId = payment.MemberId, 
+                    UploadType = Enums.FileUploadType.PaymentProof, 
+                    FileName = dto.Receipt.FileName, 
+                    FilePath = path, 
+                    SizeBytes = dto.Receipt.Length 
+                };
+                await _db.FileUploads.AddAsync(fu, cancellationToken);
+                
+                await _db.SaveChangesAsync(cancellationToken);
+            }
 
             // Send Notification
             // We use simple fire-and-forget or await? The interface awaits.

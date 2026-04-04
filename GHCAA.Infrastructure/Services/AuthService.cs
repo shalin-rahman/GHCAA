@@ -1,6 +1,8 @@
+using System.Linq;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
+using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -80,25 +82,8 @@ namespace GHCAA.Infrastructure.Services
 
             if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
             {
-                // Self-healing fallback for seeded admin accounts if hash got corrupted/drifted
-                var knownAccounts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "superadmin", "SuperAdminPassword123!" },
-                    { "shalin",     "Shalin@2024!" }
-                };
-
-                if (knownAccounts.TryGetValue(user.Username, out var knownPassword) 
-                    && loginDto.Password?.Trim() == knownPassword)
-                {
-                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(knownPassword, 11);
-                    await _db.SaveChangesAsync(cancellationToken);
-                    _logger.LogInformation("Login recovered: Password hash auto-corrected for seeded account '{Username}'.", user.Username);
-                }
-                else 
-                {
-                    _logger.LogError("Login failed: Invalid password for user {Username}", user.Username);
-                    return null;
-                }
+                _logger.LogError("Login failed: Invalid password for user {Username}", user.Username);
+                return null;
             }
 
             var token = _tokenService.CreateToken(user);
@@ -130,12 +115,26 @@ namespace GHCAA.Infrastructure.Services
                 Token = token,
                 Username = user.Username,
                 MemberId = user.MemberId,
-                Role = user.Roles?.FirstOrDefault()?.Name ?? "Member",
+                Role = PickPrimaryRoleNameForClient(user.Roles),
                 FullName = fullName,
                 Email = email,
                 MobileNo = mobileNo,
                 MustChangePassword = user.MustChangePassword
             };
+        }
+
+        /// <summary>
+        /// Mobile UI checks for "SuperAdmin" / "Admin" strings. When a user has multiple roles,
+        /// EF does not guarantee order; pick the highest-privilege role for the login payload.
+        /// </summary>
+        private static string PickPrimaryRoleNameForClient(ICollection<Role>? roles)
+        {
+            if (roles == null || roles.Count == 0) return "Member";
+            var names = roles.Where(r => !string.IsNullOrWhiteSpace(r.Name)).Select(r => r.Name!).ToList();
+            if (names.Count == 0) return "Member";
+            if (names.Contains("SuperAdmin")) return "SuperAdmin";
+            if (names.Contains("Admin")) return "Admin";
+            return names[0];
         }
         public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)
         {
