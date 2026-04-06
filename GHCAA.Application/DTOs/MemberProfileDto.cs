@@ -9,6 +9,7 @@ namespace GHCAA.Application.DTOs
         public int Id { get; set; }
         public string? MembershipNumber { get; set; }
         public MembershipStatus Status { get; set; }
+        public MembershipType MembershipType { get; set; }
         public MemberCategory Category { get; set; }
         public DateTime AppliedDate { get; set; }
         public DateTime? ApprovedDate { get; set; }
@@ -31,10 +32,6 @@ namespace GHCAA.Application.DTOs
         public int? PassingYear { get; set; }
         public string? Degree { get; set; }
         public string? Subject { get; set; }
-        public string? Designation { get; set; }
-        public string? OrganizationName { get; set; }
-        public string? ProfessionalSector { get; set; }
-        public string? Location { get; set; }
         public string? CategoryBadge { get; set; }
     }
 }

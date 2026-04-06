@@ -36,11 +36,12 @@ export class Ledger implements OnInit {
   typeFilter = signal<any>(null);
 
   // PDF Export Config
-  pdfHeaders = ['Date', 'Type', 'Category', 'Description', 'Amount'];
+  pdfHeaders = ['Date', 'Type', 'Category', 'Reference', 'Description', 'Amount'];
   pdfMapper = (r: any) => [
     new Date(r.date).toLocaleDateString(),
     r.recordType === 'Income' ? 'Income' : 'Expense',
     this.getCategoryName(r.financialCategory),
+    r.reference || '—',
     r.description,
     r.amount.toLocaleString()
   ];
@@ -52,6 +53,7 @@ export class Ledger implements OnInit {
     recordType: 'Income',
     financialCategory: 'MembershipFee',
     description: '',
+    reference: '',
     year: new Date().getFullYear()
   };
 
@@ -152,5 +154,3 @@ export class Ledger implements OnInit {
     });
   }
 }
-
-

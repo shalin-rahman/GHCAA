@@ -43,15 +43,39 @@ export class Profile implements OnInit {
 
     ngOnInit() {
         this.profileService.getProfile().subscribe({
-            next: (p) => {
-                this.profile = { ...p };
-                if (this.profile.dateOfBirth) this.profile.dateOfBirth = new Date(this.profile.dateOfBirth).toISOString().split('T')[0];
-                if (!this.profile.academicHistory) this.profile.academicHistory = [];
-                if (!this.profile.professionalHistory) this.profile.professionalHistory = [];
-                else {
+            next: (p: any) => {
+                // Robust case-insensitive property mapping
+                const mapping = (obj: any) => {
+                    const result: any = {};
+                    const props = [
+                        'id', 'fullName', 'mobileNo', 'email', 'fatherName', 'motherName', 'dateOfBirth', 
+                        'nid', 'gender', 'bloodGroup', 'presentAddress', 'permanentAddress', 
+                        'emergencyContactName', 'emergencyContactRelation', 'emergencyContactPhone',
+                        'membershipNumber', 'membershipType', 'category', 'status', 'photoPath', 'signaturePath',
+                        'isVerified', 'contributionPoints', 'tShirtSize', 'isMobilePublic', 'isEmailPublic',
+                        'isAddressPublic', 'isNIDPublic', 'isFamilyPublic', 'notifyEventCreation',
+                        'notifyParticipationApproval', 'notifyRegistrationUpdate', 'notifyRelevantUpdates',
+                        'certificatePath', 'paymentProofPath'
+                    ];
+                    props.forEach(prop => {
+                        const pascal = prop.charAt(0).toUpperCase() + prop.slice(1);
+                        result[prop] = obj[prop] !== undefined ? obj[prop] : (obj[pascal] !== undefined ? obj[pascal] : (prop === 'nid' ? obj['NID'] : undefined));
+                    });
+                    result.academicHistory = obj.academicHistory || obj.AcademicHistory || [];
+                    result.professionalHistory = obj.professionalHistory || obj.ProfessionalHistory || [];
+                    return result;
+                };
+
+                this.profile = mapping(p);
+                
+                if (this.profile.dateOfBirth) {
+                    this.profile.dateOfBirth = new Date(this.profile.dateOfBirth).toISOString().split('T')[0];
+                }
+                
+                if (this.profile.professionalHistory) {
                     this.profile.professionalHistory = this.profile.professionalHistory.map((ph: any) => ({
                         ...ph,
-                        startDate: ph.startDate ? new Date(ph.startDate).toISOString().split('T')[0] : ''
+                        startDate: (ph.startDate || ph.StartDate) ? new Date(ph.startDate || ph.StartDate).toISOString().split('T')[0] : ''
                     }));
                 }
                 this.loading.set(false);
@@ -116,7 +140,12 @@ export class Profile implements OnInit {
         return subject && subject !== 'None' ? `in ${subject}` : '';
     }
 
-
+    getImageUrl(path: string | null | undefined): string {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path : '/' + path;
+        return cleanPath.replace(/^\/\//, '/');
+    }
 
     getGHCHistory() {
         if (!this.profile.academicHistory) return null;

@@ -41,12 +41,12 @@ class AdminService {
     }
   }
 
-  Future<bool> resolveApproval(int memberId, bool approve, {String? reason}) async {
+  Future<bool> resolveApproval(int memberId, bool approve, {required int adminId, String? reason}) async {
     try {
       final endpoint = approve ? 'approve' : 'reject';
       final response = await _dio.post('/admin/members/$memberId/$endpoint', data: {
-        'approvedByAdminId': 1, // Placeholder: map to current session
-        'rejectedByAdminId': 1,
+        'approvedByAdminId': adminId,
+        'rejectedByAdminId': adminId,
         'reason': reason ?? (approve ? 'Approved' : 'Rejected'),
       });
       return response.statusCode == 200;
@@ -108,6 +108,50 @@ class AdminService {
   Future<bool> updateMember(int id, Map<String, dynamic> data) async {
     try {
       final response = await _dio.put('/admin/members/$id', data: data);
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
+
+  // Financial Fee Configuration
+  Future<List<dynamic>> getFeeConfigs() async {
+    try {
+      final response = await _dio.get('/financials/fees/config');
+      return response.data as List<dynamic>;
+    } catch (_) { return []; }
+  }
+
+  Future<bool> addFeeConfig(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post('/financials/fees/config', data: data);
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (_) { return false; }
+  }
+
+  Future<bool> updateFeeConfig(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.put('/financials/fees/config', data: data);
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
+
+  // Committee Member Management
+  Future<List<dynamic>> getCommitteeMembers(int periodId) async {
+    try {
+      final response = await _dio.get('/admin/governance/periods/$periodId/members');
+      return response.data as List<dynamic>;
+    } catch (_) { return []; }
+  }
+
+  Future<bool> assignMemberToCommittee(int periodId, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post('/admin/governance/periods/$periodId/members', data: data);
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
+
+  Future<bool> removeMemberFromCommittee(int ecMemberId) async {
+    try {
+      final response = await _dio.delete('/admin/governance/members/$ecMemberId');
       return response.statusCode == 200;
     } catch (_) { return false; }
   }

@@ -36,7 +36,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
-      title: 'Haraganga News Hub',
+      title: 'News',
       breadcrumb: 'PORTAL > NEWS',
       child: Column(
         children: [
@@ -49,7 +49,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                 prefixIcon: const Icon(Icons.search, size: 20, color: AppTheme.royalGold),
                 suffixIcon: _searchController.text.isNotEmpty 
                   ? IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 20, color: Colors.white54),
+                      icon: const Icon(Icons.cancel_rounded, size: 18, color: Colors.white24),
                       onPressed: () {
                         _searchController.clear();
                         ref.read(newsSearchQueryProvider.notifier).state = "";

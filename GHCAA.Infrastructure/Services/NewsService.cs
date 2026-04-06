@@ -68,6 +68,9 @@ namespace GHCAA.Infrastructure.Services
             var post = await _db.NewsPosts
                 .IgnoreQueryFilters()
                 .Include(n => n.Author)
+                .Include(n => n.Collaborators)
+                    .ThenInclude(c => c.User)
+                        .ThenInclude(u => u!.Member)
                 .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
             
             return post == null ? null : MapToDto(post);
@@ -84,7 +87,8 @@ namespace GHCAA.Infrastructure.Services
                 ImageUrl = dto.ImageUrl,
                 IsActive = dto.IsActive,
                 AuthorId = authorId,
-                PublishDate = DateTime.UtcNow
+                PublishDate = DateTime.UtcNow,
+                ExternalCollaborators = dto.Collaborators != null ? string.Join(", ", dto.Collaborators) : null
             };
 
             await _db.NewsPosts.AddAsync(post, cancellationToken);
@@ -104,6 +108,7 @@ namespace GHCAA.Infrastructure.Services
             existing.ImageUrl = dto.ImageUrl;
             existing.IsActive = dto.IsActive;
             existing.LastModified = DateTime.UtcNow;
+            existing.ExternalCollaborators = dto.Collaborators != null ? string.Join(", ", dto.Collaborators) : null;
 
             await _db.SaveChangesAsync(cancellationToken);
             return MapToDto(existing);
@@ -144,6 +149,33 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
+        public async Task<bool> AddCollaboratorAsync(int newsPostId, int userId, CancellationToken cancellationToken = default)
+        {
+            var exists = await _db.NewsCollaborators.AnyAsync(nc => nc.NewsPostId == newsPostId && nc.UserId == userId, cancellationToken);
+            if (exists) return true;
+
+            var collab = new NewsCollaborator
+            {
+                NewsPostId = newsPostId,
+                UserId = userId,
+                AddedAt = DateTime.UtcNow
+            };
+
+            await _db.NewsCollaborators.AddAsync(collab, cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> RemoveCollaboratorAsync(int newsPostId, int userId, CancellationToken cancellationToken = default)
+        {
+            var collab = await _db.NewsCollaborators.FirstOrDefaultAsync(nc => nc.NewsPostId == newsPostId && nc.UserId == userId, cancellationToken);
+            if (collab == null) return false;
+
+            _db.NewsCollaborators.Remove(collab);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
         private static NewsPostDto MapToDto(NewsPost post)
         {
             return new NewsPostDto
@@ -156,7 +188,8 @@ namespace GHCAA.Infrastructure.Services
                 ImageUrl = post.ImageUrl,
                 IsActive = post.IsActive,
                 CreatedAt = post.PublishDate,
-                AuthorName = post.Author?.Member?.FullName ?? post.Author?.Username ?? "Unknown"
+                AuthorName = post.Author?.Member?.FullName ?? post.Author?.Username ?? "Unknown",
+                Collaborators = post.ExternalCollaborators?.Split(", ").ToList() ?? new List<string>()
             };
         }
     }

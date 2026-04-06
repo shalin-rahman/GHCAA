@@ -49,7 +49,7 @@ namespace GHCAA.Infrastructure.Services
                     ImageUrl = e.ImageUrl,
                     RegistrationStartDate = e.RegistrationStartDate,
                     RegistrationEndDate = e.RegistrationEndDate,
-                    AdminNote = e.AdminNote,
+                    AdminNote = null, // Secure: Do not leak AdminNote in public listing
                     ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
                 })
                 .ToListAsync(cancellationToken);
@@ -98,7 +98,7 @@ namespace GHCAA.Infrastructure.Services
                 ImageUrl = e.ImageUrl,
                 RegistrationStartDate = e.RegistrationStartDate,
                 RegistrationEndDate = e.RegistrationEndDate,
-                AdminNote = e.AdminNote,
+                AdminNote = null, // Secure: Do not leak AdminNote in public detail view
                 ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
             };
         }
@@ -126,6 +126,9 @@ namespace GHCAA.Infrastructure.Services
                 AdminNote = dto.AdminNote,
                 CreatedAt = DateTime.UtcNow
             };
+
+            alumniEvent.ParticipantLimit = dto.ParticipantLimit;
+            alumniEvent.HasWaitlist = dto.HasWaitlist;
 
             _context.AlumniEvents.Add(alumniEvent);
             await _context.SaveChangesAsync(cancellationToken);
@@ -166,6 +169,8 @@ namespace GHCAA.Infrastructure.Services
                 : null;
             alumniEvent.AllowNonMembers = dto.AllowNonMembers;
             alumniEvent.AdminNote = dto.AdminNote;
+            alumniEvent.ParticipantLimit = dto.ParticipantLimit;
+            alumniEvent.HasWaitlist = dto.HasWaitlist;
 
             await _context.SaveChangesAsync(cancellationToken);
             return alumniEvent;
@@ -225,6 +230,17 @@ namespace GHCAA.Infrastructure.Services
                 receiptPath = await _fileStorageService.SaveFileAsync(receipt.Content, receipt.FileName, targetId, FileUploadType.PaymentProof, cancellationToken);
             }
 
+            var initialStatus = EventRegistrationStatus.Pending;
+            if (alumniEvent.HasWaitlist && alumniEvent.ParticipantLimit.HasValue)
+            {
+                var approvedCount = await _context.EventRegistrations
+                    .CountAsync(r => r.EventId == dto.EventId && r.Status == EventRegistrationStatus.Approved, cancellationToken);
+                if (approvedCount >= alumniEvent.ParticipantLimit.Value)
+                {
+                    initialStatus = EventRegistrationStatus.Waitlisted;
+                }
+            }
+
             var registration = new EventRegistration
             {
                 EventId = dto.EventId,
@@ -240,7 +256,7 @@ namespace GHCAA.Infrastructure.Services
                 ReceiptPath = receiptPath,
                 ContributionAmount = dto.ContributionAmount,
                 TicketCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
-                Status = EventRegistrationStatus.Pending,
+                Status = initialStatus,
                 RegisteredAt = DateTime.UtcNow
             };
             

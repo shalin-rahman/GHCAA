@@ -27,7 +27,7 @@ class NewsDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailsAsync = ref.watch(newsDetailsProvider(newsId));
     final roleAsync = ref.watch(roleProvider);
-    final isAdmin = roleAsync.value.isStaffAdminRole;
+    final isAdmin = roleAsync.value?.isStaffAdminRole ?? false;
 
     return AppScaffold(
       title: 'Article Details',

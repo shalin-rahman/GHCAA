@@ -3,7 +3,8 @@
 Welcome to the GHCAA Platform. This project is a comprehensive digital ecosystem designed to connect Haraganga College Alumni through secure membership, intelligent search, and integrated financial governance.
 
 > [!IMPORTANT]
-> This document and the associated **[Software Requirements Specification (SRS)](SRS.md)** serve as the definitive technical handover for the development team.
+> This document and the associated **[Software Requirements Specification (SRS)](SRS.md)** serve as the definitive technical handover for the development team. 
+> Detailed system diagrams can be found in the **[Architecture & Data Flow](docs/architecture_data_flow.md)** guide.
 
 ---
 
@@ -79,6 +80,8 @@ The following features and integrations have been prioritized for the next phase
 - **SMS Gateway**: Implement an SMS provider (e.g., Twilio, SSLWireless/Banglalink) for OTP verification and time-sensitive notifications.
 - **Automatic Session Invalidation**: Real-time invalidation of all JWT tokens for a user if their status changes to "Terminated" or "Inactive".
 - **Real-time Notifications**: SignalR integration for instant alerts on approvals, messages, and event updates.
+- **FR 5.4: Automated Session Governance**: Integration of global interceptors (Web/Mobile) to detect `401 Unauthorized` and trigger immediate redirections. Includes a platform-wide **10-minute inactivity logout** policy.
+- **FR 5.5: Comprehensive Sitemap & Documentation**: Integrated categorical public sitemap in the Angular footer and established the **[Architecture & Data Flow](docs/architecture_data_flow.md)** blueprint.
 
 **6. Mobile App (Flutter) Development**
 - [x] **Phase 1: Project Setup & Architecture**
@@ -108,9 +111,11 @@ The following features and integrations have been prioritized for the next phase
   - [x] Integrate Peer-to-Peer messaging feature.
   - [x] Integrate Job & Mentorship Hub.
   - [x] Integrate Haraganga AI Assistant chat UI.
-- [ ] **Phase 6: Quality Assurance & Polish**
-  - [ ] End-to-end testing of Member and Admin flows.
-  - [ ] Add micro-animations and polish glassmorphic UI components.
+- [x] **Phase 6: Quality Assurance & Polish**
+  - [x] End-to-end stabilization of Member and Admin flows.
+  - [x] Implementation of Session Expiry Redirection (401 handler).
+  - [x] Implementation of Platform-wide Inactivity Logout (10-min threshold).
+  - [x] Synchronized Administrative Member Management (Mobile Update Parity).
   - [ ] Finalize build for Android (APK/AAB) and iOS (IPA).
 
 ---

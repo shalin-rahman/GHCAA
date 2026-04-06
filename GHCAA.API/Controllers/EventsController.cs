@@ -214,6 +214,15 @@ namespace GHCAA.API.Controllers
             return success ? Ok() : BadRequest("Failed to send invitation or registration not approved.");
         }
 
+        [HttpPost("admin/checkin/qr")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> QRCodeCheckIn([FromBody] QrCheckInDto dto, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(dto.TicketCode)) return BadRequest();
+            var success = await _eventService.CheckInByTicketCodeAsync(dto.TicketCode, cancellationToken);
+            return success ? Ok(new { Message = "Check-in successful." }) : NotFound(new { Message = "Ticket code invalid, already used, or not found." });
+        }
+
         // --- Operations (Tasks & Budget) ---
 
         [HttpGet("admin/{eventId}/tasks")]
@@ -279,5 +288,10 @@ namespace GHCAA.API.Controllers
             var success = await _eventService.DeleteExpenseAsync(id, cancellationToken);
             return success ? Ok() : NotFound();
         }
+    }
+
+    public class QrCheckInDto
+    {
+        public string TicketCode { get; set; } = null!;
     }
 }

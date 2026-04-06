@@ -14,7 +14,7 @@ namespace GHCAA.Application.Interfaces
         Task<ApproveMemberResultDto> ApproveMemberAsync(int memberId, int approvedByAdminId, CancellationToken cancellationToken = default);
         Task<MemberProfileDto?> GetProfileAsync(int memberId, bool isPrivileged = false, CancellationToken cancellationToken = default);
         Task<bool> UpdateProfileAsync(int memberId, UpdateProfileDto dto, CancellationToken cancellationToken = default);
-        Task<object> GetDashboardStatsAsync(CancellationToken cancellationToken = default);
+        Task<object> GetDashboardStatsAsync(bool isPrivileged, CancellationToken cancellationToken = default);
         Task<MemberRegistrationResultDto> GetStatusAsync(int id, CancellationToken cancellationToken = default);
         Task<object?> GetMemberDocumentsAsync(int memberId, CancellationToken cancellationToken = default);
         // Admin/SuperAdmin Operations

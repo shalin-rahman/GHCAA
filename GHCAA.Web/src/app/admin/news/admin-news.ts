@@ -38,7 +38,7 @@ export class AdminNews implements OnInit {
     editingId = signal<number | null>(null);
     uploadingImage = signal(false);
 
-    form: any = { title: '', content: '', articleCategory: 'Regular', imageUrl: '', isActive: true };
+    form: any = { title: '', content: '', articleCategory: 'Regular', imageUrl: '', isActive: true, status: 2, collaborators: [] };
 
     ngOnInit() { 
         this.loadNews(); 
@@ -57,7 +57,7 @@ export class AdminNews implements OnInit {
 
     openForm() {
         this.editingId.set(null);
-        this.form = { title: '', content: '', articleCategory: 'Regular', imageUrl: '', isActive: true };
+        this.form = { title: '', content: '', articleCategory: 'Regular', imageUrl: '', isActive: true, status: 2, collaborators: [] };
         this.showForm.set(true);
     }
 
@@ -68,7 +68,9 @@ export class AdminNews implements OnInit {
             content: post.content,
             articleCategory: post.articleCategory,
             imageUrl: post.imageUrl || '',
-            isActive: post.isActive
+            isActive: post.isActive,
+            status: post.status ?? 2,
+            collaborators: post.collaborators || []
         };
         this.showForm.set(true);
         window.scrollTo(0, 0);

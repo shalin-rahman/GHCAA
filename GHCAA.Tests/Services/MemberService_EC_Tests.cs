@@ -40,11 +40,11 @@ namespace GHCAA.Tests.Services
             var gamification = new Mock<IGamificationService>();
             var financials = new Mock<IFinancialService>();
 
-            _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object, financials.Object);
+            _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object, financials.Object, new Mock<IRealTimeService>().Object);
         
-            if (!_context.ECPeriods.Any())
+            if (!_context.ECPeriods.Any(p => p.Title == "Interim Executive Committee"))
             {
-                _context.ECPeriods.Add(new ECPeriod { Title = "Test Period", StartDate = DateTime.UtcNow, IsActive = true });
+                _context.ECPeriods.Add(new ECPeriod { Title = "Interim Executive Committee", StartDate = DateTime.UtcNow.AddYears(-1), IsActive = true });
                 _context.SaveChanges();
             }
         }
@@ -119,9 +119,24 @@ namespace GHCAA.Tests.Services
         {
             return new AdminMemberUpdateDto
             {
-                FullName = m.FullName, Email = m.Email, MobileNo = m.MobileNo, NID = m.NID,
-                FatherName = m.FatherName, MotherName = m.MotherName, PresentAddress = m.PresentAddress,
-                PermanentAddress = m.PermanentAddress, MembershipType = Enums.MembershipType.General, Category = Enums.MemberCategory.None,
+                FullName = m.FullName, 
+                Email = m.Email, 
+                MobileNo = m.MobileNo, 
+                NID = m.NID,
+                FatherName = m.FatherName, 
+                MotherName = m.MotherName, 
+                PresentAddress = m.PresentAddress,
+                PermanentAddress = m.PermanentAddress, 
+                DateOfBirth = m.DateOfBirth,
+                Gender = m.Gender,
+                BloodGroup = m.BloodGroup,
+                EmergencyContactName = m.EmergencyContactName,
+                EmergencyContactRelation = m.EmergencyContactRelation,
+                EmergencyContactPhone = m.EmergencyContactPhone,
+                MembershipType = m.MembershipType, 
+                Category = m.Category,
+                Status = m.Status,
+                IsVerified = m.IsVerified
             };
         }
     }

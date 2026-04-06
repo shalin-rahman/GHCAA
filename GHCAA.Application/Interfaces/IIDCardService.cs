@@ -7,5 +7,8 @@ namespace GHCAA.Application.Interfaces
     {
         Task<string> GenerateIDCardDataUriAsync(int memberId, CancellationToken cancellationToken = default);
         Task<string> GenerateCertificateDataUriAsync(int memberId, CancellationToken cancellationToken = default);
+
+        Task<byte[]> GenerateIDCardPdfAsync(int memberId, CancellationToken cancellationToken = default);
+        Task<byte[]> GenerateCertificatePdfAsync(int memberId, CancellationToken cancellationToken = default);
     }
 }

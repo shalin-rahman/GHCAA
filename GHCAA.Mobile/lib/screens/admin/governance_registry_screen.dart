@@ -29,6 +29,86 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
     super.dispose();
   }
 
+  void _showMembers(int periodId, String title) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.midnightSurface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => _CommitteeMemberPanel(periodId: periodId, title: title),
+    );
+  }
+
+  Future<void> _activatePeriod(int id) async {
+    try {
+      final dio = ref.read(dioProvider);
+      await dio.post('/admin/governance/periods/$id/activate');
+      ref.invalidate(ecPeriodsAdminProvider);
+    } catch (_) {}
+  }
+
+  void _editPeriod(dynamic period) {
+    _showPeriodDialog(period: period);
+  }
+
+  void _createPeriod() {
+    _showPeriodDialog();
+  }
+
+  void _showPeriodDialog({dynamic period}) {
+    final titleCtrl = TextEditingController(text: period != null ? period['title'] : '');
+    final startCtrl = TextEditingController(text: period != null ? period['startDate']?.split('T')[0] : '');
+    final endCtrl = TextEditingController(text: period != null ? period['endDate']?.split('T')[0] : '');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.midnightSurface,
+        title: Text(period == null ? 'ESTABLISH GOVERNANCE TERM' : 'MODIFY TERM ASSET', style: const TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Term Title (e.g., EC 2026-2028)')),
+              TextField(controller: startCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Start Date (YYYY-MM-DD)')),
+              TextField(controller: endCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'End Date (YYYY-MM-DD) - Optional')),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('ABORT', style: TextStyle(color: Colors.white54))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
+            onPressed: () async {
+              try {
+                final dio = ref.read(dioProvider);
+                final payload = {
+                  'title': titleCtrl.text,
+                  'startDate': startCtrl.text,
+                  if (endCtrl.text.isNotEmpty) 'endDate': endCtrl.text,
+                };
+                
+                if (period == null) {
+                  await dio.post('/admin/governance/periods', data: payload);
+                } else {
+                  await dio.put('/admin/governance/periods/${period['id']}', data: payload);
+                }
+                
+                ref.invalidate(ecPeriodsAdminProvider);
+                if (ctx.mounted) Navigator.pop(ctx);
+              } catch (e) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Error saving term: $e')));
+                }
+              }
+            },
+            child: const Text('COMMIT CHANGES', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final periodsAsync = ref.watch(ecPeriodsAdminProvider);
@@ -179,116 +259,133 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
         style: TextStyle(color: isActive ? Colors.greenAccent : Colors.white38, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
     );
   }
+}
 
-  void _showMembers(int periodId, String title) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppTheme.midnightSurface,
-      isScrollControlled: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          height: MediaQuery.of(ctx).size.height * 0.7,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Members: $title', style: const TextStyle(color: AppTheme.royalGold, fontSize: 16, fontWeight: FontWeight.bold)),
-              const Divider(color: Colors.white24, height: 32),
-              // We simulate the assignment form
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Membership Number',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                  focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: AppTheme.royalGold)),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.add_circle, color: AppTheme.royalGold),
-                    onPressed: () async {
-                      // Implement assignment logic
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Member added (Simulation)')));
-                    },
+class _CommitteeMemberPanel extends ConsumerStatefulWidget {
+  final int periodId;
+  final String title;
+  const _CommitteeMemberPanel({required this.periodId, required this.title});
+
+  @override
+  ConsumerState<_CommitteeMemberPanel> createState() => _CommitteeMemberPanelState();
+}
+
+class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
+  final _idController = TextEditingController();
+  final _posController = TextEditingController();
+  bool _isAdding = false;
+  List<dynamic>? _members;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final list = await ref.read(adminServiceProvider).getCommitteeMembers(widget.periodId);
+    if (mounted) setState(() => _members = list);
+  }
+
+  Future<void> _assign() async {
+    final mid = int.tryParse(_idController.text);
+    final pos = int.tryParse(_posController.text) ?? 5; // Default position
+    if (mid == null) return;
+
+    setState(() => _isAdding = true);
+    final success = await ref.read(adminServiceProvider).assignMemberToCommittee(widget.periodId, {
+      'memberId': mid,
+      'position': pos,
+      'reason': 'Governance Assignment',
+    });
+
+    if (success) {
+      _idController.clear();
+      _posController.clear();
+      _load();
+    }
+    if (mounted) setState(() => _isAdding = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(child: Text(widget.title, style: const TextStyle(color: AppTheme.royalGold, fontSize: 16, fontWeight: FontWeight.w900))),
+                IconButton(icon: const Icon(Icons.close, color: Colors.white54), onPressed: () => Navigator.pop(context)),
+              ],
+            ),
+            const Divider(color: Colors.white10),
+            const SizedBox(height: 16),
+            const Text('ASSIGN NEW GOVERNANCE NODE', style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: _idController,
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: const InputDecoration(hintText: 'Member ID'),
                   ),
                 ),
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 16),
-              const Expanded(
-                child: Center(child: Text('Current members will appear here.', style: TextStyle(color: Colors.white54))),
-              ),
-            ],
-          ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _posController,
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: const InputDecoration(hintText: 'Pos'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                _isAdding 
+                  ? const CircularProgressIndicator(strokeWidth: 2)
+                  : IconButton.filled(
+                      onPressed: _assign, 
+                      style: IconButton.styleFrom(backgroundColor: AppTheme.royalGold),
+                      icon: const Icon(Icons.person_add_alt_1, color: Colors.black, size: 20)
+                    ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: _members == null
+                ? const Center(child: CircularProgressIndicator())
+                : _members!.isEmpty 
+                  ? const Center(child: Text('No members assigned to this committee.', style: TextStyle(color: Colors.white24)))
+                  : ListView.builder(
+                      itemCount: _members!.length,
+                      itemBuilder: (context, index) {
+                        final m = _members![index];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: CircleAvatar(backgroundColor: Colors.white10, radius: 18, child: Text(m['position'].toString(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 12))),
+                          title: Text(m['fullName'] ?? 'Alumnus', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                          subtitle: Text('ID: ${m['memberId']} | ROLE: ${m['positionName'] ?? 'Member'}', style: const TextStyle(color: Colors.white38, fontSize: 10)),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 18),
+                            onPressed: () async {
+                              final ok = await ref.read(adminServiceProvider).removeMemberFromCommittee(m['id']);
+                              if (ok) _load();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-
-  Future<void> _activatePeriod(int id) async {
-    try {
-      final dio = ref.read(dioProvider);
-      await dio.post('/admin/governance/periods/$id/activate');
-      ref.invalidate(ecPeriodsAdminProvider);
-    } catch (_) {}
-  }
-
-  void _editPeriod(dynamic period) {
-    _showPeriodDialog(period: period);
-  }
-
-  void _createPeriod() {
-    _showPeriodDialog();
-  }
-
-  void _showPeriodDialog({dynamic period}) {
-    final titleCtrl = TextEditingController(text: period != null ? period['title'] : '');
-    final startCtrl = TextEditingController(text: period != null ? period['startDate']?.split('T')[0] : '');
-    final endCtrl = TextEditingController(text: period != null ? period['endDate']?.split('T')[0] : '');
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.midnightSurface,
-        title: Text(period == null ? 'ESTABLISH GOVERNANCE TERM' : 'MODIFY TERM ASSET', style: const TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.bold)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Term Title (e.g., EC 2026-2028)')),
-              TextField(controller: startCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Start Date (YYYY-MM-DD)')),
-              TextField(controller: endCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'End Date (YYYY-MM-DD) - Optional')),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('ABORT', style: TextStyle(color: Colors.white54))),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
-            onPressed: () async {
-              try {
-                final dio = ref.read(dioProvider);
-                final payload = {
-                  'title': titleCtrl.text,
-                  'startDate': startCtrl.text,
-                  if (endCtrl.text.isNotEmpty) 'endDate': endCtrl.text,
-                };
-                
-                if (period == null) {
-                  await dio.post('/admin/governance/periods', data: payload);
-                } else {
-                  await dio.put('/admin/governance/periods/${period['id']}', data: payload);
-                }
-                
-                ref.invalidate(ecPeriodsAdminProvider);
-                if (ctx.mounted) Navigator.pop(ctx);
-              } catch (e) {
-                if (ctx.mounted) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Error saving term: $e')));
-                }
-              }
-            },
-            child: const Text('COMMIT CHANGES', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
     );
   }

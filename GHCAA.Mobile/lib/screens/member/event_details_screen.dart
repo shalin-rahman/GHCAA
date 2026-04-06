@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -28,12 +30,17 @@ class EventDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailsAsync = ref.watch(eventDetailsProvider(eventId));
     final roleAsync = ref.watch(roleProvider);
-    final isAdmin = roleAsync.value.isStaffAdminRole;
+    final isAdmin = roleAsync.value?.isStaffAdminRole ?? false;
 
     return AppScaffold(
       title: 'Event Details',
       breadcrumb: 'Timeline > Event Details',
       actions: isAdmin ? [
+        IconButton(
+          icon: const Icon(Icons.image_outlined, color: Colors.white54, size: 20),
+          tooltip: 'Upload Event Logo',
+          onPressed: () => _uploadEventLogo(context, ref),
+        ),
         IconButton(
           icon: const Icon(Icons.edit, color: AppTheme.royalGold, size: 20),
           onPressed: () => detailsAsync.whenData((event) {
@@ -68,19 +75,37 @@ class EventDetailsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Event Logo / Banner
+                if (event['imageUrl'] != null && event['imageUrl'].toString().isNotEmpty)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.network(
+                      event['imageUrl'].toString().startsWith('http')
+                          ? event['imageUrl']
+                          : '${AppConfig.apiBaseUrl.replaceFirst('/api', '')}/${event['imageUrl'].toString().replaceFirst(RegExp(r'^/'), '')}',
+                      height: 180,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox(),
+                    ),
+                  ),
+                if (event['imageUrl'] != null && event['imageUrl'].toString().isNotEmpty)
+                  const SizedBox(height: 16),
+
                 GlassContainer(
                    child: Column(
                      crossAxisAlignment: CrossAxisAlignment.start,
                      children: [
                        Text((event['title'] ?? 'Global Event').toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 18, letterSpacing: 1)),
                        const SizedBox(height: 8),
-                       Text('VENUE: ${event['venue'] ?? 'TBA'}', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                       Text('VENUE: ${event['location'] ?? event['venue'] ?? 'TBA'}', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
                        const Divider(color: Colors.white12, height: 32),
                        Text(event['description'] ?? 'No operational details found.', style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.5)),
                        const SizedBox(height: 16),
-                       _buildStatRow('Date', event['eventDate']?.toString().split('T')[0] ?? 'N/A'),
-                       _buildStatRow('Participant Limit', event['participantLimit']?.toString() ?? 'Open'),
-                       _buildStatRow('Ticket Cost', '৳${event['ticketPrice']?.toString() ?? '0.00'}'),
+                       _buildStatRow('Start Date', event['startDate']?.toString().split('T')[0] ?? event['eventDate']?.toString().split('T')[0] ?? 'N/A'),
+                       _buildStatRow('Participants', '${event['participantCount'] ?? 0} registered'),
+                       _buildStatRow('Entry Fee', event['requiresPayment'] == false ? 'FREE' : '৳${event['registrationFee']?.toString() ?? '0.00'}'),
+                       _buildStatRow('Non-Members', event['allowNonMembers'] == true ? 'Allowed' : 'Members Only'),
                        const SizedBox(height: 24),
                        const Text('PARTICIPATION PRESENCE', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
                        const SizedBox(height: 12),
@@ -294,6 +319,26 @@ class EventDetailsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _uploadEventLogo(BuildContext context, WidgetRef ref) async {
+    final picker = ImagePicker();
+    final file = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (file == null) return;
+
+    try {
+      final dio = ref.read(dioProvider);
+      final formData = FormData.fromMap({
+        'logo': await MultipartFile.fromFile(file.path, filename: 'event_logo.jpg'),
+      });
+      final response = await dio.post('/events/admin/$eventId/logo', data: formData);
+      if (response.statusCode == 200) {
+        ref.invalidate(eventDetailsProvider(eventId));
+        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Event logo updated.')));
+      }
+    } catch (e) {
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e'), backgroundColor: Colors.redAccent));
+    }
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {

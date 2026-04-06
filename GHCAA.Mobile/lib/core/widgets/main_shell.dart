@@ -1,18 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../../features/auth/auth_service.dart';
+import '../../features/messaging/chat_service.dart';
+import '../../core/real_time/notification_hub_service.dart';
 
-class MainShell extends ConsumerWidget {
+class MainShell extends ConsumerStatefulWidget {
   final Widget child;
   const MainShell({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MainShell> createState() => _MainShellState();
+}
+
+class _MainShellState extends ConsumerState<MainShell> {
+  @override
+  void initState() {
+    super.initState();
+    _initHubs();
+  }
+
+  void _initHubs() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(chatServiceProvider).initHub();
+      ref.read(notificationHubServiceProvider).initHub();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
     final roleAsync = ref.watch(roleProvider);
-    final isPageAdmin = roleAsync.value.isStaffAdminRole;
+    final isPageAdmin = roleAsync.value?.isStaffAdminRole ?? false;
 
     int calculateSelectedIndex(String location) {
       if (isPageAdmin) {
@@ -28,6 +49,7 @@ class MainShell extends ConsumerWidget {
     }
 
     void onItemTapped(int index, BuildContext context) {
+      HapticFeedback.selectionClick();
       if (isPageAdmin) {
         switch (index) {
           case 0: context.go('/admin_dashboard'); break;
@@ -48,7 +70,7 @@ class MainShell extends ConsumerWidget {
     final primaryColor = isPageAdmin ? Colors.redAccent : AppTheme.royalGold;
 
     return Scaffold(
-      body: child,
+      body: widget.child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppTheme.midnightBase,

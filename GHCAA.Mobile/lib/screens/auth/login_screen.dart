@@ -19,6 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _enableBiometric = false;
 
   Future<void> _handleLogin() async {
     final identifier = _identifierController.text.trim();
@@ -38,12 +39,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final error = await ref.read(authServiceProvider).login(
             identifier,
             password,
+            enableBiometric: _enableBiometric,
           );
           
       if (!mounted) return;
 
       if (error == null) {
-        final role = await ref.read(authServiceProvider).getRole();
+        // Invalidate cached providers so they re-read the newly saved role/profile
+        ref.invalidate(roleProvider);
+        ref.invalidate(userProfileProvider);
+        final role = await ref.read(roleProvider.future);
         if (!mounted) return;
         if (role.isStaffAdminRole) {
           context.go('/admin_dashboard');
@@ -174,7 +179,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _handleLogin(),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Switch(
+                            value: _enableBiometric,
+                            onChanged: (val) => setState(() => _enableBiometric = val),
+                            activeThumbColor: AppTheme.royalGold,
+                          ),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'Enable Biometric Quick Login',
+                              style: TextStyle(color: Colors.white70, fontSize: 13),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
                       _isLoading
                           ? const CircularProgressIndicator(
                               color: AppTheme.royalGold)

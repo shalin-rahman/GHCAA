@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using static GHCAA.Domain.Enums;
 
@@ -27,8 +28,10 @@ namespace GHCAA.Domain.Models
         public int AuthorId { get; set; }
         
         public DateTime? LastModified { get; set; }
+        public string? ExternalCollaborators { get; set; }
 
         // Navigation
         public User? Author { get; set; }
+        public ICollection<NewsCollaborator> Collaborators { get; set; } = new List<NewsCollaborator>();
     }
 }

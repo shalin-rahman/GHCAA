@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -34,12 +35,17 @@ namespace GHCAA.Infrastructure.Services
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         }
 
+        public async Task<ECPeriod?> GetActivePeriodAsync(CancellationToken cancellationToken = default)
+        {
+            return await _db.ECPeriods
+                .FirstOrDefaultAsync(p => p.IsActive, cancellationToken);
+        }
+
         public async Task<ECPeriod> CreatePeriodAsync(string title, DateTime startDate, DateTime? endDate, CancellationToken cancellationToken = default)
         {
             var utcStart = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
             var utcEnd = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : (DateTime?)null;
 
-            // Gap Check: No Overlaps
             await EnsureNoOverlapAsync(null, utcStart, utcEnd, cancellationToken);
 
             var period = new ECPeriod
@@ -63,7 +69,6 @@ namespace GHCAA.Infrastructure.Services
             var utcStart = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
             var utcEnd = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : (DateTime?)null;
 
-            // Gap Check: No Overlaps (excluding self)
             await EnsureNoOverlapAsync(id, utcStart, utcEnd, cancellationToken);
 
             period.Title = title;
@@ -72,17 +77,11 @@ namespace GHCAA.Infrastructure.Services
 
             if (isActive && !period.IsActive)
             {
-                // Strict Rule: Active period must cover "Current Dates"
                 var today = DateTime.UtcNow.Date;
                 if (utcStart.Date > today || (utcEnd.HasValue && utcEnd.Value.Date < today))
                 {
                     throw new InvalidOperationException("Only a period covering the current date can be activated.");
                 }
-                await ActivatePeriodInternalAsync(id, cancellationToken);
-            }
-            else if (isActive && period.IsActive)
-            {
-                // Already active? Re-sync to ensure everything is matched (Immediate Effect)
                 await ActivatePeriodInternalAsync(id, cancellationToken);
             }
             else if (!isActive && period.IsActive)
@@ -101,9 +100,6 @@ namespace GHCAA.Infrastructure.Services
         private async Task EnsureNoOverlapAsync(int? excludeId, DateTime start, DateTime? end, CancellationToken ct)
         {
             var query = _db.ECPeriods.Where(p => (!excludeId.HasValue || p.Id != excludeId.Value));
-            
-            // Logic: Two periods overlap if (Start1 <= End2) AND (End1 >= Start2)
-            // If end is null, we treat it as infinite future
             var overlapping = await query.AnyAsync(p => 
                 (p.EndDate == null || p.EndDate >= start) && (end == null || p.StartDate <= end), ct);
 
@@ -134,18 +130,11 @@ namespace GHCAA.Infrastructure.Services
 
         private async Task<bool> ActivatePeriodInternalAsync(int id, CancellationToken cancellationToken)
         {
-            var period = await _db.ECPeriods
-                .Include(p => p.ECMembers)
-                .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
-                
-            if (period == null) return false;
-
-            // 1. Deactivate other periods
             var activePeriods = await _db.ECPeriods.Where(p => p.IsActive).ToListAsync(cancellationToken);
             foreach (var p in activePeriods) p.IsActive = false;
 
-            // 2. Set the new period as active
-            period.IsActive = true;
+            var period = await _db.ECPeriods.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            if (period != null) period.IsActive = true;
 
             return true;
         }
@@ -161,40 +150,10 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, CancellationToken cancellationToken = default)
         {
-            var period = await _db.ECPeriods.FindAsync(new object[] { periodId }, cancellationToken);
             var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
-
-            if (period == null || member == null) return false;
-
-            // Business Gap: Only Active members can hold EC positions
-            if (member.Status != MembershipStatus.Active)
+            if (member == null || member.Status != MembershipStatus.Active)
             {
                 throw new InvalidOperationException("Only active members can be assigned to the Executive Committee.");
-            }
-
-            // Business Gap: Unique positions check (for key roles)
-            var keyRoles = new[] { ECPosition.President, ECPosition.GeneralSecretary, ECPosition.Treasurer };
-            var targetPos = (ECPosition)position;
-
-            if (keyRoles.Contains(targetPos))
-            {
-                var alreadyHas = await _db.ECMembers
-                    .AnyAsync(em => em.ECPeriodId == periodId && em.Position == targetPos && em.EndDate == null && em.MemberId != memberId, cancellationToken);
-                
-                if (alreadyHas)
-                {
-                    throw new InvalidOperationException($"A {targetPos} is already assigned to this period.");
-                }
-            }
-
-            // Remove existing active role for this member in THIS period (if any)
-            var existing = await _db.ECMembers
-                .Where(em => em.ECPeriodId == periodId && em.MemberId == memberId && em.EndDate == null)
-                .FirstOrDefaultAsync(cancellationToken);
-            
-            if (existing != null)
-            {
-                throw new InvalidOperationException("This member already holds a role in this EC Period. Please remove the existing role first.");
             }
 
             var newAssignment = new ECMember
@@ -207,36 +166,97 @@ namespace GHCAA.Infrastructure.Services
             };
 
             _db.ECMembers.Add(newAssignment);
-
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
 
         public async Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, CancellationToken cancellationToken = default)
         {
-            var ecMember = await _db.ECMembers
-                .Include(em => em.Member)
-                .Include(em => em.ECPeriod)
-                .FirstOrDefaultAsync(em => em.Id == ecMemberId, cancellationToken);
-
+            var ecMember = await _db.ECMembers.FindAsync(new object[] { ecMemberId }, cancellationToken);
             if (ecMember == null) return false;
 
             ecMember.EndDate = DateTime.UtcNow;
-
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
 
         public async Task<bool> DeleteECMemberAsync(int id, CancellationToken cancellationToken = default)
         {
-            var ecMember = await _db.ECMembers
-                .Include(em => em.Member)
-                .Include(em => em.ECPeriod)
-                .FirstOrDefaultAsync(em => em.Id == id, cancellationToken);
-
+            var ecMember = await _db.ECMembers.FindAsync(new object[] { id }, cancellationToken);
             if (ecMember == null) return false;
 
             _db.ECMembers.Remove(ecMember);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<Constitution?> GetActiveConstitutionAsync(CancellationToken cancellationToken = default)
+        {
+            return await _db.Constitutions
+                .OrderByDescending(c => c.EffectiveDate)
+                .FirstOrDefaultAsync(c => c.IsActive, cancellationToken);
+        }
+
+        public async Task<IEnumerable<Constitution>> GetConstitutionHistoryAsync(CancellationToken cancellationToken = default)
+        {
+            return await _db.Constitutions
+                .OrderByDescending(c => c.EffectiveDate)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<bool> CreateConstitutionVersionAsync(string version, string content, string changeSummary, CancellationToken cancellationToken = default)
+        {
+            var constitution = new Constitution
+            {
+                Version = version,
+                Content = content,
+                ChangeSummary = changeSummary,
+                EffectiveDate = DateTime.UtcNow,
+                IsActive = false
+            };
+
+            _db.Constitutions.Add(constitution);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> ActivateConstitutionAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var target = await _db.Constitutions.FindAsync(new object[] { id }, cancellationToken);
+            if (target == null) return false;
+
+            var activeList = await _db.Constitutions.Where(c => c.IsActive).ToListAsync(cancellationToken);
+            foreach (var c in activeList)
+            {
+                c.IsActive = false;
+                c.SupersededDate = DateTime.UtcNow;
+            }
+
+            target.IsActive = true;
+            target.SupersededDate = null;
+            
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> VoteOnConstitutionAsync(int constitutionId, int memberId, bool isFor, string? comments, CancellationToken cancellationToken = default)
+        {
+            var constitution = await _db.Constitutions.FindAsync(new object[] { constitutionId }, cancellationToken);
+            if (constitution == null || !constitution.IsActive) return false;
+
+            var alreadyVoted = await _db.AmendmentVotes.AnyAsync(v => v.ConstitutionId == constitutionId && v.MemberId == memberId, cancellationToken);
+            if (alreadyVoted) return false;
+
+            var vote = new AmendmentVote
+            {
+                ConstitutionId = constitutionId,
+                MemberId = memberId,
+                IsFor = isFor,
+                Comments = comments,
+                VotedAt = DateTime.UtcNow
+            };
+
+            _db.AmendmentVotes.Add(vote);
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }

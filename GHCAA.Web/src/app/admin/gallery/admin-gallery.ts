@@ -25,6 +25,16 @@ export class AdminGallery implements OnInit {
     uploadedFiles = signal<File[]>([]);
     searchQuery = signal('');
 
+    getImageUrl(path: string | null | undefined): string {
+        if (!path) return '';
+        // If it already has a leading slash, don't add another one
+        // If it starts with http, return as is
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path : '/' + path;
+        // Ensure we don't have double slashes at the start which browser treats as protocol-relative
+        return cleanPath.replace(/^\/\//, '/');
+    }
+
     filteredGalleries = computed(() => {
         const q = this.searchQuery().toLowerCase().trim();
         if (!q) return this.galleries();
@@ -52,8 +62,20 @@ export class AdminGallery implements OnInit {
     loadGalleries() {
         this.loading.set(true);
         this.galleryService.getAllGalleries().subscribe({
-            next: (data) => {
-                this.galleries.set(data);
+            next: (data: any[]) => {
+                // Robust mapping for case-insensitive property access
+                const mapped = (data || []).map((g: any) => {
+                    const result: any = { ...g };
+                    // Handle photos casing
+                    const photos = g.photos || g.Photos || [];
+                    result.photos = photos.map((p: any) => ({
+                        id: p.id || p.Id,
+                        photoPath: p.photoPath || p.PhotoPath,
+                        uploadedAt: p.uploadedAt || p.UploadedAt
+                    }));
+                    return result;
+                });
+                this.galleries.set(mapped);
                 this.loading.set(false);
             },
             error: () => {

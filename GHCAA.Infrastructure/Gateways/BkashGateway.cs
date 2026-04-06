@@ -117,6 +117,24 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
+        public async Task<bool> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var payload = await System.Text.Json.JsonSerializer.DeserializeAsync<Dictionary<string, object>>(body, cancellationToken: cancellationToken);
+                if (payload == null) return false;
+
+                // Simple JSON to Dictionary<string, string> conversion for VerifyCallbackAsync compatibility
+                var data = payload.ToDictionary(x => x.Key, x => x.Value?.ToString() ?? "");
+                return await VerifyCallbackAsync(data, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "bKash Webhook Processing Failed");
+                return false;
+            }
+        }
+
         private async Task<string?> GetTokenAsync(Domain.Models.PaymentConfiguration config, CancellationToken cancellationToken)
         {
             var baseUrl = config.IsSandbox 

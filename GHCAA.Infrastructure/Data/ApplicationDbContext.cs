@@ -91,6 +91,10 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<EventExpense> EventExpenses { get; set; } = null!;
         public DbSet<GamificationConfig> GamificationConfigs { get; set; } = null!;
         public DbSet<SavedPaymentMethod> SavedPaymentMethods { get; set; } = null!;
+        public DbSet<NewsCollaborator> NewsCollaborators { get; set; } = null!;
+        public DbSet<Constitution> Constitutions { get; set; } = null!;
+        public DbSet<AmendmentVote> AmendmentVotes { get; set; } = null!;
+        public DbSet<MentorshipRequest> MentorshipRequests { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -301,6 +305,37 @@ namespace GHCAA.Infrastructure.Data
             modelBuilder.Entity<Member>().Property(m => m.FullName).HasMaxLength(200);
             modelBuilder.Entity<User>().Property(u => u.Username).HasMaxLength(100).IsRequired();
             modelBuilder.Entity<FileUpload>().Property(f => f.FileName).HasMaxLength(260);
+            
+            // News Collaborators relationship
+            modelBuilder.Entity<NewsCollaborator>()
+                .HasOne(nc => nc.NewsPost)
+                .WithMany(n => n.Collaborators)
+                .HasForeignKey(nc => nc.NewsPostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NewsCollaborator>()
+                .HasOne(nc => nc.User)
+                .WithMany()
+                .HasForeignKey(nc => nc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Governance & Constitution
+            modelBuilder.Entity<AmendmentVote>()
+                .HasOne(v => v.Constitution)
+                .WithMany(c => c.Votes)
+                .HasForeignKey(v => v.ConstitutionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AmendmentVote>()
+                .HasOne(v => v.Member)
+                .WithMany()
+                .HasForeignKey(v => v.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique vote per member per constitution version
+            modelBuilder.Entity<AmendmentVote>()
+                .HasIndex(v => new { v.ConstitutionId, v.MemberId })
+                .IsUnique();
 
             // ChatMessage Relationships
             modelBuilder.Entity<ChatMessage>()

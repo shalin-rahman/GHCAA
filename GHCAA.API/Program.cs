@@ -175,5 +175,6 @@ app.UseAuthentication();
 app.UseMiddleware<SecurityStampMiddleware>(); // Invalidates sessions on status change
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<GHCAA.API.Hubs.ChatHub>("/hubs/chat");
+app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");
+app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");
 app.Run();

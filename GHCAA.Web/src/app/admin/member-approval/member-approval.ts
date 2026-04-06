@@ -53,9 +53,18 @@ export class MemberApproval implements OnInit {
     this.loading.set(true);
     this.adminService.getPendingMembers().subscribe({
       next: (data) => {
-        // Only show applied status (0) in logic if preferred, 
-        // though backend might already filter for pending
-        this.requests.set(data.items || []);
+        // Robust mapping for case-insensitive property access
+        const items = (data.items || []).map((obj: any) => {
+          const result: any = {};
+          const props = ['id', 'fullName', 'email', 'mobileNo', 'membershipNumber', 'status', 'photoPath', 'category'];
+          props.forEach(p => {
+             const pascal = p.charAt(0).toUpperCase() + p.slice(1);
+             result[p] = obj[p] !== undefined ? obj[p] : (obj[pascal] !== undefined ? obj[pascal] : undefined);
+          });
+          return result;
+        });
+        
+        this.requests.set(items);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)

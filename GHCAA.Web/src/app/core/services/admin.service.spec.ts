@@ -34,10 +34,10 @@ describe('AdminService', () => {
     });
 
     it('should fetch members', () => {
-        service.getMembers(2, 20, 'test', 'Active', 'all', true).subscribe(res => {
+        service.getMembers(2, 20, 'test', 'Active', 'all', 'all', true).subscribe(res => {
             expect(res).toBeTruthy();
         });
-        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}?page=2&pageSize=20&includeArchived=true&statusFilter=Active&categoryFilter=all&searchQuery=test`);
+        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}?page=2&pageSize=20&includeArchived=true&statusFilter=Active&categoryFilter=all&membershipTypeFilter=all&searchQuery=test`);
         expect(req.request.method).toBe('GET');
         req.flush({ items: [] });
     });

@@ -27,7 +27,7 @@ namespace GHCAA.Domain
         public enum JobCategory { IT, Finance, Engineering, Marketing, Education, Health, PublicSector, Mentorship, Other }
 
         // Event Registration Enums
-        public enum EventRegistrationStatus { Pending, Approved, Rejected }
+        public enum EventRegistrationStatus { Pending, Approved, Rejected, Waitlisted }
 
         // Payment Method Enums
         public enum PaymentMethod { ManualReceipt, BKash, Nagad, Rocket, CreditCard, BankTransfer, CashOnHand }

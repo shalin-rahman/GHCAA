@@ -64,6 +64,15 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Submission Status <span class="required-star">*</span></label>
+                    <select [(ngModel)]="form.status" name="status" required #statusInput="ngModel">
+                        <option [ngValue]="0">Draft</option>
+                        <option [ngValue]="1">Pending Review</option>
+                        <option [ngValue]="2">Approved</option>
+                        <option [ngValue]="3">Rejected</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Cover Image</label>
                     <div class="image-upload-wrapper" style="display: flex; gap: 10px; align-items: center;">
                         <input type="url" [(ngModel)]="form.imageUrl" name="imageUrl" #imageUrlInput="ngModel"
@@ -77,6 +86,11 @@
                                 [disabled]="uploadingImage()">
                         </label>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label>Collaborators (Comma separated names)</label>
+                    <input type="text" [ngModel]="form.collaborators.join(', ')" (ngModelChange)="form.collaborators = $event.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0)" 
+                        name="collaborators" placeholder="e.g. John Doe, Jane Smith">
                 </div>
             </div>
 

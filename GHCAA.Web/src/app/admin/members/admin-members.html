@@ -9,9 +9,11 @@
                 [pdfDataMapper]="pdfMapper" [exporting]="isExporting()" (exportStart)="handleExport($event)"
                 title="Member Registry Export">
             </app-export-buttons>
+            @if (nav.isSuperAdmin()) {
             <button class="btn btn-accent btn-md" (click)="openImport()">
                 <span class="icon">📥</span> Bulk Import
             </button>
+            }
         </div>
     </div>
 
@@ -46,6 +48,13 @@
             <option [value]="c.value">{{ c.label }}</option>
             }
         </select>
+        @if (nav.isSuperAdmin()) {
+        <label class="premium-checkbox-label ml-4 scale-75 origin-left">
+            <input type="checkbox" [ngModel]="includeArchived()" (ngModelChange)="includeArchived.set($event); onFilterChange()">
+            <span class="checkmark"></span>
+            <span class="label-text">Inc. Archived</span>
+        </label>
+        }
     </div>
 
     <!-- Table Container -->
@@ -78,7 +87,7 @@
                 <tr class="animate-fade-in">
                     <td class="member-cell" (click)="openDetail(member)">
                         @if (member.photoPath) {
-                        <img [src]="'/' + member.photoPath" class="member-avatar photo" alt="Photo">
+                        <img [src]="getImageUrl(member.photoPath)" class="member-avatar photo" alt="Photo">
                         } @else {
                         <div class="member-avatar">{{ member.fullName?.[0] }}</div>
                         }
@@ -140,7 +149,7 @@
                     @if (photoPreview()) {
                     <img [src]="photoPreview()" class="modal-avatar photo" alt="Preview">
                     } @else if (selectedMember()?.photoPath) {
-                    <img [src]="'/' + selectedMember().photoPath" class="modal-avatar photo" alt="Photo">
+                    <img [src]="getImageUrl(selectedMember().photoPath)" class="modal-avatar photo" alt="Photo">
                     } @else {
                     <div class="modal-avatar">{{ selectedMember()?.fullName?.[0] }}</div>
                     }
@@ -175,7 +184,7 @@
                     @if (signaturePreview()) {
                         <img [src]="signaturePreview()" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature Preview">
                     } @else if (selectedMember()?.signaturePath) {
-                        <img [src]="'/' + selectedMember().signaturePath" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature">
+                        <img [src]="getImageUrl(selectedMember().signaturePath)" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature">
                     } @else {
                         <div class="h-12 w-24 border border-dashed border-white/20 rounded-md flex items-center justify-center text-lg">🖋️</div>
                     }
@@ -593,32 +602,88 @@
                 <div class="full border-t pt-8 mt-4">
                     <div class="flex justify-between items-center mb-6">
                         <h4 class="text-accent uppercase tracking-widest text-xs font-black">EC Position History</h4>
+                        @if (isEditing()) {
+                            <button class="btn btn-outline btn-sm" (click)="addECHistory()">➕ Add EC Role</button>
+                        }
                     </div>
 
+                    @if (isEditing()) {
+                    <div class="form-group full bg-primary/5 p-4 rounded-lg border border-primary/10 mb-4">
+                        <label class="text-accent font-bold">EC Change Reason</label>
+                        <input type="text" [(ngModel)]="selectedMember().ecChangeReason"
+                            placeholder="Why is this member's Executive Committee status changing?"
+                            class="w-full">
+                        <small class="opacity-50 italic">Required only if modifying EC roles.</small>
+                    </div>
+                    }
+
                     <div class="history-list flex flex-col gap-3">
-                        @for (h of selectedMember()?.ecHistory; track h.id) {
+                        @for (h of selectedMember()?.ecHistory; track $index) {
                         <div class="history-item glass-effect rounded-lg p-4 flex justify-between items-center">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-bold text-sm">{{ getECPositionName(h.position) }}</span>
-                                    <span class="text-[10px] bg-primary/10 px-2 py-0.5 rounded opacity-70">{{
-                                        h.periodTitle }}</span>
-                                    @if (h.isCurrent) {
-                                    <span
-                                        class="text-[8px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Active</span>
-                                    }
+                            @if (isEditing()) {
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mr-4">
+                                    <div class="form-group">
+                                        <label class="text-[10px]">Position</label>
+                                        <select [(ngModel)]="h.position">
+                                            @for (role of ecPositions; track role.value) { 
+                                                <option [value]="role.value">{{ role.label }}</option> 
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="text-[10px]">Period</label>
+                                        <select [(ngModel)]="h.periodTitle">
+                                            @for (p of ecPeriods(); track p.id) { 
+                                                <option [value]="p.title">{{ p.title }}</option> 
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="form-group">
+                                            <label class="text-[10px]">Start Date</label>
+                                            <input type="date" [ngModel]="h.startDate | date:'yyyy-MM-dd'" (ngModelChange)="h.startDate = $event">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-[10px]">End Date</label>
+                                            <input type="date" [ngModel]="h.endDate | date:'yyyy-MM-dd'" (ngModelChange)="h.endDate = $event">
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="form-group">
+                                            <label class="text-[10px]">Role Specific Reason</label>
+                                            <input type="text" [(ngModel)]="h.changeReason" placeholder="Optional notes for this role">
+                                        </div>
+                                        <div class="flex items-end mb-2">
+                                            <label class="premium-checkbox-label">
+                                                <input type="checkbox" [(ngModel)]="h.isCurrent">
+                                                <span class="checkmark"></span>
+                                                <span class="label-text">Active Role</span>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="text-[10px] opacity-50 mt-1">
-                                    {{ h.startDate | date:'mediumDate' }} — {{ h.endDate ? (h.endDate |
-                                    date:'mediumDate') : 'Present' }}
-                                    @if (h.changeReason) {
-                                    <span class="ml-2 italic text-gray-400">({{ h.changeReason }})</span>
-                                    }
+                                <button class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
+                                    (click)="selectedMember().ecHistory.splice($index, 1)">✕ Remove</button>
+                            } @else {
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-sm">{{ getECPositionName(h.position) }}</span>
+                                        <span class="text-[10px] bg-primary/10 px-2 py-0.5 rounded opacity-70">{{ h.periodTitle }}</span>
+                                        @if (h.isCurrent) {
+                                        <span class="text-[8px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Active</span>
+                                        }
+                                    </div>
+                                    <div class="text-[10px] opacity-50 mt-1">
+                                        {{ h.startDate | date:'mediumDate' }} — {{ h.endDate ? (h.endDate | date:'mediumDate') : 'Present' }}
+                                        @if (h.changeReason) {
+                                            <span class="ml-2 italic text-gray-400">({{ h.changeReason }})</span>
+                                        }
+                                    </div>
                                 </div>
-                            </div>
-                            <button
-                                class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
-                                (click)="deleteECHistory(h.id)">✕ Delete</button>
+                                <button
+                                    class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
+                                    (click)="deleteECHistory(h.id)">✕ Delete</button>
+                            }
                         </div>
                         }
                         @if (!selectedMember()?.ecHistory?.length) {
@@ -652,9 +717,11 @@
                                     }
                                 </div>
                             </div>
+                            @if (nav.isSuperAdmin()) {
                             <button
                                 class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
                                 (click)="deletePayment(p.id)">✕ Delete</button>
+                            }
                         </div>
                         }
                         @if (!memberPayments().length) {

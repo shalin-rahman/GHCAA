@@ -144,6 +144,22 @@ namespace GHCAA.API.Controllers
             return success ? Ok(new { Message = "Article rejected." }) : NotFound();
         }
 
+        [HttpPost("{id:int}/collaborators/{userId:int}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> AddCollaborator(int id, int userId, CancellationToken cancellationToken)
+        {
+            var success = await _newsService.AddCollaboratorAsync(id, userId, cancellationToken);
+            return success ? Ok(new { Message = "Collaborator added." }) : BadRequest("Could not add collaborator.");
+        }
+
+        [HttpDelete("{id:int}/collaborators/{userId:int}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> RemoveCollaborator(int id, int userId, CancellationToken cancellationToken)
+        {
+            var success = await _newsService.RemoveCollaboratorAsync(id, userId, cancellationToken);
+            return success ? Ok(new { Message = "Collaborator removed." }) : NotFound();
+        }
+
         [HttpPost("upload-image")]
         [Authorize] // Allow members to upload images for their articles too
         public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)

@@ -31,3 +31,18 @@ export const adminGuard = () => {
 
     return router.parseUrl('/portal/dashboard');
 };
+
+/**
+ * Functional guard for super-admin-only routes
+ */
+export const superAdminGuard = () => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+
+    const role = auth.currentUser()?.role;
+    if (role === 'SuperAdmin') {
+        return true;
+    }
+
+    return router.parseUrl('/admin/dashboard');
+};

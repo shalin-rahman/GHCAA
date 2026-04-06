@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, adminGuard } from './core/guards/auth.guard';
+import { authGuard, adminGuard, superAdminGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
     {
@@ -169,7 +169,8 @@ export const routes: Routes = [
             },
             {
                 path: 'ledger',
-                loadComponent: () => import('./admin/ledger/ledger').then(m => m.Ledger)
+                loadComponent: () => import('./admin/ledger/ledger').then(m => m.Ledger),
+                canActivate: [superAdminGuard]
             },
             {
                 path: 'events',
@@ -181,19 +182,23 @@ export const routes: Routes = [
             },
             {
                 path: 'payments/fees',
-                loadComponent: () => import('./admin/fee-config/admin-fee-config').then(m => m.AdminFeeConfig)
+                loadComponent: () => import('./admin/fee-config/admin-fee-config').then(m => m.AdminFeeConfig),
+                canActivate: [superAdminGuard]
             },
             {
                 path: 'payments',
-                loadComponent: () => import('./admin/payment-config/admin-payment-config').then(m => m.AdminPaymentConfig)
+                loadComponent: () => import('./admin/payment-config/admin-payment-config').then(m => m.AdminPaymentConfig),
+                canActivate: [superAdminGuard]
             },
             {
                 path: 'roles',
-                loadComponent: () => import('./admin/roles/admin-roles').then(m => m.AdminRoles)
+                loadComponent: () => import('./admin/roles/admin-roles').then(m => m.AdminRoles),
+                canActivate: [superAdminGuard]
             },
             {
                 path: 'audit',
-                loadComponent: () => import('./admin/audit/admin-audit').then(m => m.AdminAudit)
+                loadComponent: () => import('./admin/audit/admin-audit').then(m => m.AdminAudit),
+                canActivate: [superAdminGuard]
             },
             {
                 path: 'article-approvals',

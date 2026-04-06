@@ -4,86 +4,253 @@
 1.1  [DONE] Fix AdminLedgerScreen class name mismatch in app_router.dart
 1.2  [DONE] Audit and match Registration Wizard titles/labels to exact web equivalents
 1.3  [DONE] Sync RegisterModel with backend Member.cs (FatherName, MotherName, Emergency fields, etc.)
-1.4  [IN PROGRESS] Audit and match all other mobile screen titles/labels to exact web equivalents
-1.5  [IN PROGRESS] Verify CRUD operations (Load, Add, Save, Update, Delete) on all mobile screens:
+1.4  [DONE] Audit and match all other mobile screen titles/labels to exact web equivalents
+1.5  [DONE] Verify CRUD operations (Load, Add, Save, Update, Delete) on all mobile screens
+1.6  [DONE] Implement Mobile Messaging/Chat module (SignalR integration)
+1.7  [DONE] Synchronize UI validations with API/DB nullability constraints
+1.8  [DONE] Implement Automated 401 Session Redirection
+1.9  [DONE] Implement 10-minute Inactivity Logout
+1.10 [DONE] Synchronize Administrative Member Management
+1.11 [DONE] Implement Optimized Image Delivery (CachedNetworkImage)
+1.12 [DONE] Implement High-Reliability Error Boundaries
+1.13 [DONE] Add Haptic Feedback ecosystem
+1.14 [DONE] Integrated Home Login Experience
+1.15 [DONE] Simplified Registration Portal
+1.16 [DONE] High-Fidelity UI dividers on all edit screens
+1.17 [DONE] Global Top Navbar Visibility Control
+1.18 [DONE] Back button present on all mobile screens (AppScaffold route-aware logic)
+1.19 [DONE] Fix: Member seeing admin navigation — roleProvider made persistent + invalidated after login
+1.20 [DONE] Fix: Dashboard showing inconsistent "Optimize Identity" % — shared calculateProfileCompleteness utility
+1.21 [DONE] Fix: Dashboard banner showed first name only — now shows full name + MembershipType/Category badges
+1.22 [DONE] Fix: Gatekeeper QR scanner overlay broken corner elements — rebuilt with proper bracket widget
+1.23 [DONE] Web Portal DB Parity Audit — Member Profile, Admin Members, Events, News forms synced to DTOs
+
+## AREA 2: CORE ALUMNI MANAGEMENT & REGISTRY
+2.1  [DONE] Member Academic/Professional record migration
+2.2  [DONE] Public Portal Directory Enhancements (Batch, Type, Category display)
+2.3  [DONE] Membership & Identity Lifecycle (Family links, Verified status, Archived cascade)
+2.4  [DONE] Automated ID & Certificate Generation (PDF + QR)
+2.5  [DONE] Profile UI Refinement
+
+## AREA 3: COMMUNICATION & SOCIAL
+3.1  [DONE] Real-time Communication Bridge (SignalR Hub)
+3.2  [DONE] Communication & Templating (HTML template system)
+3.3  [DONE] SMS Gateway Integration (Greenweb)
+3.4  [TODO] Discussion forums / community groups
+3.5  [DONE] Networking & Engagement (Privacy controls, Mentorship flow)
+
+## AREA 4: EVENTS & GATHERINGS
+4.1  [DONE] Close event registration on landing if due/passed
+4.2  [DONE] Landing Page Event Section fixes
+4.3  [DONE] Flexible Event Pricing
+4.4  [DONE] Event Media: Logo upload
+4.5  [DONE] My Participations: Payment via gateway
+4.6  [DONE] Events Advanced: Waitlist management and QR Attendance Scan
+
+## AREA 5: FINANCIAL & ADMIN GOVERNANCE
+5.1  [DONE] Smart Payment Gateway Automation
+5.2  [DONE] EC Management: Role removal and Period update
+5.3  [DONE] Constraint: Single role per member in EC period
+5.4  [DONE] Financial Governance: Automated PDF Tax/Donation Receipts
+5.5  [DONE] Claims-based Authorization UI — PermissionsMatrixScreen
+
+## AREA 6: CAREER & OPPORTUNITIES
+6.1  [DONE] Professional Hub: Alumni directory search (LinkedIn-style)
+6.2  [TODO] Alumni referral system for jobs and internships
+
+## AREA 7: SECURITY & AUTHENTICATION
+7.1  [DONE] Fix Member Login with NID
+7.2  [DONE] Fix Member Login/Password Reset timeout
+7.3  [TODO] Security Hardening:
+     - 7.3.1 [TODO] Two-Factor Authentication (2FA) for admin actions
+     - 7.3.2 [DONE] Real-time Session Termination upon status change
+     - 7.3.3 [TODO] Biometric Authentication (FaceID/Fingerprint) for Mobile
+     - 7.3.4 [TODO] Social Auth (OAuth2) — LinkedIn/Google
+7.4  [DONE] Secure Web Administrative routes with SuperAdmin functional guards
+7.5  [DONE] Stabilize Web App Profile Rendering
+7.6  [DONE] Fix asset image path prefixing across all web components
+
+## AREA 8: ARCHITECTURAL LEAKAGE & HARDENING (NEW — IDENTIFIED THIS SESSION)
+8.1  [DONE] Role Leakage Fix: roleProvider changed from autoDispose to persistent FutureProvider;
+     invalidated explicitly on login/logout to prevent stale admin role leaking into member sessions.
+8.2  [DONE] Mobile: Apply `roleAsync.value?.isStaffAdminRole ?? false` to remaining matched files: `job_details_screen`, `gallery_screen`, `event_details_screen`, `events_screen`, `dashboard_screen`, `app_scaffold`, `main_shell`.
+8.3  [DONE] Mobile: `FlutterSecureStorage` stores plain user credentials. Refactored `login_screen` and `auth_service` so credentials are ONLY stored if the user explicitly switches on Biometric Login.
+8.4  [DONE] Mobile: SharedPreferences clearAll() wiped dashboard_is_compact layout on logout. Refactored `StorageService.clearAll()` to individually remove session keys preserving layout preferences.
+8.5  [DONE] Web: Event form StartDate/EndDate inputs do not enforce StartDate < EndDate cross-field validation. Added cross-field Validator statically in `admin-events.ts` (eventDatesValidator).
+8.6  [DONE] Web: Member profile form Email and MobileNo are readonly but still submitted in the PUT payload. Backend explicitly ignores these fields in UpdateProfileAsync mapping, preventing spoofed writes.
+8.7  [DONE] API: EventsController — GET /events (public listing) exposes AdminNote. Updated `EventService` mapper to null out sensitive `AdminNote` in `GetActiveEventsAsync` and `GetEventByIdAsync` to prevent data leakage.
+8.8  [DONE] Mobile: FutureProvider.autoDispose on userProfileProvider removed. Refactored `userProfileProvider` to persistent FutureProvider to prevent unnecessary API re-fetches on UI transition, similar to the roleProvider fix.
+
+## AREA 9: MOBILE APP ENGINEERING (TIER-1 STANDARDS)
+9.1  [TODO] Design System & UI Foundation (8pt grid, tokens, button states, touch targets)
+9.2  [TODO] Navigation & Layout Architecture (Adaptive layout, Deep linking, Stateful nav)
+9.3  [TODO] Performance & Scaling (Cursor pagination, Strict virtualization, Cold start < 1.5s)
+9.4  [TODO] Memory & Threading (Background Isolates, Low-memory cache purging)
+9.5  [TODO] Persistence & Offline-First (Isar/Drift, Sync Queue, Background scheduler)
+9.6  [TODO] Networking & Resilience (Exponential backoff, Request batching, Connectivity banners)
+9.7  [TODO] State Management & UX:
+     - 9.7.1 [TODO] Riverpod State Hydration (Local Persistence)
+     - 9.7.2 [TODO] Undo/Redo for critical flows
+     - 9.7.3 [DONE] Skeleton/Shimmer Screens
+9.8  [TODO] Security & Hardening (Biometric + PIN, SSL Pinning, Binary obfuscation)
+9.9  [TODO] Internationalization (English + Bengali, RTL/LTR)
+9.10 [PARTIAL] Quality & Observability:
+     - 9.10.1 [DONE] Global Error Boundary
+     - 9.10.2 [DONE] Sentry/Firebase Crash reporting
+     - 9.10.3 [TODO] Battery Optimization
+     - 9.10.4 [TODO] Comprehensive Testing suite
+9.11 [PARTIAL] Release Engineering:
+     - 9.11.1 [TODO] Reduce APK/IPA size
+     - 9.11.2 [DONE] Fastlane + GitHub Actions CI/CD
+
+## AREA 10: INSTITUTIONAL GOVERNANCE & TRANSPARENCY
+10.1 [DONE] Digital Constitution: Versioned legal repository
+10.2 [DONE] Amendment Voting: Secure democratic participation
+10.3 [DONE] Collaborative Editorial: Multi-editor press release workflows
+10.4 [DONE] Mobile Governance Portal: governance_screen.dart wired at /committee
+10.5 [DONE] Public Sitemap & Navigation: Angular footer sitemap
+10.6 [DONE] System Architecture Blueprint: docs/architecture_data_flow.md
+
+## CREDENTIALS:
+- SuperAdmin: superadmin / SuperAdminPassword123!
+- Developer Admin: shalin / Shalin@2024!
+
+
+## AREA 1: MOBILE STABILITY & PARITY (SPRINT 1)
+1.1  [DONE] Fix AdminLedgerScreen class name mismatch in app_router.dart
+1.2  [DONE] Audit and match Registration Wizard titles/labels to exact web equivalents
+1.3  [DONE] Sync RegisterModel with backend Member.cs (FatherName, MotherName, Emergency fields, etc.)
+1.4  [DONE] Audit and match all other mobile screen titles/labels to exact web equivalents
+1.5  [DONE] Verify CRUD operations (Load, Add, Save, Update, Delete) on all mobile screens:
      - 1.5.1 [DONE] Profile Update (Member/Admin)
-     - 1.5.2 [TODO] Member Approvals (Admin)
+     - 1.5.2 [DONE] Member Approvals (Admin)
      - 1.5.3 [DONE] Event Management (Admin)
      - 1.5.4 [DONE] Job Hub (Member/Admin)
      - 1.5.5 [DONE] News Management (Admin)
-     - 1.5.6 [TODO] Photo Gallery (Admin)
+     - 1.5.6 [DONE] Photo Gallery (Admin)
      - 1.5.7 [DONE] Article Submission & Approval
-     - 1.5.8 [TODO] Fee Configuration (Admin)
-     - 1.5.9 [TODO] Governance Registry (Admin)
-     - 1.5.10 [TODO] Contact Messages (Admin)
-1.6  [IN PROGRESS] Implement Mobile Messaging/Chat module (SignalR integration)
-1.7  [TODO] Synchronize UI validations with API/DB nullability constraints
+     - 1.5.8 [DONE] Fee Configuration (Admin) - Synchronized with financials API
+     - 1.5.9 [DONE] Governance Registry (Admin) - Implemented Member Assignment
+     - 1.5.10 [DONE] Contact Messages (Admin) - Verified Read logic
+1.6  [DONE] Implement Mobile Messaging/Chat module (SignalR integration)
+1.7  [DONE] Synchronize UI validations with API/DB nullability constraints
+1.8  [DONE] Implement Automated 401 Session Redirection (Intercept 401 and kick to login)
+1.9  [DONE] Implement 10-minute Inactivity Logout (Idle detection + LifeCycle resume check)
+1.10 [DONE] Synchronize Administrative Member Management (Status & Category update parity)
+1.11 [DONE] Implement Optimized Image Delivery (CachedNetworkImage + Progressive Loading)
+1.12 [DONE] Implement High-Reliability Error Boundaries (Global catch & Silent Reporting)
+1.13 [DONE] Add Subtle Haptic Feedback ecosystem for all primary Mobile interactions
+1.14 [DONE] Integrated Home Login Experience: Eliminate redirect-jump by adding login form to AppHomeScreen
+1.15 [DONE] Simplified Registration Portal: Move 'Join Us' as a cohesive action on the Home dashboard
+1.16 [DONE] Implement High-Fidelity UI dividers and field separation across all mobile edit screens (Admin/Member)
+1.17 [DONE] Implement Global Top Navbar Visibility Control (Show/Hide toggle in Drawer settings)
 
 ## AREA 2: CORE ALUMNI MANAGEMENT & REGISTRY
 2.1  [DONE] Member Academic/Professional record migration (Legacy column removal and mapping).
-2.2  [TODO] Public Portal Directory Enhancements:
-     - 2.2.1 Show first Degree/certificate in Batch (e.g., "Batch of HSC 1979").
-     - 2.2.2 Display Membership Type and Member Category beside Membership No.
-2.3  [TODO] Membership & Identity Lifecycle:
-     - 2.3.1 Family/Spouse link-ups (Associate Memberships).
-     - 2.3.2 "Blue Tick" Verified Alumni status logic.
-     - 2.3.3 IsArchived soft-deletion cascading jobs.
-2.4  [TODO] Automated ID & Certificate Generation (Print-ready PDF with QR).
-2.5  [TODO] Profile UI Refinement: Update "Remove" button design in Education/Professional records.
+2.2  [DONE] Public Portal Directory Enhancements:
+     - 2.2.1 [DONE] Show first Degree/certificate in Batch (e.g., "Batch of HSC 1979").
+     - 2.2.2 [DONE] Display Membership Type and Member Category beside Membership No.
+2.3  [DONE] Membership & Identity Lifecycle:
+     - 2.3.1 [DONE] Family/Spouse link-ups (Associate Memberships) — FamilyLinkScreen wired + routed.
+     - 2.3.2 [DONE] "Blue Tick" Verified Alumni status — AdminMemberUpdateDto + MemberService handle IsVerified.
+     - 2.3.3 [DONE] IsArchived soft-deletion cascading jobs, family links, news, and user sessions.
+2.4  [DONE] Automated ID & Certificate Generation (Print-ready PDF with QR) — ProfileController + IDCardService.
+2.5  [DONE] Profile UI Refinement: Update "Remove" button design in Education/Professional records.
 
 ## AREA 3: COMMUNICATION & SOCIAL
-3.1  [TODO] Real-time Communication Bridge (SignalR Hub):
-     - 3.1.1 Live Admin Alerts for new registrations/donations.
-     - 3.1.2 Member Chat/Noticeboard (Batch Chat/Global Hub).
-3.2  [TODO] Advanced Communication & Templating (Handlebars HTML emails).
-3.3  [TODO] SMS Gateway Integration (SSL Wireless/Greenweb) for OTP and alerts.
+3.1  [DONE] Real-time Communication Bridge (SignalR Hub):
+     - 3.1.1 [DONE] Live Admin Alerts for new registrations/donations.
+     - 3.1.2 [DONE] Member Chat/Noticeboard (Batch Chat/Global Hub) - UI Framework & Service.
+3.2  [DONE] Communication & Templating — Full HTML template system with DB-first strategy + fallback defaults.
+3.3  [DONE] SMS Gateway Integration (Greenweb/SSL Wireless) — ISmsService + GreenwebSmsService + DI registered.
 3.4  [TODO] Discussion forums / community groups within the platform.
-3.5  [TODO] Networking & Engagement:
-     - 3.5.1 Granular privacy controls (NetworkingController search must respect toggles).
-     - 3.5.2 Mentorship Request flow within the Job Hub.
+3.5  [DONE] Networking & Engagement:
+     - 3.5.1 [DONE] Granular privacy controls (NetworkingController/Service respects all visibility toggles).
+     - 3.5.2 [DONE] Mentorship Request flow within the Job Hub.
 
 ## AREA 4: EVENTS & GATHERINGS
 4.1  [DONE] Close event registration on landing if due/passed.
 4.2  [DONE] Landing Page Event Section: Show last 1 closed event + fix label overflow.
-4.3  [TODO] Flexible Event Pricing (Optional fees, Free events, Variable amounts).
-4.4  [TODO] Event Media: Logo upload feature and display in details/portal.
-4.5  [TODO] My Participations: Payment via gateway + automated registration closing.
-4.6  [TODO] Events Advanced: Waitlist management and QR Attendance Scan entry.
+4.3  [DONE] Flexible Event Pricing — Free/Paid toggle, optional fee, registration window dates, non-member access.
+4.4  [DONE] Event Media: Logo upload feature and display in details/portal.
+4.5  [DONE] My Participations: Payment via gateway + automated registration closing.
+4.6  [DONE] Events Advanced: Waitlist management and QR Attendance Scan entry.
 
 ## AREA 5: FINANCIAL & ADMIN GOVERNANCE
-5.1  [TODO] Smart Payment Gateway Automation (Webhook integration for bKash/Nagad).
-5.2  [TODO] EC Management Fixes: Role removal and Period update propagation.
-5.3  [TODO] Constraint: Single role per member in a specific EC period.
-5.4  [TODO] Financial Governance: Automated PDF Tax/Donation Receipts generation.
-5.5  [TODO] Claims-based Authorization UI (Permissions Matrix for dynamic Custom Roles).
+5.1  [DONE] Smart Payment Gateway Automation (Webhook integration for bKash/Nagad/SSLCommerz).
+5.2  [DONE] EC Management: Role removal and Period update propagation.
+5.3  [DONE] Constraint: Single role per member in a specific EC period.
+5.4  [DONE] Financial Governance: Automated PDF Tax/Donation Receipts generation.
+5.5  [DONE] Claims-based Authorization UI — PermissionsMatrixScreen with user management, role assign/remove, admin creation.
 
 ## AREA 6: CAREER & OPPORTUNITIES
-6.1  [TODO] Professional Hub: Alumni directory search (LinkedIn-style) with filtering.
+6.1  [DONE] Professional Hub: Alumni directory search (LinkedIn-style) with filtering.
 6.2  [TODO] Alumni referral system for jobs and internships.
 
 ## AREA 7: SECURITY & AUTHENTICATION
-7.1  [TODO] Fix Member Login with NID (Resolve 401 Unauthorized errors).
+7.1  [DONE] Fix Member Login with NID (Resolve 401 Unauthorized errors)
 7.2  [DONE] Fix Member Login/Password Reset timeout issues.
 7.3  [TODO] Security Hardening:
-     - 7.3.1 Two-Factor Authentication (2FA) for admin actions.
-     - 7.3.2 Real-time Session Termination upon status change.
-     - 7.3.3 Social Auth (OAuth2) - LinkedIn/Google integration.
+     - 7.3.1 [TODO] Two-Factor Authentication (2FA) for admin actions (SMS/Email OTP)
+     - 7.3.2 [DONE] Real-time Session Termination upon status change.
+     - 7.3.3 [TODO] Biometric Authentication (FaceID/Fingerprint) for Mobile sessions
+     - 7.3.4 [TODO] Social Auth (OAuth2) - LinkedIn/Google integration.
+7.4  [DONE] Secure Web Administrative routes with SuperAdmin functional guards.
+7.5  [DONE] Stabilize Web App Profile Rendering (Robust pascal/camel Case mapping).
+7.6  [DONE] Fix asset image path prefixing across all web components (Admin Gallery & Member Profile).
 
-## AREA 8: INFRASTRUCTURE & DEVOPS
-8.1  [TODO] Fix Responsiveness for Landing/Portal pages on mobile browsers.
-8.2  [TODO] Fix Footer Menu Scroll-up behavior.
-8.3  [TODO] Bulk Data Management: Excel Export/Import with logic-safe validation.
-8.4  [TODO] Flutter App Multi-Platform Stability (Android/iOS parity).
-8.5  [TODO] Implement /healthz health check endpoints (FE & BE).
-8.6  [TODO] Performance & Refactoring: API optimization and unused code removal.
-8.7  [DONE] Enterprise CI/CD Infrastructure (GitHub Actions, Signing Automation, Fastlane).
+## AREA 9: MOBILE APP ENGINEERING (TIER-1 STANDARDS)
+9.1  [TODO] Design System & UI Foundation:
+     - 9.1.1 [TODO] Enforce 8pt grid + 4pt micro-spacing system across all screens.
+     - 9.1.2 [TODO] Standardize tokens (Typography H1-H6, Body, Caption) & Spacing scale.
+     - 9.1.3 [TODO] Build resilient Button system (Ghost, Disabled, Focus/Success states).
+     - 9.1.4 [TODO] Ensure 48dp minimum touch targets for all interactive regions.
+9.2  [TODO] Navigation & Layout Architecture:
+     - 9.2.1 [TODO] Implement Fluid Adaptive Layout (Sidebar for Tablets/Pads).
+     - 9.2.2 [TODO] Enable Deep Linking support for Member Profiles & Events.
+     - 9.2.3 [TODO] Configure "Stateful Navigation" (Restore exact screen context on resume).
+9.3  [TODO] Performance & Scaling:
+     - 9.3.1 [TODO] Implement Cursor-based pagination for Alumni Registry.
+     - 9.3.2 [TODO] Strict Virtualization (ListView.builder) on all content lists.
+     - 9.3.3 [TODO] Optimize App Startup time (Target < 1.5s cold start).
+9.4  [TODO] Memory & Threading:
+     - 9.4.1 [TODO] Move heavy data processing (JSON/Encryption) to Background Isolates.
+     - 9.4.2 [TODO] Handle dynamic System Low-Memory warnings with cache purging.
+9.5  [TODO] Persistence & Offline-First:
+     - 9.5.1 [TODO] Set up High-Performance Local DB (Isar/Drift).
+     - 9.5.2 [TODO] Implement Sync Queue with Conflict Resolution logic.
+     - 9.5.3 [TODO] Automated background synchronization scheduler.
+9.6  [TODO] Networking & Resilience:
+     - 9.6.1 [TODO] Implement Exponential Backoff retry mechanism in ApiClient.
+     - 9.6.2 [TODO] Add Request Batching & Idempotency keys for financial transactions.
+     - 9.6.3 [TODO] Real-time Network Status Detection (Connectivity banners).
+9.7  [TODO] State Management & UX:
+     - 9.7.1 [TODO] Implement Riverpod State Hydration (Local Persistence).
+     - 9.7.2 [TODO] Add Undo/Redo support for critical flows (Profile Edits/Applications).
+     - 9.7.3 [DONE] Replace generic loaders with Skeleton/Shimmer Screens.
+9.8  [TODO] Security & Hardening:
+     - 9.8.1 [TODO] Integrate Biometric Auth (FaceID/Fingerprint) with secure PIN fallback.
+     - 9.8.2 [TODO] Implement SSL Pinning for Production API integrity.
+     - 9.8.3 [TODO] Encrypt sensitive local preferences & Obfuscate Production binary.
+9.9  [TODO] Internationalization:
+     - 9.9.1 [TODO] Unified Localization (English + Bengali) with native RTL/LTR support.
+9.10 [TODO] Quality & Observability:
+     - 9.10.1 [DONE] Global Error Boundary (Build failure redirection).
+     - 9.10.2 [DONE] Sentry/Firebase Crash reporting with full device context.
+     - 9.10.3 [TODO] Battery Optimization: Batch API calls & adjust polling intervals.
+     - 9.10.4 [TODO] Comprehensive Testing suite (Unit, Widget, Integration, Offline-edge-case).
+9.11 [TODO] Release Engineering:
+     - 9.11.1 [TODO] Reduce APK/IPA size (Code splitting & asset optimization).
+     - 9.11.2 [DONE] Fastlane + GitHub Actions CI/CD Pipeline.
 
-## AREA 9: KNOWLEDGE & DOCUMENTATION
-9.1  [TODO] Update README with consolidated feature details.
-9.2  [TODO] Generate official feature list for SRS/FR from codebase analysis.
-9.3  [TODO] Perform end-to-end Workflow Review and implementation audit.
+## AREA 10: INSTITUTIONAL GOVERNANCE & TRANSPARENCY
+10.1 [DONE] Digital Constitution: Versioned legal repository and public history.
+10.2 [DONE] Amendment Voting: Secure democratic participation for verified alumni.
+10.3 [DONE] Collaborative Editorial: Multi-editor press release and news workflows.
+10.4 [DONE] Mobile Governance Portal: governance_screen.dart wired into router at /committee.
+10.5 [DONE] Public Sitemap & Navigation: Categorical sitemap in Angular footer for transparency.
+10.6 [DONE] System Architecture Blueprint: Created comprehensive Data Flow Diagram (docs/architecture_data_flow.md).
 
----
-**CREDENTIALS:**
+## CREDENTIALS:
 - SuperAdmin: superadmin / SuperAdminPassword123!
 - Developer Admin: shalin / Shalin@2024!

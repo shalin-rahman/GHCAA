@@ -112,7 +112,9 @@ export class AdminEvents implements OnInit {
         adminNote: [''],
         isActive: [true],
         allowNonMembers: [false],
-        imageUrl: ['']
+        imageUrl: [''],
+        participantLimit: [null],
+        hasWaitlist: [false]
     }, { validators: AdminEvents.eventDatesValidator });
 
     ngOnInit() {
@@ -196,7 +198,9 @@ export class AdminEvents implements OnInit {
             registrationEndDate: ev.registrationEndDate ? new Date(ev.registrationEndDate).toISOString().slice(0, 16) : '',
             adminNote: ev.adminNote,
             isActive: ev.isActive,
-            allowNonMembers: ev.allowNonMembers
+            allowNonMembers: ev.allowNonMembers,
+            participantLimit: (ev as any).participantLimit,
+            hasWaitlist: (ev as any).hasWaitlist
         });
         this.selectedLogo.set(null);
         this.logoPreview.set(ev.imageUrl || null);

@@ -6,6 +6,8 @@ import '../../features/admin/admin_service.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/widgets/glass_container.dart';
 
+import '../../features/auth/auth_service.dart';
+
 final pendingApprovalsProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(adminServiceProvider).getPendingApprovals());
 
 final memberApprovalSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
@@ -22,7 +24,7 @@ class ApprovalQueueScreen extends ConsumerWidget {
     return AppScaffold(
       isAdmin: true,
       title: 'Approvals',
-      breadcrumb: 'ADMIN > MEMBER QUEUE',
+      breadcrumb: 'ADMIN > APPROVALS',
       child: Column(
         children: [
           Padding(
@@ -163,7 +165,10 @@ class ApprovalQueueScreen extends ConsumerWidget {
   }
 
   Future<void> _handleApproval(WidgetRef ref, int id, bool approve) async {
-    final success = await ref.read(adminServiceProvider).resolveApproval(id, approve);
+    final adminProfile = ref.read(userProfileProvider).value;
+    final adminId = adminProfile?['id'] ?? 1; // Fallback to 1 if not yet loaded (SuperAdmin expected)
+    
+    final success = await ref.read(adminServiceProvider).resolveApproval(id, approve, adminId: adminId);
     if (success) {
       ref.invalidate(pendingApprovalsProvider);
     }

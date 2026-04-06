@@ -9,10 +9,14 @@ final storageServiceProvider = Provider<StorageService>((ref) => StorageService(
 class StorageService {
   static const _jwtKey = 'jwt_token';
   static const _legacyJwtPrefsKey = 'jwt_token';
+  static const _credUserKey = 'cred_user';
+  static const _credPassKey = 'cred_pass';
 
   final FlutterSecureStorage _secure = const FlutterSecureStorage();
+  String? _cachedToken;
 
   Future<void> saveToken(String token) async {
+    _cachedToken = token;
     if (kIsWeb) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_legacyJwtPrefsKey, token);
@@ -24,15 +28,21 @@ class StorageService {
   }
 
   Future<String?> getToken() async {
+    if (_cachedToken != null) return _cachedToken;
     if (kIsWeb) {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_legacyJwtPrefsKey);
+      _cachedToken = prefs.getString(_legacyJwtPrefsKey);
+      return _cachedToken;
     }
     var token = await _secure.read(key: _jwtKey);
-    if (token != null && token.isNotEmpty) return token;
+    if (token != null && token.isNotEmpty) {
+      _cachedToken = token;
+      return token;
+    }
     final prefs = await SharedPreferences.getInstance();
     final legacy = prefs.getString(_legacyJwtPrefsKey);
     if (legacy != null && legacy.isNotEmpty) {
+      _cachedToken = legacy;
       await _secure.write(key: _jwtKey, value: legacy);
       await prefs.remove(_legacyJwtPrefsKey);
       return legacy;
@@ -41,6 +51,7 @@ class StorageService {
   }
 
   Future<void> removeToken() async {
+    _cachedToken = null;
     if (kIsWeb) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_legacyJwtPrefsKey);
@@ -87,7 +98,28 @@ class StorageService {
 
   Future<void> clearAll() async {
     await removeToken();
+    await clearCredentials();
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+  }
+
+  Future<void> saveCredentials(String username, String password) async {
+    if (kIsWeb) return; // Do not store passwords on web implicitly
+    await _secure.write(key: _credUserKey, value: username);
+    await _secure.write(key: _credPassKey, value: password);
+  }
+
+  Future<Map<String, String>?> getCredentials() async {
+    if (kIsWeb) return null;
+    final user = await _secure.read(key: _credUserKey);
+    final pass = await _secure.read(key: _credPassKey);
+    if (user != null && pass != null) return {'username': user, 'password': pass};
+    return null;
+  }
+
+  Future<void> clearCredentials() async {
+    if (kIsWeb) return;
+    await _secure.delete(key: _credUserKey);
+    await _secure.delete(key: _credPassKey);
   }
 }

@@ -14,5 +14,7 @@ namespace GHCAA.Application.Interfaces
         Task<bool> DeleteNewsAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> ApproveArticleAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> RejectArticleAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> AddCollaboratorAsync(int newsPostId, int userId, CancellationToken cancellationToken = default);
+        Task<bool> RemoveCollaboratorAsync(int newsPostId, int userId, CancellationToken cancellationToken = default);
     }
 }

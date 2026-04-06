@@ -18,15 +18,17 @@ import '../../screens/member/financial_portal_screen.dart';
 import '../../screens/member/news_screen.dart';
 import '../../screens/member/news_details_screen.dart';
 import '../../screens/member/gallery_screen.dart';
-import '../../screens/member/committee_screen.dart';
 import '../../screens/member/notification_screen.dart';
 import '../../screens/member/member_activity_history_screen.dart';
 import '../../screens/member/family_link_screen.dart';
 import '../../screens/member/support_screen.dart';
 import '../../screens/member/articles_screen.dart';
+import '../../screens/member/mentorship_hub_screen.dart';
+import '../../screens/member/professional_hub_screen.dart';
 import '../../screens/member/submit_article_screen.dart';
 import '../../screens/member/magazine_screen.dart';
 import '../../screens/member/about_screen.dart';
+import '../storage/storage_service.dart';
 import '../../screens/admin/approval_queue_screen.dart';
 import '../../screens/admin/audit_screen.dart';
 import '../../screens/admin/theme_management_screen.dart';
@@ -38,12 +40,59 @@ import '../../screens/admin/article_approval_screen.dart';
 import '../../screens/admin/gatekeeper_screen.dart';
 import '../../screens/admin/ledger_screen.dart';
 import '../../screens/admin/admin_modules.dart';
+import '../../screens/admin/permissions_matrix_screen.dart';
 import '../../screens/member/ai_chat_screen.dart';
+import '../../screens/member/chats_screen.dart';
+import '../../screens/member/chat_room_screen.dart';
+import '../../screens/member/governance_screen.dart';
 import '../../core/widgets/main_shell.dart';
 
+class AuthNotifier extends ChangeNotifier {
+  final Ref _ref;
+  String? _token;
+
+  AuthNotifier(this._ref) {
+    _ref.listen(authStateProvider, (previous, next) {
+      if (next.value != _token) {
+        _token = next.value;
+        notifyListeners();
+      }
+    });
+  }
+
+  String? get token => _token;
+}
+
+final authNotifierProvider = Provider<AuthNotifier>((ref) => AuthNotifier(ref));
+
+final authStateProvider = StreamProvider<String?>((ref) {
+  final storage = ref.watch(storageServiceProvider);
+  // Keep the polling as a fallback/background check for expiry, 
+  // but we'll use AuthNotifier for immediate UI reaction.
+  return Stream.periodic(const Duration(seconds: 2)).asyncMap((_) => storage.getToken()).distinct();
+});
+
 final routerProvider = Provider<GoRouter>((ref) {
+  final authNotifier = ref.watch(authNotifierProvider);
+
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: authNotifier,
+    redirect: (context, state) {
+      final token = authNotifier.token;
+      final isLoggingIn = state.uri.path == '/login' || state.uri.path == '/register' || state.uri.path == '/';
+      
+      if (token == null && !isLoggingIn) {
+        return '/login';
+      }
+      
+      // If logged in and hitting landing/login/register, go to appropriate dashboard
+      if (token != null && isLoggingIn) {
+        return '/dashboard'; // Login screen logic handles specific role redirection
+      }
+
+      return null;
+    },
     routes: [
       GoRoute(
         path: '/', 
@@ -91,15 +140,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => NewsDetailsScreen(newsId: int.parse(state.pathParameters['id']!)),
           ),
           GoRoute(path: '/gallery', name: 'gallery', builder: (context, state) => const GalleryScreen()),
-          GoRoute(path: '/committee', name: 'committee', builder: (context, state) => const CommitteeScreen()),
+          GoRoute(path: '/committee', name: 'governance', builder: (context, state) => const GovernanceScreen()),
           GoRoute(path: '/notifications', name: 'notifications', builder: (context, state) => const NotificationScreen()),
           GoRoute(path: '/activity', name: 'activity', builder: (context, state) => const MemberActivityHistoryScreen()),
           GoRoute(path: '/family', name: 'family', builder: (context, state) => const FamilyLinkScreen()),
           GoRoute(path: '/support', name: 'support', builder: (context, state) => const SupportScreen()),
           GoRoute(path: '/articles', name: 'articles', builder: (context, state) => const MemberArticlesScreen()),
-          GoRoute(path: '/articles/submit', name: 'submit_article', builder: (context, state) => const SubmitArticleScreen()),
+          GoRoute(path: '/submit_article', name: 'submit_article', builder: (context, state) => const SubmitArticleScreen()),
           GoRoute(path: '/magazine', name: 'magazine', builder: (context, state) => const MagazineScreen()),
           GoRoute(path: '/about', name: 'about', builder: (context, state) => const AboutScreen()),
+          GoRoute(path: '/mentorship', name: 'mentorship', builder: (context, state) => const MentorshipHubScreen()),
+          GoRoute(path: '/professionals', name: 'professionals', builder: (context, state) => const ProfessionalHubScreen()),
           
           // Admin Routes
           GoRoute(path: '/admin_dashboard', name: 'admin_dashboard', builder: (context, state) => const AdminDashboardScreen()),
@@ -112,7 +163,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/gatekeeper', name: 'admin_gatekeeper', builder: (context, state) => const GatekeeperScreen()),
           GoRoute(path: '/admin/governance', name: 'admin_governance', builder: (context, state) => const AdminGovernanceScreen()),
           GoRoute(path: '/admin/articles', name: 'admin_articles', builder: (context, state) => const ArticleApprovalScreen()),
+          GoRoute(path: '/admin/permissions', name: 'admin_permissions', builder: (context, state) => const PermissionsMatrixScreen()),
           GoRoute(path: '/admin/cms', name: 'admin_cms', builder: (context, state) => const AdminCMS()),
+          GoRoute(path: '/chats', name: 'chats', builder: (context, state) => const ChatsScreen()),
+          GoRoute(
+            path: '/chat/:id',
+            name: 'chat_room',
+            builder: (context, state) => ChatRoomScreen(otherUserId: int.parse(state.pathParameters['id']!)),
+          ),
           GoRoute(path: '/assistant', name: 'assistant', builder: (context, state) => const AIChatScreen()),
         ],
       ),

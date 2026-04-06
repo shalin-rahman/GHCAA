@@ -224,6 +224,7 @@
                         <th>Timestamp</th>
                         <th>Recipient</th>
                         <th>Subject</th>
+                        <th>Target</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -232,7 +233,13 @@
                     <tr>
                         <td>{{ log.sentDate | date:'short' }}</td>
                         <td><small>{{ log.recipientEmail }}</small></td>
-                        <td>{{ log.subject }}</td>
+                        <td>
+                            <div>{{ log.subject }}</div>
+                            @if (log.errorMessage) {
+                                <div class="text-[10px] text-red-400 mt-1 italic">Error: {{ log.errorMessage }}</div>
+                            }
+                        </td>
+                        <td><small class="text-accent/70 font-bold uppercase text-[9px]">{{ log.targetAudience }}</small></td>
                         <td>
                             <span class="status-badge" [class.active]="log.status === 'Sent'"
                                 [class.inactive]="log.status !== 'Sent'">
@@ -275,8 +282,13 @@
                         <input type="text" [(ngModel)]="editingTemplate()!.subject">
                     </div>
                     <div class="form-group full">
-                        <label>Description</label>
+                        <label>Description (Internal Use)</label>
                         <input type="text" [(ngModel)]="editingTemplate()!.description">
+                    </div>
+                    <div class="form-group full">
+                        <label>Variable Placeholders (JSON list, e.g. ["FullName", "MemberId"])</label>
+                        <input type="text" [(ngModel)]="editingTemplate()!.variables" placeholder='["FullName", "RegistrationYear"]'>
+                        <small class="opacity-50 italic">List strings exactly as they appear in template tags like &#123;&#123;FullName&#125;&#125;.</small>
                     </div>
                     <div class="form-group full">
                         <label>HTML Content</label>

@@ -23,15 +23,16 @@ namespace GHCAA.API.Controllers
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats(CancellationToken cancellationToken)
         {
-            var stats = await _memberService.GetDashboardStatsAsync(cancellationToken);
+            var isPrivileged = User.IsInRole("SuperAdmin");
+            var stats = await _memberService.GetDashboardStatsAsync(isPrivileged, cancellationToken);
             return Ok(stats);
         }
 
         [HttpGet("analytics")]
         public async Task<IActionResult> GetAnalytics(CancellationToken cancellationToken)
         {
-            // Same as stats but mapped to specific route requested by frontend
-            var stats = await _memberService.GetDashboardStatsAsync(cancellationToken);
+            var isPrivileged = User.IsInRole("SuperAdmin");
+            var stats = await _memberService.GetDashboardStatsAsync(isPrivileged, cancellationToken);
             return Ok(stats);
         }
 
@@ -223,6 +224,13 @@ namespace GHCAA.API.Controllers
             return Ok(new { DataUri = dataUri });
         }
 
+        [HttpGet("members/{id}/id-card/pdf")]
+        public async Task<IActionResult> GetMemberIDCardPdf(int id, CancellationToken cancellationToken)
+        {
+            var pdfBytes = await _idCardService.GenerateIDCardPdfAsync(id, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"ID_Card_{id}.pdf");
+        }
+
         [HttpPost("members/{id}/reset-password-admin")]
         public async Task<IActionResult> ResetPasswordAdmin(int id, CancellationToken cancellationToken)
         {
@@ -246,6 +254,13 @@ namespace GHCAA.API.Controllers
         {
             var dataUri = await _idCardService.GenerateCertificateDataUriAsync(id, cancellationToken);
             return Ok(new { DataUri = dataUri });
+        }
+
+        [HttpGet("members/{id}/certificate/pdf")]
+        public async Task<IActionResult> GetMemberCertificatePdf(int id, CancellationToken cancellationToken)
+        {
+            var pdfBytes = await _idCardService.GenerateCertificatePdfAsync(id, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"Certificate_{id}.pdf");
         }
 
         [HttpGet("contact-messages")]

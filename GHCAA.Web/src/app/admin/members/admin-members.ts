@@ -31,6 +31,7 @@ export class AdminMembers implements OnInit {
   statusFilter = signal('all');
   categoryFilter = signal('all');
   membershipTypeFilter = signal('all');
+  includeArchived = signal(false);
   selectedMember = signal<any>(null);
   isEditing = signal(false);
   submitting = signal(false);
@@ -144,6 +145,13 @@ export class AdminMembers implements OnInit {
     m.status
   ];
 
+  getImageUrl(path: string | null | undefined): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const cleanPath = path.startsWith('/') ? path : '/' + path;
+    return cleanPath.replace(/^\/\//, '/');
+  }
+
   ngOnInit() {
     this.loadMembers();
     this.loadECPeriods();
@@ -198,9 +206,28 @@ export class AdminMembers implements OnInit {
 
   loadMembers() {
     this.loading.set(true);
-    this.adminService.getMembers(this.currentPage(), this.pageSize(), this.searchQuery(), this.statusFilter(), this.categoryFilter(), this.membershipTypeFilter(), false).subscribe({
+    const page = this.currentPage();
+    const query = this.searchQuery();
+    const status = this.statusFilter();
+    const type = this.membershipTypeFilter();
+    const cat = this.categoryFilter();
+    const incArchived = this.includeArchived();
+
+    this.adminService.getMembers(page, this.pageSize(), query, status, cat, type, incArchived).subscribe({
       next: (res: any) => {
-        this.allMembers.set(res.items);
+        // Robust case-insensitive property mapping for the list items
+        const mapping = (obj: any) => {
+          const result: any = {};
+          const props = ['id', 'fullName', 'email', 'mobileNo', 'membershipNumber', 'membershipType', 'status', 'ghcLastCertificatePassingYear', 'category', 'photoPath'];
+          props.forEach(p => {
+            const pascal = p.charAt(0).toUpperCase() + p.slice(1);
+            result[p] = obj[p] !== undefined ? obj[p] : (obj[pascal] !== undefined ? obj[pascal] : (p === 'nid' ? obj['NID'] : undefined));
+          });
+          return result;
+        };
+
+        const mappedItems = (res.items || []).map(mapping);
+        this.allMembers.set(mappedItems);
         this.totalPages.set(res.totalPages || 1);
         this.totalItems.set(res.totalItems || 0);
         this.loading.set(false);
@@ -267,20 +294,72 @@ export class AdminMembers implements OnInit {
   }
 
   openDetail(member: any) { 
-    const mappedMember = { ...member };
-    if (mappedMember.dateOfBirth) mappedMember.dateOfBirth = new Date(mappedMember.dateOfBirth).toISOString().split('T')[0];
-    if (mappedMember.professionalHistory) {
-        mappedMember.professionalHistory = mappedMember.professionalHistory.map((ph: any) => ({
-            ...ph,
-            startDate: ph.startDate ? new Date(ph.startDate).toISOString().split('T')[0] : ''
-        }));
-    }
-    
-    this.selectedMember.set(mappedMember); 
-    this.isEditing.set(false); 
-    this.photoToUpload = null; 
-    this.photoPreview.set(null); 
-    this.loadPayments(member.id);
+    this.loading.set(true);
+    this.adminService.getMemberById(member.id).subscribe({
+      next: (fullMember: any) => {
+        // Robust case-insensitive property mapping to handle both PascalCase (C#) and camelCase (JS)
+        // This addresses reports of values not loading correctly in the web app
+        const mapping = (obj: any) => {
+          const result: any = {};
+          // Known properties from C# DTO and our TS interfaces
+          const props = [
+            'id', 'fullName', 'mobileNo', 'email', 'fatherName', 'motherName', 'dateOfBirth', 
+            'nid', 'gender', 'bloodGroup', 'presentAddress', 'permanentAddress', 
+            'emergencyContactName', 'emergencyContactRelation', 'emergencyContactPhone',
+            'membershipNumber', 'membershipType', 'category', 'status', 'photoPath', 'signaturePath',
+            'isVerified', 'contributionPoints', 'tShirtSize', 'isMobilePublic', 'isEmailPublic',
+            'isAddressPublic', 'isNIDPublic', 'isFamilyPublic', 'notifyEventCreation',
+            'notifyParticipationApproval', 'notifyRegistrationUpdate', 'notifyRelevantUpdates',
+            'certificatePath', 'paymentProofPath', 'ghcLastCertificatePassingYear'
+          ];
+          
+          props.forEach(p => {
+            // Case-insensitive lookup
+            const pascal = p.charAt(0).toUpperCase() + p.slice(1);
+            const value = obj[p] !== undefined ? obj[p] : (obj[pascal] !== undefined ? obj[pascal] : (p === 'nid' ? obj['NID'] : undefined));
+            result[p] = value;
+          });
+
+          // Handle special cases for NID and Passing Year if they didn't match
+          if (result.nid === undefined && obj['NID'] !== undefined) result.nid = obj['NID'];
+
+          // Copy nested objects directly if they exist
+          result.academicHistory = obj.academicHistory || obj.AcademicHistory || [];
+          result.professionalHistory = obj.professionalHistory || obj.ProfessionalHistory || [];
+          result.ecHistory = obj.ecHistory || obj.ECHistory || [];
+          
+          return result;
+        };
+
+        const mappedMember = mapping(fullMember);
+
+        // Date normalization for HTML5 inputs (yyyy-MM-dd)
+        if (mappedMember.dateOfBirth) {
+            mappedMember.dateOfBirth = new Date(mappedMember.dateOfBirth).toISOString().split('T')[0];
+        } else if (fullMember.DateOfBirth) {
+            mappedMember.dateOfBirth = new Date(fullMember.DateOfBirth).toISOString().split('T')[0];
+        }
+
+        if (mappedMember.professionalHistory) {
+            mappedMember.professionalHistory = mappedMember.professionalHistory.map((ph: any) => ({
+                ...ph,
+                startDate: (ph.startDate || ph.StartDate) ? new Date(ph.startDate || ph.StartDate).toISOString().split('T')[0] : ''
+            }));
+        }
+        
+        console.log('Member Details Loaded (Mapped):', mappedMember);
+        this.selectedMember.set(mappedMember); 
+        this.isEditing.set(false); 
+        this.photoToUpload = null; 
+        this.photoPreview.set(null); 
+        this.loadPayments(member.id);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.notify.error('Failed to load member profile.');
+        this.loading.set(false);
+      }
+    });
   }
 
   loadPayments(memberId: number) {
@@ -364,6 +443,7 @@ export class AdminMembers implements OnInit {
     this.submitting.set(true);
     this.adminService.updateMember(member.id, {
       fullName: member.fullName,
+      status: member.status,
       fatherName: member.fatherName,
       motherName: member.motherName,
       dateOfBirth: member.dateOfBirth,
@@ -406,7 +486,9 @@ export class AdminMembers implements OnInit {
       emergencyContactRelation: member.emergencyContactRelation,
       emergencyContactPhone: member.emergencyContactPhone,
       academicHistory: member.academicHistory,
-      professionalHistory: member.professionalHistory
+      professionalHistory: member.professionalHistory,
+      ecHistory: member.ecHistory,
+      ecChangeReason: member.ecChangeReason
     }).subscribe({
       next: () => {
         // After data update, if there are files, upload them
@@ -681,7 +763,10 @@ export class AdminMembers implements OnInit {
   }
 
   getLabel(options: any[], value: any): string {
-    const option = options.find(o => o.value === value);
-    return option ? option.label : (value || 'Not Specified');
+    if (value === null || value === undefined) return 'Not Specified';
+    // Stringify comparison to handle string vs number (e.g. "Male" vs "Male", or enum 0 vs "0")
+    // Special case for enums: if value is a number, we might need to match its string representation if options use that
+    const option = options.find(o => String(o.value).toLowerCase() === String(value).toLowerCase());
+    return option ? option.label : String(value);
   }
 }

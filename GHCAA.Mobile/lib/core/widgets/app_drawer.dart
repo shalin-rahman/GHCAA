@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../../features/auth/auth_service.dart';
 import '../config/app_config.dart';
 import 'async_value_widget.dart';
+import '../../features/theme/dynamic_theme_service.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -73,7 +74,15 @@ class AppDrawer extends ConsumerWidget {
                             _MenuItem(Icons.contact_support_outlined, 'Support', '/support'),
                             _MenuItem(Icons.info_outline, 'About', '/about'),
                           ]),
-
+                          _buildSection(context, 'LAYOUT SETTINGS', [
+                            _buildToggleItem(
+                              ref, 
+                              Icons.view_compact_outlined, 
+                              'Top Navbar', 
+                              ref.watch(globalAppBarVisibilityProvider),
+                              (val) => ref.read(globalAppBarVisibilityProvider.notifier).state = val,
+                            ),
+                          ]),
                         ],
                       );
                     },
@@ -140,7 +149,7 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, String title, List<_MenuItem> items) {
+  Widget _buildSection(BuildContext context, String title, List<dynamic> items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -148,17 +157,23 @@ class AppDrawer extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
           child: Text(title, style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
         ),
-        ...items.map((item) => ListTile(
-          leading: Icon(item.icon, color: AppTheme.textSecondaryDark, size: 22),
-          title: Text(item.title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.pop(context); // Close drawer
-            context.go(item.route);
-          },
-          dense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-        )),
+        ...items.map((item) {
+          if (item is Widget) return item;
+          if (item is _MenuItem) {
+            return ListTile(
+              leading: Icon(item.icon, color: AppTheme.textSecondaryDark, size: 22),
+              title: Text(item.title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.pop(context); // Close drawer
+                context.go(item.route);
+              },
+              dense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+            );
+          }
+          return const SizedBox();
+        }),
       ],
     );
   }
@@ -187,6 +202,24 @@ class AppDrawer extends ConsumerWidget {
         }
       },
       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+    );
+  }
+
+  Widget _buildToggleItem(WidgetRef ref, IconData icon, String title, bool value, Function(bool) onChanged) {
+    return ListTile(
+      leading: Icon(icon, color: AppTheme.royalGold.withValues(alpha: 0.7), size: 22),
+      title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+      trailing: Switch.adaptive(
+        value: value,
+        onChanged: (v) {
+          HapticFeedback.selectionClick();
+          onChanged(v);
+        },
+        activeTrackColor: AppTheme.royalGold.withValues(alpha: 0.3),
+        activeThumbColor: AppTheme.royalGold,
+      ),
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
     );
   }
 }

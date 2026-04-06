@@ -175,40 +175,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             return null;
           },
         ),
-        _gap(),
-        TextFormField(
-          readOnly: true,
-          decoration: const InputDecoration(
-            labelText: 'Date of Birth *',
-            border: OutlineInputBorder(),
-            hintText: 'Tap to select',
-            prefixIcon: Icon(Icons.calendar_today_outlined),
-          ),
-          controller: TextEditingController(
-            text: state.data['DateOfBirth'] != null
-                ? state.data['DateOfBirth'].toString().split('T')[0]
-                : '',
-          ),
-          onTap: () async {
-            final date = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now().subtract(const Duration(days: 365 * 25)),
-              firstDate: DateTime(1940),
-              lastDate: DateTime.now().subtract(const Duration(days: 365 * 16)),
-              builder: (ctx, child) => Theme(
-                data: Theme.of(ctx).copyWith(
-                  colorScheme: const ColorScheme.dark(primary: AppTheme.royalGold),
-                ),
-                child: child!,
-              ),
-            );
-            if (date != null) {
-              ref.read(registerWizardProvider.notifier).updateData('DateOfBirth', date.toIso8601String());
-            }
-          },
-          validator: (_) => state.data['DateOfBirth'] == null ? 'Date of birth is required' : null,
+        _buildDateField(
+          label: 'Date Of Birth (Registry Record) *',
+          value: state.data['DateOfBirth'],
+          onPicked: (v) => ref.read(registerWizardProvider.notifier).updateData('DateOfBirth', v),
         ),
-        _gap(),
+        const Divider(color: Colors.white10),
         _buildAsyncDropdown(
           label: 'Blood Group *',
           group: 'BloodGroup',
@@ -245,6 +217,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _sectionTitle('Academic Records'),
+        _buildTextField(
+          label: 'Educational Institution *',
+          initialValue: state.data['InstitutionName'],
+          hintText: 'Default: Govt. Haraganga College',
+          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('InstitutionName', v),
+        ),
+        _gap(),
         _buildAsyncDropdown(
           label: 'Degree Conferred *',
           group: 'Degree',
@@ -268,7 +247,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           value: state.data['PassingYear']?.toString(),
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('PassingYear', int.tryParse(v ?? '')),
         ),
-        _gap(),
+        const Divider(color: Colors.white10),
         _buildTextField(
           label: 'Current Profession / Designation',
           initialValue: state.data['Designation'],
@@ -319,12 +298,89 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle('Membership Type'),
+        _sectionTitle('Membership & Subscription'),
         _buildAsyncDropdown(
           label: 'Membership Category *',
           group: 'MembershipType',
           value: state.data['MembershipType'] ?? 'General',
           onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('MembershipType', v),
+        ),
+        _gap(),
+        _sectionTitle('Registry Filing Fee'),
+        const Text(
+          'Select your preferred channel for the one-time registration filing fee. Instructions will appear below your choice.',
+          style: TextStyle(fontSize: 11, color: Colors.white54),
+        ),
+        const SizedBox(height: AppConstants.paddingMedium),
+        FutureBuilder<List<Map<String, String>>>(
+          future: ref.read(dropdownDataProvider).getOptions('PaymentMethod'),
+          builder: (context, snapshot) {
+            final options = snapshot.data ?? [];
+            final selectedValue = state.data['PaymentMethodId']?.toString();
+            final selectedMethod = options.firstWhere((o) => o['value'] == selectedValue, orElse: () => {});
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: options.any((o) => o['value'] == selectedValue) ? selectedValue : null,
+                  decoration: const InputDecoration(labelText: 'Payment Method *', border: OutlineInputBorder()),
+                  dropdownColor: AppTheme.midnightSurface,
+                  items: options.map((o) => DropdownMenuItem(value: o['value'], child: Text(o['label']!))).toList(),
+                  onChanged: (v) {
+                    ref.read(registerWizardProvider.notifier).updateData('PaymentMethodId', int.tryParse(v ?? '0'));
+                  },
+                  validator: (v) => (v == null || v == '0') ? 'Please select a payment method' : null,
+                ),
+                if (selectedMethod.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.royalGold.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.2)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.info_outline, color: AppTheme.royalGold, size: 16),
+                            SizedBox(width: 8),
+                            Text('Payment Instructions', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 12)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          selectedMethod['instructions'] ?? 'Follow standard procedure.',
+                          style: const TextStyle(fontSize: 12, color: Colors.white70, height: 1.4),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (selectedMethod['requiresReference'] == 'true') ...[
+                    _buildTextField(
+                      label: 'Transaction ID / Reference *',
+                      initialValue: state.data['TransactionId'],
+                      onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('TransactionId', v),
+                    ),
+                    _gap(),
+                  ],
+                  if (selectedMethod['requiresReceipt'] == 'true') ...[
+                    _buildPickerField(
+                      label: 'Payment Receipt / Screenshot *',
+                      icon: Icons.receipt_long_outlined,
+                      value: state.data['PaymentProofPath'],
+                      onPicked: (path) => ref.read(registerWizardProvider.notifier).updateData('PaymentProofPath', path),
+                    ),
+                    _gap(),
+                  ],
+                ],
+              ],
+            );
+          },
         ),
         _gap(),
         _sectionTitle('Notification Protocols'),
@@ -380,8 +436,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
         _buildConsentCheckbox(
           'I solemnly affirm that the data provided is accurate. I pledge to uphold the GHCAA Constitution and maintain association decorum.',
-          state.data['HasAcceptedTerms'] ?? false,
-          (v) => ref.read(registerWizardProvider.notifier).updateData('HasAcceptedTerms', v),
+          state.data['HasAffirmed'] ?? false,
+          (v) => ref.read(registerWizardProvider.notifier).updateData('HasAffirmed', v),
         ),
       ],
     );
@@ -407,7 +463,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
   );
 
-  Widget _gap() => const SizedBox(height: AppConstants.paddingMedium);
+  Widget _gap() => const Divider(color: Colors.white10);
 
   Widget _buildPickerField({
     required String label,
@@ -466,9 +522,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         final options = snapshot.data ?? [];
         final validValue = options.any((e) => e['value'] == value) ? value : null;
         return DropdownButtonFormField<String>(
-          value: validValue,
-          decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
-          dropdownColor: AppTheme.midnightSurface,
+          initialValue: validValue,
           items: options.map((o) => DropdownMenuItem(value: o['value'], child: Text(o['label']!))).toList(),
           onChanged: onChanged,
           validator: (v) => v == null ? 'Please select $label' : null,
@@ -481,16 +535,64 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     required String label,
     required String? initialValue,
     required Function(String) onChanged,
+    String? hintText,
     TextInputType keyboardType = TextInputType.text,
     bool required = true,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
       initialValue: initialValue,
-      decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
+      decoration: InputDecoration(
+        labelText: label, 
+        hintText: hintText,
+        border: InputBorder.none,
+      ),
       keyboardType: keyboardType,
       onChanged: onChanged,
       validator: validator ?? (required ? (v) => (v == null || v.isEmpty) ? 'This field is required' : null : null),
+    );
+  }
+
+  Widget _buildDateField({
+    required String label,
+    String? value,
+    required Function(String) onPicked,
+  }) {
+    return InkWell(
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: value != null ? DateTime.parse(value) : DateTime.now().subtract(const Duration(days: 365 * 25)),
+          firstDate: DateTime(1940),
+          lastDate: DateTime.now().subtract(const Duration(days: 365 * 16)),
+          builder: (ctx, child) => Theme(
+            data: Theme.of(ctx).copyWith(
+              colorScheme: const ColorScheme.dark(primary: AppTheme.royalGold),
+            ),
+            child: child!,
+          ),
+        );
+        if (date != null) {
+          onPicked(date.toIso8601String());
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: Colors.white24),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.calendar_today_outlined, size: 18, color: AppTheme.royalGold),
+            const SizedBox(width: 12),
+            Text(
+              value != null ? value.split('T')[0] : label,
+              style: TextStyle(color: value != null ? Colors.white : Colors.white54, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

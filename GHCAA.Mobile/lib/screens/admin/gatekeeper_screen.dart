@@ -40,6 +40,7 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
       if (response.statusCode == 200) {
         setState(() {
           _scannedMember = response.data;
+          _scannedMember!['isTicket'] = false;
           _isLoading = false;
         });
         HapticFeedback.heavyImpact();
@@ -49,6 +50,40 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
     } catch (e) {
       setState(() {
         _error = 'Registry Error: Identity Node not found in archive.';
+        _isLoading = false;
+      });
+      HapticFeedback.vibrate();
+    }
+  }
+
+  Future<void> _verifyTicket(String ticketCode) async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+      _isScanning = false;
+    });
+
+    try {
+      final dio = ref.read(dioProvider);
+      final response = await dio.post('/events/admin/checkin/qr', data: {'ticketCode': ticketCode});
+      
+      if (response.statusCode == 200) {
+        setState(() {
+          _scannedMember = {
+            'fullName': 'TICKET VERIFIED',
+            'membershipNumber': ticketCode,
+            'status': 'Checked-In',
+            'isTicket': true,
+          };
+          _isLoading = false;
+        });
+        HapticFeedback.heavyImpact();
+      } else {
+        throw Exception();
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Invalid Ticket: Code unusable or already checked in.';
         _isLoading = false;
       });
       HapticFeedback.vibrate();
@@ -106,10 +141,17 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
             for (final barcode in barcodes) {
               final String? code = barcode.rawValue;
               if (code != null) {
-                final id = int.tryParse(code.replaceAll(RegExp(r'[^0-9]'), ''));
-                if (id != null) {
-                  _verifyMember(id);
+                // If it's pure 8 chars alphanumeric, it's likely a ticket.
+                // Otherwise try member ID.
+                if (code.length == 8 && RegExp(r'^[A-Z0-9]+$').hasMatch(code)) {
+                  _verifyTicket(code);
                   break;
+                } else {
+                  final id = int.tryParse(code.replaceAll(RegExp(r'[^0-9]'), ''));
+                  if (id != null) {
+                    _verifyMember(id);
+                    break;
+                  }
                 }
               }
             }
@@ -134,37 +176,57 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
 
   Widget _buildScannerOverlay() {
     return Center(
-      child: Container(
-        width: 250,
-        height: 250,
-        decoration: BoxDecoration(
-          border: Border.all(color: AppTheme.royalGold, width: 2),
-          borderRadius: BorderRadius.circular(24),
-        ),
+      child: SizedBox(
+        width: 260,
+        height: 260,
         child: Stack(
           children: [
-            _buildCorner(0, 0, 20, 0),
-            _buildCorner(null, 0, 0, 20),
-            _buildCorner(0, null, 20, 0),
-            _buildCorner(null, null, 0, 20),
+            // Top-left corner
+            Positioned(top: 0, left: 0, child: _buildCornerBracket(topLeft: true)),
+            // Top-right corner
+            Positioned(top: 0, right: 0, child: _buildCornerBracket(topRight: true)),
+            // Bottom-left corner
+            Positioned(bottom: 0, left: 0, child: _buildCornerBracket(bottomLeft: true)),
+            // Bottom-right corner
+            Positioned(bottom: 0, right: 0, child: _buildCornerBracket(bottomRight: true)),
+            // Subtle inner outline
+            Center(
+              child: Container(
+                width: 240,
+                height: 240,
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.15), width: 1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCorner(double? left, double? top, double br, double bl) {
-    return Positioned(
-      left: left,
-      top: top,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: AppTheme.royalGold,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(left == 0 && top == 0 ? 0 : 0),
-          ),
+  Widget _buildCornerBracket({
+    bool topLeft = false,
+    bool topRight = false,
+    bool bottomLeft = false,
+    bool bottomRight = false,
+  }) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        border: Border(
+          top: (topLeft || topRight) ? const BorderSide(color: AppTheme.royalGold, width: 3) : BorderSide.none,
+          bottom: (bottomLeft || bottomRight) ? const BorderSide(color: AppTheme.royalGold, width: 3) : BorderSide.none,
+          left: (topLeft || bottomLeft) ? const BorderSide(color: AppTheme.royalGold, width: 3) : BorderSide.none,
+          right: (topRight || bottomRight) ? const BorderSide(color: AppTheme.royalGold, width: 3) : BorderSide.none,
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: topLeft ? const Radius.circular(6) : Radius.zero,
+          topRight: topRight ? const Radius.circular(6) : Radius.zero,
+          bottomLeft: bottomLeft ? const Radius.circular(6) : Radius.zero,
+          bottomRight: bottomRight ? const Radius.circular(6) : Radius.zero,
         ),
       ),
     );

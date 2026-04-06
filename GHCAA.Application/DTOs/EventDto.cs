@@ -49,6 +49,9 @@ namespace GHCAA.Application.DTOs
         public DateTime? RegistrationEndDate { get; set; }
         public string? AdminNote { get; set; }
 
+        public int? ParticipantLimit { get; set; }
+        public bool HasWaitlist { get; set; } = false;
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             // 1. End date must be strictly after start date

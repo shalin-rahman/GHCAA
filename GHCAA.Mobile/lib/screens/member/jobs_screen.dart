@@ -40,8 +40,8 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
     final myMemberId = selfProfile?['id'];
 
     return AppScaffold(
-      title: 'Opportunities Hub',
-      breadcrumb: 'PORTAL > JOB HUB',
+      title: 'Jobs',
+      breadcrumb: 'PORTAL > JOBS',
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           HapticFeedback.mediumImpact();
@@ -62,7 +62,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                 prefixIcon: const Icon(Icons.search, size: 20, color: AppTheme.royalGold),
                 suffixIcon: _searchController.text.isNotEmpty 
                   ? IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 20, color: Colors.white54),
+                      icon: const Icon(Icons.cancel_rounded, size: 18, color: Colors.white24),
                       onPressed: () {
                         _searchController.clear();
                         ref.read(jobSearchQueryProvider.notifier).state = "";
@@ -77,6 +77,44 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                     borderSide: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.1))),
               ),
               onChanged: (v) => ref.read(jobSearchQueryProvider.notifier).state = v.toLowerCase(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      context.pushNamed('mentorship');
+                    },
+                    icon: const Icon(Icons.handshake_outlined, size: 16),
+                    label: const Text('MENTORSHIP HUB', style: TextStyle(fontSize: 9, letterSpacing: 1, fontWeight: FontWeight.bold)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.royalGold,
+                      side: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.3)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      context.pushNamed('professionals');
+                    },
+                    icon: const Icon(Icons.work_outline, size: 16),
+                    label: const Text('PROFESSIONALS', style: TextStyle(fontSize: 9, letterSpacing: 1, fontWeight: FontWeight.bold)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.royalGold,
+                      side: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.3)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -143,6 +181,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                                                 IconButton(
                                                   icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
                                                   onPressed: () async {
+                                                     HapticFeedback.lightImpact();
                                                      final confirm = await showDialog<bool>(
                                                        context: context,
                                                        builder: (ctx) => AlertDialog(
@@ -155,6 +194,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                                                        ),
                                                      );
                                                      if (confirm == true) {
+                                                       HapticFeedback.mediumImpact();
                                                        await ref.read(jobServiceProvider).deleteJob(job['id']);
                                                        ref.invalidate(jobsListProvider);
                                                      }
@@ -249,6 +289,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                 };
                 final success = await ref.read(jobServiceProvider).postJob(payload);
                 if (success) {
+                  HapticFeedback.heavyImpact();
                   ref.invalidate(jobsListProvider);
                   if (ctx.mounted) Navigator.pop(ctx);
                 }

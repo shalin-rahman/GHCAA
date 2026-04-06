@@ -214,7 +214,8 @@ export class AdminComm implements OnInit {
             code: '',
             description: '',
             subject: '',
-            body: ''
+            body: '',
+            variables: '[]'
         });
         setTimeout(() => this.initEditor('template-editor', '', (html) => {
             const t = this.editingTemplate();

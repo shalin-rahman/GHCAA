@@ -5,6 +5,8 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Linq;
 
@@ -22,7 +24,26 @@ public class FinancialServiceTests : TestBase
     {
         _communicationMock = new Mock<ICommunicationService>();
         _notificationMock = new Mock<INotificationService>();
-        _service = new FinancialService(_context, _communicationMock.Object, _notificationMock.Object);
+        
+        var storageMock = new Mock<IFileStorageService>();
+        var realTimeMock = new Mock<IRealTimeService>();
+        var loggerMock = new Mock<ILogger<FinancialService>>();
+        var configMock = new Mock<IConfiguration>();
+        var userMock = new Mock<IUserService>();
+        var activityMock = new Mock<IActivityService>();
+        var gamificationMock = new Mock<IGamificationService>();
+
+        _service = new FinancialService(
+            _context, 
+            _communicationMock.Object, 
+            _notificationMock.Object,
+            storageMock.Object,
+            realTimeMock.Object,
+            loggerMock.Object,
+            configMock.Object,
+            userMock.Object,
+            activityMock.Object,
+            gamificationMock.Object);
 
         if (!await _context.MembershipFeeConfigs.AnyAsync())
         {

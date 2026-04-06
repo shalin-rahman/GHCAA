@@ -437,7 +437,8 @@ export const API_ENDPOINTS = {
         HISTORY: '/api/messaging/history'
     },
     HUBS: {
-        CHAT: '/hubs/chat'
+        CHAT: '/api/hubs/chat',
+        NOTIFICATIONS: '/api/hubs/notifications'
     },
     NOTIFICATIONS: {
         BASE: '/api/notifications',

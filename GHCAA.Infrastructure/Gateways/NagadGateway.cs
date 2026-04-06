@@ -40,5 +40,10 @@ namespace GHCAA.Infrastructure.Gateways
         {
             return Task.FromResult(false);
         }
+
+        public Task<bool> ProcessWebhookAsync(Stream stream, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(false);
+        }
     }
 }

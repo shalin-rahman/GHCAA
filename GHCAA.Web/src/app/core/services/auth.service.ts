@@ -19,7 +19,7 @@ export class AuthService {
     public isAuthenticated = computed(() => !!this._currentUser());
 
     private inactivityTimer: any;
-    private readonly TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+    private readonly TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 
     constructor() { 
         this.initActivityTracking();

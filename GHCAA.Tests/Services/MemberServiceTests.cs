@@ -56,7 +56,8 @@ public class MemberServiceTests : TestBase
             _mockNotificationService.Object,
             _mockConfig.Object,
             _mockGamification.Object,
-            _mockFinancialService.Object
+            _mockFinancialService.Object,
+            new Mock<IRealTimeService>().Object
         );
     }
 

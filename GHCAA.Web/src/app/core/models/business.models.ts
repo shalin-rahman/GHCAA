@@ -147,6 +147,7 @@ export interface NewsPost {
     isActive: boolean;
     authorName?: string;
     createdAt: string | Date;
+    collaborators: string[];
 }
 
 export interface CreateNewsDto {
@@ -156,6 +157,7 @@ export interface CreateNewsDto {
     status?: SubmissionStatus;
     imageUrl?: string;
     isActive?: boolean;
+    collaborators?: string[];
 }
 
 export interface UpdateNewsDto extends Partial<CreateNewsDto> {

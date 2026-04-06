@@ -66,8 +66,8 @@
 
 .position-badge {
     display: inline-block;
-    background: var(--surface-color);
-    color: var(--primary-color);
+    background: rgba(var(--accent-color-rgb), 0.1);
+    color: var(--accent-color);
     padding: 0.25rem 0.75rem;
     border-radius: 4px;
     font-size: 0.7rem;
@@ -120,7 +120,7 @@
 }
 
 .pillar-card h4 {
-    color: var(--primary-color);
+    color: var(--accent-color);
     margin-bottom: 0.75rem;
 }
 

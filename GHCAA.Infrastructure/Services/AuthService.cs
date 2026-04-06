@@ -27,13 +27,14 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<TokenResponseDto?> LoginAsync(LoginDto loginDto, CancellationToken cancellationToken = default)
         {
-            // Trim whitespace to prevent subtle login failures from copy-paste or autocomplete
+            // Trim whitespace and remove internal spaces for identifiers like NID/Username
             var input = loginDto.Username?.Trim() ?? string.Empty;
+            var normalizedInput = input.Replace(" ", "");
 
-            // 1. Try finding user directly by Username (exact match)
+            // 1. Try finding user directly by Username (exact match with normalized string)
             var user = await _db.Users
                 .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Username == input, cancellationToken);
+                .FirstOrDefaultAsync(u => u.Username == normalizedInput || u.Username == input, cancellationToken);
 
             // 2. Fallback: If not found, try finding user via Member properties (Email, NID, MembershipNumber)
             if (user == null)
@@ -42,7 +43,7 @@ namespace GHCAA.Infrastructure.Services
                 
                 var member = await _db.Members
                     .IgnoreQueryFilters() // Just for lookup, we'll check status/archived later
-                    .FirstOrDefaultAsync(m => m.Email == input || m.NID == input || m.MembershipNumber == input, cancellationToken);
+                    .FirstOrDefaultAsync(m => m.Email == input || m.NID == normalizedInput || m.MembershipNumber == normalizedInput || m.MembershipNumber == input, cancellationToken);
 
                 if (member != null)
                 {

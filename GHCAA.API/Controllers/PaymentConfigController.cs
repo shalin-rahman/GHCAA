@@ -53,7 +53,7 @@ namespace GHCAA.API.Controllers
 
         // ADMIN: Get all payment configs
         [HttpGet("admin/all")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> GetAllConfigs(CancellationToken cancellationToken)
         {
             var configs = await _db.PaymentConfigurations
@@ -77,7 +77,7 @@ namespace GHCAA.API.Controllers
 
         // ADMIN: Create new payment config
         [HttpPost("admin")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> CreateConfig([FromBody] PaymentConfiguration config, CancellationToken cancellationToken)
         {
             config.CreatedAt = DateTime.UtcNow;
@@ -88,7 +88,7 @@ namespace GHCAA.API.Controllers
 
         // ADMIN: Update payment config
         [HttpPut("admin/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> UpdateConfig(int id, [FromBody] PaymentConfiguration config, CancellationToken cancellationToken)
         {
             var existing = await _db.PaymentConfigurations.FindAsync(new object[] { id }, cancellationToken);
@@ -130,7 +130,7 @@ namespace GHCAA.API.Controllers
 
         // ADMIN: Toggle enable/disable
         [HttpPost("admin/{id}/toggle")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> ToggleConfig(int id, CancellationToken cancellationToken)
         {
             var config = await _db.PaymentConfigurations.FindAsync(new object[] { id }, cancellationToken);
@@ -144,7 +144,7 @@ namespace GHCAA.API.Controllers
 
         // ADMIN: Delete payment config
         [HttpDelete("admin/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> DeleteConfig(int id, CancellationToken cancellationToken)
         {
             var config = await _db.PaymentConfigurations.FindAsync(new object[] { id }, cancellationToken);
@@ -157,7 +157,7 @@ namespace GHCAA.API.Controllers
 
         // ADMIN: Seed default payment methods if none exist
         [HttpPost("admin/seed-defaults")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> SeedDefaults(CancellationToken cancellationToken)
         {
             if (await _db.PaymentConfigurations.AnyAsync(cancellationToken))

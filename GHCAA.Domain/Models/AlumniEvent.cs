@@ -37,6 +37,9 @@ namespace GHCAA.Domain.Models
         
         public string? AdminNote { get; set; }
 
+        public int? ParticipantLimit { get; set; }
+        public bool HasWaitlist { get; set; } = false;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

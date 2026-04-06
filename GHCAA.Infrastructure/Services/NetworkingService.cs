@@ -205,9 +205,9 @@ namespace GHCAA.Infrastructure.Services
 
                 // Summary Data for easier display
                 CategoryBadge = m.Category.ToString(),
-                PassingYear = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.PassingYear,
-                Degree = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Degree,
-                Subject = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Subject,
+                GHCLastCertificatePassingYear = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.PassingYear,
+                GHCLastCertificate = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Degree,
+                GHCLastCertificateSubject = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Subject,
                 Designation = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Designation,
                 OrganizationName = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.OrganizationName,
                 ProfessionalSector = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Sector,
@@ -319,9 +319,9 @@ namespace GHCAA.Infrastructure.Services
             var ghcRecord = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC);
             if (ghcRecord != null)
             {
-                dto.PassingYear = ghcRecord.PassingYear;
-                dto.Degree = ghcRecord.Degree;
-                dto.Subject = ghcRecord.Subject;
+                dto.GHCLastCertificatePassingYear = ghcRecord.PassingYear;
+                dto.GHCLastCertificate = ghcRecord.Degree;
+                dto.GHCLastCertificateSubject = ghcRecord.Subject;
             }
 
             var currentJob = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent);
@@ -330,6 +330,7 @@ namespace GHCAA.Infrastructure.Services
                 dto.Designation = currentJob.Designation;
                 dto.OrganizationName = currentJob.OrganizationName;
                 dto.ProfessionalSector = currentJob.Sector;
+                dto.Location = currentJob.Location;
             }
 
             return dto;

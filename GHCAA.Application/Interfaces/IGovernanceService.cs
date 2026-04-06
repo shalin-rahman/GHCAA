@@ -18,5 +18,14 @@ namespace GHCAA.Application.Interfaces
         Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, CancellationToken cancellationToken = default);
         Task<bool> RemoveMemberFromCommitteeAsync(int ecMemberId, CancellationToken cancellationToken = default);
         Task<bool> DeleteECMemberAsync(int id, CancellationToken cancellationToken = default);
+        
+        Task<ECPeriod?> GetActivePeriodAsync(CancellationToken cancellationToken = default);
+
+        // Constitution logic
+        Task<Constitution?> GetActiveConstitutionAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<Constitution>> GetConstitutionHistoryAsync(CancellationToken cancellationToken = default);
+        Task<bool> CreateConstitutionVersionAsync(string version, string content, string changeSummary, CancellationToken cancellationToken = default);
+        Task<bool> ActivateConstitutionAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> VoteOnConstitutionAsync(int constitutionId, int memberId, bool isFor, string? comments, CancellationToken cancellationToken = default);
     }
 }

@@ -26,14 +26,24 @@ export class AdminFeeConfig implements OnInit {
   feeCategories = FINANCIAL_CATEGORY_OPTIONS;
   membershipTypes = MEMBERSHIP_TYPE_OPTIONS;
 
+  static configDatesValidator(group: import('@angular/forms').AbstractControl): import('@angular/forms').ValidationErrors | null {
+    const start = group.get('effectiveDate')?.value;
+    const end = group.get('effectiveTo')?.value;
+    if (start && end && new Date(end) <= new Date(start)) {
+        return { endBeforeStart: "'Effective To' date must be after 'Effective From' date." };
+    }
+    return null;
+  }
+
   form = this.fb.group({
     category: ['RegistrationFee', Validators.required],
     membershipType: ['General', Validators.required],
     amount: [0, [Validators.required, Validators.min(0)]],
     effectiveDate: ['', Validators.required],
     effectiveTo: [null],
-    isActive: [true]
-  });
+    isActive: [true],
+    description: ['']
+  }, { validators: AdminFeeConfig.configDatesValidator });
 
   ngOnInit() {
     this.loadConfigs();
@@ -70,13 +80,22 @@ export class AdminFeeConfig implements OnInit {
     this.form.patchValue({
       ...config,
       effectiveDate: config.effectiveDate ? new Date(config.effectiveDate).toISOString().split('T')[0] : '',
-      effectiveTo: config.effectiveTo ? new Date(config.effectiveTo).toISOString().split('T')[0] : null
+      effectiveTo: config.effectiveTo ? new Date(config.effectiveTo).toISOString().split('T')[0] : null,
+      description: config.description || ''
     });
     this.showForm.set(true);
   }
 
   submitForm() {
-    if (this.form.invalid) return;
+    this.form.markAllAsTouched();
+    if (this.form.invalid) {
+      if (this.form.errors?.['endBeforeStart']) {
+        this.notify.error(this.form.errors['endBeforeStart']);
+      } else {
+        this.notify.error('Please fix the errors in the form.');
+      }
+      return;
+    }
 
     this.submitting.set(true);
     const id = this.editingId();

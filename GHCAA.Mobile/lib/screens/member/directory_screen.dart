@@ -8,6 +8,8 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../features/networking/networking_service.dart';
 import '../../features/lookups/dropdown_service.dart';
 import '../../core/config/app_config.dart';
+import '../../core/widgets/custom_network_image.dart';
+import '../../core/widgets/skeleton_loader.dart';
 
 final directorySearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -127,8 +129,8 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: 'Alumni Directory',
-      breadcrumb: 'PORTAL > ALUMNI DIRECTORY',
+      title: 'Member Directory',
+      breadcrumb: 'PORTAL > MEMBER DIRECTORY',
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
@@ -136,9 +138,18 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
             TextField(
               key: const ValueKey('directory_search'),
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Search alumni registry...',
-                prefixIcon: Icon(Icons.search_rounded, size: 20),
+                prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                suffixIcon: _searchController.text.isNotEmpty 
+                  ? IconButton(
+                      icon: const Icon(Icons.cancel_rounded, size: 18, color: Colors.white24),
+                      onPressed: () {
+                        _searchController.clear();
+                        _onSearchChanged('');
+                      },
+                    )
+                  : null,
               ),
               onChanged: _onSearchChanged,
             ),
@@ -194,7 +205,10 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
             const SizedBox(height: 20),
             Expanded(
               child: _isLoading 
-                ? const Center(child: CircularProgressIndicator(color: AppTheme.royalGold))
+                ? ListView.builder(
+                    itemCount: 8,
+                    itemBuilder: (context, index) => SkeletonLoader.memberCard(),
+                  )
                 : RefreshIndicator(
                     color: AppTheme.royalGold,
                     onRefresh: () async {
@@ -249,10 +263,32 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(m['fullName'] ?? 'Anonymous Alumnus',
-                                                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: -0.2)),
-                                                  const SizedBox(height: 1),
-                                                  Text(m['membershipNumber'] ?? 'REG-PENDING', style: const TextStyle(color: AppTheme.royalGold, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                                  Row(
+                                                    children: [
+                                                      Flexible(
+                                                        child: Text(m['fullName'] ?? 'Anonymous Alumnus',
+                                                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: -0.2),
+                                                            overflow: TextOverflow.ellipsis),
+                                                      ),
+                                                      if (m['isVerified'] == true) ...[
+                                                        const SizedBox(width: 4),
+                                                        const Icon(Icons.verified, color: AppTheme.royalGold, size: 14),
+                                                      ],
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Text(m['membershipNumber'] ?? 'REG-PENDING', style: const TextStyle(color: AppTheme.royalGold, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                                      if (m['memberCategory'] != null) ...[
+                                                        const SizedBox(width: 8),
+                                                        Container(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0.5),
+                                                          decoration: BoxDecoration(color: AppTheme.royalGold.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(3)),
+                                                          child: Text(m['memberCategory']!.toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 7, fontWeight: FontWeight.w900)),
+                                                        ),
+                                                      ],
+                                                    ],
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -330,8 +366,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   String _getCompactBatch(Map<String, dynamic> m) {
     final degree = m['degree'] ?? 'HSC';
     final year = m['passingYear']?.toString() ?? '';
-    final shortYear = year.length > 2 ? year.substring(year.length - 2) : year;
-    return '$degree \'$shortYear';
+    return 'Batch of $degree $year';
   }
 
   Widget _buildFilterDropdown(String label, List<String> options) {
@@ -374,29 +409,14 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   }
 
   Widget _buildMemberThumbnail(String? url, String? name) {
-    String? fullUrl;
-    if (url != null && url.isNotEmpty) {
-      if (url.startsWith('http')) {
-        fullUrl = url;
-      } else {
-        final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
-        final cleanP = url.startsWith('/') ? url.substring(1) : url;
-        fullUrl = '$base/$cleanP';
-      }
-    }
-
-    return Container(
+    return SizedBox(
       width: 44,
       height: 52,
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.2)),
-        image: fullUrl != null ? DecorationImage(image: NetworkImage(fullUrl), fit: BoxFit.cover) : null,
+      child: CustomNetworkImage(
+        imageUrl: url ?? '',
+        borderRadius: 10,
+        fit: BoxFit.cover,
       ),
-      child: fullUrl == null 
-        ? Center(child: Text(name != null && name.isNotEmpty ? name[0] : '?', style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 16)))
-        : null,
     );
   }
 }

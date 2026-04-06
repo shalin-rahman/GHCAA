@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace GHCAA.API.Controllers
 {
     [ApiController]
-    [Route("healtz")]
+    [Route("healthz")]
     public class HealthController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
@@ -61,7 +61,7 @@ namespace GHCAA.API.Controllers
             if (!emailOk) allHealthy = false;
 
             // 4. SMS Gateway (Placeholder or Check setting)
-            var smsOk = !string.IsNullOrEmpty(_config["SmsSettings:ApiKey"]);
+            var smsOk = !string.IsNullOrEmpty(_config["SmsSettings:Token"]);
             health.Checks.Add(new { Name = "SmsService", Status = smsOk ? "Healthy" : "Unconfigured" });
             // SMS is currently optional in early phases, so we won't mark allHealthy false for it yet
 

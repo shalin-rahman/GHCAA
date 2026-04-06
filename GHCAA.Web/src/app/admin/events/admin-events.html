@@ -78,12 +78,19 @@
                         <div *ngIf="eventForm.get('title')?.invalid && eventForm.get('title')?.touched"
                             class="text-[9px] text-red-500 font-bold uppercase mt-1">Title is required</div>
                     </div>
-                    <div class="form-group">
-                        <label>Scheduled Date & Time <span class="text-red-500">*</span></label>
-                        <input type="datetime-local" formControlName="date"
-                            [class.border-red-500]="eventForm.get('date')?.invalid && eventForm.get('date')?.touched">
-                        <div *ngIf="eventForm.get('date')?.invalid && eventForm.get('date')?.touched"
-                            class="text-[9px] text-red-500 font-bold uppercase mt-1">Event date is required</div>
+                    <div class="form-group border-r border-white/5 pr-4">
+                        <label>Start Date & Time <span class="text-red-500">*</span></label>
+                        <input type="datetime-local" formControlName="startDate"
+                            [class.border-red-500]="eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.touched">
+                        <div *ngIf="eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.touched"
+                            class="text-[9px] text-red-500 font-bold uppercase mt-1">Start date is required</div>
+                    </div>
+                    <div class="form-group pl-4">
+                        <label>End Date & Time <span class="text-red-500">*</span></label>
+                        <input type="datetime-local" formControlName="endDate"
+                            [class.border-red-500]="eventForm.get('endDate')?.invalid && eventForm.get('endDate')?.touched">
+                        <div *ngIf="eventForm.get('endDate')?.invalid && eventForm.get('endDate')?.touched"
+                            class="text-[9px] text-red-500 font-bold uppercase mt-1">End date is required</div>
                     </div>
                 </div>
 
@@ -126,8 +133,17 @@
                         <input type="number" formControlName="registrationFee" placeholder="0.00">
                     </div>
                     <div class="form-group">
-                        <label>Visibility & Asset Access</label>
+                        <label>Participant Limit</label>
+                        <input type="number" formControlName="participantLimit" placeholder="Leave empty for unlimited">
+                    </div>
+                    <div class="form-group">
+                        <label>Visibility & Capacity Controls</label>
                         <div class="flex flex-col gap-4 py-2">
+                            <label class="premium-checkbox-label">
+                                <input type="checkbox" formControlName="hasWaitlist">
+                                <span class="checkmark"></span>
+                                <span class="label-text">Enable Waitlist (if limit reached)</span>
+                            </label>
                             <label class="premium-checkbox-label">
                                 <input type="checkbox" formControlName="requiresPayment">
                                 <span class="checkmark"></span>
@@ -251,8 +267,10 @@
                 <div class="event-actions">
                     <button (click)="viewEvent(ev)" class="btn btn-outline btn-sm rounded-xl">View</button>
                     <button (click)="openEditForm(ev)" class="btn btn-secondary btn-sm rounded-xl">Edit</button>
+                    @if (nav.isSuperAdmin()) {
                     <button (click)="deleteEvent(ev.id)"
                         class="btn btn-secondary btn-sm border-red-500/20 text-red-500 hover:bg-red-500/10">Delete</button>
+                    }
                 </div>
             </div>
             } @empty {

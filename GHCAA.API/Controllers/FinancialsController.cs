@@ -116,7 +116,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("fees/config")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> GetFeeConfigs(CancellationToken cancellationToken)
         {
             var configs = await _financialService.GetMembershipFeeConfigsAsync(cancellationToken);
@@ -124,7 +124,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("fees/config")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> AddFeeConfig([FromBody] CreateMembershipFeeConfigDto dto, CancellationToken cancellationToken)
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
@@ -138,7 +138,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPut("fees/config")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> UpdateFeeConfig([FromBody] UpdateMembershipFeeConfigDto dto, CancellationToken cancellationToken)
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;

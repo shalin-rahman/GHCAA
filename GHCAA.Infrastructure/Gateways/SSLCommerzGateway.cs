@@ -124,6 +124,25 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
+        public async Task<bool> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                using var reader = new StreamReader(body);
+                var content = await reader.ReadToEndAsync(cancellationToken);
+                var data = content.Split('&', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Split('='))
+                    .ToDictionary(x => x[0], x => x.Length > 1 ? Uri.UnescapeDataString(x[1]) : "");
+
+                return await VerifyCallbackAsync(data, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SSLCommerz Webhook Processing Failed");
+                return false;
+            }
+        }
+
         private class SSLCommerzValidationResponse
         {
             public string? status { get; set; }

@@ -18,7 +18,7 @@ class AuthService {
   AuthService(this._dio, this._storage, this._ref);
 
 
-  Future<String?> login(String identifier, String password) async {
+  Future<String?> login(String identifier, String password, {bool enableBiometric = false}) async {
     try {
       DeviceInfo? device;
       try {
@@ -39,6 +39,12 @@ class AuthService {
 
         await _storage.saveToken(token);
         await _storage.saveRole(role);
+        
+        if (enableBiometric) {
+          await _storage.saveCredentials(identifier, password); // For Biometric Fast Login
+        } else {
+          await _storage.clearCredentials(); // Ensure removed if user opts out
+        }
 
         return null; // Success
       }
@@ -60,42 +66,45 @@ class AuthService {
     try {
       final String? photoPath = data['ProfileImagePath'];
       final String? nidPath = data['NidPhotoPath'];
+      final String? paymentPath = data['PaymentProofPath'];
+      final academicHistory = data['AcademicHistory'] as List?;
 
-      // Remove local paths from JSON as they are irrelevant for the server
       data.remove('ProfileImagePath');
       data.remove('NidPhotoPath');
+      data.remove('PaymentProofPath');
+      data.remove('AcademicHistory');
 
       final formData = FormData.fromMap(data);
 
       if (photoPath != null && photoPath.isNotEmpty) {
-        formData.files.add(MapEntry(
-            'photo', await MultipartFile.fromFile(photoPath, filename: 'profile_photo.jpg')));
+        formData.files.add(MapEntry('photo', await MultipartFile.fromFile(photoPath, filename: 'profile_photo.jpg')));
+      }
+      if (nidPath != null && nidPath.isNotEmpty) {
+        formData.files.add(MapEntry('certificate', await MultipartFile.fromFile(nidPath, filename: 'academic_proof.jpg')));
+      }
+      if (paymentPath != null && paymentPath.isNotEmpty) {
+        formData.files.add(MapEntry('paymentProof', await MultipartFile.fromFile(paymentPath, filename: 'payment_receipt.jpg')));
       }
 
-      if (nidPath != null && nidPath.isNotEmpty) {
-        formData.files.add(MapEntry(
-            'certificate', await MultipartFile.fromFile(nidPath, filename: 'nid_document.jpg')));
+      if (academicHistory != null) {
+        for (int i = 0; i < academicHistory.length; i++) {
+          final record = academicHistory[i] as Map<String, dynamic>;
+          record.forEach((key, value) {
+            if (value != null) {
+              formData.fields.add(MapEntry('AcademicHistory[$i].$key', value.toString()));
+            }
+          });
+        }
       }
 
       final response = await _dio.post('/auth/register', data: formData);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return null; // Success
-      }
+      return (response.statusCode == 200 || response.statusCode == 201) ? null : "Submission failed.";
     } catch (e) {
       if (e is DioException) {
-        if (e.response?.statusCode == 400) {
-          final msg = e.response?.data?['message'] ??
-              e.response?.data?['error'] ??
-              "Individual details already registered or data mismatch.";
-          return msg;
-        }
-        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
-          return "Connection timed out. Please try again.";
-        }
+        return e.response?.data?['message'] ?? e.response?.data?['error'] ?? "Data mismatch or connection error.";
       }
-      return "An unexpected error occurred during submission.";
+      return "An unexpected error occurred.";
     }
-    return "Submission failed. Please check your data.";
   }
 
   Future<bool> forgotPassword(String identifier) async {
@@ -125,11 +134,41 @@ class AuthService {
   }
 }
 
-final roleProvider = FutureProvider.autoDispose<String?>((ref) async {
+// Non-autoDispose so role is cached in Riverpod across navigations.
+// Invalidate explicitly after login/logout via ref.invalidate(roleProvider).
+final roleProvider = FutureProvider<String?>((ref) async {
   return ref.read(authServiceProvider).getRole();
 });
 
-final userProfileProvider = FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
+/// Canonical list of profile fields for completeness calculation.
+/// Uses exact keys returned by the backend /profile endpoint.
+/// Update this one list to affect all completeness indicators across the app.
+const profileCompletenessFields = [
+  'fullName',
+  'email',
+  'mobileNo',      // API key — NOT 'phoneNumber'
+  'dateOfBirth',
+  'gender',
+  'membershipNumber',
+  'photoPath',
+  'passingYear',   // API key — NOT 'batch'
+  'subject',       // API key — NOT 'department'
+  'presentAddress',
+  'bloodGroup',
+];
+
+/// Returns a value between 0.0 and 1.0 representing profile completeness.
+double calculateProfileCompleteness(Map<String, dynamic>? profile) {
+  if (profile == null) return 0;
+  final filled = profileCompletenessFields
+      .where((f) => profile[f] != null && profile[f].toString().isNotEmpty)
+      .length;
+  return filled / profileCompletenessFields.length;
+}
+
+// Non-autoDispose so profile is cached in Riverpod across navigations.
+// Invalidate explicitly after login/logout via ref.invalidate(userProfileProvider).
+final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   final storage = ref.read(storageServiceProvider);
   try {
     final dio = ref.read(dioProvider);
@@ -144,6 +183,13 @@ final userProfileProvider = FutureProvider.autoDispose<Map<String, dynamic>?>((r
     return await storage.getProfile();
   }
 });
+
+class ActivityNotifier extends StateNotifier<DateTime> {
+  ActivityNotifier() : super(DateTime.now());
+  void update() => state = DateTime.now();
+}
+
+final lastActivityProvider = StateNotifierProvider<ActivityNotifier, DateTime>((ref) => ActivityNotifier());
 
 /// Admin / SuperAdmin checks for mobile UI (case-insensitive; tolerant of API casing).
 extension UserRoleExt on String? {

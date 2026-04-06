@@ -51,7 +51,7 @@
 
     &:hover {
         transform: translateY(-10px) rotateY(5deg);
-        border-color: var(--primary-color);
+        border-color: var(--text-main);
     }
 
     .card-header {
@@ -75,7 +75,7 @@
                 margin: 0;
                 font-size: 1.8rem;
                 font-weight: 800;
-                color: var(--primary-color);
+                color: var(--text-main);
                 letter-spacing: 2px;
                 line-height: 1;
             }
@@ -121,7 +121,7 @@
             .name {
                 font-size: 1.6rem;
                 font-weight: 800;
-                color: var(--primary-color);
+                color: var(--text-main);
                 text-transform: uppercase;
                 margin-bottom: 0.75rem;
                 line-height: 1.2;
@@ -160,7 +160,7 @@
                     .value {
                         font-family: monospace;
                         font-weight: 700;
-                        color: var(--primary-color);
+                        color: var(--text-main);
                         font-size: 1rem;
                     }
                 }
@@ -198,7 +198,7 @@
 
             strong {
                 font-size: 0.75rem;
-                color: var(--primary-color);
+                color: var(--text-main);
             }
 
             span {
@@ -277,7 +277,7 @@
 
         span {
             font-weight: 800;
-            color: var(--primary-color);
+            color: var(--text-main);
         }
     }
 
@@ -308,7 +308,7 @@
         width: 50px;
         height: 50px;
         border: 4px solid var(--glass-border);
-        border-top-color: var(--primary-color);
+        border-top-color: var(--text-main);
         border-radius: 50%;
         animation: spin 1s infinite linear;
         margin: 0 auto 1.5rem;

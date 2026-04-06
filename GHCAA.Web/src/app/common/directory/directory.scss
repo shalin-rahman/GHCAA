@@ -17,7 +17,7 @@
     h2 {
         margin: 0;
         font-size: 2rem;
-        color: var(--primary-color);
+        color: var(--text-main);
     }
 
     p {
@@ -64,7 +64,7 @@
 
         &:focus {
             outline: none;
-            border-color: var(--primary-color);
+            border-color: var(--text-main);
             box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
         }
     }
@@ -105,7 +105,7 @@
 
     &:hover {
         transform: translateY(-8px);
-        border-color: var(--primary-color);
+        border-color: var(--text-main);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     }
 }
@@ -160,7 +160,7 @@
         .m-no {
             font-size: 0.7rem;
             font-weight: 800;
-            color: var(--primary-color);
+            color: var(--text-main);
             background: rgba(var(--primary-rgb), 0.05);
             padding: 0.15rem 0.5rem;
             border-radius: 4px;
@@ -183,7 +183,7 @@
                 opacity: 0.4;
             }
         }
-        .m-type-label { color: var(--primary-color); }
+        .m-type-label { color: var(--text-main); }
         .m-cat-label { color: var(--text-muted); }
     }
 
@@ -223,7 +223,7 @@
         strong { color: var(--text-main); }
         
         a {
-            color: var(--primary-color);
+            color: var(--text-main);
             text-decoration: none;
             font-weight: 700;
             &:hover { text-decoration: underline; }
@@ -233,7 +233,7 @@
             .batch-text {
                 color: var(--text-main);
                 strong {
-                    color: var(--primary-color);
+                    color: var(--text-main);
                     font-weight: 900;
                     text-decoration: underline;
                     text-decoration-color: rgba(var(--primary-rgb), 0.2);
@@ -258,7 +258,7 @@
     color: var(--text-muted);
 
     strong {
-        color: var(--primary-color);
+        color: var(--text-main);
     }
 }
 
@@ -280,7 +280,7 @@
         width: 20px;
         height: 20px;
         border: 2px solid var(--glass-border);
-        border-top-color: var(--primary-color);
+        border-top-color: var(--text-main);
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
     }
@@ -410,7 +410,7 @@
     .role {
         margin: 0 0 1rem;
         font-size: 1.1rem;
-        color: var(--primary-color);
+        color: var(--text-main);
         font-weight: 600;
     }
 }
@@ -450,7 +450,7 @@
         font-size: 0.9rem;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: var(--primary-color);
+        color: var(--text-main);
         border-bottom: 1px solid var(--glass-border);
         padding-bottom: 0.75rem;
         display: flex;
@@ -496,7 +496,7 @@
         word-break: break-word;
 
         a {
-            color: var(--primary-color);
+            color: var(--text-main);
             text-decoration: none;
 
             &:hover {
@@ -580,7 +580,7 @@
 
         .h-period {
             font-size: 0.75rem;
-            color: var(--primary-color);
+            color: var(--text-main);
             font-weight: 800;
             letter-spacing: 0.5px;
         }

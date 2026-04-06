@@ -42,16 +42,15 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileProvider);
-    final roleAsync = ref.watch(roleProvider);
     final isCompact = ref.watch(dashboardLayoutProvider);
 
     return AppScaffold(
       showAppBar: false,
       child: profileAsync.when(
         data: (profile) {
+          final roleAsync = ref.watch(roleProvider);
+          final isAdmin = roleAsync.value?.isStaffAdminRole ?? false;
           final fullName = profile?['fullName'] ?? 'Distinguished Alumnus';
-          final firstName = fullName.split(' ').first;
-          final isAdmin = roleAsync.value.isStaffAdminRole;
           
           String? photoUrl;
           if (profile?['photoPath'] != null && profile!['photoPath'].toString().isNotEmpty) {
@@ -120,7 +119,7 @@ class DashboardScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
                       
                       // Majestic Profile Banner (More compact version)
-                      _buildMajesticBanner(firstName, profile, photoUrl),
+                      _buildMajesticBanner(fullName, profile, photoUrl),
                       const SizedBox(height: 16),
                       _buildCompletenessCheck(context, profile),
                       const SizedBox(height: 24),
@@ -139,18 +138,18 @@ class DashboardScreen extends ConsumerWidget {
 
                       _buildCategoryHeader('PORTAL DIRECTIVES', AppTheme.royalGold),
                       _buildResponsiveGrid(context, isCompact, [
-                        _buildActionCard(context, Icons.account_circle_outlined, 'Identity Registry', 'Digital ID', '/profile', isCompact: isCompact),
-                        _buildActionCard(context, Icons.groups_outlined, 'Alumni Network', 'Registry', '/directory', isCompact: isCompact),
-                        _buildActionCard(context, Icons.account_balance_wallet_outlined, 'Fiscal Nodes', 'Dues', '/financials', isCompact: isCompact, accentColor: Colors.tealAccent),
-                        _buildActionCard(context, Icons.work_outline, 'Career Hub', 'Jobs', '/jobs', isCompact: isCompact),
-                        _buildActionCard(context, Icons.event_available_outlined, 'Timeline', 'Events', '/events', isCompact: isCompact),
-                        _buildActionCard(context, Icons.newspaper_outlined, 'Editorial', 'Journal', '/news', isCompact: isCompact, accentColor: Colors.purpleAccent),
-                        _buildActionCard(context, Icons.photo_library_outlined, 'Visual Hub', 'Gallery', '/gallery', isCompact: isCompact, accentColor: Colors.purpleAccent),
-                        _buildActionCard(context, Icons.corporate_fare_outlined, 'Executive Board', 'Committee', '/committee', isCompact: isCompact),
-                        _buildActionCard(context, Icons.history_outlined, 'Historical Log', 'Activity', '/activity', isCompact: isCompact),
-                        _buildActionCard(context, Icons.notifications_active_outlined, 'Dispatch', 'Alerts', '/notifications', isCompact: isCompact, accentColor: Colors.orangeAccent),
-                        _buildActionCard(context, Icons.support_agent_outlined, 'Node Support', 'Help', '/support', isCompact: isCompact),
-                        _buildActionCard(context, Icons.info_outline, 'Architecture', 'About', '/about', isCompact: isCompact),
+                        _buildActionCard(context, Icons.account_circle_outlined, 'Digital ID', 'Registry', '/digital_id', isCompact: isCompact),
+                        _buildActionCard(context, Icons.groups_outlined, 'Member Directory', 'Directory', '/directory', isCompact: isCompact),
+                        _buildActionCard(context, Icons.account_balance_wallet_outlined, 'Payments', 'Dues', '/financials', isCompact: isCompact, accentColor: Colors.tealAccent),
+                        _buildActionCard(context, Icons.work_outline, 'Jobs', 'Hub', '/jobs', isCompact: isCompact),
+                        _buildActionCard(context, Icons.event_available_outlined, 'Events', 'Announcements', '/events', isCompact: isCompact),
+                        _buildActionCard(context, Icons.newspaper_outlined, 'News', 'Feed', '/news', isCompact: isCompact, accentColor: Colors.purpleAccent),
+                        _buildActionCard(context, Icons.photo_library_outlined, 'Gallery', 'Memories', '/gallery', isCompact: isCompact, accentColor: Colors.purpleAccent),
+                        _buildActionCard(context, Icons.corporate_fare_outlined, 'EC Committee', 'Board', '/committee', isCompact: isCompact),
+                        _buildActionCard(context, Icons.history_outlined, 'Activity Log', 'Trace', '/activity', isCompact: isCompact),
+                        _buildActionCard(context, Icons.notifications_active_outlined, 'Notifications', 'Alerts', '/notifications', isCompact: isCompact, accentColor: Colors.orangeAccent),
+                        _buildActionCard(context, Icons.support_agent_outlined, 'Support', 'Helpdesk', '/support', isCompact: isCompact),
+                        _buildActionCard(context, Icons.info_outline, 'About GHCAA', 'Info', '/about', isCompact: isCompact),
                       ]),
                       
                       const SizedBox(height: 40),
@@ -209,13 +208,12 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   double _calculateCompleteness(Map<String, dynamic>? profile) {
-    if (profile == null) return 0;
-    const fields = ['fullName', 'email', 'phoneNumber', 'dateOfBirth', 'gender', 'membershipNumber', 'photoPath', 'batch', 'department'];
-    int filled = fields.where((f) => profile[f] != null && profile[f].toString().isNotEmpty).length;
-    return filled / fields.length;
+    return calculateProfileCompleteness(profile);
   }
 
-  Widget _buildMajesticBanner(String firstName, Map<String, dynamic>? profile, String? photoUrl) {
+  Widget _buildMajesticBanner(String fullName, Map<String, dynamic>? profile, String? photoUrl) {
+    final membershipType = profile?['membershipType']?.toString() ?? '';
+    final membershipCategory = profile?['category']?.toString() ?? '';
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -235,12 +233,39 @@ class DashboardScreen extends ConsumerWidget {
               children: [
                 const Text('ALUMNUS AUTHORIZED', style: TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 2)),
                 const SizedBox(height: 4),
-                Text(firstName.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900)),
+                if (membershipType.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppTheme.royalGold.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(membershipType.toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                  ),
+                Text(fullName.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: -0.3), maxLines: 2, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
-                  child: Text('REG NO: ${profile?['membershipNumber'] ?? 'AUDIT'}', style: const TextStyle(color: Colors.white70, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
+                      child: Text('REG: ${profile?['membershipNumber'] ?? 'AUDIT'}', style: const TextStyle(color: Colors.white70, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    ),
+                    if (membershipCategory.isNotEmpty && membershipCategory != 'None') ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
+                        ),
+                        child: Text(membershipCategory.toUpperCase(), style: const TextStyle(color: Colors.blueAccent, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -325,6 +350,7 @@ class DashboardScreen extends ConsumerWidget {
       _buildActionCard(context, Icons.gavel, 'Approvals', 'Audit', '/admin/approvals', accentColor: Colors.redAccent, isCompact: isCompact),
       _buildActionCard(context, Icons.message_outlined, 'Dispatch', 'Log', '/admin/messages', accentColor: Colors.redAccent, isCompact: isCompact),
       _buildActionCard(context, Icons.analytics_outlined, 'History', 'Trace', '/admin/audit', accentColor: Colors.redAccent, isCompact: isCompact),
+      _buildActionCard(context, Icons.manage_accounts_outlined, 'Permissions', 'Matrix', '/admin/permissions', accentColor: Colors.deepOrangeAccent, isCompact: isCompact),
     ]);
   }
 

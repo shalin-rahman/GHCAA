@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AdminService, DashboardStats } from '../../core/services/admin.service';
+import { NavService } from '../../core/services/nav.service';
 import { NewsService } from '../../core/services/news.service';
 import { EventsService } from '../../core/services/events.service';
 import { forkJoin, of } from 'rxjs';
@@ -26,6 +27,7 @@ interface StatCard {
 })
 export class AdminDashboard implements OnInit {
   private adminService = inject(AdminService);
+  public nav = inject(NavService);
   private newsService = inject(NewsService);
   private eventsService = inject(EventsService);
 
@@ -42,20 +44,32 @@ export class AdminDashboard implements OnInit {
       events: this.eventsService.getEvents().pipe(catchError(() => of([])))
     }).subscribe({
       next: ({ stats, news, events }) => {
-        this.stats.set(stats ?? {
-          totalMembers: 0, applied: 0, active: 0, inactive: 0, balance: 0,
-          lastUpdated: new Date().toISOString()
-        });
+        // Handle case-insensitive stats mapping (PascalCase from C# vs camelCase in JS)
+        const s: any = stats || {};
+        const mappedStats: DashboardStats = {
+          totalMembers: s.totalMembers ?? s.TotalMembers ?? 0,
+          applied: s.applied ?? s.Applied ?? 0,
+          active: s.active ?? s.Active ?? 0,
+          inactive: s.inactive ?? s.Inactive ?? 0,
+          balance: s.balance ?? s.Balance ?? 0,
+          lastUpdated: s.lastUpdated ?? s.LastUpdated ?? new Date().toISOString()
+        };
+        
+        this.stats.set(mappedStats);
+        
         // Take last 4 news items sorted by date
-        const sorted = [...(news as any[])].sort(
-          (a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime()
+        const newsItems = Array.isArray(news) ? news : ((news as any)?.items || []);
+        const sorted = [...newsItems].sort(
+          (a, b) => new Date(b.publishedAt || b.PublishedAt || b.createdAt || b.CreatedAt).getTime() - 
+                     new Date(a.publishedAt || a.PublishedAt || a.createdAt || a.CreatedAt).getTime()
         );
         this.recentNews.set(sorted.slice(0, 4));
 
         // Take up to 4 upcoming events
-        const upcoming = [...(events as any[])]
-          .filter(e => new Date(e.startDate) >= new Date())
-          .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+        const eventItems = Array.isArray(events) ? events : ((events as any)?.items || []);
+        const upcoming = [...eventItems]
+          .filter(e => new Date(e.startDate || e.StartDate) >= new Date())
+          .sort((a, b) => new Date(a.startDate || a.StartDate).getTime() - new Date(b.startDate || b.StartDate).getTime())
           .slice(0, 4);
         this.upcomingEvents.set(upcoming);
 

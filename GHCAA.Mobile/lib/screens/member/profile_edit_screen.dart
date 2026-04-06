@@ -166,8 +166,12 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         });
       }
       // Fix missing required fields for the backend DTO validation
+    out['professionalHistory'] = prof;
+    }
+
+    // Fix missing required fields for the backend DTO validation (outside if blocks)
     if (out['emergencyContactRelation'] == null || out['emergencyContactRelation'].toString().isEmpty) {
-        out['emergencyContactRelation'] = 'None';
+        out['emergencyContactRelation'] = 'Other';
     }
     if (out['emergencyContactPhone'] == null || out['emergencyContactPhone'].toString().isEmpty) {
         out['emergencyContactPhone'] = out['mobileNo'] ?? '01XXXXXXXXX';
@@ -183,10 +187,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         return m;
       }).toList();
     }
-
-    out['professionalHistory'] = prof;
-    }
-
     
     return _sanitizePayload(out);
   }
@@ -348,11 +348,18 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                             if (i > 0) const Divider(color: Colors.white10),
                             Row(children: [
                                Expanded(child: Text('RECORD #${i+1}', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold))),
-                               IconButton(icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18), onPressed: () => setState(() => (_data['academicHistory'] as List).removeAt(i))),
+                               TextButton.icon(
+                                 onPressed: () => setState(() => (_data['academicHistory'] as List).removeAt(entry.key)),
+                                 icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 14),
+                                 label: const Text('REMOVE', style: TextStyle(color: Colors.redAccent, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                               ),
                             ]),
                             _buildHistoryTextField('INSTITUTION', 'academicHistory', i, 'institutionName'),
+                            const Divider(color: Colors.white10),
                             _buildHistoryDropdown('DEGREE', 'academicHistory', i, 'degree', 'Degree'),
+                            const Divider(color: Colors.white10),
                             _buildHistoryTextField('SUBJECT', 'academicHistory', i, 'subject'),
+                            const Divider(color: Colors.white10),
                             _buildHistoryDropdown('PASSING', 'academicHistory', i, 'passingYear', 'PassingYear'),
                          ],
                       );
@@ -383,12 +390,20 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                             if (i > 0) const Divider(color: Colors.white10),
                             Row(children: [
                                Expanded(child: Text('POSITION #${i+1}', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold))),
-                               IconButton(icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18), onPressed: () => setState(() => (_data['professionalHistory'] as List).removeAt(i))),
+                               TextButton.icon(
+                                 onPressed: () => setState(() => (_data['professionalHistory'] as List).removeAt(entry.key)),
+                                 icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 14),
+                                 label: const Text('REMOVE', style: TextStyle(color: Colors.redAccent, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                               ),
                             ]),
                             _buildHistoryTextField('ORGANIZATION', 'professionalHistory', i, 'organizationName'),
+                            const Divider(color: Colors.white10),
                             _buildHistoryTextField('DESIGNATION', 'professionalHistory', i, 'designation'),
+                            const Divider(color: Colors.white10),
                             _buildHistoryDropdown('SECTOR', 'professionalHistory', i, 'sector', 'ProfessionalSector'),
+                            const Divider(color: Colors.white10),
                             _buildHistoryTextField('LOCATION', 'professionalHistory', i, 'location'),
+                            const Divider(color: Colors.white10),
                             _buildHistoryToggle('CURRENT ROLE', 'professionalHistory', i, 'isCurrent'),
                          ],
                       );

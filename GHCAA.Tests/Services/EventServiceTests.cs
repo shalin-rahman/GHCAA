@@ -249,5 +249,44 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
         result.Amount.Should().Be(500);
         _context.EventExpenses.Any(ex => ex.Id == result.Id).Should().BeTrue();
     }
+
+     [Test]
+    public async Task RegisterForEventAsync_ShouldWaitlist_WhenCapacityExceeded()
+    {
+        // Arrange
+        var ev = new AlumniEvent { 
+            Title = "Full Event", 
+            Description = "D", 
+            StartDate = DateTime.UtcNow.AddDays(1), 
+            EndDate = DateTime.UtcNow.AddDays(2), 
+            Location = "L",
+            ParticipantLimit = 1,
+            HasWaitlist = true,
+            IsActive = true
+        };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+        
+        // Add one approved registration to fill capacity
+        var reg1 = new EventRegistration { 
+            EventId = ev.Id, 
+            Status = EventRegistrationStatus.Approved, 
+            PaymentReference = "P1", 
+            TicketCode = "T1", 
+            RegisteredAt = DateTime.UtcNow 
+        };
+        _context.EventRegistrations.Add(reg1);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var member = new Member { FullName = "Waitlister", Email = "w@t.com", NID = "W1", MobileNo = "W1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.RegisterForEventAsync(new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P2" }, member.Id, null);
+
+        // Assert
+        result.Status.Should().Be(EventRegistrationStatus.Waitlisted);
+    }
 }
 

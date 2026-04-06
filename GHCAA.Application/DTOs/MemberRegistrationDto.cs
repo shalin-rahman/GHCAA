@@ -14,6 +14,9 @@ namespace GHCAA.Application.DTOs
         [Range(1, int.MaxValue, ErrorMessage = "A valid payment method must be selected.")]
         public int PaymentMethodId { get; set; }
 
+        public GHCAA.Domain.Enums.MembershipType MembershipType { get; set; } = GHCAA.Domain.Enums.MembershipType.General;
+        public GHCAA.Domain.Enums.MemberCategory Category { get; set; } = GHCAA.Domain.Enums.MemberCategory.None;
+
         [System.ComponentModel.DataAnnotations.MaxLength(200, ErrorMessage = "Transaction ID must not exceed 200 characters.")]
         public string? TransactionId { get; set; }
     }

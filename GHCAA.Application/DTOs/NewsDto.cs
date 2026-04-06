@@ -15,6 +15,7 @@ namespace GHCAA.Application.DTOs
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? AuthorName { get; set; }
+        public List<string> Collaborators { get; set; } = new List<string>();
     }
 
     public class CreateNewsDto
@@ -34,6 +35,8 @@ namespace GHCAA.Application.DTOs
 
         [Url(ErrorMessage = "Image URL must be a valid URL.")]
         public string? ImageUrl { get; set; }
+
+        public List<string> Collaborators { get; set; } = new List<string>();
 
         public bool IsActive { get; set; } = true;
     }

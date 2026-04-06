@@ -53,6 +53,8 @@ final activeSpecialThemeProvider = FutureProvider<SpecialTheme?>((ref) async {
   return ref.read(themeServiceProvider).getActiveTheme();
 });
 
+final globalAppBarVisibilityProvider = StateProvider<bool>((ref) => true);
+
 class ThemeService {
   final Dio _dio;
   ThemeService(this._dio);

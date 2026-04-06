@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import '../../core/api/api_client.dart';
 import '../../core/config/app_config.dart';
 import '../../core/storage/storage_service.dart';
-import '../auth/auth_service.dart';
 
 final chatServiceProvider = Provider<ChatService>((ref) {
   return ChatService(ref);
@@ -44,9 +44,9 @@ class ChatService {
 
     try {
       await _hubConnection!.start();
-      print('SignalR: Connected to ChatHub');
+      debugPrint('SignalR: Connected to ChatHub');
     } catch (e) {
-      print('SignalR Error: $e');
+      debugPrint('SignalR Error: $e');
     }
   }
 
@@ -58,7 +58,7 @@ class ChatService {
     try {
       await _hubConnection!.invoke('SendDirectMessage', args: [receiverUserId, message]);
     } catch (e) {
-      print('SignalR Invoke Error: $e');
+      debugPrint('SignalR Invoke Error: $e');
       rethrow;
     }
   }

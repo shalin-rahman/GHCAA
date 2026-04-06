@@ -43,8 +43,6 @@ namespace GHCAA.Application.DTOs
 
         public Gender Gender { get; set; } = Gender.None;
         public BloodGroup BloodGroup { get; set; } = BloodGroup.Unknown;
-        public MembershipType MembershipType { get; set; } = MembershipType.General;
-        public MemberCategory Category { get; set; } = MemberCategory.None;
 
         // ── Address ───────────────────────────────────────────────────────────────
         [Required(ErrorMessage = "Present address is required.")]
@@ -76,11 +74,7 @@ namespace GHCAA.Application.DTOs
         public bool IsEmailPublic { get; set; }
         public bool IsAddressPublic { get; set; }
         public bool IsNIDPublic { get; set; }
-        public bool IsVerified { get; set; }
-        public int ContributionPoints { get; set; }
         public DateTime? LastUpdateDate { get; set; }
-        public string? ApprovedByName { get; set; }
-        public DateTime? ApprovedDate { get; set; }
         
         // Notification Preferences
         public bool NotifyEventCreation { get; set; } = true;

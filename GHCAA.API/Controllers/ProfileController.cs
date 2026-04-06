@@ -75,6 +75,16 @@ namespace GHCAA.API.Controllers
             return Ok(new { DataUri = dataUri });
         }
 
+        [HttpGet("id-card/pdf")]
+        public async Task<IActionResult> GetIDCardPdf(CancellationToken cancellationToken)
+        {
+            var memberId = GetMemberId();
+            if (memberId == 0) return Unauthorized();
+
+            var pdfBytes = await _idCardService.GenerateIDCardPdfAsync(memberId, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"ID_Card_{memberId}.pdf");
+        }
+
         [HttpGet("certificate")]
         public async Task<IActionResult> GetCertificate(CancellationToken cancellationToken)
         {
@@ -83,6 +93,16 @@ namespace GHCAA.API.Controllers
 
             var dataUri = await _idCardService.GenerateCertificateDataUriAsync(memberId, cancellationToken);
             return Ok(new { DataUri = dataUri });
+        }
+
+        [HttpGet("certificate/pdf")]
+        public async Task<IActionResult> GetCertificatePdf(CancellationToken cancellationToken)
+        {
+            var memberId = GetMemberId();
+            if (memberId == 0) return Unauthorized();
+
+            var pdfBytes = await _idCardService.GenerateCertificatePdfAsync(memberId, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"Certificate_{memberId}.pdf");
         }
 
         [HttpPost("photo")]

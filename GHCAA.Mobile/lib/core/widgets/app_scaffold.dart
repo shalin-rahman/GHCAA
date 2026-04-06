@@ -18,6 +18,7 @@ class AppScaffold extends ConsumerWidget {
   final bool showAppBar;
   final Widget? leading;
   final String? breadcrumb;
+  final PreferredSizeWidget? bottom;
 
   const AppScaffold({
     super.key,
@@ -30,86 +31,15 @@ class AppScaffold extends ConsumerWidget {
     this.showAppBar = true,
     this.leading,
     this.breadcrumb,
+    this.bottom,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final specialThemeAsync = ref.watch(activeSpecialThemeProvider);
-
-    Widget buildBody(List<Color> gradientColors, {String? announcement, Color? textColor}) {
-      final canPop = GoRouter.of(context).canPop();
-
-      return Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: showAppBar 
-          ? AppBar(
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (title != null) Text(title!, style: TextStyle(color: textColor ?? Colors.white, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1)),
-                  if (breadcrumb != null) Text(breadcrumb!.toUpperCase(), style: const TextStyle(fontSize: 9, color: AppTheme.royalGold, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
-                ],
-              ),
-              backgroundColor: Colors.black.withValues(alpha: 0.4),
-              elevation: 0,
-              centerTitle: false,
-              actions: actions,
-              leading: leading ?? (canPop 
-                ? IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: textColor ?? AppTheme.royalGold),
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      context.pop();
-                    },
-                  )
-                : Builder(
-                    builder: (context) => IconButton(
-                      icon: Icon(Icons.menu_rounded, size: 24, color: textColor ?? AppTheme.royalGold),
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        Scaffold.of(context).openDrawer();
-                      },
-                    ),
-                  )),
-              iconTheme: IconThemeData(color: textColor ?? Colors.white),
-            )
-          : null,
-        drawer: const AppDrawer(),
-        body: Listener(
-          onPointerDown: (_) => ref.read(sessionProvider.notifier).userActivityDetected(),
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: const Alignment(0, -0.8),
-                radius: 1.5,
-                colors: gradientColors,
-              ),
-            ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  if (announcement != null && announcement.isNotEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      color: Colors.black.withValues(alpha: 0.3),
-                      child: Text(announcement, style: TextStyle(color: textColor ?? Colors.white, fontSize: 12, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                    ),
-                  Expanded(child: child),
-                ],
-              ),
-            ),
-          ),
-        ),
-        bottomNavigationBar: bottomNavigationBar,
-        floatingActionButton: floatingActionButton,
-      );
-    }
-
     final roleAsync = ref.watch(roleProvider);
-    final isUserAdmin = isAdmin || roleAsync.value.isStaffAdminRole;
+    final isUserAdmin = isAdmin || (roleAsync.value?.isStaffAdminRole ?? false);
+    final isGlobalAppBarVisible = ref.watch(globalAppBarVisibilityProvider);
 
     return specialThemeAsync.when(
       data: (st) {
@@ -117,16 +47,94 @@ class AppScaffold extends ConsumerWidget {
           final colors = st.gradientEnabled 
             ? [st.backgroundColor, st.backgroundColor.withValues(alpha: 0.7)] 
             : [st.backgroundColor, st.backgroundColor];
-          return buildBody(colors, announcement: st.announcement, textColor: st.textColor);
+          return _buildScaffold(context, ref, colors, announcement: st.announcement, textColor: st.textColor, isGlobalVisible: isGlobalAppBarVisible, isUserAdmin: isUserAdmin);
         }
         
         final List<Color> gradientColors = isUserAdmin 
           ? [AppTheme.adminMidnightSurface, AppTheme.adminMidnightBase]
           : [AppTheme.midnightSurface, AppTheme.midnightBase];
-        return buildBody(gradientColors);
+        
+        return _buildScaffold(context, ref, gradientColors, isGlobalVisible: isGlobalAppBarVisible, isUserAdmin: isUserAdmin);
       },
-      loading: () => buildBody([AppTheme.midnightSurface, AppTheme.midnightBase]),
-      error: (e, s) => buildBody([AppTheme.midnightSurface, AppTheme.midnightBase]),
+      loading: () => _buildScaffold(context, ref, [AppTheme.midnightSurface, AppTheme.midnightBase], isGlobalVisible: isGlobalAppBarVisible, isUserAdmin: isUserAdmin),
+      error: (e, s) => _buildScaffold(context, ref, [AppTheme.midnightSurface, AppTheme.midnightBase], isGlobalVisible: isGlobalAppBarVisible, isUserAdmin: isUserAdmin),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, WidgetRef ref, List<Color> gradientColors, {String? announcement, Color? textColor, bool isGlobalVisible = true, bool isUserAdmin = false}) {
+    final canPop = GoRouter.of(context).canPop();
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: (showAppBar && isGlobalVisible) 
+        ? AppBar(
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (title != null) Text(title!, style: TextStyle(color: textColor ?? Colors.white, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1)),
+                if (breadcrumb != null) Text(breadcrumb!.toUpperCase(), style: const TextStyle(fontSize: 9, color: AppTheme.royalGold, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+              ],
+            ),
+            backgroundColor: Colors.black.withValues(alpha: 0.4),
+            elevation: 0,
+            centerTitle: false,
+            actions: actions,
+            leading: leading ?? (!['/dashboard', '/directory', '/digital_id', '/profile', '/admin_dashboard', '/login', '/register'].contains(GoRouterState.of(context).uri.path)
+              ? IconButton(
+                  icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: textColor ?? AppTheme.royalGold),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    if (canPop) {
+                      context.pop();
+                    } else {
+                      if (isUserAdmin) { context.go('/admin_dashboard'); } else { context.go('/dashboard'); }
+                    }
+                  },
+                )
+              : Builder(
+                  builder: (context) => IconButton(
+                    icon: Icon(Icons.menu_rounded, size: 24, color: textColor ?? AppTheme.royalGold),
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      Scaffold.of(context).openDrawer();
+                    },
+                  ),
+                )),
+            iconTheme: IconThemeData(color: textColor ?? Colors.white),
+            bottom: bottom,
+          )
+        : null,
+      drawer: const AppDrawer(),
+      body: Listener(
+        onPointerDown: (_) => ref.read(sessionProvider.notifier).userActivityDetected(),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(0, -0.8),
+              radius: 1.5,
+              colors: gradientColors,
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                if (announcement != null && announcement.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    color: Colors.black.withValues(alpha: 0.3),
+                    child: Text(announcement, style: TextStyle(color: textColor ?? Colors.white, fontSize: 12, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                  ),
+                Expanded(child: child),
+              ],
+            ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: bottomNavigationBar,
+      floatingActionButton: floatingActionButton,
     );
   }
 }

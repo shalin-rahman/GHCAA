@@ -18,6 +18,7 @@ class RegisterModel {
   final List<Map<String, dynamic>> academicHistory;
   final String? profileImagePath;
   final String? nidPhotoPath;
+  final String? paymentProofPath;
   final String membershipType;
   final String bloodGroup;
   final String? dateOfBirth;
@@ -30,6 +31,9 @@ class RegisterModel {
   final bool notifyParticipationApproval;
   final bool notifyRegistrationUpdate;
   final bool notifyRelevantUpdates;
+  final int paymentMethodId;
+  final String transactionId;
+  final String institutionName;
 
   const RegisterModel({
     this.fullName = '',
@@ -48,6 +52,7 @@ class RegisterModel {
     this.academicHistory = const [],
     this.profileImagePath,
     this.nidPhotoPath,
+    this.paymentProofPath,
     this.membershipType = 'General',
     this.bloodGroup = 'APositive',
     this.dateOfBirth,
@@ -60,6 +65,9 @@ class RegisterModel {
     this.notifyParticipationApproval = true,
     this.notifyRegistrationUpdate = true,
     this.notifyRelevantUpdates = true,
+    this.paymentMethodId = 0,
+    this.transactionId = '',
+    this.institutionName = 'Govt. Haraganga College',
   });
 
   RegisterModel copyWith({
@@ -79,6 +87,7 @@ class RegisterModel {
     List<Map<String, dynamic>>? academicHistory,
     String? profileImagePath,
     String? nidPhotoPath,
+    String? paymentProofPath,
     String? membershipType,
     String? bloodGroup,
     String? dateOfBirth,
@@ -91,6 +100,9 @@ class RegisterModel {
     bool? notifyParticipationApproval,
     bool? notifyRegistrationUpdate,
     bool? notifyRelevantUpdates,
+    int? paymentMethodId,
+    String? transactionId,
+    String? institutionName,
   }) {
     return RegisterModel(
       fullName: fullName ?? this.fullName,
@@ -109,6 +121,7 @@ class RegisterModel {
       academicHistory: academicHistory ?? this.academicHistory,
       profileImagePath: profileImagePath ?? this.profileImagePath,
       nidPhotoPath: nidPhotoPath ?? this.nidPhotoPath,
+      paymentProofPath: paymentProofPath ?? this.paymentProofPath,
       membershipType: membershipType ?? this.membershipType,
       bloodGroup: bloodGroup ?? this.bloodGroup,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
@@ -121,6 +134,9 @@ class RegisterModel {
       notifyParticipationApproval: notifyParticipationApproval ?? this.notifyParticipationApproval,
       notifyRegistrationUpdate: notifyRegistrationUpdate ?? this.notifyRegistrationUpdate,
       notifyRelevantUpdates: notifyRelevantUpdates ?? this.notifyRelevantUpdates,
+      paymentMethodId: paymentMethodId ?? this.paymentMethodId,
+      transactionId: transactionId ?? this.transactionId,
+      institutionName: institutionName ?? this.institutionName,
     );
   }
 
@@ -138,7 +154,17 @@ class RegisterModel {
         'passingYear': int.tryParse(passingYear),
         'presentAddress': presentAddress,
         'permanentAddress': permanentAddress,
-        'academicHistory': academicHistory,
+        'academicHistory': academicHistory.isNotEmpty 
+            ? academicHistory 
+            : [
+                {
+                  'InstitutionName': institutionName,
+                  'Degree': degree,
+                  'Subject': subject,
+                  'PassingYear': int.tryParse(passingYear),
+                  'IsGHC': true,
+                }
+              ],
         'membershipType': membershipType,
         'bloodGroup': bloodGroup,
         'dateOfBirth': dateOfBirth,
@@ -147,12 +173,15 @@ class RegisterModel {
         'designation': designation,
         'profileImagePath': profileImagePath,
         'nidPhotoPath': nidPhotoPath,
+        'paymentProofPath': paymentProofPath,
         'notifyEventCreation': notifyEventCreation,
         'notifyParticipationApproval': notifyParticipationApproval,
         'notifyRegistrationUpdate': notifyRegistrationUpdate,
         'notifyRelevantUpdates': notifyRelevantUpdates,
         'hasAcceptedTerms': hasAcceptedTerms,
         'hasAcceptedGdpr': hasAcceptedGdpr,
+        'paymentMethodId': paymentMethodId,
+        'transactionId': transactionId,
       };
 }
 
@@ -192,10 +221,25 @@ class RegisterState {
         'DateOfBirth': model.dateOfBirth,
         'ProfileImagePath': model.profileImagePath,
         'NidPhotoPath': model.nidPhotoPath,
+        'PaymentProofPath': model.paymentProofPath,
         'NotifyEventCreation': model.notifyEventCreation,
         'NotifyParticipationApproval': model.notifyParticipationApproval,
         'NotifyRegistrationUpdate': model.notifyRegistrationUpdate,
         'NotifyRelevantUpdates': model.notifyRelevantUpdates,
+        'PaymentMethodId': model.paymentMethodId,
+        'TransactionId': model.transactionId,
+        'InstitutionName': model.institutionName,
+        'AcademicHistory': model.academicHistory.isNotEmpty 
+            ? model.academicHistory 
+            : [
+                {
+                  'InstitutionName': model.institutionName,
+                  'Degree': model.degree,
+                  'Subject': model.subject,
+                  'PassingYear': model.passingYear.isEmpty ? null : int.tryParse(model.passingYear),
+                  'IsGHC': true,
+                }
+              ],
       };
 
   RegisterState copyWith({int? currentStep, RegisterModel? model}) {
@@ -243,6 +287,7 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
     List<Map<String, dynamic>>? academicHistory,
     String? profileImagePath,
     String? nidPhotoPath,
+    String? paymentProofPath,
     String? membershipType,
     String? bloodGroup,
     String? dateOfBirth,
@@ -255,6 +300,9 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
     bool? notifyParticipationApproval,
     bool? notifyRegistrationUpdate,
     bool? notifyRelevantUpdates,
+    int? paymentMethodId,
+    String? transactionId,
+    String? institutionName,
   }) {
     state = state.copyWith(
       model: state.model.copyWith(
@@ -274,6 +322,7 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
         academicHistory: academicHistory,
         profileImagePath: profileImagePath,
         nidPhotoPath: nidPhotoPath,
+        paymentProofPath: paymentProofPath,
         membershipType: membershipType,
         bloodGroup: bloodGroup,
         dateOfBirth: dateOfBirth,
@@ -286,6 +335,9 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
         notifyParticipationApproval: notifyParticipationApproval,
         notifyRegistrationUpdate: notifyRegistrationUpdate,
         notifyRelevantUpdates: notifyRelevantUpdates,
+        paymentMethodId: paymentMethodId,
+        transactionId: transactionId,
+        institutionName: institutionName,
       ),
     );
   }
@@ -361,6 +413,9 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
       case 'NidPhotoPath':
         updateModel(nidPhotoPath: value as String?);
         break;
+      case 'PaymentProofPath':
+        updateModel(paymentProofPath: value as String?);
+        break;
       case 'NotifyEventCreation':
         updateModel(notifyEventCreation: value as bool);
         break;
@@ -372,6 +427,15 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
         break;
       case 'NotifyRelevantUpdates':
         updateModel(notifyRelevantUpdates: value as bool);
+        break;
+      case 'PaymentMethodId':
+        updateModel(paymentMethodId: value as int);
+        break;
+      case 'TransactionId':
+        updateModel(transactionId: value as String);
+        break;
+      case 'InstitutionName':
+        updateModel(institutionName: value as String);
         break;
     }
   }

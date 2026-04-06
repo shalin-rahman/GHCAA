@@ -29,6 +29,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly IConfiguration _config;
         private readonly IGamificationService _gamification;
         private readonly IFinancialService _financialService;
+        private readonly IRealTimeService _realTimeService;
 
         public MemberService(
             ApplicationDbContext db,
@@ -43,7 +44,8 @@ namespace GHCAA.Infrastructure.Services
             INotificationService notificationService,
             IConfiguration config,
             IGamificationService gamification,
-            IFinancialService financialService)
+            IFinancialService financialService,
+            IRealTimeService realTimeService)
         {
             _db = db;
             _storage = storage;
@@ -58,6 +60,7 @@ namespace GHCAA.Infrastructure.Services
             _config = config;
             _gamification = gamification;
             _financialService = financialService;
+            _realTimeService = realTimeService;
         }
 
         public async Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default)
@@ -150,7 +153,7 @@ namespace GHCAA.Infrastructure.Services
                         Degree = a.Degree,
                         Subject = a.Subject,
                         AdmissionYear = a.AdmissionYear,
-                        PassingYear = a.PassingYear,
+                        PassingYear = a.PassingYear ?? 0,
                         IsGHC = a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase),
                         Result = a.Result
                     });
@@ -250,6 +253,15 @@ namespace GHCAA.Infrastructure.Services
             await _activityService.LogActivityAsync(member.Id, "Registration", "New registry filing submitted for review.", member.Id, cancellationToken: cancellationToken);
 
             _logger.LogInformation("Registered application for MemberId {MemberId}", member.Id);
+            
+            // Trigger Live Admin Alert
+            await _realTimeService.SendAdminAlertAsync("NEW_REGISTRATION", new { 
+                MemberId = member.Id, 
+                Name = member.FullName, 
+                MembershipType = member.MembershipType.ToString(),
+                Timestamp = DateTime.UtcNow 
+            });
+
                 await transaction.CommitAsync(cancellationToken);
                 return member.Id;
             }
@@ -536,8 +548,7 @@ namespace GHCAA.Infrastructure.Services
                     StartDate = p.StartDate,
                     EndDate = p.EndDate,
                     IsCurrent = p.IsCurrent,
-                    Location = p.Location,
-                    ResponsibilitiesString = p.Responsibilities
+                    Location = p.Location
                 }).ToList() ?? new List<ProfessionalRecordDto>()
             };
 
@@ -688,7 +699,7 @@ namespace GHCAA.Infrastructure.Services
                         Degree = a.Degree,
                         Subject = a.Subject,
                         AdmissionYear = a.AdmissionYear,
-                        PassingYear = a.PassingYear,
+                        PassingYear = a.PassingYear ?? 0,
                         IsGHC = a.IsGHC || (a.InstitutionName != null && a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase)),
                         Result = a.Result
                     });
@@ -746,6 +757,24 @@ namespace GHCAA.Infrastructure.Services
                 role.ChangeReason = "Member archived";
             }
 
+            // Cascade: Archive Job Opportunities
+            await _db.JobOpportunities
+                .Where(j => j.PostedByMemberId == memberId && j.IsActive)
+                .ExecuteUpdateAsync(s => s.SetProperty(j => j.IsActive, false), cancellationToken);
+
+            // Cascade: Cancel Family Link Requests (both sent and received)
+            await _db.FamilyLinkRequests
+                .Where(r => (r.RequesterId == memberId || r.TargetMemberId == memberId) && r.Status == Enums.FamilyLinkStatus.Requested)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.Status, Enums.FamilyLinkStatus.Cancelled), cancellationToken);
+
+            // Cascade: Unpublish news (AuthorId in NewsPost maps to User, who maps to Member)
+            if (user != null)
+            {
+                await _db.NewsPosts
+                    .Where(n => n.AuthorId == user.Id && n.IsActive)
+                    .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsActive, false), cancellationToken);
+            }
+
             await _db.SaveChangesAsync(cancellationToken);
             await _activityService.LogActivityAsync(memberId, "Archived", "Member archived (soft deleted).", cancellationToken: cancellationToken);
             _logger.LogInformation("Member {MemberId} archived (soft delete)", memberId);
@@ -794,20 +823,26 @@ namespace GHCAA.Infrastructure.Services
             };
         }
 
-        public async Task<object> GetDashboardStatsAsync(CancellationToken cancellationToken = default)
+        public async Task<object> GetDashboardStatsAsync(bool isPrivileged, CancellationToken cancellationToken = default)
         {
             var totalMembers = await _db.Members.CountAsync(m => !m.IsArchived, cancellationToken);
             var applied = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Applied && !m.IsArchived, cancellationToken);
             var active = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived, cancellationToken);
             var inactive = await _db.Members.CountAsync(m => (m.Status == Enums.MembershipStatus.InactivePayment || m.Status == Enums.MembershipStatus.InactiveResigned) && !m.IsArchived, cancellationToken);
             
-            var totalCollection = await _db.FinancialRecords
-                .Where(r => r.RecordType == Enums.FinancialRecordType.Income)
-                .SumAsync(r => r.Amount, cancellationToken);
-            
-            var totalExpense = await _db.FinancialRecords
-                .Where(r => r.RecordType == Enums.FinancialRecordType.Expense)
-                .SumAsync(r => r.Amount, cancellationToken);
+            decimal? balance = null;
+            if (isPrivileged)
+            {
+                var totalCollection = await _db.FinancialRecords
+                    .Where(r => r.RecordType == Enums.FinancialRecordType.Income)
+                    .SumAsync(r => r.Amount, cancellationToken);
+                
+                var totalExpense = await _db.FinancialRecords
+                    .Where(r => r.RecordType == Enums.FinancialRecordType.Expense)
+                    .SumAsync(r => r.Amount, cancellationToken);
+                    
+                balance = totalCollection - totalExpense;
+            }
 
             return new
             {
@@ -815,7 +850,7 @@ namespace GHCAA.Infrastructure.Services
                 Applied = applied,
                 Active = active,
                 Inactive = inactive,
-                Balance = totalCollection - totalExpense,
+                Balance = balance,
                 LastUpdated = DateTime.UtcNow
             };
         }
@@ -966,9 +1001,9 @@ namespace GHCAA.Infrastructure.Services
                 var ghcRecord = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC);
                 if (ghcRecord != null)
                 {
-                    dto.PassingYear = ghcRecord.PassingYear;
-                    dto.Degree = ghcRecord.Degree;
-                    dto.Subject = ghcRecord.Subject;
+                    dto.GHCLastCertificatePassingYear = ghcRecord.PassingYear;
+                    dto.GHCLastCertificate = ghcRecord.Degree;
+                    dto.GHCLastCertificateSubject = ghcRecord.Subject;
                 }
 
                 var currentJob = member.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent);
@@ -977,6 +1012,7 @@ namespace GHCAA.Infrastructure.Services
                     dto.Designation = currentJob.Designation;
                     dto.OrganizationName = currentJob.OrganizationName;
                     dto.ProfessionalSector = currentJob.Sector;
+                    dto.Location = currentJob.Location;
                 }
 
                 memberDtos.Add(dto);
@@ -1075,7 +1111,7 @@ namespace GHCAA.Infrastructure.Services
                         Degree = a.Degree,
                         Subject = a.Subject,
                         AdmissionYear = a.AdmissionYear,
-                        PassingYear = a.PassingYear,
+                        PassingYear = a.PassingYear ?? 0,
                         IsGHC = a.IsGHC || a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase),
                         Result = a.Result
                     });

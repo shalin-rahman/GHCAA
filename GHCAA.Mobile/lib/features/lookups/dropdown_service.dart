@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/api/api_client.dart';
 import 'lookup_service.dart';
 
 final dropdownDataProvider = Provider<DropdownService>((ref) {
@@ -121,10 +122,34 @@ class DropdownService {
           {'value': 'Guest', 'label': 'Guest'},
           {'value': 'Student', 'label': 'Student'},
         ];
+      case 'UserStatus':
+      case 'MembershipStatus':
+        return [
+          {'value': 'Applied', 'label': 'Pending Approval'},
+          {'value': 'Active', 'label': 'Active Member'},
+          {'value': 'InactivePayment', 'label': 'Inactive (Unpaid)'},
+          {'value': 'InactiveResigned', 'label': 'Resigned'},
+          {'value': 'Terminated', 'label': 'Terminated'},
+        ];
       case 'PassingYear':
         final currentYear = DateTime.now().year;
         return List.generate(currentYear - 1950 + 1, (i) => (currentYear - i).toString())
             .map((y) => {'value': y, 'label': y}).toList();
+      case 'PaymentMethod':
+        try {
+          final dio = _ref.read(dioProvider);
+          final response = await dio.get('/payment-config/active');
+          if (response.statusCode == 200 && response.data is List) {
+            return (response.data as List).map((e) => {
+              'value': e['id'].toString(),
+              'label': e['displayName'].toString(),
+              'instructions': e['instructions']?.toString() ?? '',
+              'requiresReceipt': e['requiresReceipt'].toString(),
+              'requiresReference': e['requiresReference'].toString(),
+            }).toList();
+          }
+        } catch (_) {}
+        return [];
       default:
         return [];
     }
