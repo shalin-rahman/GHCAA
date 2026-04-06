@@ -49,7 +49,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
         },
         backgroundColor: AppTheme.royalGold,
         icon: const Icon(Icons.add, color: Colors.black, size: 20),
-        label: const Text('SHARE OPPORTUNITY', style: TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1)),
+        label: const Text('ADD JOB', style: TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1)),
       ),
       child: Column(
         children: [
@@ -58,7 +58,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search career hub...',
+                hintText: 'Search jobs...',
                 prefixIcon: const Icon(Icons.search, size: 20, color: AppTheme.royalGold),
                 suffixIcon: _searchController.text.isNotEmpty 
                   ? IconButton(
@@ -90,7 +90,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                       context.pushNamed('mentorship');
                     },
                     icon: const Icon(Icons.handshake_outlined, size: 16),
-                    label: const Text('MENTORSHIP HUB', style: TextStyle(fontSize: 9, letterSpacing: 1, fontWeight: FontWeight.bold)),
+                    label: const Text('MENTORSHIP', style: TextStyle(fontSize: 9, letterSpacing: 1, fontWeight: FontWeight.bold)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.royalGold,
                       side: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.3)),
@@ -143,14 +143,14 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              'Showing ${filtered.length} of ${jobs.length} listed opportunities',
+                              'Showing ${filtered.length} of ${jobs.length} listed jobs',
                               style: TextStyle(fontSize: 10, color: AppTheme.royalGold.withValues(alpha: 0.7), fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
                       Expanded(
                         child: filtered.isEmpty 
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No active opportunities found.' : 'No opportunities match your search.', style: const TextStyle(color: AppTheme.textSecondaryDark)))
+                          ? Center(child: Text(searchQuery.isEmpty ? 'No active jobs found.' : 'No jobs match your search.', style: const TextStyle(color: AppTheme.textSecondaryDark)))
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                               itemCount: filtered.length,
@@ -174,7 +174,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
                                               Expanded(
-                                                child: Text(job['title'] ?? 'Position Title Missing',
+                                                child: Text(job['title'] ?? 'Job Title',
                                                     style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: -0.2)),
                                               ),
                                               if (isMine)
@@ -205,7 +205,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                                             ],
                                           ),
                                           const SizedBox(height: 1),
-                                          Text(job['companyName'] ?? 'Organization Undisclosed',
+                                          Text(job['companyName'] ?? 'Company',
                                               style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                                           const SizedBox(height: 10),
                                           const Divider(color: Colors.white10, height: 1),
@@ -260,15 +260,15 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.midnightSurface,
-        title: const Text('SHARE OPPORTUNITY', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+        title: const Text('ADD JOB', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildField('Job Title', titleCtrl),
-              _buildField('Organization', companyCtrl),
+              _buildField('Company', companyCtrl),
               _buildField('Location', locCtrl),
-              _buildField('External Link', linkCtrl),
+              _buildField('Application Link', linkCtrl),
               _buildField('Short Description', descCtrl, maxLines: 3),
             ],
           ),
@@ -295,7 +295,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                 }
               } catch (_) {}
             },
-            child: const Text('POST HUB', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            child: const Text('POST JOB', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

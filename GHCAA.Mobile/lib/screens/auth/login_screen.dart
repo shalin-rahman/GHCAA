@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart';
 import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/password_field.dart';
 import '../../features/auth/auth_service.dart';
 
@@ -88,136 +88,159 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32.0),
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 60),
                 // Branded Logo Integration
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                        color: AppTheme.royalGold.withValues(alpha: 0.2)),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    'assets/logo.png',
-                    height: 120,
-                    width: 120,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.school,
-                        size: 72,
-                        color: AppTheme.royalGold),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.03),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.1)),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(60),
+                      child: Image.asset(
+                        'assets/logo.png',
+                        height: 100,
+                        width: 100,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const Icon(
+                            Icons.account_balance_rounded,
+                            size: 60,
+                            color: AppTheme.royalGold),
+                      ),
+                    ),
                   ),
                 ),
-              ),
                 const SizedBox(height: 24),
                 Text(AppConfig.organizationAcronym,
-                    style: const TextStyle(
-                        fontSize: 28,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        fontSize: 32,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 2,
+                        letterSpacing: 4,
                         color: Colors.white)),
                 const SizedBox(height: 4),
                 Text(
-                  AppConfig.organizationTagline,
-                  style: const TextStyle(
-                      fontSize: 10,
-                      fontStyle: FontStyle.italic,
-                      color: AppTheme.royalGold,
-                      letterSpacing: 0.5),
+                  AppConfig.organizationTagline.toUpperCase(),
                   textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppTheme.royalGold,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.5),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(AppConfig.organizationName,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppTheme.textSecondaryDark)),
-                const SizedBox(height: 32),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textSecondaryDark)),
+                const SizedBox(height: 48),
                 
                 if (_errorMessage != null)
                   Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    margin: const EdgeInsets.only(bottom: 24),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+                      color: Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.redAccent, size: 20),
+                        const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 20),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             _errorMessage!,
-                            style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                            style: const TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                GlassContainer(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: _identifierController,
-                        decoration: const InputDecoration(
-                            labelText: 'User Name',
-                            prefixIcon: Icon(Icons.person_outline)),
-                      ),
-                      const SizedBox(height: 16),
-                      PasswordField(
-                        controller: _passwordController,
-                        labelText: 'Password',
-                        textInputAction: TextInputAction.done,
-                        onSubmitted: (_) => _handleLogin(),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Switch(
-                            value: _enableBiometric,
-                            onChanged: (val) => setState(() => _enableBiometric = val),
-                            activeThumbColor: AppTheme.royalGold,
-                          ),
-                          const SizedBox(width: 8),
-                          const Expanded(
-                            child: Text(
-                              'Enable Biometric Quick Login',
-                              style: TextStyle(color: Colors.white70, fontSize: 13),
+ 
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text('AUTHENTICATION REQUIRED', 
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(letterSpacing: 2, fontSize: 9)),
+                        const SizedBox(height: 24),
+                        TextField(
+                          controller: _identifierController,
+                          decoration: const InputDecoration(
+                              labelText: 'Member Identifier',
+                              prefixIcon: Icon(Icons.person_rounded)),
+                        ),
+                        const SizedBox(height: 16),
+                        PasswordField(
+                          controller: _passwordController,
+                          labelText: 'Access Password',
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _handleLogin(),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Transform.scale(
+                              scale: 0.8,
+                              child: Switch(
+                                value: _enableBiometric,
+                                onChanged: (val) {
+                                  HapticFeedback.selectionClick();
+                                  setState(() => _enableBiometric = val);
+                                },
+                                activeThumbColor: AppTheme.royalGold,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      _isLoading
-                          ? const CircularProgressIndicator(
-                              color: AppTheme.royalGold)
-                          : SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                  onPressed: _handleLogin,
-                                  child: const Text('Login')),
+                            Text(
+                              'Enable Biometric Access',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
                             ),
-                    ],
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        _isLoading
+                          ? const Center(child: CircularProgressIndicator(color: AppTheme.royalGold))
+                          : ElevatedButton(
+                              onPressed: () {
+                                HapticFeedback.mediumImpact();
+                                _handleLogin();
+                              },
+                              child: const Text('ENGAGE PORTAL')),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 24),
-                TextButton(
-                  onPressed: () => context.push('/register'),
-                  child: const Text('Register',
-                      style: TextStyle(color: AppTheme.royalGold)),
-                ),
                 const SizedBox(height: 32),
-                Text(AppConfig.appVersion,
-                    style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("New to the collective?", style: TextStyle(color: Colors.white38, fontSize: 13)),
+                    TextButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        context.push('/register');
+                      },
+                      child: const Text('REGISTER NOW',
+                          style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.w900, fontSize: 12)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 60),
+                Text('SYSTEM VERSION ${AppConfig.appVersion}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 9, color: Colors.white10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                const SizedBox(height: 24),
               ],
             ),
           ),

@@ -39,7 +39,7 @@ class ProfileScreen extends ConsumerWidget {
                   _buildDigitalIDCard(context, profile),
                   const SizedBox(height: 32),
                   
-                  _buildSectionHeader('Personal Particulars'),
+                  _buildSectionHeader('Personal Details'),
                   GlassContainer(
                     child: Column(
                       children: [
@@ -57,11 +57,11 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 32),
 
-                  _buildSectionHeader('Academic Timeline'),
+                  _buildSectionHeader('Educational History'),
                   _buildAcademicTimeline(profile['academicHistory'] ?? []),
                   const SizedBox(height: 32),
 
-                  _buildSectionHeader('Professional Career Milestones'),
+                  _buildSectionHeader('Professional History'),
                   _buildProfessionalTimeline(profile['professionalHistory'] ?? []),
                   const SizedBox(height: 32),
 
@@ -163,16 +163,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildMemberPhoto(String? path, String name) {
-    String? fullUrl;
-    if (path != null && path.toString().isNotEmpty) {
-      if (path.toString().startsWith('http')) {
-        fullUrl = path.toString();
-      } else {
-        final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
-        final cleanP = path.toString().startsWith('/') ? path.toString().substring(1) : path.toString();
-        fullUrl = '$base/$cleanP';
-      }
-    }
+    final fullUrl = AppConfig.resolveImageUrl(path);
     
     return Container(
       width: 80,

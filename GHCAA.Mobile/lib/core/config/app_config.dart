@@ -46,4 +46,12 @@ class AppConfig {
   static String get memberNoun {
     return dotenv.env['MEMBER_NOUN'] ?? 'Haragangian';
   }
+  static String? resolveImageUrl(String? path) {
+    if (path == null || path.trim().isEmpty) return null;
+    if (path.startsWith('http')) return path;
+    
+    final baseUrl = apiBaseUrl.replaceFirst('/api', '');
+    final cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    return '$baseUrl/$cleanPath';
+  }
 }

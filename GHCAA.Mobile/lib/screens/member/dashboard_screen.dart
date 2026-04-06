@@ -52,17 +52,7 @@ class DashboardScreen extends ConsumerWidget {
           final isAdmin = roleAsync.value?.isStaffAdminRole ?? false;
           final fullName = profile?['fullName'] ?? 'Distinguished Alumnus';
           
-          String? photoUrl;
-          if (profile?['photoPath'] != null && profile!['photoPath'].toString().isNotEmpty) {
-            final p = profile['photoPath'].toString();
-            if (p.startsWith('http')) {
-              photoUrl = p;
-            } else {
-              final base = AppConfig.apiBaseUrl.replaceFirst('/api', '');
-              final cleanP = p.startsWith('/') ? p.substring(1) : p;
-              photoUrl = '$base/$cleanP';
-            }
-          }
+          final photoUrl = AppConfig.resolveImageUrl(profile?['photoPath']);
 
           return CustomScrollView(
             slivers: [
@@ -124,9 +114,9 @@ class DashboardScreen extends ConsumerWidget {
                       _buildCompletenessCheck(context, profile),
                       const SizedBox(height: 24),
 
-                      // ----- ADMIN EXCLUSIVE OVERRIDE -----
+                      // ----- ADMIN SECTION -----
                       if (isAdmin) ...[
-                        _buildCategoryHeader('SYSTEM AUTHORITY', Colors.redAccent),
+                        _buildCategoryHeader('ADMINISTRATIVE CONTROLS', Colors.redAccent),
                         _buildAdminAnalyticsCluster(ref),
                         const SizedBox(height: 16),
                         _buildAdminGrid(context, isCompact),
@@ -136,17 +126,17 @@ class DashboardScreen extends ConsumerWidget {
                       ],
                       // ------------------------------------
 
-                      _buildCategoryHeader('PORTAL DIRECTIVES', AppTheme.royalGold),
-                      _buildResponsiveGrid(context, isCompact, [
-                        _buildActionCard(context, Icons.account_circle_outlined, 'Digital ID', 'Registry', '/digital_id', isCompact: isCompact),
+                      _buildCategoryHeader('DASHBOARD NAVIGATION', AppTheme.royalGold),
+                        _buildResponsiveGrid(context, isCompact, [
+                        _buildActionCard(context, Icons.account_circle_outlined, 'Digital ID', 'Profile', '/digital_id', isCompact: isCompact),
                         _buildActionCard(context, Icons.groups_outlined, 'Member Directory', 'Directory', '/directory', isCompact: isCompact),
                         _buildActionCard(context, Icons.account_balance_wallet_outlined, 'Payments', 'Dues', '/financials', isCompact: isCompact, accentColor: Colors.tealAccent),
-                        _buildActionCard(context, Icons.work_outline, 'Jobs', 'Hub', '/jobs', isCompact: isCompact),
+                        _buildActionCard(context, Icons.work_outline, 'Jobs', 'Listings', '/jobs', isCompact: isCompact),
                         _buildActionCard(context, Icons.event_available_outlined, 'Events', 'Announcements', '/events', isCompact: isCompact),
                         _buildActionCard(context, Icons.newspaper_outlined, 'News', 'Feed', '/news', isCompact: isCompact, accentColor: Colors.purpleAccent),
-                        _buildActionCard(context, Icons.photo_library_outlined, 'Gallery', 'Memories', '/gallery', isCompact: isCompact, accentColor: Colors.purpleAccent),
-                        _buildActionCard(context, Icons.corporate_fare_outlined, 'EC Committee', 'Board', '/committee', isCompact: isCompact),
-                        _buildActionCard(context, Icons.history_outlined, 'Activity Log', 'Trace', '/activity', isCompact: isCompact),
+                        _buildActionCard(context, Icons.photo_library_outlined, 'Gallery', 'Photos', '/gallery', isCompact: isCompact, accentColor: Colors.purpleAccent),
+                        _buildActionCard(context, Icons.corporate_fare_outlined, 'EC Committee', 'Members', '/committee', isCompact: isCompact),
+                        _buildActionCard(context, Icons.history_outlined, 'Activity Log', 'Logs', '/activity', isCompact: isCompact),
                         _buildActionCard(context, Icons.notifications_active_outlined, 'Notifications', 'Alerts', '/notifications', isCompact: isCompact, accentColor: Colors.orangeAccent),
                         _buildActionCard(context, Icons.support_agent_outlined, 'Support', 'Helpdesk', '/support', isCompact: isCompact),
                         _buildActionCard(context, Icons.info_outline, 'About GHCAA', 'Info', '/about', isCompact: isCompact),
@@ -193,9 +183,9 @@ class DashboardScreen extends ConsumerWidget {
                child: Column(
                  crossAxisAlignment: CrossAxisAlignment.start,
                  children: [
-                   const Text('OPTIMIZE IDENTITY', style: TextStyle(color: Colors.amberAccent, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                   const Text('PROFILE INCOMPLETE', style: TextStyle(color: Colors.amberAccent, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
                    const SizedBox(height: 2),
-                   Text('Your profile is ${(completeness * 100).toInt()}% synchronized. Finalize your registry data for full access.', 
+                   Text('Your profile is ${(completeness * 100).toInt()}% complete. Please update your information for full access.', 
                      style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w500)),
                  ],
                ),
@@ -231,7 +221,7 @@ class DashboardScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('ALUMNUS AUTHORIZED', style: TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                const Text('AUTHORIZED ACCESS', style: TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 2)),
                 const SizedBox(height: 4),
                 if (membershipType.isNotEmpty)
                   Container(
@@ -251,7 +241,7 @@ class DashboardScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
-                      child: Text('REG: ${profile?['membershipNumber'] ?? 'AUDIT'}', style: const TextStyle(color: Colors.white70, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      child: Text('ID: ${profile?['membershipNumber'] ?? 'N/A'}', style: const TextStyle(color: Colors.white70, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     ),
                     if (membershipCategory.isNotEmpty && membershipCategory != 'None') ...[
                       const SizedBox(width: 6),
@@ -315,9 +305,9 @@ class DashboardScreen extends ConsumerWidget {
     return analyticsAsync.when(
       data: (analytics) => Row(
         children: [
-          _buildCompactStatCard('ALUMNI', '${analytics['totalMembers'] ?? 0}', Colors.blueAccent),
+          _buildCompactStatCard('TOTAL MEMBERS', '${analytics['totalMembers'] ?? 0}', Colors.blueAccent),
           const SizedBox(width: 8),
-          _buildCompactStatCard('PENDING', '${analytics['pendingApprovals'] ?? 0}', Colors.orangeAccent),
+          _buildCompactStatCard('PENDING APPROVALS', '${analytics['pendingApprovals'] ?? 0}', Colors.orangeAccent),
         ],
       ),
       loading: () => const LinearProgressIndicator(color: Colors.redAccent, minHeight: 1),
@@ -346,11 +336,11 @@ class DashboardScreen extends ConsumerWidget {
 
   Widget _buildAdminGrid(BuildContext context, bool isCompact) {
     return _buildResponsiveGrid(context, isCompact, [
-      _buildActionCard(context, Icons.dashboard_customize_outlined, 'Sys Admin', 'Base', '/admin_dashboard', accentColor: Colors.redAccent, isCompact: isCompact),
-      _buildActionCard(context, Icons.gavel, 'Approvals', 'Audit', '/admin/approvals', accentColor: Colors.redAccent, isCompact: isCompact),
-      _buildActionCard(context, Icons.message_outlined, 'Dispatch', 'Log', '/admin/messages', accentColor: Colors.redAccent, isCompact: isCompact),
-      _buildActionCard(context, Icons.analytics_outlined, 'History', 'Trace', '/admin/audit', accentColor: Colors.redAccent, isCompact: isCompact),
-      _buildActionCard(context, Icons.manage_accounts_outlined, 'Permissions', 'Matrix', '/admin/permissions', accentColor: Colors.deepOrangeAccent, isCompact: isCompact),
+      _buildActionCard(context, Icons.dashboard_customize_outlined, 'Admin Panel', 'Dashboard', '/admin_dashboard', accentColor: Colors.redAccent, isCompact: isCompact),
+      _buildActionCard(context, Icons.gavel, 'Approvals', 'Member Requests', '/admin/approvals', accentColor: Colors.redAccent, isCompact: isCompact),
+      _buildActionCard(context, Icons.message_outlined, 'Messages', 'Dispatch', '/admin/messages', accentColor: Colors.redAccent, isCompact: isCompact),
+      _buildActionCard(context, Icons.analytics_outlined, 'Audit Log', 'Sys Log', '/admin/audit', accentColor: Colors.redAccent, isCompact: isCompact),
+      _buildActionCard(context, Icons.manage_accounts_outlined, 'Permissions', 'Access Matrix', '/admin/permissions', accentColor: Colors.deepOrangeAccent, isCompact: isCompact),
     ]);
   }
 
@@ -361,29 +351,49 @@ class DashboardScreen extends ConsumerWidget {
         HapticFeedback.lightImpact();
         context.push(route);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.04),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.02), width: 1.2),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(isCompact ? 8.0 : 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: isCompact ? 20 : 24),
-              const Spacer(),
-              Text(title, 
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.white, fontSize: isCompact ? 10 : 12, fontWeight: FontWeight.bold)),
-              if (!isCompact) ...[
-                const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(color: Colors.white24, fontSize: 8)),
-              ]
-            ],
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [
+                color.withValues(alpha: 0.08),
+                Colors.black.withValues(alpha: 0.0),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(isCompact ? 10.0 : 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: isCompact ? 18 : 22),
+                ),
+                const Spacer(),
+                Text(title, 
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontSize: isCompact ? 11 : 13,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  )),
+                if (!isCompact) ...[
+                  const SizedBox(height: 2),
+                  Text(subtitle.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 7, color: Colors.white30, letterSpacing: 1)),
+                ]
+              ],
+            ),
           ),
         ),
       ),
@@ -405,7 +415,7 @@ class DashboardScreen extends ConsumerWidget {
           children: [
             Icon(Icons.verified, color: color, size: 14),
             const SizedBox(width: 8),
-            Text(isAdmin ? 'ENTERPRISE ADMINISTRATOR' : 'VERIFIED HARAGANGIAN', 
+            Text(isAdmin ? 'ADMINISTRATOR' : 'VERIFIED MEMBER', 
               style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
           ],
         ),

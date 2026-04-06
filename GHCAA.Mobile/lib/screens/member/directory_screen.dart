@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../features/networking/networking_service.dart';
 import '../../features/lookups/dropdown_service.dart';
@@ -33,8 +32,6 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
   bool _isLoadingMore = false;
   bool _hasMore = true;
   int _totalItems = 0;
-  
-
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -132,18 +129,19 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
       title: 'Member Directory',
       breadcrumb: 'PORTAL > MEMBER DIRECTORY',
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           children: [
+            const SizedBox(height: 12),
             TextField(
               key: const ValueKey('directory_search'),
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search alumni registry...',
-                prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                hintText: 'Search members...',
+                prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.royalGold),
                 suffixIcon: _searchController.text.isNotEmpty 
                   ? IconButton(
-                      icon: const Icon(Icons.cancel_rounded, size: 18, color: Colors.white24),
+                      icon: const Icon(Icons.backspace_rounded, size: 16, color: Colors.white24),
                       onPressed: () {
                         _searchController.clear();
                         _onSearchChanged('');
@@ -155,200 +153,172 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
             ),
             if (!_isLoading && _totalItems > 0)
               Padding(
-                padding: const EdgeInsets.only(top: 8.0, left: 4.0),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
                 child: Row(
                   children: [
                     Text(
-                      'Showing ${_alumni.length} of $_totalItems alumni records',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppTheme.royalGold.withValues(alpha: 0.7),
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5
-                      ),
+                      'Showing ${_alumni.length} of $_totalItems members',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 8, letterSpacing: 1.5, color: Colors.white38),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(color: AppTheme.obsidianBlack, borderRadius: BorderRadius.circular(4), border: Border.all(color: AppTheme.glassBorder)),
+                      child: Text('SYNCED', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.greenAccent, fontSize: 8)),
                     ),
                   ],
                 ),
               ),
             const SizedBox(height: 12),
-            // Filter Row 1: Batch & Dept
-            Row(
+            // Dynamic Filtering Framework
+            Column(
               children: [
-                Expanded(
-                  child: FutureBuilder<List<Map<String, String>>>(
-                    future: ref.read(dropdownDataProvider).getOptions('PassingYear'),
-                    builder: (context, snapshot) => _buildFilterDropdown('BATCH', snapshot.data?.map((e) => e['label']!).toList() ?? []),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FutureBuilder<List<Map<String, String>>>(
+                        future: ref.read(dropdownDataProvider).getOptions('PassingYear'),
+                        builder: (context, snapshot) => _buildFilterDropdown('YEAR', snapshot.data?.map((e) => e['label']!).toList() ?? []),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FutureBuilder<List<Map<String, String>>>(
+                        future: ref.read(dropdownDataProvider).getOptions('Subject'),
+                        builder: (context, snapshot) => _buildFilterDropdown('DEPT', snapshot.data?.map((e) => e['label']!).toList() ?? []),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: FutureBuilder<List<Map<String, String>>>(
-                    future: ref.read(dropdownDataProvider).getOptions('Subject'),
-                    builder: (context, snapshot) => _buildFilterDropdown('SUBJECT', snapshot.data?.map((e) => e['label']!).toList() ?? []),
-                  ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildFilterDropdown('TYPE', ['General', 'Founding', 'Executive', 'Associate', 'Honorary', 'Advisory']),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildFilterDropdown('CATEGORY', ['LifelongPatron', 'Sponsor', 'Advisor', 'Mentor', 'Volunteer', 'Student']),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            // Filter Row 2: Type & Category
-            Row(
-              children: [
-                Expanded(
-                  child: _buildFilterDropdown('TYPE', ['General', 'Founding', 'Executive', 'Associate', 'Honorary', 'Advisory']),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildFilterDropdown('CATEGORY', ['LifelongPatron', 'Sponsor', 'Advisor', 'Mentor', 'Volunteer', 'Student']),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             Expanded(
               child: _isLoading 
                 ? ListView.builder(
-                    itemCount: 8,
-                    itemBuilder: (context, index) => SkeletonLoader.memberCard(),
+                    itemCount: 6,
+                    itemBuilder: (context, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: SkeletonLoader.memberCard(),
+                    ),
                   )
                 : RefreshIndicator(
                     color: AppTheme.royalGold,
+                    backgroundColor: AppTheme.deepCharcoal,
                     onRefresh: () async {
                       HapticFeedback.mediumImpact();
                       await _fetchAlumni(refresh: true);
                     },
                     child: _alumni.isEmpty
-                        ? const Center(child: Text('No records found in the registry.', style: TextStyle(color: AppTheme.textSecondaryDark)))
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.search_off_rounded, color: Colors.white10, size: 48),
+                                const SizedBox(height: 16),
+                                Text('No members found.', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.white12)),
+                              ],
+                            ),
+                          )
                         : ListView.builder(
                             controller: _scrollController,
-                            padding: const EdgeInsets.only(bottom: 40),
+                            padding: const EdgeInsets.only(bottom: 100),
                             physics: const AlwaysScrollableScrollPhysics(),
                             itemCount: _alumni.length + (_hasMore || _isLoadingMore ? 1 : 0),
                             itemBuilder: (context, index) {
                               if (index == _alumni.length) {
                                 return const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 24.0),
-                                  child: Center(child: CircularProgressIndicator(color: AppTheme.royalGold, strokeWidth: 2)),
+                                  padding: EdgeInsets.symmetric(vertical: 32.0),
+                                  child: Center(child: CircularProgressIndicator(color: AppTheme.royalGold, strokeWidth: 1.5)),
                                 );
                               }
-
+ 
                               final m = _alumni[index];
-                              
                               String? photoUrl;
                               if (m['photoPath'] != null && m['photoPath'].toString().isNotEmpty) {
                                 final p = m['photoPath'];
-                                if (p.startsWith('http')) {
-                                  photoUrl = p;
-                                } else {
-                                  final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
-                                  final cleanP = p.startsWith('/') ? p.substring(1) : p;
-                                  photoUrl = '$base/$cleanP';
-                                }
+                                final base = AppConfig.apiBaseUrl.replaceFirst('/api', '');
+                                photoUrl = p.startsWith('http') ? p : '$base/$p';
                               }
-
+ 
                               return Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: GlassContainer(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: Card(
                                   child: InkWell(
+                                    borderRadius: BorderRadius.circular(16),
                                     onTap: () {
                                       HapticFeedback.lightImpact();
                                       context.push('/directory/${m['id']}');
                                     },
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            _buildMemberThumbnail(photoUrl, m['fullName']),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Flexible(
-                                                        child: Text(m['fullName'] ?? 'Anonymous Alumnus',
-                                                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: -0.2),
-                                                            overflow: TextOverflow.ellipsis),
-                                                      ),
-                                                      if (m['isVerified'] == true) ...[
-                                                        const SizedBox(width: 4),
-                                                        const Icon(Icons.verified, color: AppTheme.royalGold, size: 14),
-                                                      ],
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Text(m['membershipNumber'] ?? 'REG-PENDING', style: const TextStyle(color: AppTheme.royalGold, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                                                      if (m['memberCategory'] != null) ...[
-                                                        const SizedBox(width: 8),
-                                                        Container(
-                                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0.5),
-                                                          decoration: BoxDecoration(color: AppTheme.royalGold.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(3)),
-                                                          child: Text(m['memberCategory']!.toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 7, fontWeight: FontWeight.w900)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              _buildMemberThumbnail(context, photoUrl, m['fullName']),
+                                              const SizedBox(width: 16),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Flexible(
+                                                          child: Text(m['fullName']?.toString() ?? 'Member',
+                                                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                                                              overflow: TextOverflow.ellipsis),
                                                         ),
+                                                        if (m['isVerified'] == true) ...[
+                                                          const SizedBox(width: 6),
+                                                          const Icon(Icons.verified_user_rounded, color: AppTheme.royalGold, size: 14),
+                                                        ],
                                                       ],
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            if (m['membershipType'] != null)
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                decoration: BoxDecoration(color: Colors.lightGreen.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
-                                                child: Text(m['membershipType']!, style: const TextStyle(color: Colors.lightGreenAccent, fontSize: 8, fontWeight: FontWeight.bold)),
-                                              ),
-                                            const SizedBox(width: 4),
-                                            const Icon(Icons.chevron_right_rounded, size: 14, color: AppTheme.royalGold)
-                                          ],
-                                        ),
-                                        const SizedBox(height: 10),
-                                        const Divider(color: Colors.white10, height: 1),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              flex: 5,
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(Icons.school_outlined, size: 12, color: AppTheme.royalGold),
-                                                  const SizedBox(width: 6),
-                                                  Flexible(
-                                                    child: Text(
-                                                      _getCompactBatch(m),
-                                                      style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              flex: 4,
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.end,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Flexible(
-                                                    child: Text(
-                                                      m['designation'] ?? 'Alumnus',
-                                                      style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500),
-                                                      textAlign: TextAlign.right,
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
+                                                    const SizedBox(height: 4),
+                                                    Row(
+                                                      children: [
+                                                        Text(m['membershipNumber'] ?? 'PENDING', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.royalGold, fontSize: 8)),
+                                                        const SizedBox(width: 8),
+                                                        if (m['memberCategory'] != null)
+                                                          Container(
+                                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                            decoration: BoxDecoration(color: AppTheme.royalGold.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(4)),
+                                                            child: Text(m['memberCategory']!.toString().toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 7, fontWeight: FontWeight.w900)),
+                                                          ),
+                                                      ],
                                                     ),
-                                                  ),
-                                                  const SizedBox(width: 6),
-                                                  const Icon(Icons.business_center_outlined, size: 12, color: AppTheme.royalGold),
-                                                ],
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                              const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.white12)
+                                            ],
+                                          ),
+                                          const Padding(
+                                            padding: EdgeInsets.symmetric(vertical: 12),
+                                            child: Divider(color: Colors.white10, height: 1),
+                                          ),
+                                          Row(
+                                            children: [
+                                              _metaBadge(Icons.school_rounded, _getCompactBatch(m)),
+                                              const Spacer(),
+                                              _metaBadge(Icons.cases_rounded, m['designation'] ?? 'Member'),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -362,38 +332,49 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
       ),
     );
   }
-
+ 
+  Widget _metaBadge(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 12, color: AppTheme.royalGold.withValues(alpha: 0.5)),
+        const SizedBox(width: 6),
+        Text(text, style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 8, color: Colors.white54)),
+      ],
+    );
+  }
+ 
   String _getCompactBatch(Map<String, dynamic> m) {
     final degree = m['degree'] ?? 'HSC';
     final year = m['passingYear']?.toString() ?? '';
-    return 'Batch of $degree $year';
+    return '$degree $year';
   }
-
+ 
   Widget _buildFilterDropdown(String label, List<String> options) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.2),
+        color: AppTheme.obsidianBlack,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.1)),
+        border: Border.all(color: AppTheme.glassBorder),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: label == 'BATCH' ? _selectedBatch : (label == 'SUBJECT' ? _selectedDept : (label == 'TYPE' ? _selectedType : _selectedCategory)),
-          hint: Text(label, style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 8, fontWeight: FontWeight.bold)),
-          dropdownColor: AppTheme.midnightSurface,
-          icon: const Icon(Icons.arrow_drop_down, color: AppTheme.royalGold, size: 16),
+          value: label == 'YEAR' ? _selectedBatch : (label == 'DEPT' ? _selectedDept : (label == 'TYPE' ? _selectedType : _selectedCategory)),
+          hint: Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 8, color: AppTheme.royalGold.withValues(alpha: 0.6))),
+          dropdownColor: AppTheme.deepCharcoal,
+          icon: const Icon(Icons.arrow_drop_down_rounded, color: AppTheme.royalGold, size: 20),
           isExpanded: true,
-          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
           items: [
-            DropdownMenuItem(value: null, child: Text('ALL $label', style: const TextStyle(fontSize: 10))),
-            ...options.map((o) => DropdownMenuItem(value: o, child: Text(o, style: const TextStyle(fontSize: 10)))),
+            DropdownMenuItem(value: null, child: Text('ALL $label', style: const TextStyle(fontSize: 9))),
+            ...options.map((o) => DropdownMenuItem(value: o, child: Text(o, style: const TextStyle(fontSize: 9)))),
           ],
           onChanged: (v) {
             setState(() {
-              if (label == 'BATCH') {
+              if (label == 'YEAR') {
                 _selectedBatch = v;
-              } else if (label == 'SUBJECT') {
+              } else if (label == 'DEPT') {
                 _selectedDept = v;
               } else if (label == 'TYPE') {
                 _selectedType = v;
@@ -407,15 +388,21 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
       ),
     );
   }
-
-  Widget _buildMemberThumbnail(String? url, String? name) {
-    return SizedBox(
-      width: 44,
-      height: 52,
-      child: CustomNetworkImage(
-        imageUrl: url ?? '',
-        borderRadius: 10,
-        fit: BoxFit.cover,
+ 
+  Widget _buildMemberThumbnail(BuildContext context, String? url, String? name) {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: AppTheme.obsidianBlack,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.glassBorder),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: url != null && url.isNotEmpty
+          ? CustomNetworkImage(imageUrl: url, fit: BoxFit.cover)
+          : const Icon(Icons.person_pin_rounded, color: AppTheme.royalGold, size: 24),
       ),
     );
   }

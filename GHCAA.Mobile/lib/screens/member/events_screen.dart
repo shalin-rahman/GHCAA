@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../features/events/events_service.dart';
@@ -12,6 +11,8 @@ import '../../features/financials/gateway_service.dart';
 import '../financials/payment_web_page.dart';
 import '../../core/config/app_config.dart';
 import '../../core/widgets/custom_network_image.dart';
+import '../../core/utils/app_utils.dart';
+import '../../core/widgets/app_search_field.dart';
 
 final eventSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
@@ -51,7 +52,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     final searchQuery = ref.watch(eventSearchQueryProvider);
     final roleAsync = ref.watch(FutureProvider((ref) => ref.read(authServiceProvider).getRole()));
     final isAdmin = roleAsync.value?.isStaffAdminRole ?? false;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+
 
     return AppScaffold(
       isAdmin: isAdmin,
@@ -60,35 +61,22 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
       floatingActionButton: isAdmin ? FloatingActionButton.extended(
         onPressed: () => _showCreateEvent(context, ref),
         backgroundColor: AppTheme.royalGold,
-        icon: const Icon(Icons.add, color: Colors.black),
-        label: const Text('MANAGE EVENTS', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.5)),
+        elevation: 8,
+        icon: const Icon(Icons.add, color: Colors.black, size: 20),
+        label: Text('ADD EVENT', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.black, fontSize: 11)),
       ) : null,
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: TextField(
+            child: AppSearchField(
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search events...',
-                prefixIcon: const Icon(Icons.search, size: 20, color: AppTheme.royalGold),
-                suffixIcon: _searchController.text.isNotEmpty 
-                  ? IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 20, color: Colors.white54),
-                      onPressed: () {
-                        _searchController.clear();
-                        ref.read(eventSearchQueryProvider.notifier).state = "";
-                      },
-                    )
-                  : null,
-                filled: true,
-                fillColor: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.1))),
-              ),
+              hintText: 'Search events...',
               onChanged: (v) => ref.read(eventSearchQueryProvider.notifier).state = v.toLowerCase(),
+              onClear: () {
+                _searchController.clear();
+                ref.read(eventSearchQueryProvider.notifier).state = "";
+              },
             ),
           ),
           Expanded(
@@ -101,7 +89,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                   final title = e['title']?.toString().toLowerCase() ?? '';
                   return title.contains(searchQuery);
                 }).toList();
-
+ 
                 return RefreshIndicator(
                   color: AppTheme.royalGold,
                   onRefresh: () async {
@@ -112,36 +100,26 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                     children: [
                       if (filtered.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(left: 24, bottom: 8),
+                          padding: const EdgeInsets.only(left: 24, bottom: 8, top: 4),
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
                               'Showing ${filtered.length} of ${events.length} listed events',
-                              style: TextStyle(fontSize: 10, color: AppTheme.royalGold.withValues(alpha: 0.7), fontWeight: FontWeight.bold),
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.royalGold.withValues(alpha: 0.6), letterSpacing: 1),
                             ),
                           ),
                         ),
                       Expanded(
                         child: filtered.isEmpty
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No active events found.' : 'No events match your search.', style: const TextStyle(color: AppTheme.textSecondaryDark)))
+                          ? Center(child: Text(searchQuery.isEmpty ? 'No active events found.' : 'No events match your search.', style: Theme.of(context).textTheme.bodyMedium))
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                               itemCount: filtered.length,
                               itemBuilder: (context, index) {
                                 final ev = filtered[index];
                                 final isOpen = _isRegistrationOpen(ev);
-                                final coverUrl = ev['coverImageUrl'] ?? ev['imageUrl'];
-                                String? fullImgUrl;
-                                if (coverUrl != null && coverUrl.toString().isNotEmpty) {
-                                  if (coverUrl.toString().startsWith('http')) {
-                                    fullImgUrl = coverUrl.toString();
-                                  } else {
-                                    final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
-                                    final cleanP = coverUrl.toString().startsWith('/') ? coverUrl.toString().substring(1) : coverUrl.toString();
-                                    fullImgUrl = '$base/$cleanP';
-                                  }
-                                }
-
+                                final fullImgUrl = AppConfig.resolveImageUrl(ev['coverImageUrl'] ?? ev['imageUrl']);
+ 
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 24.0),
                                   child: GestureDetector(
@@ -149,8 +127,8 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                       HapticFeedback.lightImpact();
                                       context.push('/events/${ev['id']}');
                                     },
-                                    child: GlassContainer(
-                                      padding: EdgeInsets.zero,
+                                    child: Card(
+                                      margin: EdgeInsets.zero,
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.stretch,
                                         children: [
@@ -159,10 +137,13 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                               SizedBox(
                                                 height: 190,
                                                 width: double.infinity,
-                                                child: CustomNetworkImage(
-                                                  imageUrl: fullImgUrl ?? '',
-                                                  borderRadius: 16,
-                                                  fit: BoxFit.cover,
+                                                child: ClipRRect(
+                                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                                  child: CustomNetworkImage(
+                                                    imageUrl: fullImgUrl ?? '',
+                                                    borderRadius: 0,
+                                                    fit: BoxFit.cover,
+                                                  ),
                                                 ),
                                               ),
                                               if (fullImgUrl == null)
@@ -175,7 +156,11 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                 right: 16,
                                                 child: Container(
                                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                                  decoration: BoxDecoration(color: isOpen ? Colors.green.withValues(alpha: 0.9) : Colors.redAccent.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(6)),
+                                                  decoration: BoxDecoration(
+                                                    color: isOpen ? Colors.green.withValues(alpha: 0.9) : Colors.redAccent.withValues(alpha: 0.9), 
+                                                    borderRadius: BorderRadius.circular(6),
+                                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10)]
+                                                  ),
                                                   child: Text(isOpen ? 'REGISTRATION OPEN' : 'CLOSED', style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
                                                 ),
                                               ),
@@ -184,11 +169,17 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                 left: 0,
                                                 right: 0,
                                                 child: Container(
-                                                  padding: const EdgeInsets.all(12),
-                                                  decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent])),
+                                                  padding: const EdgeInsets.all(16),
+                                                  decoration: BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                      begin: Alignment.bottomCenter, 
+                                                      end: Alignment.topCenter, 
+                                                      colors: [Colors.black.withValues(alpha: 0.9), Colors.transparent]
+                                                    )
+                                                  ),
                                                   child: Row(
                                                     children: [
-                                                      const Icon(Icons.pin_drop_outlined, size: 14, color: AppTheme.royalGold),
+                                                      const Icon(Icons.location_on_rounded, size: 16, color: AppTheme.royalGold),
                                                       const SizedBox(width: 8),
                                                       Text(ev['location']?.toString().toUpperCase() ?? 'LOCATION TBD', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
                                                     ],
@@ -198,25 +189,25 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                             ],
                                           ),
                                           Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                            padding: const EdgeInsets.all(20.0),
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                  children: [
-                                                    Text(ev['startDate']?.toString().split('T')[0] ?? 'DATE TBD', style: const TextStyle(color: AppTheme.royalGold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1)),
-                                                    if (ev['registrationFee'] != null && ev['registrationFee'] > 0)
-                                                      Text('${ev['registrationFee']} BDT', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900))
-                                                    else
-                                                      const Text('FREE ENTRY', style: TextStyle(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
-                                                  ],
-                                                ),
-                                                const SizedBox(height: 14),
-                                                Text(ev['title'] ?? 'Alumni Reunion Event', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, height: 1.2, letterSpacing: -0.2)),
-                                                const SizedBox(height: 6),
-                                                Text(ev['description'] ?? 'No description provided.', style: const TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textSecondaryDark), maxLines: 2, overflow: TextOverflow.ellipsis),
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                      Text(AppUtils.formatDate(ev['startDate']), style: Theme.of(context).textTheme.labelLarge),
+                                                      if (ev['registrationFee'] != null && ev['registrationFee'] > 0)
+                                                        Text(AppUtils.formatCurrency(ev['registrationFee']), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.royalGold, fontWeight: FontWeight.w900))
+                                                      else
+                                                        const Text('FREE ENTRY', style: TextStyle(color: Colors.greenAccent, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                                                    ],
+                                                  ),
                                                 const SizedBox(height: 16),
+                                                Text(ev['title'] ?? 'Alumni Reunion Event', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
+                                                const SizedBox(height: 8),
+                                                Text(ev['description'] ?? 'No description provided.', style: Theme.of(context).textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
+                                                const SizedBox(height: 24),
                                                 SizedBox(
                                                   width: double.infinity,
                                                   child: ElevatedButton.icon(
@@ -224,14 +215,8 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                       HapticFeedback.lightImpact();
                                                       handleEventPayment((ev['registrationFee'] ?? 0).toDouble(), ev['title'] ?? 'Event');
                                                     } : null,
-                                                    icon: Icon(isOpen ? Icons.how_to_reg_rounded : Icons.lock_clock_outlined, size: 16),
-                                                    label: Text(isOpen ? 'REGISTER' : 'CLOSED', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1)),
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor: isOpen ? AppTheme.royalGold : Colors.white10,
-                                                      foregroundColor: isOpen ? Colors.black : Colors.white38,
-                                                      padding: const EdgeInsets.symmetric(vertical: 16),
-                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                                    ),
+                                                    icon: Icon(isOpen ? Icons.how_to_reg_rounded : Icons.lock_clock_outlined, size: 18),
+                                                    label: Text(isOpen ? 'CONFIRM REGISTRATION' : 'REGISTRATION CLOSED'),
                                                   ),
                                                 ),
                                               ],
@@ -277,134 +262,129 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     DateTime endDate = DateTime.now().add(const Duration(days: 30, hours: 4));
     DateTime? regStart;
     DateTime? regEnd;
-
+ 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: AppTheme.midnightSurface,
-          title: const Text('CREATE EVENT', style: TextStyle(color: AppTheme.royalGold, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          backgroundColor: AppTheme.deepCharcoal,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: AppTheme.glassBorder),
+          ),
+          title: Center(
+            child: Text('CREATE NEW EVENT', 
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(letterSpacing: 2)),
+          ),
           content: SizedBox(
-            width: double.maxFinite,
+            width: MediaQuery.of(context).size.width * 0.85,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-
-                  // Core Details
-                  TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Event Title *', prefixIcon: Icon(Icons.event_outlined))),
-                  const SizedBox(height: 10),
-                  TextField(controller: descCtrl, style: const TextStyle(color: Colors.white, height: 1.5), decoration: const InputDecoration(labelText: 'Description *', prefixIcon: Icon(Icons.description_outlined)), maxLines: 3),
-                  const SizedBox(height: 10),
-                  TextField(controller: locCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Location *', prefixIcon: Icon(Icons.location_on_outlined))),
-
-                  const SizedBox(height: 16),
-                  const Divider(color: Colors.white12),
-                  const Text('EVENT DATES', style: TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                   const SizedBox(height: 16),
+                  TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Event Title', prefixIcon: Icon(Icons.title_rounded))),
+                  const SizedBox(height: 12),
+                  TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Description', prefixIcon: Icon(Icons.description_rounded)), maxLines: 3),
+                  const SizedBox(height: 12),
+                  TextField(controller: locCtrl, decoration: const InputDecoration(labelText: 'Primary Location', prefixIcon: Icon(Icons.place_rounded))),
+ 
+                  const SizedBox(height: 24),
+                  _sectionHeader(context, 'EVENT DATES'),
+                  const SizedBox(height: 12),
+                  _datePickerRow(context, 'Start Date', startDate, (picked) => setDialogState(() => startDate = picked)),
                   const SizedBox(height: 8),
-
-                  // Event Start Date
-                  _datePickerRow(ctx, 'Start Date', startDate, (picked) => setDialogState(() => startDate = picked)),
+                  _datePickerRow(context, 'End Date', endDate, (picked) => setDialogState(() => endDate = picked)),
+ 
+                  const SizedBox(height: 20),
+                  _sectionHeader(context, 'REGISTRATION DETAILS'),
+                  const SizedBox(height: 12),
+                  _datePickerRow(context, 'Opens', regStart, (picked) => setDialogState(() => regStart = picked), nullable: true),
                   const SizedBox(height: 8),
-                  _datePickerRow(ctx, 'End Date', endDate, (picked) => setDialogState(() => endDate = picked)),
-
-                  const SizedBox(height: 16),
-                  const Divider(color: Colors.white12),
-                  const Text('REGISTRATION WINDOW', style: TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                  const SizedBox(height: 8),
-                  _datePickerRow(ctx, 'Reg. Opens', regStart, (picked) => setDialogState(() => regStart = picked), nullable: true),
-                  const SizedBox(height: 8),
-                  _datePickerRow(ctx, 'Reg. Closes', regEnd, (picked) => setDialogState(() => regEnd = picked), nullable: true),
-
-                  const SizedBox(height: 16),
-                  const Divider(color: Colors.white12),
-                  const Text('PRICING & ACCESS', style: TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                  const SizedBox(height: 8),
-
+                  _datePickerRow(context, 'Closes', regEnd, (picked) => setDialogState(() => regEnd = picked), nullable: true),
+ 
+                  const SizedBox(height: 20),
+                  _sectionHeader(context, 'FEE AND CAPACITY'),
+                  const SizedBox(height: 12),
+ 
                   // Free/Paid toggle
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isFree ? Colors.greenAccent.withValues(alpha: 0.06) : Colors.white.withValues(alpha: 0.04),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: isFree ? Colors.greenAccent.withValues(alpha: 0.3) : Colors.white12),
+                      color: Colors.white.withValues(alpha: 0.03),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.glassBorder),
                     ),
                     child: Row(
                       children: [
-                        Icon(isFree ? Icons.volunteer_activism_outlined : Icons.credit_card_outlined,
-                            color: isFree ? Colors.greenAccent : AppTheme.royalGold, size: 18),
-                        const SizedBox(width: 10),
+                        Icon(isFree ? Icons.celebration_rounded : Icons.payments_rounded,
+                            color: isFree ? Colors.greenAccent : AppTheme.royalGold, size: 20),
+                        const SizedBox(width: 12),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(isFree ? 'FREE EVENT' : 'PAID EVENT',
-                                  style: TextStyle(color: isFree ? Colors.greenAccent : AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                              Text(isFree ? 'No fee required for participants' : 'Set a registration fee below',
-                                  style: const TextStyle(color: Colors.white38, fontSize: 9)),
-                            ],
-                          ),
+                          child: Text(isFree ? 'FREE EVENT' : 'PAID EVENT',
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: isFree ? Colors.greenAccent : AppTheme.royalGold,
+                                fontSize: 10,
+                              )),
                         ),
-                        Switch(
-                          value: isFree,
-                          onChanged: (v) => setDialogState(() { isFree = v; if (v) feeCtrl.clear(); }),
-                          activeThumbColor: Colors.greenAccent,
-                          inactiveThumbColor: AppTheme.royalGold,
-                          inactiveTrackColor: AppTheme.royalGold.withValues(alpha: 0.3),
+                        Transform.scale(
+                          scale: 0.7,
+                          child: Switch(
+                            value: !isFree,
+                            onChanged: (v) => setDialogState(() { isFree = !v; if (!v) feeCtrl.clear(); }),
+                            activeThumbColor: AppTheme.royalGold,
+                          ),
                         ),
                       ],
                     ),
                   ),
-
-                  // Fee field (only when paid)
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
-                    child: isFree ? const SizedBox() : Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: TextField(
-                        controller: feeCtrl,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          labelText: 'Registration Fee (BDT)',
-                          prefixIcon: Icon(Icons.currency_exchange),
-                          hintText: 'e.g. 500',
-                        ),
-                      ),
+ 
+                  // Fee field
+                  if (!isFree) Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: TextField(
+                      controller: feeCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(labelText: 'Registration Fee (BDT)', prefixIcon: Icon(Icons.currency_exchange_rounded)),
                     ),
                   ),
-
-                  const SizedBox(height: 10),
-                  // Non-member toggle
-                  SwitchListTile(
-                    value: allowNonMembers,
-                    onChanged: (v) => setDialogState(() => allowNonMembers = v),
-                    activeThumbColor: AppTheme.royalGold,
-                    title: const Text('Allow Non-Members', style: TextStyle(color: Colors.white, fontSize: 12)),
-                    subtitle: const Text('Open registration to guests & public', style: TextStyle(color: Colors.white38, fontSize: 10)),
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
+ 
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('ALLOW NON-MEMBERS', 
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                      ),
+                      Transform.scale(
+                        scale: 0.7,
+                        child: Switch(
+                          value: allowNonMembers,
+                          onChanged: (v) => setDialogState(() => allowNonMembers = v),
+                          activeThumbColor: AppTheme.royalGold,
+                        ),
+                      ),
+                    ],
                   ),
-
+ 
                   const SizedBox(height: 4),
                   TextField(
                     controller: capacityCtrl,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(labelText: 'Max Capacity (leave blank for unlimited)', prefixIcon: Icon(Icons.people_outline)),
+                    decoration: const InputDecoration(labelText: 'Participant Capacity', prefixIcon: Icon(Icons.groups_rounded), hintText: 'Unlimited if empty'),
                   ),
                 ],
               ),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: Colors.white54))),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: Colors.white38))),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
               onPressed: () async {
                 if (titleCtrl.text.isEmpty || descCtrl.text.isEmpty || locCtrl.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Title, description and location are required.')));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all required fields.')));
                   return;
                 }
                 try {
@@ -427,54 +407,58 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                     ref.invalidate(eventsListProvider);
                     if (ctx.mounted) Navigator.pop(ctx);
                     if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Event created successfully.')));
-                  } else {
-                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to create event.'), backgroundColor: Colors.redAccent));
                   }
                 } catch (e) {
                   if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: Colors.redAccent));
                 }
               },
-              child: const Text('CREATE', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              child: const Text('CREATE EVENT'),
             ),
           ],
         ),
       ),
     );
   }
+ 
+  Widget _sectionHeader(BuildContext context, String title) {
+    return Text(title, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.royalGold, letterSpacing: 1.5, fontSize: 8));
+  }
 
-  Widget _datePickerRow(BuildContext ctx, String label, DateTime? value, void Function(DateTime) onPicked, {bool nullable = false}) {
+  Widget _datePickerRow(BuildContext context, String label, DateTime? value, void Function(DateTime) onPicked, {bool nullable = false}) {
     return GestureDetector(
       onTap: () async {
         final picked = await showDatePicker(
-          context: ctx,
+          context: context,
           initialDate: value ?? DateTime.now(),
           firstDate: DateTime.now().subtract(const Duration(days: 1)),
           lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
           builder: (context, child) => Theme(
-            data: ThemeData.dark().copyWith(colorScheme: const ColorScheme.dark(primary: AppTheme.royalGold, surface: Color(0xFF1A1A2E))),
+            data: Theme.of(context).copyWith(
+              colorScheme: const ColorScheme.dark(primary: AppTheme.royalGold, surface: AppTheme.deepCharcoal),
+            ),
             child: child!,
           ),
         );
         if (picked != null) onPicked(picked);
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.04),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white12),
+          color: AppTheme.obsidianBlack,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.glassBorder),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today_outlined, size: 16, color: AppTheme.royalGold),
-            const SizedBox(width: 10),
+            const Icon(Icons.event_note_rounded, size: 16, color: AppTheme.royalGold),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
-                value != null ? '${value.day}/${value.month}/${value.year}' : 'Set $label',
-                style: TextStyle(color: value != null ? Colors.white : Colors.white38, fontSize: 12),
+                value != null ? AppUtils.formatDate(value) : 'Select $label',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: value != null ? Colors.white : Colors.white38),
               ),
             ),
-            Text(label, style: const TextStyle(color: Colors.white38, fontSize: 9, letterSpacing: 0.5)),
+            Text(label.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 7, color: AppTheme.royalGold.withValues(alpha: 0.5))),
           ],
         ),
       ),

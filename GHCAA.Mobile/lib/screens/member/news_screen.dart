@@ -6,6 +6,8 @@ import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/utils/app_utils.dart';
+import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../features/content/content_service.dart';
 
@@ -33,7 +35,6 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
   Widget build(BuildContext context) {
     final newsAsync = ref.watch(newsListProvider);
     final searchQuery = ref.watch(newsSearchQueryProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
       title: 'News',
@@ -42,28 +43,14 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: TextField(
+            child: AppSearchField(
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search news hub...',
-                prefixIcon: const Icon(Icons.search, size: 20, color: AppTheme.royalGold),
-                suffixIcon: _searchController.text.isNotEmpty 
-                  ? IconButton(
-                      icon: const Icon(Icons.cancel_rounded, size: 18, color: Colors.white24),
-                      onPressed: () {
-                        _searchController.clear();
-                        ref.read(newsSearchQueryProvider.notifier).state = "";
-                      },
-                    )
-                  : null,
-                filled: true,
-                fillColor: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.1))),
-              ),
+              hintText: 'Search news...',
               onChanged: (v) => ref.read(newsSearchQueryProvider.notifier).state = v.toLowerCase(),
+              onClear: () {
+                _searchController.clear();
+                ref.read(newsSearchQueryProvider.notifier).state = "";
+              },
             ),
           ),
           Expanded(
@@ -104,17 +91,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                               itemCount: filtered.length,
                               itemBuilder: (context, index) {
                                 final article = filtered[index];
-                                final thumbnailUrl = article['imageUrl'] ?? article['thumbnailUrl'];
-                                String? fullImgUrl;
-                                if (thumbnailUrl != null && thumbnailUrl.toString().isNotEmpty) {
-                                  if (thumbnailUrl.toString().startsWith('http')) {
-                                    fullImgUrl = thumbnailUrl.toString();
-                                  } else {
-                                    final base = AppConfig.apiBaseUrl.endsWith('/') ? AppConfig.apiBaseUrl.substring(0, AppConfig.apiBaseUrl.length - 1) : AppConfig.apiBaseUrl;
-                                    final cleanP = thumbnailUrl.toString().startsWith('/') ? thumbnailUrl.toString().substring(1) : thumbnailUrl.toString();
-                                    fullImgUrl = '$base/$cleanP';
-                                  }
-                                }
+                                final fullImgUrl = AppConfig.resolveImageUrl(article['imageUrl'] ?? article['thumbnailUrl']);
 
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 24.0),
@@ -164,7 +141,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                                                       decoration: BoxDecoration(color: AppTheme.royalGold.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
                                                       child: Text(_getCategoryLabel(article['articleCategory']), style: const TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
                                                     ),
-                                                    Text(article['createdAt']?.toString().split('T')[0] ?? 'RECENT', style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)),
+                                                    Text(AppUtils.formatDate(article['createdAt']), style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)),
                                                   ],
                                                 ),
                                                 const SizedBox(height: 12),

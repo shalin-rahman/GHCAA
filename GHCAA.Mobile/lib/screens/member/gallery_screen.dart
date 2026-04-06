@@ -5,9 +5,11 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/config/app_config.dart';
 import '../../core/widgets/app_scaffold.dart';
-import '../../core/widgets/glass_container.dart';
 import '../../features/content/content_service.dart';
 import '../../features/auth/auth_service.dart';
+import '../../core/utils/app_utils.dart';
+import '../../core/widgets/admin_action_circle.dart';
+import '../../core/widgets/app_search_field.dart';
 
 final galleryItemsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   final role = await ref.read(authServiceProvider).getRole();
@@ -38,92 +40,114 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(10),
+        backgroundColor: Colors.black.withValues(alpha: 0.9),
+        insetPadding: const EdgeInsets.all(0),
         child: Stack(
           alignment: Alignment.topRight,
           children: [
-            InteractiveViewer(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+            Center(
+              child: InteractiveViewer(
                 child: Image.network(
                   url,
                   fit: BoxFit.contain,
                   loadingBuilder: (c, child, progress) => progress == null ? child : const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
                   errorBuilder: (c, e, s) => Container(
-                    color: Colors.black54,
                     padding: const EdgeInsets.all(40),
-                    child: const Column(
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.broken_image, size: 48, color: Colors.white24),
-                        SizedBox(height: 12),
-                        Text('Historical asset not found.', style: TextStyle(color: Colors.white24, fontSize: 12)),
+                        const Icon(Icons.broken_image_rounded, size: 48, color: Colors.white24),
+                        const SizedBox(height: 16),
+                        Text('Image not available', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.white24)),
                       ],
                     ),
                   ),
                 ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.white, size: 30),
-              onPressed: () => Navigator.pop(context),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: IconButton(
+                icon: const Icon(Icons.close_fullscreen_rounded, color: AppTheme.royalGold, size: 28),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
+ 
   Future<void> _createGallery() async {
     final titleCtrl = TextEditingController();
     final descCtrl = TextEditingController();
     final locCtrl = TextEditingController();
     DateTime selectedDate = DateTime.now();
-
+ 
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          backgroundColor: AppTheme.midnightSurface,
-          title: const Text('CREATE ALUMNI GALLERY', style: TextStyle(color: AppTheme.royalGold, fontSize: 14, fontWeight: FontWeight.w900)),
+          backgroundColor: AppTheme.deepCharcoal,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppTheme.glassBorder)),
+          title: Center(child: Text('CREATE NEW GALLERY', style: Theme.of(context).textTheme.labelLarge?.copyWith(letterSpacing: 2))),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Gallery Title')),
-                TextField(controller: descCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Description')),
-                TextField(controller: locCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Location (Optional)')),
                 const SizedBox(height: 16),
-                ListTile(
-                  title: const Text('Event Date', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                  subtitle: Text("${selectedDate.toLocal()}".split(' ')[0], style: const TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold)),
-                  trailing: const Icon(Icons.calendar_today, color: AppTheme.royalGold),
+                TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Gallery Title', prefixIcon: Icon(Icons.collections_bookmark_rounded))),
+                const SizedBox(height: 12),
+                TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Description', prefixIcon: Icon(Icons.notes_rounded)), maxLines: 2),
+                const SizedBox(height: 12),
+                TextField(controller: locCtrl, decoration: const InputDecoration(labelText: 'Location', prefixIcon: Icon(Icons.pin_drop_rounded))),
+                const SizedBox(height: 24),
+                Text('EVENT DATE', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.royalGold, letterSpacing: 1.5, fontSize: 8)),
+                const SizedBox(height: 12),
+                GestureDetector(
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: context, 
                       initialDate: selectedDate, 
-                      firstDate: DateTime(1900), 
-                      lastDate: DateTime.now()
+                      firstDate: DateTime(1960), 
+                      lastDate: DateTime.now(),
+                      builder: (context, child) => Theme(
+                        data: Theme.of(context).copyWith(colorScheme: const ColorScheme.dark(primary: AppTheme.royalGold, surface: AppTheme.deepCharcoal)),
+                        child: child!,
+                      ),
                     );
                     if (picked != null) setState(() => selectedDate = picked);
                   },
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(color: AppTheme.obsidianBlack, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.glassBorder)),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.event_available_rounded, size: 18, color: AppTheme.royalGold),
+                        const SizedBox(width: 12),
+                        Text(AppUtils.formatDate(selectedDate), style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        const Spacer(),
+                        const Text('EDIT', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900)),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL', style: TextStyle(color: Colors.white38))),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
-              child: const Text('CREATE', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              child: const Text('CREATE GALLERY'),
             ),
           ],
         ),
       ),
     );
-
+ 
     if (result == true && titleCtrl.text.isNotEmpty) {
       final success = await ref.read(galleryServiceProvider).createGallery({
         'title': titleCtrl.text,
@@ -138,44 +162,49 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
       }
     }
   }
-
+ 
   Future<void> _uploadPhotos(int galleryId) async {
     final picker = ImagePicker();
     final images = await picker.pickMultiImage();
     if (images.isEmpty) return;
-
+ 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Uploading ${images.length} photos...')));
-
+ 
     final uploadedPaths = <String>[];
     for (final img in images) {
       final path = await ref.read(galleryServiceProvider).uploadPhoto(img.path);
       if (path != null) uploadedPaths.add(path);
     }
-
+ 
     if (uploadedPaths.isNotEmpty) {
       final success = await ref.read(galleryServiceProvider).addPhotosToGallery(galleryId, uploadedPaths);
       if (success) {
         ref.invalidate(galleryItemsProvider);
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photos synchronized.')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photos added successfully.')));
       }
     }
   }
-
+ 
   Future<void> _confirmDeleteGallery(int id) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.midnightSurface,
-        title: const Text('Delete Gallery?', style: TextStyle(color: Colors.redAccent)),
-        content: const Text('This will permanently remove this collection and all associated photos.', style: TextStyle(color: Colors.white70)),
+        backgroundColor: AppTheme.deepCharcoal,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: Colors.redAccent, width: 0.5)),
+        title: const Text('DELETE GALLERY', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w900, fontSize: 16)),
+        content: const Text('Are you sure you want to delete this gallery and all its photos? This action cannot be undone.', style: TextStyle(color: Colors.white70, height: 1.5)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('DELETE', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true), 
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            child: const Text('DELETE'),
+          ),
         ],
       ),
     );
-
+ 
     if (confirm == true) {
       final success = await ref.read(galleryServiceProvider).deleteGallery(id);
       if (success) {
@@ -183,17 +212,17 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
       }
     }
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     final galleryAsync = ref.watch(galleryItemsProvider);
     final searchQuery = ref.watch(gallerySearchQueryProvider);
     final roleAsync = ref.watch(roleProvider);
     final isAdmin = roleAsync.value?.isStaffAdminRole ?? false;
-
+ 
     return AppScaffold(
-      title: 'Legacy Archive & Moments',
-      breadcrumb: 'PORTAL > LEGACY ARCHIVE',
+      title: 'Gallery',
+      breadcrumb: 'PORTAL > GALLERY',
       floatingActionButton: isAdmin 
         ? FloatingActionButton.extended(
             onPressed: () {
@@ -201,24 +230,22 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               _createGallery();
             },
             backgroundColor: AppTheme.royalGold,
-            icon: const Icon(Icons.add_a_photo_outlined, color: Colors.black),
-            label: const Text('CREATE GALLERY', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 11)),
+            icon: const Icon(Icons.add_photo_alternate_rounded, color: Colors.black, size: 20),
+            label: Text('ADD GALLERY', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.black, fontSize: 11)),
           )
         : null,
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: TextField(
+            child: AppSearchField(
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search archived memories...',
-                prefixIcon: const Icon(Icons.search, color: AppTheme.royalGold),
-                suffixIcon: _searchController.text.isNotEmpty 
-                  ? IconButton(icon: const Icon(Icons.close, size: 18), onPressed: () { _searchController.clear(); ref.read(gallerySearchQueryProvider.notifier).state = ""; })
-                  : null,
-              ),
+              hintText: 'Search gallery...',
               onChanged: (v) => ref.read(gallerySearchQueryProvider.notifier).state = v.toLowerCase(),
+              onClear: () {
+                _searchController.clear();
+                ref.read(gallerySearchQueryProvider.notifier).state = "";
+              },
             ),
           ),
           Expanded(
@@ -227,23 +254,30 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 final filtered = galleries.where((g) => g['title'].toString().toLowerCase().contains(searchQuery)).toList();
                 
                 if (filtered.isEmpty) {
-                  return const Center(child: Text('The vaults are empty of matching memories.', style: TextStyle(color: Colors.white24)));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.photo_library_outlined, color: Colors.white10, size: 64),
+                        const SizedBox(height: 16),
+                        Text('No galleries found.', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white12)),
+                      ],
+                    ),
+                  );
                 }
-
+ 
                 return ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {
                     final gallery = filtered[index];
                     final photos = gallery['photos'] as List? ?? [];
-                    final thumbUrl = photos.isNotEmpty ? photos[0]['photoPath'] : null;
-                    final base = AppConfig.apiBaseUrl.replaceFirst('/api', '');
-                    final fullThumb = (thumbUrl != null && thumbUrl.startsWith('http')) ? thumbUrl : (thumbUrl != null ? '$base/$thumbUrl' : null);
-
+                    final fullThumb = AppConfig.resolveImageUrl(photos.isNotEmpty ? photos[0]['photoPath'] : null);
+ 
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: GlassContainer(
-                        padding: EdgeInsets.zero,
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: Card(
+                        margin: EdgeInsets.zero,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -256,72 +290,69 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                       aspectRatio: 16 / 9,
                                       child: ClipRRect(
                                         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                                        child: Image.network(fullThumb, fit: BoxFit.cover),
+                                        child: Image.network(fullThumb, fit: BoxFit.cover, 
+                                          errorBuilder: (context, error, stackTrace) => Container(color: Colors.black12, child: const Icon(Icons.image_not_supported_outlined, color: Colors.white10))),
                                       ),
                                     ),
                                   ),
                                   if (isAdmin)
                                     Positioned(
-                                      top: 8, right: 8,
+                                      top: 12, right: 12,
                                       child: Row(
                                         children: [
-                                          CircleAvatar(
-                                            backgroundColor: Colors.black54,
-                                            child: IconButton(
-                                              icon: const Icon(Icons.add_photo_alternate, color: AppTheme.royalGold, size: 18),
-                                              onPressed: () => _uploadPhotos(gallery['id']),
-                                            ),
-                                          ),
+                                          AdminActionCircle(icon: Icons.upload_file_rounded, color: AppTheme.royalGold, tooltip: 'Upload Photos', onTap: () => _uploadPhotos(gallery['id'])),
                                           const SizedBox(width: 8),
-                                          CircleAvatar(
-                                            backgroundColor: Colors.black54,
-                                            child: IconButton(
-                                              icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
-                                              onPressed: () => _confirmDeleteGallery(gallery['id']),
-                                            ),
-                                          ),
+                                          AdminActionCircle(icon: Icons.delete_sweep_rounded, color: Colors.redAccent, tooltip: 'Delete Gallery', onTap: () => _confirmDeleteGallery(gallery['id'])),
                                         ],
                                       ),
                                     ),
                                 ],
                               ),
                             Padding(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(20),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Expanded(child: Text(gallery['title'].toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: 1))),
-                                      Text(gallery['eventDate']?.toString().split('T')[0] ?? '', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold)),
+                                      Expanded(child: Text(gallery['title'].toString().toUpperCase(), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w900))),
+                                      const SizedBox(width: 8),
+                                      Text(AppUtils.formatDate(gallery['eventDate']), style: Theme.of(context).textTheme.labelLarge),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(gallery['description'] ?? 'No archived context available.', style: const TextStyle(color: Colors.white60, fontSize: 11)),
-                                  const SizedBox(height: 12),
-                                  if (photos.length > 1)
+                                  const SizedBox(height: 8),
+                                  Text(gallery['description'] ?? 'No description available.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5)),
+                                  const SizedBox(height: 20),
+                                  if (photos.length > 1) ...[
+                                    Text('Photos', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.royalGold.withValues(alpha: 0.6), letterSpacing: 1.2)),
+                                    const SizedBox(height: 12),
                                     SizedBox(
-                                      height: 60,
+                                      height: 70,
                                       child: ListView.builder(
                                         scrollDirection: Axis.horizontal,
                                         itemCount: photos.length - 1,
                                         itemBuilder: (c, i) {
-                                          final pUrl = photos[i+1]['photoPath'];
-                                          final fUrl = (pUrl != null && pUrl.startsWith('http')) ? pUrl : '$base/$pUrl';
+                                          final fUrl = AppConfig.resolveImageUrl(photos[i+1]['photoPath']);
+                                          if (fUrl == null) return const SizedBox();
                                           return Padding(
-                                            padding: const EdgeInsets.only(right: 8),
+                                            padding: const EdgeInsets.only(right: 10),
                                             child: GestureDetector(
                                               onTap: () => _showImagePreview(context, fUrl),
-                                              child: ClipRRect(
-                                                borderRadius: BorderRadius.circular(8),
-                                                child: Image.network(fUrl, width: 60, height: 60, fit: BoxFit.cover),
+                                              child: Container(
+                                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.glassBorder)),
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(10),
+                                                  child: Image.network(fUrl, width: 70, height: 70, fit: BoxFit.cover,
+                                                    errorBuilder: (context, error, stackTrace) => const SizedBox(width: 70, child: Icon(Icons.broken_image_outlined, color: Colors.white10))),
+                                                ),
                                               ),
                                             ),
                                           );
                                         },
                                       ),
                                     ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -333,7 +364,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
-              error: (e, s) => Center(child: Text('Archive Sync Error: $e', style: const TextStyle(color: Colors.redAccent))),
+              error: (e, s) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.redAccent))),
             ),
           ),
         ],

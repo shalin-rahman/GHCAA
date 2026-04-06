@@ -5,6 +5,8 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/utils/app_utils.dart';
+import '../../core/widgets/app_search_field.dart';
 import '../../features/financials/financial_service.dart';
 
 final ledgerProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(financialServiceProvider).getLedger());
@@ -44,11 +46,10 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
     final duesAsync = ref.watch(duesProvider);
     final methodsAsync = ref.watch(savedMethodsProvider);
     final searchQuery = ref.watch(ledgerSearchQueryProvider).toLowerCase();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
       title: 'Fees & Dues',
-      breadcrumb: 'Member Portal > Payment Portal',
+      breadcrumb: 'PORTAL > FINANCIALS',
       child: RefreshIndicator(
         color: AppTheme.royalGold,
         onRefresh: () async {
@@ -69,9 +70,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
                     children: [
-                      const Text('TOTAL OUTSTANDING DUES', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
-                      const SizedBox(height: 16),
-                      Text('${dues.toStringAsFixed(2)} BDT', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1)),
+                      Text(AppUtils.formatCurrency(dues), style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1)),
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity, 
@@ -95,7 +94,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
               // Saved Payment Methods (Flexibility)
               const Padding(
                 padding: EdgeInsets.only(left: 4, bottom: 12),
-                child: Text('SAVED IDENTITY WALLET', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: AppTheme.royalGold, letterSpacing: 1.5)),
+                child: Text('SAVED PAYMENT METHODS', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: AppTheme.royalGold, letterSpacing: 1.5)),
               ),
               methodsAsync.when(
                 data: (methods) => methods.isEmpty 
@@ -135,40 +134,25 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(left: 4),
-                    child: Text('CONTRIBUTION HISTORY', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: AppTheme.royalGold, letterSpacing: 1.5)),
+                    child: Text('TRANSACTION HISTORY', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: AppTheme.royalGold, letterSpacing: 1.5)),
                   ),
                   if (ledgerAsync.hasValue && ledgerAsync.value!.isNotEmpty)
                     Text(
-                      'Showing ${ledgerAsync.value!.length} Records',
+                      'Showing ${ledgerAsync.value!.length} Transactions',
                       style: const TextStyle(fontSize: 9, color: AppTheme.royalGold, fontWeight: FontWeight.bold),
                     ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              TextField(
+              AppSearchField(
                 controller: _searchController,
-                style: const TextStyle(fontSize: 13),
-                decoration: InputDecoration(
-                  hintText: 'Search economic registry...',
-                  prefixIcon: const Icon(Icons.search, size: 18, color: AppTheme.royalGold),
-                  suffixIcon: _searchController.text.isNotEmpty 
-                    ? IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 18, color: Colors.white54),
-                        onPressed: () {
-                          _searchController.clear();
-                          ref.read(ledgerSearchQueryProvider.notifier).state = "";
-                        },
-                      )
-                    : null,
-                  filled: true,
-                  fillColor: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.white10,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.royalGold.withValues(alpha: 0.1))),
-                ),
+                hintText: 'Search transactions...',
                 onChanged: (v) => ref.read(ledgerSearchQueryProvider.notifier).state = v,
+                onClear: () {
+                  _searchController.clear();
+                  ref.read(ledgerSearchQueryProvider.notifier).state = "";
+                },
               ),
               const SizedBox(height: 20),
 
@@ -183,7 +167,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                     return Center(child: Padding(
                       padding: const EdgeInsets.all(40), 
                       child: Text(
-                        searchQuery.isEmpty ? 'No transaction history found.' : 'Search yielded no protocol entries.', 
+                        searchQuery.isEmpty ? 'No transaction history found.' : 'No transactions match your search.', 
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 12))
                     ));
@@ -208,14 +192,14 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                                 children: [
                                   Text(item['description'] ?? 'Alumni Contribution', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: -0.2)),
                                   const SizedBox(height: 2),
-                                  Text(item['date']?.toString().split('T')[0] ?? 'RECENT', style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.bold)),
+                                  Text(AppUtils.formatDate(item['date']), style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ),
                             Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                    Text('${item['amount']} BDT', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: AppTheme.royalGold)),
+                                    Text(AppUtils.formatCurrency(item['amount']), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: AppTheme.royalGold)),
                                     const SizedBox(height: 4),
                                     GestureDetector(
                                         onTap: () {

@@ -29,17 +29,54 @@ class AppTheme {
   static const Color textSecondaryLight = Color(0xFF6C757D);
 
   static const Color royalGoldVibrant = brightGold;
+ 
+  // Premium Gradients
+  static const Gradient goldGradient = LinearGradient(
+    colors: [royalGold, brightGold, royalGold],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const Gradient darkSurfaceGradient = LinearGradient(
+    colors: [deepCharcoal, obsidianBlack],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
 
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
     scaffoldBackgroundColor: obsidianBlack,
+    dividerTheme: const DividerThemeData(color: glassBorder, thickness: 1),
+    cardTheme: CardThemeData(
+      color: deepCharcoal,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: glassBorder, width: 1),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      centerTitle: true,
+      titleTextStyle: TextStyle(
+        fontFamily: 'Outfit',
+        fontSize: 18,
+        fontWeight: FontWeight.w800,
+        color: brightGold,
+        letterSpacing: 1.2,
+      ),
+      iconTheme: IconThemeData(color: royalGold),
+    ),
     colorScheme: const ColorScheme.dark(
       primary: royalGold,
       onPrimary: obsidianBlack,
       secondary: brightGold,
       surface: deepCharcoal,
       onSurface: textMain,
+      surfaceContainerHighest: Color(0xFF161616),
       outline: glassBorder,
     ),
     textTheme: const TextTheme(
@@ -48,6 +85,19 @@ class AppTheme {
         fontWeight: FontWeight.w800,
         color: textMain,
         letterSpacing: -0.02,
+        fontSize: 32,
+      ),
+      headlineMedium: TextStyle(
+        fontFamily: 'Outfit',
+        fontWeight: FontWeight.w700,
+        color: brightGold,
+        fontSize: 24,
+      ),
+      titleLarge: TextStyle(
+        fontFamily: 'Outfit',
+        fontWeight: FontWeight.w600,
+        color: textMain,
+        fontSize: 18,
       ),
       bodyLarge: TextStyle(
         fontFamily: 'Outfit',
@@ -59,6 +109,13 @@ class AppTheme {
         color: textMuted,
         fontSize: 14,
       ),
+      labelLarge: TextStyle(
+        fontFamily: 'Outfit',
+        fontWeight: FontWeight.w800,
+        color: royalGold,
+        fontSize: 12,
+        letterSpacing: 1.2,
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -67,28 +124,37 @@ class AppTheme {
         textStyle: const TextStyle(
           fontFamily: 'Outfit',
           fontWeight: FontWeight.w800,
-          letterSpacing: 1.0,
+          letterSpacing: 1.2,
         ),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 32),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
-        elevation: 8,
-        shadowColor: royalGold.withValues(alpha: 0.4),
+        elevation: 12,
+        shadowColor: royalGold.withValues(alpha: 0.5),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: obsidianBlack,
+      fillColor: deepCharcoal,
       labelStyle: const TextStyle(color: textMuted, fontFamily: 'Outfit'),
       hintStyle: const TextStyle(color: Colors.white24, fontFamily: 'Outfit'),
+      contentPadding: const EdgeInsets.all(20),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: glassBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: glassBorder),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: royalGold, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.redAccent),
       ),
     ),
   );

@@ -71,17 +71,18 @@ class AppScaffold extends ConsumerWidget {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (title != null) Text(title!, style: TextStyle(color: textColor ?? Colors.white, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1)),
-                if (breadcrumb != null) Text(breadcrumb!.toUpperCase(), style: const TextStyle(fontSize: 9, color: AppTheme.royalGold, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                if (title != null) Text(title!, style: Theme.of(context).appBarTheme.titleTextStyle),
+                if (breadcrumb != null) Text(breadcrumb!.toUpperCase(), style: Theme.of(context).textTheme.labelLarge),
               ],
             ),
-            backgroundColor: Colors.black.withValues(alpha: 0.4),
+            backgroundColor: Colors.black.withValues(alpha: 0.6),
+            surfaceTintColor: Colors.transparent,
             elevation: 0,
             centerTitle: false,
             actions: actions,
             leading: leading ?? (!['/dashboard', '/directory', '/digital_id', '/profile', '/admin_dashboard', '/login', '/register'].contains(GoRouterState.of(context).uri.path)
               ? IconButton(
-                  icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: textColor ?? AppTheme.royalGold),
+                  icon: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: textColor ?? AppTheme.royalGold),
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     if (canPop) {
@@ -91,16 +92,8 @@ class AppScaffold extends ConsumerWidget {
                     }
                   },
                 )
-              : Builder(
-                  builder: (context) => IconButton(
-                    icon: Icon(Icons.menu_rounded, size: 24, color: textColor ?? AppTheme.royalGold),
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      Scaffold.of(context).openDrawer();
-                    },
-                  ),
-                )),
-            iconTheme: IconThemeData(color: textColor ?? Colors.white),
+              : null),
+            iconTheme: IconThemeData(color: textColor ?? AppTheme.royalGold),
             bottom: bottom,
           )
         : null,

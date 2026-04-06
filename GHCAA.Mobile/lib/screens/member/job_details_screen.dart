@@ -31,7 +31,7 @@ class JobDetailsScreen extends ConsumerWidget {
 
     return AppScaffold(
       title: 'Job Details',
-      breadcrumb: 'Career Link > Job Details',
+      breadcrumb: 'Portal > Jobs',
       actions: isAdmin ? [
         IconButton(
           icon: const Icon(Icons.edit, color: AppTheme.royalGold, size: 20),
@@ -46,7 +46,7 @@ class JobDetailsScreen extends ConsumerWidget {
       ] : null,
       child: detailsAsync.when(
         data: (job) {
-          if (job == null) return const Center(child: Text('Job posting corrupted.', style: TextStyle(color: Colors.red)));
+          if (job == null) return const Center(child: Text('Job posting not found.', style: TextStyle(color: Colors.red)));
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -57,33 +57,32 @@ class JobDetailsScreen extends ConsumerWidget {
                    child: Column(
                      crossAxisAlignment: CrossAxisAlignment.start,
                      children: [
-                       Text((job['title'] ?? 'Global Opportunity').toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 18, letterSpacing: 1)),
-                       const SizedBox(height: 8),
-                       Text('COMPANY: ${job['company'] ?? 'TBA'}', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
-                       const Divider(color: Colors.white12, height: 32),
-                       Text(job['description'] ?? 'No operational details found.', style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.5)),
-                       const SizedBox(height: 16),
-                       _buildStatRow('Location', job['location'] ?? 'Remote/Hybrid'),
-                       _buildStatRow('Employment Type', job['jobType'] ?? 'Full-Time'),
-                       _buildStatRow('Salary Details', job['salaryRange'] ?? 'Negotiable'),
-                       _buildStatRow('Experience Range', job['experienceRequired'] ?? 'Open'),
-                       if (job['applicationLink'] != null) const Divider(color: Colors.white12, height: 32),
-                       if (job['applicationLink'] != null)
-                         Center(
-                           child: ElevatedButton.icon(
-                             onPressed: () async {
-                               final url = Uri.tryParse(job['applicationLink'].toString());
-                               if (url != null && await canLaunchUrl(url)) {
-                                 await launchUrl(url, mode: LaunchMode.externalApplication);
-                               }
-                             },
-                             icon: const Icon(Icons.open_in_browser, color: Colors.black, size: 18),
-                             label: const Text('APPLY NOW', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1)),
-                             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
-                           ),
-                         ),
-                     ],
-                   )
+                        Text((job['title'] ?? 'Job Details').toUpperCase(), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+                        const SizedBox(height: 8),
+                        Text('COMPANY: ${job['company'] ?? 'TBA'}', style: Theme.of(context).textTheme.labelLarge),
+                        const Divider(height: 48),
+                        Text(job['description'] ?? 'No details available.', style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6, color: Colors.white.withValues(alpha: 0.9))),
+                        const SizedBox(height: 24),
+                        _buildStatRow(context, 'Location', job['location'] ?? 'Remote/Hybrid'),
+                        _buildStatRow(context, 'Employment Type', job['jobType'] ?? 'Full-Time'),
+                        _buildStatRow(context, 'Salary', job['salaryRange'] ?? 'Negotiable'),
+                        _buildStatRow(context, 'Experience', job['experienceRequired'] ?? 'Open'),
+                        if (job['applicationLink'] != null) const Divider(height: 48),
+                        if (job['applicationLink'] != null)
+                          Center(
+                            child: ElevatedButton.icon(
+                              onPressed: () async {
+                                final url = Uri.tryParse(job['applicationLink'].toString());
+                                if (url != null && await canLaunchUrl(url)) {
+                                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                                }
+                              },
+                              icon: const Icon(Icons.open_in_browser, size: 20),
+                              label: const Text('APPLY'),
+                            ),
+                          ),
+                      ],
+                    )
                 ),
               ],
             ),
@@ -95,14 +94,14 @@ class JobDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatRow(String label, String val) {
+  Widget _buildStatRow(BuildContext context, String label, String val) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-           Text(label.toUpperCase(), style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1)),
-           Text(val, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+           Text(label.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.royalGold.withValues(alpha: 0.6), height: 1)),
+           Text(val, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
         ],
       )
     );
@@ -116,7 +115,7 @@ class JobDetailsScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.midnightSurface,
+      backgroundColor: AppTheme.deepCharcoal,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setStateModal) => Padding(
@@ -125,23 +124,20 @@ class JobDetailsScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('EDIT JOB POSTING', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 12)),
-              const SizedBox(height: 20),
+              Text('EDIT JOB', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 16)),
+              const SizedBox(height: 24),
               TextField(
                 controller: titleCtrl,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(labelText: 'Job Title', labelStyle: TextStyle(color: AppTheme.royalGold), enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24))),
+                decoration: const InputDecoration(labelText: 'Job Title'),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: descCtrl,
-                style: const TextStyle(color: Colors.white),
-                maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Description', labelStyle: TextStyle(color: AppTheme.royalGold), enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24))),
+                maxLines: 4,
+                decoration: const InputDecoration(labelText: 'Description'),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 32),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                 onPressed: saving ? null : () async {
                   setStateModal(() => saving = true);
                   try {
@@ -158,7 +154,7 @@ class JobDetailsScreen extends ConsumerWidget {
                 },
                 child: saving
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
-                    : const Text('SAVE CHANGES', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1)),
+                    : const Text('SAVE CHANGES'),
               ),
             ],
           ),
@@ -173,8 +169,8 @@ class JobDetailsScreen extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.midnightSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Remove Job Posting', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
-        content: const Text('This opportunity will be permanently removed from the Career Link. Proceed?', style: TextStyle(color: AppTheme.textSecondaryDark, height: 1.5)),
+        title: const Text('Delete Job', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+        content: const Text('Are you sure you want to delete this job posting? This action cannot be undone.', style: TextStyle(color: AppTheme.textSecondaryDark, height: 1.5)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold))),
           ElevatedButton(
@@ -192,7 +188,7 @@ class JobDetailsScreen extends ConsumerWidget {
                 if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Delete failed: $e'), backgroundColor: Colors.redAccent));
               }
             },
-            child: const Text('REMOVE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 1)),
+            child: const Text('DELETE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 1)),
           ),
         ],
       ),
