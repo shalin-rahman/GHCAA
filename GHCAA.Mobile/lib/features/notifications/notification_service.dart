@@ -10,7 +10,7 @@ class NotificationService {
 
   Future<List<dynamic>> getMyNotifications() async {
     try {
-      final response = await _dio.get('/Notification');
+      final response = await _dio.get('/notifications');
       return response.data as List<dynamic>;
     } catch (e) {
       return [];
@@ -19,7 +19,7 @@ class NotificationService {
 
   Future<bool> markAsRead(int id) async {
     try {
-      final response = await _dio.post('/Notification/$id/read');
+      final response = await _dio.post('/notifications/$id/read');
       return response.statusCode == 200;
     } catch (e) {
       return false;

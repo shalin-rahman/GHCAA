@@ -94,6 +94,7 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IGovernanceService, GovernanceService>();
             services.AddScoped<IGamificationService, GamificationService>();
             services.AddScoped<IFamilyLinkService, FamilyLinkService>();
+            services.AddScoped<IFamilyService, FamilyService>();
             services.AddScoped<IMentorshipService, MentorshipService>();
             services.AddHttpClient<ISmsService, GreenwebSmsService>();
 

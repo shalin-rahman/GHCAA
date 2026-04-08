@@ -64,6 +64,7 @@ namespace GHCAA.API.Controllers
             return Ok(job);
         }
 
+        [HttpDelete("{id}")]
         [HttpPatch("deactivate/{id}")]
         public async Task<IActionResult> DeactivateJob(int id, CancellationToken cancellationToken)
         {

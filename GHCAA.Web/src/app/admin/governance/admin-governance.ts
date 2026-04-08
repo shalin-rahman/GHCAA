@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { API_ENDPOINTS, EC_ROLES, getECPositionName } from '../../core/constants/app.constants';
+import { API_ENDPOINTS, EC_ROLES, getECPositionName, getMembershipTypeLabel, getCategoryLabel } from '../../core/constants/app.constants';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 
@@ -46,6 +46,16 @@ export class AdminGovernance implements OnInit {
     });
 
     ecPositions = EC_ROLES.map((label, index) => ({ value: index, label }));
+
+    getImageUrl(path: string | null | undefined): string {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path : '/' + path;
+        return cleanPath.replace(/^\/\//, '/');
+    }
+
+    getMembershipTypeLabel = getMembershipTypeLabel;
+    getCategoryLabel = getCategoryLabel;
 
     ngOnInit() {
         this.loadPeriods();

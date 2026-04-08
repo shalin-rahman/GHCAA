@@ -171,6 +171,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/api/uploads"
 });
 
+app.UseMiddleware<QueryStringTokenMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<SecurityStampMiddleware>(); // Invalidates sessions on status change
 app.UseAuthorization();

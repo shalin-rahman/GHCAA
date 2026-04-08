@@ -74,5 +74,15 @@ namespace GHCAA.API.Controllers
             var success = await _familyService.UnlinkAsync(GetMemberId(), linkedMemberId, cancellationToken);
             return success ? Ok(new { Message = "Institutional link dissolved." }) : BadRequest("No active link found to dissolve.");
         }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchFamilyMembers([FromQuery] string name, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return BadRequest("Name parameter is required.");
+
+            var results = await _familyService.SearchByNameAsync(name, GetMemberId(), cancellationToken);
+            return Ok(results);
+        }
     }
 }

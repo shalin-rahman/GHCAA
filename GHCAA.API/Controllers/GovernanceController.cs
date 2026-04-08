@@ -23,6 +23,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("ec/current")]
+        [HttpGet("current")]
         [AllowAnonymous]
         public async Task<IActionResult> GetCurrentEC(CancellationToken cancellationToken)
         {

@@ -91,5 +91,25 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.DeleteNews(1, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkResult>());
         }
+
+        [Test]
+        public async Task ApproveArticle_ReturnsOk_OnSuccess()
+        {
+            _newsServiceMock.Setup(x => x.ApproveArticleAsync(1, It.IsAny<CancellationToken>()))
+                            .ReturnsAsync(true);
+
+            var result = await _controller.ApproveArticle(1, CancellationToken.None);
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task RejectArticle_ReturnsOk_OnSuccess()
+        {
+            _newsServiceMock.Setup(x => x.RejectArticleAsync(1, It.IsAny<CancellationToken>()))
+                            .ReturnsAsync(true);
+
+            var result = await _controller.RejectArticle(1, CancellationToken.None);
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
     }
 }

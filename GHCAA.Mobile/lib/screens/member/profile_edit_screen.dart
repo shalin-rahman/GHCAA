@@ -261,6 +261,13 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     return AppScaffold(
       title: _isEditingOther ? 'Administrative Update' : 'Update Profile',
       breadcrumb: _isEditingOther ? 'ADMIN > MEMBER EDIT' : 'PORTAL > MY PROFILE',
+      leading: IconButton(
+        icon: const Icon(Icons.close, color: AppTheme.royalGold),
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          context.pop();
+        },
+      ),
       actions: [
         IconButton(
           onPressed: _isLoading ? null : _save,
@@ -531,7 +538,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       ),
       validator: required ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
       onSaved: (v) => _data[key] = v,
@@ -549,7 +556,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
             labelText: label,
             labelStyle: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10, fontWeight: FontWeight.bold),
             border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           ),
           dropdownColor: AppTheme.midnightSurface,
           style: const TextStyle(color: Colors.white, fontSize: 14),
@@ -629,7 +636,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         labelText: label,
         labelStyle: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 9, fontWeight: FontWeight.bold),
         border: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       ),
       onChanged: (v) => (_data[listKey] as List)[index][fieldKey] = v,
     );
@@ -647,7 +654,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
             labelText: label,
             labelStyle: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 9, fontWeight: FontWeight.bold),
             border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(vertical: 4),
+            contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
           ),
           dropdownColor: AppTheme.midnightSurface,
           style: const TextStyle(color: Colors.white, fontSize: 13),

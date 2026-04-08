@@ -695,9 +695,9 @@ namespace GHCAA.Infrastructure.Services
                 {
                     member.AcademicHistory.Add(new AcademicRecord
                     {
-                        InstitutionName = a.InstitutionName,
-                        Degree = a.Degree,
-                        Subject = a.Subject,
+                        InstitutionName = a.InstitutionName ?? "",
+                        Degree = a.Degree ?? "",
+                        Subject = a.Subject ?? "",
                         AdmissionYear = a.AdmissionYear,
                         PassingYear = a.PassingYear ?? 0,
                         IsGHC = a.IsGHC || (a.InstitutionName != null && a.InstitutionName.Contains("Haraganga", StringComparison.OrdinalIgnoreCase)),
@@ -977,9 +977,9 @@ namespace GHCAA.Infrastructure.Services
                     CategoryBadge = gains.badge,
                     
                     // Mask PII if not privileged (SuperAdmin or self) AND not public
-                    Email = (isPrivileged || member.IsEmailPublic) ? member.Email : MaskPii(member.Email, 3, 3),
-                    MobileNo = (isPrivileged || member.IsMobilePublic) ? member.MobileNo : MaskPii(member.MobileNo, 4, 3),
-                    NID = (isPrivileged || member.IsNIDPublic) ? member.NID : MaskPii(member.NID, 3, 2)
+                    Email = (isPrivileged || member.IsEmailPublic) ? (member.Email ?? "") : (MaskPii(member.Email, 3, 3) ?? ""),
+                    MobileNo = (isPrivileged || member.IsMobilePublic) ? (member.MobileNo ?? "") : (MaskPii(member.MobileNo, 4, 3) ?? ""),
+                    NID = (isPrivileged || member.IsNIDPublic) ? (member.NID ?? "") : (MaskPii(member.NID, 3, 2) ?? "")
                 };
 
                 if (member.ECMembers != null && member.ECMembers.Any())
@@ -1359,7 +1359,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<object> GetPublicStatsAsync(CancellationToken cancellationToken = default)
         {
             var activeMembers = await _db.Members.CountAsync(m => m.Status == Enums.MembershipStatus.Active && !m.IsArchived, cancellationToken);
-            var ecMembers = await _db.ECMembers.Where(em => em.ECPeriod.IsActive && em.EndDate == null).CountAsync(cancellationToken);
+            var ecMembers = await _db.ECMembers.Where(em => em.ECPeriod != null && em.ECPeriod.IsActive && em.EndDate == null).CountAsync(cancellationToken);
             var totalEvents = await _db.AlumniEvents.CountAsync(e => e.Status == Enums.EventStatus.Published, cancellationToken);
             
             return new
@@ -1387,19 +1387,23 @@ namespace GHCAA.Infrastructure.Services
 
         private decimal CalculateProfileCompletion(Member member)
         {
-            int totalFields = 10;
+            int totalFields = 11;
             int completedFields = 0;
 
             if (!string.IsNullOrEmpty(member.FullName)) completedFields++;
-            if (!string.IsNullOrEmpty(member.MobileNo)) completedFields++;
             if (!string.IsNullOrEmpty(member.Email)) completedFields++;
-            if (!string.IsNullOrEmpty(member.NID)) completedFields++;
+            if (!string.IsNullOrEmpty(member.MobileNo)) completedFields++;
+            if (member.DateOfBirth != default && member.DateOfBirth.Year > 1900) completedFields++;
+            if (member.Gender != Enums.Gender.None) completedFields++;
+            if (!string.IsNullOrEmpty(member.MembershipNumber)) completedFields++;
             if (!string.IsNullOrEmpty(member.PhotoPath)) completedFields++;
-            if (member.AcademicHistory != null && member.AcademicHistory.Any()) completedFields++;
-            if (member.ProfessionalHistory != null && member.ProfessionalHistory.Any()) completedFields++;
-            if (member.BloodGroup != default) completedFields++;
-            if (member.DateOfBirth != default && member.DateOfBirth > new DateTime(1900, 1, 1)) completedFields++;
-            if (!string.IsNullOrEmpty(member.PermanentAddress)) completedFields++;
+            
+            var ghcRecord = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC);
+            if (ghcRecord != null && ghcRecord.PassingYear > 0) completedFields++;
+            if (ghcRecord != null && !string.IsNullOrEmpty(ghcRecord.Subject)) completedFields++;
+            
+            if (!string.IsNullOrEmpty(member.PresentAddress)) completedFields++;
+            if (member.BloodGroup != Enums.BloodGroup.Unknown) completedFields++;
 
             return Math.Round((decimal)completedFields / totalFields * 100, 2);
         }

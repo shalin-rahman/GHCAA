@@ -13,29 +13,29 @@ class GovernanceApi {
   GovernanceApi(this._dio);
 
   Future<Map<String, dynamic>> getCurrentEC() async {
-    final response = await _dio.get('/api/governance/ec/current');
+    final response = await _dio.get('/governance/ec/current');
     return response.data;
   }
-
+ 
   Future<List<dynamic>> getECHistory() async {
-    final response = await _dio.get('/api/governance/ec/history');
+    final response = await _dio.get('/governance/ec/history');
     return response.data;
   }
-
+ 
   Future<Map<String, dynamic>> getCurrentConstitution() async {
-    final response = await _dio.get('/api/governance/constitution');
+    final response = await _dio.get('/governance/constitution');
     return response.data;
   }
-
+ 
   Future<List<dynamic>> getConstitutionHistory() async {
-    final response = await _dio.get('/api/governance/constitution/history');
+    final response = await _dio.get('/governance/constitution/history');
     return response.data;
   }
-
+ 
   Future<bool> voteOnAmendment(int constitutionId, bool isFor, {String? comments}) async {
     try {
       await _dio.post(
-        '/api/governance/constitution/$constitutionId/vote',
+        '/governance/constitution/$constitutionId/vote',
         data: isFor,
         queryParameters: comments != null ? {'comments': comments} : null,
       );
@@ -44,4 +44,5 @@ class GovernanceApi {
       return false;
     }
   }
+
 }

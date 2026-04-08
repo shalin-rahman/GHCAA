@@ -13,6 +13,7 @@ namespace GHCAA.Application.DTOs
         public int TargetMemberId { get; set; }
         public string TargetMemberName { get; set; } = null!;
         public string? TargetMembershipNumber { get; set; }
+        public string? TargetMemberPhotoPath { get; set; }
 
         public RelationshipType Relationship { get; set; }
         public FamilyLinkStatus Status { get; set; }

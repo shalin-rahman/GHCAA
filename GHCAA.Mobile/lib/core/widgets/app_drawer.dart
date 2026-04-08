@@ -139,7 +139,7 @@ class AppDrawer extends ConsumerWidget {
                     child: Text(isAdmin ? 'ADMINISTRATOR' : 'ALUMNI MEMBER', style: const TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(width: 8),
-                  Text('Batch: ${profile?['batch'] ?? 'N/A'}', style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 11)),
+                  Text('Batch: ${profile?['passingYear'] ?? 'N/A'}', style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 11)),
                 ],
               ),
             ],

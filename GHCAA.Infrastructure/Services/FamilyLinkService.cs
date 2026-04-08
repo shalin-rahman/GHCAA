@@ -211,6 +211,7 @@ namespace GHCAA.Infrastructure.Services
             TargetMemberId = r.TargetMemberId,
             TargetMemberName = target?.FullName ?? "Unknown",
             TargetMembershipNumber = target?.MembershipNumber,
+            TargetMemberPhotoPath = target?.PhotoPath,
             Relationship = r.Relationship,
             Status = r.Status,
             Note = r.Note,

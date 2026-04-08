@@ -8,6 +8,7 @@ import '../../features/admin/admin_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/config/app_config.dart';
 import '../../core/storage/storage_service.dart';
+import '../../core/widgets/glass_container.dart';
 
 // Persistent Layout State
 final dashboardLayoutProvider = StateNotifierProvider<DashboardLayoutNotifier, bool>((ref) {
@@ -202,73 +203,78 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildMajesticBanner(String fullName, Map<String, dynamic>? profile, String? photoUrl) {
-    final membershipType = profile?['membershipType']?.toString() ?? '';
+    final membershipType = profile?['membershipType']?.toString() ?? 'MEMBER';
     final membershipCategory = profile?['category']?.toString() ?? '';
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.15)),
-        gradient: LinearGradient(
-          colors: [AppTheme.royalGold.withValues(alpha: 0.12), Colors.black.withValues(alpha: 0.3)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+    
+    return GlassContainer(
+      padding: const EdgeInsets.all(24),
+      opacity: 0.1,
       child: Row(
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('AUTHORIZED ACCESS', style: TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 2)),
-                const SizedBox(height: 4),
-                if (membershipType.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppTheme.royalGold.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.3)),
+                Row(
+                  children: [
+                    const Text('AUTHORIZED ACCESS', 
+                      style: TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 2)),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 4, height: 4, 
+                      decoration: const BoxDecoration(color: AppTheme.royalGold, shape: BoxShape.circle),
                     ),
-                    child: Text(membershipType.toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
-                  ),
-                Text(fullName.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: -0.3), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(fullName.toUpperCase(), 
+                  style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5, height: 1.1)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
-                      child: Text('ID: ${profile?['membershipNumber'] ?? 'N/A'}', style: const TextStyle(color: Colors.white70, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.royalGold.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.3)),
+                      ),
+                      child: Text(membershipType.toUpperCase(), 
+                        style: const TextStyle(color: AppTheme.royalGold, fontSize: 9, fontWeight: FontWeight.w900)),
                     ),
                     if (membershipCategory.isNotEmpty && membershipCategory != 'None') ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.blueAccent.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
-                        ),
-                        child: Text(membershipCategory.toUpperCase(), style: const TextStyle(color: Colors.blueAccent, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                      ),
+                      const SizedBox(width: 8),
+                      Text(membershipCategory.toUpperCase(), 
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 9, fontWeight: FontWeight.w900)),
                     ],
                   ],
                 ),
               ],
             ),
           ),
-          Container(
-            width: 60, height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.royalGold, width: 1.5),
-              image: photoUrl != null ? DecorationImage(image: NetworkImage(photoUrl), fit: BoxFit.cover) : null,
-              boxShadow: [BoxShadow(color: AppTheme.royalGold.withValues(alpha: 0.1), blurRadius: 10)],
-            ),
-            child: photoUrl == null ? const Icon(Icons.person, color: AppTheme.royalGold, size: 28) : null,
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 72, height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.2), width: 1),
+                ),
+              ),
+              Container(
+                width: 60, height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.royalGold, width: 2),
+                  boxShadow: [
+                    BoxShadow(color: AppTheme.royalGold.withValues(alpha: 0.2), blurRadius: 15, spreadRadius: 2),
+                  ],
+                  image: photoUrl != null ? DecorationImage(image: NetworkImage(photoUrl), fit: BoxFit.cover) : null,
+                ),
+                child: photoUrl == null ? const Icon(Icons.person_rounded, color: AppTheme.royalGold, size: 32) : null,
+              ),
+            ],
           )
         ],
       ),
@@ -351,49 +357,55 @@ class DashboardScreen extends ConsumerWidget {
         HapticFeedback.lightImpact();
         context.push(route);
       },
-      child: Card(
-        margin: EdgeInsets.zero,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              colors: [
-                color.withValues(alpha: 0.08),
-                Colors.black.withValues(alpha: 0.0),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(isCompact ? 10.0 : 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: color, size: isCompact ? 18 : 22),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.deepCharcoal.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.glassBorder, width: 1),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -10, top: -10,
+                child: Icon(icon, color: color.withValues(alpha: 0.03), size: 80),
+              ),
+              Padding(
+                padding: EdgeInsets.all(isCompact ? 12.0 : 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon, color: color, size: isCompact ? 18 : 24),
+                    ),
+                    const Spacer(),
+                    Text(title, 
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isCompact ? 11 : 14,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.2,
+                      )),
+                    const SizedBox(height: 2),
+                    Text(subtitle.toUpperCase(), 
+                      style: TextStyle(
+                        color: color.withValues(alpha: 0.5), 
+                        fontSize: isCompact ? 7 : 8, 
+                        fontWeight: FontWeight.w900, 
+                        letterSpacing: 1.2
+                      )),
+                  ],
                 ),
-                const Spacer(),
-                Text(title, 
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontSize: isCompact ? 11 : 13,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  )),
-                if (!isCompact) ...[
-                  const SizedBox(height: 2),
-                  Text(subtitle.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 7, color: Colors.white30, letterSpacing: 1)),
-                ]
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

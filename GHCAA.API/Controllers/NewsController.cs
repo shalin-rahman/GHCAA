@@ -48,6 +48,8 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("pending")]
+        [HttpGet("admin/pending")]
+        [HttpGet("News/Pending")] // Mobile Alias
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetPendingSubmissions(CancellationToken cancellationToken)
         {
@@ -129,6 +131,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("{id:int}/approve")]
+        [HttpPost("admin/{id:int}/approve")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> ApproveArticle(int id, CancellationToken cancellationToken)
         {
@@ -137,6 +140,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("{id:int}/reject")]
+        [HttpPost("admin/{id:int}/reject")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> RejectArticle(int id, CancellationToken cancellationToken)
         {

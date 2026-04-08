@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
@@ -20,28 +21,34 @@ namespace GHCAA.Infrastructure.Services
             _db = db;
         }
 
-        public async Task<IEnumerable<ECPeriod>> GetAllPeriodsAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ECPeriodDto>> GetAllPeriodsAsync(CancellationToken cancellationToken = default)
         {
-            return await _db.ECPeriods
+            var periods = await _db.ECPeriods
                 .OrderByDescending(p => p.StartDate)
                 .ToListAsync(cancellationToken);
+            
+            return periods.Select(MapToPeriodDto);
         }
 
-        public async Task<ECPeriod?> GetPeriodByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<ECPeriodDto?> GetPeriodByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            return await _db.ECPeriods
+            var period = await _db.ECPeriods
                 .Include(p => p.ECMembers)
                 .ThenInclude(m => m.Member)
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            
+            return period == null ? null : MapToPeriodDto(period);
         }
 
-        public async Task<ECPeriod?> GetActivePeriodAsync(CancellationToken cancellationToken = default)
+        public async Task<ECPeriodDto?> GetActivePeriodAsync(CancellationToken cancellationToken = default)
         {
-            return await _db.ECPeriods
+            var period = await _db.ECPeriods
                 .FirstOrDefaultAsync(p => p.IsActive, cancellationToken);
+            
+            return period == null ? null : MapToPeriodDto(period);
         }
 
-        public async Task<ECPeriod> CreatePeriodAsync(string title, DateTime startDate, DateTime? endDate, CancellationToken cancellationToken = default)
+        public async Task<ECPeriodDto> CreatePeriodAsync(string title, DateTime startDate, DateTime? endDate, CancellationToken cancellationToken = default)
         {
             var utcStart = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
             var utcEnd = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : (DateTime?)null;
@@ -58,7 +65,7 @@ namespace GHCAA.Infrastructure.Services
 
             _db.ECPeriods.Add(period);
             await _db.SaveChangesAsync(cancellationToken);
-            return period;
+            return MapToPeriodDto(period);
         }
 
         public async Task<bool> UpdatePeriodAsync(int id, string title, DateTime startDate, DateTime? endDate, bool isActive, CancellationToken cancellationToken = default)
@@ -139,13 +146,15 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
-        public async Task<IEnumerable<ECMember>> GetCommitteeMembersAsync(int periodId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ECMemberDto>> GetCommitteeMembersAsync(int periodId, CancellationToken cancellationToken = default)
         {
-            return await _db.ECMembers
+            var members = await _db.ECMembers
                 .Include(em => em.Member)
                 .Where(em => em.ECPeriodId == periodId && em.EndDate == null)
                 .OrderBy(em => em.Position)
                 .ToListAsync(cancellationToken);
+
+            return members.Select(MapToMemberDto);
         }
 
         public async Task<bool> AssignMemberToRoleAsync(int periodId, int memberId, int position, string? reason, CancellationToken cancellationToken = default)
@@ -260,5 +269,34 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
+
+        // Mappings
+        private static ECPeriodDto MapToPeriodDto(ECPeriod p) => new()
+        {
+            Id = p.Id,
+            Title = p.Title,
+            StartDate = p.StartDate,
+            EndDate = p.EndDate,
+            IsActive = p.IsActive,
+            ECMembers = p.ECMembers?.Select(MapToMemberDto).ToList() ?? new List<ECMemberDto>()
+        };
+
+        private static ECMemberDto MapToMemberDto(ECMember m) => new()
+        {
+            Id = m.Id,
+            MemberId = m.MemberId,
+            Position = m.Position,
+            StartDate = m.StartDate,
+            EndDate = m.EndDate,
+            Member = m.Member == null ? null : new MemberSummaryDto
+            {
+                Id = m.Member.Id,
+                FullName = m.Member.FullName,
+                MembershipNumber = m.Member.MembershipNumber,
+                PhotoPath = m.Member.PhotoPath,
+                Status = m.Member.Status,
+                IsVerified = m.Member.IsVerified
+            }
+        };
     }
 }

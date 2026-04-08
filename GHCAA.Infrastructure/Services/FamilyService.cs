@@ -204,5 +204,29 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
+
+        public async Task<IEnumerable<MemberSummaryDto>> SearchByNameAsync(string name, int excludeMemberId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return Array.Empty<MemberSummaryDto>();
+
+            var members = await _db.Members
+                .Where(m => m.Id != excludeMemberId && 
+                            m.IsFamilyPublic && 
+                            m.Status == MembershipStatus.Active && 
+                            m.FullName.Contains(name))
+                .Take(20)
+                .ToListAsync(cancellationToken);
+
+            return members.Select(m => new MemberSummaryDto
+            {
+                Id = m.Id,
+                FullName = m.FullName,
+                MembershipNumber = m.MembershipNumber,
+                PhotoPath = m.PhotoPath,
+                Category = m.Category,
+                MembershipType = m.MembershipType,
+                IsVerified = m.IsVerified
+            });
+        }
     }
 }

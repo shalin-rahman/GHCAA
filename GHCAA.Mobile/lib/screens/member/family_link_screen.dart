@@ -238,7 +238,10 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
   Future<void> _showSendRequestDialog(BuildContext context) async {
     final membershipCtrl = TextEditingController();
     final noteCtrl = TextEditingController();
+    final searchCtrl = TextEditingController();
     int selectedRel = 0; // Spouse
+    List<dynamic> searchResults = [];
+    bool isSearching = false;
 
     final result = await showDialog<bool>(
       context: context,
@@ -249,23 +252,68 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextField(controller: membershipCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Target Membership No (e.g. REG-001)')),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: searchCtrl,
+                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                        decoration: const InputDecoration(labelText: 'Search Member by Name')
+                      )
+                    ),
+                    IconButton(
+                      icon: isSearching 
+                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: AppTheme.royalGold, strokeWidth: 2)) 
+                        : const Icon(Icons.search, color: AppTheme.royalGold),
+                      onPressed: () async {
+                        if (searchCtrl.text.length < 3) return;
+                        setState(() => isSearching = true);
+                        searchResults = await ref.read(familyServiceProvider).searchFamilyMembers(searchCtrl.text);
+                        setState(() => isSearching = false);
+                      },
+                    )
+                  ],
+                ),
+                if (searchResults.isNotEmpty)
+                  Container(
+                    height: 100,
+                    margin: const EdgeInsets.only(top: 8, bottom: 8),
+                    decoration: BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.circular(8)),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: searchResults.length,
+                      itemBuilder: (c, i) {
+                        final m = searchResults[i];
+                        return ListTile(
+                          title: Text(m['fullName'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                          subtitle: Text(m['membershipNumber'] ?? '', style: const TextStyle(color: Colors.white54, fontSize: 10)),
+                          onTap: () {
+                            membershipCtrl.text = m['membershipNumber'] ?? '';
+                            setState(() => searchResults = []);
+                          },
+                        );
+                      }
+                    )
+                  ),
+                const SizedBox(height: 12),
+                TextField(controller: membershipCtrl, style: const TextStyle(color: Colors.white, fontSize: 12), decoration: const InputDecoration(labelText: 'Target Membership No (e.g. REG-001)')),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<int>(
                   initialValue: selectedRel,
                   dropdownColor: AppTheme.midnightSurface,
                   decoration: const InputDecoration(labelText: 'Relationship'),
                   items: const [
-                    DropdownMenuItem(value: 0, child: Text('Spouse', style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(value: 1, child: Text('Parent', style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(value: 2, child: Text('Child', style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(value: 3, child: Text('Sibling', style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(value: 4, child: Text('Other', style: TextStyle(color: Colors.white))),
+                    DropdownMenuItem(value: 0, child: Text('Spouse', style: TextStyle(color: Colors.white, fontSize: 12))),
+                    DropdownMenuItem(value: 1, child: Text('Parent', style: TextStyle(color: Colors.white, fontSize: 12))),
+                    DropdownMenuItem(value: 2, child: Text('Child', style: TextStyle(color: Colors.white, fontSize: 12))),
+                    DropdownMenuItem(value: 3, child: Text('Sibling', style: TextStyle(color: Colors.white, fontSize: 12))),
+                    DropdownMenuItem(value: 4, child: Text('Other', style: TextStyle(color: Colors.white, fontSize: 12))),
                   ],
                   onChanged: (v) => setState(() => selectedRel = v ?? 0),
                 ),
-                TextField(controller: noteCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Personal Note (Optional)')),
+                TextField(controller: noteCtrl, style: const TextStyle(color: Colors.white, fontSize: 12), decoration: const InputDecoration(labelText: 'Personal Note (Optional)')),
               ],
             ),
           ),

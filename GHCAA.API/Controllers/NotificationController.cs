@@ -6,6 +6,7 @@ namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/notifications")]
+    [Route("api/notification")]
     [Authorize]
     public class NotificationController : ControllerBase
     {

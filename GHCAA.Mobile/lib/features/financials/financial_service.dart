@@ -12,8 +12,21 @@ class FinancialService {
 
   Future<List<dynamic>> getLedger() async {
     try {
-      final response = await _dio.get('/financial/ledger');
-      return response.data as List<dynamic>;
+      // Member call: GET /api/financials/my-history
+      // Admin call: GET /api/ledger
+      // Standardizing on my-history for the member portal to avoid 403 SuperAdminOnly restriction.
+      final response = await _dio.get('/financials/my-history');
+      final List<dynamic> history = response.data as List<dynamic>;
+
+      // Map backend fields (paidAt, financialCategory) to mobile expectations (date, description)
+      return history.map((item) {
+        return {
+          ...item,
+          'date': item['paidAt'],
+          'description': item['financialCategory']?.toString() ?? item['notes'] ?? 'Alumni Contribution',
+          'amount': item['amount'],
+        };
+      }).toList();
     } catch (e) {
       return [];
     }
@@ -43,8 +56,8 @@ class FinancialService {
   }
 
   Future<String?> getReceiptUrl(int paymentId) async {
-    // Usually we would return binary, but for mobile we might trigger a browser download 
-    // or use a specialized file downloader.
-    return '${_dio.options.baseUrl}/financials/receipt/$paymentId';
+    // Build URL without the /api suffix to get clean base host URL
+    final baseHost = _dio.options.baseUrl.replaceFirst('/api', '');
+    return '$baseHost/api/financials/receipt/$paymentId';
   }
 }

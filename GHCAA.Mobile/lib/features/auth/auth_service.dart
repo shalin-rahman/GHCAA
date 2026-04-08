@@ -37,14 +37,18 @@ class AuthService {
         final token = data['token']; 
         final role = data['role'] ?? 'Member';
 
+        // SECURITY: Clear ALL previous session data before saving new credentials.
+        // This prevents role/profile leakage when switching between admin and member accounts.
+        await _storage.clearAll();
+
         await _storage.saveToken(token);
         await _storage.saveRole(role);
         
         if (enableBiometric) {
           await _storage.saveCredentials(identifier, password); // For Biometric Fast Login
-        } else {
-          await _storage.clearCredentials(); // Ensure removed if user opts out
         }
+        // Note: do NOT call clearCredentials here — we just called clearAll() above.
+        // Credentials for biometric are only saved if the user opted in above.
 
         return null; // Success
       }

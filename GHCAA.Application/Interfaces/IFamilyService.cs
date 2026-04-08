@@ -37,6 +37,11 @@ namespace GHCAA.Application.Interfaces
         /// Unlinks a previously established family connection.
         /// </summary>
         Task<bool> UnlinkAsync(int memberId, int linkedMemberId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Searches for public/approved members by name to link as family.
+        /// </summary>
+        Task<IEnumerable<MemberSummaryDto>> SearchByNameAsync(string name, int excludeMemberId, CancellationToken cancellationToken = default);
     }
 
     public class CreateFamilyRequestDto

@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Core Brand Palette - "Obsidian & Gold Leaf"
-  static const Color obsidianBlack = Color(0xFF000000);
-  static const Color deepCharcoal = Color(0xFF0C0C0C);
-  static const Color royalGold = Color(0xFFC5A059);
-  static const Color brightGold = Color(0xFFE5C15E);
-  static const Color darkGold = Color(0xFF8E6D2A);
+  static const Color obsidianBlack = Color(0xFF0B0E14);
+  static const Color deepCharcoal = Color(0xFF161B22);
+  static const Color royalGold = Color(0xFFD4AF37);
+  static const Color brightGold = Color(0xFFFFD700);
+  static const Color darkGold = Color(0xFF996515);
   
-  static const Color textMain = Color(0xFFF5F5F5);
-  static const Color textMuted = Color(0xFF888888);
+  static const Color textMain = Color(0xFFFFFFFF);
+  static const Color textMuted = Color(0xFFA0AEC0);
   
-  static const Color glassBorder = Color(0x14FFFFFF); // rgba(255, 255, 255, 0.08)
-  static const Color shadowColor = Color(0x99000000); // rgba(0, 0, 0, 0.6)
+  static const Color glassBorder = Color(0x33D4AF37); // Royal Gold with low opacity
+  static const Color shadowColor = Color(0x66000000); 
+
 
   // Legacy Aliases for backward compatibility
   static const Color midnightBase = obsidianBlack;

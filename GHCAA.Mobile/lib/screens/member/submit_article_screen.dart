@@ -77,6 +77,13 @@ class _SubmitArticleScreenState extends ConsumerState<SubmitArticleScreen> {
     return AppScaffold(
       title: 'Community Journalism',
       breadcrumb: 'Member Portal > Submit Article',
+      leading: IconButton(
+        icon: const Icon(Icons.close, color: AppTheme.royalGold),
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          context.pop();
+        },
+      ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge, vertical: 20),
         child: Form(

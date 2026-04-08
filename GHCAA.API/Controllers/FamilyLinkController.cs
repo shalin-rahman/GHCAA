@@ -12,10 +12,12 @@ namespace GHCAA.API.Controllers
     public class FamilyLinkController : ControllerBase
     {
         private readonly IFamilyLinkService _familyLinkService;
+        private readonly IFamilyService _familyService;
 
-        public FamilyLinkController(IFamilyLinkService familyLinkService)
+        public FamilyLinkController(IFamilyLinkService familyLinkService, IFamilyService familyService)
         {
             _familyLinkService = familyLinkService;
+            _familyService = familyService;
         }
 
         private int GetMemberId() =>
@@ -23,6 +25,7 @@ namespace GHCAA.API.Controllers
 
         /// <summary>Send a family link request to another member by membership number.</summary>
         [HttpPost("send")]
+        [HttpPost("/api/members/family")] // Legacy alias for mobile
         public async Task<IActionResult> Send([FromBody] SendFamilyLinkDto dto, CancellationToken ct)
         {
             try
@@ -69,7 +72,19 @@ namespace GHCAA.API.Controllers
 
         /// <summary>Get your approved family network.</summary>
         [HttpGet("my-family")]
+        [HttpGet("/api/members/family")] // Legacy alias for mobile
+        [HttpGet("/api/Family/links")]   // Web parity alias
         public async Task<IActionResult> GetFamily(CancellationToken ct) =>
             Ok(await _familyLinkService.GetFamilyAsync(GetMemberId(), ct));
+
+        /// <summary>Search for members by name to link as family.</summary>
+        [HttpGet("search")]
+        [HttpGet("/api/Family/search")] // Web parity alias
+        public async Task<IActionResult> Search([FromQuery] string name, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return BadRequest("Name required");
+            var results = await _familyService.SearchByNameAsync(name, GetMemberId(), ct);
+            return Ok(results);
+        }
     }
 }

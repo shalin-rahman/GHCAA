@@ -25,5 +25,6 @@ namespace GHCAA.Application.DTOs
         // Gamification
         public int Rank { get; set; }
         public string? CategoryBadge { get; set; }
+        public decimal ProfileCompletionPercentage { get; set; }
     }
 }

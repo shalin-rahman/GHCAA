@@ -50,14 +50,12 @@ class AppScaffold extends ConsumerWidget {
           return _buildScaffold(context, ref, colors, announcement: st.announcement, textColor: st.textColor, isGlobalVisible: isGlobalAppBarVisible, isUserAdmin: isUserAdmin);
         }
         
-        final List<Color> gradientColors = isUserAdmin 
-          ? [AppTheme.adminMidnightSurface, AppTheme.adminMidnightBase]
-          : [AppTheme.midnightSurface, AppTheme.midnightBase];
+        final List<Color> gradientColors = [AppTheme.obsidianBlack, AppTheme.deepCharcoal];
         
         return _buildScaffold(context, ref, gradientColors, isGlobalVisible: isGlobalAppBarVisible, isUserAdmin: isUserAdmin);
       },
-      loading: () => _buildScaffold(context, ref, [AppTheme.midnightSurface, AppTheme.midnightBase], isGlobalVisible: isGlobalAppBarVisible, isUserAdmin: isUserAdmin),
-      error: (e, s) => _buildScaffold(context, ref, [AppTheme.midnightSurface, AppTheme.midnightBase], isGlobalVisible: isGlobalAppBarVisible, isUserAdmin: isUserAdmin),
+      loading: () => _buildScaffold(context, ref, [AppTheme.obsidianBlack, AppTheme.deepCharcoal], isGlobalVisible: isGlobalAppBarVisible, isUserAdmin: isUserAdmin),
+      error: (e, s) => _buildScaffold(context, ref, [AppTheme.obsidianBlack, AppTheme.deepCharcoal], isGlobalVisible: isGlobalAppBarVisible, isUserAdmin: isUserAdmin),
     );
   }
 

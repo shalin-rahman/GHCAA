@@ -71,7 +71,10 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
 
       if (error == null) {
         HapticFeedback.heavyImpact();
-        final role = await ref.read(authServiceProvider).getRole();
+        ref.invalidate(roleProvider);
+        ref.invalidate(userProfileProvider);
+        
+        final role = await ref.read(roleProvider.future);
         if (!mounted) return;
         if (role.isStaffAdminRole) {
           context.go('/admin_dashboard');

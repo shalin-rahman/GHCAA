@@ -6,6 +6,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:barcode_widget/barcode_widget.dart';
 import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
@@ -73,27 +74,34 @@ class DigitalIDScreen extends ConsumerWidget {
                                 Text(data['fullName'] ?? 'N/A', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white, height: 1.2), textAlign: TextAlign.center),
                                 const SizedBox(height: 8),
                                 Text('${data['currentDesignation'] ?? 'Alumnus'} • BATCH ${data['batch'] ?? ''}', style: const TextStyle(fontSize: 13, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
-                                const SizedBox(height: 48),
+                                const SizedBox(height: 32),
                                 Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
                                   child: QrImageView(
                                     data: data['membershipId']?.toString() ?? 'PENDING',
                                     version: QrVersions.auto,
-                                    size: 90,
+                                    size: 64,
                                     gapless: false,
-                                    eyeStyle: const QrEyeStyle(
-                                      eyeShape: QrEyeShape.square,
-                                      color: Colors.black,
-                                    ),
-                                    dataModuleStyle: const QrDataModuleStyle(
-                                      dataModuleShape: QrDataModuleShape.square,
-                                      color: Colors.black,
-                                    ),
+                                    eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Colors.black),
+                                    dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Colors.black),
                                   ),
                                 ),
-                                const SizedBox(height: 16),
-                                Text('ID: ${data['membershipId'] ?? 'PENDING'}'.toUpperCase(), style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: 2)),
+                                const SizedBox(height: 24),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                                  child: BarcodeWidget(
+                                    barcode: Barcode.code128(),
+                                    data: data['membershipId']?.toString() ?? 'PENDING',
+                                    width: 140,
+                                    height: 30,
+                                    color: Colors.black,
+                                    backgroundColor: Colors.transparent,
+                                    drawText: true,
+                                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 2),
+                                  ),
+                                ),
                               ],
                             ),
                           ),

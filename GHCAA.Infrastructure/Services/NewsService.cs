@@ -31,36 +31,52 @@ namespace GHCAA.Infrastructure.Services
                 query = query.Where(n => n.ArticleCategory == category.Value);
             }
 
-            return await query
+            var posts = await query
+                .Include(n => n.Author)
+                    .ThenInclude(u => u!.Member)
                 .OrderByDescending(n => n.PublishDate)
-                .Select(n => MapToDto(n))
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
+                
+            return posts.Select(MapToDto);
         }
 
         public async Task<IEnumerable<NewsPostDto>> GetAllNewsForAdminAsync(CancellationToken cancellationToken = default)
         {
-            return await _db.NewsPosts
+            var posts = await _db.NewsPosts
+                .Include(n => n.Author)
+                    .ThenInclude(u => u!.Member)
                 .OrderByDescending(n => n.PublishDate)
-                .Select(n => MapToDto(n))
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
+
+            return posts.Select(MapToDto);
         }
 
         public async Task<IEnumerable<NewsPostDto>> GetPendingSubmissionsAsync(CancellationToken cancellationToken = default)
         {
-            return await _db.NewsPosts
+            var posts = await _db.NewsPosts
+                .Include(n => n.Author)
+                    .ThenInclude(u => u!.Member)
                 .Where(n => n.Status == Enums.SubmissionStatus.Pending)
                 .OrderByDescending(n => n.PublishDate)
-                .Select(n => MapToDto(n))
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
+
+            return posts.Select(MapToDto);
         }
 
         public async Task<IEnumerable<NewsPostDto>> GetMySubmissionsAsync(int userId, CancellationToken cancellationToken = default)
         {
-            return await _db.NewsPosts
+            var posts = await _db.NewsPosts
+                .Include(n => n.Author)
+                    .ThenInclude(u => u!.Member)
                 .Where(n => n.AuthorId == userId)
                 .OrderByDescending(n => n.PublishDate)
-                .Select(n => MapToDto(n))
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
+
+            return posts.Select(MapToDto);
         }
 
         public async Task<NewsPostDto?> GetNewsByIdAsync(int id, CancellationToken cancellationToken = default)

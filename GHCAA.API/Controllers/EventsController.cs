@@ -45,7 +45,21 @@ namespace GHCAA.API.Controllers
 
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<IActionResult> RegisterForEvent([FromForm] RegisterForEventDto dto, IFormFile? receipt, CancellationToken cancellationToken)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> RegisterForEventForm([FromForm] RegisterForEventDto dto, IFormFile? receipt, CancellationToken cancellationToken)
+        {
+            return await ProcessRegistration(dto, receipt, cancellationToken);
+        }
+
+        [HttpPost("register")]
+        [AllowAnonymous]
+        [Consumes("application/json")]
+        public async Task<IActionResult> RegisterForEventJson([FromBody] RegisterForEventDto dto, CancellationToken cancellationToken)
+        {
+            return await ProcessRegistration(dto, null, cancellationToken);
+        }
+
+        private async Task<IActionResult> ProcessRegistration(RegisterForEventDto dto, IFormFile? receipt, CancellationToken cancellationToken)
         {
             int? memberId = null;
             if (User.Identity?.IsAuthenticated == true)

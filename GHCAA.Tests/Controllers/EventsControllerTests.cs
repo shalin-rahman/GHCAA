@@ -52,13 +52,24 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
-        public async Task RegisterForEvent_ReturnsOk()
+        public async Task RegisterForEventForm_ReturnsOk()
         {
             var dto = new RegisterForEventDto { EventId = 1, PaymentReference = "123" };
             _eventServiceMock.Setup(x => x.RegisterForEventAsync(dto, 10, It.IsAny<UploadedFileDto>(), It.IsAny<CancellationToken>()))
                              .ReturnsAsync(new EventRegistration { Id = 1 });
 
-            var result = await _controller.RegisterForEvent(dto, null, CancellationToken.None);
+            var result = await _controller.RegisterForEventForm(dto, null, CancellationToken.None);
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task RegisterForEventJson_ReturnsOk()
+        {
+            var dto = new RegisterForEventDto { EventId = 1, PaymentReference = "123" };
+            _eventServiceMock.Setup(x => x.RegisterForEventAsync(dto, 10, null, It.IsAny<CancellationToken>()))
+                             .ReturnsAsync(new EventRegistration { Id = 1 });
+
+            var result = await _controller.RegisterForEventJson(dto, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 

@@ -79,4 +79,13 @@ class FamilyService {
       return false;
     }
   }
+
+  Future<List<dynamic>> searchFamilyMembers(String name) async {
+    try {
+      final response = await _dio.get('/family/search', queryParameters: {'name': name});
+      return response.data as List<dynamic>;
+    } catch (e) {
+      return [];
+    }
+  }
 }
