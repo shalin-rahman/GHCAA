@@ -135,6 +135,40 @@
 12.4 [TODO] Mobile: Add "Report a Problem" / "Share Logs" feature so users can email/share captured logs to admin
 12.5 [TODO] Mobile: On any unhandled error, show option to "Send Report to Administrator" with log attachment
 
+## AREA 13: VISUAL TESTING & QUALITY FREEZE
+13.1 [DONE] API: Implement 'Seed Data' profile for visual tests (migration-safe, Visual env-gated)
+13.2 [DONE] Infra: Define Visual Test Storage (Baseline/Failure/Diff) — ARCH.md created
+13.3 [DONE] Scripting: Unified 'visual-check.ps1' with 4-stage runner, suite filtering, update-baselines flag
+13.4 [DONE] UI Quality Freeze: COMPREHENSIVE module-by-module coverage:
+     - [DONE] Member Identity: Digital ID Card         — digital-id.spec.ts + visual_freeze_test.dart
+     - [DONE] Member Home: Dashboard                   — dashboard.spec.ts + dashboard_visual_test.dart
+     - [DONE] Public: Landing, About, Contact, Login   — public-pages.spec.ts
+     - [DONE] Public: Registration page                — public-pages.spec.ts + auth_register golden
+     - [DONE] Content: News Hub, Magazine, Gallery     — content.spec.ts + goldens
+     - [DONE] Governance: EC Committee Registry        — governance.spec.ts + goldens
+     - [DONE] Governance: Digital Constitution         — goldens (governance_constitution)
+     - [DONE] Directory: Member directory (auth+public) — directory.spec.ts + goldens
+     - [DONE] Career: Job listings & Mentorship        — jobs.spec.ts + goldens
+     - [DONE] Events: Event list (auth+public)         — events.spec.ts + goldens
+     - [DONE] Finance: Member Payment Portal           — finance.spec.ts + goldens
+     - [DONE] Profile: Member profile & Articles       — profile.spec.ts + goldens
+     - [DONE] Admin: Dashboard, Members, Approvals     — admin.spec.ts (full)
+     - [DONE] Admin: News, Events, EC, Gallery         — admin.spec.ts (full)
+     - [DONE] Admin: Article approvals, Contact msgs   — admin.spec.ts (full)
+     - [DONE] SuperAdmin: Ledger, Fees, Roles, Audit   — admin.spec.ts (SuperAdmin group)
+     - [DONE] Support: AI Assistant & Messaging        — support.spec.ts + goldens
+     - [DONE] Notifications & Activity Log             — goldens
+     - [DONE] Auth: Login & Register screens           — goldens
+13.5 [DONE] Runner upgraded: -VisualOnly, -E2EOnly, -Suite, -UpdateBaselines, colored summary
+
+## AREA 14: FUNCTIONAL E2E (END-USER TESTING)
+14.1 [DONE] Web: Playwright member journey (Login -> Dashboard -> ID Card -> Logout)
+14.2 [DONE] Mobile: Integration test journey (Login -> Dashboard -> ID Card -> Logout)
+14.3 [DONE] Web: Admin approval workflow E2E
+14.4 [DONE] Mobile: Financial ledger verification E2E
+14.5 [DONE] Cross-Platform: Article contribution & editorial approval E2E (Web + Mobile)
+
 ## CREDENTIALS:
 - SuperAdmin: superadmin / SuperAdminPassword123!
 - Developer Admin: shalin / Shalin@2024!
+- TEST_MEMBER: demo_user / DemoPass123!

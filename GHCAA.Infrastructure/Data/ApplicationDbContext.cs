@@ -12,18 +12,34 @@ namespace GHCAA.Infrastructure.Data
 
         private List<T> LoadSeed<T>(string fileName)
         {
-            // 1. Try local publish/output directory
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Seed", fileName);
+            var profile = Environment.GetEnvironmentVariable("ASP_SEED_PROFILE");
             
-            // 2. Fallback to solution-relative path (for dev/migrations)
+            // SECURITY GATE: Never allow 'Visual' profile during migration generation or if not explicitly requested.
+            // This ensures test data (Shalin Rahman, etc.) never ends up in the production database snapshot.
+            var isDesign = AppDomain.CurrentDomain.FriendlyName.Contains("ef") || 
+                           AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName?.Contains("Microsoft.EntityFrameworkCore.Design") == true);
+
+            var seedSubDir = (profile == "Visual" && !isDesign) ? "Seed/Visual" : "Seed";
+
+            // 1. Try local publish/output directory
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", seedSubDir, fileName);
+            
+            // 2. Fallback to base Seed if Visual missing
+            if (profile == "Visual" && !File.Exists(path))
+            {
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Seed", fileName);
+            }
+
+            // 3. Fallback to solution-relative path (for dev/migrations)
             if (!File.Exists(path))
             {
                 var current = Directory.GetCurrentDirectory();
-                path = Path.Combine(current, "GHCAA.Infrastructure", "Data", "Seed", fileName);
+                var relPath = Path.Combine(current, "GHCAA.Infrastructure", "Data", seedSubDir, fileName);
                 
-                // 3. Fallback if running from within Infrastructure project
-                if (!File.Exists(path))
-                    path = Path.Combine(current, "Data", "Seed", fileName);
+                if (profile == "Visual" && !File.Exists(relPath))
+                    relPath = Path.Combine(current, "GHCAA.Infrastructure", "Data", "Seed", fileName);
+
+                path = relPath;
             }
 
             if (!File.Exists(path)) return new List<T>();

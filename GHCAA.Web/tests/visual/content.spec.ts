@@ -1,0 +1,38 @@
+import { test, expect, Page } from '@playwright/test';
+
+// Reusable auth helper
+async function loginAsMember(page: Page) {
+  await page.goto('/');
+  await page.evaluate(() => {
+    localStorage.setItem('jwt_token', 'visual_test_token');
+    localStorage.setItem('user_role', 'Member');
+    localStorage.setItem('user_id', '1001');
+  });
+}
+
+test.describe('Content & News Visual Freeze', () => {
+  test.beforeEach(async ({ page }) => loginAsMember(page));
+
+  test('Content: News hub list view should match baseline', async ({ page }) => {
+    await page.goto('/portal/news');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(800);
+    await expect(page).toHaveScreenshot('news-list.png', { fullPage: true });
+  });
+
+  test('Content: Magazine page should match baseline', async ({ page }) => {
+    await page.goto('/magazine');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(800);
+    await expect(page).toHaveScreenshot('magazine-page.png', { fullPage: true });
+  });
+
+  test('Content: Gallery grid should match baseline', async ({ page }) => {
+    await page.goto('/portal/gallery');
+    await page.waitForLoadState('networkidle');
+    // Wait for images to load
+    await page.waitForSelector('.gallery-item', { state: 'visible' });
+    await page.waitForTimeout(1000);
+    await expect(page).toHaveScreenshot('gallery-grid.png', { fullPage: true });
+  });
+});
