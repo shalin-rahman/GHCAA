@@ -1,3 +1,4 @@
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -260,7 +261,7 @@ namespace GHCAA.Infrastructure.Data
                         RequesterId = 200, 
                         TargetMemberId = 1, 
                         Status = Enums.FamilyLinkStatus.Accepted, 
-                        Relationship = "Peer", 
+                        Relationship = Enums.RelationshipType.Other, 
                         RequestedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
                     },
                     new FamilyLinkRequest 
@@ -269,7 +270,7 @@ namespace GHCAA.Infrastructure.Data
                         RequesterId = 2, 
                         TargetMemberId = 200, 
                         Status = Enums.FamilyLinkStatus.Accepted, 
-                        Relationship = "Colleague", 
+                        Relationship = Enums.RelationshipType.Other, 
                         RequestedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
                     }
                 );
