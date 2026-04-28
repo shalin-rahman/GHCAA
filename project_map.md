@@ -1,5 +1,5 @@
 # GHCAA Platform — Complete Project Class Map
-> **Version:** 2.3 · **Date:** 2026-04-10 · **Maintainer:** Update this file whenever a class/interface changes.
+> **Version:** 2.5 · **Date:** 2026-04-24 · **Maintainer:** Update this file whenever a class/interface changes.
 
 ---
 
@@ -128,6 +128,7 @@ graph TD
 | `ECChangeReason` | `string?` | |
 | `IsVerified` | `bool` | Blue tick |
 | `ContributionPoints` | `int` | Gamification |
+| `IsProfileComplete` | `bool` | 100% completion flag |
 
 **Navigation:**
 - `User?` → `User`
@@ -155,6 +156,8 @@ graph TD
 | `ResetToken` | `string?` | |
 | `ResetTokenExpiry` | `DateTime?` | |
 | `SecurityStamp` | `string` | GUID — session invalidation |
+| `GoogleId` | `string?` | Social identifier |
+| `FacebookId` | `string?` | Social identifier |
 
 **Navigation:** `Member?`, `ICollection<Role>`
 
@@ -298,6 +301,28 @@ graph TD
 
 ---
 
+### `Poll` _(GHCAA.Domain.Models)_
+| Property | Type | Notes |
+|---|---|---|
+| `Id` | `int` | PK |
+| `Title`, `Description?` | `string` | |
+| `AllowMultipleChoice` | `bool` | |
+| `IsActive`, `IsArchived` | `bool` | |
+| `CreatedAt`, `ExpiryDate?` | `DateTime` | |
+| `CreatedBy` | `int` | Admin Member ID |
+
+---
+
+### `SocialAuthConfig` _(GHCAA.Domain.Models)_
+| Property | Type | Notes |
+|---|---|---|
+| `Id` | `int` | PK |
+| `Provider` | `SocialProvider` enum | |
+| `ClientId`, `ClientSecret?` | `string` | |
+| `IsEnabled` | `bool` | |
+
+---
+
 ### `MentorshipRequest` _(GHCAA.Domain.Models)_
 
 | Property | Type |
@@ -316,8 +341,8 @@ graph TD
 | Model | Key FKs / Notes |
 |---|---|
 | `AcademicRecord` | FK → Member |
-| `ProfessionalRecord` | FK → Member |
-| `PaymentHistory` | FK → Member; has `TransactionId`, `Amount`, `Status` |
+| `ProfessionalRecord` | FK → Member; has `OrganizationName`, `Designation`, `StartDate` (Required) |
+| `PaymentHistory` | FK → Member; has `TransactionId` (Required), `Amount`, `Status` |
 | `MembershipDue` | FK → Member; annual due tracking |
 | `MembershipHistory` | FK → Member; type-change audit |
 | `MembershipFeeConfig` | Fee table by MembershipType + Year |
@@ -335,6 +360,8 @@ graph TD
 | `LookupItem` | `Category`, `Value`, `Label` |
 | `FileUpload` | `Path`, `Type` (FileUploadType), `Status` |
 | `Role` | `Name`, FK → User (many-to-many) |
+| `PollOption` | FK → Poll; `OptionText` |
+| `PollVote` | FK → Poll + PollOption + Member |
 | `Otp` | `Email`, `Code`, `ExpiresAt`, `Purpose` |
 | `ContactMessage` | `Name`, `Email`, `Subject`, `Body`, `IsRead` |
 | `SavedPaymentMethod` | FK → Member; `Method`, `AccountNumber` |
@@ -374,6 +401,7 @@ graph TD
 | `RelationshipType` | Spouse, Parent, Child, Sibling, Other |
 | `VolunteerRole` | EventOrganizer, GuestManagement, ContentCreator, Mentor, TechnicalSupport, Other |
 | `NotificationType` | EventCreation, ParticipationApproval, RegistrationUpdate, GeneralSystem, DirectMessage |
+| `SocialProvider` | Google, Facebook |
 
 ### Constants (`GHCAA.Domain.Constants`)
 
@@ -398,7 +426,7 @@ graph TD
 | `RegisterAsync(dto, photo, cert, proof, ct)` | `Task<int>` | Public |
 | `VerifyEmailAsync(email, code, ct)` | `Task<bool>` | Public |
 | `ResendOtpAsync(email, ct)` | `Task<bool>` | Public |
-| `ApproveMemberAsync(memberId, adminId, ct)` | `Task<ApproveMemberResultDto>` | Admin |
+| `ApproveMemberAsync(memberId, adminId, ct)` | `Task<ApproveMemberResultDto>` | Admin (Enforces Paid+Complete) |
 | `GetProfileAsync(memberId, isPrivileged, ct)` | `Task<MemberProfileDto?>` | Member |
 | `UpdateProfileAsync(memberId, dto, ct)` | `Task<bool>` | Member |
 | `GetDashboardStatsAsync(isPrivileged, ct)` | `Task<object>` | Auth |
@@ -647,11 +675,26 @@ graph TD
 
 ---
 
+### `IPollService`
+**Impl:** `PollService`
+
+| Method | Returns | Auth |
+|---|---|---|
+| `GetActivePollsAsync(memberId, ct)` | `List<PollDto>` | Member |
+| `GetAllPollsAsync(ct)` | `List<PollDto>` | Admin |
+| `GetPollByIdAsync(id, memberId, ct)` | `PollDto?` | Member |
+| `CreatePollAsync(dto, adminId, ct)` | `int` | Admin |
+| `VoteAsync(pollId, memberId, optionIds, ct)` | `bool` | Member |
+| `TogglePollStatusAsync(id, isActive, ct)` | `bool` | Admin |
+| `DeletePollAsync(id, ct)` | `bool` | Admin |
+
+---
+
 ### Other Interfaces (summary)
 
 | Interface | Impl | Key Methods |
 |---|---|---|
-| `IAuthService` | `AuthService` | `LoginAsync(dto)`, `ResetPasswordAsync(email, token, pwd)` |
+| `IAuthService` | `AuthService` | `LoginAsync`, `GoogleLoginAsync`, `FacebookLoginAsync` |
 | `IUserService` | `UserService` | CRUD on User entity |
 | `ITokenService` | `TokenService` | `GenerateToken(user)` |
 | `IRoleService` | `RoleService` | `CreateRole`, `AssignRoleToUser`, `RemoveRole`, `GetUserRoles` |
@@ -711,6 +754,8 @@ graph TD
 | `MemberImportDtos` | CSV import |
 | `EmailDtos` | Communication |
 | `TokenResponseDto` | JWT login response |
+| `PollDto` / `PollOptionDto` | Poll data |
+| `CreatePollDto` / `PollVoteDto` | Poll creation / voting |
 
 ---
 
@@ -751,6 +796,7 @@ All services are registered as **Scoped** unless noted.
 | `IFamilyLinkService` | `FamilyLinkService` | Services/ |
 | `IFamilyService` | `FamilyService` | Services/ |
 | `IMentorshipService` | `MentorshipService` | Services/ |
+| `IPollService` | `PollService` | Services/ |
 | `ISmsService` | `GreenwebSmsService` | Services/ (**HttpClient**) |
 | `IRealTimeService` | `RealTimeService` | API/Services/ |
 
@@ -781,7 +827,7 @@ All registered as **HttpClient** + **Scoped IPaymentGatewayService**.
 | `MySql` | `MySqlApplicationDbContext` | `MySqlConnection` |
 | `Sqlite` | `SqliteApplicationDbContext` | `SqliteConnection` |
 
-**DbSets (all 36 domain models mapped):** Member, User, Role, AlumniEvent, EventRegistration, EventTask, EventBudget, EventGallery, NewsPost, NewsCollaborator, JobOpportunity, FinancialRecord, PaymentHistory, MembershipDue, MembershipFeeConfig, MembershipHistory, AcademicRecord, ProfessionalRecord, ECPeriod, ECMember, Constitution, FamilyLinkRequest, MentorshipRequest, ActivityLog, Notification, ChatMessage, EmailTemplate, EmailLog, Otp, LookupItem, FileUpload, ContactMessage, PaymentConfiguration, SavedPaymentMethod, SpecialDayTheme, GamificationConfig
+**DbSets (all 40 domain models mapped):** Member, User, Role, AlumniEvent, EventRegistration, EventTask, EventBudget, EventGallery, NewsPost, NewsCollaborator, JobOpportunity, FinancialRecord, PaymentHistory, MembershipDue, MembershipFeeConfig, MembershipHistory, AcademicRecord, ProfessionalRecord, ECPeriod, ECMember, Constitution, FamilyLinkRequest, MentorshipRequest, Poll, PollOption, PollVote, SocialAuthConfig, ActivityLog, Notification, ChatMessage, EmailTemplate, EmailLog, Otp, LookupItem, FileUpload, ContactMessage, PaymentConfiguration, SavedPaymentMethod, SpecialDayTheme, GamificationConfig
 
 **Seed:** `GHCAA.Infrastructure/Data/Seed/` — test/dev data seeder.
 
@@ -797,6 +843,9 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `RegistrationController` | `/api/registration` | Public / RateLimit: registration | `IMemberService`, `IOtpService` |
 | `ProfileController` | `/api/profile` | Auth | `IMemberService`, `INetworkingService` |
 | `MeController` | `/api/me` | Auth | `IMemberService`, `IActivityService` |
+| `PollController` | `/api/polls` | Auth | `IPollService` |
+| `AdminSocialAuthController` | `/api/admin/social-auth` | Admin | `ApplicationDbContext` |
+| `AdminPollController` | `/api/admin/polls` | Admin | `IPollService` |
 | `AdminController` | `/api/admin` | Admin/SuperAdmin | `IMemberService`, `IRoleService`, `IUserService` |
 | `AdminGovernanceController` | `/api/admin/governance` | Admin | `IGovernanceService` |
 | `EventsController` | `/api/events` | Public + Auth + Admin | `IEventService`, `IFileStorageService` |
@@ -1638,6 +1687,7 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `MentorshipHubScreen` | `mentorship_hub_screen.dart` | `mentorshipServiceProvider` |
 | `ProfessionalHubScreen` | `professional_hub_screen.dart` | `networkingServiceProvider` |
 | `AiChatScreen` | `ai_chat_screen.dart` | `assistantServiceProvider` |
+| `PollsScreen` | `polls_screen.dart` | `pollServiceProvider` |
 | `SupportScreen` | `support_screen.dart` | `supportServiceProvider` |
 | `AboutScreen` | `about_screen.dart` | — (static) |
 
@@ -1742,6 +1792,16 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `LiveSyncTest` | `LiveSyncTest.cs` | Integration with live DB |
 | `ARCH.md` | `VisualTests/ARCH.md` | Visual test architecture doc |
 
+### Visual & E2E Testing (Playwright / Flutter Integration)
+
+| Test / Script | Path | Purpose |
+|---|---|---|
+| `visual-check.ps1` | `scripts/visual-check.ps1` | Unified 4-stage runner for Visual/E2E tests |
+| `event-forms.spec.ts`| `GHCAA.Web/tests/visual/event-forms.spec.ts` | Playwright visual tests for event modules |
+| `registration_visual_test.dart` | `GHCAA.Mobile/test/registration_visual_test.dart` | Flutter Golden tests for registration wizard |
+| `member-journey.spec.ts` | `GHCAA.Web/tests/e2e/member-journey.spec.ts` | E2E Member login/dashboard journey |
+| `admin-workflow.spec.ts` | `GHCAA.Web/tests/e2e/admin-workflow.spec.ts` | E2E Admin approval workflow |
+
 ---
 
 ## Web (Angular) — Test Specs
@@ -1789,7 +1849,7 @@ All test files use Jasmine + Karma. File pattern: `*.spec.ts`
 `directory.spec.ts`, `events.spec.ts`, `gallery.spec.ts`, `governance.spec.ts`, `jobs.spec.ts`, `news.spec.ts`, `payment-method-selector.component.spec.ts`, `payment-portal.component.spec.ts`
 
 **Member (`member/`):**
-`articles.spec.ts`, `dashboard.spec.ts`, `digital-id.spec.ts`, `payments.spec.ts`, `profile.spec.ts`
+`articles.spec.ts`, `dashboard.spec.ts`, `digital-id.spec.ts`, `payments.spec.ts`, `profile.spec.ts`, `polls.component.spec.ts`
 
 **Public (`public/`):**
 `landing.spec.ts`, `events-preview.spec.ts`, `login.spec.ts`, `register.spec.ts`
@@ -1925,4 +1985,4 @@ To maintain architectural integrity and prevent "documentation drift," the follo
 
 ---
 
-*Last updated: 2026-04-10 v2.3 — Added Mandatory Update Protocol for architectural synchronization.*
+*Last updated: 2026-04-23 v2.4 — Integrated Visual Testing Suite & Production Quality Freeze.*

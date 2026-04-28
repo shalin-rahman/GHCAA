@@ -58,7 +58,7 @@
 5.3  [DONE] Constraint: Single EC role per member per period
 5.4  [DONE] Automated PDF Tax/Donation Receipts generation
 5.5  [DONE] Claims-based Auth: PermissionsMatrixScreen for role management
-6.1  [DONE] Governance Registry: Admin assignment UI
+5.6  [DONE] Governance Registry: Admin assignment UI
 
 ## AREA 6: CAREER & OPPORTUNITIES
 6.1  [DONE] Professional Hub: Alumni directory LinkedIn-style filters
@@ -79,7 +79,7 @@
 7.12 [DONE] Mobile: Unified userProfileProvider to prevent sync-re-fetch loops
 7.13 [TODO] Security: Two-Factor Authentication (2FA) for admin actions
 7.14 [TODO] Security: Biometric Authentication (FaceID/Fingerprint)
-7.15 [TODO] Security: Social Auth (OAuth2) - LinkedIn/Google
+7.15 [DONE] Security: Social Auth (OAuth2) - LinkedIn/Google
 7.16 [TODO] Hardening: SSL Pinning and Binary Obfuscation
 
 ## AREA 8: MOBILE ENGINEERING (TIER-1 STANDARDS)
@@ -168,7 +168,67 @@
 14.4 [DONE] Mobile: Financial ledger verification E2E
 14.5 [DONE] Cross-Platform: Article contribution & editorial approval E2E (Web + Mobile)
 
+## AREA 15: SOCIAL AUTH & ONBOARDING
+15.1 [DONE] API: Add GoogleId and FacebookId to User entity
+15.2 [DONE] API: Add IsProfileComplete to Member entity
+15.3 [DONE] API: Implement Social Auth (Google/Facebook) logic & Admin Config
+15.4 [DONE] Web: Implement "Login with Google/Facebook" buttons
+15.5 [DONE] Mobile: Implement Social Login (google_sign_in, flutter_facebook_auth)
+15.6 [DONE] Cross-Platform: Implementation of Onboarding Flow (Profile Setup -> Payment -> Approval)
+15.7 [DONE] Backend: Unit tests for Social Auth and Onboarding logic
+
+## AREA 16: POLLS & VOTING
+16.1 [DONE] Domain: Create Poll, PollOption, and PollVote models
+16.2 [DONE] API: IPollService and PollService implementation
+16.3 [DONE] API: PollController for admin and member actions
+16.4 [DONE] Web: Admin UI for Poll Management
+16.5 [DONE] Web: Member UI for Poll Voting & Results
+16.6 [DONE] Mobile: Member UI for Poll Voting & Results
+16.7 [DONE] Backend: Unit tests for Polls and Voting logic
+
+## AREA 17: REGRESSION & STABILITY
+17.1 [DONE] API: Verify existing Auth flows (NID/Password) remain functional
+17.2 [DONE] API: Verify Member Registration and Approval workflows remain functional
+17.3 [DONE] Web: Verify full member lifecycle (Login -> Profile -> Dashboard)
+17.4 [DONE] Mobile: Verify full member lifecycle (Login -> Profile -> Dashboard)
+17.5 [DONE] Cross-Platform: Run all existing Playwright and Flutter integration tests
+
+## AREA 18: GENERAL MAINTENANCE & STABILITY
+18.1 [DONE] Mobile: Fix unused import in registration_visual_test.dart
+18.2 [DONE] Mobile: Upgrade Governance UI (Fonts, GlassContainer, Image resolution)
+18.3 [DONE] Web: Refine Roles Management UI (Input padding, Fancy dropdowns, Smart selection)
+18.4 [DONE] Backend: Seed Constitution data to resolve Governance 404s
+18.5 [DONE] Mobile: If not connected with net, show error on mobile app
+18.6 [DONE] Mobile: Run 'flutter pub get' in GHCAA.Mobile to resolve connectivity_plus dependency errors
+18.7 [DONE] Backend: Start GHCAA.API to resolve ECONNREFUSED (port 5087) errors
+18.8 [DONE] Backend: Update PostgreSQL password in appsettings.Development.json if SyncMembersForReal test fails locally
+18.9 [DONE] UI Audit: Review all SCSS files for hardcoded #fff or #000 that break theme accessibility
+
+## AREA 19: PAYMENT VERIFICATION & POLICY
+19.1 [DONE] Payments: Verify Registration Fee configuration in Admin Portal
+19.2 [DONE] Payments: Verify Registration Fee status on Member Dashboard (Profile Completion Wizard)
+19.3 [DONE] Payments: Ensure Registration Fee is mandatory for all members as per latest policy
+
+## AREA 20: COMPREHENSIVE E2E COVERAGE (ALL FEATURES)
+20.1 [DONE] Web: Expand Playwright E2E suite to cover all core portal features (Messaging, Job Hub, Alumni Directory, Events, Gallery, Governance, My Articles, My Profile)
+20.2 [DONE] Mobile: Expand Flutter integration/visual tests to cover all core mobile features (Messaging, Job Hub, Alumni Directory, Events, Gallery, Governance, My Articles, My Profile, Admin Modules)
+
+## AREA 21: TEST DATA MANAGEMENT & VISUAL AUTOMATION
+21.1 [DONE] Quality: Create 'test-dataset.json' with comprehensive edge cases (Large names, missing photos, various membership tiers)
+21.2 [DONE] Quality: Implement 'scripts/setup-test-data.ps1' to inject test dataset into active environment (separate from seed)
+21.3 [DONE] Quality: Implement 'scripts/cleanup-test-data.ps1' to revert environment to clean/seed state
+21.4 [DONE] Quality: Implement 'scripts/run-visual-tests.ps1' to execute all visual regressions with the test dataset
+21.5 [DONE] Quality: Integrate visual test report generation (HTML) for local review
+
+## AREA 22: PORTAL FEATURE HARDENING (E2E)
+22.1 [DONE] E2E: Verify Messaging flow (Member <-> Admin) with real-time checks
+22.2 [DONE] E2E: Verify Job Hub (Post -> Review -> View) workflow
+22.3 [DONE] E2E: Verify Alumni Directory filtering and search precision
+22.4 [DONE] E2E: Verify Event Registration and QR generation flow
+22.5 [DONE] E2E: Verify Gallery upload and album organization (Admin side)
+
 ## CREDENTIALS:
 - SuperAdmin: superadmin / SuperAdminPassword123!
 - Developer Admin: shalin / Shalin@2024!
 - TEST_MEMBER: demo_user / DemoPass123!
+- Mobile: If not connected with net, show error on mobile app

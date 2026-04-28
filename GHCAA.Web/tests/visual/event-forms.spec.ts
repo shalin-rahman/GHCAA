@@ -3,9 +3,12 @@ import { test, expect, Page } from '@playwright/test';
 async function loginAsAdmin(page: Page) {
   await page.goto('/');
   await page.evaluate(() => {
-    localStorage.setItem('jwt_token', 'visual_admin_token');
-    localStorage.setItem('user_role', 'Admin');
-    localStorage.setItem('user_id', '1');
+    localStorage.setItem('user_session', JSON.stringify({
+      token: 'visual_admin_token',
+      role: 'SuperAdmin',
+      memberId: 1,
+      username: 'superadmin'
+    }));
   });
 }
 

@@ -1,0 +1,70 @@
+<div class="member-polls-page animate-fade-in">
+    <div class="page-header">
+        <h1>Member Voices</h1>
+        <p>Participate in shaping the future of our association</p>
+    </div>
+
+    <div class="polls-container" *ngIf="!loading(); else loader">
+        <div class="no-polls" *ngIf="polls().length === 0">
+            <i class="fas fa-poll"></i>
+            <h3>No Active Polls</h3>
+            <p>Check back later for new opportunities to contribute.</p>
+        </div>
+
+        <div class="glass-card poll-vote-card" *ngFor="let poll of polls()" [class.voted]="poll.hasVoted">
+            <div class="poll-badge" *ngIf="poll.hasVoted">
+                <i class="fas fa-check-circle"></i> Voted
+            </div>
+
+            <div class="poll-content">
+                <h2>{{ poll.title }}</h2>
+                <p class="description">{{ poll.description }}</p>
+
+                <div class="voting-options" *ngIf="!poll.hasVoted">
+                    <div class="option-item" 
+                         *ngFor="let opt of poll.options" 
+                         [class.selected]="isOptionSelected(poll, opt.id)"
+                         (click)="toggleSelection(poll, opt.id)">
+                        <div class="check-box">
+                            <i class="fas fa-check" *ngIf="isOptionSelected(poll, opt.id)"></i>
+                        </div>
+                        <span class="opt-text">{{ opt.text }}</span>
+                    </div>
+
+                    <button class="btn btn-accent w-full mt-6" 
+                            [disabled]="poll.selectedOptionIds.length === 0"
+                            (click)="submitVote(poll)">
+                        Submit My Vote
+                    </button>
+                    <p class="vote-hint" *ngIf="poll.allowMultipleChoice">You can select multiple options.</p>
+                </div>
+
+                <div class="vote-results" *ngIf="poll.hasVoted">
+                    <div class="result-row" *ngFor="let opt of poll.options">
+                        <div class="result-header">
+                            <span>{{ opt.text }}</span>
+                            <span>{{ opt.percentage }}%</span>
+                        </div>
+                        <div class="result-bar">
+                            <div class="fill" [style.width.%]="opt.percentage" [class.selected]="poll.selectedOptionIds.includes(opt.id)"></div>
+                        </div>
+                    </div>
+                    <div class="result-footer">
+                        <span>Total Participants: {{ poll.totalVotes }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="poll-meta">
+                <span><i class="far fa-calendar-alt"></i> Expires: {{ poll.expiryDate | date:'mediumDate' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #loader>
+        <div class="loader-container">
+            <div class="spinner"></div>
+            <p>Loading active polls...</p>
+        </div>
+    </ng-template>
+</div>

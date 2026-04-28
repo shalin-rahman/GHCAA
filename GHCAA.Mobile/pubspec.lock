@@ -217,6 +217,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+  connectivity_plus:
+    dependency: "direct main"
+    description:
+      name: connectivity_plus
+      sha256: b5e72753cf63becce2c61fd04dfe0f1c430cc5278b53a1342dc5ad839eab29ec
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.5"
+  connectivity_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: connectivity_plus_platform_interface
+      sha256: "3c09627c536d22fd24691a905cdd8b14520de69da52c7a97499c8be5284a32ed"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   convert:
     dependency: transitive
     description:
@@ -257,6 +273,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.7"
+  dbus:
+    dependency: transitive
+    description:
+      name: dbus
+      sha256: d0c98dcd4f5169878b6cf8f6e0a52403a9dff371a3e2f019697accbf6f44a270
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.12"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -289,6 +313,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  facebook_auth_desktop:
+    dependency: transitive
+    description:
+      name: facebook_auth_desktop
+      sha256: "219d559a33891e937c1913430505eae01fb946cb35729167bbdc747e3ebbd9ff"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.1"
   fake_async:
     dependency: transitive
     description:
@@ -435,6 +467,30 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_facebook_auth:
+    dependency: "direct main"
+    description:
+      name: flutter_facebook_auth
+      sha256: faa92fb7626c230837f30d02de7d92b6af334b77ba744867c63545d4ad7e171f
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.1.0"
+  flutter_facebook_auth_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_facebook_auth_platform_interface
+      sha256: e04b8dbfa77702bea45a79993163ad5d20b2c0084109bec591fdc2b9ee505779
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.2"
+  flutter_facebook_auth_web:
+    dependency: transitive
+    description:
+      name: flutter_facebook_auth_web
+      sha256: "8a6890a98522604169ca9f958d7189c9f579dbf05ba4d3d7adf26eca4c4c4c93"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.1"
   flutter_launcher_icons:
     dependency: "direct main"
     description:
@@ -586,6 +642,54 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.3.3"
+  google_identity_services_web:
+    dependency: transitive
+    description:
+      name: google_identity_services_web
+      sha256: "5d187c46dc59e02646e10fe82665fc3884a9b71bc1c90c2b8b749316d33ee454"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.3+1"
+  google_sign_in:
+    dependency: "direct main"
+    description:
+      name: google_sign_in
+      sha256: d0a2c3bcb06e607bb11e4daca48bd4b6120f0bbc4015ccebbe757d24ea60ed2a
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.3.0"
+  google_sign_in_android:
+    dependency: transitive
+    description:
+      name: google_sign_in_android
+      sha256: d5e23c56a4b84b6427552f1cf3f98f716db3b1d1a647f16b96dbb5b93afa2805
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.2.1"
+  google_sign_in_ios:
+    dependency: transitive
+    description:
+      name: google_sign_in_ios
+      sha256: "102005f498ce18442e7158f6791033bbc15ad2dcc0afa4cf4752e2722a516c96"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.9.0"
+  google_sign_in_platform_interface:
+    dependency: transitive
+    description:
+      name: google_sign_in_platform_interface
+      sha256: "5f6f79cf139c197261adb6ac024577518ae48fdff8e53205c5373b5f6430a8aa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.5.0"
+  google_sign_in_web:
+    dependency: transitive
+    description:
+      name: google_sign_in_web
+      sha256: "460547beb4962b7623ac0fb8122d6b8268c951cf0b646dd150d60498430e4ded"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.12.4+4"
   graphs:
     dependency: transitive
     description:
@@ -887,6 +991,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.6"
+  nm:
+    dependency: transitive
+    description:
+      name: nm
+      sha256: "2c9aae4127bdc8993206464fcc063611e0e36e72018696cd9631023a31b24254"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   objective_c:
     dependency: transitive
     description:

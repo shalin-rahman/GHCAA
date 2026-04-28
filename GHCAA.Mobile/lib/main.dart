@@ -10,6 +10,7 @@ import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/auth_service.dart';
 import 'features/notifications/push_notification_service.dart'; // Keep this import
+import 'core/widgets/no_internet_banner.dart';
 
 void main() async {
   // 1. Ensure Flutter binding is valid
@@ -162,13 +163,15 @@ class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBin
     return Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: (_) => ref.read(lastActivityProvider.notifier).update(),
-      child: MaterialApp.router(
-        title: AppConfig.appName,
-        theme: AppTheme.darkTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.dark,
-        routerConfig: router,
-        debugShowCheckedModeBanner: false,
+      child: ConnectivityAwareWrapper(
+        child: MaterialApp.router(
+          title: AppConfig.appName,
+          theme: AppTheme.darkTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.dark,
+          routerConfig: router,
+          debugShowCheckedModeBanner: false,
+        ),
       ),
     );
   }

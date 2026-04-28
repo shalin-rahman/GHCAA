@@ -7,6 +7,7 @@ import { ExportButtonsComponent } from '../../common/export-buttons/export-butto
 import { PaginationComponent } from '../../common/pagination/pagination.component';
 import { ExportUtil } from '../../core/utils/export.util';
 import { NotificationService } from '../../core/services/notification.service';
+import { NavService } from '../../core/services/nav.service';
 import { APP_CONFIG } from '../../core/constants/app.constants';
 
 
@@ -21,6 +22,7 @@ export class AdminEvents implements OnInit {
     private eventsService = inject(EventsService);
     private fb = inject(FormBuilder);
     private notify = inject(NotificationService);
+    public nav = inject(NavService);
 
     appConfig = APP_CONFIG;
 

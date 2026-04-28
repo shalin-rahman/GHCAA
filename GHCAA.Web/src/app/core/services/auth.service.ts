@@ -52,21 +52,39 @@ export class AuthService {
 
     login(credentials: LoginDto): Observable<User> {
         return this.http.post<TokenResponseDto>(API_ENDPOINTS.AUTH.LOGIN, credentials).pipe(
-            map(response => {
-                const user: User = {
-                    username: response.username,
-                    memberId: response.memberId,
-                    token: response.token,
-                    role: response.role ?? 'Member',
-                    fullName: response.fullName,
-                    email: response.email,
-                    mobileNo: response.mobileNo,
-                    mustChangePassword: response.mustChangePassword
-                };
-                this.setSession(user);
-                return user;
-            })
+            map(response => this.mapAndSetUser(response))
         );
+    }
+
+    getSocialProviders(): Observable<any[]> {
+        return this.http.get<any[]>(API_ENDPOINTS.AUTH.PROVIDERS);
+    }
+
+    googleLogin(idToken: string): Observable<User> {
+        return this.http.post<TokenResponseDto>(API_ENDPOINTS.AUTH.GOOGLE, { idToken }).pipe(
+            map(response => this.mapAndSetUser(response))
+        );
+    }
+
+    facebookLogin(accessToken: string): Observable<User> {
+        return this.http.post<TokenResponseDto>(API_ENDPOINTS.AUTH.FACEBOOK, { accessToken }).pipe(
+            map(response => this.mapAndSetUser(response))
+        );
+    }
+
+    private mapAndSetUser(response: TokenResponseDto): User {
+        const user: User = {
+            username: response.username,
+            memberId: response.memberId,
+            token: response.token,
+            role: response.role ?? 'Member',
+            fullName: response.fullName,
+            email: response.email,
+            mobileNo: response.mobileNo,
+            mustChangePassword: response.mustChangePassword
+        };
+        this.setSession(user);
+        return user;
     }
 
     logout() {

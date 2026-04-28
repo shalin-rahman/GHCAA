@@ -46,6 +46,7 @@ import '../../screens/member/chats_screen.dart';
 import '../../screens/member/chat_room_screen.dart';
 import '../../screens/member/governance_screen.dart';
 import '../../core/widgets/main_shell.dart';
+import '../../features/polls/polls_screen.dart';
 
 class AuthNotifier extends ChangeNotifier {
   final Ref _ref;
@@ -151,6 +152,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/about', name: 'about', builder: (context, state) => const AboutScreen()),
           GoRoute(path: '/mentorship', name: 'mentorship', builder: (context, state) => const MentorshipHubScreen()),
           GoRoute(path: '/professionals', name: 'professionals', builder: (context, state) => const ProfessionalHubScreen()),
+          GoRoute(path: '/polls', name: 'polls', builder: (context, state) => const PollsScreen()),
           
           // Admin Routes
           GoRoute(path: '/admin_dashboard', name: 'admin_dashboard', builder: (context, state) => const AdminDashboardScreen()),

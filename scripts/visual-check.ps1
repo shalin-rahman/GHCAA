@@ -19,21 +19,39 @@ $WebDir = Join-Path $Root "GHCAA.Web"
 $MobileDir = Join-Path $Root "GHCAA.Mobile"
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║   GHCAA Quality Gate — Visual & E2E Test Runner  ║" -ForegroundColor Cyan
-Write-Host "╚══════════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host "====================================================" -ForegroundColor Cyan
+Write-Host "   GHCAA Quality Gate - Visual & E2E Test Runner    " -ForegroundColor Cyan
+Write-Host "====================================================" -ForegroundColor Cyan
 Write-Host ""
+
+# Auto-detect Flutter if not in PATH
+if (!(Get-Command flutter -ErrorAction SilentlyContinue)) {
+    $commonFlutterPaths = @("C:\src\flutter\bin", "C:\flutter\bin", "$env:LOCALAPPDATA\Flutter\bin")
+    foreach ($path in $commonFlutterPaths) {
+        if (Test-Path $path) {
+            $env:Path = "$path;$env:Path"
+            Write-Host "ENV: Flutter detected at $path and added to session PATH." -ForegroundColor DarkGray
+            break
+        }
+    }
+}
 
 # Set environment for visual seed data
 $env:ASP_SEED_PROFILE = "Visual"
-Write-Host "[CONFIG] ASP_SEED_PROFILE=Visual — using static seed data" -ForegroundColor DarkGray
+Write-Host "CONFIG: ASP_SEED_PROFILE=Visual - using static seed data" -ForegroundColor DarkGray
 Write-Host ""
+
+# Initialize exit codes
+$WebVisualExit = 0
+$WebE2EExit = 0
+$MobileVisualExit = 0
+$MobileE2EExit = 0
 
 # ──────────────────────────────────────────────
 # WEB VISUAL TESTS (Playwright)
 # ──────────────────────────────────────────────
 if (-not $E2EOnly) {
-    Write-Host "▶  [1/4] Web Visual Snapshot Tests (Playwright)" -ForegroundColor Yellow
+    Write-Host ">> [1/4] Web Visual Snapshot Tests (Playwright)" -ForegroundColor Yellow
 
     $playwrightArgs = "tests/visual"
     if ($Suite -ne "") { $playwrightArgs = "tests/visual/$Suite.spec.ts" }
@@ -45,9 +63,9 @@ if (-not $E2EOnly) {
     Pop-Location
 
     if ($WebVisualExit -ne 0) {
-        Write-Host "   ✖  Web visual tests FAILED (exit $WebVisualExit). Check playwright-report/" -ForegroundColor Red
+        Write-Host "   [FAIL] Web visual tests FAILED (exit $WebVisualExit). Check playwright-report/" -ForegroundColor Red
     } else {
-        Write-Host "   ✔  Web visual tests passed." -ForegroundColor Green
+        Write-Host "   [PASS] Web visual tests passed." -ForegroundColor Green
     }
     Write-Host ""
 }
@@ -56,7 +74,7 @@ if (-not $E2EOnly) {
 # WEB E2E TESTS (Playwright)
 # ──────────────────────────────────────────────
 if (-not $VisualOnly) {
-    Write-Host "▶  [2/4] Web Functional E2E Tests (Playwright)" -ForegroundColor Yellow
+    Write-Host ">> [2/4] Web Functional E2E Tests (Playwright)" -ForegroundColor Yellow
 
     Push-Location $WebDir
     cmd /c "npx playwright test tests/e2e --reporter=html"
@@ -64,9 +82,9 @@ if (-not $VisualOnly) {
     Pop-Location
 
     if ($WebE2EExit -ne 0) {
-        Write-Host "   ✖  Web E2E tests FAILED (exit $WebE2EExit). Check playwright-report/" -ForegroundColor Red
+        Write-Host "   [FAIL] Web E2E tests FAILED (exit $WebE2EExit). Check playwright-report/" -ForegroundColor Red
     } else {
-        Write-Host "   ✔  Web E2E tests passed." -ForegroundColor Green
+        Write-Host "   [PASS] Web E2E tests passed." -ForegroundColor Green
     }
     Write-Host ""
 }
@@ -75,9 +93,9 @@ if (-not $VisualOnly) {
 # MOBILE VISUAL TESTS (Flutter Goldens)
 # ──────────────────────────────────────────────
 if (-not $E2EOnly) {
-    Write-Host "▶  [3/4] Mobile Visual Snapshot Tests (Flutter Goldens)" -ForegroundColor Yellow
+    Write-Host ">> [3/4] Mobile Visual Snapshot Tests (Flutter Goldens)" -ForegroundColor Yellow
 
-    $flutterTestArgs = "test/full_app_visual_freeze_test.dart test/visual_freeze_test.dart test/dashboard_visual_test.dart"
+    $flutterTestArgs = "test/comprehensive_visual_freeze_test.dart"
     if ($UpdateBaselines) { $flutterTestArgs += " --update-goldens" }
 
     Push-Location $MobileDir
@@ -87,9 +105,9 @@ if (-not $E2EOnly) {
     Pop-Location
 
     if ($MobileVisualExit -ne 0) {
-        Write-Host "   ✖  Mobile visual tests FAILED (exit $MobileVisualExit)." -ForegroundColor Red
+        Write-Host "   [FAIL] Mobile visual tests FAILED (exit $MobileVisualExit)." -ForegroundColor Red
     } else {
-        Write-Host "   ✔  Mobile visual tests passed." -ForegroundColor Green
+        Write-Host "   [PASS] Mobile visual tests passed." -ForegroundColor Green
     }
     Write-Host ""
 }
@@ -98,7 +116,7 @@ if (-not $E2EOnly) {
 # MOBILE E2E TESTS (Flutter Integration)
 # ──────────────────────────────────────────────
 if (-not $VisualOnly) {
-    Write-Host "▶  [4/4] Mobile Functional E2E Tests (Flutter Integration)" -ForegroundColor Yellow
+    Write-Host ">> [4/4] Mobile Functional E2E Tests (Flutter Integration)" -ForegroundColor Yellow
 
     Push-Location $MobileDir
     flutter test integration_test/
@@ -106,9 +124,9 @@ if (-not $VisualOnly) {
     Pop-Location
 
     if ($MobileE2EExit -ne 0) {
-        Write-Host "   ✖  Mobile E2E tests FAILED (exit $MobileE2EExit)." -ForegroundColor Red
+        Write-Host "   [FAIL] Mobile E2E tests FAILED (exit $MobileE2EExit)." -ForegroundColor Red
     } else {
-        Write-Host "   ✔  Mobile E2E tests passed." -ForegroundColor Green
+        Write-Host "   [PASS] Mobile E2E tests passed." -ForegroundColor Green
     }
     Write-Host ""
 }
@@ -116,18 +134,18 @@ if (-not $VisualOnly) {
 # ──────────────────────────────────────────────
 # SUMMARY
 # ──────────────────────────────────────────────
-Write-Host "╔══════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║                    SUMMARY                       ║" -ForegroundColor Cyan
-Write-Host "╚══════════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host "====================================================" -ForegroundColor Cyan
+Write-Host "                    SUMMARY                         " -ForegroundColor Cyan
+Write-Host "====================================================" -ForegroundColor Cyan
 
 $allPassed = $true
-if (-not $E2EOnly    -and $WebVisualExit    -ne 0) { Write-Host "  ✖ Web Visual     : FAILED" -ForegroundColor Red;   $allPassed = $false }
-if (-not $VisualOnly -and $WebE2EExit       -ne 0) { Write-Host "  ✖ Web E2E        : FAILED" -ForegroundColor Red;   $allPassed = $false }
-if (-not $E2EOnly    -and $MobileVisualExit -ne 0) { Write-Host "  ✖ Mobile Visual  : FAILED" -ForegroundColor Red;   $allPassed = $false }
-if (-not $VisualOnly -and $MobileE2EExit    -ne 0) { Write-Host "  ✖ Mobile E2E     : FAILED" -ForegroundColor Red;   $allPassed = $false }
+if (-not $E2EOnly    -and $WebVisualExit    -ne 0) { Write-Host "  [FAIL] Web Visual     : FAILED" -ForegroundColor Red;   $allPassed = $false }
+if (-not $VisualOnly -and $WebE2EExit       -ne 0) { Write-Host "  [FAIL] Web E2E        : FAILED" -ForegroundColor Red;   $allPassed = $false }
+if (-not $E2EOnly    -and $MobileVisualExit -ne 0) { Write-Host "  [FAIL] Mobile Visual  : FAILED" -ForegroundColor Red;   $allPassed = $false }
+if (-not $VisualOnly -and $MobileE2EExit    -ne 0) { Write-Host "  [FAIL] Mobile E2E     : FAILED" -ForegroundColor Red;   $allPassed = $false }
 
 if ($allPassed) {
-    Write-Host "  ✔ ALL TESTS PASSED — Platform is stable." -ForegroundColor Green
+    Write-Host "  [SUCCESS] ALL TESTS PASSED - Platform is stable." -ForegroundColor Green
 } else {
     Write-Host ""
     Write-Host "  TIP: To update baselines after an approved design change:" -ForegroundColor DarkGray

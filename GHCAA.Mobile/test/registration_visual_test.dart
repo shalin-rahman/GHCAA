@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ghcaa_mobile/screens/auth/register_screen.dart';
-import 'package:ghcaa_mobile/features/auth/register_wizard_provider.dart';
 import 'package:ghcaa_mobile/core/theme/app_theme.dart';
 
 Widget wrapInApp(Widget child) => ProviderScope(

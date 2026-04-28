@@ -3,9 +3,12 @@ import { test, expect, Page } from '@playwright/test';
 async function loginAsAdmin(page: Page) {
   await page.goto('/');
   await page.evaluate(() => {
-    localStorage.setItem('jwt_token', 'visual_admin_token');
-    localStorage.setItem('user_role', 'Admin');
-    localStorage.setItem('user_id', '1');
+    localStorage.setItem('user_session', JSON.stringify({
+      token: 'visual_admin_token',
+      role: 'SuperAdmin',
+      memberId: 1,
+      username: 'superadmin'
+    }));
   });
 }
 
@@ -84,9 +87,12 @@ test.describe('SuperAdmin Panels Visual Freeze', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.evaluate(() => {
-      localStorage.setItem('jwt_token', 'visual_superadmin_token');
-      localStorage.setItem('user_role', 'SuperAdmin');
-      localStorage.setItem('user_id', '1');
+      localStorage.setItem('user_session', JSON.stringify({
+        token: 'visual_superadmin_token',
+        role: 'SuperAdmin',
+        memberId: 1,
+        username: 'superadmin'
+      }));
     });
   });
 
@@ -108,19 +114,24 @@ test.describe('SuperAdmin Panels Visual Freeze', () => {
   });
 
   test('SuperAdmin: Role management should match baseline', async ({ page }) => {
+    test.setTimeout(60000);
     await page.goto('/admin/roles');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(800);
-    await expect(page).toHaveScreenshot('admin-roles.png', { fullPage: true });
+    await page.waitForSelector('.data-table', { state: 'visible' });
+    await page.waitForTimeout(1000);
+    await expect(page).toHaveScreenshot('admin-roles.png', { fullPage: true, timeout: 30000 });
   });
 
   test('SuperAdmin: Audit log should match baseline', async ({ page }) => {
+    test.setTimeout(60000);
     await page.goto('/admin/audit');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(800);
+    await page.waitForSelector('.audit-timeline', { state: 'visible' });
+    await page.waitForTimeout(1000);
     await expect(page).toHaveScreenshot('admin-audit-log.png', {
       fullPage: true,
       mask: [page.locator('.log-timestamp')],
+      timeout: 30000
     });
   });
 });

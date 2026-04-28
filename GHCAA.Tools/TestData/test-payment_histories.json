@@ -1,0 +1,24 @@
+[
+  {
+    "Id": 9001,
+    "MemberId": 9001,
+    "TransactionId": "TXN-TEST-REG-9001",
+    "Amount": 500.0,
+    "PaidAt": "2026-03-01T10:00:00Z",
+    "Status": 1,
+    "Category": 1,
+    "Notes": "Test Registration Payment",
+    "PaymentMethod": 1
+  },
+  {
+    "Id": 9002,
+    "MemberId": 9003,
+    "TransactionId": "TXN-TEST-REG-9003",
+    "Amount": 500.0,
+    "PaidAt": "2026-03-01T10:00:00Z",
+    "Status": 1,
+    "Category": 1,
+    "Notes": "Test Registration Payment",
+    "PaymentMethod": 1
+  }
+]

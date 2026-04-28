@@ -130,6 +130,10 @@ export const routes: Routes = [
             {
                 path: 'articles',
                 loadComponent: () => import('./member/articles/articles').then(m => m.MemberArticles)
+            },
+            {
+                path: 'polls',
+                loadComponent: () => import('./member/polls/polls.component').then(m => m.MemberPolls)
             }
         ]
     },
@@ -207,6 +211,10 @@ export const routes: Routes = [
             {
                 path: 'contact-messages',
                 loadComponent: () => import('./admin/contact-messages/contact-messages').then(m => m.ContactMessages)
+            },
+            {
+                path: 'polls',
+                loadComponent: () => import('./admin/polls/polls.component').then(m => m.AdminPolls)
             }
         ]
     }

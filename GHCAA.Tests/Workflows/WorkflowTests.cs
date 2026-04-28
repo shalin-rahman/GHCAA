@@ -111,6 +111,22 @@ namespace GHCAA.Tests.Workflows
             var member = _context.Members.First(m => m.Email == "workflow@example.com");
             Assert.That(member.Status, Is.EqualTo(Enums.MembershipStatus.Applied));
 
+            // Satisfy strict approval gates: Profile Complete & Payment Completed
+            member.IsProfileComplete = true;
+            member.PhotoPath = "/uploads/test.jpg";
+            member.ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } };
+            _context.PaymentHistories.Add(new PaymentHistory
+            {
+                MemberId = member.Id,
+                TransactionId = "TRX-TEST-001",
+                Amount = 500,
+                PaidAt = DateTime.UtcNow,
+                Status = Enums.PaymentStatus.Completed,
+                FinancialCategory = Enums.FinancialCategory.RegistrationFee,
+                PaymentMethod = Enums.PaymentMethod.BKash
+            });
+            await _context.SaveChangesAsync();
+
             // 2. Admin Approves Member
             var approveResult = await _memberService.ApproveMemberAsync(member.Id, 1, CancellationToken.None);
             Assert.That(approveResult.MembershipNumber, Is.Not.Null);

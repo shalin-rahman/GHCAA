@@ -342,6 +342,7 @@ namespace GHCAA.Infrastructure.Services
                     // Find member with AcademicHistory
                     member = await _db.Members
                         .Include(m => m.AcademicHistory)
+                        .Include(m => m.ProfessionalHistory)
                         .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
                     if (member == null)
                     {
@@ -354,6 +355,22 @@ namespace GHCAA.Infrastructure.Services
                     {
                         _logger.LogWarning("Approval failed: Member {MemberId} has status {Status}, expected Applied", memberId, member.Status);
                         throw new InvalidOperationException($"Member must have 'Applied' status to be approved. Current status: {member.Status}");
+                    }
+
+                    if (CalculateProfileCompletion(member) < 100)
+                    {
+                        throw new InvalidOperationException("Member profile must be 100% complete before approval.");
+                    }
+
+                    var isPaid = await _db.PaymentHistories.AnyAsync(p => 
+                        p.MemberId == memberId && 
+                        (p.FinancialCategory == Enums.FinancialCategory.RegistrationFee || p.FinancialCategory == Enums.FinancialCategory.MembershipFee) && 
+                        p.Status == Enums.PaymentStatus.Completed, 
+                        cancellationToken);
+
+                    if (!isPaid)
+                    {
+                        throw new InvalidOperationException("Member must complete the initial payment before approval.");
                     }
 
                     // Generate membership number: GHCYYMMXXX
@@ -471,6 +488,7 @@ namespace GHCAA.Infrastructure.Services
                     .ThenInclude(r => r.Requester)
                 .Include(m => m.AcademicHistory)
                 .Include(m => m.ProfessionalHistory)
+                .Include(m => m.PaymentHistories)
                 .FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             
             if (member == null) return null;
@@ -512,6 +530,8 @@ namespace GHCAA.Infrastructure.Services
                 ContributionPoints = member.ContributionPoints,
                 Rank = gains.rank,
                 ProfileCompletionPercentage = CalculateProfileCompletion(member),
+                IsProfileComplete = member.IsProfileComplete,
+                PaymentStatus = member.PaymentHistories != null && member.PaymentHistories.Any(p => p.FinancialCategory == Enums.FinancialCategory.RegistrationFee && p.Status == Enums.PaymentStatus.Completed) ? "Completed" : "Pending",
                 // Family members from Request system
                 FamilyMembers = new List<MemberFamilyDto>(),
 
@@ -725,6 +745,15 @@ namespace GHCAA.Infrastructure.Services
                 }
             }
 
+            await _db.SaveChangesAsync(cancellationToken);
+
+            // Update IsProfileComplete status
+            member.IsProfileComplete = CalculateProfileCompletion(member) >= 100;
+            if (member.IsProfileComplete)
+            {
+                await _activityService.LogActivityAsync(memberId, "Profile Complete", "Member has completed 100% of their profile.", cancellationToken: cancellationToken);
+            }
+            
             await _db.SaveChangesAsync(cancellationToken);
             await _activityService.LogActivityAsync(memberId, "Updated", "Member updated profile details and history.", cancellationToken: cancellationToken);
             _logger.LogInformation("Member {MemberId} updated profile and history", memberId);
@@ -1387,23 +1416,26 @@ namespace GHCAA.Infrastructure.Services
 
         private decimal CalculateProfileCompletion(Member member)
         {
-            int totalFields = 11;
+            int totalFields = 13;
             int completedFields = 0;
 
             if (!string.IsNullOrEmpty(member.FullName)) completedFields++;
             if (!string.IsNullOrEmpty(member.Email)) completedFields++;
-            if (!string.IsNullOrEmpty(member.MobileNo)) completedFields++;
+            if (!string.IsNullOrEmpty(member.MobileNo) && member.MobileNo != "TBD") completedFields++;
             if (member.DateOfBirth != default && member.DateOfBirth.Year > 1900) completedFields++;
             if (member.Gender != Enums.Gender.None) completedFields++;
-            if (!string.IsNullOrEmpty(member.MembershipNumber)) completedFields++;
+            if (!string.IsNullOrEmpty(member.NID) && member.NID != "TBD") completedFields++;
+            if (!string.IsNullOrEmpty(member.FatherName) && member.FatherName != "TBD") completedFields++;
+            if (!string.IsNullOrEmpty(member.MotherName) && member.MotherName != "TBD") completedFields++;
+            if (!string.IsNullOrEmpty(member.PermanentAddress) && member.PermanentAddress != "TBD") completedFields++;
+            if (member.BloodGroup != Enums.BloodGroup.Unknown) completedFields++;
             if (!string.IsNullOrEmpty(member.PhotoPath)) completedFields++;
             
-            var ghcRecord = member.AcademicHistory?.FirstOrDefault(a => a.IsGHC);
-            if (ghcRecord != null && ghcRecord.PassingYear > 0) completedFields++;
-            if (ghcRecord != null && !string.IsNullOrEmpty(ghcRecord.Subject)) completedFields++;
-            
-            if (!string.IsNullOrEmpty(member.PresentAddress)) completedFields++;
-            if (member.BloodGroup != Enums.BloodGroup.Unknown) completedFields++;
+            var hasGhc = member.AcademicHistory?.Any(a => a.IsGHC && a.PassingYear > 0) ?? false;
+            if (hasGhc) completedFields++;
+
+            var hasProfessional = member.ProfessionalHistory?.Any() ?? false;
+            if (hasProfessional) completedFields++;
 
             return Math.Round((decimal)completedFields / totalFields * 100, 2);
         }

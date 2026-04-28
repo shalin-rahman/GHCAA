@@ -111,6 +111,10 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<Constitution> Constitutions { get; set; } = null!;
         public DbSet<AmendmentVote> AmendmentVotes { get; set; } = null!;
         public DbSet<MentorshipRequest> MentorshipRequests { get; set; } = null!;
+        public DbSet<SocialAuthConfig> SocialAuthConfigs { get; set; } = null!;
+        public DbSet<Poll> Polls { get; set; } = null!;
+        public DbSet<PollOption> PollOptions { get; set; } = null!;
+        public DbSet<PollVote> PollVotes { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -237,6 +241,40 @@ namespace GHCAA.Infrastructure.Data
             var emailTemplates = LoadSeed<EmailTemplate>("email_templates.json");
             if (emailTemplates.Any()) modelBuilder.Entity<EmailTemplate>().HasData(emailTemplates);
 
+            // Seed Family Link Requests from JSON
+            var familyLinks = LoadSeed<FamilyLinkRequest>("family_links.json");
+            if (familyLinks.Any()) modelBuilder.Entity<FamilyLinkRequest>().HasData(familyLinks);
+
+            // PROGRAMMATIC SEEDING FOR VISUAL TEST PROFILE
+            // This ensures visual tests have data even if the Visual/ subdirectory is missing.
+            var profile = Environment.GetEnvironmentVariable("ASP_SEED_PROFILE");
+            var isDesign = AppDomain.CurrentDomain.FriendlyName.Contains("ef") || 
+                           AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName?.Contains("Microsoft.EntityFrameworkCore.Design") == true);
+
+            if (profile == "Visual" && !isDesign && !familyLinks.Any())
+            {
+                modelBuilder.Entity<FamilyLinkRequest>().HasData(
+                    new FamilyLinkRequest 
+                    { 
+                        Id = 9991, 
+                        RequesterId = 200, 
+                        TargetMemberId = 1, 
+                        Status = Enums.FamilyLinkStatus.Accepted, 
+                        Relationship = "Peer", 
+                        RequestedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
+                    },
+                    new FamilyLinkRequest 
+                    { 
+                        Id = 9992, 
+                        RequesterId = 2, 
+                        TargetMemberId = 200, 
+                        Status = Enums.FamilyLinkStatus.Accepted, 
+                        Relationship = "Colleague", 
+                        RequestedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
+                    }
+                );
+            }
+
             // Seed Gamification Configs
             modelBuilder.Entity<GamificationConfig>().HasData(
                 new GamificationConfig { Id = 1, ActivityCode = "PROFILE_VERIFIED", Name = "Verifying Profile", Points = 50 },
@@ -248,6 +286,7 @@ namespace GHCAA.Infrastructure.Data
             // Soft Delete Filters
             modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsArchived);
             modelBuilder.Entity<Member>().HasQueryFilter(m => !m.IsArchived);
+            modelBuilder.Entity<Poll>().HasQueryFilter(p => !p.IsArchived);
             
             // Apply matching filters to related entities to resolve CS8602-related architecture warnings
             modelBuilder.Entity<AcademicRecord>().HasQueryFilter(a => a.Member != null && !a.Member.IsArchived);
@@ -266,6 +305,7 @@ namespace GHCAA.Infrastructure.Data
             modelBuilder.Entity<Member>().HasIndex(m => m.Email).IsUnique();
             modelBuilder.Entity<Member>().HasIndex(m => m.NID).IsUnique();
             modelBuilder.Entity<Member>().HasIndex(m => m.MobileNo).IsUnique();
+            modelBuilder.Entity<SocialAuthConfig>().HasIndex(s => s.Provider).IsUnique();
             modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
             
             // Event Registration unique constraint (Member can only register once for an event)
@@ -365,6 +405,37 @@ namespace GHCAA.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(c => c.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            // Poll Relationships
+            modelBuilder.Entity<PollOption>()
+                .HasOne(o => o.Poll)
+                .WithMany(p => p.Options)
+                .HasForeignKey(o => o.PollId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PollVote>()
+                .HasOne(v => v.Poll)
+                .WithMany(p => p.Votes)
+                .HasForeignKey(v => v.PollId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PollVote>()
+                .HasOne(v => v.PollOption)
+                .WithMany()
+                .HasForeignKey(v => v.PollOptionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PollVote>()
+                .HasOne(v => v.Member)
+                .WithMany()
+                .HasForeignKey(v => v.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            // Unique vote per member per option (if single choice, we handle logic in service)
+            // But for safety, let's say a member can only vote for a specific option once.
+            modelBuilder.Entity<PollVote>()
+                .HasIndex(v => new { v.PollOptionId, v.MemberId })
+                .IsUnique();
 
             // ActivityLog Index
             modelBuilder.Entity<ActivityLog>()
@@ -438,6 +509,10 @@ namespace GHCAA.Infrastructure.Data
             // Seed File Uploads from JSON
             var uploads = LoadSeed<FileUpload>("file_uploads.json");
             if (uploads.Any()) modelBuilder.Entity<FileUpload>().HasData(uploads);
+
+            // Seed Constitutions from JSON
+            var constitutions = LoadSeed<Constitution>("constitution.json");
+            if (constitutions.Any()) modelBuilder.Entity<Constitution>().HasData(constitutions);
 
             // Seed Saved Payment Methods from JSON
             var savedMethods = LoadSeed<SavedPaymentMethod>("saved_payment_methods.json");

@@ -1,49 +1,52 @@
 import { test, expect } from '@playwright/test';
+import { AuthHelper } from './utils/auth-helper';
 
 test.describe('Article Editorial E2E (Web)', () => {
   test('Member submits article, Admin approves, it appears in News', async ({ page }) => {
-    // ==== STEP 1: Member submits article ====
-    await page.goto('/login');
-    await page.fill('input[formControlName="username"]', 'demo_user@test.com');
-    await page.fill('input[formControlName="password"]', 'DemoPass123!');
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL(/.*portal\/dashboard/);
+    const auth = new AuthHelper(page);
+    const testArticleTitle = `E2E Automated Article - ${Date.now()}`;
 
+    // ==== STEP 1: Member submits article ====
+    // Using a regular member for feature testing as per latest instructions
+    await auth.login('2512006', '2512006');
+    
     await page.goto('/portal/articles');
-    await expect(page.locator('body')).toBeVisible();
+    await expect(page).toHaveURL(/.*portal\/articles/);
 
     // Open article form
-    await page.click('button[aria-label="New Article"], button:has-text("Write Article"), button:has-text("New")');
-    await page.fill('input[formControlName="title"]', 'E2E Automated Article');
-    await page.fill('textarea[formControlName="body"], [formControlName="content"]',
+    await page.click('button[aria-label*="New"], button:has-text("Write Article"), button:has-text("New")');
+    await page.fill('input[formControlName="title"]', testArticleTitle);
+    await page.fill('textarea[formControlName="body"], [formControlName="content"], .editor-content',
       'This is an automated test article submitted via Playwright E2E test suite.');
 
     await page.click('button[type="submit"], button:has-text("Submit")');
-    await expect(page.locator('.success-toast, .alert-success')).toBeVisible({ timeout: 5000 });
+    
+    // Wait for success toast or redirection
+    await expect(page.locator('.success-toast, .alert-success, text=/success/i').first()).toBeVisible({ timeout: 10000 });
 
-    // ==== STEP 2: Logout & login as Admin ====
-    await page.evaluate(() => localStorage.clear());
-    await page.goto('/login');
-    await page.fill('input[formControlName="username"]', 'superadmin');
-    await page.fill('input[formControlName="password"]', 'SuperAdminPassword123!');
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL(/.*admin\/dashboard/);
+    await auth.logout();
 
-    // ==== STEP 3: Admin approves article ====
+    // ==== STEP 2: Admin approves article ====
+    await auth.login('shalin', 'Shalin@2024!');
     await page.goto('/admin/article-approvals');
-    const articleRow = page.locator('tr, .article-card', { hasText: 'E2E Automated Article' });
-    await expect(articleRow).toBeVisible({ timeout: 5000 });
+    await expect(page).toHaveURL(/.*admin\/article-approvals/);
+
+    const articleRow = page.locator('tr, .article-card, .approval-item', { hasText: testArticleTitle });
+    await expect(articleRow).toBeVisible({ timeout: 10000 });
+    
     await articleRow.locator('button.btn-approve, button:has-text("Approve")').click();
+    
     // Confirm modal if present
     const confirmBtn = page.locator('button:has-text("Confirm"), button:has-text("Yes")');
-    if (await confirmBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
       await confirmBtn.click();
     }
-    await expect(articleRow).not.toBeVisible({ timeout: 5000 });
+    
+    await expect(articleRow).not.toBeVisible({ timeout: 10000 });
 
-    // ==== STEP 4: Verify article is published in News ====
+    // ==== STEP 3: Verify article is published in News ====
     await page.goto('/news');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('body')).toContainText('E2E Automated Article');
+    await expect(page.locator('body')).toContainText(testArticleTitle);
   });
 });

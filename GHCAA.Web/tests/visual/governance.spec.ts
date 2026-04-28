@@ -4,9 +4,12 @@ test.describe('Governance Visual Freeze', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.evaluate(() => {
-      localStorage.setItem('jwt_token', 'visual_test_token');
-      localStorage.setItem('user_role', 'Member');
-      localStorage.setItem('user_id', '1001');
+      localStorage.setItem('user_session', JSON.stringify({
+        token: 'visual_test_token',
+        role: 'Member',
+        memberId: 200,
+        username: 'visualtest'
+      }));
     });
   });
 
@@ -14,8 +17,8 @@ test.describe('Governance Visual Freeze', () => {
     await page.goto('/portal/governance');
     
     // Wait for the committee members grid
-    await expect(page.locator('.governance-container')).toBeVisible();
-    await expect(page.locator('.ec-member-card')).first().toBeVisible();
+    await expect(page.locator('.governance-page')).toBeVisible();
+    await expect(page.locator('.committee-card').first()).toBeVisible();
     
     // Ensure skeleton loaders are gone
     await page.waitForSelector('.skeleton-loader', { state: 'detached' });

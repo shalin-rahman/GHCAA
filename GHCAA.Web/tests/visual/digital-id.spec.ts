@@ -5,9 +5,12 @@ test.describe('Digital ID Visual Freeze', () => {
     // Setup predictable visual state
     await page.goto('/');
     await page.evaluate(() => {
-      localStorage.setItem('jwt_token', 'visual_test_token');
-      localStorage.setItem('user_role', 'Member');
-      localStorage.setItem('user_id', '1001');
+      localStorage.setItem('user_session', JSON.stringify({
+        token: 'visual_test_token',
+        role: 'Member',
+        memberId: 200,
+        username: 'visualtest'
+      }));
     });
   });
 
@@ -15,7 +18,7 @@ test.describe('Digital ID Visual Freeze', () => {
     await page.goto('/portal/id-card');
     
     // Wait for the card to be fully rendered (including fonts and gradients)
-    const card = page.locator('.id-card-container');
+    const card = page.locator('.credentials-container');
     await expect(card).toBeVisible();
     
     // Slight pause to ensure animations/gradients settle

@@ -63,6 +63,7 @@ namespace GHCAA.Domain.Models
         public string? MembershipChangeReason { get; set; }
         public string? ECChangeReason { get; set; }
         public bool IsVerified { get; set; } = false; // Blue Tick / Verification Status
+        public bool IsProfileComplete { get; set; } = false;
         public int ContributionPoints { get; set; } = 0;
 
         // Navigation

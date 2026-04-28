@@ -104,7 +104,7 @@
         opacity: 1;
         .step-num {
             background: var(--accent-color);
-            color: #000;
+            color: var(--bg-color);
             border-color: var(--accent-color);
         }
     }
@@ -137,7 +137,7 @@
     position: relative;
     z-index: 1;
 
-    p { font-size: 0.72rem; opacity: 0.6; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
+    p { font-size: 0.72rem; opacity: 0.6; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-on-dark); }
     a {
         color: var(--accent-color);
         text-decoration: none;
@@ -292,7 +292,7 @@
         .payment-icon {
             transform: scale(1.1);
             background: var(--accent-color);
-            color: #000;
+            color: var(--bg-color);
         }
     }
 }
@@ -338,7 +338,7 @@
     width: 20px;
     height: 20px;
     background: var(--accent-color);
-    color: #000;
+    color: var(--bg-color);
     border-radius: 50%;
     display: flex;
     align-items: center;

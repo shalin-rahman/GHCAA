@@ -2,6 +2,8 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace GHCAA.API.Controllers
 {
@@ -11,10 +13,24 @@ namespace GHCAA.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly GHCAA.Infrastructure.Data.ApplicationDbContext _db;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, GHCAA.Infrastructure.Data.ApplicationDbContext db)
         {
             _authService = authService;
+            _db = db;
+        }
+
+        [HttpGet("providers")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetProviders()
+        {
+            var providers = await _db.SocialAuthConfigs
+                .Where(c => c.IsEnabled)
+                .Select(c => new { c.Provider, c.ClientId })
+                .ToListAsync();
+
+            return Ok(providers);
         }
 
         [HttpPost("login")]
@@ -28,6 +44,29 @@ namespace GHCAA.API.Controllers
             }
 
             return Ok(result);
+        }
+
+        [HttpPost("google")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GoogleLogin([FromBody] SocialLoginRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _authService.GoogleLoginAsync(request.Token, cancellationToken);
+            if (result == null) return Unauthorized(new { Message = "Google authentication failed" });
+            return Ok(result);
+        }
+
+        [HttpPost("facebook")]
+        [AllowAnonymous]
+        public async Task<IActionResult> FacebookLogin([FromBody] SocialLoginRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _authService.FacebookLoginAsync(request.Token, cancellationToken);
+            if (result == null) return Unauthorized(new { Message = "Facebook authentication failed" });
+            return Ok(result);
+        }
+
+        public class SocialLoginRequest
+        {
+            public string Token { get; set; } = null!;
         }
 
         [HttpPost("reset-password")]

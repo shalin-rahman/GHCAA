@@ -1,0 +1,26 @@
+[
+  {
+    "Id": 9001,
+    "Username": "9000001",
+    "PasswordHash": "$2b$11$Ot6i0lsF.4cOAQR9ywj4weyLdnsozY9kjyxvL/j3DK7IxQdX/mPsO",
+    "MemberId": 9001,
+    "IsActive": true,
+    "CreatedAt": "2026-03-01T10:00:00Z"
+  },
+  {
+    "Id": 9002,
+    "Username": "9000002",
+    "PasswordHash": "$2b$11$Ot6i0lsF.4cOAQR9ywj4weyLdnsozY9kjyxvL/j3DK7IxQdX/mPsO",
+    "MemberId": 9002,
+    "IsActive": true,
+    "CreatedAt": "2026-03-01T10:00:00Z"
+  },
+  {
+    "Id": 9003,
+    "Username": "9000003",
+    "PasswordHash": "$2b$11$Ot6i0lsF.4cOAQR9ywj4weyLdnsozY9kjyxvL/j3DK7IxQdX/mPsO",
+    "MemberId": 9003,
+    "IsActive": true,
+    "CreatedAt": "2026-03-01T10:00:00Z"
+  }
+]

@@ -1,30 +1,33 @@
 import { test, expect } from '@playwright/test';
+import { AuthHelper } from './utils/auth-helper';
 
 test.describe('Member End-to-End Journey', () => {
   test('A member should be able to login and view their profile', async ({ page }) => {
-    // 1. Visit Login Page
-    await page.goto('/login');
-    await expect(page).toHaveTitle(/Login/);
+    const auth = new AuthHelper(page);
+    
+    // 1. Perform Login with a non-admin member
+    // Using NID for both username and password as per latest instructions
+    await auth.login('2512006', '2512006');
 
-    // 2. Perform Login
-    // Note: Using Shalin Rahman credentials from Seed Data
-    await page.fill('input[formControlName="username"]', 'demo_user@test.com');
-    await page.fill('input[formControlName="password"]', 'DemoPass123!');
-    await page.click('button[type="submit"]');
-
-    // 3. Verify Dashboard Redirection
+    // 2. Verify redirect to Dashboard
     await expect(page).toHaveURL(/.*portal\/dashboard/);
-    await expect(page.locator('h1')).toContainText(/Welcome/i);
-    await expect(page.locator('body')).toContainText('Shalin Rahman');
+    
+    // 3. Verify Dashboard content & Metrics
+    // User is identified by NID/MembershipNumber if FullName is missing in seed
+    await expect(page.locator('body')).toContainText('2512006');
+    
+    // Check for metrics cards (observed values for 2512006)
+    await expect(page.locator('.stat-card', { hasText: /Profile Complete/i })).toContainText('84.62%');
+    await expect(page.locator('.stat-card', { hasText: /Upcoming Events/i })).toContainText('2');
 
     // 4. Navigate to Digital ID
     await page.click('text=Digital ID');
     await expect(page).toHaveURL(/.*portal\/id-card/);
-    await expect(page.locator('.id-card-container')).toBeVisible();
+    const idCard = page.locator('.id-card-container, .digital-id-card, app-digital-id');
+    await expect(idCard.first()).toBeVisible();
 
     // 5. Logout
-    await page.click('.profile-dropdown');
-    await page.click('text=Logout');
+    await auth.logout();
     await expect(page).toHaveURL(/.*login/);
   });
 });

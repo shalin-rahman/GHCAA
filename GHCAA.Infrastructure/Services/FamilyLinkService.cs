@@ -162,10 +162,18 @@ namespace GHCAA.Infrastructure.Services
             return requests.Select(r => MapToDto(r, r.Requester, r.TargetMember)).ToList();
         }
 
-        public async Task<List<FamilyLinkRequestDto>> GetFamilyAsync(int memberId, CancellationToken ct = default)
+        public async Task<List<FamilyLinkRequestDto>> GetFamilyAsync(int memberId, int? requesterMemberId = null, CancellationToken ct = default)
         {
             var member = await _db.Members.FindAsync(new object[] { memberId }, ct);
             if (member == null) return new List<FamilyLinkRequestDto>();
+
+            // Privacy check: If requester is not the member themselves, and not an admin, check IsFamilyPublic
+            if (requesterMemberId.HasValue && requesterMemberId.Value != memberId && !member.IsFamilyPublic)
+            {
+                // Check if requester is an admin (this logic might need refinement based on how roles are handled)
+                // For now, assuming requesterMemberId is only passed for public views.
+                return new List<FamilyLinkRequestDto>();
+            }
 
             var requests = await _db.FamilyLinkRequests
                 .Include(r => r.Requester)
@@ -174,11 +182,6 @@ namespace GHCAA.Infrastructure.Services
                             && r.Status == FamilyLinkStatus.Accepted)
                 .ToListAsync(ct);
 
-            // Filter based on privacy settings: only show if the other person is public or we are the admin?
-            // Actually, if we are calling this for the CURRENT member's own network, we show all.
-            // If calling for ANOTHER member (public view), we need to check IsFamilyPublic.
-            // I'll add a 'publicView' flag to IFamilyLinkService if needed, but for now assuming this is for own view.
-            
             return requests.Select(r => MapToDto(r, r.Requester, r.TargetMember)).ToList();
         }
 

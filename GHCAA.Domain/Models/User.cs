@@ -26,6 +26,10 @@ namespace GHCAA.Domain.Models
         public DateTime? ResetTokenExpiry { get; set; }
         public string SecurityStamp { get; set; } = Guid.NewGuid().ToString("N");
 
+        // Social Auth
+        public string? GoogleId { get; set; }
+        public string? FacebookId { get; set; }
+
         // Navigation
         public Member? Member { get; set; }
         public ICollection<Role> Roles { get; set; } = new List<Role>();

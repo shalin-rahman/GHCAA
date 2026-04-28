@@ -99,8 +99,6 @@ class AppScaffold extends ConsumerWidget {
       body: Listener(
         onPointerDown: (_) => ref.read(sessionProvider.notifier).userActivityDetected(),
         child: Container(
-          width: double.infinity,
-          height: double.infinity,
           decoration: BoxDecoration(
             gradient: RadialGradient(
               center: const Alignment(0, -0.8),

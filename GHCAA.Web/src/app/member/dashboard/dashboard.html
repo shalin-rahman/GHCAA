@@ -11,6 +11,49 @@
     </div>
     } @else {
 
+    <!-- Profile Completion Wizard Notice -->
+    @if (profileCompletion < 100) {
+    <div class="glass-card completion-wizard animate-fade-up">
+        <div class="wizard-header">
+            <div class="header-left">
+                <span class="status-badge pending">Profile Incomplete</span>
+                <h2>Complete Your Profile</h2>
+                <p>To gain full access to the GHCAA portal and receive your digital ID, please complete your profile information.</p>
+            </div>
+            <div class="completion-stat">
+                <span class="pct">{{ profileCompletion }}%</span>
+                <div class="progress-container">
+                    <div class="progress-bar" [style.width.%]="profileCompletion"></div>
+                </div>
+            </div>
+        </div>
+        <div class="wizard-steps">
+            <div class="step" [class.done]="profile()?.fullName && profile()?.photoPath">
+                <i class="fas" [ngClass]="(profile()?.fullName && profile()?.photoPath) ? 'fa-check-circle' : 'fa-circle'"></i>
+                <span>Identity & Photo</span>
+            </div>
+            <div class="step" [class.done]="profile()?.academicHistory?.length > 0">
+                <i class="fas" [ngClass]="profile()?.academicHistory?.length > 0 ? 'fa-check-circle' : 'fa-circle'"></i>
+                <span>GHC History</span>
+            </div>
+            <div class="step" [class.done]="profile()?.professionalHistory?.length > 0">
+                <i class="fas" [ngClass]="profile()?.professionalHistory?.length > 0 ? 'fa-check-circle' : 'fa-circle'"></i>
+                <span>Professional Info</span>
+            </div>
+            <div class="step" [class.done]="profile()?.paymentStatus === 'Completed'">
+                <i class="fas" [ngClass]="profile()?.paymentStatus === 'Completed' ? 'fa-check-circle' : 'fa-circle'"></i>
+                <span>Registration Payment</span>
+            </div>
+        </div>
+        <div class="wizard-footer">
+            <button class="btn btn-accent" routerLink="/portal/profile">Finish Profile Setup</button>
+            <span class="notice" *ngIf="profileCompletion === 100 && profile()?.status === 0">
+                <i class="fas fa-clock"></i> Your profile is 100% complete. Waiting for admin approval.
+            </span>
+        </div>
+    </div>
+    }
+
     <!-- Quick Stats Row -->
     <div class="stats-row">
         <!-- Membership Card -->

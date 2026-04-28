@@ -48,5 +48,6 @@ namespace GHCAA.Domain
         public enum VolunteerRole { EventOrganizer, GuestManagement, ContentCreator, Mentor, TechnicalSupport, Other }
 
         public enum NotificationType { EventCreation, ParticipationApproval, RegistrationUpdate, GeneralSystem, DirectMessage }
+        public enum SocialProvider { Google, Facebook }
     }
 }

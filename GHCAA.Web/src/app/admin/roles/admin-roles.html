@@ -141,8 +141,8 @@
                     </td>
                     <td class="p-4 px-6">
                         <div class="flex items-center justify-end gap-3">
-                            <select #roleSelect
-                                class="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-accent/50 transition-colors">
+                            <select #roleSelect [value]="user.roles[0] || roles()[0]?.name"
+                                class="role-select">
                                 @for (r of roles(); track r.name) {
                                 <option [value]="r.name">{{ r.name }}</option>
                                 }

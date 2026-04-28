@@ -6,6 +6,8 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using System.Net.Http;
 using BCrypt.Net;
 
 namespace GHCAA.Infrastructure.Services
@@ -16,13 +18,22 @@ namespace GHCAA.Infrastructure.Services
         private readonly ITokenService _tokenService;
         private readonly ILogger<AuthService> _logger;
         private readonly IActivityService _activityService;
+        private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public AuthService(ApplicationDbContext db, ITokenService tokenService, ILogger<AuthService> logger, IActivityService activityService)
+        public AuthService(ApplicationDbContext db, 
+            ITokenService tokenService, 
+            ILogger<AuthService> logger, 
+            IActivityService activityService,
+            IConfiguration configuration,
+            IHttpClientFactory httpClientFactory)
         {
             _db = db;
             _tokenService = tokenService;
             _logger = logger;
             _activityService = activityService;
+            _configuration = configuration;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<TokenResponseDto?> LoginAsync(LoginDto loginDto, CancellationToken cancellationToken = default)
@@ -110,7 +121,6 @@ namespace GHCAA.Infrastructure.Services
                     mobileNo = member.MobileNo;
                 }
             }
-
             return new TokenResponseDto
             {
                 Token = token,
@@ -122,6 +132,155 @@ namespace GHCAA.Infrastructure.Services
                 MobileNo = mobileNo,
                 MustChangePassword = user.MustChangePassword
             };
+        }
+
+        public async Task<TokenResponseDto?> GoogleLoginAsync(string idToken, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var config = await _db.SocialAuthConfigs.FirstOrDefaultAsync(c => c.Provider == Enums.SocialProvider.Google, cancellationToken);
+                if (config == null || !config.IsEnabled)
+                {
+                    _logger.LogWarning("Google login is disabled or not configured.");
+                    return null;
+                }
+
+                var settings = new Google.Apis.Auth.GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { config.ClientId }
+                };
+
+                var payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(idToken, settings);
+                return await SocialLoginAsync(payload.Subject, payload.Email, payload.Name, "Google", cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Google token validation failed");
+                return null;
+            }
+        }
+
+        public async Task<TokenResponseDto?> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var config = await _db.SocialAuthConfigs.FirstOrDefaultAsync(c => c.Provider == Enums.SocialProvider.Facebook, cancellationToken);
+                if (config == null || !config.IsEnabled)
+                {
+                    _logger.LogWarning("Facebook login is disabled or not configured.");
+                    return null;
+                }
+
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.GetAsync($"https://graph.facebook.com/me?fields=id,name,email&access_token={accessToken}", cancellationToken);
+                
+                if (!response.IsSuccessStatusCode) return null;
+
+                var content = await response.Content.ReadAsStringAsync(cancellationToken);
+                var fbUser = System.Text.Json.JsonSerializer.Deserialize<FacebookUserDto>(content, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (fbUser == null || string.IsNullOrEmpty(fbUser.Id)) return null;
+
+                return await SocialLoginAsync(fbUser.Id, fbUser.Email, fbUser.Name, "Facebook", cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Facebook token validation failed");
+                return null;
+            }
+        }
+
+        public async Task<TokenResponseDto?> SocialLoginAsync(string socialId, string? email, string? name, string provider, CancellationToken cancellationToken = default)
+        {
+            var user = await _db.Users
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => (provider == "Google" && u.GoogleId == socialId) || (provider == "Facebook" && u.FacebookId == socialId), cancellationToken);
+
+            if (user == null && !string.IsNullOrEmpty(email))
+            {
+                // Try linking by email if user exists but hasn't linked social yet
+                user = await _db.Users
+                    .Include(u => u.Roles)
+                    .Include(u => u.Member)
+                    .FirstOrDefaultAsync(u => u.Member!.Email == email, cancellationToken);
+
+                if (user != null)
+                {
+                    if (provider == "Google") user.GoogleId = socialId;
+                    else user.FacebookId = socialId;
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
+            }
+
+            if (user == null)
+            {
+                // Create new user & member (applied status, profile incomplete)
+                var member = new Member
+                {
+                    FullName = name ?? "Social User",
+                    Email = email ?? $"{socialId}@{provider.ToLower()}.com",
+                    Status = Enums.MembershipStatus.Applied,
+                    AppliedDate = DateTime.UtcNow,
+                    IsProfileComplete = false,
+                    // Fill required but unknown fields with placeholders or nulls if allowed
+                    FatherName = "TBD",
+                    MotherName = "TBD",
+                    NID = "TBD",
+                    MobileNo = "TBD",
+                    PresentAddress = "TBD",
+                    PermanentAddress = "TBD",
+                    EmergencyContactName = "TBD",
+                    EmergencyContactRelation = "TBD",
+                    EmergencyContactPhone = "TBD"
+                };
+
+                _db.Members.Add(member);
+                await _db.SaveChangesAsync(cancellationToken);
+
+                user = new User
+                {
+                    Username = email ?? socialId,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()), // Random password
+                    MemberId = member.Id,
+                    GoogleId = provider == "Google" ? socialId : null,
+                    FacebookId = provider == "Facebook" ? socialId : null,
+                    IsActive = true
+                };
+
+                var memberRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Member", cancellationToken);
+                if (memberRole != null) user.Roles.Add(memberRole);
+
+                _db.Users.Add(user);
+                await _db.SaveChangesAsync(cancellationToken);
+                
+                user = await _db.Users.Include(u => u.Roles).FirstAsync(u => u.Id == user.Id, cancellationToken);
+            }
+
+            // Standard login logic from here
+            if (!user.IsActive) return null;
+
+            var token = _tokenService.CreateToken(user);
+            
+            var memberProfile = await _db.Members.FindAsync(user.MemberId);
+            
+            return new TokenResponseDto
+            {
+                Token = token,
+                Username = user.Username,
+                MemberId = user.MemberId,
+                Role = PickPrimaryRoleNameForClient(user.Roles),
+                FullName = memberProfile?.FullName,
+                Email = memberProfile?.Email,
+                MobileNo = memberProfile?.MobileNo,
+                MustChangePassword = false
+            };
+        }
+
+        private class FacebookUserDto
+        {
+            public string Id { get; set; } = null!;
+            public string? Name { get; set; }
+            public string? Email { get; set; }
         }
 
         /// <summary>

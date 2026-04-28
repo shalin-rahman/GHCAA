@@ -16,7 +16,7 @@ namespace GHCAA.Tests
             Console.WriteLine("🚀 Haragangian Global Directory RESTORATION Initialized...");
             
             // Live Connection String for restoration
-            var connectionString = "Host=localhost;Database=ghcaa_db;Username=postgres;Password=Shalin@2024!";
+            var connectionString = "Host=localhost;Database=GHCAADB_v2;Username=postgres;Password=postgres;SslMode=Prefer";
             
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
             // Use Npgsql directly if it's transitive from GHCAA.API

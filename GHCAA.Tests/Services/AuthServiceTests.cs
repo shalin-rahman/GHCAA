@@ -18,6 +18,8 @@ namespace GHCAA.Tests.Services
         private Mock<ITokenService> _mockTokenService = null!;
         private Mock<ILogger<AuthService>> _mockLogger = null!;
         private Mock<IActivityService> _mockActivityService = null!;
+        private Mock<Microsoft.Extensions.Configuration.IConfiguration> _mockConfig = null!;
+        private Mock<System.Net.Http.IHttpClientFactory> _mockHttp = null!;
         private AuthService _service = null!;
 
         [SetUp]
@@ -26,7 +28,9 @@ namespace GHCAA.Tests.Services
             _mockTokenService = new Mock<ITokenService>();
             _mockLogger = new Mock<ILogger<AuthService>>();
             _mockActivityService = new Mock<IActivityService>();
-            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object);
+            _mockConfig = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+            _mockHttp = new Mock<System.Net.Http.IHttpClientFactory>();
+            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _mockConfig.Object, _mockHttp.Object);
         }
 
         [Test]
@@ -128,6 +132,29 @@ namespace GHCAA.Tests.Services
 
             // Assert
             result.Should().BeFalse();
+        }
+
+        [Test]
+        public async Task SocialLoginAsync_WithValidGoogleId_ShouldReturnTokenResponse()
+        {
+            // Arrange
+            var email = "social@example.com";
+            var googleId = "google_12345";
+            var member = await CreateAndSaveTestMemberAsync("Social Member", email, "555", "555");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "social_user", "password");
+            user.GoogleId = googleId;
+            await _context.SaveChangesAsync();
+
+            var expectedToken = "mock_social_jwt_token";
+            _mockTokenService.Setup(x => x.CreateToken(It.IsAny<User>())).Returns(expectedToken);
+
+            // Act
+            var result = await _service.SocialLoginAsync(googleId, email, "Social Member", "Google");
+
+            // Assert
+            result.Should().NotBeNull();
+            result!.Token.Should().Be(expectedToken);
+            result.MemberId.Should().Be(member.Id);
         }
     }
 }

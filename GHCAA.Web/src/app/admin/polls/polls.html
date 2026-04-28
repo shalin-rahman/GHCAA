@@ -1,0 +1,114 @@
+<div class="admin-polls-page animate-fade-in">
+    <div class="page-header">
+        <div>
+            <h1>Member Polls</h1>
+            <p>Manage feedback and association decisions</p>
+        </div>
+        <button class="btn btn-accent" (click)="showCreateModal.set(true)">
+            <i class="fas fa-plus"></i> Create New Poll
+        </button>
+    </div>
+
+    <div class="polls-grid" *ngIf="!loading(); else loader">
+        <div class="glass-card poll-card" *ngFor="let poll of polls()" [class.inactive]="!poll.isActive">
+            <div class="poll-header">
+                <span class="status-badge" [class.active]="poll.isActive" [class.pending]="!poll.isActive">
+                    {{ poll.isActive ? 'Active' : 'Inactive' }}
+                </span>
+                <div class="actions">
+                    <button class="icon-btn" (click)="toggleStatus(poll)" [title]="poll.isActive ? 'Deactivate' : 'Activate'">
+                        <i class="fas" [ngClass]="poll.isActive ? 'fa-pause' : 'fa-play'"></i>
+                    </button>
+                    <button class="icon-btn delete" (click)="deletePoll(poll.id)" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <h3>{{ poll.title }}</h3>
+            <p class="description">{{ poll.description }}</p>
+
+            <div class="stats">
+                <div class="stat">
+                    <span class="value">{{ poll.totalVotes }}</span>
+                    <span class="label">Total Votes</span>
+                </div>
+                <div class="stat">
+                    <span class="value">{{ poll.options.length }}</span>
+                    <span class="label">Options</span>
+                </div>
+            </div>
+
+            <div class="options-summary">
+                <div class="option-row" *ngFor="let opt of poll.options">
+                    <div class="opt-info">
+                        <span>{{ opt.text }}</span>
+                        <span>{{ opt.voteCount }} ({{ opt.percentage }}%)</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="fill" [style.width.%]="opt.percentage"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="poll-footer">
+                <span class="date">Created: {{ poll.createdAt | date:'mediumDate' }}</span>
+                <span class="type">{{ poll.allowMultipleChoice ? 'Multiple Choice' : 'Single Choice' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #loader>
+        <div class="loader-container">
+            <div class="spinner"></div>
+            <p>Syncing polls...</p>
+        </div>
+    </ng-template>
+
+    <!-- Create Modal -->
+    <div class="modal-overlay" *ngIf="showCreateModal()" (click)="showCreateModal.set(false)">
+        <div class="modal-card glass-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Create New Poll</h2>
+                <button class="close-btn" (click)="showCreateModal.set(false)">&times;</button>
+            </div>
+
+            <form (ngSubmit)="onCreatePoll()">
+                <div class="form-group">
+                    <label>Poll Title</label>
+                    <input type="text" name="title" [(ngModel)]="newPoll.title" required placeholder="e.g. Next Reunion Location">
+                </div>
+
+                <div class="form-group">
+                    <label>Description (Optional)</label>
+                    <textarea name="description" [(ngModel)]="newPoll.description" placeholder="Provide context for the poll..."></textarea>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <label class="premium-checkbox-label">
+                        <input type="checkbox" name="allowMultipleChoice" [(ngModel)]="newPoll.allowMultipleChoice">
+                        <span class="label-text">Allow Multiple Selections</span>
+                    </label>
+                </div>
+
+                <div class="options-section">
+                    <label>Poll Options</label>
+                    <div class="option-input" *ngFor="let opt of newPoll.options; let i = index; trackBy: trackByIndex">
+                        <input type="text" [name]="'opt' + i" [(ngModel)]="newPoll.options[i]" placeholder="Option {{i+1}}" required>
+                        <button type="button" class="remove-opt" (click)="removeOption(i)" *ngIf="newPoll.options.length > 2">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm mt-4" (click)="addOption()">
+                        <i class="fas fa-plus"></i> Add Option
+                    </button>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="showCreateModal.set(false)">Cancel</button>
+                    <button type="submit" class="btn btn-accent">Publish Poll</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

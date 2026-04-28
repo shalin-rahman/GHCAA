@@ -44,6 +44,19 @@
                 {{ loading() ? 'Authenticating...' : 'Login' }}
             </button>
 
+            <div class="social-login-separator" *ngIf="socialProviders().length > 0">
+                <span>OR</span>
+            </div>
+
+            <div class="social-login-buttons" *ngIf="socialProviders().length > 0">
+                <button *ngIf="isProviderEnabled('Google')" type="button" class="btn btn-social btn-google" (click)="loginWithGoogle()">
+                    <i class="fab fa-google"></i> Continue with Google
+                </button>
+                <button *ngIf="isProviderEnabled('Facebook')" type="button" class="btn btn-social btn-facebook" (click)="loginWithFacebook()">
+                    <i class="fab fa-facebook-f"></i> Continue with Facebook
+                </button>
+            </div>
+
             <div class="form-footer">
                 <a href="javascript:void(0)" (click)="forgotPassword()">Forgot Password?</a>
                 <span>Don't have an account? <a routerLink="/register">Apply for Membership</a></span>

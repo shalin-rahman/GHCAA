@@ -261,4 +261,67 @@
     20%, 80% { transform: translate3d(2px, 0, 0); }
     30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
     40%, 60% { transform: translate3d(4px, 0, 0); }
-}
+}
+
+.social-login-separator {
+    display: flex;
+    align-items: center;
+    margin: 2.5rem 0;
+    color: rgba(255, 255, 255, 0.15);
+    font-size: 0.7rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+
+    &::before, &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    span {
+        padding: 0 1.5rem;
+    }
+}
+
+.social-login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.btn-social {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 1.15rem;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+
+    img {
+        height: 20px;
+        width: auto;
+    }
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    &.btn-google:hover {
+        box-shadow: 0 10px 20px -5px rgba(234, 67, 53, 0.15);
+    }
+
+    &.btn-facebook:hover {
+        box-shadow: 0 10px 20px -5px rgba(24, 119, 242, 0.15);
+    }
+}

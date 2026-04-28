@@ -488,7 +488,8 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
+            IsProfileComplete = true, PhotoPath = "test.jpg", DateOfBirth = new DateTime(1990, 1, 1), Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive, ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
         };
         var member2 = new Member
         {
@@ -504,9 +505,16 @@ public class MemberServiceTests : TestBase
             EmergencyContactName = "Contact",
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
+            IsProfileComplete = true, PhotoPath = "test.jpg", DateOfBirth = new DateTime(1990, 1, 1), Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive, ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
         };
         await _context.Members.AddRangeAsync(member1, member2);
+        await _context.SaveChangesAsync();
+
+        await _context.PaymentHistories.AddRangeAsync(
+            new PaymentHistory { MemberId = member1.Id, Amount = 500, Status = Enums.PaymentStatus.Completed, FinancialCategory = Enums.FinancialCategory.RegistrationFee, TransactionId = "TRX-001" },
+            new PaymentHistory { MemberId = member2.Id, Amount = 500, Status = Enums.PaymentStatus.Completed, FinancialCategory = Enums.FinancialCategory.RegistrationFee, TransactionId = "TRX-002" }
+        );
         await _context.SaveChangesAsync();
 
         _mockUserService.Setup(x => x.GenerateDefaultPassword()).Returns("Pass1234");
@@ -533,7 +541,8 @@ public class MemberServiceTests : TestBase
             Status = Enums.MembershipStatus.Applied, FatherName = "F", MotherName = "M",
             PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E",
             EmergencyContactRelation = "R", EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
+            IsProfileComplete = true, PhotoPath = "test.jpg", DateOfBirth = new DateTime(1990, 1, 1), Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive, ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
         };
         var member2008 = new Member
         {
@@ -541,9 +550,14 @@ public class MemberServiceTests : TestBase
             Status = Enums.MembershipStatus.Applied, FatherName = "F", MotherName = "M",
             PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E",
             EmergencyContactRelation = "R", EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2008, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2008, IsGHC = true } },
+            IsProfileComplete = true, PhotoPath = "test.jpg", DateOfBirth = new DateTime(1990, 1, 1), Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive, ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
         };
         await _context.Members.AddRangeAsync(member2007, member2008);
+        await _context.PaymentHistories.AddRangeAsync(
+            new PaymentHistory { Member = member2007, Amount = 500, Status = Enums.PaymentStatus.Completed, FinancialCategory = Enums.FinancialCategory.RegistrationFee, TransactionId = "TRX-2007" },
+            new PaymentHistory { Member = member2008, Amount = 500, Status = Enums.PaymentStatus.Completed, FinancialCategory = Enums.FinancialCategory.RegistrationFee, TransactionId = "TRX-2008" }
+        );
         await _context.SaveChangesAsync();
 
         _mockUserService.Setup(x => x.CreateUserAccountAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -568,9 +582,11 @@ public class MemberServiceTests : TestBase
             Status = Enums.MembershipStatus.Applied, FatherName = "F", MotherName = "M",
             PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E",
             EmergencyContactRelation = "R", EmergencyContactPhone = "0",
-            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
+            IsProfileComplete = true, PhotoPath = "test.jpg", DateOfBirth = new DateTime(1990, 1, 1), Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive, ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
         };
         await _context.Members.AddAsync(member);
+        await _context.PaymentHistories.AddAsync(new PaymentHistory { Member = member, Amount = 500, Status = Enums.PaymentStatus.Completed, FinancialCategory = Enums.FinancialCategory.RegistrationFee, TransactionId = "TRX-AWD" });
         await _context.SaveChangesAsync();
 
         _mockUserService.Setup(x => x.CreateUserAccountAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))

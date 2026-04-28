@@ -417,14 +417,19 @@ export const API_ENDPOINTS = {
         STATS: '/api/admin/stats',
         COMMUNICATION: '/api/admin/comm',
         GOVERNANCE: '/api/admin/governance',
-        CONTACT_MESSAGES: '/api/admin/contact-messages'
+        CONTACT_MESSAGES: '/api/admin/contact-messages',
+        SOCIAL_AUTH: '/api/admin/social-auth',
+        POLLS: '/api/admin/polls'
     },
     AUTH: {
         LOGIN: '/api/auth/login',
         REGISTER: '/api/auth/register',
         VERIFY_EMAIL: '/api/auth/verify-email',
         RESEND_OTP: '/api/auth/resend-otp',
-        STATUS: '/api/auth/status'
+        STATUS: '/api/auth/status',
+        PROVIDERS: '/api/auth/providers',
+        GOOGLE: '/api/auth/google',
+        FACEBOOK: '/api/auth/facebook'
     },
     EVENTS: '/api/events',
     GALLERY: '/api/gallery',
@@ -460,6 +465,10 @@ export const API_ENDPOINTS = {
     PAYMENT_CONFIG: {
         BASE: '/api/payment-config',
         PUBLIC: '/api/payment-config/active'
+    },
+    POLLS: {
+        BASE: '/api/polls',
+        ACTIVE: '/api/polls/active'
     }
 } as const;
 

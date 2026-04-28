@@ -89,7 +89,7 @@
                 </div>
                 <div class="form-group">
                     <label>Collaborators (Comma separated names)</label>
-                    <input type="text" [ngModel]="form.collaborators.join(', ')" (ngModelChange)="form.collaborators = $event.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0)" 
+                    <input type="text" [ngModel]="form.collaborators.join(', ')" (ngModelChange)="updateCollaborators($event)" 
                         name="collaborators" placeholder="e.g. John Doe, Jane Smith">
                 </div>
             </div>

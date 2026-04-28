@@ -289,7 +289,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
               GlassContainer(
                 child: Column(
                   children: [
-                    _buildTextField('FULL LEGAL NAME', 'fullName', required: true),
+                    _buildTextField('FULL LEGAL NAME (SSC/HSC RECORD)', 'fullName', required: true),
                     const Divider(color: Colors.white10),
                     _buildTextField("FATHER'S NAME", 'fatherName'),
                     const Divider(color: Colors.white10),
@@ -299,8 +299,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     const Divider(color: Colors.white10),
                     _buildDropdown('BLOOD GROUP', 'bloodGroup', 'BloodGroup'),
                     const Divider(color: Colors.white10),
-                    _buildTextField('NID NUMBER', 'nid'),
-                    _buildTextField('DATE OF BIRTH (ISO YYYY-MM-DD)', 'dateOfBirth'),
+                    _buildTextField('NATIONAL ID (NID)', 'nid'),
+                    _buildTextField('DATE OF BIRTH (REGISTRY RECORD)', 'dateOfBirth'),
                     if (_isAdmin) ...[
                       const Divider(color: Colors.white10),
                       _buildTextField('MEMBERSHIP NUMBER', 'membershipNumber'),
@@ -318,9 +318,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
               GlassContainer(
                 child: Column(
                   children: [
-                    _buildTextField('MOBILE', 'mobileNo', required: true, keyboardType: TextInputType.phone),
+                    _buildTextField('VERIFIED MOBILE', 'mobileNo', required: true, keyboardType: TextInputType.phone),
                     const Divider(color: Colors.white10),
-                    _buildTextField('EMAIL', 'email', required: true, keyboardType: TextInputType.emailAddress),
+                    _buildTextField('PRIMARY EMAIL (LOGIN)', 'email', required: true, keyboardType: TextInputType.emailAddress),
                     const Divider(color: Colors.white10),
                     _buildTextField('PRESENT ADDRESS', 'presentAddress', maxLines: 2),
                     const Divider(color: Colors.white10),

@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) - GHCAA Platform
 
-**Version:** 2.5  
-**Date:** 2026-04-23  
+**Version:** 2.6  
+**Date:** 2026-04-24  
 **Status:** Comprehensive System Definition  
 
 ---
@@ -47,6 +47,15 @@ The core of the system is a high-integrity registration and verification workflo
     *   System auto-provisions a **User Account** where the Membership Number becomes the Login ID.
 *   **3.1.3 Digital ID & Certificates**: Automatic generation of secure, QR-coded SVG/PDF ID cards and membership certificates for "Active" members.
 *   **3.1.4 Profile Management**: Granular control over personal data with member-defined **Privacy Toggles** (Masking NID, Email, Mobile, Address).
+*   **3.1.5 Social Authentication**: Integration with **Google** and **Facebook** for simplified login. The system automatically links social IDs to existing accounts via email or prompts for profile completion for new users.
+*   **3.1.6 Onboarding Workflow**: "Applied" members who login via social auth are restricted to a Profile Wizard. Full system access is gated until:
+    1.  **Profile Completion**: 100% of mandatory fields provided. The 13 required fields are:
+        *   Personal: `FullName`, `Email`, `MobileNo`, `DateOfBirth`, `Gender`, `NID`, `FatherName`, `MotherName`, `PermanentAddress`, `BloodGroup`.
+        *   Visual: `PhotoPath`.
+        *   Academic: At least one record from "Govt. Haraganga College" (`AcademicHistory`).
+        *   Professional: At least one professional experience record (`ProfessionalHistory`).
+    2.  **Financial Commitment**: Successful payment of registration/membership fees.
+    3.  **Admin Approval**: Formal verification by the association secretariat.
 
 ### 3.2 Event Management & Participation
 A centralized hub for physical and virtual gathering orchestration.
@@ -81,6 +90,7 @@ Fostering professional and personal growth within the network.
 *   **3.6.2 Constitution Hub**: Version-controlled governing documents with member voting capabilities.
 *   **3.6.3 Communication Hub**: Mass email/SMS engine with HTML templates and targeted segmenting (e.g., by batch or type).
 *   **3.6.4 Dynamic Themes**: UI transformations for special days (e.g., National Days) controlled via Admin settings.
+*   **3.6.5 Member Polls & Voting**: Admin-managed polling system for sentiment analysis and formal association decisions. Supports single/multiple choice, expiry dates, and real-time result visualization for members.
 
 ---
 
@@ -103,7 +113,8 @@ Fostering professional and personal growth within the network.
 
 | Status | Permissions | Directory Visibility |
 | :--- | :--- | :--- |
-| **Applied** | Restricted "Pending" View | Hidden |
+| **Applied (Partial)** | Restricted Onboarding View | Hidden |
+| **Applied (Paid)** | Restricted "Pending Review" | Hidden |
 | **Active** | Full Access | Full Visibility (respecting privacy toggles) |
 | **Inactive** | View Only / Access Denied | Hidden |
 | **Terminated**| Account Locked | Hidden |
@@ -119,4 +130,4 @@ Fostering professional and personal growth within the network.
 ---
 
 > [!IMPORTANT]
-> This SRS is the definitive reference for the GHCAA Platform development. Any divergence from these requirements must be documented in the **[Tasks.txt](Tasks.txt)** backlog.
+> This SRS is the definitive reference for the GHCAA Platform development. Any divergence from these requirements must be documented in the **[TODO.md](TODO.md)** backlog.

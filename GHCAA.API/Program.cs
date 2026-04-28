@@ -32,6 +32,22 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(configuration);
 builder.Services.AddMemoryCache();
 
+// 2. Configure Response Compression (Brotli/Gzip)
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.MimeTypes = Microsoft.AspNetCore.ResponseCompression.ResponseCompressionDefaults.MimeTypes.Concat(
+        new[] { "application/json", "image/svg+xml" });
+});
+
+// 3. Configure Output Caching (.NET 8+)
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(builder => builder.Cache());
+    options.AddPolicy("StaticData", builder => 
+        builder.Expire(TimeSpan.FromMinutes(5)).SetVaryByQuery("*"));
+});
+
 // Configure JWT Authentication
 builder.Services.AddJwtAuthentication(configuration, builder.Environment);
 builder.Services.AddAppAuthorization();
@@ -147,6 +163,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AngularApp");
 
+// Use Response Compression and Output Caching
+app.UseResponseCompression();
+app.UseOutputCache();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
@@ -173,9 +193,11 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseMiddleware<QueryStringTokenMiddleware>();
 app.UseAuthentication();
+app.UseMiddleware<GHCAA.API.Middleware.VisualTestAuthMiddleware>();
 app.UseMiddleware<SecurityStampMiddleware>(); // Invalidates sessions on status change
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");
 app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");
 app.Run();

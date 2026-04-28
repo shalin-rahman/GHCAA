@@ -15,6 +15,7 @@ namespace GHCAA.Application.DTOs
         public DateTime? ApprovedDate { get; set; }
         
         public bool IsVerified { get; set; }
+        public bool IsProfileComplete { get; set; }
         public string? PrimaryMemberNumber { get; set; }
         public List<MemberSummaryDto> Dependents { get; set; } = new();
         public List<MemberFamilyDto> FamilyMembers { get; set; } = new();
@@ -33,5 +34,6 @@ namespace GHCAA.Application.DTOs
         public string? Degree { get; set; }
         public string? Subject { get; set; }
         public string? CategoryBadge { get; set; }
+        public string PaymentStatus { get; set; } = "Pending";
     }
 }

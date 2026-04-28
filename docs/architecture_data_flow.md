@@ -71,6 +71,15 @@ graph TD
 - **Connections**: Persistent WebSocket established. 
 - **Delivery**: Backend triggers `Clients.Group(memberId).SendAsync()` for instant notification delivery.
 
+## 3. Integrated Quality Governance
+
+The platform employs a **Sequential CI Pipeline** that ensures every code change adheres to the following quality gates:
+
+1. **Static Analysis**: Linting and type-checking across C#, TypeScript, and Dart.
+2. **Backend Validation**: Execution of unit and integration tests (NUnit).
+3. **Visual & E2E Freeze**: Unified execution of Playwright (Web) and Flutter Integration (Mobile) tests to verify functional journeys and visual regression.
+4. **Integrated Build**: Cross-platform verification packaging the API and Web SPA into a deployment-ready artifact.
+
 ---
 
 > [!TIP]

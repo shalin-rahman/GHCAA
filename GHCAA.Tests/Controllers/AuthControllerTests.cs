@@ -10,16 +10,16 @@ using NUnit.Framework;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    public class AuthControllerTests
+    public class AuthControllerTests : ControllerTestBase
     {
-        private Mock<IAuthService> _authServiceMock;
-        private AuthController _controller;
+        private Mock<IAuthService> _authServiceMock = null!;
+        private AuthController _controller = null!;
 
         [SetUp]
         public void Setup()
         {
             _authServiceMock = new Mock<IAuthService>();
-            _controller = new AuthController(_authServiceMock.Object);
+            _controller = new AuthController(_authServiceMock.Object, _context);
         }
 
         [Test]

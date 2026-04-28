@@ -22,7 +22,7 @@ namespace GHCAA.Infrastructure
 
             if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
             {
-                services.AddDbContext<ApplicationDbContext, MySqlApplicationDbContext>(options =>
+                services.AddDbContextPool<ApplicationDbContext, MySqlApplicationDbContext>(options =>
                 {
                     var conn = configuration.GetConnectionString("MySqlConnection")
                         ?? throw new InvalidOperationException("MySqlConnection string is missing in configuration.");
@@ -33,7 +33,7 @@ namespace GHCAA.Infrastructure
             }
             else if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
             {
-                services.AddDbContext<ApplicationDbContext, SqliteApplicationDbContext>(options =>
+                services.AddDbContextPool<ApplicationDbContext, SqliteApplicationDbContext>(options =>
                 {
                     var conn = configuration.GetConnectionString("SqliteConnection")
                         ?? throw new InvalidOperationException("SqliteConnection string is missing in configuration.");
@@ -44,7 +44,7 @@ namespace GHCAA.Infrastructure
             }
             else // PgSql (default)
             {
-                services.AddDbContext<ApplicationDbContext, PgSqlApplicationDbContext>(options =>
+                services.AddDbContextPool<ApplicationDbContext, PgSqlApplicationDbContext>(options =>
                 {
                     var conn = configuration.GetConnectionString("PgSqlConnection");
                     var envUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
@@ -63,6 +63,10 @@ namespace GHCAA.Infrastructure
                     options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
                 });
             }
+
+            // Add Health Checks
+            services.AddHealthChecks()
+                .AddDbContextCheck<ApplicationDbContext>();
 
             // Register infrastructure services
             services.AddScoped<IFileStorageService, LocalFileStorageService>();
@@ -96,6 +100,7 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IFamilyLinkService, FamilyLinkService>();
             services.AddScoped<IFamilyService, FamilyService>();
             services.AddScoped<IMentorshipService, MentorshipService>();
+            services.AddScoped<IPollService, PollService>();
             services.AddHttpClient<ISmsService, GreenwebSmsService>();
 
             // Payment Gateways

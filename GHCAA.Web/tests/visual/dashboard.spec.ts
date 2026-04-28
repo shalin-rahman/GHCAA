@@ -5,9 +5,12 @@ test.describe('Portal Dashboard Visual Freeze', () => {
     // Setup predictable visual state for Member
     await page.goto('/');
     await page.evaluate(() => {
-      localStorage.setItem('jwt_token', 'visual_test_token');
-      localStorage.setItem('user_role', 'Member');
-      localStorage.setItem('user_id', '1001');
+      localStorage.setItem('user_session', JSON.stringify({
+        token: 'visual_test_token',
+        role: 'Member',
+        memberId: 200,
+        username: 'visualtest'
+      }));
     });
   });
 
@@ -15,8 +18,8 @@ test.describe('Portal Dashboard Visual Freeze', () => {
     await page.goto('/portal/dashboard');
     
     // Wait for the dashboard grid and banners
-    await expect(page.locator('.dashboard-container')).toBeVisible();
-    await expect(page.locator('.stats-grid')).toBeVisible();
+    await expect(page.locator('.dashboard-grid')).toBeVisible();
+    await expect(page.locator('.stats-row')).toBeVisible();
     
     // Ensure skeleton loaders are gone
     await page.waitForSelector('.skeleton-loader', { state: 'detached' });

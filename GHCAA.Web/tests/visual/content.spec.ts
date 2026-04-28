@@ -4,9 +4,12 @@ import { test, expect, Page } from '@playwright/test';
 async function loginAsMember(page: Page) {
   await page.goto('/');
   await page.evaluate(() => {
-    localStorage.setItem('jwt_token', 'visual_test_token');
-    localStorage.setItem('user_role', 'Member');
-    localStorage.setItem('user_id', '1001');
+    localStorage.setItem('user_session', JSON.stringify({
+      token: 'visual_test_token',
+      role: 'Member',
+      memberId: 200,
+      username: 'visualtest'
+    }));
   });
 }
 
@@ -31,7 +34,7 @@ test.describe('Content & News Visual Freeze', () => {
     await page.goto('/portal/gallery');
     await page.waitForLoadState('networkidle');
     // Wait for images to load
-    await page.waitForSelector('.gallery-item', { state: 'visible' });
+    await page.waitForSelector('.gallery-card', { state: 'visible' });
     await page.waitForTimeout(1000);
     await expect(page).toHaveScreenshot('gallery-grid.png', { fullPage: true });
   });

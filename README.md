@@ -65,32 +65,32 @@ The following features and integrations have been prioritized for the next phase
 
 **1. Membership & Identity Lifecycle**
 
-- **Family/Spouse Add-ons**: Extend the `Member` model to support linking family members or associate spouse accounts.
-- **Member Verification "Blue Tick"**: Implement a visual distinction for highly verified members in the public directory.
-- **IsArchived Cascading**: Create a dedicated background worker for bulk-archiving inactive users and natively cascading the soft-delete property.
-- **Social Auth (OAuth2)**: Allow "Link with LinkedIn/Google" for streamlined login sessions after initial NID-based manual registration.
+- [X] **Family/Spouse Add-ons**: Extend the `Member` model to support linking family members or associate spouse accounts.
+- [X] **Member Verification "Blue Tick"**: Implement a visual distinction for highly verified members in the public directory.
+- [X] **IsArchived Cascading**: Create a dedicated background worker for bulk-archiving inactive users and natively cascading the soft-delete property.
+- [ ] **Social Auth (OAuth2)**: Allow "Link with LinkedIn/Google" for streamlined login sessions after initial NID-based manual registration.
 
 **2. Events & Participation**
 
-- **Waitlist Management**: Explicitly handle "Waitlist" status for `AlumniEvent` registrations when capacity caps are reached.
-- **QR Attendance Tracking**: Add a scanner endpoint to mark an `EventRegistration` as "Attended" via the digital ID card's QR code.
+- [X] **Waitlist Management**: Explicitly handle "Waitlist" status for `AlumniEvent` registrations when capacity caps are reached.
+- [X] **QR Attendance Tracking**: Add a scanner endpoint to mark an `EventRegistration` as "Attended" via the digital ID card's QR code.
 
 **3. Financial & Admin Governance**
 
-- **Automated Tax Receipts**: Auto-generate PDF receipts for recognized donations and integrate them into the `PaymentHistory`.
+- [X] **Automated Tax Receipts**: Auto-generate PDF receipts for recognized donations and integrate them into the `PaymentHistory`.
 
 **4. Networking & Engagement**
 
-- **Granular Privacy Strictness**: Tightly bind the `NetworkingController` Search endpoint to privacy toggles, ensuring DTOs never leak masked fields.
-- **Improved Peer Chat**: Enhance the messaging flow with read receipts and persistent history.
-- **Haraganga AI Context Extension**: Feed more institutional policy data to the Gemini agent for more accurate support responses.
+- [X] **Granular Privacy Strictness**: Tightly bind the `NetworkingController` Search endpoint to privacy toggles, ensuring DTOs never leak masked fields.
+- [X] **Improved Peer Chat**: Enhance the messaging flow with read receipts and persistent history.
+- [X] **Haraganga AI Context Extension**: Feed more institutional policy data to the Gemini agent for more accurate support responses.
 
 **5. Deployment & Security Integrations**
 
-- **SMS Gateway**: Implement an SMS provider (e.g., Twilio, SSLWireless/Banglalink) for OTP verification and time-sensitive notifications.
-- **Automatic Session Invalidation**: Real-time invalidation of all JWT tokens for a user if their status changes to "Terminated" or "Inactive".
-- **Real-time Notifications**: SignalR integration for instant alerts on approvals, messages, and event updates.
-- **FR 5.4: Automated Session Governance**: Integration of global interceptors (Web/Mobile) to detect `401 Unauthorized` and trigger immediate redirections. Includes a platform-wide **10-minute inactivity logout** policy.
+- [X] **SMS Gateway**: Implement an SMS provider (e.g., Twilio, SSLWireless/Banglalink) for OTP verification and time-sensitive notifications.
+- [X] **Automatic Session Invalidation**: Real-time invalidation of all JWT tokens for a user if their status changes to "Terminated" or "Inactive".
+- [X] **Real-time Notifications**: SignalR integration for instant alerts on approvals, messages, and event updates.
+- [X] **FR 5.4: Automated Session Governance**: Integration of global interceptors (Web/Mobile) to detect `401 Unauthorized` and trigger immediate redirections. Includes a platform-wide **10-minute inactivity logout** policy.
 - **FR 5.5: Comprehensive Sitemap & Documentation**: Integrated categorical public sitemap in the Angular footer and established the **[Architecture &amp; Data Flow](docs/architecture_data_flow.md)** blueprint.
 
 **6. Mobile App (Flutter) Development**
@@ -129,7 +129,7 @@ The following features and integrations have been prioritized for the next phase
   - [X] Synchronized Administrative Member Management (Mobile Update Parity).
   - [X] Integrated Automated Sequential CI (API -> UI -> MOBILE).
   - [X] Establish Platform Quality Governance (PR Checklists).
-  - [ ] Finalize build for Android (APK/AAB) and iOS (IPA).
+  - [X] Finalize build for Android (APK/AAB) and iOS (IPA).
 
 ---
 
@@ -671,9 +671,11 @@ The project maintains a rigorous quality standard organized into three distinct 
 - **Swagger UI**: Interactive playground for manual API verification.
 - **Frontend Interceptors**: Automated error handling and token injection validation on the Angular side.
 
-### 4. Automated CI/CD & Quality Pipeline
+### 4. Automated CI/CD & Visual Quality Suite
 
 - **Sequential Validation**: A five-stage GitHub Actions pipeline enforcing quality in order: `Analysis -> API Tests -> Web UI Tests -> Mobile Tests -> Integrated Build`.
+- **Visual Freeze**: Unified `visual-check.ps1` runner executing Playwright visual tests (Web) and Flutter Golden tests (Mobile) to ensure pixel-perfect UI consistency.
+- **E2E Journeys**: Automated functional testing of core user journeys (Registration, Approval, Payment, ID Generation) across all platforms.
 - **Governed Merges**: PR templates and mandatory status checks ensure no regression in any project layer.
 
 ---

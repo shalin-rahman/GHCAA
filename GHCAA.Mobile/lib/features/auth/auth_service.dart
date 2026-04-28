@@ -66,6 +66,47 @@ class AuthService {
     return "Login failed. Please check your credentials.";
   }
 
+  Future<List<Map<String, dynamic>>> getSocialProviders() async {
+    try {
+      final response = await _dio.get('/auth/providers');
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data);
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  Future<String?> googleLogin(String idToken) async {
+    return _socialLogin('/auth/google', {'idToken': idToken});
+  }
+
+  Future<String?> facebookLogin(String accessToken) async {
+    return _socialLogin('/auth/facebook', {'accessToken': accessToken});
+  }
+
+  Future<String?> _socialLogin(String path, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post(path, data: data);
+      if (response.statusCode == 200) {
+        final respData = response.data;
+        final token = respData['token']; 
+        final role = respData['role'] ?? 'Member';
+
+        await _storage.clearAll();
+        await _storage.saveToken(token);
+        await _storage.saveRole(role);
+        
+        return null; // Success
+      }
+    } catch (e) {
+      if (e is DioException) {
+        return e.response?.data?['message'] ?? e.response?.data?['error'] ?? "Authentication failed.";
+      }
+      return "An unexpected error occurred.";
+    }
+    return "Authentication failed.";
+  }
+
   Future<String?> register(Map<String, dynamic> data) async {
     try {
       final String? photoPath = data['ProfileImagePath'];
@@ -162,12 +203,42 @@ const profileCompletenessFields = [
 ];
 
 /// Returns a value between 0.0 and 1.0 representing profile completeness.
+/// Adheres to the 100% completion definition: mandatory fields, photo, 1+ academic, 1+ professional.
 double calculateProfileCompleteness(Map<String, dynamic>? profile) {
   if (profile == null) return 0;
-  final filled = profileCompletenessFields
-      .where((f) => profile[f] != null && profile[f].toString().isNotEmpty)
-      .length;
-  return filled / profileCompletenessFields.length;
+  
+  int totalWeight = 0;
+  int filledWeight = 0;
+
+  // 1. Mandatory Personal Fields (Weight: 1 each)
+  final personalFields = ['fullName', 'email', 'mobileNo', 'dateOfBirth', 'gender', 'presentAddress', 'bloodGroup', 'nid'];
+  for (var f in personalFields) {
+    totalWeight++;
+    if (profile[f] != null && profile[f].toString().isNotEmpty) filledWeight++;
+  }
+
+  // 2. Profile Photo (Weight: 2)
+  totalWeight += 2;
+  if (profile['photoPath'] != null && profile['photoPath'].toString().isNotEmpty) filledWeight += 2;
+
+  // 3. Academic History (At least one entry) (Weight: 2)
+  totalWeight += 2;
+  final academic = profile['academicHistory'];
+  if (academic is List && academic.isNotEmpty) {
+    // Check if at least one entry is reasonably complete
+    final first = academic[0];
+    if (first['institutionName'] != null && first['degree'] != null) filledWeight += 2;
+  }
+
+  // 4. Professional History (At least one entry) (Weight: 2)
+  totalWeight += 2;
+  final professional = profile['professionalHistory'];
+  if (professional is List && professional.isNotEmpty) {
+    final first = professional[0];
+    if (first['organizationName'] != null && first['designation'] != null) filledWeight += 2;
+  }
+
+  return filledWeight / totalWeight;
 }
 
 // Non-autoDispose so profile is cached in Riverpod across navigations.

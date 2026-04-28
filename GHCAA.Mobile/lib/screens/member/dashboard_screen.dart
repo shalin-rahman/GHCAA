@@ -134,6 +134,7 @@ class DashboardScreen extends ConsumerWidget {
                         _buildActionCard(context, Icons.account_balance_wallet_outlined, 'Payments', 'Dues', '/financials', isCompact: isCompact, accentColor: Colors.tealAccent),
                         _buildActionCard(context, Icons.work_outline, 'Jobs', 'Listings', '/jobs', isCompact: isCompact),
                         _buildActionCard(context, Icons.event_available_outlined, 'Events', 'Announcements', '/events', isCompact: isCompact),
+                        _buildActionCard(context, Icons.how_to_vote_outlined, 'Polls', 'Voting', '/polls', isCompact: isCompact, accentColor: Colors.blueAccent),
                         _buildActionCard(context, Icons.newspaper_outlined, 'News', 'Feed', '/news', isCompact: isCompact, accentColor: Colors.purpleAccent),
                         _buildActionCard(context, Icons.photo_library_outlined, 'Gallery', 'Photos', '/gallery', isCompact: isCompact, accentColor: Colors.purpleAccent),
                         _buildActionCard(context, Icons.corporate_fare_outlined, 'EC Committee', 'Members', '/committee', isCompact: isCompact),

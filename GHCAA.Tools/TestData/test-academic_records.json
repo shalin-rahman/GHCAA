@@ -1,0 +1,16 @@
+[
+  {
+    "Id": 9001,
+    "MemberId": 9001,
+    "Degree": "HSC",
+    "Institution": "Govt. Haraganga College",
+    "PassingYear": 2010
+  },
+  {
+    "Id": 9002,
+    "MemberId": 9003,
+    "Degree": "PhD",
+    "Institution": "University of Research",
+    "PassingYear": 2020
+  }
+]

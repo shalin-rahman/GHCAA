@@ -140,4 +140,10 @@ export class AdminNews implements OnInit {
     getCategoryLabel(cat: any): string {
         return getArticleCategoryLabel(cat);
     }
+
+    updateCollaborators(event: string) {
+        this.form.collaborators = event.split(',')
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
+    }
 }

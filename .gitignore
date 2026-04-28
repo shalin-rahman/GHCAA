@@ -367,3 +367,18 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# GHCAA Temporary & Log Files
+test_output.txt
+test_run_output.txt
+backend_test_results.txt
+out.txt
+temp_results.txt
+file_tests.txt
+*.log
+GHCAA.Mobile/test_output.txt
+**/test_results/
+**/test-results/
+playwright-report/
+blob-report/
+test-results/
