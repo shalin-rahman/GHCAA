@@ -75,7 +75,15 @@ namespace GHCAA.API.Controllers
         [HttpGet("/api/members/family")] // Legacy alias for mobile
         [HttpGet("/api/Family/links")]   // Web parity alias
         public async Task<IActionResult> GetFamily(CancellationToken ct) =>
-            Ok(await _familyLinkService.GetFamilyAsync(GetMemberId(), ct));
+            Ok(await _familyLinkService.GetFamilyAsync(GetMemberId(), GetMemberId(), ct));
+
+        /// <summary>Get the public family network of a specific member.</summary>
+        [HttpGet("{memberId}/family")]
+        public async Task<IActionResult> GetPublicFamily(int memberId, CancellationToken ct)
+        {
+            var requesterId = GetMemberId();
+            return Ok(await _familyLinkService.GetFamilyAsync(memberId, requesterId, ct));
+        }
 
         /// <summary>Search for members by name to link as family.</summary>
         [HttpGet("search")]
