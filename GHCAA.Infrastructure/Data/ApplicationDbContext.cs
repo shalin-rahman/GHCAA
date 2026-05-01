@@ -35,16 +35,26 @@ namespace GHCAA.Infrastructure.Data
             if (!File.Exists(path))
             {
                 var current = Directory.GetCurrentDirectory();
-                var relPath = Path.Combine(current, "GHCAA.Infrastructure", "Data", seedSubDir, fileName);
+                var infrastructurePath = Path.Combine(current, "GHCAA.Infrastructure");
+                
+                // If we are running from GHCAA.API, look in parent
+                if (!Directory.Exists(infrastructurePath))
+                {
+                    var parent = Directory.GetParent(current)?.FullName;
+                    if (parent != null) infrastructurePath = Path.Combine(parent, "GHCAA.Infrastructure");
+                }
+
+                var relPath = Path.Combine(infrastructurePath, "Data", seedSubDir, fileName);
                 
                 if (profile == "Visual" && !File.Exists(relPath))
-                    relPath = Path.Combine(current, "GHCAA.Infrastructure", "Data", "Seed", fileName);
+                    relPath = Path.Combine(infrastructurePath, "Data", "Seed", fileName);
 
                 path = relPath;
             }
 
             if (!File.Exists(path)) return new List<T>();
             
+            Console.WriteLine($"[SEED] Loading {fileName} from: {path}");
             var json = File.ReadAllText(path);
             var items = System.Text.Json.JsonSerializer.Deserialize<List<T>>(json) ?? new List<T>();
 
@@ -120,6 +130,11 @@ namespace GHCAA.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            
+            // Apply all configurations from the current assembly
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+            Console.WriteLine($"[SEED] Profile: {Environment.GetEnvironmentVariable("ASP_SEED_PROFILE")}");
 
             // Force UTC for all DateTime properties (PostgreSQL requirement)
             var utcConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
@@ -145,99 +160,12 @@ namespace GHCAA.Infrastructure.Data
                 }
             }
 
-            // Member relationships
-            modelBuilder.Entity<AcademicRecord>()
-                .HasOne(a => a.Member)
-                .WithMany(m => m.AcademicHistory)
-                .HasForeignKey(a => a.MemberId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<ProfessionalRecord>()
-                .HasOne(p => p.Member)
-                .WithMany(m => m.ProfessionalHistory)
-                .HasForeignKey(p => p.MemberId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<PaymentHistory>()
-                .HasOne(p => p.Member)
-                .WithMany(m => m.PaymentHistories)
-                .HasForeignKey(p => p.MemberId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<SavedPaymentMethod>()
-                .HasOne(s => s.Member)
-                .WithMany() // Or add a collection to Member if needed
-                .HasForeignKey(s => s.MemberId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // FamilyLinkRequest relationships
-            modelBuilder.Entity<FamilyLinkRequest>()
-                .HasOne(f => f.Requester)
-                .WithMany(m => m.SentFamilyLinkRequests)
-                .HasForeignKey(f => f.RequesterId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<FamilyLinkRequest>()
-                .HasOne(f => f.TargetMember)
-                .WithMany(m => m.ReceivedFamilyLinkRequests)
-                .HasForeignKey(f => f.TargetMemberId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<FamilyLinkRequest>().HasQueryFilter(f => f.Requester != null && !f.Requester.IsArchived && f.TargetMember != null && !f.TargetMember.IsArchived);
-
-            // Member <-> User (one-to-one)
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Member)
-                .WithOne(m => m.User)
-                .HasForeignKey<User>(u => u.MemberId);
-
-            // Event Operations relationships
-            modelBuilder.Entity<EventTask>()
-                .HasOne(t => t.AssignedMember)
-                .WithMany()
-                .HasForeignKey(t => t.AssignedMemberId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            modelBuilder.Entity<EventBudget>()
-                .HasOne(b => b.Event)
-                .WithOne() // One budget per event
-                .HasForeignKey<EventBudget>(b => b.EventId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<EventExpense>()
-                .HasOne(e => e.Budget)
-                .WithMany(b => b.Expenses)
-                .HasForeignKey(e => e.EventBudgetId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // User <-> Role (many-to-many)
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.Roles)
-                .WithMany(r => r.Users)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserRoles",
-                    j => j.HasOne<Role>().WithMany().HasForeignKey("RolesId"),
-                    j => j.HasOne<User>().WithMany().HasForeignKey("UsersId"),
-                    j =>
-                    {
-                        j.HasKey("RolesId", "UsersId");
-                        j.ToTable("UserRoles");
-                    });
-
-            // LookupItem Unique Constraint
-            modelBuilder.Entity<LookupItem>()
-                .HasIndex(l => new { l.LookupGroup, l.Value }).IsUnique();
-
-            modelBuilder.Entity<EmailTemplate>()
-                .HasIndex(t => t.Code).IsUnique();
-
             // Seed Lookups from JSON
             if (IsSeedDisabled) return;
 
             var lookupItems = LoadSeed<LookupItem>("lookups.json");
             if (lookupItems.Any()) modelBuilder.Entity<LookupItem>().HasData(lookupItems);
 
-            // Seed Email Templates
             // Seed Email Templates from JSON
             var emailTemplates = LoadSeed<EmailTemplate>("email_templates.json");
             if (emailTemplates.Any()) modelBuilder.Entity<EmailTemplate>().HasData(emailTemplates);
@@ -247,7 +175,6 @@ namespace GHCAA.Infrastructure.Data
             if (familyLinks.Any()) modelBuilder.Entity<FamilyLinkRequest>().HasData(familyLinks);
 
             // PROGRAMMATIC SEEDING FOR VISUAL TEST PROFILE
-            // This ensures visual tests have data even if the Visual/ subdirectory is missing.
             var profile = Environment.GetEnvironmentVariable("ASP_SEED_PROFILE");
             var isDesign = AppDomain.CurrentDomain.FriendlyName.Contains("ef") || 
                            AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName?.Contains("Microsoft.EntityFrameworkCore.Design") == true);
@@ -284,49 +211,6 @@ namespace GHCAA.Infrastructure.Data
                 new GamificationConfig { Id = 4, ActivityCode = "MENTORING", Name = "Mentoring a Fellow Alumni", Points = 200 }
             );
 
-            // Soft Delete Filters
-            modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsArchived);
-            modelBuilder.Entity<Member>().HasQueryFilter(m => !m.IsArchived);
-            modelBuilder.Entity<Poll>().HasQueryFilter(p => !p.IsArchived);
-            
-            // Apply matching filters to related entities to resolve CS8602-related architecture warnings
-            modelBuilder.Entity<AcademicRecord>().HasQueryFilter(a => a.Member != null && !a.Member.IsArchived);
-            modelBuilder.Entity<ProfessionalRecord>().HasQueryFilter(p => p.Member != null && !p.Member.IsArchived);
-            modelBuilder.Entity<FileUpload>().HasQueryFilter(f => f.Member != null && !f.Member.IsArchived);
-            modelBuilder.Entity<MembershipDue>().HasQueryFilter(d => d.Member != null && !d.Member.IsArchived);
-            modelBuilder.Entity<MembershipHistory>().HasQueryFilter(h => h.Member != null && !h.Member.IsArchived);
-            modelBuilder.Entity<Notification>().HasQueryFilter(n => n.Member != null && !n.Member.IsArchived);
-            modelBuilder.Entity<PaymentHistory>().HasQueryFilter(ph => ph.Member != null && !ph.Member.IsArchived);
-            modelBuilder.Entity<ECMember>().HasQueryFilter(em => em.Member != null && !em.Member.IsArchived);
-            modelBuilder.Entity<NewsPost>().HasQueryFilter(np => np.Author != null && !np.Author.IsArchived);
-            modelBuilder.Entity<ChatMessage>().HasQueryFilter(cm => (cm.Sender != null && !cm.Sender.IsArchived) && (cm.Receiver != null && !cm.Receiver.IsArchived));
-            modelBuilder.Entity<SavedPaymentMethod>().HasQueryFilter(s => s.Member != null && !s.Member.IsArchived);
-
-            // Unique constraints
-            modelBuilder.Entity<Member>().HasIndex(m => m.Email).IsUnique();
-            modelBuilder.Entity<Member>().HasIndex(m => m.NID).IsUnique();
-            modelBuilder.Entity<Member>().HasIndex(m => m.MobileNo).IsUnique();
-            modelBuilder.Entity<SocialAuthConfig>().HasIndex(s => s.Provider).IsUnique();
-            modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
-            
-            // Event Registration unique constraint (Member can only register once for an event)
-            modelBuilder.Entity<EventRegistration>()
-                .HasIndex(r => new { r.EventId, r.MemberId })
-                .IsUnique()
-                .HasFilter("\"MemberId\" IS NOT NULL");
-
-            // Guest registration unique constraint
-            modelBuilder.Entity<EventRegistration>()
-                .HasIndex(r => new { r.EventId, r.GuestEmail })
-                .IsUnique()
-                .HasFilter("\"GuestEmail\" IS NOT NULL");
-
-            // Payment uniqueness
-            modelBuilder.Entity<PaymentHistory>()
-                .HasIndex(p => p.TransactionId)
-                .IsUnique();
-            
-            // Seed Roles
             // Seed Roles from JSON
             var roles = LoadSeed<Role>("roles.json");
             if (roles.Any()) modelBuilder.Entity<Role>().HasData(roles);
@@ -352,102 +236,6 @@ namespace GHCAA.Infrastructure.Data
                     UsersId = int.Parse(ur["UsersId"]?.ToString() ?? "0") 
                 }).ToList());
             }
-
-            modelBuilder.Entity<FileUpload>()
-                .HasIndex(f => new { f.MemberId, f.UploadType });
-
-            modelBuilder.Entity<PaymentHistory>()
-                .HasIndex(p => new { p.MemberId, p.TransactionId });
-
-            modelBuilder.Entity<Member>().Property(m => m.FullName).HasMaxLength(200);
-            modelBuilder.Entity<User>().Property(u => u.Username).HasMaxLength(100).IsRequired();
-            modelBuilder.Entity<FileUpload>().Property(f => f.FileName).HasMaxLength(260);
-            
-            // News Collaborators relationship
-            modelBuilder.Entity<NewsCollaborator>()
-                .HasOne(nc => nc.NewsPost)
-                .WithMany(n => n.Collaborators)
-                .HasForeignKey(nc => nc.NewsPostId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<NewsCollaborator>()
-                .HasOne(nc => nc.User)
-                .WithMany()
-                .HasForeignKey(nc => nc.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Governance & Constitution
-            modelBuilder.Entity<AmendmentVote>()
-                .HasOne(v => v.Constitution)
-                .WithMany(c => c.Votes)
-                .HasForeignKey(v => v.ConstitutionId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<AmendmentVote>()
-                .HasOne(v => v.Member)
-                .WithMany()
-                .HasForeignKey(v => v.MemberId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Unique vote per member per constitution version
-            modelBuilder.Entity<AmendmentVote>()
-                .HasIndex(v => new { v.ConstitutionId, v.MemberId })
-                .IsUnique();
-
-            // ChatMessage Relationships
-            modelBuilder.Entity<ChatMessage>()
-                .HasOne(c => c.Sender)
-                .WithMany()
-                .HasForeignKey(c => c.SenderId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<ChatMessage>()
-                .HasOne(c => c.Receiver)
-                .WithMany()
-                .HasForeignKey(c => c.ReceiverId)
-                .OnDelete(DeleteBehavior.Restrict);
-            
-            // Poll Relationships
-            modelBuilder.Entity<PollOption>()
-                .HasOne(o => o.Poll)
-                .WithMany(p => p.Options)
-                .HasForeignKey(o => o.PollId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<PollVote>()
-                .HasOne(v => v.Poll)
-                .WithMany(p => p.Votes)
-                .HasForeignKey(v => v.PollId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<PollVote>()
-                .HasOne(v => v.PollOption)
-                .WithMany()
-                .HasForeignKey(v => v.PollOptionId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<PollVote>()
-                .HasOne(v => v.Member)
-                .WithMany()
-                .HasForeignKey(v => v.MemberId)
-                .OnDelete(DeleteBehavior.Cascade);
-            
-            // Unique vote per member per option (if single choice, we handle logic in service)
-            // But for safety, let's say a member can only vote for a specific option once.
-            modelBuilder.Entity<PollVote>()
-                .HasIndex(v => new { v.PollOptionId, v.MemberId })
-                .IsUnique();
-
-            // ActivityLog Index
-            modelBuilder.Entity<ActivityLog>()
-                .HasIndex(a => new { a.MemberId, a.Timestamp });
-
-            // Event Gallery Relationships
-            modelBuilder.Entity<EventGallery>()
-                .HasMany(g => g.Photos)
-                .WithOne(p => p.EventGallery)
-                .HasForeignKey(p => p.EventGalleryId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             // Seed Membership Fees from JSON
             var feeConfigs = LoadSeed<MembershipFeeConfig>("fee_configs.json");

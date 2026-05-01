@@ -36,9 +36,57 @@ if (!(Get-Command flutter -ErrorAction SilentlyContinue)) {
     }
 }
 
-# Set environment for visual seed data
+# Set environment for visual seed data and isolated SQLite database
+$dbPath = Join-Path $Root "visual_test.db"
 $env:ASP_SEED_PROFILE = "Visual"
+$env:DatabaseProvider = "Sqlite"
+$env:SqliteConnection = "Data Source=$dbPath"
+$env:AppSettings__RecreateDatabaseOnStartup = "true"
+
+# Clean up previous test database if it exists
+if (Test-Path $dbPath) {
+    Remove-Item $dbPath -Force
+    Write-Host "CLEAN: Removed previous test database." -ForegroundColor DarkGray
+}
+
 Write-Host "CONFIG: ASP_SEED_PROFILE=Visual - using static seed data" -ForegroundColor DarkGray
+Write-Host "CONFIG: DatabaseProvider=Sqlite - using temporary isolated DB at $dbPath" -ForegroundColor DarkGray
+Write-Host ""
+
+# Start the API server in the background
+Write-Host ">> Starting API server (SQLite mode)..." -ForegroundColor Yellow
+$ApiProj = Join-Path $Root "GHCAA.API/GHCAA.API.csproj"
+$OutLog = Join-Path $Root "api_stdout.txt"
+$ErrLog = Join-Path $Root "api_stderr.txt"
+if (Test-Path $OutLog) { Remove-Item $OutLog }
+if (Test-Path $ErrLog) { Remove-Item $ErrLog }
+$ApiProcess = Start-Process dotnet -ArgumentList "run --project `"$ApiProj`" --no-build" -PassThru -WindowStyle Hidden -RedirectStandardOutput $OutLog -RedirectStandardError $ErrLog
+$ApiId = $ApiProcess.Id
+
+# Wait for API to be ready (health check)
+$maxRetries = 30
+$retryCount = 0
+$apiReady = $false
+while (-not $apiReady -and $retryCount -lt $maxRetries) {
+    try {
+        $response = Invoke-WebRequest -Uri "http://127.0.0.1:5087/health" -UseBasicParsing -ErrorAction SilentlyContinue
+        if ($response.StatusCode -eq 200) { $apiReady = $true }
+    } catch {
+        # Wait and retry
+    }
+    if (-not $apiReady) {
+        $retryCount++
+        Start-Sleep -Seconds 2
+        Write-Host "   Waiting for API... ($retryCount/$maxRetries)" -ForegroundColor DarkGray
+    }
+}
+
+if (-not $apiReady) {
+    Write-Host "   [FAIL] API failed to start in time." -ForegroundColor Red
+    Stop-Process -Id $ApiId -Force
+    exit 1
+}
+Write-Host "   [READY] API is up at http://localhost:5087" -ForegroundColor Green
 Write-Host ""
 
 # Initialize exit codes
@@ -119,7 +167,7 @@ if (-not $VisualOnly) {
     Write-Host ">> [4/4] Mobile Functional E2E Tests (Flutter Integration)" -ForegroundColor Yellow
 
     Push-Location $MobileDir
-    flutter test integration_test/
+    flutter test integration_test/ -d windows
     $MobileE2EExit = $LASTEXITCODE
     Pop-Location
 
@@ -150,5 +198,14 @@ if ($allPassed) {
     Write-Host ""
     Write-Host "  TIP: To update baselines after an approved design change:" -ForegroundColor DarkGray
     Write-Host "       ./scripts/visual-check.ps1 -UpdateBaselines" -ForegroundColor DarkGray
+
+    # Cleanup test database on exit
+    if (Test-Path $dbPath) { Remove-Item $dbPath -Force }
+    if ($ApiId) { Stop-Process -Id $ApiId -Force }
     exit 1
 }
+
+# Cleanup test database on success
+if (Test-Path $dbPath) { Remove-Item $dbPath -Force }
+if ($ApiId) { Stop-Process -Id $ApiId -Force }
+Write-Host "CLEAN: Removed temporary test database and stopped API server." -ForegroundColor DarkGray

@@ -16,103 +16,83 @@ namespace GHCAA.Infrastructure
             // QuestPDF Community License
             QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
-            // Register DbContext — provider selected by "DatabaseProvider" in appsettings.json
-            // Supported values: "PgSql" (default), "MySql", "Sqlite"
+            // 1. Configure DbContext dynamically
             var provider = configuration.GetValue<string>("DatabaseProvider") ?? "PgSql";
+            var connectionString = GetConnectionString(provider, configuration);
 
-            if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
+            services.AddDbContextPool<ApplicationDbContext, ApplicationDbContext>((sp, options) =>
             {
-                services.AddDbContextPool<ApplicationDbContext, MySqlApplicationDbContext>(options =>
+                switch (provider.ToLower())
                 {
-                    var conn = configuration.GetConnectionString("MySqlConnection")
-                        ?? throw new InvalidOperationException("MySqlConnection string is missing in configuration.");
-                    options.UseMySql(conn, ServerVersion.AutoDetect(conn),
-                        o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-                });
-            }
-            else if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
-            {
-                services.AddDbContextPool<ApplicationDbContext, SqliteApplicationDbContext>(options =>
-                {
-                    var conn = configuration.GetConnectionString("SqliteConnection")
-                        ?? throw new InvalidOperationException("SqliteConnection string is missing in configuration.");
-                    options.UseSqlite(conn,
-                        o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-                });
-            }
-            else // PgSql (default)
-            {
-                services.AddDbContextPool<ApplicationDbContext, PgSqlApplicationDbContext>(options =>
-                {
-                    var conn = configuration.GetConnectionString("PgSqlConnection");
-                    var envUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-                    
-                    if (!string.IsNullOrEmpty(envUrl) && envUrl.StartsWith("postgres://"))
-                    {
-                        var uri = new Uri(envUrl);
-                        var userInfo = uri.UserInfo.Split(':');
-                        conn = $"Host={uri.Host};Port={(uri.Port > 0 ? uri.Port : 5432)};Database={uri.LocalPath.TrimStart('/')};Username={(userInfo.Length > 0 ? userInfo[0] : "")};Password={(userInfo.Length > 1 ? userInfo[1] : "")};SslMode=Prefer;Trust Server Certificate=True;";
-                    }
-
-                    if (string.IsNullOrEmpty(conn)) throw new InvalidOperationException("PostgreSQL connection string or DATABASE_URL is missing.");
-
-                    options.UseNpgsql(conn,
-                        o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-                });
-            }
+                    case "sqlite":
+                        options.UseSqlite(connectionString, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
+                        break;
+                    case "mysql":
+                        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), o => o.MigrationsAssembly("GHCAA.Infrastructure"));
+                        break;
+                    default: // PgSql
+                        options.UseNpgsql(connectionString, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
+                        break;
+                }
+                options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+            });
 
             // Add Health Checks
-            services.AddHealthChecks()
-                .AddDbContextCheck<ApplicationDbContext>();
+            services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>();
 
-            // Register infrastructure services
+            // 2. Automated Service Registration
+            // Registers classes in .Services namespace against their implemented IInterfaces in GHCAA.Application.Interfaces
+            var serviceTypes = typeof(DependencyInjection).Assembly.GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && t.Namespace != null && t.Namespace.Contains("Services"));
+
+            foreach (var type in serviceTypes)
+            {
+                var interfaces = type.GetInterfaces()
+                    .Where(i => i.Namespace != null && i.Namespace.StartsWith("GHCAA.Application.Interfaces"));
+
+                foreach (var iface in interfaces)
+                {
+                    services.AddScoped(iface, type);
+                }
+            }
+
+            // 3. Manual Registrations for non-standard services
             services.AddScoped<IFileStorageService, LocalFileStorageService>();
             services.AddScoped<IFileUploadRepository, FileUploadRepository>();
-            services.AddScoped<IEmailService, GmailEmailService>();
-            services.AddScoped<IOtpService, OtpService>();
-            services.AddScoped<IMemberService, MemberService>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<ITokenService, TokenService>();
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IRoleService, RoleService>();
-            services.AddScoped<ILookupService, LookupService>();
-            services.AddScoped<INetworkingService, NetworkingService>();
-            services.AddScoped<ICommunicationService, CommunicationService>();
-            services.AddScoped<IFinancialService, FinancialService>();
-            services.AddScoped<IFinancialLedgerService, FinancialLedgerService>();
-            services.AddScoped<INewsService, NewsService>();
-            services.AddScoped<IJobHubService, JobHubService>();
-            services.AddScoped<IIDCardService, IDCardService>();
-            services.AddScoped<IActivityService, ActivityService>();
-            services.AddScoped<IGalleryService, GalleryService>();
-            services.AddScoped<IChatService, ChatService>();
-            services.AddScoped<IContactService, ContactService>();
-            services.AddScoped<IAssistantService, AssistantService>();
-            services.AddScoped<INotificationService, NotificationService>();
-            services.AddScoped<IEventService, EventService>();
-            services.AddScoped<IMemberImportService, MemberImportService>();
-            services.AddScoped<IThemeService, ThemeService>();
-            services.AddScoped<IGovernanceService, GovernanceService>();
-            services.AddScoped<IGamificationService, GamificationService>();
-            services.AddScoped<IFamilyLinkService, FamilyLinkService>();
-            services.AddScoped<IFamilyService, FamilyService>();
-            services.AddScoped<IMentorshipService, MentorshipService>();
-            services.AddScoped<IPollService, PollService>();
-            services.AddHttpClient<ISmsService, GreenwebSmsService>();
-
-            // Payment Gateways
+            services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
+            
+            // Payment Gateways (HttpClient instances)
             services.AddHttpClient<SSLCommerzGateway>();
             services.AddHttpClient<BkashGateway>();
             services.AddHttpClient<NagadGateway>();
             services.AddScoped<IPaymentGatewayService, SSLCommerzGateway>();
             services.AddScoped<IPaymentGatewayService, BkashGateway>();
             services.AddScoped<IPaymentGatewayService, NagadGateway>();
-            services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
-            
+            services.AddHttpClient<ISmsService, GreenwebSmsService>();
+
             return services;
+        }
+
+        private static string GetConnectionString(string provider, IConfiguration configuration)
+        {
+            if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+                return configuration.GetConnectionString("SqliteConnection") ?? "Data Source=ghcaa.db";
+
+            if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase))
+                return configuration.GetConnectionString("MySqlConnection") ?? "";
+
+            // PgSql (with DATABASE_URL support)
+            var conn = configuration.GetConnectionString("PgSqlConnection");
+            var envUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+            
+            if (!string.IsNullOrEmpty(envUrl) && envUrl.StartsWith("postgres://"))
+            {
+                var uri = new Uri(envUrl);
+                var userInfo = uri.UserInfo.Split(':');
+                return $"Host={uri.Host};Port={(uri.Port > 0 ? uri.Port : 5432)};Database={uri.LocalPath.TrimStart('/')};Username={(userInfo.Length > 0 ? userInfo[0] : "")};Password={(userInfo.Length > 1 ? userInfo[1] : "")};SslMode=Prefer;Trust Server Certificate=True;";
+            }
+
+            return conn ?? throw new InvalidOperationException($"Connection string for {provider} is missing.");
         }
     }
 }

@@ -34,7 +34,7 @@
             <div class="user-info" *ngIf="!isSidebarCollapsed()">
                 <div class="user-avatar">{{ auth.currentUser()?.username?.[0]?.toUpperCase() }}</div>
                 <div class="user-details">
-                    <span class="user-name">{{ auth.currentUser()?.username }}</span>
+                    <span class="user-name">{{ auth.currentUser()?.fullName || auth.currentUser()?.username }}</span>
                     <small class="user-role">{{ nav.isAdmin() ? 'Administrator' : 'Alumni Member' }}</small>
                 </div>
             </div>
@@ -68,7 +68,7 @@
                     <div class="user-profile">
                         <div class="avatar">{{ auth.currentUser()?.username?.[0]?.toUpperCase() }}</div>
                         <div class="user-details hide-mobile">
-                            <span class="username">{{ auth.currentUser()?.username }}</span>
+                            <span class="username">{{ auth.currentUser()?.fullName || auth.currentUser()?.username }}</span>
                             <small class="role">{{ nav.isAdmin() ? 'Administrator' : 'Alumni Member' }}</small>
                         </div>
                     </div>

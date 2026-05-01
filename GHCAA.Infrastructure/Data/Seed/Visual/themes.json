@@ -1,0 +1,30 @@
+[
+  {
+    "Id": 2,
+    "Title": "Eid Ul Fit'r 2026",
+    "StartDate": "2026-03-16T00:00:00+00:00",
+    "EndDate": "2026-03-23T00:00:00+00:00",
+    "BackgroundColor": "#69808c",
+    "TextColor": "#fdf51c",
+    "AnnouncementText": "ঈদ মোবারক! সম্প্রীতি ও ভ্রাতৃত্বের মেলবন্ধনে কাটুক পবিত্র ঈদ।",
+    "AnimationStyle": "Scroll",
+    "ImageUrl": "",
+    "SidebarColor": "#2f3e46",
+    "EnableGradientFading": true,
+    "IsEnabled": true
+  },
+  {
+    "Id": 1,
+    "Title": "Independence Day 2026",
+    "StartDate": "2026-03-23T00:00:00+00:00",
+    "EndDate": "2026-03-27T00:00:00+00:00",
+    "BackgroundColor": "#1a710e",
+    "TextColor": "#ff0f0f",
+    "AnnouncementText": "Happy 55th Independence Day! Celebrating our glorious freedom — March 26, 1971.",
+    "AnimationStyle": "Typewriter",
+    "ImageUrl": "",
+    "SidebarColor": "#0b4d02",
+    "EnableGradientFading": false,
+    "IsEnabled": false
+  }
+]

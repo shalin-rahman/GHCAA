@@ -57,11 +57,13 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
+    bool isTestEnv = configuration["ASP_SEED_PROFILE"] == "Visual" || builder.Environment.IsDevelopment();
+
     // Login/OTP Policy: Very strict (5 requests per 1 minute)
     options.AddFixedWindowLimiter("auth", opt =>
     {
         opt.Window = TimeSpan.FromMinutes(1);
-        opt.PermitLimit = 5;
+        opt.PermitLimit = isTestEnv ? 500 : 5;
         opt.QueueLimit = 0;
     });
 
@@ -69,7 +71,7 @@ builder.Services.AddRateLimiter(options =>
     options.AddFixedWindowLimiter("registration", opt =>
     {
         opt.Window = TimeSpan.FromMinutes(5);
-        opt.PermitLimit = 10;
+        opt.PermitLimit = isTestEnv ? 1000 : 10;
         opt.QueueLimit = 0;
     });
 
@@ -77,7 +79,7 @@ builder.Services.AddRateLimiter(options =>
     options.AddFixedWindowLimiter("api", opt =>
     {
         opt.Window = TimeSpan.FromMinutes(1);
-        opt.PermitLimit = 100;
+        opt.PermitLimit = isTestEnv ? 10000 : 100;
         opt.QueueLimit = 2;
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
     });
@@ -119,7 +121,6 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowCredentials();
 
-        // In Development, we automatically allow any localhost port to support Flutter Web debugging
         if (builder.Environment.IsDevelopment())
         {
             policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost");
@@ -128,38 +129,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
-// Auto-apply Entity Framework migrations at startup for deployments like Render
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
-        
-        var recreateDb = configuration.GetValue<bool>("AppSettings:RecreateDatabaseOnStartup", false);
-        if (recreateDb)
-        {
-            context.Database.EnsureDeleted();
-        }
-
-        if (context.Database.IsRelational())
-        {
-            context.Database.Migrate();
-        }
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while migrating or initializing the database.");
-    }
-}
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
 app.UseCors("AngularApp");
 
@@ -200,4 +169,41 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");
 app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");
+// Automatic Database Initialization for Visual Testing Profile
+if (app.Configuration["ASP_SEED_PROFILE"] == "Visual")
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
+    
+    if (app.Configuration.GetValue<bool>("AppSettings:RecreateDatabaseOnStartup"))
+    {
+        context.Database.EnsureDeleted();
+    }
+    context.Database.EnsureCreated();
+
+    // MANUAL SEEDING: Force override EF Core snapshots with fresh data from Seed/Visual
+    var infrastructurePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "GHCAA.Infrastructure");
+    if (!Directory.Exists(infrastructurePath)) infrastructurePath = Path.Combine(Directory.GetCurrentDirectory(), "GHCAA.Infrastructure");
+
+    var usersJsonPath = Path.Combine(infrastructurePath, "Data", "Seed", "Visual", "users.json");
+    if (File.Exists(usersJsonPath))
+    {
+        var json = File.ReadAllText(usersJsonPath);
+        var users = System.Text.Json.JsonSerializer.Deserialize<List<GHCAA.Domain.Models.User>>(json);
+        if (users != null)
+        {
+            // Clear existing users to remove snapshot-seeded data
+            context.Users.RemoveRange(context.Users);
+            context.SaveChanges();
+
+            foreach (var user in users)
+            {
+                context.Users.Add(user);
+            }
+            context.SaveChanges();
+            Console.WriteLine($"[SEED] Authoritatively seeded {users.Count} users from {usersJsonPath}");
+        }
+    }
+}
+
 app.Run();
