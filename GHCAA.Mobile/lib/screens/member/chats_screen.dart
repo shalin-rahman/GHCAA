@@ -256,6 +256,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
 
   Widget _buildTimeAndUnread(dynamic time, dynamic unreadCount) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
