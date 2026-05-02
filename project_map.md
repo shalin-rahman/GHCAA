@@ -73,6 +73,14 @@ graph TD
 | `registration` | 5 min | 10 req |
 | `api` | 1 min | 100 req |
 
+### Environments & Pipelines
+
+| Environment | API Config | Mobile Config | Pipeline Config | Purpose |
+|---|---|---|---|---|
+| **Development** | `appsettings.Development.json` | `.env` | Local / Manual | Daily development & local database testing |
+| **Pre-Production** | `appsettings.Preprod.json` | `.env.preprod` | `.github/workflows/ghcaa-ci-preprod.yml` | Full-stack CI/CD validation on the `preprod` branch |
+| **Production** | `appsettings.json` (w/ Env Vars) | Managed via fastlane | `.github/workflows/ghcaa-ci-standard.yml` | Live user environment |
+
 ---
 
 ## Domain Layer — Models

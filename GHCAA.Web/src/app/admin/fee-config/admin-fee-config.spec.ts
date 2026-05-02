@@ -54,7 +54,7 @@ describe('AdminFeeConfig Component', () => {
     });
 
     it('should open edit form with config data', () => {
-        const config = { id: 1, category: 'MembershipFee', amount: 500, effectiveDate: '2023-01-01' };
+        const config = { id: 1, category: 'MembershipFee', amount: 500, effectiveDate: '01-01-2023' };
         component.openEditForm(config);
         expect(component.showForm()).toBe(true);
         expect(component.editingId()).toBe(1);
@@ -63,7 +63,7 @@ describe('AdminFeeConfig Component', () => {
 
     it('should call addFeeConfig on valid new submission', () => {
         component.openCreateForm();
-        component.form.patchValue({ amount: 1000, effectiveDate: '2023-12-31' });
+        component.form.patchValue({ amount: 1000, effectiveDate: '31-12-2023' });
         
         component.submitForm();
         
@@ -72,7 +72,7 @@ describe('AdminFeeConfig Component', () => {
     });
 
     it('should call updateFeeConfig on valid edit submission', () => {
-        const config = { id: 5, category: 'MembershipFee', amount: 500, effectiveDate: '2023-01-01' };
+        const config = { id: 5, category: 'MembershipFee', amount: 500, effectiveDate: '01-01-2023' };
         component.openEditForm(config);
         component.form.patchValue({ amount: 600 });
         
@@ -85,7 +85,7 @@ describe('AdminFeeConfig Component', () => {
     it('should handle error during submission', () => {
         financialServiceMock.addFeeConfig.mockReturnValue(throwError(() => ({ error: { message: 'Api Error' } })));
         component.openCreateForm();
-        component.form.patchValue({ amount: 1000, effectiveDate: '2023-12-31' });
+        component.form.patchValue({ amount: 1000, effectiveDate: '31-12-2023' });
         
         component.submitForm();
         

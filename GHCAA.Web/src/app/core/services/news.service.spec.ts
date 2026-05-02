@@ -16,7 +16,8 @@ describe('NewsService', () => {
         status: 'Approved',
         isActive: true,
         authorName: 'Admin',
-        createdAt: '2026-03-08T00:00:00Z'
+        createdAt: '08-03-2026',
+        collaborators: []
     };
 
 

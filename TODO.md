@@ -93,6 +93,7 @@
 8.8  [TODO] i18n: Unified Localization (English + Bengali)
 8.9  [DONE] CI/CD: Fastlane + GitHub Actions Deployment Pipeline
 8.10 [DONE] Quality: Global Error Boundary and Sentry/Firebase tracing
+8.11 [DONE] CI/CD: Operationalize multi-environment pipelines (Preprod/Standard)
 
 ## AREA 9: INSTITUTIONAL GOVERNANCE & QUALITY
 9.1  [DONE] Digital Constitution: Versioned legal repository
