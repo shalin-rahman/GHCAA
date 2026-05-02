@@ -9,6 +9,7 @@ import '../../features/auth/register_wizard_provider.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/lookups/dropdown_service.dart';
 import '../../features/files/file_service.dart';
+import '../../core/utils/app_utils.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -562,7 +563,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       onTap: () async {
         final date = await showDatePicker(
           context: context,
-          initialDate: value != null ? DateTime.parse(value) : DateTime.now().subtract(const Duration(days: 365 * 25)),
+          initialDate: value != null ? AppUtils.parseDate(value) ?? DateTime.now().subtract(const Duration(days: 365 * 25)) : DateTime.now().subtract(const Duration(days: 365 * 25)),
           firstDate: DateTime(1940),
           lastDate: DateTime.now().subtract(const Duration(days: 365 * 16)),
           builder: (ctx, child) => Theme(
@@ -573,7 +574,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         );
         if (date != null) {
-          onPicked(date.toIso8601String());
+          onPicked(AppUtils.formatDate(date));
         }
       },
       child: Container(
@@ -587,7 +588,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             const Icon(Icons.calendar_today_outlined, size: 18, color: AppTheme.royalGold),
             const SizedBox(width: 12),
             Text(
-              value != null ? value.split('T')[0] : label,
+              value != null ? AppUtils.formatDate(value) : label,
               style: TextStyle(color: value != null ? Colors.white : Colors.white54, fontSize: 13),
             ),
           ],

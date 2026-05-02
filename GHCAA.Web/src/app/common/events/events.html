@@ -261,7 +261,7 @@
                 <div class="reg-info">
                     <h4>{{ reg.eventTitle }}</h4>
                     <div class="sub">
-                        <span>📅 Registered: {{ reg.registeredAt | date:'mediumDate' }}</span>
+                        <span>📅 Registered: {{ reg.registeredAt | date:'dd-MM-yyyy' }}</span>
                         <span class="text-accent opacity-80 font-mono">#{{ reg.paymentReference }}</span>
                     </div>
                 </div>
@@ -342,7 +342,7 @@
                                 <span class="icon">📅</span>
                                 <div class="meta">
                                     <label>Date & Time</label>
-                                    <strong>{{ invitationData()?.registeredAt | date:'medium' }}</strong>
+                                    <strong>{{ invitationData()?.registeredAt | date:'dd-MM-yyyy' }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -359,7 +359,7 @@
                                 <div class="seal">
                                     <span class="seal-txt">GHC APPROVED</span>
                                 </div>
-                                <p class="seal-date">Validated on {{ invitationData()?.registeredAt | date:'shortDate'
+                                <p class="seal-date">Validated on {{ invitationData()?.registeredAt | date:'dd-MM-yyyy'
                                     }}</p>
                             </div>
                         </div>

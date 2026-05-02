@@ -54,7 +54,9 @@
                 </div>
                 <div class="form-group">
                     <label>Valid Until / Deadline</label>
-                    <input type="date" [(ngModel)]="newJob.applicationDeadline" name="deadline">
+                    <input type="text" [(ngModel)]="newJob.applicationDeadline" name="deadline"
+                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
+                        #deadlineM="ngModel" [class.border-red-500]="deadlineM.invalid && deadlineM.touched">
                 </div>
                 <div class="form-group">
                     <label>Application / Contact Method</label>
@@ -182,7 +184,7 @@
                             </div>
                             <div class="l-item" *ngIf="job.applicationDeadline">
                                 <span class="block text-[10px] text-muted uppercase font-bold">Closing Date</span>
-                                <span class="font-black">{{ job.applicationDeadline | date:'longDate' }}</span>
+                                <span class="font-black">{{ job.applicationDeadline | date:'dd-MM-yyyy' }}</span>
                             </div>
                         </div>
                     </div>

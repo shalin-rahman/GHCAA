@@ -90,10 +90,12 @@
                             </div>
                             <div class="form-group">
                                 <label>Date of Birth *</label>
-                                <input type="date" [(ngModel)]="model.DateOfBirth" name="dateOfBirth" required [max]="maxBirthDate" #dobReg="ngModel"
+                                <input type="text" [(ngModel)]="model.DateOfBirth" name="dateOfBirth" required 
+                                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}" #dobReg="ngModel"
                                     [class.border-red-500]="dobReg.invalid && dobReg.touched">
                                 <div class="field-error mt-1" *ngIf="dobReg.touched && dobReg.invalid">
                                     <span class="text-xs text-red-500" *ngIf="dobReg.errors?.['required']">Birth date is required.</span>
+                                    <span class="text-xs text-red-500" *ngIf="dobReg.errors?.['pattern']">Use format: dd-mm-yyyy</span>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -294,12 +296,14 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Start Date *</label>
-                                            <input type="date" [(ngModel)]="p.startDate" [name]="'pSD_' + $index" required
+                                            <input type="text" [(ngModel)]="p.startDate" [name]="'pSD_' + $index" required
+                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                                                 #psdM="ngModel" [class.border-red-500]="psdM.invalid && psdM.touched">
                                         </div>
                                         <div class="form-group" *ngIf="!p.isCurrent">
                                             <label>Relief Date (End) *</label>
-                                            <input type="date" [(ngModel)]="p.endDate" [name]="'pED_' + $index" required
+                                            <input type="text" [(ngModel)]="p.endDate" [name]="'pED_' + $index" required
+                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                                                 #pedM="ngModel" [class.border-red-500]="pedM.invalid && pedM.touched">
                                         </div>
                                         <div class="input-group full py-2">

@@ -47,8 +47,18 @@ export class Ledger implements OnInit {
   ];
 
 
+  formatDateToDMY(d: any) {
+    if (!d) return '';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return d;
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
   newRecord: any = {
-    date: new Date().toISOString().split('T')[0],
+    date: this.formatDateToDMY(new Date()),
     amount: 1000,
     recordType: 'Income',
     financialCategory: 'MembershipFee',

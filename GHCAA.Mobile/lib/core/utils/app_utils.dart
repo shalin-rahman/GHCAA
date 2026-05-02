@@ -8,11 +8,29 @@ class AppUtils {
       if (date is DateTime) {
         dt = date;
       } else {
-        dt = DateTime.parse(date.toString());
+        // Try parsing as dd-MM-yyyy first
+        try {
+          dt = DateFormat('dd-MM-yyyy').parse(date.toString());
+        } catch (_) {
+          dt = DateTime.parse(date.toString());
+        }
       }
-      return DateFormat('dd MMM yyyy').format(dt);
+      return DateFormat('dd-MM-yyyy').format(dt);
     } catch (e) {
       return date.toString().split('T')[0]; // Fallback to raw date part
+    }
+  }
+
+  static DateTime? parseDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return null;
+    try {
+      return DateFormat('dd-MM-yyyy').parse(dateStr);
+    } catch (_) {
+      try {
+        return DateTime.parse(dateStr);
+      } catch (_) {
+        return null;
+      }
     }
   }
 

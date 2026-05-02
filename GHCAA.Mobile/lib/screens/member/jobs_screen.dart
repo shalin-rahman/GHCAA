@@ -8,6 +8,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../features/jobs/job_service.dart';
 import '../../features/auth/auth_service.dart';
+import '../../core/utils/app_utils.dart';
 
 final jobSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
@@ -284,7 +285,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                   'location': locCtrl.text,
                   'externalUrl': linkCtrl.text,
                   'description': descCtrl.text,
-                  'postedAt': DateTime.now().toIso8601String(),
+                  'postedAt': AppUtils.formatDate(DateTime.now()),
                   'isActive': true,
                 };
                 final success = await ref.read(jobServiceProvider).postJob(payload);

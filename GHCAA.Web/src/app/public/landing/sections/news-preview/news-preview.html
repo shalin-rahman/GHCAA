@@ -10,7 +10,7 @@
         <div class="news-grid">
             @for (item of news(); track item.id) {
             <div class="news-card glass-card">
-                <div class="news-date">{{ item.createdAt | date:'MMM d, y' }}</div>
+                <div class="news-date">{{ item.createdAt | date:'dd-MM-yyyy' }}</div>
                 <h3>{{ item.title }}</h3>
                 <p>{{ item.content }}</p>
                 <a routerLink="/portal/news" class="read-more">Read Full Story →</a>

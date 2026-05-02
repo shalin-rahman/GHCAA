@@ -153,7 +153,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
         'title': titleCtrl.text,
         'description': descCtrl.text,
         'location': locCtrl.text,
-        'eventDate': selectedDate.toIso8601String(),
+        'eventDate': AppUtils.formatDate(selectedDate),
         'isActive': true,
       });
       if (success) {

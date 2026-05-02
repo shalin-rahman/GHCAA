@@ -227,6 +227,14 @@
 22.4 [DONE] E2E: Verify Event Registration and QR generation flow
 22.5 [DONE] E2E: Verify Gallery upload and album organization (Admin side)
 
+## AREA 23: ECOSYSTEM-WIDE DATE STANDARDIZATION (dd-MM-yyyy)
+23.1 [DONE] API: Implement DateFormatConverter for unified dd-MM-yyyy/ISO parsing
+23.2 [DONE] Web: Standardize all Angular date inputs to dd-mm-yyyy (Registration, Profile, Events, Admin)
+23.3 [DONE] Web: Update date validation logic and labels to guide users on dd-mm-yyyy format
+23.4 [DONE] Mobile: Refactor AppUtils with parseDate/formatDate supporting dd-MM-yyyy standard
+23.5 [DONE] Mobile: Update all screens (Registration, Profile, Events, Jobs, Gallery) to use standardized dates
+23.6 [DONE] E2E: Update Playwright test suite to use dd-mm-yyyy for all automated date entries
+
 ## CREDENTIALS:
 - SuperAdmin: superadmin / SuperAdminPassword123!
 - Developer Admin: shalin / Shalin@2024!

@@ -261,8 +261,8 @@
 
                 <div class="form-group">
                     <label>Date of Birth</label>
-                    <input type="date" [ngModel]="selectedMember().dateOfBirth | date:'yyyy-MM-dd'"
-                        (ngModelChange)="selectedMember().dateOfBirth = $event" [readonly]="!isEditing()">
+                    <input type="text" [(ngModel)]="selectedMember().dateOfBirth" [readonly]="!isEditing()"
+                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
                 </div>
                 <div class="form-group">
                     <label>National ID (NID)</label>
@@ -576,8 +576,9 @@
                                     <div class="grid grid-cols-2 gap-2">
                                         <div class="form-group">
                                             <label class="text-[10px]">Start Date</label>
-                                            <input type="date" [ngModel]="prof.startDate | date:'yyyy-MM-dd'"
-                                                (ngModelChange)="prof.startDate = $event" [readonly]="!isEditing()">
+                                            <input type="text" [(ngModel)]="prof.startDate"
+                                                [readonly]="!isEditing()"
+                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
                                         </div>
                                         <div class="flex items-end flex-1">
                                             <label class="premium-checkbox-label mb-2">
@@ -641,11 +642,13 @@
                                     <div class="grid grid-cols-2 gap-2">
                                         <div class="form-group">
                                             <label class="text-[10px]">Start Date</label>
-                                            <input type="date" [ngModel]="h.startDate | date:'yyyy-MM-dd'" (ngModelChange)="h.startDate = $event">
+                                            <input type="text" [(ngModel)]="h.startDate"
+                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
                                         </div>
                                         <div class="form-group">
                                             <label class="text-[10px]">End Date</label>
-                                            <input type="date" [ngModel]="h.endDate | date:'yyyy-MM-dd'" (ngModelChange)="h.endDate = $event">
+                                            <input type="text" [(ngModel)]="h.endDate"
+                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
@@ -674,7 +677,7 @@
                                         }
                                     </div>
                                     <div class="text-[10px] opacity-50 mt-1">
-                                        {{ h.startDate | date:'mediumDate' }} — {{ h.endDate ? (h.endDate | date:'mediumDate') : 'Present' }}
+                                        {{ h.startDate }} — {{ h.endDate || 'Present' }}
                                         @if (h.changeReason) {
                                             <span class="ml-2 italic text-gray-400">({{ h.changeReason }})</span>
                                         }
@@ -711,7 +714,7 @@
                                 </div>
                                 <div class="text-[10px] opacity-50 mt-1">
                                     TrxID: <code class="text-accent">{{ p.transactionId }}</code> • {{ p.paidAt |
-                                    date:'mediumDate' }}
+                                    date:'dd-MM-yyyy' }}
                                     @if (p.notes) {
                                     <div class="mt-1 italic text-gray-400">Note: {{ p.notes }}</div>
                                     }

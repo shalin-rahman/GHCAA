@@ -164,7 +164,7 @@
                             {{ post.isActive ? 'Published' : 'Draft' }}
                         </span>
                     </td>
-                    <td>{{ post.createdAt | date:'mediumDate' }}</td>
+                    <td>{{ post.createdAt | date:'dd-MM-yyyy' }}</td>
                     <td class="actions-cell">
                         <button class="btn btn-outline btn-sm" (click)="selectedPost.set(post)">Details ↗</button>
                         <button class="icon-btn" (click)="editPost(post)" title="Edit">✏️</button>
@@ -187,7 +187,7 @@
                         class="px-3 py-1 bg-accent/10 text-accent rounded-full text-[10px] uppercase font-black tracking-widest">{{
                         getCategoryLabel(post.articleCategory) }}</span>
                     <h3 class="mt-2">{{ post.title }}</h3>
-                    <p class="text-xs opacity-50 font-bold mt-1">Published on {{ post.createdAt | date:'longDate' }}</p>
+                    <p class="text-xs opacity-50 font-bold mt-1">Published on {{ post.createdAt | date:'dd-MM-yyyy' }}</p>
                 </div>
                 <button (click)="selectedPost.set(null)" class="close-btn">✕</button>
             </div>

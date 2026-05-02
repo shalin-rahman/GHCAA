@@ -10,7 +10,7 @@ namespace GHCAA.Infrastructure.Data.Configurations
         {
             builder.HasKey(e => e.Id);
 
-            builder.HasQueryFilter(e => !e.IsArchived);
+            builder.HasQueryFilter(e => e.IsActive);
         }
     }
 }

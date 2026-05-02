@@ -245,8 +245,8 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
   bool _isRegistrationOpen(Map<String, dynamic> ev) {
     if (ev['isActive'] == false) return false;
     final now = DateTime.now();
-    if (ev['registrationStartDate'] != null && DateTime.parse(ev['registrationStartDate']).isAfter(now)) return false;
-    if (ev['registrationEndDate'] != null && DateTime.parse(ev['registrationEndDate']).isBefore(now)) return false;
+    if (ev['registrationStartDate'] != null && AppUtils.parseDate(ev['registrationStartDate'].toString())?.isAfter(now) == true) return false;
+    if (ev['registrationEndDate'] != null && AppUtils.parseDate(ev['registrationEndDate'].toString())?.isBefore(now) == true) return false;
     return true;
   }
 
@@ -393,14 +393,14 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                     'title': titleCtrl.text.trim(),
                     'description': descCtrl.text.trim(),
                     'location': locCtrl.text.trim(),
-                    'startDate': startDate.toUtc().toIso8601String(),
-                    'endDate': endDate.toUtc().toIso8601String(),
+                    'startDate': AppUtils.formatDate(startDate),
+                    'endDate': AppUtils.formatDate(endDate),
                     'requiresPayment': !isFree,
                     'registrationFee': fee,
                     'allowNonMembers': allowNonMembers,
                     'isActive': true,
-                    if (regStart != null) 'registrationStartDate': regStart!.toUtc().toIso8601String(),
-                    if (regEnd != null) 'registrationEndDate': regEnd!.toUtc().toIso8601String(),
+                    if (regStart != null) 'registrationStartDate': AppUtils.formatDate(regStart!),
+                    if (regEnd != null) 'registrationEndDate': AppUtils.formatDate(regEnd!),
                   };
                   final success = await ref.read(eventsServiceProvider).createEvent(payload);
                   if (success) {

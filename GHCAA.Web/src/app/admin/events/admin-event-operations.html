@@ -34,7 +34,8 @@
                            class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
                 </div>
                 <div>
-                    <input type="date" [(ngModel)]="newTask.dueDate" 
+                    <input type="text" [(ngModel)]="newTask.dueDate" 
+                           placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                            class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
                 </div>
                 <button (click)="addTask()" 
@@ -60,7 +61,7 @@
                         </p>
                         <p class="text-xs text-slate-500">
                             <span *ngIf="task.assignedMemberName" class="text-accent/70">Assigned: {{ task.assignedMemberName }}</span>
-                            <span *ngIf="task.dueDate" class="ml-2">Due: {{ task.dueDate | date }}</span>
+                            <span *ngIf="task.dueDate" class="ml-2">Due: {{ task.dueDate | date:'dd-MM-yyyy' }}</span>
                         </p>
                     </div>
                 </div>
@@ -124,7 +125,8 @@
                            class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
                 </div>
                 <div>
-                    <input type="date" [(ngModel)]="newExpense.spentAt" 
+                    <input type="text" [(ngModel)]="newExpense.spentAt" 
+                           placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                            class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-slate-200">
                 </div>
                 <button (click)="addExpense()" 
@@ -148,7 +150,7 @@
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     <tr *ngFor="let ex of budget()?.expenses" class="hover:bg-white/5 transition-all text-sm">
-                        <td class="px-4 py-4 text-slate-400">{{ ex.spentAt | date:'mediumDate' }}</td>
+                        <td class="px-4 py-4 text-slate-400">{{ ex.spentAt | date:'dd-MM-yyyy' }}</td>
                         <td class="px-4 py-4 font-semibold text-slate-200">{{ ex.category }}</td>
                         <td class="px-4 py-4 text-slate-400 italic text-xs">{{ ex.note || '---' }}</td>
                         <td class="px-4 py-4 text-right font-mono text-emerald-400 font-bold">৳ {{ ex.amount | number:'1.2-2' }}</td>

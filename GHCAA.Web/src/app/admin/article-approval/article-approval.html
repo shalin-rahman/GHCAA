@@ -51,7 +51,7 @@
                     </td>
                     <td><span class="badge">{{ article.articleCategory }}</span></td>
                     <td>{{ article.authorName }}</td>
-                    <td>{{ article.createdAt | date:'shortTime' }} <br> <small>{{ article.createdAt | date:'mediumDate'
+                    <td>{{ article.createdAt | date:'shortTime' }} <br> <small>{{ article.createdAt | date:'dd-MM-yyyy'
                             }}</small></td>
                     <td>
                         <button class="btn btn-secondary btn-sm" (click)="viewArticle(article)">Review Article</button>

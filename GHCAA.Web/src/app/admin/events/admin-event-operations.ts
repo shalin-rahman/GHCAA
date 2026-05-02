@@ -24,12 +24,22 @@ export class AdminEventOperations implements OnInit {
   // Tab handling
   activeOpTab = signal<'tasks' | 'budget'>('tasks');
 
+  formatDateToDMY(d: any) {
+    if (!d) return '';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return d;
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
   // Task Form
   newTask = { title: '', description: '', assignedMemberId: null as number | null, dueDate: '' };
   
   // Budget Form
   newBudget = { estimatedTotal: 0 };
-  newExpense = { category: '', amount: 0, note: '', spentAt: new Date().toISOString().slice(0, 10) };
+  newExpense = { category: '', amount: 0, note: '', spentAt: this.formatDateToDMY(new Date()) };
 
   ngOnInit() {
     this.loadTasks();
@@ -85,7 +95,7 @@ export class AdminEventOperations implements OnInit {
     if (!this.newExpense.category || this.newExpense.amount <= 0) return;
     this.eventsService.addExpense({ ...this.newExpense, eventId: this.event.id }).subscribe(() => {
       this.notify.success('Expense recorded!');
-      this.newExpense = { category: '', amount: 0, note: '', spentAt: new Date().toISOString().slice(0, 10) };
+      this.newExpense = { category: '', amount: 0, note: '', spentAt: this.formatDateToDMY(new Date()) };
       this.loadBudget();
     });
   }

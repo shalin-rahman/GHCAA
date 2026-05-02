@@ -6,6 +6,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/config/app_config.dart';
+import '../../core/utils/app_utils.dart';
 
 final currentECProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   return await ref.read(governanceApiProvider).getCurrentEC();
@@ -81,7 +82,7 @@ class GovernanceScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Tenure: ${DateTime.parse(period['startDate']).year} - ${period['endDate'] != null ? DateTime.parse(period['endDate']).year : (DateTime.now().year + 2)}',
+                          'Tenure: ${AppUtils.parseDate(period['startDate'])?.year ?? ""} - ${period['endDate'] != null ? AppUtils.parseDate(period['endDate'])?.year : (DateTime.now().year + 2)}',
                           style: const TextStyle(color: AppTheme.textMuted, fontSize: 12, fontFamily: 'Outfit'),
                         ),
                       ],
@@ -223,7 +224,7 @@ class GovernanceScreen extends ConsumerWidget {
 
         final version = data['version'] ?? '1.0';
         final changes = data['changeSummary'] ?? 'Initial adoption of association by-laws.';
-        final effective = DateTime.parse(data['effectiveDate'] ?? DateTime.now().toIso8601String());
+        final effective = AppUtils.parseDate(data['effectiveDate']) ?? DateTime.now();
 
         return ListView(
           padding: const EdgeInsets.all(24.0),

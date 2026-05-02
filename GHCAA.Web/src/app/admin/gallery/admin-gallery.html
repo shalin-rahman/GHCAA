@@ -27,10 +27,12 @@
                 </div>
                 <div class="form-group">
                     <label>Event Date <span class="required-star">*</span></label>
-                    <input type="date" [(ngModel)]="newGallery.eventDate" name="date" required #dateInput="ngModel"
+                    <input type="text" [(ngModel)]="newGallery.eventDate" name="date" required #dateInput="ngModel"
+                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                         [class.border-red-500]="dateInput.invalid && dateInput.touched">
                     <div *ngIf="dateInput.touched && dateInput.invalid" class="text-[10px] text-red-500 mt-1">
-                        Date is required.
+                        <span *ngIf="dateInput.errors?.['required']">Date is required.</span>
+                        <span *ngIf="dateInput.errors?.['pattern']">Use format: dd-mm-yyyy</span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -107,7 +109,7 @@
                 </div>
 
                 <div class="album-meta">
-                    <div>📅 {{ gallery.eventDate | date:'mediumDate' }}</div>
+                    <div>📅 {{ gallery.eventDate | date:'dd-MM-yyyy' }}</div>
                     @if (gallery.location) {
                     <div>📍 {{ gallery.location }}</div>
                     }
@@ -139,7 +141,7 @@
         <div class="p-8 flex justify-between items-center border-b border-primary/10">
             <div class="header-info">
                 <h3 class="text-accent">{{ gallery.title }}</h3>
-                <small class="opacity-50">{{ gallery.eventDate | date }} • {{ gallery.location }}</small>
+                <small class="opacity-50">{{ gallery.eventDate | date:'dd-MM-yyyy' }} • {{ gallery.location }}</small>
             </div>
             <button (click)="closeDetail()" class="text-2xl opacity-50 hover:opacity-100">✕</button>
         </div>
@@ -170,7 +172,7 @@
                         <button (click)="removePhoto(photo.id)" class="remove-btn" title="Remove Photo">
                             ✕
                         </button>
-                        <small>{{ photo.uploadedAt | date:'short' }}</small>
+                        <small>{{ photo.uploadedAt | date:'dd-MM-yyyy' }}</small>
                     </div>
                 </div>
                 } @empty {

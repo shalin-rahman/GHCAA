@@ -99,11 +99,21 @@ export class Jobs implements OnInit {
       jobCategory: job.jobCategory,
       description: job.description,
       requirements: job.requirements,
-      deadline: job.applicationDeadline, // Backend usually expects YYYY-MM-DD
+      applicationDeadline: this.formatDateToDMY(job.applicationDeadline),
       applicationEmail: job.applicationEmail
     };
     this.showForm.set(true);
     this.selectedJob.set(null);
+  }
+
+  formatDateToDMY(d: any) {
+    if (!d) return '';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return d;
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 
   closeForm() {

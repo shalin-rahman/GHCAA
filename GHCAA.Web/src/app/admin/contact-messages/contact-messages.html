@@ -48,7 +48,7 @@
                         <span class="badge" [class.badge-accent]="msg.subject?.includes('Help')">{{ msg.subject
                             }}</span>
                     </td>
-                    <td>{{ msg.createdAt | date:'short' }}</td>
+                    <td>{{ msg.createdAt | date:'dd-MM-yyyy' }}</td>
                     <td>
                         <button class="btn btn-secondary btn-sm" (click)="viewMessage(msg)">View Detail</button>
                     </td>
@@ -83,7 +83,7 @@
                 </div>
                 <div class="row">
                     <span class="label">Date:</span>
-                    <span class="val">{{ selectedMessage().createdAt | date:'medium' }}</span>
+                    <span class="val">{{ selectedMessage().createdAt | date:'dd-MM-yyyy' }}</span>
                 </div>
             </div>
             <div class="msg-content p-6 glass-card bg-white/5 border border-white/5 whitespace-pre-wrap">

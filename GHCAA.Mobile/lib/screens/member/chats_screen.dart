@@ -278,7 +278,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
       if (dt.year == now.year && dt.month == now.month && dt.day == now.day) {
         return DateFormat.Hm().format(dt);
       }
-      return DateFormat('MMM d').format(dt);
+      return DateFormat('dd-MM-yyyy').format(dt);
     } catch (e) { return ''; }
   }
 }

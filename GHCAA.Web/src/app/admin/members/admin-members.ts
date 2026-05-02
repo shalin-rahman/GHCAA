@@ -6,6 +6,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { EC_ROLES, getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_STATUS_OPTIONS, MEMBERSHIP_TYPE_OPTIONS, MEMBER_CATEGORY_OPTIONS, EC_ROLES_OPTIONS, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName } from '../../core/constants/app.constants';
+import { DatePipe } from '@angular/common';
 import * as XLSX from 'xlsx';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
@@ -15,6 +16,7 @@ import { ExportUtil } from '../../core/utils/export.util';
   selector: 'app-admin-members',
   standalone: true,
   imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent],
+  providers: [DatePipe],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'
 })
@@ -22,6 +24,7 @@ export class AdminMembers implements OnInit {
   private adminService = inject(AdminService);
   private notify = inject(NotificationService);
   private router = inject(Router);
+  private datePipe = inject(DatePipe);
   nav = inject(NavService);
 
   allMembers = signal<any[]>([]);
@@ -333,17 +336,17 @@ export class AdminMembers implements OnInit {
 
         const mappedMember = mapping(fullMember);
 
-        // Date normalization for HTML5 inputs (yyyy-MM-dd)
+        // Date normalization for Registry standards (dd-MM-yyyy)
         if (mappedMember.dateOfBirth) {
-            mappedMember.dateOfBirth = new Date(mappedMember.dateOfBirth).toISOString().split('T')[0];
+            mappedMember.dateOfBirth = this.datePipe.transform(mappedMember.dateOfBirth, 'dd-MM-yyyy') || '';
         } else if (fullMember.DateOfBirth) {
-            mappedMember.dateOfBirth = new Date(fullMember.DateOfBirth).toISOString().split('T')[0];
+            mappedMember.dateOfBirth = this.datePipe.transform(fullMember.DateOfBirth, 'dd-MM-yyyy') || '';
         }
 
         if (mappedMember.professionalHistory) {
             mappedMember.professionalHistory = mappedMember.professionalHistory.map((ph: any) => ({
                 ...ph,
-                startDate: (ph.startDate || ph.StartDate) ? new Date(ph.startDate || ph.StartDate).toISOString().split('T')[0] : ''
+                startDate: this.datePipe.transform(ph.startDate || ph.StartDate, 'dd-MM-yyyy') || ''
             }));
         }
         
@@ -714,7 +717,7 @@ export class AdminMembers implements OnInit {
         designation: '',
         sector: '',
         location: '',
-        startDate: new Date().toISOString().split('T')[0],
+        startDate: this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '',
         isCurrent: true
       });
       return { ...m };
@@ -734,7 +737,7 @@ export class AdminMembers implements OnInit {
     this.selectedMember().ecHistory.unshift({
       periodTitle: activePeriod ? activePeriod.title : '',
       position: 0, // None
-      startDate: new Date().toISOString().split('T')[0],
+      startDate: this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '',
       isCurrent: true,
       changeReason: ''
     });

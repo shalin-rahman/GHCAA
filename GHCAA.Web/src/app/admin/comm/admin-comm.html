@@ -231,7 +231,7 @@
                 <tbody>
                     @for (log of filteredLogs(); track log.id) {
                     <tr>
-                        <td>{{ log.sentDate | date:'short' }}</td>
+                        <td>{{ log.sentDate | date:'dd-MM-yyyy' }}</td>
                         <td><small>{{ log.recipientEmail }}</small></td>
                         <td>
                             <div>{{ log.subject }}</div>

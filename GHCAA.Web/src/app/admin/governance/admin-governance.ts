@@ -93,12 +93,22 @@ export class AdminGovernance implements OnInit {
         this.showPeriodModal.set(true);
     }
 
+    formatDateToDMY(d: any) {
+        if (!d) return '';
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return d;
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
     editPeriod(period: any) {
         this.editPeriodData.set({
             id: period.id,
             title: period.title,
-            startDate: period.startDate ? period.startDate.split('T')[0] : '', // format for input type="date"
-            endDate: period.endDate ? period.endDate.split('T')[0] : '',
+            startDate: this.formatDateToDMY(period.startDate),
+            endDate: this.formatDateToDMY(period.endDate),
             isActive: period.isActive
         });
         this.showPeriodModal.set(true);

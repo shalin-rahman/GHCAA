@@ -7,6 +7,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/api/api_client.dart';
 import '../../features/lookups/dropdown_service.dart';
 import '../../core/config/app_config.dart';
+import '../../core/utils/app_utils.dart';
 
 class AdminCommunicationHub extends ConsumerStatefulWidget {
   const AdminCommunicationHub({super.key});
@@ -364,7 +365,7 @@ class AdminCMS extends ConsumerWidget {
             children: [
               TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Gallery Title')),
               TextField(controller: descCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Description')),
-              TextField(controller: dateCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Event Date (YYYY-MM-DD)')),
+              TextField(controller: dateCtrl, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Event Date (DD-MM-YYYY)')),
             ],
           ),
         ),
@@ -378,7 +379,7 @@ class AdminCMS extends ConsumerWidget {
                 final payload = {
                   'title': titleCtrl.text,
                   'description': descCtrl.text,
-                  'eventDate': dateCtrl.text.isNotEmpty ? dateCtrl.text : DateTime.now().toIso8601String(),
+                  'eventDate': dateCtrl.text.isNotEmpty ? dateCtrl.text : AppUtils.formatDate(DateTime.now()),
                   'isActive': true,
                   'isFeatured': false,
                 };

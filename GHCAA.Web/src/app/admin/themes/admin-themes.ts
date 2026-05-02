@@ -23,6 +23,16 @@ export class AdminThemes implements OnInit {
     isEditing = signal(false);
     isSaving = signal(false);
 
+    formatDateToDMY(d: any) {
+        if (!d) return '';
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return d;
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
     selectedTheme: SpecialDayTheme = this.resetTheme();
 
     ngOnInit() {
@@ -52,8 +62,8 @@ export class AdminThemes implements OnInit {
         this.isEditing.set(true);
         this.selectedTheme = { 
             ...theme,
-            startDate: theme.startDate ? new Date(theme.startDate).toISOString().split('T')[0] : '',
-            endDate: theme.endDate ? new Date(theme.endDate).toISOString().split('T')[0] : ''
+            startDate: this.formatDateToDMY(theme.startDate),
+            endDate: this.formatDateToDMY(theme.endDate)
         };
         this.showForm.set(true);
     }
@@ -104,8 +114,8 @@ export class AdminThemes implements OnInit {
         return {
             id: 0,
             title: '',
-            startDate: new Date().toISOString().split('T')[0],
-            endDate: new Date().toISOString().split('T')[0],
+            startDate: this.formatDateToDMY(new Date()),
+            endDate: this.formatDateToDMY(new Date()),
             backgroundColor: '#000000',
             textColor: '#ffffff',
             announcementText: '',

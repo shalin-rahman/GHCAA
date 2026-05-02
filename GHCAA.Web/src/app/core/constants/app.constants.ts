@@ -14,6 +14,9 @@ export const EC_ROLES = [
     'Institutional Representative'
 ] as const;
 
+export const DATE_FORMAT = 'dd-MM-yyyy';
+export const DATE_REGEX = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+
 export const DEVELOPER_INFO = {
     name: 'md habibur rahman shalin',
     email: 'shalin.rahman@gmail.com',

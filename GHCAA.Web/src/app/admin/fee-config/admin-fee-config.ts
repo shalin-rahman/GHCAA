@@ -23,6 +23,16 @@ export class AdminFeeConfig implements OnInit {
   editingId = signal<number | null>(null);
   submitting = signal(false);
 
+  formatDateToDMY(d: any) {
+    if (!d) return '';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return d;
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
   feeCategories = FINANCIAL_CATEGORY_OPTIONS;
   membershipTypes = MEMBERSHIP_TYPE_OPTIONS;
 
@@ -69,7 +79,7 @@ export class AdminFeeConfig implements OnInit {
       category: 'RegistrationFee',
       membershipType: 'General',
       amount: 0,
-      effectiveDate: new Date().toISOString().split('T')[0],
+      effectiveDate: this.formatDateToDMY(new Date()),
       isActive: true
     });
     this.showForm.set(true);
@@ -79,8 +89,8 @@ export class AdminFeeConfig implements OnInit {
     this.editingId.set(config.id);
     this.form.patchValue({
       ...config,
-      effectiveDate: config.effectiveDate ? new Date(config.effectiveDate).toISOString().split('T')[0] : '',
-      effectiveTo: config.effectiveTo ? new Date(config.effectiveTo).toISOString().split('T')[0] : null,
+      effectiveDate: this.formatDateToDMY(config.effectiveDate),
+      effectiveTo: this.formatDateToDMY(config.effectiveTo),
       description: config.description || ''
     });
     this.showForm.set(true);

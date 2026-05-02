@@ -59,7 +59,7 @@ void main() {
         presentAddress: 'Dhaka, Bangladesh',
         permanentAddress: 'Comilla, Bangladesh',
         bloodGroup: 'BPositive',
-        dateOfBirth: '1995-06-15',
+        dateOfBirth: '15-06-1995',
       );
 
       expect(wizard.state.model.fullName, 'Shalin Rahman');

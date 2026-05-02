@@ -48,10 +48,20 @@ export class AdminGallery implements OnInit {
     // Form State
     showForm = signal(false);
     editingId = signal<number | null>(null);
+    formatDateToDMY(d: any) {
+        if (!d) return '';
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return d;
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
     newGallery = {
         title: '',
         description: '',
-        eventDate: new Date().toISOString().split('T')[0],
+        eventDate: this.formatDateToDMY(new Date()),
         location: ''
     };
 
@@ -97,7 +107,7 @@ export class AdminGallery implements OnInit {
         this.newGallery = {
             title: gallery.title,
             description: gallery.description || '',
-            eventDate: gallery.eventDate ? new Date(gallery.eventDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            eventDate: this.formatDateToDMY(gallery.eventDate),
             location: gallery.location || ''
         };
         this.showForm.set(true);
@@ -109,7 +119,7 @@ export class AdminGallery implements OnInit {
         this.newGallery = {
             title: '',
             description: '',
-            eventDate: new Date().toISOString().split('T')[0],
+            eventDate: this.formatDateToDMY(new Date()),
             location: ''
         };
     }

@@ -6,11 +6,13 @@ import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName, TSHIRT_SIZES } from '../../core/constants/app.constants';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
     imports: [CommonModule, FormsModule],
+    providers: [DatePipe],
     templateUrl: './profile.html',
     styleUrl: './profile.scss'
 })
@@ -21,6 +23,7 @@ export class Profile implements OnInit {
     ecRoles = EC_ROLES;
     private profileService = inject(ProfileService);
     private notify = inject(NotificationService);
+    private datePipe = inject(DatePipe);
 
     loading = signal(true);
     saving = signal(false);
@@ -69,13 +72,14 @@ export class Profile implements OnInit {
                 this.profile = mapping(p);
                 
                 if (this.profile.dateOfBirth) {
-                    this.profile.dateOfBirth = new Date(this.profile.dateOfBirth).toISOString().split('T')[0];
+                    this.profile.dateOfBirth = this.datePipe.transform(this.profile.dateOfBirth, 'dd-MM-yyyy') || '';
                 }
                 
                 if (this.profile.professionalHistory) {
                     this.profile.professionalHistory = this.profile.professionalHistory.map((ph: any) => ({
                         ...ph,
-                        startDate: (ph.startDate || ph.StartDate) ? new Date(ph.startDate || ph.StartDate).toISOString().split('T')[0] : ''
+                        startDate: this.datePipe.transform(ph.startDate || ph.StartDate, 'dd-MM-yyyy') || '',
+                        endDate: ph.endDate || ph.EndDate ? this.datePipe.transform(ph.endDate || ph.EndDate, 'dd-MM-yyyy') : ''
                     }));
                 }
                 this.loading.set(false);
@@ -106,7 +110,7 @@ export class Profile implements OnInit {
             designation: '',
             sector: 'Other',
             location: '',
-            startDate: new Date().toISOString().split('T')[0],
+            startDate: this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '',
             isCurrent: true
         });
     }

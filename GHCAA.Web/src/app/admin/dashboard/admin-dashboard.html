@@ -2,7 +2,7 @@
     <div class="page-header">
         <div class="header-text">
             <h2>Dashboard</h2>
-            <small>Live system overview — {{ now | date:'mediumDate' }}</small>
+            <small>Live system overview — {{ now | date:'dd-MM-yyyy' }}</small>
         </div>
         <div class="header-actions">
             <span class="pulse-line">Live System Status</span>
@@ -124,7 +124,7 @@
                     <div class="news-feed-body">
                         <span class="news-category">{{ item.articleCategory || item.category || 'General' }}</span>
                         <strong>{{ item.title }}</strong>
-                        <small>{{ item.publishedAt || item.createdAt | date:'mediumDate' }}</small>
+                        <small>{{ item.publishedAt || item.createdAt | date:'dd-MM-yyyy' }}</small>
                     </div>
                     <div class="news-status-chip" [class.published]="item.status !== 'Draft'">
                         {{ item.status === 'Draft' ? 'Draft' : 'Live' }}

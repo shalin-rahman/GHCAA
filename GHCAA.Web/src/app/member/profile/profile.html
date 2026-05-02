@@ -270,11 +270,12 @@
                     </div>
                     <div class="form-group">
                         <label>Date of Birth *</label>
-                        <input type="date" [ngModel]="profile.dateOfBirth | date:'yyyy-MM-dd'" 
-                            (ngModelChange)="profile.dateOfBirth = $event" name="dateOfBirth" required 
+                        <input type="text" [(ngModel)]="profile.dateOfBirth" name="dateOfBirth" required 
+                            placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                             #dobM="ngModel" [class.border-red-500]="dobM.invalid && dobM.touched">
                         <div *ngIf="dobM.touched && dobM.invalid" class="text-[10px] text-red-500 mt-1">
                             <span *ngIf="dobM.errors?.['required']">Date of birth is required.</span>
+                            <span *ngIf="dobM.errors?.['pattern']">Use format: dd-mm-yyyy</span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -457,12 +458,14 @@
                             
                             <div class="form-group">
                                 <label>Date of Induction *</label>
-                                <input type="date" [(ngModel)]="work.startDate" [name]="'sD_' + $index" required
+                                <input type="text" [(ngModel)]="work.startDate" [name]="'sD_' + $index" required
+                                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                                     #pSdM="ngModel" [class.border-red-500]="pSdM.invalid && pSdM.touched">
                             </div>
                             <div class="form-group" *ngIf="!work.isCurrent">
                                 <label>Retirement / Resignation Date *</label>
-                                <input type="date" [(ngModel)]="work.endDate" [name]="'eD_' + $index" required
+                                <input type="text" [(ngModel)]="work.endDate" [name]="'eD_' + $index" required
+                                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                                     #pEdM="ngModel" [class.border-red-500]="pEdM.invalid && pEdM.touched">
                             </div>
 

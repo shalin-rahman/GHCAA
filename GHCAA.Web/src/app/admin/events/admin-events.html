@@ -444,7 +444,7 @@
                     }
                     <h3 class="text-accent">{{ ev.title }}</h3>
                     <p class="text-xs uppercase font-black tracking-widest text-muted mt-1">{{ ev.location }} • {{
-                        ev.startDate | date:'longDate' }} – {{ ev.endDate | date:'longDate' }}</p>
+                        ev.startDate | date:'dd-MM-yyyy' }} – {{ ev.endDate | date:'dd-MM-yyyy' }}</p>
                 </div>
                 <button (click)="closeDetail()" class="close-btn">✕</button>
             </div>
@@ -462,11 +462,11 @@
                     </div>
                     <div class="data-field-box">
                         <h5>Registration Opens</h5>
-                        <p>{{ (ev.registrationStartDate | date:'medium') || 'Immediately' }}</p>
+                        <p>{{ (ev.registrationStartDate | date:'dd-MM-yyyy') || 'Immediately' }}</p>
                     </div>
                     <div class="data-field-box">
                         <h5>Registration Closes</h5>
-                        <p>{{ (ev.registrationEndDate | date:'medium') || 'Open until event' }}</p>
+                        <p>{{ (ev.registrationEndDate | date:'dd-MM-yyyy') || 'Open until event' }}</p>
                     </div>
                 </div>
 
@@ -538,7 +538,7 @@
                                 <span class="icon">📅</span>
                                 <div class="meta">
                                     <label>Date & Time</label>
-                                    <strong>{{ invitationData()?.registeredAt | date:'medium' }}</strong>
+                                    <strong>{{ invitationData()?.registeredAt | date:'dd-MM-yyyy' }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -555,7 +555,7 @@
                                 <div class="seal">
                                     <span class="seal-txt">{{ appConfig.approvalSeal }}</span>
                                 </div>
-                                <p class="seal-date">Validated on {{ invitationData()?.registeredAt | date:'shortDate'
+                                <p class="seal-date">Validated on {{ invitationData()?.registeredAt | date:'dd-MM-yyyy'
                                     }}</p>
                             </div>
                         </div>

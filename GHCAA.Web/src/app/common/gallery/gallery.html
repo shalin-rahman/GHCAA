@@ -75,7 +75,7 @@
             <div class="card-body">
                 <h3>{{ g.title }}</h3>
                 <div class="meta">
-                    <span>📅 {{ g.eventDate | date }}</span>
+                    <span>📅 {{ g.eventDate | date:'dd-MM-yyyy' }}</span>
                     <span>📍 {{ g.location }}</span>
                 </div>
             </div>
@@ -97,7 +97,7 @@
             <div>
                 <h2 class="text-2xl font-black text-accent uppercase tracking-tighter">{{ gallery?.title }}</h2>
                 <p class="text-xs uppercase font-black tracking-widest text-muted">
-                    {{ gallery?.eventDate | date }} • {{ gallery?.location }}
+                    {{ gallery?.eventDate | date:'dd-MM-yyyy' }} • {{ gallery?.location }}
                 </p>
             </div>
         </div>

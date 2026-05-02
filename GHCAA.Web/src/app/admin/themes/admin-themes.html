@@ -45,9 +45,9 @@
                     </td>
                     <td>
                         <div class="date-range">
-                            <span class="d-chip start">{{ theme.startDate | date:'mediumDate' }}</span>
+                            <span class="d-chip start">{{ theme.startDate | date:'dd-MM-yyyy' }}</span>
                             <span class="connector">→</span>
-                            <span class="d-chip end">{{ theme.endDate | date:'mediumDate' }}</span>
+                            <span class="d-chip end">{{ theme.endDate | date:'dd-MM-yyyy' }}</span>
                         </div>
                     </td>
                     <td>
@@ -112,11 +112,13 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div class="form-group">
                                 <label>Start Date</label>
-                                <input type="date" [(ngModel)]="selectedTheme.startDate">
+                                <input type="text" [(ngModel)]="selectedTheme.startDate"
+                                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
                             </div>
                             <div class="form-group">
                                 <label>End Date</label>
-                                <input type="date" [(ngModel)]="selectedTheme.endDate">
+                                <input type="text" [(ngModel)]="selectedTheme.endDate"
+                                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
                             </div>
                         </div>
                     </div>

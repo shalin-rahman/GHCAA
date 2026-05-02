@@ -39,7 +39,7 @@
                 <div class="audit-content">
                     <div class="audit-header">
                         <span class="action-type">{{ log.action }}</span>
-                        <span class="timestamp">{{ log.createdAt | date:'medium' }}</span>
+                        <span class="timestamp">{{ log.createdAt | date:'dd-MM-yyyy' }}</span>
                     </div>
                     <p class="description">{{ log.details }}</p>
                     <div class="audit-meta">

@@ -52,7 +52,7 @@
             </div>
 
             <div class="poll-footer">
-                <span class="date">Created: {{ poll.createdAt | date:'mediumDate' }}</span>
+                <span class="date">Created: {{ poll.createdAt | date:'dd-MM-yyyy' }}</span>
                 <span class="type">{{ poll.allowMultipleChoice ? 'Multiple Choice' : 'Single Choice' }}</span>
             </div>
         </div>
