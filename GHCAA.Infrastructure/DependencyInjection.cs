@@ -85,7 +85,7 @@ namespace GHCAA.Infrastructure
             var conn = configuration.GetConnectionString("PgSqlConnection");
             var envUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
             
-            if (!string.IsNullOrEmpty(envUrl) && envUrl.StartsWith("postgres://"))
+            if (!string.IsNullOrEmpty(envUrl) && (envUrl.StartsWith("postgres://") || envUrl.StartsWith("postgresql://")))
             {
                 var uri = new Uri(envUrl);
                 var userInfo = uri.UserInfo.Split(':');
