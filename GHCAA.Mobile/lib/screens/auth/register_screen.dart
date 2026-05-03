@@ -47,7 +47,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         },
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingLarge),
+        padding: const EdgeInsets.all(AppTheme.spaceL),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -59,28 +59,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     final isActive = i <= currentStep;
                     return Expanded(
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
-                        height: 4,
+                        margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceXS),
+                        height: AppTheme.spaceXS,
                         decoration: BoxDecoration(
                           color: isActive ? AppTheme.royalGold : Colors.white10,
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusXS / 2),
                         ),
                       ),
                     );
                   }),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppTheme.spaceS),
                 Text(
                   'Step ${currentStep + 1} of 3 — ${_stepLabels[currentStep]}',
-                  style: const TextStyle(color: AppTheme.royalGold, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                  style: const TextStyle(
+                    color: AppTheme.royalGold,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
                 ),
-                const SizedBox(height: AppConstants.paddingLarge),
+                const SizedBox(height: AppTheme.spaceL),
                 GlassContainer(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildStepContent(context, registerState),
-                      const SizedBox(height: AppConstants.paddingExtraLarge),
+                      const SizedBox(height: AppTheme.spaceXL),
                       SizedBox(
                         width: double.infinity,
                         child: _isLoading
@@ -312,7 +317,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           'Select your preferred channel for the one-time registration filing fee. Instructions will appear below your choice.',
           style: TextStyle(fontSize: 11, color: Colors.white54),
         ),
-        const SizedBox(height: AppConstants.paddingMedium),
+        const SizedBox(height: AppTheme.spaceM),
         FutureBuilder<List<Map<String, String>>>(
           future: ref.read(dropdownDataProvider).getOptions('PaymentMethod'),
           builder: (context, snapshot) {
@@ -325,7 +330,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 DropdownButtonFormField<String>(
                   initialValue: options.any((o) => o['value'] == selectedValue) ? selectedValue : null,
-                  decoration: const InputDecoration(labelText: 'Payment Method *', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Payment Method *',
+                    border: OutlineInputBorder(),
+                  ),
                   dropdownColor: AppTheme.midnightSurface,
                   items: options.map((o) => DropdownMenuItem(value: o['value'], child: Text(o['label']!))).toList(),
                   onChanged: (v) {
@@ -334,12 +342,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   validator: (v) => (v == null || v == '0') ? 'Please select a payment method' : null,
                 ),
                 if (selectedMethod.isNotEmpty) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppTheme.spaceS),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppTheme.spaceM),
                     decoration: BoxDecoration(
                       color: AppTheme.royalGold.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusS),
                       border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.2)),
                     ),
                     child: Column(
@@ -348,11 +356,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         const Row(
                           children: [
                             Icon(Icons.info_outline, color: AppTheme.royalGold, size: 16),
-                            SizedBox(width: 8),
+                            SizedBox(width: AppTheme.spaceS),
                             Text('Payment Instructions', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 12)),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppTheme.spaceS),
                         Text(
                           selectedMethod['instructions'] ?? 'Follow standard procedure.',
                           style: const TextStyle(fontSize: 12, color: Colors.white70, height: 1.4),
@@ -421,10 +429,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             );
           },
         ),
-        const Divider(color: Colors.white10, height: 40),
+        const Divider(color: Colors.white10, height: AppTheme.spaceXXL),
         _sectionTitle('Constitution & Consent'),
         const Center(child: Icon(Icons.gavel_rounded, size: 48, color: AppTheme.royalGold)),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppTheme.spaceS),
         _buildConsentCheckbox(
           'I have read and understood the constitution and the Broadened Terms and Conditions of Registration, and I irrevocably agree to be bound by them.',
           state.data['HasAcceptedTerms'] ?? false,
@@ -446,7 +454,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Widget _buildConsentCheckbox(String label, bool value, Function(bool?) onChanged) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppTheme.spaceS),
       child: CheckboxListTile(
         contentPadding: EdgeInsets.zero,
         title: Text(label, style: const TextStyle(fontSize: 11, color: Colors.white70, height: 1.4)),
@@ -476,7 +484,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label.toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppTheme.spaceXS),
         InkWell(
           onTap: () async {
             final file = await ref.read(fileServiceProvider).pickImage();
@@ -484,17 +492,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               onPicked(file.path);
             }
           },
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppTheme.radiusS),
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppTheme.spaceM),
             decoration: BoxDecoration(
               border: Border.all(color: value != null ? AppTheme.royalGold.withValues(alpha: 0.5) : Colors.white10),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppTheme.radiusS),
             ),
             child: Row(
               children: [
                 Icon(icon, color: value != null ? AppTheme.royalGold : Colors.white30, size: 20),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppTheme.spaceM),
                 Expanded(
                   child: Text(
                     value != null ? value.split('/').last : 'Tap to select file...',
@@ -578,15 +586,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceM),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(AppTheme.radiusXS),
           border: Border.all(color: Colors.white24),
         ),
         child: Row(
           children: [
             const Icon(Icons.calendar_today_outlined, size: 18, color: AppTheme.royalGold),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppTheme.spaceM),
             Text(
               value != null ? AppUtils.formatDate(value) : label,
               style: TextStyle(color: value != null ? Colors.white : Colors.white54, fontSize: 13),

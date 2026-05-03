@@ -52,12 +52,12 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                   fit: BoxFit.contain,
                   loadingBuilder: (c, child, progress) => progress == null ? child : const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
                   errorBuilder: (c, e, s) => Container(
-                    padding: const EdgeInsets.all(40),
+                    padding: const EdgeInsets.all(AppTheme.spaceXXL),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.broken_image_rounded, size: 48, color: Colors.white24),
-                        const SizedBox(height: 16),
+                        const Icon(Icons.broken_image_rounded, size: AppTheme.spaceXXL, color: Colors.white24),
+                        const SizedBox(height: AppTheme.spaceM),
                         Text('Image not available', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.white24)),
                       ],
                     ),
@@ -66,7 +66,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(AppTheme.spaceL),
               child: IconButton(
                 icon: const Icon(Icons.close_fullscreen_rounded, color: AppTheme.royalGold, size: 28),
                 onPressed: () => Navigator.pop(context),
@@ -97,15 +97,15 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 16),
+                const SizedBox(height: AppTheme.spaceM),
                 TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Gallery Title', prefixIcon: Icon(Icons.collections_bookmark_rounded))),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppTheme.spaceM),
                 TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Description', prefixIcon: Icon(Icons.notes_rounded)), maxLines: 2),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppTheme.spaceM),
                 TextField(controller: locCtrl, decoration: const InputDecoration(labelText: 'Location', prefixIcon: Icon(Icons.pin_drop_rounded))),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppTheme.spaceXL),
                 Text('EVENT DATE', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.royalGold, letterSpacing: 1.5, fontSize: 8)),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppTheme.spaceM),
                 GestureDetector(
                   onTap: () async {
                     final picked = await showDatePicker(
@@ -121,12 +121,12 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                     if (picked != null) setState(() => selectedDate = picked);
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: AppTheme.obsidianBlack, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.glassBorder)),
+                    padding: const EdgeInsets.all(AppTheme.spaceM),
+                    decoration: BoxDecoration(color: AppTheme.obsidianBlack, borderRadius: BorderRadius.circular(AppTheme.radiusM), border: Border.all(color: AppTheme.glassBorder)),
                     child: Row(
                       children: [
                         const Icon(Icons.event_available_rounded, size: 18, color: AppTheme.royalGold),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppTheme.spaceM),
                         Text(AppUtils.formatDate(selectedDate), style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                         const Spacer(),
                         const Text('EDIT', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900)),
@@ -237,7 +237,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceM),
             child: AppSearchField(
               controller: _searchController,
               hintText: 'Search gallery...',
@@ -259,7 +259,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(Icons.photo_library_outlined, color: Colors.white10, size: 64),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppTheme.spaceM),
                         Text('No galleries found.', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white12)),
                       ],
                     ),
@@ -267,7 +267,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 }
  
                 return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                  padding: const EdgeInsets.fromLTRB(AppTheme.spaceL, 0, AppTheme.spaceL, 104),
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {
                     final gallery = filtered[index];
@@ -275,7 +275,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                     final fullThumb = AppConfig.resolveImageUrl(photos.isNotEmpty ? photos[0]['photoPath'] : null);
  
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 24),
+                      padding: const EdgeInsets.only(bottom: AppTheme.spaceXL),
                       child: Card(
                         margin: EdgeInsets.zero,
                         child: Column(
@@ -289,7 +289,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                     child: AspectRatio(
                                       aspectRatio: 16 / 9,
                                       child: ClipRRect(
-                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusL)),
                                         child: Image.network(fullThumb, fit: BoxFit.cover, 
                                           errorBuilder: (context, error, stackTrace) => Container(color: Colors.black12, child: const Icon(Icons.image_not_supported_outlined, color: Colors.white10))),
                                       ),
@@ -297,11 +297,11 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                   ),
                                   if (isAdmin)
                                     Positioned(
-                                      top: 12, right: 12,
+                                      top: AppTheme.spaceS + 4, right: AppTheme.spaceS + 4,
                                       child: Row(
                                         children: [
                                           AdminActionCircle(icon: Icons.upload_file_rounded, color: AppTheme.royalGold, tooltip: 'Upload Photos', onTap: () => _uploadPhotos(gallery['id'])),
-                                          const SizedBox(width: 8),
+                                          const SizedBox(width: AppTheme.spaceS),
                                           AdminActionCircle(icon: Icons.delete_sweep_rounded, color: Colors.redAccent, tooltip: 'Delete Gallery', onTap: () => _confirmDeleteGallery(gallery['id'])),
                                         ],
                                       ),
@@ -309,7 +309,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                 ],
                               ),
                             Padding(
-                              padding: const EdgeInsets.all(20),
+                              padding: const EdgeInsets.all(AppTheme.spaceL),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -317,18 +317,18 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(child: Text(gallery['title'].toString().toUpperCase(), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w900))),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: AppTheme.spaceS),
                                       Text(AppUtils.formatDate(gallery['eventDate']), style: Theme.of(context).textTheme.labelLarge),
                                     ],
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: AppTheme.spaceS),
                                   Text(gallery['description'] ?? 'No description available.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5)),
-                                  const SizedBox(height: 20),
+                                  const SizedBox(height: AppTheme.spaceL),
                                   if (photos.length > 1) ...[
                                     Text('Photos', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.royalGold.withValues(alpha: 0.6), letterSpacing: 1.2)),
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: AppTheme.spaceM),
                                     SizedBox(
-                                      height: 70,
+                                      height: 72,
                                       child: ListView.builder(
                                         scrollDirection: Axis.horizontal,
                                         itemCount: photos.length - 1,
@@ -336,15 +336,15 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                           final fUrl = AppConfig.resolveImageUrl(photos[i+1]['photoPath']);
                                           if (fUrl == null) return const SizedBox();
                                           return Padding(
-                                            padding: const EdgeInsets.only(right: 10),
+                                            padding: const EdgeInsets.only(right: AppTheme.spaceS),
                                             child: GestureDetector(
                                               onTap: () => _showImagePreview(context, fUrl),
                                               child: Container(
-                                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.glassBorder)),
+                                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppTheme.radiusS), border: Border.all(color: AppTheme.glassBorder)),
                                                 child: ClipRRect(
-                                                  borderRadius: BorderRadius.circular(10),
-                                                  child: Image.network(fUrl, width: 70, height: 70, fit: BoxFit.cover,
-                                                    errorBuilder: (context, error, stackTrace) => const SizedBox(width: 70, child: Icon(Icons.broken_image_outlined, color: Colors.white10))),
+                                                  borderRadius: BorderRadius.circular(AppTheme.radiusS),
+                                                  child: Image.network(fUrl, width: 72, height: 72, fit: BoxFit.cover,
+                                                    errorBuilder: (context, error, stackTrace) => const SizedBox(width: 72, child: Icon(Icons.broken_image_outlined, color: Colors.white10))),
                                                 ),
                                               ),
                                             ),

@@ -73,16 +73,16 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceL),
           itemCount: conversations.length,
           itemBuilder: (context, index) {
             final conversation = conversations[index];
             return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(bottom: AppTheme.spaceM),
               child: GlassContainer(
                 padding: EdgeInsets.zero,
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceS),
                   onTap: () {
                     HapticFeedback.lightImpact();
                     context.push('/chat/${conversation['otherUserId']}');
@@ -110,12 +110,12 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
         return Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppTheme.spaceM),
               child: GlassContainer(
                 child: Row(
                   children: [
                     const Icon(Icons.group_work_outlined, color: AppTheme.royalGold),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: AppTheme.spaceM),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text('BATCH OF $batch ($dept)', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
@@ -136,7 +136,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
                    if (snapshot.hasData) {
                      final msg = snapshot.data!;
                      return ListView(
-                       padding: const EdgeInsets.all(16),
+                       padding: const EdgeInsets.all(AppTheme.spaceM),
                        children: [
                          _buildLiveMessage(msg['senderName'], msg['content'], msg['timestamp']),
                        ],
@@ -158,11 +158,11 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
     return Column(
       children: [
         const Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(AppTheme.spaceM),
           child: GlassContainer(
             child: Row(children: [
               Icon(Icons.campaign_outlined, color: Colors.redAccent),
-              SizedBox(width: 16),
+              SizedBox(width: AppTheme.spaceM),
               Expanded(child: Text('OFFICIAL ALUMNI NOTICES', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1))),
             ]),
           ),
@@ -174,7 +174,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
               if (snapshot.hasData) {
                  final notice = snapshot.data!;
                  return ListView(
-                   padding: const EdgeInsets.all(16),
+                   padding: const EdgeInsets.all(AppTheme.spaceM),
                    children: [
                      _buildLiveMessage('ASSOCIATION PRESS', notice['title'], notice['timestamp'], isNotice: true),
                    ],
@@ -190,9 +190,9 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
 
   Widget _buildLiveMessage(String? sender, String? content, dynamic time, {bool isNotice = false}) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
+      margin: const EdgeInsets.only(bottom: AppTheme.spaceM, left: AppTheme.spaceM, right: AppTheme.spaceM),
       child: GlassContainer(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppTheme.spaceM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -200,7 +200,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
               Text(sender ?? 'System', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isNotice ? Colors.redAccent : AppTheme.royalGold)),
               Text(_formatTime(time), style: const TextStyle(fontSize: 9, color: Colors.white24)),
             ]),
-            const SizedBox(height: 6),
+            const SizedBox(height: AppTheme.spaceS),
             Text(content ?? '', style: const TextStyle(fontSize: 13, color: Colors.white70)),
           ],
         ),
@@ -214,7 +214,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: 48, color: Colors.white10),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppTheme.spaceM),
           Text(message, style: const TextStyle(color: Colors.white24, fontSize: 13)),
         ],
       ),
@@ -227,9 +227,9 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: 64, color: Colors.white24),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppTheme.spaceL),
           Text(message, style: const TextStyle(color: Colors.white54, fontSize: 16)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppTheme.spaceS),
           TextButton(
             onPressed: onAction,
             child: const Text('SEARCH ALUMNI DIRECTORY', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
@@ -263,7 +263,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
         Text(_formatTime(time), style: TextStyle(fontSize: 10, color: AppTheme.royalGold.withValues(alpha: 0.8), fontWeight: FontWeight.bold)),
         if (unreadCount != null && unreadCount > 0)
           Container(
-            margin: const EdgeInsets.only(top: 4), padding: const EdgeInsets.all(6),
+            margin: const EdgeInsets.only(top: AppTheme.spaceXS), padding: const EdgeInsets.all(6),
             decoration: const BoxDecoration(color: AppTheme.royalGold, shape: BoxShape.circle),
             child: Text(unreadCount.toString(), style: const TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.bold)),
           ),

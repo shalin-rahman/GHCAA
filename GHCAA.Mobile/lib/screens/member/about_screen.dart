@@ -14,29 +14,29 @@ class AboutScreen extends StatelessWidget {
       title: 'Our Heritage',
       breadcrumb: 'Member Portal > Institution Heritage',
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
+        padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceXXL),
         child: Column(
           children: [
             Hero(
               tag: 'app_logo',
               child: Container(
-                width: 130,
-                height: 130,
-                padding: const EdgeInsets.all(8),
+                width: 128,
+                height: 128,
+                padding: const EdgeInsets.all(AppTheme.spaceS),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(40),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusXL + 16), // 24 + 16 = 40
                   border: Border.all(
                       color: AppTheme.royalGold.withValues(alpha: 0.3), width: 2),
                   color: Colors.black.withValues(alpha: 0.2),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(32),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusXL + 8), // 24 + 8 = 32
                   child: Image.asset('assets/logo.png', fit: BoxFit.contain,
                       errorBuilder: (c, e, s) => const Center(child: Icon(Icons.school_outlined, color: AppTheme.royalGold, size: 60))),
                 ),
               ),
             ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppTheme.spaceXL),
             Text(AppConfig.appName.toUpperCase(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
@@ -45,49 +45,49 @@ class AboutScreen extends StatelessWidget {
                     letterSpacing: 3,
                     height: 1.2,
                     color: Colors.white)),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppTheme.spaceS),
             Text('ESTABLISHED 1971 | ${AppConfig.appVersion}',
                 style: const TextStyle(
                     fontSize: 10,
                     color: AppTheme.royalGold,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.5)),
-            const SizedBox(height: 56),
+            const SizedBox(height: AppTheme.spaceXXL),
             _buildInfoCard(
               'ASSOCIATION MISSION',
               AppConfig.portalDescription,
               Icons.auto_awesome_outlined,
             ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppTheme.spaceL),
             _buildInfoCard(
               'PLATFORM INTEGRITY',
               'Built with enterprise-grade obsidian-cloud security, real-time auditing, and transparent background processing to serve the Haragangian community worldwide.',
               Icons.security_outlined,
             ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
-            const SizedBox(height: 56),
+            const SizedBox(height: AppTheme.spaceXXL),
             const Divider(color: Colors.white10),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppTheme.spaceXL),
             const Text('ENGINEERING & DESIGN REGISTRY',
                 style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 2,
                     color: AppTheme.textSecondaryDark)),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppTheme.spaceM),
             const Text('MB HABIBUR RAHMAN SHALIN',
                 style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                     letterSpacing: 0.5)),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppTheme.spaceXS),
             const Text('Advanced Platform Architect & Haragangian Alumnus',
                 style:
                     TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 64),
+            const SizedBox(height: AppTheme.spaceHUGE),
             Text('© ${DateTime.now().year} Haragangian Alumni'.toUpperCase(),
                 style: const TextStyle(fontSize: 9, color: Colors.white12, fontWeight: FontWeight.w900, letterSpacing: 1)),
-            const SizedBox(height: 40),
+            const SizedBox(height: AppTheme.spaceXL + AppTheme.spaceS), // 40
           ],
         ),
       ),
@@ -102,7 +102,7 @@ class AboutScreen extends StatelessWidget {
           Row(
             children: [
               Icon(icon, size: 18, color: AppTheme.royalGold),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppTheme.spaceS),
               Text(title,
                   style: const TextStyle(
                       fontSize: 11,
@@ -111,7 +111,7 @@ class AboutScreen extends StatelessWidget {
                       color: AppTheme.royalGold)),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppTheme.spaceM),
           Text(content,
               style: const TextStyle(
                   fontSize: 13, height: 1.6, color: Colors.white70)),

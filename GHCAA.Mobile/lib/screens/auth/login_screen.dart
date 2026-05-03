@@ -109,23 +109,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceXL),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 60),
+                const SizedBox(height: AppTheme.spaceHUGE),
                 // Branded Logo Integration
                 Center(
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(AppTheme.spaceS),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.03),
                       shape: BoxShape.circle,
                       border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.1)),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(60),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusXL),
                       child: Image.asset(
                         'assets/logo.png',
                         height: 100,
@@ -139,7 +139,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppTheme.spaceL),
                 Text(AppConfig.organizationAcronym,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
@@ -148,7 +148,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         fontWeight: FontWeight.w900,
                         letterSpacing: 8,
                         color: Colors.white)),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppTheme.spaceXS),
                 Text(
                   AppConfig.organizationTagline.toUpperCase(),
                   textAlign: TextAlign.center,
@@ -158,25 +158,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.5),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppTheme.spaceM),
                 Text(AppConfig.organizationName,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textSecondaryDark)),
-                const SizedBox(height: 48),
+                const SizedBox(height: AppTheme.spaceXXL),
                 
                 if (_errorMessage != null)
                   Container(
-                    margin: const EdgeInsets.only(bottom: 24),
-                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.only(bottom: AppTheme.spaceL),
+                    padding: const EdgeInsets.all(AppTheme.spaceM),
                     decoration: BoxDecoration(
                       color: Colors.red.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusL),
                       border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
                         const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 20),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppTheme.spaceM),
                         Expanded(
                           child: Text(
                             _errorMessage!,
@@ -200,21 +200,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           letterSpacing: 2,
                           fontFamily: 'Outfit'
                         )),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: AppTheme.spaceXL),
                       TextField(
                         controller: _identifierController,
                         decoration: const InputDecoration(
                             labelText: 'Member ID (Email / NID)',
                             prefixIcon: Icon(Icons.badge_outlined)),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppTheme.spaceM),
                       PasswordField(
                         controller: _passwordController,
                         labelText: 'Portal Password',
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _handleLogin(),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppTheme.spaceM),
                       Row(
                         children: [
                             Transform.scale(
@@ -234,7 +234,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppTheme.spaceL),
                         _isLoading
                           ? const Center(child: CircularProgressIndicator(color: AppTheme.royalGold))
                           : ElevatedButton(
@@ -244,18 +244,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               },
                               child: const Text('ENGAGE PORTAL')),
                         
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppTheme.spaceL),
                         const Row(
                           children: [
                             Expanded(child: Divider(color: Colors.white12)),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                              padding: EdgeInsets.symmetric(horizontal: AppTheme.spaceS),
                               child: Text('OR', style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)),
                             ),
                             Expanded(child: Divider(color: Colors.white12)),
                           ],
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppTheme.spaceL),
                         
                         // Social Login Buttons
                         OutlinedButton.icon(
@@ -264,23 +264,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           label: const Text('Continue with Google', style: TextStyle(color: Colors.white)),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Colors.white12),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppTheme.spaceM),
                         OutlinedButton.icon(
                           onPressed: () => _handleSocialLogin('Facebook'),
                           icon: const Icon(Icons.facebook, color: Colors.blue),
                           label: const Text('Continue with Facebook', style: TextStyle(color: Colors.white)),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Colors.white12),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
                           ),
                         ),
                       ],
                     ),
                   ),
-                const SizedBox(height: 32),
+                const SizedBox(height: AppTheme.spaceXL),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -295,11 +295,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 60),
+                const SizedBox(height: AppTheme.spaceHUGE),
                 Text('SYSTEM VERSION ${AppConfig.appVersion}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 9, color: Colors.white10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppTheme.spaceL),
               ],
             ),
           ),

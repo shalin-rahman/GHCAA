@@ -68,7 +68,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            padding: const EdgeInsets.fromLTRB(AppTheme.spaceL, AppTheme.spaceM, AppTheme.spaceL, AppTheme.spaceS),
             child: AppSearchField(
               controller: _searchController,
               hintText: 'Search events...',
@@ -100,7 +100,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                     children: [
                       if (filtered.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(left: 24, bottom: 8, top: 4),
+                          padding: const EdgeInsets.only(left: AppTheme.spaceL, bottom: AppTheme.spaceS, top: AppTheme.spaceXS),
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
@@ -113,7 +113,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                         child: filtered.isEmpty
                           ? Center(child: Text(searchQuery.isEmpty ? 'No active events found.' : 'No events match your search.', style: Theme.of(context).textTheme.bodyMedium))
                           : ListView.builder(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceM),
                               itemCount: filtered.length,
                               itemBuilder: (context, index) {
                                 final ev = filtered[index];
@@ -121,7 +121,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                 final fullImgUrl = AppConfig.resolveImageUrl(ev['coverImageUrl'] ?? ev['imageUrl']);
  
                                 return Padding(
-                                  padding: const EdgeInsets.only(bottom: 24.0),
+                                  padding: const EdgeInsets.only(bottom: AppTheme.spaceL),
                                   child: GestureDetector(
                                     onTap: () {
                                       HapticFeedback.lightImpact();
@@ -135,10 +135,10 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                           Stack(
                                             children: [
                                               SizedBox(
-                                                height: 190,
+                                                height: 192,
                                                 width: double.infinity,
                                                 child: ClipRRect(
-                                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusL)),
                                                   child: CustomNetworkImage(
                                                     imageUrl: fullImgUrl ?? '',
                                                     borderRadius: 0,
@@ -148,18 +148,18 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                               ),
                                               if (fullImgUrl == null)
                                                 SizedBox(
-                                                  height: 190,
+                                                  height: 192,
                                                   child: Center(child: Icon(Icons.celebration_outlined, size: 64, color: AppTheme.royalGold.withValues(alpha: 0.1))),
                                                 ),
                                               Positioned(
                                                 top: 16,
                                                 right: 16,
                                                 child: Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceS, vertical: AppTheme.spaceXS),
                                                   decoration: BoxDecoration(
                                                     color: isOpen ? Colors.green.withValues(alpha: 0.9) : Colors.redAccent.withValues(alpha: 0.9), 
-                                                    borderRadius: BorderRadius.circular(6),
-                                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10)]
+                                                    borderRadius: BorderRadius.circular(AppTheme.radiusXS),
+                                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: AppTheme.spaceS)]
                                                   ),
                                                   child: Text(isOpen ? 'REGISTRATION OPEN' : 'CLOSED', style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
                                                 ),
@@ -169,7 +169,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                 left: 0,
                                                 right: 0,
                                                 child: Container(
-                                                  padding: const EdgeInsets.all(16),
+                                                  padding: const EdgeInsets.all(AppTheme.spaceM),
                                                   decoration: BoxDecoration(
                                                     gradient: LinearGradient(
                                                       begin: Alignment.bottomCenter, 
@@ -180,7 +180,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                   child: Row(
                                                     children: [
                                                       const Icon(Icons.location_on_rounded, size: 16, color: AppTheme.royalGold),
-                                                      const SizedBox(width: 8),
+                                                      const SizedBox(width: AppTheme.spaceS),
                                                       Text(ev['location']?.toString().toUpperCase() ?? 'LOCATION TBD', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
                                                     ],
                                                   ),
@@ -189,7 +189,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                             ],
                                           ),
                                           Padding(
-                                            padding: const EdgeInsets.all(20.0),
+                                            padding: const EdgeInsets.all(AppTheme.spaceL),
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
@@ -203,11 +203,11 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                         const Text('FREE ENTRY', style: TextStyle(color: Colors.greenAccent, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
                                                     ],
                                                   ),
-                                                const SizedBox(height: 16),
+                                                  const SizedBox(height: AppTheme.spaceM),
                                                 Text(ev['title'] ?? 'Alumni Reunion Event', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
-                                                const SizedBox(height: 8),
+                                                const SizedBox(height: AppTheme.spaceS),
                                                 Text(ev['description'] ?? 'No description provided.', style: Theme.of(context).textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
-                                                const SizedBox(height: 24),
+                                                const SizedBox(height: AppTheme.spaceL),
                                                 SizedBox(
                                                   width: double.infinity,
                                                   child: ElevatedButton.icon(
@@ -270,7 +270,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
           backgroundColor: AppTheme.deepCharcoal,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppTheme.radiusXL),
             side: const BorderSide(color: AppTheme.glassBorder),
           ),
           title: Center(
@@ -284,44 +284,44 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                   const SizedBox(height: 16),
+                   const SizedBox(height: AppTheme.spaceM),
                   TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Event Title', prefixIcon: Icon(Icons.title_rounded))),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppTheme.spaceM),
                   TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Description', prefixIcon: Icon(Icons.description_rounded)), maxLines: 3),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppTheme.spaceM),
                   TextField(controller: locCtrl, decoration: const InputDecoration(labelText: 'Primary Location', prefixIcon: Icon(Icons.place_rounded))),
  
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppTheme.spaceL),
                   _sectionHeader(context, 'EVENT DATES'),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppTheme.spaceM),
                   _datePickerRow(context, 'Start Date', startDate, (picked) => setDialogState(() => startDate = picked)),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppTheme.spaceS),
                   _datePickerRow(context, 'End Date', endDate, (picked) => setDialogState(() => endDate = picked)),
  
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppTheme.spaceL),
                   _sectionHeader(context, 'REGISTRATION DETAILS'),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppTheme.spaceM),
                   _datePickerRow(context, 'Opens', regStart, (picked) => setDialogState(() => regStart = picked), nullable: true),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppTheme.spaceS),
                   _datePickerRow(context, 'Closes', regEnd, (picked) => setDialogState(() => regEnd = picked), nullable: true),
  
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppTheme.spaceL),
                   _sectionHeader(context, 'FEE AND CAPACITY'),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppTheme.spaceM),
  
                   // Free/Paid toggle
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppTheme.spaceM),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.03),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusM),
                       border: Border.all(color: AppTheme.glassBorder),
                     ),
                     child: Row(
                       children: [
                         Icon(isFree ? Icons.celebration_rounded : Icons.payments_rounded,
                             color: isFree ? Colors.greenAccent : AppTheme.royalGold, size: 20),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppTheme.spaceM),
                         Expanded(
                           child: Text(isFree ? 'FREE EVENT' : 'PAID EVENT',
                               style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -343,7 +343,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
  
                   // Fee field
                   if (!isFree) Padding(
-                    padding: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.only(top: AppTheme.spaceM),
                     child: TextField(
                       controller: feeCtrl,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -442,16 +442,16 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
         if (picked != null) onPicked(picked);
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceM),
         decoration: BoxDecoration(
           color: AppTheme.obsidianBlack,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
           border: Border.all(color: AppTheme.glassBorder),
         ),
         child: Row(
           children: [
             const Icon(Icons.event_note_rounded, size: 16, color: AppTheme.royalGold),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppTheme.spaceM),
             Expanded(
               child: Text(
                 value != null ? AppUtils.formatDate(value) : 'Select $label',

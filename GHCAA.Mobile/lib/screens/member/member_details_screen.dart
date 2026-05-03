@@ -106,12 +106,12 @@ class MemberDetailsScreen extends ConsumerWidget {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildAvatar(photoUrl, profile['fullName']),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppTheme.spaceL),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -123,20 +123,20 @@ class MemberDetailsScreen extends ConsumerWidget {
                 ),
               ),
               if (profile['isVerified'] == true) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: AppTheme.spaceS),
                 const Icon(Icons.verified, color: AppTheme.royalGold, size: 22),
               ],
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppTheme.spaceS),
           Text(
             'MEMBER-ID: ${profile['membershipNumber'] ?? 'REG-PENDING'}',
             style: const TextStyle(color: AppTheme.royalGold, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppTheme.spaceM),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppTheme.spaceS,
+            runSpacing: AppTheme.spaceS,
             alignment: WrapAlignment.center,
             children: [
               if (profile['membershipType'] != null)
@@ -149,7 +149,7 @@ class MemberDetailsScreen extends ConsumerWidget {
                 _buildChip('VERIFIED ALUMNI', Colors.cyanAccent, Colors.blueGrey),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppTheme.spaceL),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
@@ -162,7 +162,7 @@ class MemberDetailsScreen extends ConsumerWidget {
                ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppTheme.spaceL),
           _buildSectionCard('ACADEMIC HISTORY', [
             ... (profile['academicHistory'] as List? ?? []).map((a) => _InfoRow(
               icon: Icons.school_outlined, 
@@ -170,7 +170,7 @@ class MemberDetailsScreen extends ConsumerWidget {
               value: '${a['institutionName']} (${a['passingYear']})'
             )),
           ]),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppTheme.spaceM),
           _buildSectionCard('PROFESSIONAL HISTORY', [
             ... (profile['professionalHistory'] as List? ?? []).map((p) => _InfoRow(
               icon: Icons.work_outline, 
@@ -179,7 +179,7 @@ class MemberDetailsScreen extends ConsumerWidget {
             )),
           ]),
           if (isAdmin) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppTheme.spaceM),
             _buildSectionCard('PERSONAL INFORMATION', [
               _InfoRow(icon: Icons.badge_outlined, label: "Father's Name", value: profile['fatherName']),
               _InfoRow(icon: Icons.badge_outlined, label: "Mother's Name", value: profile['motherName']),
@@ -191,7 +191,7 @@ class MemberDetailsScreen extends ConsumerWidget {
               _InfoRow(icon: Icons.fingerprint, label: 'National ID', value: profile['nid']),
             ]),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: AppTheme.spaceM),
           _buildSectionCard('Identity & Credentials', [
              _InfoRow(
                icon: Icons.badge_outlined,
@@ -206,25 +206,25 @@ class MemberDetailsScreen extends ConsumerWidget {
                onTap: () => _downloadCredential(context, ref, profile['id'], 'certificate'),
              ),
           ]),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppTheme.spaceM),
           _buildSectionCard('Contact Protocols', [
             _InfoRow(icon: Icons.email_outlined, label: 'Email', value: profile['email']),
             _InfoRow(icon: Icons.phone_outlined, label: 'Mobile', value: profile['mobileNo']),
           ]),
           if (isAdmin) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppTheme.spaceM),
             _buildSectionCard('MEMBERSHIP DETAILS', [
               _InfoRow(icon: Icons.auto_awesome, label: 'Merit Score', value: (profile['contributionPoints'] ?? profile['meritPoints'] ?? 0).toString()),
               _InfoRow(icon: Icons.file_present, label: 'Application Date', value: profile['createdAt'] != null ? profile['createdAt'].toString().split('T')[0] : null),
               _InfoRow(icon: Icons.verified_user, label: 'Approval Date', value: profile['approvalDate'] != null ? profile['approvalDate'].toString().split('T')[0] : 'Pending'),
             ]),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppTheme.spaceM),
             _buildSectionCard('Admin Controls & Meta', [
               _InfoRow(icon: Icons.admin_panel_settings, label: 'Role', value: profile['role']),
               _InfoRow(icon: Icons.verified, label: 'Status', value: profile['status'] ?? (profile['isApproved'] == true ? 'Approved' : 'Pending'), highlight: (profile['status'] ?? (profile['isApproved'] == true ? 'Approved' : 'Pending')) == 'Pending'),
               _InfoRow(icon: Icons.calendar_today, label: 'Joined', value: profile['createdAt'] != null ? profile['createdAt'].toString().split('T')[0] : null),
             ]),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppTheme.spaceM),
             _buildSectionCard('Dossier Verification', [
               if (profile['certificatePath'] != null)
                 _InfoRow(
@@ -243,7 +243,7 @@ class MemberDetailsScreen extends ConsumerWidget {
             ]),
           ],
           if (isAdmin && (profile['status'] == 'Pending' || profile['isApproved'] == false)) ...[
-            const SizedBox(height: 32),
+            const SizedBox(height: AppTheme.spaceXL),
             Row(
               children: [
                 Expanded(
@@ -253,7 +253,7 @@ class MemberDetailsScreen extends ConsumerWidget {
                     child: const Text('REJECT', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppTheme.spaceM),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => _handleAudit(context, ref, profile['id'], true),
@@ -271,8 +271,8 @@ class MemberDetailsScreen extends ConsumerWidget {
 
   Widget _buildChip(String label, Color textColor, Color bgColor) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bgColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16), border: Border.all(color: bgColor.withValues(alpha: 0.3))),
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceS, vertical: AppTheme.spaceXS),
+      decoration: BoxDecoration(color: bgColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(AppTheme.radiusL), border: Border.all(color: bgColor.withValues(alpha: 0.3))),
       child: Text(label, style: TextStyle(color: textColor, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
     );
   }
@@ -315,7 +315,7 @@ class MemberDetailsScreen extends ConsumerWidget {
           children: [
             InteractiveViewer(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 child: Image.network(
                   fullUrl,
                   fit: BoxFit.contain,
@@ -347,21 +347,21 @@ class MemberDetailsScreen extends ConsumerWidget {
 
   Widget _buildSectionCard(String title, List<_InfoRow> rows) {
     return GlassContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppTheme.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title.toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
-          const Divider(color: Colors.white12, height: 24),
+          const Divider(color: Colors.white12, height: AppTheme.spaceL),
           ...rows.where((row) => row.value != null && row.value!.isNotEmpty).map((row) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.only(bottom: AppTheme.spaceM),
             child: InkWell(
               onTap: row.onTap,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(row.icon, size: 16, color: row.highlight ? Colors.redAccent : AppTheme.textSecondaryDark),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppTheme.spaceM),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

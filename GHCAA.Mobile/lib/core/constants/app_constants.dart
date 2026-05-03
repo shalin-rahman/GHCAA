@@ -1,16 +1,17 @@
+import '../theme/app_theme.dart';
 
 class AppConstants {
-  // Spacing & Padding
-  static const double paddingSmall = 8.0;
-  static const double paddingMedium = 16.0;
-  static const double paddingLarge = 24.0;
-  static const double paddingExtraLarge = 32.0;
+  // Spacing & Padding - Linked to AppTheme 8pt Grid
+  static const double paddingSmall = AppTheme.spaceS;      // 8.0
+  static const double paddingMedium = AppTheme.spaceM;     // 16.0
+  static const double paddingLarge = AppTheme.spaceL;      // 24.0
+  static const double paddingExtraLarge = AppTheme.spaceXL; // 32.0
 
-  // BorderRadius
-  static const double radiusSmall = 8.0;
-  static const double radiusMedium = 16.0;
-  static const double radiusLarge = 24.0;
-  static const double radiusExtraLarge = 32.0;
+  // BorderRadius - Linked to AppTheme
+  static const double radiusSmall = AppTheme.radiusS;      // 8.0
+  static const double radiusMedium = AppTheme.radiusM;     // 12.0
+  static const double radiusLarge = AppTheme.radiusL;      // 16.0
+  static const double radiusExtraLarge = AppTheme.radiusXL; // 24.0
 
   // Animations
   static const Duration durationFast = Duration(milliseconds: 200);

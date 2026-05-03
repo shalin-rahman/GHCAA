@@ -59,7 +59,7 @@ class DashboardScreen extends ConsumerWidget {
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+                  padding: const EdgeInsets.all(AppTheme.spaceL),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -75,7 +75,7 @@ class DashboardScreen extends ConsumerWidget {
                             child: Row(
                               children: [
                                 Image.asset('assets/logo.png', height: 40),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: AppTheme.spaceS),
                                 const Icon(Icons.menu_rounded, color: AppTheme.royalGold, size: 28),
                               ],
                             ),
@@ -92,10 +92,10 @@ class DashboardScreen extends ConsumerWidget {
                                   },
                                 ),
                                 Container(
-                                  margin: const EdgeInsets.only(left: 8),
+                                  margin: const EdgeInsets.only(left: AppTheme.spaceS),
                                   decoration: BoxDecoration(
                                       color: Colors.redAccent.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(AppTheme.radiusM),
                                       border: Border.all(color: Colors.redAccent.withValues(alpha: 0.2)),
                                   ),
                                 child: IconButton(
@@ -107,23 +107,23 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppTheme.spaceL),
                       
                       // Majestic Profile Banner (More compact version)
                       _buildMajesticBanner(fullName, profile, photoUrl),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppTheme.spaceM),
                       _buildCompletenessCheck(context, profile),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppTheme.spaceL),
 
                       // ----- ADMIN SECTION -----
                       if (isAdmin) ...[
                         _buildCategoryHeader('ADMINISTRATIVE CONTROLS', Colors.redAccent),
                         _buildAdminAnalyticsCluster(ref),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppTheme.spaceM),
                         _buildAdminGrid(context, isCompact),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppTheme.spaceL),
                         const Divider(color: Colors.white10),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppTheme.spaceL),
                       ],
                       // ------------------------------------
 
@@ -144,9 +144,9 @@ class DashboardScreen extends ConsumerWidget {
                         _buildActionCard(context, Icons.info_outline, 'About GHCAA', 'Info', '/about', isCompact: isCompact),
                       ]),
                       
-                      const SizedBox(height: 40),
+                      const SizedBox(height: AppTheme.spaceXXL),
                       _buildPremiumBadge(isAdmin),
-                      const SizedBox(height: 60),
+                      const SizedBox(height: AppTheme.spaceHUGE),
                     ],
                   ),
                 ),
@@ -171,22 +171,22 @@ class DashboardScreen extends ConsumerWidget {
         context.push('/profile');
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceS),
         decoration: BoxDecoration(
           color: Colors.amberAccent.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
           border: Border.all(color: Colors.amberAccent.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
              const Icon(Icons.tips_and_updates_outlined, color: Colors.amberAccent, size: 20),
-             const SizedBox(width: 12),
+             const SizedBox(width: AppTheme.spaceM),
              Expanded(
                child: Column(
                  crossAxisAlignment: CrossAxisAlignment.start,
                  children: [
                    const Text('PROFILE INCOMPLETE', style: TextStyle(color: Colors.amberAccent, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
-                   const SizedBox(height: 2),
+                   const SizedBox(height: AppTheme.spaceXS / 2),
                    Text('Your profile is ${(completeness * 100).toInt()}% complete. Please update your information for full access.', 
                      style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w500)),
                  ],
@@ -208,7 +208,7 @@ class DashboardScreen extends ConsumerWidget {
     final membershipCategory = profile?['category']?.toString() ?? '';
     
     return GlassContainer(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppTheme.spaceL),
       opacity: 0.1,
       child: Row(
         children: [
@@ -219,32 +219,32 @@ class DashboardScreen extends ConsumerWidget {
                 Row(
                   children: [
                     const Text('AUTHORIZED ACCESS', 
-                      style: TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 2)),
-                    const SizedBox(width: 8),
+                      style: TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                    const SizedBox(width: AppTheme.spaceS),
                     Container(
                       width: 4, height: 4, 
                       decoration: const BoxDecoration(color: AppTheme.royalGold, shape: BoxShape.circle),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppTheme.spaceM),
                 Text(fullName.toUpperCase(), 
                   style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5, height: 1.1)),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppTheme.spaceS),
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceS, vertical: AppTheme.spaceXS),
                       decoration: BoxDecoration(
                         color: AppTheme.royalGold.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusXS),
                         border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.3)),
                       ),
                       child: Text(membershipType.toUpperCase(), 
                         style: const TextStyle(color: AppTheme.royalGold, fontSize: 9, fontWeight: FontWeight.w900)),
                     ),
                     if (membershipCategory.isNotEmpty && membershipCategory != 'None') ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppTheme.spaceS),
                       Text(membershipCategory.toUpperCase(), 
                         style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 9, fontWeight: FontWeight.w900)),
                     ],
@@ -264,7 +264,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               ),
               Container(
-                width: 60, height: 60,
+                width: 64, height: 64,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: AppTheme.royalGold, width: 2),
@@ -284,11 +284,11 @@ class DashboardScreen extends ConsumerWidget {
 
   Widget _buildCategoryHeader(String title, Color color) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppTheme.spaceS),
       child: Row(
         children: [
-          Container(width: 3, height: 12, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
-          const SizedBox(width: 8),
+          Container(width: 3, height: 12, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(AppTheme.radiusXS))),
+          const SizedBox(width: AppTheme.spaceS),
           Text(title, style: TextStyle(color: color.withValues(alpha: 0.8), fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
         ],
       ),
@@ -300,8 +300,8 @@ class DashboardScreen extends ConsumerWidget {
       crossAxisCount: isCompact ? 3 : 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: isCompact ? 10 : 14,
-      crossAxisSpacing: isCompact ? 10 : 14,
+      mainAxisSpacing: isCompact ? AppTheme.spaceS : AppTheme.spaceM,
+      crossAxisSpacing: isCompact ? AppTheme.spaceS : AppTheme.spaceM,
       childAspectRatio: isCompact ? 1.0 : 1.25,
       children: children,
     );
@@ -313,7 +313,7 @@ class DashboardScreen extends ConsumerWidget {
       data: (analytics) => Row(
         children: [
           _buildCompactStatCard('TOTAL MEMBERS', '${analytics['totalMembers'] ?? 0}', Colors.blueAccent),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppTheme.spaceS),
           _buildCompactStatCard('PENDING APPROVALS', '${analytics['pendingApprovals'] ?? 0}', Colors.orangeAccent),
         ],
       ),
@@ -325,10 +325,10 @@ class DashboardScreen extends ConsumerWidget {
   Widget _buildCompactStatCard(String label, String value, Color color) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppTheme.spaceM),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
           border: Border.all(color: color.withValues(alpha: 0.1)),
         ),
         child: Column(
@@ -361,11 +361,11 @@ class DashboardScreen extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppTheme.deepCharcoal.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
           border: Border.all(color: AppTheme.glassBorder, width: 1),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
           child: Stack(
             children: [
               Positioned(
@@ -373,15 +373,15 @@ class DashboardScreen extends ConsumerWidget {
                 child: Icon(icon, color: color.withValues(alpha: 0.03), size: 80),
               ),
               Padding(
-                padding: EdgeInsets.all(isCompact ? 12.0 : 20.0),
+                padding: EdgeInsets.all(isCompact ? AppTheme.spaceM : AppTheme.spaceL),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(AppTheme.spaceS),
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusM),
                       ),
                       child: Icon(icon, color: color, size: isCompact ? 18 : 24),
                     ),
@@ -395,7 +395,7 @@ class DashboardScreen extends ConsumerWidget {
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.2,
                       )),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppTheme.spaceXS / 2),
                     Text(subtitle.toUpperCase(), 
                       style: TextStyle(
                         color: color.withValues(alpha: 0.5), 
@@ -417,17 +417,17 @@ class DashboardScreen extends ConsumerWidget {
     final color = isAdmin ? Colors.redAccent : AppTheme.royalGold;
     return Center(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceS),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
           border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.verified, color: color, size: 14),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppTheme.spaceS),
             Text(isAdmin ? 'ADMINISTRATOR' : 'VERIFIED MEMBER', 
               style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
           ],

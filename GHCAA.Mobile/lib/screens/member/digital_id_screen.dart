@@ -34,7 +34,7 @@ class DigitalIDScreen extends ConsumerWidget {
 
           return Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+              padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceXL),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -47,7 +47,7 @@ class DigitalIDScreen extends ConsumerWidget {
                         children: [
                           Container(height: 14, color: AppTheme.royalGold),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(32, 24, 32, 32),
+                            padding: const EdgeInsets.fromLTRB(AppTheme.spaceXL, AppTheme.spaceL, AppTheme.spaceXL, AppTheme.spaceXL),
                             child: Column(
                               children: [
                                 const Row(
@@ -57,7 +57,7 @@ class DigitalIDScreen extends ConsumerWidget {
                                     Text('Haragangian Alumni Digital Pass', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2)),
                                   ],
                                 ),
-                                const SizedBox(height: 32),
+                                const SizedBox(height: AppTheme.spaceXL),
                                 Container(
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
@@ -70,14 +70,14 @@ class DigitalIDScreen extends ConsumerWidget {
                                     child: photoUrl == null ? Text(data['fullName']?[0] ?? '?', style: const TextStyle(fontSize: 48, color: AppTheme.royalGold, fontWeight: FontWeight.w900)) : null,
                                   ),
                                 ),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: AppTheme.spaceL),
                                 Text(data['fullName'] ?? 'N/A', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white, height: 1.2), textAlign: TextAlign.center),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: AppTheme.spaceS),
                                 Text('${data['currentDesignation'] ?? 'Alumnus'} • BATCH ${data['batch'] ?? ''}', style: const TextStyle(fontSize: 13, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
-                                const SizedBox(height: 32),
+                                const SizedBox(height: AppTheme.spaceXL),
                                 Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                                  padding: const EdgeInsets.all(AppTheme.spaceXS),
+                                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppTheme.radiusM)),
                                   child: QrImageView(
                                     data: data['membershipId']?.toString() ?? 'PENDING',
                                     version: QrVersions.auto,
@@ -87,10 +87,10 @@ class DigitalIDScreen extends ConsumerWidget {
                                     dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Colors.black),
                                   ),
                                 ),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: AppTheme.spaceL),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM, vertical: AppTheme.spaceS),
+                                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppTheme.radiusXS)),
                                   child: BarcodeWidget(
                                     barcode: Barcode.code128(),
                                     data: data['membershipId']?.toString() ?? 'PENDING',
@@ -109,7 +109,7 @@ class DigitalIDScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppTheme.spaceXXL),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -124,7 +124,7 @@ class DigitalIDScreen extends ConsumerWidget {
                           style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: AppTheme.spaceM),
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () {
@@ -151,7 +151,7 @@ class DigitalIDScreen extends ConsumerWidget {
             padding: EdgeInsets.all(24.0),
             child: AspectRatio(
                 aspectRatio: 0.63,
-                child: SkeletonLoader(width: double.infinity, height: double.infinity, borderRadius: 24)),
+                child: SkeletonLoader(width: double.infinity, height: double.infinity, borderRadius: AppTheme.radiusXL)),
           ),
         ),
         error: (e, s) => Center(child: Text('Error: $e')),

@@ -42,7 +42,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            padding: const EdgeInsets.fromLTRB(AppTheme.spaceL, AppTheme.spaceM, AppTheme.spaceL, AppTheme.spaceS),
             child: AppSearchField(
               controller: _searchController,
               hintText: 'Search news...',
@@ -74,7 +74,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                     children: [
                       if (filtered.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(left: 24, bottom: 8),
+                          padding: const EdgeInsets.only(left: AppTheme.spaceXL, bottom: AppTheme.spaceS),
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
@@ -87,14 +87,14 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                         child: filtered.isEmpty
                           ? Center(child: Text(searchQuery.isEmpty ? 'No news articles found.' : 'No stories match your search.', style: const TextStyle(color: AppTheme.textSecondaryDark)))
                           : ListView.builder(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceM),
                               itemCount: filtered.length,
                               itemBuilder: (context, index) {
                                 final article = filtered[index];
                                 final fullImgUrl = AppConfig.resolveImageUrl(article['imageUrl'] ?? article['thumbnailUrl']);
 
                                 return Padding(
-                                  padding: const EdgeInsets.only(bottom: 24.0),
+                                  padding: const EdgeInsets.only(bottom: AppTheme.spaceXL),
                                   child: GlassContainer(
                                     padding: EdgeInsets.zero,
                                     child: InkWell(
@@ -107,13 +107,13 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                                         children: [
                                           if (fullImgUrl != null)
                                             ClipRRect(
-                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusL)),
                                               child: Image.network(
                                                 fullImgUrl, 
-                                                height: 190, 
+                                                height: 192, 
                                                 fit: BoxFit.cover,
                                                 errorBuilder: (context, error, stackTrace) => Container(
-                                                  height: 190,
+                                                  height: 192,
                                                   color: Colors.black26,
                                                   child: const Icon(Icons.broken_image_outlined, color: Colors.white24),
                                                 ),
@@ -121,15 +121,15 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                                             )
                                           else
                                             Container(
-                                              height: 190,
+                                              height: 192,
                                               decoration: BoxDecoration(
                                                 color: AppTheme.royalGold.withValues(alpha: 0.05),
-                                                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                                borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusL)),
                                               ),
                                               child: Center(child: Icon(Icons.newspaper_rounded, size: 64, color: AppTheme.royalGold.withValues(alpha: 0.1))),
                                             ),
                                           Padding(
-                                            padding: const EdgeInsets.all(16.0),
+                                            padding: const EdgeInsets.all(AppTheme.spaceM),
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
@@ -137,16 +137,16 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   children: [
                                                     Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                      decoration: BoxDecoration(color: AppTheme.royalGold.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
+                                                      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceS, vertical: AppTheme.spaceXS),
+                                                      decoration: BoxDecoration(color: AppTheme.royalGold.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(AppTheme.radiusXS)),
                                                       child: Text(_getCategoryLabel(article['articleCategory']), style: const TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
                                                     ),
                                                     Text(AppUtils.formatDate(article['createdAt']), style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)),
                                                   ],
                                                 ),
-                                                const SizedBox(height: 12),
+                                                const SizedBox(height: AppTheme.spaceM),
                                                 Text(article['title'] ?? 'Alumni News Highlight', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, height: 1.25)),
-                                                const SizedBox(height: 8),
+                                                const SizedBox(height: AppTheme.spaceS),
                                                 Text(article['content']?.toString().substring(0, article['content'].toString().length > 150 ? 150 : article['content'].toString().length) ?? 'Read more about this story in the alumni portal.', style: const TextStyle(fontSize: 12, height: 1.5, color: AppTheme.textSecondaryDark), maxLines: 2, overflow: TextOverflow.ellipsis),
                                               ],
                                             ),

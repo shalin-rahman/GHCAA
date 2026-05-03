@@ -31,6 +31,22 @@ class AppTheme {
 
   static const Color royalGoldVibrant = brightGold;
  
+  // Design Tokens - 8pt Grid System
+  static const double spaceXS = 4.0;
+  static const double spaceS = 8.0;
+  static const double spaceM = 16.0;
+  static const double spaceL = 24.0;
+  static const double spaceXL = 32.0;
+  static const double spaceXXL = 48.0;
+  static const double spaceHUGE = 64.0;
+
+  // Border Radius Tokens
+  static const double radiusXS = 4.0;
+  static const double radiusS = 8.0;
+  static const double radiusM = 12.0;
+  static const double radiusL = 16.0;
+  static const double radiusXL = 24.0;
+
   // Premium Gradients
   static const Gradient goldGradient = LinearGradient(
     colors: [royalGold, brightGold, royalGold],
@@ -53,10 +69,10 @@ class AppTheme {
       color: deepCharcoal,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(radiusL),
         side: const BorderSide(color: glassBorder, width: 1),
       ),
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      margin: const EdgeInsets.symmetric(vertical: spaceS, horizontal: spaceM),
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
@@ -127,9 +143,9 @@ class AppTheme {
           fontWeight: FontWeight.w800,
           letterSpacing: 1.2,
         ),
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 32),
+        padding: const EdgeInsets.symmetric(vertical: spaceM + 2, horizontal: spaceXL),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(radiusM),
         ),
         elevation: 12,
         shadowColor: royalGold.withValues(alpha: 0.5),
@@ -140,21 +156,21 @@ class AppTheme {
       fillColor: deepCharcoal,
       labelStyle: const TextStyle(color: textMuted, fontFamily: 'Outfit'),
       hintStyle: const TextStyle(color: Colors.white24, fontFamily: 'Outfit'),
-      contentPadding: const EdgeInsets.all(20),
+      contentPadding: const EdgeInsets.all(spaceM),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radiusM),
         borderSide: const BorderSide(color: glassBorder),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radiusM),
         borderSide: const BorderSide(color: glassBorder),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radiusM),
         borderSide: const BorderSide(color: royalGold, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radiusM),
         borderSide: const BorderSide(color: Colors.redAccent),
       ),
     ),

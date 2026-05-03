@@ -129,10 +129,10 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
       title: 'Member Directory',
       breadcrumb: 'PORTAL > MEMBER DIRECTORY',
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL),
         child: Column(
           children: [
-            const SizedBox(height: 12),
+            const SizedBox(height: AppTheme.spaceM),
             TextField(
               key: const ValueKey('directory_search'),
               controller: _searchController,
@@ -153,7 +153,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
             ),
             if (!_isLoading && _totalItems > 0)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM, horizontal: AppTheme.spaceXS),
                 child: Row(
                   children: [
                     Text(
@@ -169,7 +169,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                   ],
                 ),
               ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppTheme.spaceM),
             // Dynamic Filtering Framework
             Column(
               children: [
@@ -181,7 +181,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                         builder: (context, snapshot) => _buildFilterDropdown('YEAR', snapshot.data?.map((e) => e['label']!).toList() ?? []),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: AppTheme.spaceS),
                     Expanded(
                       child: FutureBuilder<List<Map<String, String>>>(
                         future: ref.read(dropdownDataProvider).getOptions('Subject'),
@@ -190,13 +190,13 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: AppTheme.spaceS),
                 Row(
                   children: [
                     Expanded(
                       child: _buildFilterDropdown('TYPE', ['General', 'Founding', 'Executive', 'Associate', 'Honorary', 'Advisory']),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: AppTheme.spaceS),
                     Expanded(
                       child: _buildFilterDropdown('CATEGORY', ['LifelongPatron', 'Sponsor', 'Advisor', 'Mentor', 'Volunteer', 'Student']),
                     ),
@@ -204,13 +204,13 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppTheme.spaceL),
             Expanded(
               child: _isLoading 
                 ? ListView.builder(
                     itemCount: 6,
                     itemBuilder: (context, index) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.only(bottom: AppTheme.spaceM),
                       child: SkeletonLoader.memberCard(),
                     ),
                   )
@@ -254,22 +254,22 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                               }
  
                               return Padding(
-                                padding: const EdgeInsets.only(bottom: 12.0),
+                                padding: const EdgeInsets.only(bottom: AppTheme.spaceM),
                                 child: Card(
                                   child: InkWell(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(AppTheme.radiusL),
                                     onTap: () {
                                       HapticFeedback.lightImpact();
                                       context.push('/directory/${m['id']}');
                                     },
                                     child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
+                                      padding: const EdgeInsets.all(AppTheme.spaceM),
                                       child: Column(
                                         children: [
                                           Row(
                                             children: [
                                               _buildMemberThumbnail(context, photoUrl, m['fullName']),
-                                              const SizedBox(width: 16),
+                                              const SizedBox(width: AppTheme.spaceM),
                                               Expanded(
                                                 child: Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,7 +307,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                                             ],
                                           ),
                                           const Padding(
-                                            padding: EdgeInsets.symmetric(vertical: 12),
+                                            padding: EdgeInsets.symmetric(vertical: AppTheme.spaceM),
                                             child: Divider(color: Colors.white10, height: 1),
                                           ),
                                           Row(
@@ -338,7 +338,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 12, color: AppTheme.royalGold.withValues(alpha: 0.5)),
-        const SizedBox(width: 6),
+        const SizedBox(width: AppTheme.spaceXS),
         Text(text, style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 8, color: Colors.white54)),
       ],
     );
@@ -355,7 +355,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: AppTheme.obsidianBlack,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
         border: Border.all(color: AppTheme.glassBorder),
       ),
       child: DropdownButtonHideUnderline(
@@ -395,11 +395,11 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
       height: 48,
       decoration: BoxDecoration(
         color: AppTheme.obsidianBlack,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
         border: Border.all(color: AppTheme.glassBorder),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
         child: url != null && url.isNotEmpty
           ? CustomNetworkImage(imageUrl: url, fit: BoxFit.cover)
           : const Icon(Icons.person_pin_rounded, color: AppTheme.royalGold, size: 24),

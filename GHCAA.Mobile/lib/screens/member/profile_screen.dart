@@ -32,12 +32,12 @@ class ProfileScreen extends ConsumerWidget {
               ref.invalidate(userProfileProvider);
             },
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              padding: const EdgeInsets.all(AppTheme.spaceL),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildDigitalIDCard(context, profile),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppTheme.spaceXL),
                   
                   _buildSectionHeader('Personal Details'),
                   GlassContainer(
@@ -55,15 +55,15 @@ class ProfileScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppTheme.spaceXL),
 
                   _buildSectionHeader('Educational History'),
                   _buildAcademicTimeline(profile['academicHistory'] ?? []),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppTheme.spaceXL),
 
                   _buildSectionHeader('Professional History'),
                   _buildProfessionalTimeline(profile['professionalHistory'] ?? []),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppTheme.spaceXL),
 
                   _buildSectionHeader('Privacy Settings'),
                   GlassContainer(
@@ -76,7 +76,7 @@ class ProfileScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppTheme.spaceXL),
 
                   _buildSectionHeader('Security & Audits'),
                   GlassContainer(
@@ -90,9 +90,9 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
                   
-                  const SizedBox(height: 56),
+                  const SizedBox(height: AppTheme.spaceHUGE),
                   _buildSignOutButton(context),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: AppTheme.spaceXXL),
                 ],
               ),
             ),
@@ -107,14 +107,14 @@ class ProfileScreen extends ConsumerWidget {
     final isVerified = status == 'Active' || status == 1;
 
     return GlassContainer(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppTheme.spaceL),
       child: Column(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildMemberPhoto(data['photoPath'], data['fullName']),
-              const SizedBox(width: 20),
+              const SizedBox(width: AppTheme.spaceM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,17 +123,17 @@ class ProfileScreen extends ConsumerWidget {
                       data['membershipNumber'] ?? 'REGISTRY PENDING',
                       style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppTheme.spaceXS),
                     Text(
                       data['fullName'] ?? 'Full Name',
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, height: 1.1),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppTheme.spaceS),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceS, vertical: AppTheme.spaceXS),
                       decoration: BoxDecoration(
                         color: isVerified ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusXS),
                         border: Border.all(color: isVerified ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3)),
                       ),
                       child: Text(
@@ -153,9 +153,9 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppTheme.spaceL),
           const Divider(color: Colors.white10, height: 1),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppTheme.spaceM),
           _buildProfileHealth(data['profileCompletionPercentage'] ?? 0),
         ],
       ),
@@ -167,10 +167,10 @@ class ProfileScreen extends ConsumerWidget {
     
     return Container(
       width: 80,
-      height: 100,
+      height: 104, // 13 * 8
       decoration: BoxDecoration(
         color: Colors.black,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppTheme.radiusS),
         border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.2)),
         image: fullUrl != null ? DecorationImage(image: NetworkImage(fullUrl), fit: BoxFit.cover) : null,
       ),
@@ -191,14 +191,14 @@ class ProfileScreen extends ConsumerWidget {
             Text('$percentage%', style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold)),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppTheme.spaceXS),
         ClipRRect(
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BorderRadius.circular(AppTheme.radiusXS / 2), // Half XS = 2.0
           child: LinearProgressIndicator(
             value: percentage / 100,
             backgroundColor: Colors.white.withValues(alpha: 0.05),
             color: AppTheme.royalGold,
-            minHeight: 4,
+            minHeight: AppTheme.spaceXS,
           ),
         ),
       ],
@@ -207,7 +207,7 @@ class ProfileScreen extends ConsumerWidget {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 12),
+      padding: const EdgeInsets.only(left: AppTheme.spaceXS, bottom: AppTheme.spaceS),
       child: Text(
         title.toUpperCase(),
         style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5),
@@ -219,7 +219,7 @@ class ProfileScreen extends ConsumerWidget {
     if (history.isEmpty) return _buildEmptyPlaceholder('No academic registration found');
     
     return GlassContainer(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppTheme.spaceM),
       child: Column(
         children: history.map((item) => _buildTimelineItem(
           title: '${item['degree']} in ${item['subject']}',
@@ -235,7 +235,7 @@ class ProfileScreen extends ConsumerWidget {
     if (history.isEmpty) return _buildEmptyPlaceholder('Professional history pending update');
     
     return GlassContainer(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppTheme.spaceM),
       child: Column(
         children: history.map((item) => _buildTimelineItem(
           title: item['designation'],
@@ -249,7 +249,7 @@ class ProfileScreen extends ConsumerWidget {
 
   Widget _buildTimelineItem({required String title, required String subtitle, required String trailing, required bool isLast}) {
     return Container(
-      margin: EdgeInsets.only(bottom: isLast ? 0 : 16),
+      margin: EdgeInsets.only(bottom: isLast ? 0 : AppTheme.spaceM),
       child: Row(
         children: [
           Expanded(
@@ -269,24 +269,24 @@ class ProfileScreen extends ConsumerWidget {
 
   Widget _buildEmptyPlaceholder(String message) {
     return GlassContainer(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
       child: Center(child: Text(message, style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 12, fontStyle: FontStyle.italic))),
     );
   }
 
   Widget _buildInfoRow(IconData icon, String label, String? value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM, horizontal: AppTheme.spaceM),
       child: Row(
         children: [
           Icon(icon, size: 18, color: AppTheme.royalGold),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppTheme.spaceM),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label.toUpperCase(), style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppTheme.spaceXS / 2),
                 Text(value ?? 'N/A', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
               ],
             ),
@@ -302,7 +302,7 @@ class ProfileScreen extends ConsumerWidget {
       value: value,
       onChanged: (v) {},
       activeThumbColor: AppTheme.royalGold,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM),
     );
   }
 
@@ -312,7 +312,7 @@ class ProfileScreen extends ConsumerWidget {
       title: Text(title, style: const TextStyle(fontSize: 14, color: Colors.white)),
       trailing: const Icon(Icons.chevron_right, size: 16, color: AppTheme.royalGold),
       onTap: route != null ? () => context.go(route) : () {},
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM),
     );
   }
 
@@ -323,8 +323,8 @@ class ProfileScreen extends ConsumerWidget {
         onPressed: () => context.go('/login'),
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: Colors.white10),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusM)),
         ),
         child: const Text('LOGOUT', style: TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
       ),

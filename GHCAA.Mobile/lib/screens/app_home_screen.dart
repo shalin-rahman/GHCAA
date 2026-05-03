@@ -110,11 +110,11 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceXL),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: AppTheme.spaceXXL),
                 Center(
                   child: Hero(
                     tag: 'app_logo',
@@ -144,26 +144,26 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
                     ),
                   ).animate().scale(duration: 800.ms, curve: Curves.elasticOut).fadeIn(),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: AppTheme.spaceXL),
                 Text(
                   AppConfig.portalTitle,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: 2, color: Colors.white),
                 ).animate().slideY(begin: 0.3, duration: 600.ms).fadeIn(),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppTheme.spaceXS),
                 Text(
                   AppConfig.organizationTagline,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 9, fontStyle: FontStyle.italic, color: AppTheme.royalGold, letterSpacing: 0.5),
                 ).animate().fadeIn(delay: 400.ms),
-                const SizedBox(height: 32),
+                const SizedBox(height: AppTheme.spaceXL),
                 
                 GlassContainer(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Text('QUICK LOGIN', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppTheme.spaceM),
                       TextField(
                         controller: _identifierController,
                         style: const TextStyle(color: Colors.white),
@@ -172,7 +172,7 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
                           prefixIcon: Icon(Icons.person_outline, size: 20),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppTheme.spaceM),
                       PasswordField(
                         controller: _passwordController,
                         labelText: 'Password',
@@ -180,10 +180,10 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
                       ),
                       if (_errorMessage != null)
                         Padding(
-                          padding: const EdgeInsets.only(top: 12),
+                          padding: const EdgeInsets.only(top: AppTheme.spaceM),
                           child: Text(_errorMessage!, style: const TextStyle(color: Colors.redAccent, fontSize: 11)),
                         ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppTheme.spaceL),
                       _isLoading 
                         ? const Center(child: CircularProgressIndicator(color: AppTheme.royalGold))
                         : ElevatedButton(
@@ -191,7 +191,7 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
                             child: const Text('LOGIN'),
                           ),
                       if (_canBiometric && !_isLoading) ...[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppTheme.spaceM),
                         OutlinedButton.icon(
                           onPressed: _handleBiometricLogin,
                           icon: const Icon(Icons.fingerprint, color: AppTheme.royalGold),
@@ -206,7 +206,7 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
                   ),
                 ).animate().slideY(begin: 0.2, duration: 800.ms, curve: Curves.easeOutCirc).fadeIn(delay: 600.ms),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: AppTheme.spaceL),
                 Center(
                   child: TextButton(
                     onPressed: () => context.go('/register'),

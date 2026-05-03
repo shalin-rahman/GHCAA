@@ -112,7 +112,7 @@ class AppScaffold extends ConsumerWidget {
                 if (announcement != null && announcement.isNotEmpty)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceS, horizontal: AppTheme.spaceM),
                     color: Colors.black.withValues(alpha: 0.3),
                     child: Text(announcement, style: TextStyle(color: textColor ?? Colors.white, fontSize: 12, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                   ),
