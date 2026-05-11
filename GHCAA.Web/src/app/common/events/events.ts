@@ -2,11 +2,11 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { EventsService } from '../../core/services/events.service';
-import { AlumniEvent, EventRegistration } from '../../core/models/business.models';
+import { AlumniEvent, EventRegistration, PaymentGateway } from '../../core/models/business.models';
 import { AuthService } from '../../core/services/auth.service';
 import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
 import { PaymentConfig, PaymentConfigService } from '../../core/services/payment-config.service';
-import { GatewaysService, PaymentGateway } from '../../core/services/gateways.service';
+import { GatewaysService } from '../../core/services/gateways.service';
 import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { FinancialService } from '../../core/services/financial.service';
@@ -247,7 +247,11 @@ export class Events implements OnInit {
   }
 
   public initiateGateway(ev: AlumniEvent, ref: string) {
-    const gateway = this.selectedPaymentMethod()?.method === 'SSLCommerz' ? PaymentGateway.SSLCommerz : PaymentGateway.Bkash;
+    const gatewayStr = this.selectedPaymentMethod()?.gateway;
+    const gateway = (gatewayStr && PaymentGateway[gatewayStr as keyof typeof PaymentGateway] !== undefined) 
+      ? PaymentGateway[gatewayStr as keyof typeof PaymentGateway] 
+      : PaymentGateway.None;
+      
     const amountToCharge = ev.registrationFee || this.regForm.value.contributionAmount || 0;
 
     const user = this.auth.currentUser();

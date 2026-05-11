@@ -20,7 +20,8 @@ describe('Login Component', () => {
 
     beforeEach(async () => {
         authServiceMock = {
-            login: vi.fn()
+            login: vi.fn(),
+            getSocialProviders: vi.fn().mockReturnValue(of([]))
         };
 
         notificationServiceMock = {

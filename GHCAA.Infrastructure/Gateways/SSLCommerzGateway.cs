@@ -3,10 +3,13 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GHCAA.Infrastructure.Gateways
 {
@@ -91,17 +94,46 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
+        // 24.11: Verify SSLCommerz verify_sign. Algorithm: sort all fields except verify_sign and
+        // verify_sign_sha2 alphabetically, concatenate values with '&', append store_passwd, MD5 the result.
+        private static bool VerifySign(IDictionary<string, string> data, string storePass)
+        {
+            if (!data.TryGetValue("verify_sign", out var expectedSign) || string.IsNullOrEmpty(expectedSign))
+                return false;
+
+            var sortedValues = data.Keys
+                .Where(k => k != "verify_sign" && k != "verify_sign_sha2")
+                .OrderBy(k => k)
+                .Select(k => data[k]);
+
+            var sb = new StringBuilder();
+            foreach (var v in sortedValues)
+                sb.Append(v).Append('&');
+            sb.Append(storePass);
+
+            var hash = MD5.HashData(Encoding.UTF8.GetBytes(sb.ToString()));
+            var computed = Convert.ToHexString(hash).ToLowerInvariant();
+            return computed == expectedSign.ToLowerInvariant();
+        }
+
         public async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
             if (!callbackData.ContainsKey("status") || callbackData["status"] != "VALID") return false;
-            
+
             var valId = callbackData.TryGetValue("val_id", out var v) ? v : "";
             if (string.IsNullOrEmpty(valId)) return false;
 
             var config = await _db.PaymentConfigurations
                 .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled, cancellationToken);
-            
+
             if (config == null) return false;
+
+            // 24.11: Verify the HMAC signature before trusting any val_id or amount in the callback.
+            if (!VerifySign(callbackData, config.GatewaySecretKey ?? string.Empty))
+            {
+                _logger.LogWarning("SSLCommerz callback rejected: verify_sign mismatch");
+                return false;
+            }
 
             var isSandbox = config.IsSandbox;
             var sandboxUrl = _config["PaymentGateways:SSLCommerz:SandboxUrl"] ?? "https://sandbox.sslcommerz.com";
@@ -130,9 +162,9 @@ namespace GHCAA.Infrastructure.Gateways
             {
                 using var reader = new StreamReader(body);
                 var content = await reader.ReadToEndAsync(cancellationToken);
-                var data = content.Split('&', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(x => x.Split('='))
-                    .ToDictionary(x => x[0], x => x.Length > 1 ? Uri.UnescapeDataString(x[1]) : "");
+                // S4.2: Use QueryHelpers.ParseQuery so base64 values containing '=' are not truncated.
+                var parsed = QueryHelpers.ParseQuery(content);
+                var data = parsed.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString());
 
                 return await VerifyCallbackAsync(data, cancellationToken);
             }

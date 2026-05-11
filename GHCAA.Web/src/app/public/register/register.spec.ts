@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Register } from './register';
 import { RegistrationService } from '../../core/services/registration.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { GatewaysService } from '../../core/services/gateways.service';
+import { FinancialService } from '../../core/services/financial.service';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
@@ -33,12 +35,22 @@ describe('Register Component', () => {
             navigate: vi.fn()
         };
 
+        const gatewaysServiceMock = {
+            initiatePayment: vi.fn().mockReturnValue(of({}))
+        };
+
+        const financialServiceMock = {
+            getApplicableFee: vi.fn().mockReturnValue(of({ amount: 500 }))
+        };
+
         await TestBed.configureTestingModule({
             imports: [Register],
             providers: [
                 { provide: RegistrationService, useValue: regServiceMock },
                 { provide: NotificationService, useValue: notificationServiceMock },
-                { provide: Router, useValue: routerMock }
+                { provide: Router, useValue: routerMock },
+                { provide: GatewaysService, useValue: gatewaysServiceMock },
+                { provide: FinancialService, useValue: financialServiceMock }
             ]
         }).compileComponents();
 

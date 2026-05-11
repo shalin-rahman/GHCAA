@@ -22,9 +22,6 @@ namespace GHCAA.API.Middleware
             // 2. Clickjacking protection
             context.Response.Headers.Append("X-Frame-Options", "DENY");
 
-            // 3. XSS Protection (for older browsers)
-            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
-
             // 4. Strict-Transport-Security (HSTS) - Only for HTTPS
             if (context.Request.IsHttps)
             {
@@ -38,7 +35,7 @@ namespace GHCAA.API.Middleware
             // A basic restrictive CSP - can be tuned based on needs
             context.Response.Headers.Append("Content-Security-Policy", 
                 "default-src 'self'; " +
-                "script-src 'self' 'unsafe-inline'; " +
+                "script-src 'self'; " +
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
                 "font-src 'self' https://fonts.gstatic.com; " +
                 "img-src 'self' data: https:; " +

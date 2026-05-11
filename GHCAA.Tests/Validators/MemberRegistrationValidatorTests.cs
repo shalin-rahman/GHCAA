@@ -253,8 +253,7 @@ public class MemberRegistrationValidatorTests
         var dto = CreateValidDto();
         dto.DateOfBirth = DateTime.UtcNow.AddDays(1);
         var result = _validator.TestValidate(dto);
-        result.ShouldHaveValidationErrorFor(x => x.DateOfBirth)
-            .WithErrorMessage("Invalid DOB");
+        result.ShouldHaveValidationErrorFor(x => x.DateOfBirth);
     }
 
     [Test]

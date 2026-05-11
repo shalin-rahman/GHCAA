@@ -600,7 +600,7 @@ public class MemberServiceTests : TestBase
     }
 
     [Test]
-    public async Task RejectMemberAsync_ShouldSendEmailAndRemoveMember()
+    public async Task RejectMemberAsync_ShouldSendEmailAndSoftDeleteMember()
     {
         // Arrange
         var member = new Member
@@ -619,11 +619,13 @@ public class MemberServiceTests : TestBase
         // Act
         var result = await _service.RejectMemberAsync(member.Id, adminId, reason);
 
-        // Assert
+        // Assert — 24.30: member is soft-deleted, not hard-deleted; audit trail is preserved
         result.Should().BeTrue();
-        var deletedMember = await _context.Members.FindAsync(member.Id);
-        deletedMember.Should().BeNull();
-        
+        var rejectedMember = await _context.Members.IgnoreQueryFilters().FirstOrDefaultAsync(m => m.Id == member.Id);
+        rejectedMember.Should().NotBeNull();
+        rejectedMember!.Status.Should().Be(Enums.MembershipStatus.Rejected);
+        rejectedMember.IsArchived.Should().BeTrue();
+
         _mockCommunication.Verify(x => x.SendEmailByCodeAsync(
             member.Email, "APPLICATION_REJECTED", It.Is<Dictionary<string, string>>(d => d["Reason"] == reason), It.IsAny<Member>(), It.IsAny<CancellationToken>()), Times.Once);
     }

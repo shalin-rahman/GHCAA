@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
@@ -110,16 +111,16 @@ namespace GHCAA.Infrastructure.Services
             }
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            user.MustChangePassword = false; // Successfully changed
+            user.MustChangePassword = false;
+            user.SecurityStamp = Guid.NewGuid().ToString("N"); // S5.4: invalidate existing JWTs
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
 
         public string GenerateDefaultPassword()
         {
-            var random = new Random();
             return new string(Enumerable.Range(0, 8)
-                .Select(_ => PasswordChars[random.Next(PasswordChars.Length)])
+                .Select(_ => PasswordChars[RandomNumberGenerator.GetInt32(PasswordChars.Length)])
                 .ToArray());
         }
     }

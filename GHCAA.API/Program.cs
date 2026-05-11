@@ -59,12 +59,19 @@ builder.Services.AddRateLimiter(options =>
 
     bool isTestEnv = configuration["ASP_SEED_PROFILE"] == "Visual" || builder.Environment.IsDevelopment();
 
-    // Login/OTP Policy: Very strict (5 requests per 1 minute)
-    options.AddFixedWindowLimiter("auth", opt =>
+    // 24.48: Login policy keyed per (IP, username) — each distinct caller gets its own
+    // 5-req/min bucket so a single attacker cannot consume the global quota.
+    options.AddPolicy<string>("auth", httpContext =>
     {
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.PermitLimit = isTestEnv ? 500 : 5;
-        opt.QueueLimit = 0;
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var username = httpContext.Items.TryGetValue("LoginUsername", out var u) ? u?.ToString() ?? "" : "";
+        var key = isTestEnv ? "__test__" : $"{ip}:{username}";
+        return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(1),
+            PermitLimit = isTestEnv ? 500 : 5,
+            QueueLimit = 0
+        });
     });
 
     // Registration Policy: Moderate (10 requests per 5 minutes)
@@ -116,6 +123,11 @@ builder.Services.AddCors(options =>
 {
     var allowedOrigins = configuration.GetSection("AppSettings:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 
+    // 24.49: Fail fast in Production when AllowedOrigins is not configured.
+    // An empty list would silently block all cross-origin requests (or allow all via the dev fallback).
+    if (!builder.Environment.IsDevelopment() && allowedOrigins.Length == 0)
+        throw new InvalidOperationException("AppSettings:AllowedOrigins must be configured in Production environments.");
+
     options.AddPolicy("AngularApp", policy =>
     {
         policy.WithOrigins(allowedOrigins)
@@ -132,7 +144,21 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Use Exception Middleware first to catch all subsequent errors
+app.UseMiddleware<ExceptionMiddleware>();
+
 app.UseCors("AngularApp");
+ 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "GHCAA API V1");
+        c.DisplayRequestDuration();
+        c.EnableDeepLinking();
+    });
+}
 
 // Use Response Compression and Output Caching
 app.UseResponseCompression();
@@ -143,9 +169,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<AuditLogMiddleware>();
+app.UseMiddleware<LoginRateLimitMiddleware>(); // 24.48: peek username before rate limiter
 
 app.UseRateLimiter(); // Apply Rate Limiting
 
@@ -164,19 +190,21 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseMiddleware<QueryStringTokenMiddleware>();
 app.UseAuthentication();
-app.UseMiddleware<GHCAA.API.Middleware.VisualTestAuthMiddleware>();
+if (app.Environment.IsDevelopment() && app.Configuration["ASP_SEED_PROFILE"] == "Visual")
+    app.UseMiddleware<GHCAA.API.Middleware.VisualTestAuthMiddleware>();
 app.UseMiddleware<SecurityStampMiddleware>(); // Invalidates sessions on status change
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");
 app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");
+
 // Automatic Database Initialization for Visual Testing Profile
 if (app.Configuration["ASP_SEED_PROFILE"] == "Visual")
 {
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
-    
+
     if (app.Configuration.GetValue<bool>("AppSettings:RecreateDatabaseOnStartup"))
     {
         context.Database.EnsureDeleted();
@@ -184,6 +212,13 @@ if (app.Configuration["ASP_SEED_PROFILE"] == "Visual")
     context.Database.EnsureCreated();
 
     // MANUAL SEEDING: Force override EF Core snapshots with fresh data from Seed/Visual
+    OverrideEFCoreMigratedData(context);
+}
+
+app.Run();
+
+static void OverrideEFCoreMigratedData(GHCAA.Infrastructure.Data.ApplicationDbContext context)
+{
     var infrastructurePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "GHCAA.Infrastructure");
     if (!Directory.Exists(infrastructurePath)) infrastructurePath = Path.Combine(Directory.GetCurrentDirectory(), "GHCAA.Infrastructure");
 
@@ -207,5 +242,3 @@ if (app.Configuration["ASP_SEED_PROFILE"] == "Visual")
         }
     }
 }
-
-app.Run();

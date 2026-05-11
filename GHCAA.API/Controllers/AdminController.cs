@@ -3,6 +3,7 @@ using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GHCAA.API.Controllers
 {
@@ -85,14 +86,18 @@ namespace GHCAA.API.Controllers
         [HttpPost("members/{id}/approve")]
         public async Task<IActionResult> ApproveMember(int id, [FromBody] ApproveMemberDto dto, CancellationToken cancellationToken)
         {
+            // 24.51: Read admin identity from the JWT claim, not the request body.
+            if (!int.TryParse(User.FindFirst("MemberId")?.Value, out var adminMemberId))
+                return Unauthorized();
+
             try
             {
-                var result = await _memberService.ApproveMemberAsync(id, dto.ApprovedByAdminId, cancellationToken);
-                return Ok(new 
-                { 
-                    Message = "Member approved successfully", 
+                var result = await _memberService.ApproveMemberAsync(id, adminMemberId, cancellationToken);
+                return Ok(new
+                {
+                    Message = "Member approved successfully. Login credentials have been emailed to the member.",
                     MembershipNumber = result.MembershipNumber,
-                    DefaultPassword = result.DefaultPassword
+                    PasswordEmailed = true
                 });
             }
             catch (KeyNotFoundException ex)
@@ -108,9 +113,13 @@ namespace GHCAA.API.Controllers
         [HttpPost("members/{id}/reject")]
         public async Task<IActionResult> RejectMember(int id, [FromBody] RejectMemberDto dto, CancellationToken cancellationToken)
         {
+            // 24.51: Read admin identity from the JWT claim, not the request body.
+            if (!int.TryParse(User.FindFirst("MemberId")?.Value, out var adminMemberId))
+                return Unauthorized();
+
             try
             {
-                var success = await _memberService.RejectMemberAsync(id, dto.RejectedByAdminId, dto.Reason, cancellationToken);
+                var success = await _memberService.RejectMemberAsync(id, adminMemberId, dto.Reason, cancellationToken);
                 if (!success) return NotFound();
                 return Ok(new { Message = "Application rejected and user notified." });
             }
@@ -238,9 +247,8 @@ namespace GHCAA.API.Controllers
             {
                 var result = await _memberService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
                 if (!result.Success) return NotFound(new { Message = "Member or user account not found. Please ensure the member is approved and active." });
-                return Ok(new { 
-                    Message = "Password reset link generated. If the email is not received, you can manually share the link below.",
-                    ResetUrl = result.ResetUrl 
+                return Ok(new {
+                    Message = "Password reset link has been sent to the member's registered email address."
                 });
             }
             catch (Exception ex)

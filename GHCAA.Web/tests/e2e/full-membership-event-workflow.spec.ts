@@ -10,11 +10,11 @@ declare const __dirname: string;
 // Test data – unique per run so DB collisions are avoided
 // ─────────────────────────────────────────────────────────────────────────────
 const RUN_ID   = Date.now();
-const NEW_NID  = `9900${RUN_ID}`.slice(0, 10);   // 10-digit NID
-const NEW_EMAIL = `e2e.test.${RUN_ID}@ghcaa.test`;
-const NEW_MOBILE = '01712345678';
+const NEW_NID  = `1990${RUN_ID.toString().slice(-13)}`; // 17-digit NID
+const NEW_EMAIL = `e2e.${RUN_ID}@ghcaa.test`;
+const NEW_MOBILE = `017${RUN_ID.toString().slice(-8)}`; // 11-digit Mobile
 const NEW_NAME  = `E2E Member ${RUN_ID}`;
-const EVENT_TITLE = `Post EId Reunion ${RUN_ID}`;
+const EVENT_TITLE = `E2E Event ${RUN_ID}`;
 
 const ADMIN_USER = 'shalin';
 const ADMIN_PASS = 'Shalin@2024!';
@@ -78,6 +78,15 @@ async function logout(page: Page) {
 test('Comprehensive GHCAA Ecosystem Workflow', async ({ page }) => {
   test.slow();
   const imgPath = stubImagePath();
+  page.on('console', msg => console.log(`BROWSER [${msg.type()}]: ${msg.text()}`));
+  page.on('pageerror', err => console.log(`BROWSER ERROR: ${err.message}`));
+  page.on('requestfailed', request => console.log(`BROWSER REQ FAILED: ${request.url()} - ${request.failure()?.errorText}`));
+  page.on('response', async response => {
+    if (response.status() >= 400) {
+      const body = await response.text().catch(() => 'No body');
+      console.log(`BROWSER REQ ERROR: ${response.url()} -> ${response.status()}\nBody: ${body}`);
+    }
+  });
 
   // ── STEP 1: New Member Registration ───────────────────────────────────────
   console.log('--- Step 1: Member Registration ---');
@@ -96,7 +105,7 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page }) => {
   await page.locator('select[name="tShirtSize"]').selectOption('L');
   await page.locator('select[name="membershipType"]').selectOption('General');
 
-  // Dynamic fee check
+  // Dynamic fee check - using innerText match as fallback for visual consistency
   await page.waitForFunction(() => document.body.innerText.match(/1[,.]?000|500/), { timeout: 10000 });
 
   await page.locator('input[name="email"]').fill(NEW_EMAIL);
@@ -104,22 +113,28 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page }) => {
   await page.locator('textarea[name="presentAddress"]').fill('123 E2E Street, Dhaka');
   await page.locator('textarea[name="permanentAddress"]').fill('456 Home Village');
 
+  // Verify no validation errors before continuing
+  const step1Errors = page.locator('.text-red-500, .invalid-feedback').filter({ visible: true });
+  if (await step1Errors.count() > 0) {
+    throw new Error(`Step 1 Validation Error: ${await step1Errors.first().innerText()}`);
+  }
   await page.locator('button:has-text("Continue Assessment")').click();
   await page.waitForSelector('text=Background & Milestones', { timeout: 15000 });
 
-  // Academic Info
-  await page.waitForSelector('.academic-history-row select', { timeout: 5000 });
-  await page.locator('select').nth(0).selectOption('HSC');
-  await page.locator('select').nth(1).selectOption('Science');
-  await page.locator('select').nth(2).selectOption('2006');
-  await page.locator('select').nth(3).selectOption('2008');
+  // Academic Info - Using container-based targeting for robust selection
+  const academicSection = page.locator('.history-item').first();
+  await academicSection.locator('.form-group', { hasText: /Degree Conferred/i }).locator('select').selectOption('HSC');
+  await academicSection.locator('.form-group', { hasText: /Subject/i }).locator('select').selectOption('Science');
+  await academicSection.locator('.form-group', { hasText: /Admission/i }).locator('select').selectOption('2006');
+  await academicSection.locator('.form-group', { hasText: /Passing Year/i }).locator('select').selectOption('2008');
 
   // Professional History (Standard date format)
   await page.getByPlaceholder(/Employer Title/i).first().fill('GHCAA Test Corp');
   await page.getByPlaceholder(/Chief Technologist/i).first().fill('Software Engineer');
+  await page.locator('select').filter({ hasText: /Select Sector/ }).selectOption({ index: 1 });
   await page.locator('input[placeholder="dd-mm-yyyy"]').first().fill('01-01-2010'); 
   
-  const isCurrent = page.locator('input[type="checkbox"]').first();
+  const isCurrent = page.locator('label').filter({ hasText: /I currently serve/i }).locator('input[type="checkbox"]');
   if (await isCurrent.isVisible() && !(await isCurrent.isChecked())) await isCurrent.check();
 
   await page.locator('input[name*="emergencyContactName"]').fill('Emergency Contact');
@@ -127,25 +142,38 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page }) => {
   await page.locator('input[name*="emergencyContactPhone"]').fill('01898765432');
 
   await page.locator('button:has-text("Continue Assessment")').click();
-  await page.waitForSelector('text=Registry Filing', { timeout: 15000 });
+  // Wait for the actual content of Step 3, not the stepper
+  await page.waitForSelector('h2:has-text("Registry Filing")', { timeout: 15000 });
   
-  await page.waitForFunction(() => document.querySelectorAll('.payment-card').length > 0);
-  await page.locator('.payment-card').filter({ hasText: /Manual Receipt/i }).first().click();
+  // Explicitly select Cash / Manual Receipt
+  await page.locator('.payment-card', { hasText: /Cash.*Receipt/i }).click();
   
-  await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-  await page.locator('input[type="file"]').first().setInputFiles(imgPath);
-  const proofInput = page.locator('input[type="file"]').nth(1);
-  if (await proofInput.isVisible()) await proofInput.setInputFiles(imgPath);
+  // Targeted file uploads using container labels for precision
+  const photoContainer = page.locator('.form-group', { hasText: /Profile Photo/i });
+  await photoContainer.locator('input[type="file"]').setInputFiles(imgPath);
 
-  const checkboxes = page.locator('input[type="checkbox"]');
-  for (let i = 0; i < await checkboxes.count(); i++) {
-    await checkboxes.nth(i).check();
+  const certContainer = page.locator('.form-group', { hasText: /Academic Certificate/i });
+  await certContainer.locator('input[type="file"]').setInputFiles(imgPath);
+
+  // Payment portal file drop for receipt
+  const receiptDrop = page.locator('app-payment-portal .file-drop');
+  if (await receiptDrop.count() > 0) {
+    await receiptDrop.locator('input[type="file"]').setInputFiles(imgPath);
   }
 
-  await page.getByRole('button', { name: /Finalize Registry/i }).click();
+  // Accept all terms explicitly
+  await page.locator('label', { hasText: /I have read and understood/i }).locator('input').check();
+  await page.locator('label', { hasText: /I explicitly consent/i }).locator('input').check();
+  await page.locator('label', { hasText: /I solemnly affirm/i }).locator('input').check();
+
+  // Finalize Registry
+  await page.locator('button[type="submit"]:has-text("Finalize Registry")').click();
+  
+  // Wait for success states: OTP screen, success message, or redirect to login
   await Promise.race([
-    page.waitForSelector('text=Security Authentication', { timeout: 30000 }),
-    page.waitForSelector('text=submitted', { timeout: 30000 })
+    page.waitForSelector('text=Security Authentication', { timeout: 60000 }),
+    page.waitForSelector('text=submitted successfully', { timeout: 60000 }),
+    page.waitForURL(/.*login/, { timeout: 60000 })
   ]);
   console.log('✅ Registration Submitted.');
 

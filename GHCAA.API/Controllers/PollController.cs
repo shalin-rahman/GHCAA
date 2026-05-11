@@ -20,17 +20,19 @@ namespace GHCAA.API.Controllers
             _pollService = pollService;
         }
 
-        private int GetMemberId()
+        // 24.50: Returns null when the claim is absent or not a valid integer, avoiding int.Parse crash.
+        private int? GetMemberId()
         {
-            var claim = User.FindFirst("MemberId");
-            return claim != null ? int.Parse(claim.Value) : 0;
+            var value = User.FindFirst("MemberId")?.Value;
+            return int.TryParse(value, out var id) ? id : null;
         }
 
         [HttpGet("active")]
         public async Task<IActionResult> GetActivePolls(CancellationToken cancellationToken)
         {
             var memberId = GetMemberId();
-            var polls = await _pollService.GetActivePollsAsync(memberId, cancellationToken);
+            if (memberId == null) return Unauthorized();
+            var polls = await _pollService.GetActivePollsAsync(memberId.Value, cancellationToken);
             return Ok(polls);
         }
 
@@ -38,7 +40,8 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> GetPoll(int id, CancellationToken cancellationToken)
         {
             var memberId = GetMemberId();
-            var poll = await _pollService.GetPollByIdAsync(id, memberId, cancellationToken);
+            if (memberId == null) return Unauthorized();
+            var poll = await _pollService.GetPollByIdAsync(id, memberId.Value, cancellationToken);
             if (poll == null) return NotFound();
             return Ok(poll);
         }
@@ -47,9 +50,9 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> Vote(int id, [FromBody] PollVoteDto dto, CancellationToken cancellationToken)
         {
             var memberId = GetMemberId();
-            if (memberId == 0) return Unauthorized();
+            if (memberId == null) return Unauthorized();
 
-            var success = await _pollService.VoteAsync(id, memberId, dto.OptionIds, cancellationToken);
+            var success = await _pollService.VoteAsync(id, memberId.Value, dto.OptionIds, cancellationToken);
             if (!success) return BadRequest(new { Message = "Voting failed. You may have already voted or the poll is closed." });
 
             return Ok(new { Message = "Vote recorded successfully." });

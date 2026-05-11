@@ -117,21 +117,19 @@ namespace GHCAA.Infrastructure.Services
             // Generate Membership Number: GHC + YY + MM + (last 3 digit max + 1)
             var now = DateTime.UtcNow;
             var prefix = $"GHC{now:yyMM}";
-            
-            // Get the last membership number for the current month prefix
+
+            // 24.29: Order by Id (insertion order) to avoid lexicographic rollover at 999→1000.
             var lastMember = await _db.Members
                 .Where(m => m.MembershipNumber != null && m.MembershipNumber.StartsWith(prefix))
-                .OrderByDescending(m => m.MembershipNumber)
+                .OrderByDescending(m => m.Id)
                 .FirstOrDefaultAsync(cancellationToken);
-                
+
             int nextId = 1;
-            if (lastMember != null && lastMember.MembershipNumber != null && lastMember.MembershipNumber.Length >= prefix.Length + 1)
+            if (lastMember?.MembershipNumber != null && lastMember.MembershipNumber.Length > prefix.Length)
             {
-                var lastPart = lastMember.MembershipNumber.Substring(prefix.Length);
+                var lastPart = lastMember.MembershipNumber[prefix.Length..];
                 if (int.TryParse(lastPart, out int lastId))
-                {
                     nextId = lastId + 1;
-                }
             }
             
             member.MembershipNumber = $"{prefix}{nextId:D3}";
@@ -333,6 +331,7 @@ namespace GHCAA.Infrastructure.Services
         {
             Member? member;
             string membershipNumber;
+            string cleanNid = string.Empty;
 
             // Use a transaction to prevent race conditions during membership Serial generation
             using (var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken))
@@ -377,19 +376,18 @@ namespace GHCAA.Infrastructure.Services
                     var now = DateTime.UtcNow;
                     var prefix = $"GHC{now:yyMM}";
                     
+                    // 24.29: Order by Id to avoid lexicographic rollover bug.
                     var lastBound = await _db.Members
                         .Where(m => m.MembershipNumber != null && m.MembershipNumber.StartsWith(prefix))
-                        .OrderByDescending(m => m.MembershipNumber)
+                        .OrderByDescending(m => m.Id)
                         .FirstOrDefaultAsync(cancellationToken);
-                        
+
                     int nextId = 1;
-                    if (lastBound != null && lastBound.MembershipNumber != null && lastBound.MembershipNumber.Length >= prefix.Length + 1)
+                    if (lastBound?.MembershipNumber != null && lastBound.MembershipNumber.Length > prefix.Length)
                     {
-                        var lastPart = lastBound.MembershipNumber.Substring(prefix.Length);
+                        var lastPart = lastBound.MembershipNumber[prefix.Length..];
                         if (int.TryParse(lastPart, out int lastId))
-                        {
                             nextId = lastId + 1;
-                        }
                     }
                     
                     membershipNumber = member.MembershipNumber ?? $"{prefix}{nextId:D3}";
@@ -402,15 +400,20 @@ namespace GHCAA.Infrastructure.Services
                     member.ApprovedBy = approvedByAdminId;
 
                     await _db.SaveChangesAsync(cancellationToken);
-                    
+
                     // Award points for verification
                     await _gamification.AwardPointsAsync(memberId, "PROFILE_VERIFIED", metadata: "Initial approval", cancellationToken: cancellationToken);
+
+                    // 24.31: Create user account inside the transaction so Member(Active) and User are always atomic.
+                    // If CreateUserAccountAsync throws, the transaction rolls back and the member stays Applied.
+                    cleanNid = member.NID.Replace(" ", "");
+                    await _userService.CreateUserAccountAsync(memberId, cleanNid, cleanNid, cancellationToken);
 
                     await transaction.CommitAsync(cancellationToken);
 
                     await _activityService.LogActivityAsync(memberId, "Approved", $"Member approved by Admin {approvedByAdminId}. Membership Number: {membershipNumber}", approvedByAdminId, cancellationToken: cancellationToken);
 
-                    _logger.LogInformation("Member {MemberId} approved by Admin {AdminId}. Membership Number: {MembershipNumber}", 
+                    _logger.LogInformation("Member {MemberId} approved by Admin {AdminId}. Membership Number: {MembershipNumber}",
                         memberId, approvedByAdminId, membershipNumber);
                 }
                 catch (Exception)
@@ -420,10 +423,7 @@ namespace GHCAA.Infrastructure.Services
                 }
             }
 
-            // Create user account using NID (without spaces) as both username and password
-            var cleanNid = member.NID.Replace(" ", "");
-            await _userService.CreateUserAccountAsync(memberId, cleanNid, cleanNid, cancellationToken);
-            var defaultPassword = cleanNid; // Use NID as the default password display
+            var defaultPassword = cleanNid;
 
             // Send Welcome Email
             try
@@ -470,9 +470,11 @@ namespace GHCAA.Infrastructure.Services
                 _logger.LogWarning(ex, "Failed to send rejection email to {Email}", member.Email);
             }
 
-            // Remove registry filing
-            _db.Members.Remove(member);
+            // 24.30: Soft-delete preserves audit trail and prevents FK cascade failures.
+            member.Status = Enums.MembershipStatus.Rejected;
+            member.IsArchived = true;
             await _db.SaveChangesAsync(cancellationToken);
+            await _activityService.LogActivityAsync(id, "Rejected", $"Application rejected by Admin {adminId}. Reason: {reason}", adminId, cancellationToken: cancellationToken);
             _logger.LogWarning("Admin {AdminId} rejected application {MemberId} for: {Reason}", adminId, id, reason);
             return true;
         }
@@ -1351,38 +1353,72 @@ namespace GHCAA.Infrastructure.Services
         }
         public async Task<int> BulkArchiveInactiveMembersAsync(CancellationToken cancellationToken = default)
         {
-            var inactiveStatuses = new[] { 
-                Enums.MembershipStatus.InactivePayment, 
-                Enums.MembershipStatus.InactiveResigned, 
-                Enums.MembershipStatus.Terminated 
+            var inactiveStatuses = new[] {
+                Enums.MembershipStatus.InactivePayment,
+                Enums.MembershipStatus.InactiveResigned,
+                Enums.MembershipStatus.Terminated
             };
-            
-            // Criteria: Inactive for more than 6 months
+
+            // 24.32: Replaced per-row ArchiveMemberAsync loop (N+1) with bulk ExecuteUpdateAsync calls.
             var threshold = DateTime.UtcNow.AddMonths(-6);
-            
-            var targetMembers = await _db.Members
+
+            var targetMemberIds = await _db.Members
                 .Where(m => !m.IsArchived && inactiveStatuses.Contains(m.Status) && m.LastUpdateDate < threshold)
                 .Select(m => m.Id)
                 .ToListAsync(cancellationToken);
-                
-            int processedCount = 0;
-            foreach (var id in targetMembers)
+
+            if (targetMemberIds.Count == 0)
+                return 0;
+
+            // Bulk archive member rows
+            await _db.Members
+                .Where(m => targetMemberIds.Contains(m.Id))
+                .ExecuteUpdateAsync(s => s.SetProperty(m => m.IsArchived, true), cancellationToken);
+
+            // Bulk archive user rows and rotate SecurityStamp to invalidate all active JWTs.
+            // SecurityStamp must be unique per user so we load and update in a single SaveChanges.
+            var usersToArchive = await _db.Users
+                .Where(u => u.MemberId != null && targetMemberIds.Contains(u.MemberId.Value))
+                .ToListAsync(cancellationToken);
+
+            foreach (var user in usersToArchive)
             {
-                try 
-                {
-                    await ArchiveMemberAsync(id, cancellationToken);
-                    processedCount++;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to bulk archive member {MemberId}", id);
-                }
+                user.IsArchived = true;
+                user.SecurityStamp = Guid.NewGuid().ToString("N");
             }
-            
-            if (processedCount > 0)
-                _logger.LogInformation("Successfully bulk-archived {Count} inactive members.", processedCount);
-                
-            return processedCount;
+
+            if (usersToArchive.Count > 0)
+                await _db.SaveChangesAsync(cancellationToken);
+
+            // Bulk end active EC roles
+            await _db.ECMembers
+                .Where(em => targetMemberIds.Contains(em.MemberId) && em.EndDate == null)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(em => em.EndDate, DateTime.UtcNow)
+                    .SetProperty(em => em.ChangeReason, "Bulk archived"), cancellationToken);
+
+            // Bulk cancel pending family link requests
+            await _db.FamilyLinkRequests
+                .Where(r => (targetMemberIds.Contains(r.RequesterId) || targetMemberIds.Contains(r.TargetMemberId))
+                         && r.Status == Enums.FamilyLinkStatus.Requested)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.Status, Enums.FamilyLinkStatus.Cancelled), cancellationToken);
+
+            // Bulk deactivate job opportunities
+            await _db.JobOpportunities
+                .Where(j => targetMemberIds.Contains(j.PostedByMemberId) && j.IsActive)
+                .ExecuteUpdateAsync(s => s.SetProperty(j => j.IsActive, false), cancellationToken);
+
+            // Bulk unpublish news posts authored by archived users
+            var archivedUserIds = usersToArchive.Select(u => u.Id).ToList();
+            if (archivedUserIds.Count > 0)
+            {
+                await _db.NewsPosts
+                    .Where(n => archivedUserIds.Contains(n.AuthorId) && n.IsActive)
+                    .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsActive, false), cancellationToken);
+            }
+
+            _logger.LogInformation("Bulk-archived {Count} inactive members.", targetMemberIds.Count);
+            return targetMemberIds.Count;
         }
 
         public async Task<object> GetPublicStatsAsync(CancellationToken cancellationToken = default)

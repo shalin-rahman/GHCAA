@@ -42,7 +42,8 @@ namespace GHCAA.Tests.Controllers
             var json = """
 {
   "PaymentGateways": { "EnabledMethods": [ "SSLCommerz", "BkashGateway" ] },
-  "GeneralSettings": { "AssociationNamePrefix": "TEST-", "Currency": "BDT" }
+  "GeneralSettings": { "AssociationNamePrefix": "TEST-", "Currency": "BDT" },
+  "AppSettings": { "PublicApiBaseUrl": "http://localhost:5000" }
 }
 """;
             _gatewayTestConfig = new ConfigurationBuilder()
@@ -110,8 +111,7 @@ namespace GHCAA.Tests.Controllers
             {
                 Amount = 100,
                 Gateway = Enums.PaymentGateway.SSLCommerz,
-                Reference = "Registration",
-                BaseUrl = "http://api.com"
+                Reference = "Registration"
             };
 
             var gatewayMock = new Mock<IPaymentGatewayService>();
@@ -135,8 +135,7 @@ namespace GHCAA.Tests.Controllers
             {
                 Amount = 100,
                 Gateway = Enums.PaymentGateway.SSLCommerz,
-                Reference = "Registration",
-                BaseUrl = "http://api.com"
+                Reference = "Registration"
             };
 
             var result = await _controller.InitiatePayment(request, CancellationToken.None);
@@ -168,8 +167,7 @@ namespace GHCAA.Tests.Controllers
             {
                 Amount = 99,
                 Gateway = Enums.PaymentGateway.SSLCommerz,
-                Reference = "EVT-REG-AMT-TEST",
-                BaseUrl = "http://api.com"
+                Reference = "EVT-REG-AMT-TEST"
             };
 
             var result = await _controller.InitiatePayment(request, CancellationToken.None);

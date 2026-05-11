@@ -38,14 +38,52 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Future<void> handleEventPayment(double amount, String eventTitle) async {
-      final gateway = ref.read(gatewayServiceProvider);
-      final res = await gateway.initiate(
-          amount, PaymentGateway.sslCommerz, 'EVT-REG-$eventTitle');
+    Future<void> processPayment(double amount, PaymentGateway gateway, String eventTitle) async {
+      final gatewayService = ref.read(gatewayServiceProvider);
+      final res = await gatewayService.initiate(
+          amount, gateway, 'EVT-REG-$eventTitle');
       if (res.success && res.gatewayUrl != null && context.mounted) {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => PaymentWebPage(url: res.gatewayUrl!)));
+      } else if (!res.success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(res.message ?? 'Payment initiation failed.'),
+          backgroundColor: Colors.redAccent,
+        ));
       }
+    }
+
+    Future<void> handleEventPayment(double amount, String eventTitle) async {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: AppTheme.deepCharcoal,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXL)),
+        ),
+        builder: (context) => Container(
+          padding: const EdgeInsets.all(AppTheme.spaceL),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('SELECT PAYMENT METHOD', 
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(letterSpacing: 2, color: AppTheme.royalGold)),
+              const SizedBox(height: AppTheme.spaceL),
+              _paymentOption(context, 'SSLCommerz', 'Secure Pay with Cards/MFS', Icons.account_balance_wallet_rounded, () async {
+                Navigator.pop(context);
+                await processPayment(amount, PaymentGateway.sslCommerz, eventTitle);
+              }),
+              const SizedBox(height: AppTheme.spaceM),
+              _paymentOption(context, 'DGePay', 'Debit/Credit Cards & Wallets', Icons.credit_card_rounded, () async {
+                Navigator.pop(context);
+                await processPayment(amount, PaymentGateway.dgePay, eventTitle);
+              }),
+              const SizedBox(height: AppTheme.spaceXL),
+            ],
+          ),
+        ),
+      );
     }
 
     final eventsAsync = ref.watch(eventsListProvider);
@@ -422,6 +460,44 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
  
   Widget _sectionHeader(BuildContext context, String title) {
     return Text(title, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.royalGold, letterSpacing: 1.5, fontSize: 8));
+  }
+
+  Widget _paymentOption(BuildContext context, String title, String subtitle, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.radiusL),
+      child: Container(
+        padding: const EdgeInsets.all(AppTheme.spaceM),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.03),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
+          border: Border.all(color: AppTheme.glassBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spaceS),
+              decoration: BoxDecoration(
+                color: AppTheme.royalGold.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: AppTheme.royalGold, size: 24),
+            ),
+            const SizedBox(width: AppTheme.spaceM),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900, color: Colors.white)),
+                  Text(subtitle, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.white38, fontSize: 10)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Colors.white24),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _datePickerRow(BuildContext context, String label, DateTime? value, void Function(DateTime) onPicked, {bool nullable = false}) {

@@ -5,6 +5,7 @@ import { EventGallery } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { validateUploadFile } from '../../core/utils/file-validation.util';
 
 @Component({
   selector: 'app-gallery',
@@ -46,8 +47,11 @@ export class Gallery implements OnInit {
   }
 
   onFileSelected(e: any) {
-    const file = e.target.files[0];
-    if (file) this.newMemory.photo = file;
+    const file: File = e.target.files[0];
+    if (!file) return;
+    const err = validateUploadFile(file, 'image');
+    if (err) { this.notify.error(err); e.target.value = ''; return; }
+    this.newMemory.photo = file;
   }
 
   submitMemory() {
@@ -72,7 +76,7 @@ export class Gallery implements OnInit {
   }
 
   viewFull(path: string) {
-    window.open(path, '_blank');
+    window.open(path, '_blank', 'noopener,noreferrer');
   }
 }
 

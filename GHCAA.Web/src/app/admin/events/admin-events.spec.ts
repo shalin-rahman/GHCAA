@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminEvents } from './admin-events';
 import { EventsService } from '../../core/services/events.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { NavService } from '../../core/services/nav.service';
 import { of } from 'rxjs';
 
 describe('AdminEvents Component', () => {
@@ -22,11 +23,19 @@ describe('AdminEvents Component', () => {
             warning: vi.fn()
         };
 
+        const navServiceMock = {
+            portalNavItems: () => [],
+            adminNavItems: () => [],
+            isSuperAdmin: () => false,
+            isAdmin: () => false
+        };
+
         await TestBed.configureTestingModule({
             imports: [AdminEvents],
             providers: [
                 { provide: EventsService, useValue: eventsServiceMock },
-                { provide: NotificationService, useValue: notificationServiceMock }
+                { provide: NotificationService, useValue: notificationServiceMock },
+                { provide: NavService, useValue: navServiceMock }
             ]
         }).compileComponents();
 

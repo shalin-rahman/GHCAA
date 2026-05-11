@@ -34,6 +34,7 @@
 2.5  [DONE] Membership Lifecycle: Soft-delete cascading (IsArchived architecture)
 2.6  [DONE] Automated ID & Certificate Generation (PDF + QR)
 2.7  [DONE] Profile UI refinement (Education/Professional record edit buttons)
+2.8  [DONE] Create offline data collection templates (Google Forms) for manual member & event migration matching DB validations
 
 ## AREA 3: COMMUNICATION & SOCIAL
 3.1  [DONE] Real-time Communication Bridge (SignalR Admin Alerts)
@@ -83,7 +84,7 @@
 7.16 [TODO] Hardening: SSL Pinning and Binary Obfuscation
 
 ## AREA 8: MOBILE ENGINEERING (TIER-1 STANDARDS)
-8.1  [TODO] UI: Enforce 8pt grid and standard design tokens globally
+8.1  [DONE] UI: Enforce 8pt grid and standard design tokens globally
 8.2  [TODO] Nav: Adaptive layout for Tablets/Pads (Sidebar architecture)
 8.3  [TODO] Perf: Cursor-based pagination for Alumni Registry
 8.4  [TODO] Perf: Isolated background threading for JSON/Encryption processing
@@ -236,8 +237,104 @@
 23.5 [DONE] Mobile: Update all screens (Registration, Profile, Events, Jobs, Gallery) to use standardized dates
 23.6 [DONE] E2E: Update Playwright test suite to use dd-mm-yyyy for all automated date entries
 
+## AREA 24: SECURITY HARDENING (from full-stack code review — 2026-05-02)
+
+### 24-A: CRITICAL — Authentication & Token Backdoors
+24.1  [DONE] Security: Gate VisualTestAuthMiddleware behind Development env + ASP_SEED_PROFILE=Visual; reject "Bearer visual_*" in all other environments (VisualTestAuthMiddleware.cs)
+24.2  [DONE] Security: Remove committed JWT fallback key "LOCAL_DEVELOPMENT_JWT_FALLBACK_32_CHARS_MIN"; generate ephemeral random 32-byte key on dev startup, require User Secrets (JwtSigningKeyResolver.cs)
+24.3  [DONE] Security: Remove DB passwords from appsettings.Development.json and appsettings.json; enforce env-var / User Secrets only (appsettings.*.json)
+24.4  [DONE] Security: Add [Authorize] attribute to ChatHub class (ChatHub.cs)
+24.5  [DONE] Security: Add [Authorize] attribute to NotificationHub class; gate JoinBatch/JoinDepartment to authenticated callers (NotificationHub.cs)
+24.6  [DONE] Security: Replace non-thread-safe Dictionary<string,string> in ChatHub with ConcurrentDictionary; support multi-device per user (ChatHub.cs)
+
+### 24-B: CRITICAL — Sensitive Data in Responses
+24.7  [DONE] API: Do not return DefaultPassword in ApproveMember HTTP response; send via email only, return PasswordEmailed: true flag (AdminController.cs)
+24.8  [DONE] API: Do not return ResetUrl (containing reset token) in ResetPasswordAdmin response; force email-only delivery (AdminController.cs)
+24.9  [DONE] API: Do not return ClientSecret/GatewaySecretKey in AdminSocialAuthController.GetConfigs or PaymentConfigController responses; mask or omit secrets (AdminSocialAuthController.cs, PaymentConfigController.cs)
+
+### 24-C: CRITICAL — Payment Gateway Security
+24.10 [DONE] Payment: Implement HMAC/signature verification on bKash webhook before trusting paymentID (BkashGateway.cs ProcessWebhookAsync)
+24.11 [DONE] Payment: Implement verify_sign HMAC check on SSLCommerz webhook; verify store_passwd hash against all callback fields (SSLCommerzGateway.cs VerifyCallbackAsync)
+24.12 [DONE] Payment: Verify executed payment amount against the originating PaymentHistory amount for bKash (BkashGateway.cs VerifyCallbackAsync)
+24.13 [DONE] Payment: Add idempotency — store paymentID/val_id in PaymentHistory with UNIQUE constraint; short-circuit on duplicate callback (both gateways)
+24.14 [DONE] Payment: Fix HttpClient.DefaultRequestHeaders mutation race in BkashGateway (3 call sites); use per-request HttpRequestMessage headers (BkashGateway.cs)
+24.15 [DONE] Payment: Derive CallbackUrl exclusively from server-side config (AppSettings:PublicApiBaseUrl), never from request.BaseUrl supplied by the client (GatewaysController.cs)
+24.16 [DONE] Payment: Replace hardcoded fee fallback of 500 BDT and adminId fallback of "1" with startup-time config validation that fails loudly (GatewaysController.cs)
+24.17 [DONE] Payment: Fix SSLCommerz form body parser — split on '=' truncates base64 values; use QueryHelpers.ParseQuery instead (SSLCommerzGateway.cs ProcessWebhookAsync)
+
+### 24-D: CRITICAL — File & Path Security
+24.18 [DONE] Security: Fix path traversal in SecureFilesController — after Path.GetFullPath, assert path starts with the secure-uploads root; reject any path containing ".." (SecureFilesController.cs)
+
+### 24-E: CRITICAL — OTP Service
+24.19 [DONE] Security: Replace new Random() with RandomNumberGenerator.GetInt32(100_000, 1_000_000) for cryptographically secure OTP generation (OtpService.cs)
+24.20 [DONE] Security: Store OTP as HMAC-SHA256(code, email), not cleartext; a DB compromise reveals all active codes (OtpService.cs)
+24.21 [DONE] Security: Add per-email attempt counter — lock OTP after 5 wrong attempts; add Purpose field (EmailVerify, PasswordReset) to prevent cross-use (OtpService.cs)
+24.22 [DONE] Security: Invalidate all previous unverified OTPs for the same email before inserting a new one (OtpService.cs)
+
+### 24-F: HIGH — Authentication Service
+24.23 [DONE] Security: Add brute-force lockout to LoginAsync — track FailedLoginAttempts + LockoutUntil on User, lock 15 min after 5 failures (AuthService.cs)
+24.24 [DONE] Security: Fix username enumeration timing attack — always run a dummy BCrypt.Verify when user is not found to normalize response time (AuthService.cs)
+24.25 [DONE] Security: Fix social auto-link — only link IdP email to local account when member.EmailVerified == true (AuthService.cs SocialLoginAsync)
+24.26 [DONE] Security: Social signup uses unique SOCIAL-{PROVIDER}-{socialId} sentinel instead of "TBD" for NID/MobileNo — prevents UNIQUE index crash on second social signup (AuthService.cs SocialLoginAsync)
+24.27 [DONE] Security: JWT lifetime reduced to 60 min; opaque refresh token (SHA-256 hash stored in RefreshTokens table, 7-day cookie rotation) implemented in TokenService.cs + RefreshToken entity + /auth/refresh endpoint
+24.28 [DONE] Security: Rotate SecurityStamp on password reset and password change to invalidate all previous JWTs (AuthService.cs, UserService.cs)
+
+### 24-G: HIGH — Data Integrity (MemberService)
+24.29 [DONE] Bug: Fix membership number lexicographic race — OrderByDescending(m.Id) instead of string sort; prevents regression at 999→1000 rollover (MemberService.cs RegisterAsync + ApproveMemberAsync)
+24.30 [DONE] Bug: Replace hard-delete of rejected applicants with soft-delete (Status=Rejected, IsArchived=true) preserving audit trail; added Rejected to MembershipStatus enum (MemberService.cs, Enums.cs)
+24.31 [DONE] Bug: CreateUserAccountAsync moved inside the serializable transaction in ApproveMemberAsync — member+user are now atomic (MemberService.cs)
+24.32 [DONE] Perf: BulkArchiveInactiveMembersAsync replaced N+1 ArchiveMemberAsync loop with bulk ExecuteUpdateAsync calls for all cascades (MemberService.cs)
+
+### 24-H: HIGH — Missing DB Indexes
+24.33 [DONE] Perf: Add index on User.MemberId (hot lookup path in Auth, Member services)
+24.34 [DONE] Perf: Add partial index on User.ResetToken WHERE ResetToken IS NOT NULL
+24.35 [DONE] Perf: Add index on User.GoogleId, User.FacebookId (social login hot path)
+24.36 [DONE] Perf: Add composite index on Otp(Email, ExpiryAt) — OTP verification scans table without it
+24.37 [DONE] Perf: Add composite index on Member(Status, IsArchived) — heavily filtered in admin listing queries (MemberConfiguration.cs)
+24.38 [DONE] Perf: Add entity configuration file for Otp table (currently using EF defaults — no indexes, no column length caps on a security-critical table)
+
+### 24-I: HIGH — Frontend (Angular)
+24.39 [DONE] Security: Move JWT from localStorage to httpOnly + Secure + SameSite=Strict cookie set by backend; token no longer stored in localStorage; Angular uses /auth/me on init; sessionStorage holds display fields only (auth.service.ts, ServiceExtensions.cs, AuthController.cs)
+24.40 [DONE] Security: Wrap getUserFromStorage() JSON.parse in try/catch; fall back to null and clear corrupt entry (auth.service.ts)
+24.41 [DONE] Security: Check JWT exp claim on storage restore — drop session if token is already expired (auth.service.ts)
+24.42 [DONE] Security: Sanitize article HTML server-side with Ganss.HtmlSanitizer before storage in NewsService.CreateNewsAsync + UpdateNewsAsync; [innerHTML] now safe (NewsService.cs, magazine.html)
+24.43 [DONE] Security: Restrict Authorization header injection in globalHttpInterceptor to /api/* URLs only, not all outgoing HttpClient requests (global-http.interceptor.ts)
+24.44 [DONE] Security: Token refresh implemented — 401 queuing with BehaviorSubject, POST /auth/refresh retried, all concurrent 401s share single refresh call, logout only on refresh failure (global-http.interceptor.ts, AuthController.cs)
+24.45 [DONE] Security: Client-side file validation added — images ≤ 5 MB (JPEG/PNG/WebP), PDFs ≤ 10 MB; shared validateUploadFile() utility applied to register.ts, gallery.ts, admin-members.ts, admin-events.ts, articles.ts (file-validation.util.ts)
+24.46 [DONE] Security: Enforce mustChangePassword redirect — after login, route to change-password screen before allowing any navigation (auth.service.ts, auth.guard.ts)
+
+### 24-J: HIGH — API Controller Hardening
+24.47 [DONE] Security: Restrict QueryStringTokenMiddleware to GET-only on /api/secure-files/ and /api/uploads/ paths (QueryStringTokenMiddleware.cs)
+24.48 [DONE] Security: PartitionedRateLimiter keyed on (IP, username) for login endpoint; LoginRateLimitMiddleware peeks body username before rate limiter runs (Program.cs, LoginRateLimitMiddleware.cs)
+24.49 [DONE] Security: Add startup validator that throws if AllowedOrigins is empty in Production (Program.cs)
+24.50 [DONE] Security: Use int.TryParse for MemberId claim parsing; return Unauthorized on missing/invalid claim (PollController.cs, FamilyLinkController.cs)
+24.51 [DONE] Security: Read admin identity from User.FindFirst("MemberId") JWT claim in ApproveMember and RejectMember (AdminController.cs)
+
+### 24-K: MEDIUM — Validator & Input Hardening
+24.52 [DONE] Validation: Add MaximumLength and safe-character regex to FatherName, MotherName, PresentAddress, PermanentAddress, EmergencyContactName, EmergencyContactRelation, EmergencyContactPhone in MemberRegistrationValidator (MemberRegistrationValidator.cs)
+24.53 [DONE] Validation: Add EmergencyContactPhone format validation (same regex as MobileNo) (MemberRegistrationValidator.cs)
+24.54 [DONE] Validation: Add minimum age gate (LessThan(UtcNow.AddYears(-13))) and sanity lower bound (GreaterThan(UtcNow.AddYears(-120))) to DateOfBirth (MemberRegistrationValidator.cs)
+24.55 [DONE] Validation: Add MaximumLength(254) to Email in VerifyEmailValidator; add caps to AcademicHistory.Subject and Result fields (MemberRegistrationValidator.cs, VerifyEmailValidator.cs)
+24.56 [DONE] Validation: Enforce AdmissionYear < PassingYear in academic record child rules (MemberRegistrationValidator.cs)
+
+### 24-L: MEDIUM — CSP & Security Headers
+24.57 [DONE] Security: Remove 'unsafe-inline' from script-src in CSP header; use nonces or hashes (SecurityHeadersMiddleware.cs)
+24.58 [DONE] Security: Register SecurityHeadersMiddleware before UseStaticFiles so static file responses also receive security headers (Program.cs)
+24.59 [DONE] Security: Remove deprecated X-XSS-Protection header (SecurityHeadersMiddleware.cs)
+24.60 [DONE] Security: Add window.open(..., '_blank', 'noopener,noreferrer') to all gallery/event external link openings to prevent tab-napping (gallery.ts, events.ts)
+
 ## CREDENTIALS:
+
 - SuperAdmin: superadmin / SuperAdminPassword123!
 - Developer Admin: shalin / Shalin@2024!
 - TEST_MEMBER: demo_user / DemoPass123!
 - Mobile: If not connected with net, show error on mobile app
+
+## AREA 25: DGePAY PAYMENT GATEWAY INTEGRATION
+- [x] 25.1 API: Implement DGePayGateway service (AES-128-ECB + HMAC-SHA256, Database-driven)
+- [x] 25.2 API: Register DGePayGateway in DependencyInjection.cs and PaymentGatewayFactory
+- [x] 25.3 Define callback endpoint in GatewaysController
+- [x] 25.4 Seed DGePay UAT credentials in payment_configurations.json
+- [x] 25.5 Formalize Gateway Workflow documentation (docs/PAYMENT_GATEWAY_WORKFLOW.md)
+- [ ] 25.6 Update Mobile UI (Flutter)
+- [ ] 25.7 E2E Payment Flow Verification

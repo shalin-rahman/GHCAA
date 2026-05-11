@@ -20,6 +20,11 @@ namespace GHCAA.Infrastructure.Data.Configurations
 
             builder.HasIndex(p => new { p.MemberId, p.TransactionId });
 
+            // 24.13: Partial unique index on GatewayPaymentId prevents duplicate callback processing.
+            builder.HasIndex(p => p.GatewayPaymentId)
+                .IsUnique()
+                .HasFilter("\"GatewayPaymentId\" IS NOT NULL");
+
             builder.HasQueryFilter(ph => ph.Member != null && !ph.Member.IsArchived);
         }
     }

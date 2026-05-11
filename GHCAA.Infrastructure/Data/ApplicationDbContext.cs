@@ -123,6 +123,7 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<AmendmentVote> AmendmentVotes { get; set; } = null!;
         public DbSet<MentorshipRequest> MentorshipRequests { get; set; } = null!;
         public DbSet<SocialAuthConfig> SocialAuthConfigs { get; set; } = null!;
+        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
         public DbSet<Poll> Polls { get; set; } = null!;
         public DbSet<PollOption> PollOptions { get; set; } = null!;
         public DbSet<PollVote> PollVotes { get; set; } = null!;

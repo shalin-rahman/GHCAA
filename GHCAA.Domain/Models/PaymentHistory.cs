@@ -18,6 +18,11 @@ namespace GHCAA.Domain.Models
         [MaxLength(500)]
         public string? ReceiptPath { get; set; }
 
+        // 24.13: Stores the gateway's own transaction identifier (bKash paymentID / SSLCommerz val_id).
+        // UNIQUE partial index (WHERE NOT NULL) prevents duplicate callback processing.
+        [MaxLength(255)]
+        public string? GatewayPaymentId { get; set; }
+
         // Navigation
         public Member? Member { get; set; }
     }

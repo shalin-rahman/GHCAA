@@ -37,12 +37,25 @@ namespace GHCAA.API.Extensions
                 {
                     OnMessageReceived = context =>
                     {
-                        var accessToken = context.Request.Query["access_token"];
                         var path = context.HttpContext.Request.Path;
-                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+
+                        // SignalR hubs pass token via query string.
+                        var qsToken = context.Request.Query["access_token"];
+                        if (!string.IsNullOrEmpty(qsToken) && path.StartsWithSegments("/hubs"))
                         {
-                            context.Token = accessToken;
+                            context.Token = qsToken;
+                            return Task.CompletedTask;
                         }
+
+                        // 24.39: Browser clients use httpOnly cookie; Bearer header takes priority
+                        // so API clients / mobile remain unaffected.
+                        if (!context.Request.Headers.ContainsKey("Authorization")
+                            && context.Request.Cookies.TryGetValue("access_token", out var cookieToken)
+                            && !string.IsNullOrEmpty(cookieToken))
+                        {
+                            context.Token = cookieToken;
+                        }
+
                         return Task.CompletedTask;
                     }
                 };

@@ -9,12 +9,15 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using GHCAA.Domain;
+using Ganss.Xss;
 
 namespace GHCAA.Infrastructure.Services
 {
     public class NewsService : INewsService
     {
         private readonly ApplicationDbContext _db;
+        // 24.42: Shared, stateless sanitizer instance — HtmlSanitizer is thread-safe.
+        private static readonly HtmlSanitizer _sanitizer = new();
 
         public NewsService(ApplicationDbContext db)
         {
@@ -97,7 +100,7 @@ namespace GHCAA.Infrastructure.Services
             var post = new NewsPost
             {
                 Title = dto.Title,
-                Content = dto.Content,
+                Content = _sanitizer.Sanitize(dto.Content ?? ""), // 24.42: strip XSS before storage
                 ArticleCategory = dto.ArticleCategory,
                 Status = dto.Status,
                 ImageUrl = dto.ImageUrl,
@@ -118,7 +121,7 @@ namespace GHCAA.Infrastructure.Services
             if (existing == null) throw new KeyNotFoundException("Post not found");
 
             existing.Title = dto.Title;
-            existing.Content = dto.Content;
+            existing.Content = _sanitizer.Sanitize(dto.Content ?? ""); // 24.42
             existing.ArticleCategory = dto.ArticleCategory;
             existing.Status = dto.Status;
             existing.ImageUrl = dto.ImageUrl;

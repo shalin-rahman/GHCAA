@@ -9,12 +9,16 @@ export const authGuard = () => {
     const auth = inject(AuthService);
     const router = inject(Router);
 
-    if (auth.isAuthenticated()) {
-        return true;
+    if (!auth.isAuthenticated()) {
+        return router.parseUrl('/login');
     }
 
-    // Redirect to login if not authenticated
-    return router.parseUrl('/login');
+    // S7.6: Force password change before accessing any protected route.
+    if (auth.currentUser()?.mustChangePassword) {
+        return router.parseUrl('/portal/change-password');
+    }
+
+    return true;
 };
 
 /**

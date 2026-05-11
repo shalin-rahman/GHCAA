@@ -7,7 +7,9 @@ import { NotificationService } from '../../core/services/notification.service';
 import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
 import { FinancialService } from '../../core/services/financial.service';
 import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { GatewaysService } from '../../core/services/gateways.service';
+import { PaymentGateway } from '../../core/models/business.models';
 
 @Component({
   selector: 'app-register',
@@ -138,8 +140,18 @@ export class Register implements OnDestroy {
 
   getValidYears() {
     if (!this.model.DateOfBirth) return this.years;
-    const birthYear = new Date(this.model.DateOfBirth).getFullYear();
-    const minYear = birthYear + 15;
+    
+    let birthYear = NaN;
+    if (typeof this.model.DateOfBirth === 'string' && this.model.DateOfBirth.includes('-')) {
+      const parts = this.model.DateOfBirth.split('-');
+      // Handle both YYYY-MM-DD and DD-MM-YYYY
+      birthYear = parts[0].length === 4 ? parseInt(parts[0]) : parseInt(parts[2]);
+    } else {
+      birthYear = new Date(this.model.DateOfBirth).getFullYear();
+    }
+
+    if (isNaN(birthYear)) return this.years;
+    const minYear = birthYear + 13; // Minimum age for SSC/HSC usually ~15-16, 13 is safe
     return this.years.filter(y => y >= minYear);
   }
 
@@ -174,10 +186,12 @@ export class Register implements OnDestroy {
   }
 
   onFileSelect(event: any, key: string) {
-    const file = event.target.files[0];
-    if (file) {
-      this.files[key] = file;
-    }
+    const file: File = event.target.files[0];
+    if (!file) return;
+    const kind = key === 'paymentProof' ? 'pdf' : 'image';
+    const err = validateUploadFile(file, kind);
+    if (err) { this.notify.error(err); event.target.value = ''; return; }
+    this.files[key] = file;
   }
 
   onSubmit(form: any) {
@@ -208,7 +222,9 @@ export class Register implements OnDestroy {
     const formData = new FormData();
     Object.keys(this.model).forEach(key => {
       if (key !== 'AcademicHistory' && key !== 'ProfessionalHistory') {
-        formData.append(key, this.model[key]);
+        let val = this.model[key];
+        if (key === 'DateOfBirth') val = this.formatDateForApi(val);
+        formData.append(key, val);
       }
     });
 
@@ -228,8 +244,8 @@ export class Register implements OnDestroy {
       formData.append(`ProfessionalHistory[${i}].Designation`, item.designation);
       formData.append(`ProfessionalHistory[${i}].Sector`, item.sector || '');
       formData.append(`ProfessionalHistory[${i}].Location`, item.location || '');
-      formData.append(`ProfessionalHistory[${i}].StartDate`, item.startDate || '');
-      if (item.endDate) formData.append(`ProfessionalHistory[${i}].EndDate`, item.endDate);
+      formData.append(`ProfessionalHistory[${i}].StartDate`, this.formatDateForApi(item.startDate) || '');
+      if (item.endDate) formData.append(`ProfessionalHistory[${i}].EndDate`, this.formatDateForApi(item.endDate));
       formData.append(`ProfessionalHistory[${i}].IsCurrent`, item.isCurrent.toString());
     });
 
@@ -259,13 +275,28 @@ export class Register implements OnDestroy {
     });
   }
 
+  private formatDateForApi(dateStr: string): string {
+    if (!dateStr || typeof dateStr !== 'string') return dateStr;
+    const parts = dateStr.split('-');
+    if (parts.length === 3 && parts[0].length === 2) {
+      // dd-mm-yyyy to yyyy-mm-dd
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateStr;
+  }
+
   private initiateGateway(memberId: number) {
     const method = this.selectedPaymentMethod();
     if (!method) return;
 
+    const gatewayStr = method.gateway;
+    const gateway = (gatewayStr && PaymentGateway[gatewayStr as keyof typeof PaymentGateway] !== undefined) 
+      ? PaymentGateway[gatewayStr as keyof typeof PaymentGateway] 
+      : PaymentGateway.None;
+
     this.gatewaysService.initiatePayment({
       amount: this.registrationFee(), // Dynamically fetched fee
-      gateway: method.gateway,
+      gateway: gateway,
       reference: this.model.TransactionId || `REG-${memberId}`,
       baseUrl: window.location.origin,
       customerName: this.model.FullName,

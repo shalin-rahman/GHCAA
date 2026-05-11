@@ -39,7 +39,8 @@ public class OtpServiceTests : TestBase
 
         var otp = await _context.Otps.FirstOrDefaultAsync(o => o.Email == email);
         otp.Should().NotBeNull();
-        otp!.Code.Should().Be(code);
+        // 24.20: Code is stored as HMAC-SHA256 hex (64 chars), not the returned plaintext code.
+        otp!.Code.Should().HaveLength(64).And.MatchRegex(@"^[0-9a-f]{64}$");
         otp.IsVerified.Should().BeFalse();
     }
 
@@ -104,7 +105,9 @@ public class OtpServiceTests : TestBase
         var result = await _service.VerifyOtpAsync(email, code);
 
         result.Should().BeTrue();
-        var otp = await _context.Otps.FirstOrDefaultAsync(o => o.Email == email && o.Code == code);
+        // 24.20: Code stored as HMAC hash; query by email + IsVerified flag instead.
+        var otp = await _context.Otps.FirstOrDefaultAsync(o => o.Email == email && o.IsVerified == true);
+        otp.Should().NotBeNull();
         otp!.IsVerified.Should().BeTrue();
     }
 
@@ -156,7 +159,9 @@ public class OtpServiceTests : TestBase
         var result = await _service.VerifyOtpAsync(email, newCode);
         result.Should().BeTrue();
 
-        var verifiedOtp = await _context.Otps.Where(o => o.Email == email && o.Code == newCode).FirstOrDefaultAsync();
+        // 24.20: Code stored as HMAC hash; find by email + IsVerified flag.
+        var verifiedOtp = await _context.Otps.Where(o => o.Email == email && o.IsVerified == true).FirstOrDefaultAsync();
+        verifiedOtp.Should().NotBeNull();
         verifiedOtp!.IsVerified.Should().BeTrue();
     }
 }

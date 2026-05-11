@@ -11,6 +11,7 @@ import * as XLSX from 'xlsx';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
 import { ExportUtil } from '../../core/utils/export.util';
+import { validateUploadFile } from '../../core/utils/file-validation.util';
 
 @Component({
   selector: 'app-admin-members',
@@ -536,11 +537,12 @@ export class AdminMembers implements OnInit {
   }
 
   onDocSelected(event: any, type: 'cert' | 'pay') {
-    const file = event.target.files[0];
-    if (file) {
-      if (type === 'cert') this.certToUpload = file;
-      else this.payToUpload = file;
-    }
+    const file: File = event.target.files[0];
+    if (!file) return;
+    const err = validateUploadFile(file, 'pdf');
+    if (err) { this.notify.error(err); event.target.value = ''; return; }
+    if (type === 'cert') this.certToUpload = file;
+    else this.payToUpload = file;
   }
 
   contactMember(email: string) {

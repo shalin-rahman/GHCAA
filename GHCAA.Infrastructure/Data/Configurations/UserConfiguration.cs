@@ -17,6 +17,12 @@ namespace GHCAA.Infrastructure.Data.Configurations
 
             builder.HasIndex(u => u.Username).IsUnique();
 
+            // S8.1: Performance indexes for common lookup patterns.
+            builder.HasIndex(u => u.MemberId);
+            builder.HasIndex(u => u.ResetToken).HasFilter("\"ResetToken\" IS NOT NULL");
+            builder.HasIndex(u => u.GoogleId).HasFilter("\"GoogleId\" IS NOT NULL");
+            builder.HasIndex(u => u.FacebookId).HasFilter("\"FacebookId\" IS NOT NULL");
+
             builder.HasOne(u => u.Member)
                 .WithOne(m => m.User)
                 .HasForeignKey<User>(u => u.MemberId);

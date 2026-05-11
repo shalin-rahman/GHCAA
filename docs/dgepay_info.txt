@@ -1,0 +1,31 @@
+Steps to activate Merchant UAT Account:
+
+Activation Link: https://merchant-uat.dgepay.net/login
+Once opened, follow these steps:
+* Enter your registered mobile number (Onboarding Number: 01716115454)
+* You will receive an OTP on your registered mobile number.
+* Submit the OTP to verify your identity.
+* Set your PIN (This will be your login credential for accessing the Merchant Panel)
+* Your DGePay UAT Merchant Account will be activated instantly.
+* PIN: 3191
+
+
+API Authentication Details
+
+Client ID: 53bd7c39fa50400d9f278c6cd9d837d4
+Client Secret Key: b734f77a2028d8da
+Client API Key: fbfbf6419fa64c1e830f2ab5624f167f
+Base URL: https://api-uat.dgepay.net/dipon/v3
+
+
+https://merchant-payment-uat.dgepay.net/merchant-payment-form?paymentRef=1778136975159635777115533
+
+
+
+
+
+
+
+--- Integrating guide - --------------
+
+https://github.com/IamTIqbal/dgepay-php-client

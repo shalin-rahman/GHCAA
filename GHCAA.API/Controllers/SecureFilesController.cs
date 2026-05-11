@@ -50,8 +50,24 @@ namespace GHCAA.API.Controllers
                 }
             }
 
-            // Construct full path on disk
-            var fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, normalizedPath);
+            // S6.1: Reject paths containing ".." before disk access.
+            if (normalizedPath.Contains(".."))
+            {
+                _logger.LogWarning("Path traversal attempt blocked: {Path}", normalizedPath);
+                return NotFound();
+            }
+
+            var secureRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "uploads"));
+            var fullPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, normalizedPath));
+
+            // Ensure the resolved path is inside the intended uploads root.
+            if (!fullPath.StartsWith(secureRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                && !fullPath.Equals(secureRoot, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning("Path traversal blocked — resolved path {Full} is outside root {Root}", fullPath, secureRoot);
+                return NotFound();
+            }
+
             if (!System.IO.File.Exists(fullPath))
             {
                 _logger.LogError("Secure file record exists in DB but file is missing on disk: {Path}", fullPath);

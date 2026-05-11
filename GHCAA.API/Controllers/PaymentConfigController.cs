@@ -83,7 +83,7 @@ namespace GHCAA.API.Controllers
             config.CreatedAt = DateTime.UtcNow;
             await _db.PaymentConfigurations.AddAsync(config, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
-            return Ok(config);
+            return Ok(MaskSecrets(config));
         }
 
         // ADMIN: Update payment config
@@ -125,7 +125,7 @@ namespace GHCAA.API.Controllers
             existing.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);
-            return Ok(existing);
+            return Ok(MaskSecrets(existing));
         }
 
         // ADMIN: Toggle enable/disable
@@ -154,6 +154,18 @@ namespace GHCAA.API.Controllers
             await _db.SaveChangesAsync(cancellationToken);
             return Ok();
         }
+
+        private static object MaskSecrets(PaymentConfiguration c) => new
+        {
+            c.Id, c.Method, c.DisplayName, c.Description, c.Icon,
+            c.IsEnabled, c.IsSandbox, c.SortOrder, c.Gateway,
+            c.WalletNumber, c.AccountHolderName, c.BankName, c.BranchName,
+            c.AccountNumber, c.RoutingNumber, c.Instructions,
+            c.RequiresReceipt, c.RequiresReference,
+            c.GatewayCallbackUrl, c.CreatedAt, c.UpdatedAt,
+            GatewayPublicKey = string.IsNullOrEmpty(c.GatewayPublicKey) ? null : "••••••••",
+            GatewaySecretKey = string.IsNullOrEmpty(c.GatewaySecretKey) ? null : "••••••••"
+        };
 
         // ADMIN: Seed default payment methods if none exist
         [HttpPost("admin/seed-defaults")]

@@ -65,9 +65,11 @@ namespace GHCAA.Infrastructure
             services.AddHttpClient<SSLCommerzGateway>();
             services.AddHttpClient<BkashGateway>();
             services.AddHttpClient<NagadGateway>();
+            services.AddHttpClient<DGePayGateway>();
             services.AddScoped<IPaymentGatewayService, SSLCommerzGateway>();
             services.AddScoped<IPaymentGatewayService, BkashGateway>();
             services.AddScoped<IPaymentGatewayService, NagadGateway>();
+            services.AddScoped<IPaymentGatewayService, DGePayGateway>();
             services.AddHttpClient<ISmsService, GreenwebSmsService>();
 
             return services;

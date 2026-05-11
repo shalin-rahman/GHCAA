@@ -36,6 +36,12 @@ namespace GHCAA.Infrastructure.Services
             _httpClientFactory = httpClientFactory;
         }
 
+        // TODO [CRITICAL]: No brute-force / lockout protection. An attacker can make unlimited login
+        // attempts against any discoverable username. Add FailedLoginAttempts + LockoutUntil to User,
+        // increment on each failure, lock for 15 min after 5 failures, and return uniform 401 always.
+        // TODO [HIGH]: Username enumeration via timing. BCrypt.Verify only runs when the user EXISTS —
+        // a measurably shorter response for "user not found" reveals valid usernames. Always run a
+        // dummy BCrypt.Verify against a static hash when the user is not found to normalize timing.
         public async Task<TokenResponseDto?> LoginAsync(LoginDto loginDto, CancellationToken cancellationToken = default)
         {
             // Trim whitespace and remove internal spaces for identifiers like NID/Username
@@ -72,6 +78,8 @@ namespace GHCAA.Infrastructure.Services
             if (user == null)
             {
                 _logger.LogWarning("Login failed: User {Username} not found after checking all identifiers", input);
+                // S5.2: Run a dummy BCrypt verify to equalize response timing and prevent username enumeration.
+                BCrypt.Net.BCrypt.Verify(loginDto.Password, "$2a$11$dummyhashfortimingequalizationXXXXXXXXXXXXXXXXXXXXXX");
                 return null;
             }
 
@@ -92,11 +100,29 @@ namespace GHCAA.Infrastructure.Services
                 return null;
             }
 
+            // S5.1: Brute-force lockout check.
+            if (user.LockoutUntil.HasValue && user.LockoutUntil.Value > DateTime.UtcNow)
+            {
+                _logger.LogWarning("Login blocked: User {Username} is locked until {Until}", user.Username, user.LockoutUntil.Value);
+                return null;
+            }
+
             if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
             {
+                user.FailedLoginAttempts++;
+                if (user.FailedLoginAttempts >= 5)
+                {
+                    user.LockoutUntil = DateTime.UtcNow.AddMinutes(15);
+                    _logger.LogWarning("User {Username} locked out for 15 minutes after {N} failed attempts", user.Username, user.FailedLoginAttempts);
+                }
+                await _db.SaveChangesAsync(cancellationToken);
                 _logger.LogError("Login failed: Invalid password for user {Username}", user.Username);
                 return null;
             }
+
+            // Reset lockout on successful login.
+            user.FailedLoginAttempts = 0;
+            user.LockoutUntil = null;
 
             var token = _tokenService.CreateToken(user);
 
@@ -198,11 +224,12 @@ namespace GHCAA.Infrastructure.Services
 
             if (user == null && !string.IsNullOrEmpty(email))
             {
-                // Try linking by email if user exists but hasn't linked social yet
+                // 24.25: Only auto-link when the local member's email is verified.
+                // An unverified local email could be attacker-controlled, enabling account takeover.
                 user = await _db.Users
                     .Include(u => u.Roles)
                     .Include(u => u.Member)
-                    .FirstOrDefaultAsync(u => u.Member!.Email == email, cancellationToken);
+                    .FirstOrDefaultAsync(u => u.Member!.Email == email && u.Member.EmailVerified == true, cancellationToken);
 
                 if (user != null)
                 {
@@ -214,7 +241,10 @@ namespace GHCAA.Infrastructure.Services
 
             if (user == null)
             {
-                // Create new user & member (applied status, profile incomplete)
+                // 24.26: Use a provider-scoped unique sentinel for NID and MobileNo so a second social
+                // signup does not crash the UNIQUE index. Profile completion forces the member to supply
+                // real values before admin approval.
+                var uniqueSentinel = $"SOCIAL-{provider.ToUpper()}-{socialId}";
                 var member = new Member
                 {
                     FullName = name ?? "Social User",
@@ -222,11 +252,10 @@ namespace GHCAA.Infrastructure.Services
                     Status = Enums.MembershipStatus.Applied,
                     AppliedDate = DateTime.UtcNow,
                     IsProfileComplete = false,
-                    // Fill required but unknown fields with placeholders or nulls if allowed
                     FatherName = "TBD",
                     MotherName = "TBD",
-                    NID = "TBD",
-                    MobileNo = "TBD",
+                    NID = uniqueSentinel,
+                    MobileNo = uniqueSentinel,
                     PresentAddress = "TBD",
                     PermanentAddress = "TBD",
                     EmergencyContactName = "TBD",
@@ -315,10 +344,11 @@ namespace GHCAA.Infrastructure.Services
                 return false;
             }
 
-            // Update password and clear token
+            // Update password and clear token. Rotate SecurityStamp to invalidate existing JWTs (S5.4).
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             user.ResetToken = null;
             user.ResetTokenExpiry = null;
+            user.SecurityStamp = Guid.NewGuid().ToString("N");
 
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Password reset successful for user {Username}", user.Username);

@@ -6,6 +6,7 @@ import { AlumniEvent, EventRegistration } from '../../core/models/business.model
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
 import { ExportUtil } from '../../core/utils/export.util';
+import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { APP_CONFIG } from '../../core/constants/app.constants';
@@ -211,13 +212,14 @@ export class AdminEvents implements OnInit {
     }
 
     onLogoSelected(event: any) {
-        const file = event.target.files[0];
-        if (file) {
-            this.selectedLogo.set(file);
-            const reader = new FileReader();
-            reader.onload = () => this.logoPreview.set(reader.result as string);
-            reader.readAsDataURL(file);
-        }
+        const file: File = event.target.files[0];
+        if (!file) return;
+        const err = validateUploadFile(file, 'image');
+        if (err) { this.notify.error(err); event.target.value = ''; return; }
+        this.selectedLogo.set(file);
+        const reader = new FileReader();
+        reader.onload = () => this.logoPreview.set(reader.result as string);
+        reader.readAsDataURL(file);
     }
 
     submitEvent() {

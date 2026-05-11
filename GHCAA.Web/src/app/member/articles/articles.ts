@@ -10,6 +10,7 @@ import {
   SUBMISSION_STATUS,
   getArticleCategoryLabel
 } from '../../core/constants/app.constants';
+import { validateUploadFile } from '../../core/utils/file-validation.util';
 
 @Component({
   selector: 'app-member-articles',
@@ -102,7 +103,8 @@ export class MemberArticles implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-
+    const err = validateUploadFile(file, 'image');
+    if (err) { this.notify.error(err); input.value = ''; return; }
     this.selectedFile = file;
     const reader = new FileReader();
     reader.onload = (e) => this.photoPreview.set(e.target?.result as string);

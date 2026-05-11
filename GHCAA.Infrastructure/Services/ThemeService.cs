@@ -23,7 +23,15 @@ namespace GHCAA.Infrastructure.Services
         private readonly ApplicationDbContext _context;
         private readonly IMemoryCache _cache;
         private const string CacheKey = "GHCAA_ActiveTheme";
-        private static readonly TimeZoneInfo BangladeshTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Dhaka");
+        private DateTime GetBangladeshTimeNow()
+        {
+            var utcNow = DateTime.UtcNow;
+            try { return TimeZoneInfo.ConvertTimeFromUtc(utcNow, TimeZoneInfo.FindSystemTimeZoneById("Asia/Dhaka")); }
+            catch (TimeZoneNotFoundException) { 
+                try { return TimeZoneInfo.ConvertTimeFromUtc(utcNow, TimeZoneInfo.FindSystemTimeZoneById("Bangladesh Standard Time")); }
+                catch (TimeZoneNotFoundException) { return utcNow.AddHours(6); }
+            }
+        }
 
         public ThemeService(ApplicationDbContext context, IMemoryCache cache)
         {
@@ -39,8 +47,7 @@ namespace GHCAA.Infrastructure.Services
             }
 
             // Refined Timezone Logic: Ensure theme activation matches Association's Local Time (GMT+6)
-            var nowUtc = DateTime.UtcNow;
-            var nowLocal = TimeZoneInfo.ConvertTimeFromUtc(nowUtc, BangladeshTimeZone).Date;
+            var nowLocal = GetBangladeshTimeNow().Date;
 
             var theme = await _context.SpecialDayThemes
                 .Where(t => t.IsEnabled && t.StartDate.Date <= nowLocal && t.EndDate.Date >= nowLocal)

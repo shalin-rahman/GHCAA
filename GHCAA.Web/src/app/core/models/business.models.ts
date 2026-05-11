@@ -13,7 +13,18 @@ export type JobCategory = 'IT' | 'Finance' | 'Engineering' | 'Marketing' | 'Educ
 export type SubmissionStatus = 'Draft' | 'Pending' | 'Approved' | 'Rejected';
 export type ArticleCategory = 'Event' | 'Magazine' | 'Regular';
 
-
+export enum PaymentGateway {
+    None = 0,
+    Stripe = 1,
+    PayPal = 2,
+    SSLCommerz = 3,
+    BkashGateway = 4,
+    NagadGateway = 5,
+    RocketGateway = 6,
+    BankTransferGateway = 7,
+    Manual = 8,
+    DGePay = 9
+}
 export interface Member {
     id: number;
     fullName: string;

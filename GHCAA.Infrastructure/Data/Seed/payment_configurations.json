@@ -142,5 +142,29 @@
     "RequiresReference": false,
     "CreatedAt": "2026-03-13T18:34:13.225081Z",
     "UpdatedAt": "2026-03-13T18:35:27.695088Z"
+  },
+  {
+    "Id": 7,
+    "Method": 4,
+    "DisplayName": "DGePay (Cards/Wallets)",
+    "Description": "Secure payment via DGePay gateway",
+    "Icon": "💳",
+    "IsEnabled": true,
+    "WalletNumber": "fbfbf6419fa64c1e830f2ab5624f167f",
+    "AccountHolderName": null,
+    "BankName": null,
+    "BranchName": null,
+    "AccountNumber": null,
+    "RoutingNumber": null,
+    "Gateway": 9,
+    "GatewayPublicKey": "53bd7c39fa50400d9f278c6cd9d837d4",
+    "GatewaySecretKey": "b734f77a2028d8da",
+    "GatewayCallbackUrl": null,
+    "SortOrder": 7,
+    "Instructions": "You will be redirected to a secure payment page.",
+    "RequiresReceipt": false,
+    "RequiresReference": false,
+    "CreatedAt": "2026-05-07T08:26:04Z",
+    "UpdatedAt": null
   }
 ]

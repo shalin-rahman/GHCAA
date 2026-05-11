@@ -432,7 +432,10 @@ export const API_ENDPOINTS = {
         STATUS: '/api/auth/status',
         PROVIDERS: '/api/auth/providers',
         GOOGLE: '/api/auth/google',
-        FACEBOOK: '/api/auth/facebook'
+        FACEBOOK: '/api/auth/facebook',
+        REFRESH: '/api/auth/refresh',
+        ME: '/api/auth/me',
+        LOGOUT: '/api/auth/logout'
     },
     EVENTS: '/api/events',
     GALLERY: '/api/gallery',

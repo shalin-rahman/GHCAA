@@ -81,6 +81,8 @@
                         <img [src]="selectedArticle()?.imageUrl" alt="Hero">
                     </div>
 
+                    <!-- 24.42: Content is sanitized server-side (HtmlSanitizer) before storage.
+                         Angular's DomSanitizer provides a second layer. -->
                     <div class="detail-content" [innerHTML]="selectedArticle()?.content"></div>
 
                     <div class="detail-footer">

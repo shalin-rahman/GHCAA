@@ -20,17 +20,23 @@ namespace GHCAA.API.Controllers
             _familyService = familyService;
         }
 
-        private int GetMemberId() =>
-            int.Parse(User.FindFirstValue("MemberId") ?? "0");
+        // 24.50: Returns null when claim is absent or malformed, avoiding int.Parse crash.
+        private int? GetMemberId()
+        {
+            var value = User.FindFirstValue("MemberId");
+            return int.TryParse(value, out var id) ? id : null;
+        }
 
         /// <summary>Send a family link request to another member by membership number.</summary>
         [HttpPost("send")]
         [HttpPost("/api/members/family")] // Legacy alias for mobile
         public async Task<IActionResult> Send([FromBody] SendFamilyLinkDto dto, CancellationToken ct)
         {
+            var memberId = GetMemberId();
+            if (memberId == null) return Unauthorized();
             try
             {
-                var result = await _familyLinkService.SendRequestAsync(GetMemberId(), dto, ct);
+                var result = await _familyLinkService.SendRequestAsync(memberId.Value, dto, ct);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
@@ -41,14 +47,18 @@ namespace GHCAA.API.Controllers
         [HttpPost("respond")]
         public async Task<IActionResult> Respond([FromBody] RespondFamilyLinkDto dto, CancellationToken ct)
         {
-            var success = await _familyLinkService.RespondAsync(GetMemberId(), dto, ct);
+            var memberId = GetMemberId();
+            if (memberId == null) return Unauthorized();
+            var success = await _familyLinkService.RespondAsync(memberId.Value, dto, ct);
             return success ? Ok(new { message = "Response recorded." }) : NotFound();
         }
 
         [HttpDelete("remove/{requestId}")]
         public async Task<IActionResult> Remove(int requestId)
         {
-            var result = await _familyLinkService.RemoveLinkAsync(GetMemberId(), requestId);
+            var memberId = GetMemberId();
+            if (memberId == null) return Unauthorized();
+            var result = await _familyLinkService.RemoveLinkAsync(memberId.Value, requestId);
             return result ? Ok() : NotFound();
         }
 
@@ -56,33 +66,48 @@ namespace GHCAA.API.Controllers
         [HttpPost("{requestId}/cancel")]
         public async Task<IActionResult> Cancel(int requestId, CancellationToken ct)
         {
-            var success = await _familyLinkService.CancelAsync(GetMemberId(), requestId, ct);
+            var memberId = GetMemberId();
+            if (memberId == null) return Unauthorized();
+            var success = await _familyLinkService.CancelAsync(memberId.Value, requestId, ct);
             return success ? Ok(new { message = "Request cancelled." }) : NotFound();
         }
 
         /// <summary>List all requests you sent.</summary>
         [HttpGet("sent")]
-        public async Task<IActionResult> GetSent(CancellationToken ct) =>
-            Ok(await _familyLinkService.GetSentRequestsAsync(GetMemberId(), ct));
+        public async Task<IActionResult> GetSent(CancellationToken ct)
+        {
+            var memberId = GetMemberId();
+            if (memberId == null) return Unauthorized();
+            return Ok(await _familyLinkService.GetSentRequestsAsync(memberId.Value, ct));
+        }
 
         /// <summary>List all pending requests received (awaiting your response).</summary>
         [HttpGet("received")]
-        public async Task<IActionResult> GetReceived(CancellationToken ct) =>
-            Ok(await _familyLinkService.GetReceivedRequestsAsync(GetMemberId(), ct));
+        public async Task<IActionResult> GetReceived(CancellationToken ct)
+        {
+            var memberId = GetMemberId();
+            if (memberId == null) return Unauthorized();
+            return Ok(await _familyLinkService.GetReceivedRequestsAsync(memberId.Value, ct));
+        }
 
         /// <summary>Get your approved family network.</summary>
         [HttpGet("my-family")]
         [HttpGet("/api/members/family")] // Legacy alias for mobile
         [HttpGet("/api/Family/links")]   // Web parity alias
-        public async Task<IActionResult> GetFamily(CancellationToken ct) =>
-            Ok(await _familyLinkService.GetFamilyAsync(GetMemberId(), GetMemberId(), ct));
+        public async Task<IActionResult> GetFamily(CancellationToken ct)
+        {
+            var memberId = GetMemberId();
+            if (memberId == null) return Unauthorized();
+            return Ok(await _familyLinkService.GetFamilyAsync(memberId.Value, memberId.Value, ct));
+        }
 
         /// <summary>Get the public family network of a specific member.</summary>
         [HttpGet("{memberId}/family")]
         public async Task<IActionResult> GetPublicFamily(int memberId, CancellationToken ct)
         {
             var requesterId = GetMemberId();
-            return Ok(await _familyLinkService.GetFamilyAsync(memberId, requesterId, ct));
+            if (requesterId == null) return Unauthorized();
+            return Ok(await _familyLinkService.GetFamilyAsync(memberId, requesterId.Value, ct));
         }
 
         /// <summary>Search for members by name to link as family.</summary>
@@ -91,7 +116,9 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> Search([FromQuery] string name, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(name)) return BadRequest("Name required");
-            var results = await _familyService.SearchByNameAsync(name, GetMemberId(), ct);
+            var memberId = GetMemberId();
+            if (memberId == null) return Unauthorized();
+            var results = await _familyService.SearchByNameAsync(name, memberId.Value, ct);
             return Ok(results);
         }
     }

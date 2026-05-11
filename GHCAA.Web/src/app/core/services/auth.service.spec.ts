@@ -14,6 +14,9 @@ describe('AuthService', () => {
     let router: Router;
 
     beforeEach(() => {
+        sessionStorage.clear();
+        localStorage.clear();
+
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule, RouterTestingModule.withRoutes([])],
             providers: [AuthService]
@@ -23,11 +26,13 @@ describe('AuthService', () => {
         router = TestBed.inject(Router);
         vi.spyOn(router, 'navigate');
 
-        localStorage.clear();
+        // Flush the /auth/me request triggered by the constructor when no session exists.
+        httpMock.expectOne(API_ENDPOINTS.AUTH.ME).flush(null, { status: 401, statusText: 'Unauthorized' });
     });
 
     afterEach(() => {
         httpMock.verify();
+        sessionStorage.clear();
         localStorage.clear();
     });
 
@@ -45,7 +50,10 @@ describe('AuthService', () => {
             expect(user.memberId).toBe(1);
             expect(service.isAuthenticated()).toBe(true);
             expect(service.getToken()).toBe('new-token');
-            expect(localStorage.getItem('user_session')).toBeTruthy();
+            // Token is NOT stored — only display fields are persisted.
+            const stored = JSON.parse(sessionStorage.getItem('user_session')!);
+            expect(stored.token).toBeUndefined();
+            expect(stored.username).toBe('user');
         });
 
         const req = httpMock.expectOne(API_ENDPOINTS.AUTH.LOGIN);
@@ -55,19 +63,16 @@ describe('AuthService', () => {
     });
 
     it('should logout and clear session', () => {
-        // Set initial session
-        const mockUser: User = { token: 'token', memberId: 1, username: 'user', role: 'Member' };
-        localStorage.setItem('user_session', JSON.stringify(mockUser));
-        
-        // Mock a re-initialization manually for testing logout logic separately since session is populated in constructor typically, 
-        // we will directly call logout.
         service.logout();
+
+        // Flush the POST /auth/logout call.
+        const req = httpMock.expectOne(API_ENDPOINTS.AUTH.LOGOUT);
+        expect(req.request.method).toBe('POST');
+        req.flush(null);
 
         expect(service.isAuthenticated()).toBe(false);
         expect(service.getToken()).toBeNull();
-        expect(localStorage.getItem('user_session')).toBeNull();
+        expect(sessionStorage.getItem('user_session')).toBeNull();
         expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });
-
-
 });

@@ -43,8 +43,8 @@ namespace GHCAA.API.Controllers
             if (request.Amount <= 0 || request.Amount > 10_000_000m)
                 return BadRequest(new { message = "Payment amount is out of the allowed range." });
 
-            if (string.IsNullOrWhiteSpace(request.Reference) || string.IsNullOrWhiteSpace(request.BaseUrl))
-                return BadRequest(new { message = "Reference and API base URL are required." });
+            if (string.IsNullOrWhiteSpace(request.Reference))
+                return BadRequest(new { message = "Reference is required." });
 
             int? memberId = null;
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
@@ -129,14 +129,18 @@ namespace GHCAA.API.Controllers
             var prefix = _config["GeneralSettings:AssociationNamePrefix"] ?? "GHCAA-";
             var trxId = prefix + Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
             
+            // S4.3: Derive CallbackUrl from server-side config, never from client-supplied BaseUrl.
+            var publicApiBase = _config["AppSettings:PublicApiBaseUrl"]
+                ?? throw new InvalidOperationException("AppSettings:PublicApiBaseUrl is not configured.");
+
             var initiateDto = new PaymentGatewayInitiationDto
             {
                 MemberId = memberId,
                 Amount = request.Amount,
                 Currency = _config["GeneralSettings:Currency"] ?? "BDT",
-                Reference = request.Reference, // e.g. "Registration" or "Due-2024"
+                Reference = request.Reference,
                 TransactionId = trxId,
-                CallbackUrl = $"{request.BaseUrl}/api/gateways/callback/{request.Gateway.ToString().ToLower()}",
+                CallbackUrl = $"{publicApiBase.TrimEnd('/')}/api/gateways/callback/{request.Gateway.ToString().ToLower()}",
                 CustomerName = request.CustomerName,
                 CustomerEmail = request.CustomerEmail,
                 CustomerPhone = request.CustomerPhone
@@ -176,7 +180,9 @@ namespace GHCAA.API.Controllers
             if (isValid)
             {
                 var amount = data.TryGetValue("amount", out var a) && decimal.TryParse(a, out var amt) ? amt : 0;
-                await HandleSuccessfulPayment(trunkTrxId, cancellationToken, amount);
+                // 24.13: Pass SSLCommerz's val_id as the idempotency key.
+                var valId = data.TryGetValue("val_id", out var vi) ? vi : null;
+                await HandleSuccessfulPayment(trunkTrxId, cancellationToken, amount, valId);
                 return Redirect($"{GetClientUrl()}/payment/success?trxId={trunkTrxId}");
             }
 
@@ -198,16 +204,44 @@ namespace GHCAA.API.Controllers
 
             var gateway = _gatewayFactory.GetGateway(Enums.PaymentGateway.BkashGateway);
             var callbackData = new Dictionary<string, string> { { "paymentID", paymentID }, { "status", status } };
-            
+
             var isValid = await gateway.VerifyCallbackAsync(callbackData, cancellationToken);
-            
+
             if (isValid)
             {
-                await HandleSuccessfulPayment(trunkTrxId, cancellationToken);
+                // 24.13: Pass bKash paymentID as the idempotency key.
+                await HandleSuccessfulPayment(trunkTrxId, cancellationToken, gatewayPaymentId: paymentID);
                 return Redirect($"{GetClientUrl()}/payment/success?trxId={trunkTrxId}");
             }
 
             _logger.LogWarning("bKash Callback Verification/Execution FAILED for {PaymentID}", trunkTrxId);
+            return Redirect($"{GetClientUrl()}/payment/failed?trxId={trunkTrxId}");
+        }
+
+        [HttpGet("callback/dgepay")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DGePayCallback([FromQuery] string data, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("DGePay Callback Received.");
+
+            var gateway = _gatewayFactory.GetGateway(Enums.PaymentGateway.DGePay);
+            var callbackData = new Dictionary<string, string> { { "data", data } };
+
+            var isValid = await gateway.VerifyCallbackAsync(callbackData, cancellationToken);
+
+            // DGePayGateway.VerifyCallbackAsync populates callbackData with unique_txn_id and amount
+            var trunkTrxId = callbackData.TryGetValue("unique_txn_id", out var tid) ? tid : "N/A";
+
+            if (isValid)
+            {
+                var amountStr = callbackData.TryGetValue("amount", out var a) ? a : "0";
+                decimal.TryParse(amountStr, out var amount);
+
+                await HandleSuccessfulPayment(trunkTrxId, cancellationToken, amount, gatewayPaymentId: trunkTrxId);
+                return Redirect($"{GetClientUrl()}/payment/success?trxId={trunkTrxId}");
+            }
+
+            _logger.LogWarning("DGePay Callback Verification FAILED for {TrxID}", trunkTrxId);
             return Redirect($"{GetClientUrl()}/payment/failed?trxId={trunkTrxId}");
         }
 
@@ -249,10 +283,27 @@ namespace GHCAA.API.Controllers
             return BadRequest(new { status = "failed" });
         }
 
-        private async Task HandleSuccessfulPayment(string transactionId, CancellationToken cancellationToken, decimal confirmedAmount = 0)
+        private async Task HandleSuccessfulPayment(string transactionId, CancellationToken cancellationToken, decimal confirmedAmount = 0, string? gatewayPaymentId = null)
         {
+            // 24.13: Idempotency check — short-circuit if this gateway payment was already processed.
+            if (!string.IsNullOrEmpty(gatewayPaymentId))
+            {
+                var alreadyProcessed = await _db.PaymentHistories.AnyAsync(
+                    p => p.GatewayPaymentId == gatewayPaymentId && p.Status == Enums.PaymentStatus.Completed,
+                    cancellationToken);
+                if (alreadyProcessed)
+                {
+                    _logger.LogInformation("Duplicate callback ignored for GatewayPaymentId {GwId}", gatewayPaymentId);
+                    return;
+                }
+            }
+
             var payment = await _db.PaymentHistories.FirstOrDefaultAsync(p => p.TransactionId == transactionId, cancellationToken);
             if (payment == null || payment.Status == Enums.PaymentStatus.Completed) return;
+
+            // 24.13: Persist the gateway payment ID for future idempotency checks.
+            if (!string.IsNullOrEmpty(gatewayPaymentId))
+                payment.GatewayPaymentId = gatewayPaymentId;
 
             // Security Check: Verify amount matches the record (if provided)
             if (confirmedAmount > 0 && Math.Abs(payment.Amount - confirmedAmount) > 0.01m)
@@ -307,10 +358,18 @@ namespace GHCAA.API.Controllers
                         .OrderByDescending(f => f.EffectiveDate)
                         .FirstOrDefaultAsync(cancellationToken);
 
-                    var required = currentFee?.Amount ?? 500; // Default to 500 if not found
+                    // S4.3: Fail loudly when fee config is missing — do not silently default.
+                    if (currentFee == null)
+                    {
+                        _logger.LogError("Auto-approval skipped for Member {Id}: no fee config found for type {Type}", member.Id, member.MembershipType);
+                        return;
+                    }
+                    var required = currentFee.Amount;
                     if (payment.Amount >= required)
                     {
-                        var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";
+                        // S4.3: Fail loudly when SystemAdminId is not configured.
+                        var adminIdStr = _config["GeneralSettings:SystemAdminId"]
+                            ?? throw new InvalidOperationException("GeneralSettings:SystemAdminId is not configured.");
                         int.TryParse(adminIdStr, out var adminId);
 
                         _logger.LogInformation("Auto-Approving Member {MemberId} after successful gateway payment.", member.Id);
@@ -334,7 +393,6 @@ namespace GHCAA.API.Controllers
             public decimal Amount { get; set; }
             public Enums.PaymentGateway Gateway { get; set; }
             public string Reference { get; set; } = null!;
-            public string BaseUrl { get; set; } = null!; // The API base URL for callback construction
             public string? CustomerName { get; set; }
             public string? CustomerEmail { get; set; }
             public string? CustomerPhone { get; set; }

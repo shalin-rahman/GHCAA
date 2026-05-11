@@ -26,6 +26,10 @@ namespace GHCAA.Domain.Models
         public DateTime? ResetTokenExpiry { get; set; }
         public string SecurityStamp { get; set; } = Guid.NewGuid().ToString("N");
 
+        // Brute-force lockout (S5.1)
+        public int FailedLoginAttempts { get; set; } = 0;
+        public DateTime? LockoutUntil { get; set; }
+
         // Social Auth
         public string? GoogleId { get; set; }
         public string? FacebookId { get; set; }

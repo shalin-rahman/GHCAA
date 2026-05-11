@@ -22,7 +22,17 @@ namespace GHCAA.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetConfigs()
         {
-            var configs = await _db.SocialAuthConfigs.ToListAsync();
+            var configs = await _db.SocialAuthConfigs
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Provider,
+                    c.ClientId,
+                    ClientSecret = string.IsNullOrEmpty(c.ClientSecret) ? null : "••••••••",
+                    c.IsEnabled,
+                    c.UpdatedAt
+                })
+                .ToListAsync();
             return Ok(configs);
         }
 
@@ -30,7 +40,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> UpdateConfig(SocialProvider provider, [FromBody] SocialAuthConfig updateDto)
         {
             var config = await _db.SocialAuthConfigs.FirstOrDefaultAsync(c => c.Provider == provider);
-            
+
             if (config == null)
             {
                 config = new SocialAuthConfig { Provider = provider };
@@ -43,7 +53,15 @@ namespace GHCAA.API.Controllers
             config.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();
-            return Ok(config);
+            return Ok(new
+            {
+                config.Id,
+                config.Provider,
+                config.ClientId,
+                ClientSecret = string.IsNullOrEmpty(config.ClientSecret) ? null : "••••••••",
+                config.IsEnabled,
+                config.UpdatedAt
+            });
         }
 
         [HttpPost("{provider}/toggle")]

@@ -721,7 +721,10 @@ graph TD
 | `IMemberImportService` | `MemberImportService` | `ImportFromCsvAsync(stream)` |
 | `IThemeService` | `ThemeService` | `GetActiveTheme()`, `SetTheme(id)`, `CreateTheme(dto)` |
 | `IRealTimeService` | `RealTimeService` (API) | `NotifyUserAsync(userId, event, data)`, `BroadcastAsync(...)` |
-| `IPaymentGatewayService` | `SSLCommerzGateway` / `BkashGateway` / `NagadGateway` | `InitiatePaymentAsync`, `VerifyCallbackAsync`, `ProcessWebhookAsync` |
+| `IPaymentGatewayService` | `SSLCommerzGateway` | Gateways/ |
+| `IPaymentGatewayService` | `BkashGateway` | Gateways/ |
+| `IPaymentGatewayService` | `NagadGateway` | Gateways/ |
+| `IPaymentGatewayService` | `DGePayGateway` | Gateways/ |
 | `IPaymentGatewayFactory` | `PaymentGatewayFactory` | `GetGateway(gatewayType)` → `IPaymentGatewayService` |
 
 ---

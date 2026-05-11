@@ -17,6 +17,9 @@ namespace GHCAA.Infrastructure.Data.Configurations
             builder.HasIndex(m => m.NID).IsUnique();
             builder.HasIndex(m => m.MobileNo).IsUnique();
 
+            // 24.37: Admin member listing queries filter heavily on both Status and IsArchived.
+            builder.HasIndex(m => new { m.Status, m.IsArchived });
+
             builder.HasQueryFilter(m => !m.IsArchived);
         }
     }

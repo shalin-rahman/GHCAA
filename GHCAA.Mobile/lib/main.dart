@@ -17,39 +17,42 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // 1b. Global Error UI (World-Class Redirection)
-  ErrorWidget.builder = (details) => Material(
-    child: Container(
-      padding: const EdgeInsets.all(32),
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(0, -0.6),
-          radius: 1.5,
-          colors: [AppTheme.midnightSurface, AppTheme.midnightBase],
+  ErrorWidget.builder = (details) => Directionality(
+    textDirection: TextDirection.ltr,
+    child: Material(
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0, -0.6),
+            radius: 1.5,
+            colors: [AppTheme.midnightSurface, AppTheme.midnightBase],
+          ),
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline_rounded, color: AppTheme.royalGold, size: 60),
-          const SizedBox(height: 24),
-          const Text(
-            'UNEXPECTED SYSTEM OVERLOAD',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: 2),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'The registry is currently experiencing a visual synchronization error. Our engineers have been notified.',
-            style: TextStyle(color: AppTheme.textSecondaryDark, fontSize: 12, height: 1.5),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 48),
-          ElevatedButton(
-            onPressed: () => Sentry.captureException(details.exception, stackTrace: details.stack),
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
-            child: const Text('DIAGNOSE & REPORT', style: TextStyle(color: Colors.black)),
-          ),
-        ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline_rounded, color: AppTheme.royalGold, size: 60),
+            const SizedBox(height: 24),
+            const Text(
+              'UNEXPECTED SYSTEM OVERLOAD',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: 2),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'The registry is currently experiencing a visual synchronization error. Our engineers have been notified.',
+              style: TextStyle(color: AppTheme.textSecondaryDark, fontSize: 12, height: 1.5),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 48),
+            ElevatedButton(
+              onPressed: () => Sentry.captureException(details.exception, stackTrace: details.stack),
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
+              child: const Text('DIAGNOSE & REPORT', style: TextStyle(color: Colors.black)),
+            ),
+          ],
+        ),
       ),
     ),
   );
