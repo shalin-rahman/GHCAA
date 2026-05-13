@@ -69,8 +69,20 @@ class AppScaffold extends ConsumerWidget {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (title != null) Text(title!, style: Theme.of(context).appBarTheme.titleTextStyle),
-                if (breadcrumb != null) Text(breadcrumb!.toUpperCase(), style: Theme.of(context).textTheme.labelLarge),
+                if (title != null) 
+                  Text(
+                    title!, 
+                    style: Theme.of(context).appBarTheme.titleTextStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (breadcrumb != null) 
+                  Text(
+                    breadcrumb!.toUpperCase(), 
+                    style: Theme.of(context).textTheme.labelLarge,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
               ],
             ),
             backgroundColor: Colors.black.withValues(alpha: 0.6),

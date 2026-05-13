@@ -234,11 +234,18 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                   Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
-                                                      Text(AppUtils.formatDate(ev['startDate']), style: Theme.of(context).textTheme.labelLarge),
+                                                      Expanded(
+                                                        child: Text(AppUtils.formatDate(ev['startDate']), style: Theme.of(context).textTheme.labelLarge, overflow: TextOverflow.ellipsis),
+                                                      ),
+                                                      const SizedBox(width: 8),
                                                       if (ev['registrationFee'] != null && ev['registrationFee'] > 0)
-                                                        Text(AppUtils.formatCurrency(ev['registrationFee']), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.royalGold, fontWeight: FontWeight.w900))
+                                                        Flexible(
+                                                          child: Text(AppUtils.formatCurrency(ev['registrationFee']), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.royalGold, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis),
+                                                        )
                                                       else
-                                                        const Text('FREE ENTRY', style: TextStyle(color: Colors.greenAccent, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                                                        const Flexible(
+                                                          child: Text('FREE ENTRY', style: TextStyle(color: Colors.greenAccent, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.5), overflow: TextOverflow.ellipsis),
+                                                        ),
                                                     ],
                                                   ),
                                                   const SizedBox(height: AppTheme.spaceM),

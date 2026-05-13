@@ -595,9 +595,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           children: [
             const Icon(Icons.calendar_today_outlined, size: 18, color: AppTheme.royalGold),
             const SizedBox(width: AppTheme.spaceM),
-            Text(
-              value != null ? AppUtils.formatDate(value) : label,
-              style: TextStyle(color: value != null ? Colors.white : Colors.white54, fontSize: 13),
+            Expanded(
+              child: Text(
+                value != null ? AppUtils.formatDate(value) : label,
+                style: TextStyle(color: value != null ? Colors.white : Colors.white54, fontSize: 13),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

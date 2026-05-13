@@ -15,6 +15,7 @@ import '../../screens/member/job_details_screen.dart';
 import '../../screens/member/profile_screen.dart';
 import '../../screens/member/profile_edit_screen.dart';
 import '../../screens/member/financial_portal_screen.dart';
+import '../../screens/financials/payment_web_page.dart';
 import '../../screens/member/news_screen.dart';
 import '../../screens/member/news_details_screen.dart';
 import '../../screens/member/gallery_screen.dart';
@@ -134,6 +135,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => JobDetailsScreen(jobId: int.parse(state.pathParameters['id']!)),
           ),
           GoRoute(path: '/financials', name: 'financials', builder: (context, state) => const FinancialPortalScreen()),
+          GoRoute(
+            path: '/financials/payment',
+            name: 'payment_web',
+            builder: (context, state) => PaymentWebPage(url: state.extra as String),
+          ),
           GoRoute(path: '/news', name: 'news', builder: (context, state) => const NewsScreen()),
           GoRoute(
             path: '/news/:id',

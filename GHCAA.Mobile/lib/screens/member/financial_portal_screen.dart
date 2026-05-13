@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/utils/app_utils.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../features/financials/financial_service.dart';
+import '../../features/financials/gateway_service.dart';
+import 'package:go_router/go_router.dart';
 
 final ledgerProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(financialServiceProvider).getLedger());
 final duesProvider = FutureProvider<double>((ref) async => ref.read(financialServiceProvider).getOutstandingDues());
@@ -38,6 +40,79 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
         await launchUrl(uri);
       }
     }
+  }
+
+  Future<void> _initiatePayment(double amount, PaymentGateway gateway) async {
+    HapticFeedback.lightImpact();
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+    );
+
+    try {
+      final response = await ref.read(gatewayServiceProvider).initiate(amount, gateway, 'OUTSTANDING_DUES');
+      if (mounted) Navigator.of(context).pop(); // Dismiss loading
+
+      if (response.success && response.gatewayUrl != null) {
+        if (mounted) context.pushNamed('payment_web', extra: response.gatewayUrl);
+      } else {
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.message ?? 'Failed to initiate payment')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
+  void _showGatewaySelection(double amount) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => GlassContainer(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('SELECT PAYMENT GATEWAY', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: AppTheme.royalGold, letterSpacing: 1.5)),
+            const SizedBox(height: 24),
+            _gatewayTile('DGePay (UAT)', Icons.payment, () => _initiatePayment(amount, PaymentGateway.dgePay)),
+            const SizedBox(height: 12),
+            _gatewayTile('Stripe', Icons.credit_card, () => _initiatePayment(amount, PaymentGateway.stripe)),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _gatewayTile(String title, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
+      child: GlassContainer(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            Icon(icon, color: AppTheme.royalGold),
+            const SizedBox(width: 16),
+            Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+            const Spacer(),
+            const Icon(Icons.chevron_right, color: Colors.white24),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -77,7 +152,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                         child: ElevatedButton(
                           onPressed: dues > 0 ? () {
                             HapticFeedback.mediumImpact();
-                            // Checkout flow
+                            _showGatewaySelection(dues);
                           } : null, 
                           style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                           child: const Text('PAY OUTSTANDING', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1))

@@ -140,23 +140,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: AppTheme.spaceL),
-                Text(AppConfig.organizationAcronym,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 40,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 8,
-                        color: Colors.white)),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(AppConfig.organizationAcronym,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 40,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 8,
+                          color: Colors.white)),
+                ),
                 const SizedBox(height: AppTheme.spaceXS),
-                Text(
-                  AppConfig.organizationTagline.toUpperCase(),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppTheme.royalGold,
-                      fontSize: 8,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    AppConfig.organizationTagline.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppTheme.royalGold,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.5),
+                  ),
                 ),
                 const SizedBox(height: AppTheme.spaceM),
                 Text(AppConfig.organizationName,
@@ -191,7 +197,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text('SECURE AUTHENTICATION', 
+                      const Text('GHCAA AUTHENTICATION', 
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: AppTheme.royalGold,
@@ -228,9 +234,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 activeThumbColor: AppTheme.royalGold,
                               ),
                             ),
-                            Text(
-                              'Enable Biometric Access',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
+                            Expanded(
+                              child: Text(
+                                'Enable Biometric Access',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
+                              ),
                             ),
                           ],
                         ),

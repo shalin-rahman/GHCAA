@@ -205,10 +205,12 @@ class _MemberArticlesScreenState extends ConsumerState<MemberArticlesScreen> {
                                                       Row(
                                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                         children: [
-                                                          Container(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
-                                                            child: Text(art['status']?.toString().toUpperCase() ?? 'PENDING', style: TextStyle(color: statusColor, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                                                          Flexible(
+                                                            child: Container(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                              decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
+                                                              child: Text(art['status']?.toString().toUpperCase() ?? 'PENDING', style: TextStyle(color: statusColor, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1.5), overflow: TextOverflow.ellipsis),
+                                                            ),
                                                           ),
                                                           Text(art['createdAt']?.toString().split('T')[0] ?? art['submittedAt']?.toString().split('T')[0] ?? 'RECENT', style: const TextStyle(fontSize: 10, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.bold)),
                                                         ],

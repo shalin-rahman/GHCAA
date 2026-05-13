@@ -302,7 +302,7 @@ class DashboardScreen extends ConsumerWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: isCompact ? AppTheme.spaceS : AppTheme.spaceM,
       crossAxisSpacing: isCompact ? AppTheme.spaceS : AppTheme.spaceM,
-      childAspectRatio: isCompact ? 1.0 : 1.25,
+      childAspectRatio: isCompact ? 0.95 : 1.25,
       children: children,
     );
   }
@@ -333,8 +333,11 @@ class DashboardScreen extends ConsumerWidget {
         ),
         child: Column(
           children: [
-            Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
-            Text(label, style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: color, letterSpacing: 0.5)),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+            ),
+            Text(label, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: color, letterSpacing: 0.5)),
           ],
         ),
       ),
@@ -372,40 +375,42 @@ class DashboardScreen extends ConsumerWidget {
                 right: -10, top: -10,
                 child: Icon(icon, color: color.withValues(alpha: 0.03), size: 80),
               ),
-              Padding(
-                padding: EdgeInsets.all(isCompact ? AppTheme.spaceM : AppTheme.spaceL),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(AppTheme.spaceS),
+                      padding: EdgeInsets.all(isCompact ? AppTheme.spaceXS : AppTheme.spaceS),
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(AppTheme.radiusM),
                       ),
                       child: Icon(icon, color: color, size: isCompact ? 18 : 24),
                     ),
-                    const Spacer(),
-                    Text(title, 
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: isCompact ? 11 : 14,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.2,
-                      )),
-                    const SizedBox(height: AppTheme.spaceXS / 2),
-                    Text(subtitle.toUpperCase(), 
-                      style: TextStyle(
-                        color: color.withValues(alpha: 0.5), 
-                        fontSize: isCompact ? 7 : 8, 
-                        fontWeight: FontWeight.w900, 
-                        letterSpacing: 1.2
-                      )),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, 
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: isCompact ? 11 : 14,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.2,
+                          )),
+                        const SizedBox(height: AppTheme.spaceXS / 2),
+                        Text(subtitle.toUpperCase(), 
+                          style: TextStyle(
+                            color: color.withValues(alpha: 0.5), 
+                            fontSize: isCompact ? 7 : 8, 
+                            fontWeight: FontWeight.w900, 
+                            letterSpacing: 1.2
+                          )),
+                      ],
+                    ),
                   ],
                 ),
-              ),
             ],
           ),
         ),

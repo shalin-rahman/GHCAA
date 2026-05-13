@@ -50,13 +50,28 @@ class DigitalIDScreen extends ConsumerWidget {
                             padding: const EdgeInsets.fromLTRB(AppTheme.spaceXL, AppTheme.spaceL, AppTheme.spaceXL, AppTheme.spaceXL),
                             child: Column(
                               children: [
-                                const Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Icon(Icons.school_outlined, size: 28, color: AppTheme.royalGold),
-                                    Text('Haragangian Alumni Digital Pass', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2)),
-                                  ],
-                                ),
+                                 const Row(
+                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                   children: [
+                                     Icon(Icons.school_outlined, size: 28, color: AppTheme.royalGold),
+                                     SizedBox(width: AppTheme.spaceS),
+                                     Expanded(
+                                       child: FittedBox(
+                                         fit: BoxFit.scaleDown,
+                                         alignment: Alignment.centerRight,
+                                         child: Text(
+                                           'Haragangian Alumni Digital Pass',
+                                           style: TextStyle(
+                                             color: AppTheme.royalGold,
+                                             fontWeight: FontWeight.bold,
+                                             fontSize: 13,
+                                             letterSpacing: 1.2,
+                                           ),
+                                         ),
+                                       ),
+                                     ),
+                                   ],
+                                 ),
                                 const SizedBox(height: AppTheme.spaceXL),
                                 Container(
                                   decoration: BoxDecoration(

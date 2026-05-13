@@ -144,11 +144,11 @@ namespace GHCAA.Infrastructure.Gateways
 
                 // Store decrypted info for the controller
                 callbackData["unique_txn_id"] = data.UniqueTxnId ?? "";
-                callbackData["status_code"] = data.StatusCode ?? "";
+                callbackData["status_code"] = data.StatusCode?.ToString() ?? "";
                 callbackData["amount"] = data.Amount?.ToString() ?? "0";
 
                 // Status code 3 = success
-                if (data.StatusCode != "3")
+                if (data.StatusCode != 3)
                 {
                     _logger.LogInformation("DGePay Callback status not successful: {Status}", data.StatusCode);
                     return false;
@@ -205,7 +205,7 @@ namespace GHCAA.Infrastructure.Gateways
                 if (!response.IsSuccessStatusCode) return false;
 
                 var result = JsonSerializer.Deserialize<DGePayResponse<DGePayCallbackData>>(responseContent);
-                return result?.Data?.StatusCode == "3";
+                return result?.Data?.StatusCode == 3;
             }
             catch (Exception ex)
             {
@@ -379,7 +379,7 @@ namespace GHCAA.Infrastructure.Gateways
         private class DGePayCallbackData
         {
             [JsonPropertyName("status_code")]
-            public string? StatusCode { get; set; }
+            public int? StatusCode { get; set; }
             [JsonPropertyName("message")]
             public string? Message { get; set; }
             [JsonPropertyName("unique_txn_id")]

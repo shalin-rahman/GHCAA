@@ -312,9 +312,9 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                                           ),
                                           Row(
                                             children: [
-                                              _metaBadge(Icons.school_rounded, _getCompactBatch(m)),
-                                              const Spacer(),
-                                              _metaBadge(Icons.cases_rounded, m['designation'] ?? 'Member'),
+                                              Flexible(child: _metaBadge(Icons.school_rounded, _getCompactBatch(m))),
+                                              const SizedBox(width: 4),
+                                              Flexible(child: _metaBadge(Icons.cases_rounded, m['designation'] ?? 'Member')),
                                             ],
                                           ),
                                         ],
@@ -339,7 +339,14 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
       children: [
         Icon(icon, size: 12, color: AppTheme.royalGold.withValues(alpha: 0.5)),
         const SizedBox(width: AppTheme.spaceXS),
-        Text(text, style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 8, color: Colors.white54)),
+        Flexible(
+          child: Text(
+            text, 
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 8, color: Colors.white54),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }

@@ -336,5 +336,20 @@
 - [x] 25.3 Define callback endpoint in GatewaysController
 - [x] 25.4 Seed DGePay UAT credentials in payment_configurations.json
 - [x] 25.5 Formalize Gateway Workflow documentation (docs/PAYMENT_GATEWAY_WORKFLOW.md)
-- [ ] 25.6 Update Mobile UI (Flutter)
+- [x] 25.6 Update Mobile UI (Flutter) — gateway enum synced, selection bottom-sheet, PaymentWebPage integration
 - [ ] 25.7 E2E Payment Flow Verification
+
+## AREA 26: VISUAL REGRESSION LAYOUT HARDENING
+26.1 [DONE] Mobile: Fix RenderFlex overflows — AppScaffold title/breadcrumb (maxLines + ellipsis)
+26.2 [DONE] Mobile: Fix RenderFlex overflows — DirectoryScreen member designation badges (Flexible + ellipsis)
+26.3 [DONE] Mobile: Fix RenderFlex overflow — DigitalIDScreen header title (Expanded + FittedBox)
+26.4 [DONE] Mobile: Fix RenderFlex overflow — NewsScreen category chip row (Flexible + ellipsis)
+26.5 [DONE] Mobile: Fix RenderFlex overflow — ArticlesScreen article status badge row (Flexible + ellipsis)
+26.6 [DONE] Mobile: Fix RenderFlex overflow — JobDetailsScreen stat rows (Expanded + end-aligned ellipsis)
+26.7 [DONE] Mobile: Fix RenderFlex overflow — EventsScreen date/fee row (Expanded + Flexible)
+26.8 [DONE] Mobile: Fix overflow — DashboardScreen admin analytics stat card (FittedBox + label ellipsis)
+26.9 [DONE] Test: Fix MockHttpClient missing @override annotations in full_app_visual_freeze_test.dart
+26.10 [TODO] Mobile: Generate final golden baselines after Riverpod teardown fix — run `flutter test --update-goldens`
+26.11 [TODO] CI/CD: Integrate golden_toolkit suite into headless pipeline (fixed viewport + font config)
+26.12 [TODO] Test: Fix Riverpod NotInitializedError in tearDownAll — wrap each screen in isolated ProviderScope or call container.dispose() explicitly (full_app_visual_freeze_test.dart, visual_freeze_test.dart, dashboard_visual_test.dart)
+26.13 [TODO] Test: Fix registration_visual_test.dart — update "CONTINUE" button finder to match current wizard label/key in register_screen.dart
