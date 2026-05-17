@@ -284,90 +284,99 @@ void main() {
   setUpAll(() async {
     HttpOverrides.global = _MockHttpOverrides();
     dotenv.testLoad(fileInput: 'ORG_ACRONYM=GHCAA\nBASE_API_URL=http://localhost:5087/api');
+    await loadAppFonts();
   });
 
-  testGoldens('Mobile Full-App Visual Freeze', (tester) async {
-    await loadAppFonts();
+  group('Mobile Full-App Visual Freeze', () {
+    testGoldens('Auth: Login Portal', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const LoginScreen()),
+        surfaceSize: const Size(390, 844),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'login_portal', customPump: _pump);
+    });
 
-    // 1. Auth: Login screen
-    await tester.pumpWidgetBuilder(
-      wrapInApp(const LoginScreen()),
-      surfaceSize: const Size(390, 844),
-    );
-    await _pump(tester);
-    await screenMatchesGolden(tester, 'login_portal', customPump: _pump);
+    testGoldens('Auth: Registration Wizard', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const RegisterScreen()),
+        surfaceSize: const Size(390, 844),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'registration_wizard', customPump: _pump);
+    });
 
-    // 2. Auth: Registration wizard
-    await tester.pumpWidgetBuilder(
-      wrapInApp(const RegisterScreen()),
-      surfaceSize: const Size(390, 844),
-    );
-    await _pump(tester);
-    await screenMatchesGolden(tester, 'registration_wizard', customPump: _pump);
+    testGoldens('Member: Governance Portal', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const GovernanceScreen()),
+        surfaceSize: const Size(390, 844),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'governance_portal', customPump: _pump);
+    });
 
-    // 3. Member: Governance portal screen
-    await tester.pumpWidgetBuilder(
-      wrapInApp(const GovernanceScreen()),
-      surfaceSize: const Size(390, 844),
-    );
-    await _pump(tester);
-    await screenMatchesGolden(tester, 'governance_portal', customPump: _pump);
+    testGoldens('Member: Committee Registry', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const CommitteeScreen()),
+        surfaceSize: const Size(390, 844),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'committee_registry', customPump: _pump);
+    });
 
-    // 4. Member: Committee/Advisory board screen
-    await tester.pumpWidgetBuilder(
-      wrapInApp(const CommitteeScreen()),
-      surfaceSize: const Size(390, 844),
-    );
-    await _pump(tester);
-    await screenMatchesGolden(tester, 'committee_registry', customPump: _pump);
+    testGoldens('Directory: Member Listing', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const DirectoryScreen()),
+        surfaceSize: const Size(390, 844),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'directory_listing', customPump: _pump);
+    });
 
-    // 5. Directory: Member listing screen
-    await tester.pumpWidgetBuilder(
-      wrapInApp(const DirectoryScreen()),
-      surfaceSize: const Size(390, 844),
-    );
-    await _pump(tester);
-    await screenMatchesGolden(tester, 'directory_listing', customPump: _pump);
+    testGoldens('Events: Event Listing', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const EventsScreen()),
+        surfaceSize: const Size(390, 844),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'events_listing', customPump: _pump);
+    });
 
-    // 6. Events: Event calendar/listing screen
-    await tester.pumpWidgetBuilder(
-      wrapInApp(const EventsScreen()),
-      surfaceSize: const Size(390, 844),
-    );
-    await _pump(tester);
-    await screenMatchesGolden(tester, 'events_listing', customPump: _pump);
+    testGoldens('News: News Portal', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const NewsScreen()),
+        surfaceSize: const Size(390, 844),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'news_portal', customPump: _pump);
+    });
 
-    // 7. News & Media: Portal screen
-    await tester.pumpWidgetBuilder(
-      wrapInApp(const NewsScreen()),
-      surfaceSize: const Size(390, 844),
-    );
-    await _pump(tester);
-    await screenMatchesGolden(tester, 'news_portal', customPump: _pump);
+    testGoldens('Financials: Payment Portal', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const FinancialPortalScreen()),
+        surfaceSize: const Size(390, 844),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'financial_portal', customPump: _pump);
+    });
 
-    // 8. Financials: Portal screen (Payment selection)
-    await tester.pumpWidgetBuilder(
-      wrapInApp(const FinancialPortalScreen()),
-      surfaceSize: const Size(390, 844),
-    );
-    await _pump(tester);
-    await screenMatchesGolden(tester, 'financial_portal', customPump: _pump);
+    testGoldens('Member: Dashboard Overview', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const DashboardScreen()),
+        surfaceSize: const Size(390, 844),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'dashboard_overview', customPump: _pump);
+    });
 
-    // 9. Member: Dashboard screen
-    await tester.pumpWidgetBuilder(
-      wrapInApp(const DashboardScreen()),
-      surfaceSize: const Size(390, 844),
-    );
-    await _pump(tester);
-    await screenMatchesGolden(tester, 'dashboard_overview', customPump: _pump);
-
-    // 10. Member: Digital ID screen
-    await tester.pumpWidgetBuilder(
-      wrapInApp(const DigitalIDScreen()),
-      surfaceSize: const Size(390, 844),
-    );
-    await _pump(tester);
-    await screenMatchesGolden(tester, 'digital_id_pass', customPump: _pump);
+    testGoldens('Member: Digital ID Pass', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const DigitalIDScreen()),
+        surfaceSize: const Size(390, 844),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'digital_id_pass', customPump: _pump);
+    });
   });
 }
 

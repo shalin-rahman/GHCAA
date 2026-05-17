@@ -61,6 +61,7 @@ class AppScaffold extends ConsumerWidget {
 
   Widget _buildScaffold(BuildContext context, WidgetRef ref, List<Color> gradientColors, {String? announcement, Color? textColor, bool isGlobalVisible = true, bool isUserAdmin = false}) {
     final canPop = GoRouter.of(context).canPop();
+    final isTablet = MediaQuery.of(context).size.width >= 600;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -107,7 +108,7 @@ class AppScaffold extends ConsumerWidget {
             bottom: bottom,
           )
         : null,
-      drawer: const AppDrawer(),
+      drawer: isTablet ? null : const AppDrawer(),
       body: Listener(
         onPointerDown: (_) => ref.read(sessionProvider.notifier).userActivityDetected(),
         child: Container(
@@ -128,7 +129,14 @@ class AppScaffold extends ConsumerWidget {
                     color: Colors.black.withValues(alpha: 0.3),
                     child: Text(announcement, style: TextStyle(color: textColor ?? Colors.white, fontSize: 12, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                   ),
-                Expanded(child: child),
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 800),
+                      child: child,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

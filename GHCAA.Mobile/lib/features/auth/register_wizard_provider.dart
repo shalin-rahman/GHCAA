@@ -270,6 +270,13 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
   void nextStep() => nextPage();
   void prevStep() => prevPage();
 
+  /// Directly set the wizard to a specific step. Used by tests to bypass form
+  /// validation and pre-seed the UI at the desired step (0-indexed).
+  void setStep(int step) {
+    assert(step >= 0 && step < _totalSteps, 'Step must be 0–${_totalSteps - 1}');
+    state = state.copyWith(currentStep: step);
+  }
+
   void updateModel({
     String? fullName,
     String? email,

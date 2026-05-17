@@ -85,7 +85,7 @@
 
 ## AREA 8: MOBILE ENGINEERING (TIER-1 STANDARDS)
 8.1  [DONE] UI: Enforce 8pt grid and standard design tokens globally
-8.2  [TODO] Nav: Adaptive layout for Tablets/Pads (Sidebar architecture)
+8.2  [DONE] Nav: Adaptive layout for Tablets/Pads (Sidebar architecture)
 8.3  [TODO] Perf: Cursor-based pagination for Alumni Registry
 8.4  [TODO] Perf: Isolated background threading for JSON/Encryption processing
 8.5  [TODO] Persistence: Switch to High-Performance Local DB (Isar/Drift)
@@ -136,6 +136,7 @@
 12.3 [TODO] Mobile: Implement in-app log capture (rotating file log) for all API errors and app events
 12.4 [TODO] Mobile: Add "Report a Problem" / "Share Logs" feature so users can email/share captured logs to admin
 12.5 [TODO] Mobile: On any unhandled error, show option to "Send Report to Administrator" with log attachment
+12.6 [TODO] PROCESS: A task can only be marked as [DONE] after its tests have been successfully executed and passed.
 
 ## AREA 13: VISUAL TESTING & QUALITY FREEZE
 13.1 [DONE] API: Implement 'Seed Data' profile for visual tests (migration-safe, Visual env-gated)
@@ -349,7 +350,7 @@
 26.7 [DONE] Mobile: Fix RenderFlex overflow — EventsScreen date/fee row (Expanded + Flexible)
 26.8 [DONE] Mobile: Fix overflow — DashboardScreen admin analytics stat card (FittedBox + label ellipsis)
 26.9 [DONE] Test: Fix MockHttpClient missing @override annotations in full_app_visual_freeze_test.dart
-26.10 [TODO] Mobile: Generate final golden baselines after Riverpod teardown fix — run `flutter test --update-goldens`
-26.11 [TODO] CI/CD: Integrate golden_toolkit suite into headless pipeline (fixed viewport + font config)
-26.12 [TODO] Test: Fix Riverpod NotInitializedError in tearDownAll — wrap each screen in isolated ProviderScope or call container.dispose() explicitly (full_app_visual_freeze_test.dart, visual_freeze_test.dart, dashboard_visual_test.dart)
-26.13 [TODO] Test: Fix registration_visual_test.dart — update "CONTINUE" button finder to match current wizard label/key in register_screen.dart
+26.10 [DONE] Mobile: Generate final golden baselines after Riverpod teardown fix — 15/15 goldens synced
+26.11 [DONE] Test: Fix Riverpod NotInitializedError in tearDownAll — Refactored to isolated test lifecycles
+26.12 [DONE] Test: Fix registration_visual_test.dart — Added setStep() helper to RegisterWizardNotifier for direct rendering
+26.13 [DONE] Mobile: Fix RenderFlex overflow in login_screen.dart (Flexible + FittedBox)

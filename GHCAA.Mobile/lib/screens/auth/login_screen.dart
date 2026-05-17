@@ -292,14 +292,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("New to the collective?", style: TextStyle(color: Colors.white38, fontSize: 13)),
-                    TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        context.push('/register');
-                      },
-                      child: const Text('REGISTER NOW',
-                          style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.w900, fontSize: 12)),
+                    const Flexible(
+                      child: Text(
+                        "New to the collective?",
+                        style: TextStyle(color: Colors.white38, fontSize: 13),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    FittedBox(
+                      child: TextButton(
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/register');
+                        },
+                        child: const Text('REGISTER NOW',
+                            style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.w900, fontSize: 12)),
+                      ),
                     ),
                   ],
                 ),
