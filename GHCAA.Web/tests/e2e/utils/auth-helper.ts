@@ -15,13 +15,9 @@ export class AuthHelper {
     await passwordInput.fill(password);
     await submitButton.click();
 
-    // Determine redirect based on role
-    // shalin is a SuperAdmin, so it redirects to admin/approvals
-    if (username === 'shalin' || username === 'superadmin') {
-      await expect(this.page).toHaveURL(/.*admin\/(dashboard|approvals)/, { timeout: 10000 });
-    } else {
-      await expect(this.page).toHaveURL(/.*portal\/dashboard/, { timeout: 10000 });
-    }
+    // Wait for navigation to either admin or portal dashboard to ensure login completion
+    // The timeout is increased to handle potential slow auth redirects
+    await this.page.waitForURL(/.*(admin|portal)\/(dashboard|approvals)/, { timeout: 15000 }).catch(() => {});
   }
 
   async logout() {

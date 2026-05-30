@@ -1,0 +1,108 @@
+<div class="forum-page">
+  <!-- Page Header -->
+  <div class="forum-header">
+    <div class="forum-header-inner">
+      <div class="header-left">
+        @if (selectedCategory()) {
+          <button class="btn-back" (click)="backToCategories()">
+            <span class="icon">&#8592;</span> All Categories
+          </button>
+          <h1>{{ selectedCategory()!.name }}</h1>
+          <p class="sub">{{ selectedCategory()!.description }}</p>
+        } @else {
+          <h1>&#128172; Community Forum</h1>
+          <p class="sub">Ask questions, share ideas, and connect with fellow Haragangians.</p>
+        }
+      </div>
+      @if (selectedCategory() && !showCreateForm()) {
+        <button class="btn-primary" (click)="openCreateForm()">+ New Topic</button>
+      }
+    </div>
+  </div>
+
+  @if (errorMsg()) {
+    <div class="alert alert-error">{{ errorMsg() }}</div>
+  }
+
+  <!-- Create Topic Form -->
+  @if (showCreateForm()) {
+    <div class="create-topic-card">
+      <h3>Start a New Discussion</h3>
+      <div class="form-group">
+        <label>Topic Title <span class="req">*</span></label>
+        <input type="text" [(ngModel)]="newTopic.title" placeholder="Write a clear, concise title..." maxlength="200" />
+      </div>
+      <div class="form-group">
+        <label>Content <span class="req">*</span></label>
+        <textarea [(ngModel)]="newTopic.content" rows="6" placeholder="Describe your topic in detail..."></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-secondary" (click)="cancelCreate()">Cancel</button>
+        <button class="btn-primary" (click)="submitTopic()" [disabled]="submitting() || !newTopic.title.trim() || !newTopic.content.trim()">
+          {{ submitting() ? 'Posting...' : 'Post Topic' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Category Grid -->
+  @if (!selectedCategory() && !showCreateForm()) {
+    @if (loading()) {
+      <div class="loader-wrap"><div class="spinner"></div><p>Loading categories…</p></div>
+    } @else {
+      <div class="category-grid">
+        @for (cat of categories(); track cat.id) {
+          <div class="category-card" (click)="selectCategory(cat)">
+            <div class="cat-icon">&#128172;</div>
+            <div class="cat-info">
+              <h3>{{ cat.name }}</h3>
+              <p>{{ cat.description }}</p>
+              <div class="cat-stats">
+                <span>{{ cat.topicCount }} topics</span>
+                <span class="dot">·</span>
+                <span>{{ cat.postCount }} posts</span>
+              </div>
+            </div>
+            <span class="cat-arrow">&#8250;</span>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <p>No forum categories found.</p>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- Topics List -->
+  @if (selectedCategory() && !showCreateForm()) {
+    @if (topicsLoading()) {
+      <div class="loader-wrap"><div class="spinner"></div><p>Loading topics…</p></div>
+    } @else {
+      <div class="topics-list">
+        @for (topic of topics(); track topic.id) {
+          <div class="topic-row" (click)="openTopic(topic)">
+            <div class="topic-indicators">
+              @if (topic.isPinned) { <span class="badge badge-pin">Pinned</span> }
+              @if (topic.isLocked) { <span class="badge badge-lock">Locked</span> }
+            </div>
+            <div class="topic-main">
+              <h4>{{ topic.title }}</h4>
+              <p class="topic-meta">
+                by <strong>{{ topic.authorName }}</strong> · {{ formatDate(topic.createdAt) }}
+              </p>
+            </div>
+            <div class="topic-counters">
+              <span title="Replies">&#128172; {{ topic.replyCount }}</span>
+              <span title="Views">&#128065; {{ topic.viewCount }}</span>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <p>No topics yet. <button class="link-btn" (click)="openCreateForm()">Start the first discussion!</button></p>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

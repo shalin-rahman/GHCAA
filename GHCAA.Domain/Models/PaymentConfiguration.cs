@@ -23,7 +23,7 @@ namespace GHCAA.Domain.Models
         public bool IsEnabled { get; set; } = true;
 
         // For mobile wallets: bKash, Nagad, Rocket
-        [MaxLength(20)]
+        [MaxLength(50)]
         public string? WalletNumber { get; set; }
 
         [MaxLength(100)]

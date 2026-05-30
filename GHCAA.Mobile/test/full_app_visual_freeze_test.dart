@@ -369,6 +369,15 @@ void main() {
       await screenMatchesGolden(tester, 'dashboard_overview', customPump: _pump);
     });
 
+    testGoldens('Member: Dashboard Overview (Tablet)', (tester) async {
+      await tester.pumpWidgetBuilder(
+        wrapInApp(const DashboardScreen()),
+        surfaceSize: const Size(1024, 768),
+      );
+      await _pump(tester);
+      await screenMatchesGolden(tester, 'dashboard_overview_tablet', customPump: _pump);
+    });
+
     testGoldens('Member: Digital ID Pass', (tester) async {
       await tester.pumpWidgetBuilder(
         wrapInApp(const DigitalIDScreen()),

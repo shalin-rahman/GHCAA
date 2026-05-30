@@ -134,6 +134,14 @@ export const routes: Routes = [
             {
                 path: 'polls',
                 loadComponent: () => import('./member/polls/polls.component').then(m => m.MemberPolls)
+            },
+            {
+                path: 'forum',
+                loadComponent: () => import('./member/forum/forum').then(m => m.Forum)
+            },
+            {
+                path: 'forum/:id',
+                loadComponent: () => import('./member/forum/topic-detail').then(m => m.TopicDetail)
             }
         ]
     },

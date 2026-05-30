@@ -128,6 +128,12 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<PollOption> PollOptions { get; set; } = null!;
         public DbSet<PollVote> PollVotes { get; set; } = null!;
 
+        // Forum Module
+        public DbSet<ForumCategory> ForumCategories { get; set; } = null!;
+        public DbSet<ForumTopic> ForumTopics { get; set; } = null!;
+        public DbSet<ForumPost> ForumPosts { get; set; } = null!;
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

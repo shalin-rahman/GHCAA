@@ -1,31 +1,53 @@
-# PLAN.md: Area 8.2 - Adaptive Layout for Tablets/Pads
+# PLAN.md: 3.7 Discussion Forums and Community Groups (Mobile UI)
 
 ## Objective
-Implement an adaptive layout in the Flutter mobile application to support tablets and large screen devices. For larger screens (e.g., width > 600px), replace the `BottomNavigationBar` and `Drawer` with a persistent `NavigationRail` or `Sidebar` architecture to utilize the extra horizontal space efficiently.
-
-## Technical Approach
-We will utilize Flutter's `LayoutBuilder` and `MediaQuery` to detect screen width constraints. The primary navigation container (`AppScaffold` or equivalent root scaffold) will dynamically return either a mobile-optimized or tablet-optimized layout.
+Implement a high-fidelity Discussion Forums and Community Groups module in the Flutter application (`GHCAA.Mobile`) that communicates with the recently finished C# backend endpoints.
 
 ## Execution Steps
 
-- [x] **Step 1: Identify and Update Root Navigation Scaffold**
-  - Locate the main scaffold wrapper used across the application (usually `app_scaffold.dart` or `dashboard_screen.dart`).
-  - Wrap the main scaffold body with a `LayoutBuilder`.
-  - Define a breakpoint constant (e.g., `const double kTabletBreakpoint = 600.0;`).
+- [ ] **Step 1: Create Forum Service & Riverpod Providers**
+  - Create file `lib/features/forum/forum_service.dart`.
+  - Define Dart models: `ForumCategory`, `ForumTopic`, `ForumPost`.
+  - Implement `ForumService` using `Dio` (`dioProvider`) mapping:
+    - Get Categories: `GET /api/forum/categories`
+    - Get Topics by Category: `GET /api/forum/categories/{id}/topics?page={page}&pageSize={pageSize}`
+    - Get Topic by ID: `GET /api/forum/topics/{id}`
+    - Get Posts by Topic: `GET /api/forum/topics/{id}/posts?page={page}&pageSize={pageSize}`
+    - Create Topic: `POST /api/forum/topics`
+    - Create Post: `POST /api/forum/topics/{topicId}/posts`
+    - Delete Topic: `DELETE /api/forum/topics/{topicId}`
+    - Delete Post: `DELETE /api/forum/posts/{postId}`
+  - Expose Riverpod providers:
+    - `forumServiceProvider` (Provider)
+    - `forumCategoriesProvider` (FutureProvider)
+    - `forumTopicsProvider(categoryId)` (FutureProvider.family)
+    - `topicDetailProvider(topicId)` (FutureProvider.family)
+    - `topicPostsProvider(topicId)` (FutureProvider.family)
 
-- [x] **Step 2: Implement NavigationRail (Tablet UI)**
-  - For screens wider than `kTabletBreakpoint`, render a `Row` containing a `NavigationRail` on the left and the main screen content (`Expanded`) on the right.
-  - Map the existing `BottomNavigationBarItem` properties to `NavigationRailDestination`.
-  - Hide the standard `Drawer` and `BottomNavigationBar` in the tablet layout.
+- [ ] **Step 2: Implement Forum Category List Screen**
+  - Create file `lib/screens/member/forum/forum_categories_screen.dart`.
+  - Present categories as cards using standard design patterns, displaying name, description, topic count, and reply/post count.
+  - Add search/filtering by category name.
 
-- [x] **Step 3: Refactor Main Screens for Horizontal Scaling**
-  - Ensure the content area does not stretch infinitely (e.g., forms or text). 
-  - Add `Center` + `ConstrainedBox` wrappers to specific high-density screens (like Profile, Registration, Login) if they stretch too wide on a tablet layout.
+- [ ] **Step 3: Implement Forum Topic List Screen**
+  - Create file `lib/screens/member/forum/forum_topics_screen.dart`.
+  - Show topics within a selected category in a clean, modern list.
+  - Display author details, creation date (using `AppUtils.formatDate`), view count, and reply count.
+  - Provide a "New Topic" button opening a bottom sheet/dialog to enter Title and Content.
 
-- [ ] **Step 4: Verify Adaptive Behavior**
-  - Run the Flutter application on a desktop/tablet simulator.
-  - Ensure state is maintained when resizing the window across the breakpoint.
-  - Fix any visual overflow or render errors caused by the new layout constraints.
+- [ ] **Step 4: Implement Forum Topic Detail Screen**
+  - Create file `lib/screens/member/forum/forum_topic_detail_screen.dart`.
+  - Display the main topic description/content.
+  - List replies in flat-thread style. If `parentPostId != null`, prefix with `↳ replying to [Author]`.
+  - Implement a quick reply input at the bottom of the screen.
+  - Support "reply directly to post" action which sets the `parentPostId`.
+  - Render a delete button for posts/topics if the current user is the author or an Admin/SuperAdmin.
 
-- [ ] **Step 5: E2E / Visual Regression Integration**
-  - Check if the visual test harness requires any updates to test both mobile and tablet breakpoints. (Optional for this phase, but good practice).
+- [ ] **Step 5: Register Mobile Routes and Update App Drawer**
+  - Update `lib/core/router/app_router.dart` with routes `/forum`, `/forum/topics/:id`, and `/forum/topic/:id`.
+  - Update `lib/core/widgets/app_drawer.dart` to add "Discussions" under the `COMMUNITY` section.
+
+- [ ] **Step 6: Verify and Document**
+  - Verify that the app builds and runs without errors.
+  - Update `project_map.md` and check off items in `task.md`.
+  - Generate the `walkthrough.md` artifact.

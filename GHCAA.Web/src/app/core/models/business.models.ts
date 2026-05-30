@@ -486,3 +486,54 @@ export interface CreateMembershipFeeConfig {
 export interface UpdateMembershipFeeConfig extends Partial<CreateMembershipFeeConfig> {
     id: number;
 }
+
+// ── Forum / Community Groups (3.7) ──────────────────────────────────────────
+
+export interface ForumCategory {
+    id: number;
+    name: string;
+    description?: string;
+    sortOrder: number;
+    topicCount: number;
+    postCount: number;
+}
+
+export interface ForumTopic {
+    id: number;
+    categoryId: number;
+    title: string;
+    content: string;
+    authorId: number;
+    authorName: string;
+    authorPhotoUrl?: string;
+    createdAt: string | Date;
+    lastUpdatedAt?: string | Date;
+    viewCount: number;
+    isPinned: boolean;
+    isLocked: boolean;
+    replyCount: number;
+}
+
+export interface ForumPost {
+    id: number;
+    topicId: number;
+    content: string;
+    authorId: number;
+    authorName: string;
+    authorPhotoUrl?: string;
+    createdAt: string | Date;
+    updatedAt?: string | Date;
+    parentPostId?: number;
+}
+
+export interface CreateForumTopicDto {
+    categoryId: number;
+    title: string;
+    content: string;
+}
+
+export interface CreateForumPostDto {
+    topicId: number;
+    content: string;
+    parentPostId?: number;
+}

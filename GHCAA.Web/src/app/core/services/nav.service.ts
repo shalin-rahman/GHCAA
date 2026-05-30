@@ -19,6 +19,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
     { path: '/portal/events', label: 'Events', icon: '🎟️', mobileVisible: true },
     { path: '/portal/assistant', label: 'Assistance', icon: '✨', mobileVisible: true },
     { path: '/portal/messages', label: 'Messaging', icon: '💬' },
+    { path: '/portal/forum', label: 'Discussions', icon: '🗣️' },
     { path: '/portal/jobs', label: 'Job Hub', icon: '💼', mobileVisible: true },
     { path: '/portal/directory', label: 'Alumni Directory', icon: '🔍' },
     { path: '/portal/gallery', label: 'Event Gallery', icon: '🖼️' },

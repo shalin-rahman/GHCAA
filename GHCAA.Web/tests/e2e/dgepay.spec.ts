@@ -6,7 +6,13 @@ test.describe('DGePay Payment Gateway Flow E2E', () => {
 
   test.beforeEach(async ({ page }) => {
     auth = new AuthHelper(page);
-    await auth.login('2512006', '2512006');
+    try {
+      // Try earlier default test user
+      await auth.login('2512006', '2512006');
+    } catch (e) {
+      // Fallback to demo user
+      await auth.login('demo_user', 'DemoPass123!');
+    }
   });
 
   test.afterEach(async ({ page }) => {

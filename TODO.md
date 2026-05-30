@@ -43,7 +43,7 @@
 3.4  [DONE] SMS Gateway Integration (Greenweb/SSL Wireless)
 3.5  [DONE] Networking: Privacy controls (visibility toggles respect DTO masking)
 3.6  [DONE] Networking: Mentorship request flow in Job Hub
-3.7  [TODO] Discussion forums and community groups
+3.7  [DONE] Discussion forums and community groups
 
 ## AREA 4: EVENTS & GATHERINGS
 4.1  [DONE] Automated registration closing for past/due events
@@ -338,7 +338,7 @@
 - [x] 25.4 Seed DGePay UAT credentials in payment_configurations.json
 - [x] 25.5 Formalize Gateway Workflow documentation (docs/PAYMENT_GATEWAY_WORKFLOW.md)
 - [x] 25.6 Update Mobile UI (Flutter) — gateway enum synced, selection bottom-sheet, PaymentWebPage integration
-- [ ] 25.7 E2E Payment Flow Verification
+- [x] 25.7 E2E Payment Flow Verification
 
 ## AREA 26: VISUAL REGRESSION LAYOUT HARDENING
 26.1 [DONE] Mobile: Fix RenderFlex overflows — AppScaffold title/breadcrumb (maxLines + ellipsis)
@@ -354,3 +354,15 @@
 26.11 [DONE] Test: Fix Riverpod NotInitializedError in tearDownAll — Refactored to isolated test lifecycles
 26.12 [DONE] Test: Fix registration_visual_test.dart — Added setStep() helper to RegisterWizardNotifier for direct rendering
 26.13 [DONE] Mobile: Fix RenderFlex overflow in login_screen.dart (Flexible + FittedBox)
+
+## AREA 27: TEST COVERAGE IMPROVEMENT
+27.1  [IN-PROGRESS] Generate low‑coverage report (parse coverage.cobertura.xml)
+27.2  [TODO] Add test project references for API, Application, Domain, Infrastructure
+27.3  [TODO] Write unit tests for Controllers (WebApplicationFactory)
+27.4  [TODO] Write unit tests for Handlers/Services (Moq)
+27.5  [TODO] Write unit tests for Domain Validators (FluentValidation)
+27.6  [TODO] Write repository integration tests with in‑memory SQLite
+27.7  [TODO] Write utility class tests (DateFormatConverter, etc.)
+27.8  [TODO] Run coverage and enforce ≥ 80 % per file
+27.9  [TODO] Update README with test & coverage instructions
+

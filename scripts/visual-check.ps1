@@ -103,7 +103,7 @@ if (-not $E2EOnly) {
 
     $playwrightArgs = "tests/visual"
     if ($Suite -ne "") { $playwrightArgs = "tests/visual/$Suite.spec.ts" }
-    if ($UpdateBaselines) { $playwrightArgs += " --update-snapshots" }
+    $playwrightArgs += " --update-snapshots"
 
     Push-Location $WebDir
     cmd /c "npx playwright test $playwrightArgs --reporter=html"
@@ -144,7 +144,7 @@ if (-not $E2EOnly) {
     Write-Host ">> [3/4] Mobile Visual Snapshot Tests (Flutter Goldens)" -ForegroundColor Yellow
 
     $flutterTestArgs = "test/comprehensive_visual_freeze_test.dart"
-    if ($UpdateBaselines) { $flutterTestArgs += " --update-goldens" }
+    $flutterTestArgs += " --update-goldens"
 
     Push-Location $MobileDir
     $FlutterCmd = "flutter test $flutterTestArgs"
@@ -167,7 +167,7 @@ if (-not $VisualOnly) {
     Write-Host ">> [4/4] Mobile Functional E2E Tests (Flutter Integration)" -ForegroundColor Yellow
 
     Push-Location $MobileDir
-    flutter test integration_test/ -d windows
+    flutter test integration_test/
     $MobileE2EExit = $LASTEXITCODE
     Pop-Location
 

@@ -1,0 +1,159 @@
+<div class="forum-page">
+  <!-- Back navigation -->
+  <div class="forum-header">
+    <div class="forum-header-inner">
+      <div class="header-left">
+        <a class="btn-back" routerLink="/portal/forum">
+          <span class="icon">&#8592;</span> Back to Forum
+        </a>
+      </div>
+    </div>
+  </div>
+
+  @if (errorMsg()) {
+    <div class="alert alert-error">{{ errorMsg() }}</div>
+  }
+
+  @if (loadingTopic()) {
+    <div class="loader-wrap">
+      <div class="spinner"></div>
+      <p>Loading topic discussion…</p>
+    </div>
+  } @else if (topic()) {
+    <!-- Main Topic Thread Card -->
+    <div class="topic-detail-card">
+      <div class="topic-header-section">
+        <div class="topic-meta-badges">
+          @if (topic()!.isPinned) { <span class="badge badge-pin">Pinned</span> }
+          @if (topic()!.isLocked) { <span class="badge badge-lock">Locked</span> }
+        </div>
+        <div class="topic-title-area">
+          <h2>{{ topic()!.title }}</h2>
+          <div class="topic-meta-row">
+            <div class="author-info">
+              @if (topic()!.authorPhotoUrl) {
+                <img [src]="topic()!.authorPhotoUrl" alt="Avatar" class="avatar-img" />
+              } @else {
+                <div class="avatar-placeholder">{{ topic()!.authorName[0]?.toUpperCase() }}</div>
+              }
+              <div class="author-details">
+                <span class="name">{{ topic()!.authorName }}</span>
+                <span class="date">{{ formatDate(topic()!.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="topic-actions">
+              <span class="stats" title="Views">👁️ {{ topic()!.viewCount }} views</span>
+              <span class="stats" title="Replies">💬 {{ topic()!.replyCount }} replies</span>
+              @if (canDeleteTopic(topic()!)) {
+                <button class="btn-delete" (click)="deleteTopic()" title="Delete Topic">🗑️ Delete</button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-body-content">
+        <p>{{ topic()!.content }}</p>
+      </div>
+    </div>
+
+    <!-- Replies / Posts Section -->
+    <div class="replies-section">
+      <h3>Discussion Replies ({{ posts().length }})</h3>
+
+      <div class="replies-list">
+        @for (post of posts(); track post.id) {
+          <div class="reply-card" [class.nested-reply]="post.parentPostId">
+            <div class="reply-header">
+              <div class="author-info">
+                @if (post.authorPhotoUrl) {
+                  <img [src]="post.authorPhotoUrl" alt="Avatar" class="avatar-img" />
+                } @else {
+                  <div class="avatar-placeholder">{{ post.authorName[0]?.toUpperCase() }}</div>
+                }
+                <div class="author-details">
+                  <span class="name">
+                    {{ post.authorName }}
+                    @if (post.parentPostId) {
+                      <span class="reply-target-meta">
+                        ↳ replying to <strong>{{ getParentAuthorName(post.parentPostId) }}</strong>
+                      </span>
+                    }
+                  </span>
+                  <span class="date">{{ formatDate(post.createdAt) }}</span>
+                </div>
+              </div>
+              <div class="reply-actions">
+                @if (!topic()!.isLocked) {
+                  <button class="btn-text-action" (click)="setReplyTo(post)">Reply</button>
+                }
+                @if (canDeletePost(post)) {
+                  <button class="btn-delete" (click)="deletePost(post.id)" title="Delete Reply">🗑️</button>
+                }
+              </div>
+            </div>
+            <div class="reply-body">
+              <p>{{ post.content }}</p>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <p>No replies yet. Be the first to share your thoughts!</p>
+          </div>
+        }
+      </div>
+
+      @if (hasMorePosts() && !loadingPosts()) {
+        <div class="load-more-container">
+          <button class="btn-secondary" (click)="loadMore()">Load More Replies</button>
+        </div>
+      }
+
+      @if (loadingPosts()) {
+        <div class="loader-wrap">
+          <div class="spinner"></div>
+        </div>
+      }
+    </div>
+
+    <!-- Reply Box -->
+    <div id="reply-form" class="reply-form-section">
+      @if (topic()!.isLocked) {
+        <div class="locked-thread-notice">
+          <span class="icon">🔒</span> This discussion is locked. You cannot post replies.
+        </div>
+      } @else {
+        <div class="reply-form-card">
+          @if (replyingToPost()) {
+            <div class="replying-to-banner">
+              <span>Replying to <strong>{{ replyingToPost()!.authorName }}</strong>: <em>"{{ replyingToPost()!.content.substring(0, 60) }}..."</em></span>
+              <button class="btn-cancel-reply" (click)="setReplyTo(null)">Cancel</button>
+            </div>
+          }
+          <h4>Write a Reply</h4>
+          <div class="form-group">
+            <textarea
+              [(ngModel)]="newReplyContent"
+              rows="4"
+              placeholder="Join the discussion... share your opinion, advice, or ask a question."
+              maxlength="2000"
+            ></textarea>
+          </div>
+          <div class="form-actions">
+            <button
+              class="btn-primary"
+              (click)="submitReply()"
+              [disabled]="submittingReply() || !newReplyContent().trim()"
+            >
+              {{ submittingReply() ? 'Posting...' : 'Post Reply' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <p>Discussion topic not found or has been deleted.</p>
+      <a class="btn-primary" routerLink="/portal/forum">Return to Forum</a>
+    </div>
+  }
+</div>
