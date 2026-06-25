@@ -6,6 +6,7 @@ import { routes } from './app.routes';
 import { globalHttpInterceptor } from './core/interceptors/global-http.interceptor';
 import { APP_CONFIG } from './core/constants/app.constants';
 import { firstValueFrom } from 'rxjs';
+import { OrgConfigService } from './core/services/org-config.service';
 
 export function initializeAppConfig(http: HttpClient) {
   return () => firstValueFrom(http.get('/assets/app.config.json'))
@@ -25,6 +26,12 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: initializeAppConfig,
       deps: [HttpClient],
+      multi: true
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (orgConfigService: OrgConfigService) => () => orgConfigService.loadConfig(),
+      deps: [OrgConfigService],
       multi: true
     }
   ]

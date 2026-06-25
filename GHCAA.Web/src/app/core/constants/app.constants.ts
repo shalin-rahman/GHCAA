@@ -42,7 +42,8 @@ export const MEMBERSHIP_TYPES = [
     'General Member',
     'Associate Member',
     'Honorary Member',
-    'Advisory Member'
+    'Advisory Member',
+    'Guest Member'
 ];
 
 // Membership options moved to grouped section below
@@ -286,7 +287,8 @@ export const MEMBERSHIP_TYPE_OPTIONS = [
     { value: 'General', label: 'General Member' },
     { value: 'Associate', label: 'Associate Member' },
     { value: 'Honorary', label: 'Honorary Member' },
-    { value: 'Advisory', label: 'Advisory Member' }
+    { value: 'Advisory', label: 'Advisory Member' },
+    { value: 'Guest', label: 'Guest Member' }
 ];
 
 export const MEMBER_CATEGORY_OPTIONS = [
@@ -476,7 +478,8 @@ export const API_ENDPOINTS = {
         BASE: '/api/polls',
         ACTIVE: '/api/polls/active'
     },
-    FORUM: '/api/forum'
+    ORG: '/api/org',
+    CONFIG: '/api/config'
 } as const;
 
 export const APP_CONFIG = {

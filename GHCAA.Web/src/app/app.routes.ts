@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard, adminGuard, superAdminGuard } from './core/guards/auth.guard';
+import { featureGuard } from './core/guards/feature.guard';
 
 export const routes: Routes = [
     {
@@ -32,7 +33,8 @@ export const routes: Routes = [
             },
             {
                 path: 'gallery',
-                loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery)
+                loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery),
+                canActivate: [featureGuard('enableAlumniGallery')]
             },
             {
                 path: 'magazine',
@@ -44,6 +46,7 @@ export const routes: Routes = [
             },
             {
                 path: 'events',
+                canActivate: [featureGuard('enableEBook')], // We use enableEBook to guard Events as aligned in requirements/plan
                 children: [
                     { path: '', loadComponent: () => import('./common/events/events').then(m => m.Events) },
                     { path: ':id', loadComponent: () => import('./common/events/events').then(m => m.Events) }
@@ -55,7 +58,8 @@ export const routes: Routes = [
             },
             {
                 path: 'jobs',
-                loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs)
+                loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs),
+                canActivate: [featureGuard('enableJobBoard')]
             },
             {
                 path: 'payment',
@@ -82,7 +86,8 @@ export const routes: Routes = [
             },
             {
                 path: 'jobs',
-                loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs)
+                loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs),
+                canActivate: [featureGuard('enableJobBoard')]
             },
             {
                 path: 'id-card',
@@ -114,7 +119,8 @@ export const routes: Routes = [
             },
             {
                 path: 'gallery',
-                loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery)
+                loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery),
+                canActivate: [featureGuard('enableAlumniGallery')]
             },
             {
                 path: 'news',
@@ -122,6 +128,7 @@ export const routes: Routes = [
             },
             {
                 path: 'events',
+                canActivate: [featureGuard('enableEBook')],
                 children: [
                     { path: '', loadComponent: () => import('./common/events/events').then(m => m.Events) },
                     { path: ':id', loadComponent: () => import('./common/events/events').then(m => m.Events) }
@@ -137,11 +144,13 @@ export const routes: Routes = [
             },
             {
                 path: 'forum',
-                loadComponent: () => import('./member/forum/forum').then(m => m.Forum)
+                loadComponent: () => import('./member/forum/forum').then(m => m.Forum),
+                canActivate: [featureGuard('enableDiscussionForums')]
             },
             {
                 path: 'forum/:id',
-                loadComponent: () => import('./member/forum/topic-detail').then(m => m.TopicDetail)
+                loadComponent: () => import('./member/forum/topic-detail').then(m => m.TopicDetail),
+                canActivate: [featureGuard('enableDiscussionForums')]
             }
         ]
     },
@@ -223,6 +232,11 @@ export const routes: Routes = [
             {
                 path: 'polls',
                 loadComponent: () => import('./admin/polls/polls.component').then(m => m.AdminPolls)
+            },
+            {
+                path: 'org-config',
+                loadComponent: () => import('./admin/org-config/org-config').then(m => m.OrgConfig),
+                canActivate: [superAdminGuard]
             }
         ]
     }

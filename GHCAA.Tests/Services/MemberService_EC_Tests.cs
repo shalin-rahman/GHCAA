@@ -39,8 +39,9 @@ namespace GHCAA.Tests.Services
             var config = new Mock<IConfiguration>();
             var gamification = new Mock<IGamificationService>();
             var financials = new Mock<IFinancialService>();
+            var orgConfig = new Mock<IOrgConfigService>();
 
-            _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object, financials.Object, new Mock<IRealTimeService>().Object);
+            _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object, financials.Object, new Mock<IRealTimeService>().Object, orgConfig.Object);
         
             if (!_context.ECPeriods.Any(p => p.Title == "Interim Executive Committee"))
             {

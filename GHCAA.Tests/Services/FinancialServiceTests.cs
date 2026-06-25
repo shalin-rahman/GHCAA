@@ -32,6 +32,7 @@ public class FinancialServiceTests : TestBase
         var userMock = new Mock<IUserService>();
         var activityMock = new Mock<IActivityService>();
         var gamificationMock = new Mock<IGamificationService>();
+        var orgConfigMock = new Mock<IOrgConfigService>();
 
         _service = new FinancialService(
             _context, 
@@ -43,7 +44,8 @@ public class FinancialServiceTests : TestBase
             configMock.Object,
             userMock.Object,
             activityMock.Object,
-            gamificationMock.Object);
+            gamificationMock.Object,
+            orgConfigMock.Object);
 
         if (!await _context.MembershipFeeConfigs.AnyAsync())
         {

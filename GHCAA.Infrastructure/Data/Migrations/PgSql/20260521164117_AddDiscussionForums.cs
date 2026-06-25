@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -177,6 +177,19 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 keyValue: -1,
                 column: "LastUpdated",
                 value: new DateTime(2026, 5, 21, 16, 41, 12, 433, DateTimeKind.Utc).AddTicks(6901));
+
+            // Fix: WalletNumber was created as varchar(20) in the original migration but the domain
+            // model declares [MaxLength(50)]. The DGePay seed value is 32 chars, so we widen first.
+            migrationBuilder.AlterColumn<string>(
+                name: "WalletNumber",
+                table: "PaymentConfigurations",
+                type: "character varying(50)",
+                maxLength: 50,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "character varying(20)",
+                oldMaxLength: 20,
+                oldNullable: true);
 
             migrationBuilder.InsertData(
                 table: "PaymentConfigurations",

@@ -31,6 +31,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly IUserService _userService;
         private readonly IActivityService _activityService;
         private readonly IGamificationService _gamification;
+        private readonly IOrgConfigService _orgConfigService;
 
         public FinancialService(
             ApplicationDbContext db, 
@@ -42,7 +43,8 @@ namespace GHCAA.Infrastructure.Services
             IConfiguration config,
             IUserService userService,
             IActivityService activityService,
-            IGamificationService gamification)
+            IGamificationService gamification,
+            IOrgConfigService orgConfigService)
         {
             _db = db;
             _communication = communication;
@@ -54,6 +56,7 @@ namespace GHCAA.Infrastructure.Services
             _userService = userService;
             _activityService = activityService;
             _gamification = gamification;
+            _orgConfigService = orgConfigService;
         }
 
         public async Task<IEnumerable<PaymentHistoryDto>> GetMemberPaymentHistoryAsync(int memberId, CancellationToken cancellationToken = default)
@@ -508,6 +511,8 @@ namespace GHCAA.Infrastructure.Services
 
             if (payment == null) throw new KeyNotFoundException("Payment record not found.");
 
+            var config = await _orgConfigService.GetConfigAsync();
+
             // Create PDF using QuestPDF
             var document = Document.Create(container =>
             {
@@ -523,7 +528,7 @@ namespace GHCAA.Infrastructure.Services
                         row.RelativeItem().Column(col =>
                         {
                             col.Item().Text("PAYMENT RECEIPT").FontSize(24).Bold().FontColor(Colors.Blue.Medium);
-                            col.Item().Text($"{Constants.Branding.AppName}").FontSize(14).Bold();
+                            col.Item().Text($"{config.Branding.ShortName}").FontSize(14).Bold();
                         });
 
                         row.RelativeItem().AlignRight().Column(col =>

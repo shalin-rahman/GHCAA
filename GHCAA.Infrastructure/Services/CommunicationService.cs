@@ -107,11 +107,14 @@ namespace GHCAA.Infrastructure.Services
             }
         };
 
-        public CommunicationService(ApplicationDbContext db, IEmailService emailService, ILogger<CommunicationService> logger)
+        private readonly IOrgConfigService _orgConfigService;
+
+        public CommunicationService(ApplicationDbContext db, IEmailService emailService, ILogger<CommunicationService> logger, IOrgConfigService orgConfigService)
         {
             _db = db;
             _emailService = emailService;
             _logger = logger;
+            _orgConfigService = orgConfigService;
         }
 
         public async Task<IEnumerable<EmailTemplate>> GetAllTemplatesAsync(CancellationToken cancellationToken = default)
@@ -382,7 +385,7 @@ namespace GHCAA.Infrastructure.Services
 
             try
             {
-                var fullBody = body + GetEmailFooter();
+                var fullBody = body + await GetEmailFooterAsync();
                 await _emailService.SendEmailAsync(to, subject, fullBody, cancellationToken);
             }
             catch (Exception ex)
@@ -405,25 +408,29 @@ namespace GHCAA.Infrastructure.Services
             });
         }
 
-        private string GetEmailFooter()
+        private async Task<string> GetEmailFooterAsync()
         {
+            var config = await _orgConfigService.GetConfigAsync();
+            var locale = config.Localization.Locales.TryGetValue(config.Localization.DefaultLocale, out var lp) ? lp : null;
+            var tagline = locale?.Tagline ?? "Together We Thrive";
+
             return $@"
                 <div style='margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5c15e; font-family: sans-serif; color: #666;'>
                     <table width='100%' cellpadding='0' cellspacing='0'>
                         <tr>
                             <td style='vertical-align: middle; width: 60px;'>
-                                <img src='{Constants.Defaults.LogoUrl}' alt='GHCAA Logo' style='width: 50px; height: 50px; border-radius: 50%;' />
+                                <img src='{config.Branding.LogoUrl}' alt='{config.Branding.ShortName} Logo' style='width: 50px; height: 50px; border-radius: 50%;' />
                             </td>
                             <td style='vertical-align: middle; padding-left: 15px;'>
-                                <div style='font-size: 16px; font-weight: 800; color: #111;'>{Constants.Branding.OrganizationName}</div>
-                                <div style='font-size: 12px; color: #c5a059;'>{Constants.Branding.Tagline}</div>
+                                <div style='font-size: 16px; font-weight: 800; color: #111;'>{config.Branding.FullName}</div>
+                                <div style='font-size: 12px; color: #c5a059;'>{tagline}</div>
                             </td>
                         </tr>
                     </table>
                     <div style='margin-top: 15px; font-size: 11px;'>
-                        <p>Registered Office: {Constants.Branding.RegisteredOffice}</p>
-                        <p>Enquiries: <a href='mailto:{Constants.Defaults.SupportEmail}' style='color: #c5a059; text-decoration: none;'>{Constants.Defaults.SupportEmail}</a></p>
-                        <p style='color: #999; margin-top: 20px;'>&copy; {DateTime.UtcNow.Year} HARAGANGIAN. All rights reserved.</p>
+                        <p>Registered Office: {config.Contact.RegisteredOffice}</p>
+                        <p>Enquiries: <a href='mailto:{config.Contact.SupportEmail}' style='color: #c5a059; text-decoration: none;'>{config.Contact.SupportEmail}</a></p>
+                        <p style='color: #999; margin-top: 20px;'>&copy; {DateTime.UtcNow.Year} {config.Branding.MemberNickname.ToUpper()}. All rights reserved.</p>
                     </div>
                 </div>";
         }

@@ -11,6 +11,7 @@ import 'core/router/app_router.dart';
 import 'features/auth/auth_service.dart';
 import 'features/notifications/push_notification_service.dart'; // Keep this import
 import 'core/widgets/no_internet_banner.dart';
+import 'core/services/app_localizations.dart';
 
 void main() async {
   // 1. Ensure Flutter binding is valid
@@ -155,6 +156,7 @@ class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBin
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
+    final locale = ref.watch(languageProvider);
     
     // 5. Initialize Push Notifications on startup (Defensive check)
     try {
@@ -172,6 +174,15 @@ class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBin
           theme: AppTheme.darkTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.dark,
+          locale: locale,
+          localizationsDelegates: const [
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', ''),
+            Locale('bn', ''),
+          ],
           routerConfig: router,
           debugShowCheckedModeBanner: false,
         ),

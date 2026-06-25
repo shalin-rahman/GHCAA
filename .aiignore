@@ -1,0 +1,11 @@
+# .aiignore
+# Ignore compiled binaries and heavy node modules to prevent token bloat
+node_modules/
+bin/
+obj/
+dist/
+.angular/
+*.apk
+*.ipa
+.dart_tool/
+build/

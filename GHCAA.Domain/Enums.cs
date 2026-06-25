@@ -3,7 +3,7 @@ namespace GHCAA.Domain
     public class Enums
     {
         public enum MembershipStatus { Applied, Active, InactivePayment, InactiveResigned, Terminated, Rejected }
-        public enum MembershipType { Founding, Executive, General, Associate, Honorary, Advisory }
+        public enum MembershipType { Founding, Executive, General, Associate, Honorary, Advisory, Guest }
         public enum MemberCategory { None, LifelongPatron, Sponsor, Advisor, Mentor, Recruiter, Active, Volunteer, Contributor, Guest, Student }
         public enum ECPosition { None, President, VicePresident, GeneralSecretary, OfficeSecretary, JointSecretary1, JointSecretary2, Treasurer, MediaCulturalAndSportsSecretary, OrganizationalSecretary, InformationAndTechnologySecretary, Member1, Member2, LawSecretary, ImmediatePastPresident, InstitutionalRepresentative }
         public enum BloodGroup { Unknown, APositive, ANegative, BPositive, BNegative, OPositive, ONegative, ABPositive, ABNegative }

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../../features/auth/auth_service.dart';
 import '../config/app_config.dart';
+import '../config/org_config.dart';
+import '../services/org_config_service.dart';
 import 'async_value_widget.dart';
 import '../../features/theme/dynamic_theme_service.dart';
 
@@ -16,6 +18,8 @@ class AppDrawer extends ConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
     final roleAsync = ref.watch(roleProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final localePack = ref.watch(localePackProvider);
+    final branding = ref.watch(orgBrandingProvider);
 
     return Drawer(
       backgroundColor: isDark ? AppTheme.midnightBase : Colors.white,
@@ -29,7 +33,7 @@ class AppDrawer extends ConsumerWidget {
         ) : null,
         child: Column(
           children: [
-            _buildHeader(context, profileAsync, roleAsync),
+            _buildHeader(context, profileAsync, roleAsync, localePack: localePack, branding: branding),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -40,7 +44,7 @@ class AppDrawer extends ConsumerWidget {
                       return Column(
                         children: [
                           if (isAdmin)
-                            _buildSection(context, 'ADMINISTRATION', [
+                            _buildSection(context, localePack.administration, [
                               _MenuItem(Icons.admin_panel_settings_outlined, 'Dashboard', '/admin_dashboard'),
                               _MenuItem(Icons.gavel_outlined, 'Approvals', '/admin/approvals'),
                               _MenuItem(Icons.account_tree_outlined, 'Governance', '/admin/governance'),
@@ -53,11 +57,11 @@ class AppDrawer extends ConsumerWidget {
                               _MenuItem(Icons.security_outlined, 'Gatekeeper', '/admin/gatekeeper'),
                               _MenuItem(Icons.history_edu_outlined, 'Audit Logs', '/admin/audit'),
                             ]),
-                          _buildSection(context, 'MY ACCOUNT', [
+                          _buildSection(context, localePack.myAccount, [
                             _MenuItem(Icons.badge_outlined, 'My Profile', '/profile'),
                             _MenuItem(Icons.receipt_long_outlined, 'Payments', '/financials'),
                           ]),
-                          _buildSection(context, 'COMMUNITY', [
+                          _buildSection(context, localePack.community, [
                             _MenuItem(Icons.people_outline, 'Alumni Directory', '/directory'),
                             _MenuItem(Icons.event_note_outlined, 'Events', '/events'),
                             _MenuItem(Icons.work_outline, 'Job Hub', '/jobs'),
@@ -65,7 +69,7 @@ class AppDrawer extends ConsumerWidget {
                             _MenuItem(Icons.family_restroom_outlined, 'Family Links', '/family'),
                             _MenuItem(Icons.forum_outlined, 'Discussions', '/forum'),
                           ]),
-                          _buildSection(context, 'MEDIA & TOOLS', [
+                          _buildSection(context, localePack.mediaAndTools, [
                             _MenuItem(Icons.newspaper_outlined, 'News', '/news'),
                             _MenuItem(Icons.photo_library_outlined, 'Event Gallery', '/gallery'),
                             _MenuItem(Icons.article_outlined, 'Articles', '/articles'),
@@ -102,7 +106,7 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, AsyncValue<Map<String, dynamic>?> profileAsync, AsyncValue<String?> roleAsync) {
+  Widget _buildHeader(BuildContext context, AsyncValue<Map<String, dynamic>?> profileAsync, AsyncValue<String?> roleAsync, {required LocalePack localePack, required OrgBranding branding}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
@@ -129,7 +133,7 @@ class AppDrawer extends ConsumerWidget {
                 child: photoUrl == null ? const Icon(Icons.person, color: AppTheme.royalGold, size: 36) : null,
               ),
               const SizedBox(height: 16),
-              Text(profile?['fullName'] ?? 'Alumnus', 
+              Text(profile?['fullName'] ?? branding.memberNickname, 
                   style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
               const SizedBox(height: 4),
               Row(
@@ -137,10 +141,10 @@ class AppDrawer extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(color: isAdmin ? Colors.redAccent : AppTheme.royalGold, borderRadius: BorderRadius.circular(4)),
-                    child: Text(isAdmin ? 'ADMINISTRATOR' : 'ALUMNI MEMBER', style: const TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.bold)),
+                    child: Text(isAdmin ? localePack.adminRoleLabel : localePack.memberRoleLabel, style: const TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(width: 8),
-                  Text('Batch: ${profile?['passingYear'] ?? 'N/A'}', style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 11)),
+                  Text('${localePack.batchPrefix}${profile?['passingYear'] ?? 'N/A'}', style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 11)),
                 ],
               ),
             ],

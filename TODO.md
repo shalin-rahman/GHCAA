@@ -366,3 +366,117 @@
 27.8  [TODO] Run coverage and enforce ≥ 80 % per file
 27.9  [TODO] Update README with test & coverage instructions
 
+
+
+## AREA 28: CONFIGURATION-DRIVEN FRAMEWORK
+> Reference doc: docs/CONFIG_DRIVEN_FRAMEWORK.md
+> DRY/SOLID review completed by Claude Opus on 2026-05-30.
+> All blocking bugs from review are fixed. Phase 1 (backend) is merge-ready pending 28.0.
+
+### PRIORITY 0 - BLOCKING (must run before anything else in this area)
+28.0  [TODO] DB: Apply pending Area-24 migrations, then generate & apply AddOrganizationConfig
+              Step 1: dotnet ef database update --project GHCAA.Infrastructure --startup-project GHCAA.API
+              Step 2: dotnet ef migrations add AddOrganizationConfig --project GHCAA.Infrastructure --startup-project GHCAA.API --output-dir Data/Migrations/PgSql
+              Step 3: dotnet ef database update --project GHCAA.Infrastructure --startup-project GHCAA.API
+              DEPENDS ON: PhaseB_S5S8 + AddRefreshTokens migrations from Area 24 applied first
+
+### PRIORITY 1 - PHASE 1 BACKEND (DONE - verify before merge)
+28.1  [DONE] Domain:  OrganizationConfig entity (GHCAA.Domain/Models/OrganizationConfig.cs)
+28.2  [DONE] App:     OrgConfigDto + nested records (GHCAA.Application/DTOs/OrgConfigDto.cs)
+28.3  [DONE] App:     IOrgConfigService interface (GetConfigAsync + UpdateConfigAsync only)
+28.4  [DONE] Infra:   OrgConfigService - GetOrCreateAsync cache, OrgId-keyed upsert, enum-driven MembershipTypes list
+28.5  [DONE] Infra:   OrganizationConfigConfiguration (text column, unique OrgId index, cross-provider safe)
+28.6  [DONE] Infra:   DbSet<OrganizationConfig> added to ApplicationDbContext
+28.7  [DONE] API:     OrgConfigController - GET public / PUT SuperAdminOnly (parity comment)
+28.8  [DONE] API:     Program.cs startup seed (fault-tolerant try/catch, idempotent)
+28.9  [DONE] Domain:  Guest added to MembershipType enum (value=6, additive - no migration needed for enum)
+28.10 [DONE] Angular: Guest added to MEMBERSHIP_TYPES + MEMBERSHIP_TYPE_OPTIONS (app.constants.ts)
+
+### PRIORITY 2 - PHASE 2: ANGULAR CONSUMER
+> DEPENDS ON: 28.0 (migration applied, GET /api/config returning 200)
+28.11 [TODO] Angular: Create OrgConfig TypeScript model (GHCAA.Web/src/app/core/models/org-config.model.ts)
+              Shape: OrgBranding, FeatureToggles, LocalePack, NavLabels, EmailSubjects interfaces
+28.12 [TODO] Angular: Create OrgConfigService (GHCAA.Web/src/app/core/services/org-config.service.ts)
+              - Signal<OrgConfig|null> config; load(): Promise<void> via GET /api/config
+              - t(path, locale?) for locale string lookup
+              - isEnabled(feature: keyof FeatureToggles) boolean
+              - Falls back to GHCAA_DEFAULT_CONFIG on API failure
+              DEPENDS ON: 28.11
+28.13 [TODO] Angular: Wire APP_INITIALIZER in app.config.ts to call OrgConfigService.load() before render
+              DEPENDS ON: 28.12
+28.14 [TODO] Angular: Add API_ENDPOINTS.ORG_CONFIG = '/api/config' to app.constants.ts
+28.15 [TODO] Angular: Replace APP_CONFIG.* references in components with orgConfigService.config()?.branding.*
+              Grep target: grep -r "APP_CONFIG\." src/app --include="*.ts" --include="*.html" -l
+              DEPENDS ON: 28.12, 28.13
+28.16 [TODO] Angular: Create feature guard (GHCAA.Web/src/app/core/guards/feature.guard.ts)
+              Apply to /portal/forum, /portal/jobs, /portal/polls routes in app.routes.ts
+              DEPENDS ON: 28.12
+
+### PRIORITY 3 - PHASE 3: FLUTTER CONSUMER
+> DEPENDS ON: 28.11-28.16 (Angular consumer pattern validated first)
+28.17 [TODO] Mobile: Create OrgConfig Dart model (GHCAA.Mobile/lib/core/models/org_config.dart)
+              fromJson factory + ghcaaDefaults static getter for offline fallback
+28.18 [TODO] Mobile: Create OrgConfigService Dart singleton (GHCAA.Mobile/lib/core/services/org_config_service.dart)
+              - load(ApiClient): fetches /api/config, caches to SharedPreferences for offline resilience
+              - pack getter returns locale-appropriate LocalePack
+              DEPENDS ON: 28.17
+28.19 [TODO] Mobile: Wire OrgConfigService.instance.load() in main.dart before runApp
+              DEPENDS ON: 28.18
+28.20 [TODO] Mobile: Update app_drawer.dart - replace 7 hardcoded strings with pack.nav.*
+              'ADMINISTRATION' -> pack.nav.administration
+              'MY ACCOUNT'     -> pack.nav.myAccount
+              'COMMUNITY'      -> pack.nav.community
+              'MEDIA & TOOLS'  -> pack.nav.mediaAndTools
+              'ADMINISTRATOR'  -> pack.nav.adminRoleLabel
+              'ALUMNI MEMBER'  -> pack.nav.memberRoleLabel
+              'Batch: '        -> pack.nav.batchPrefix
+              DEPENDS ON: 28.18
+28.21 [TODO] Mobile: Add Guest to any hardcoded MembershipType list in Flutter
+              Grep: grep -r 'Advisory' lib --include="*.dart"
+              DEPENDS ON: none (standalone fix)
+
+### PRIORITY 4 - TESTS
+> DEPENDS ON: 28.0 (migration), 28.4 (service implemented)
+28.22 [TODO] Tests: OrgConfigSeedTests - assert GHCAA defaults have all required locale keys
+              File: GHCAA.Tests/OrgConfig/OrgConfigSeedTests.cs
+              Cases: en+bn present; MembershipTypeLabels has 7 keys (incl. Guest); all features default ON except Gamification+SocialAuth
+28.23 [TODO] Tests: OrgConfigServiceTests - unit tests with SQLite in-memory
+              File: GHCAA.Tests/OrgConfig/OrgConfigServiceTests.cs
+              Cases: returns defaults when DB empty; UpdateConfigAsync persists; cache invalidates; Bengali locale lookup
+              DEPENDS ON: 28.0
+28.24 [TODO] Tests: OrgConfigControllerTests - integration tests
+              File: GHCAA.Tests/Integration/OrgConfigControllerTests.cs
+              Cases: GET returns 200; PUT returns 403 for Admin role; PUT returns 204 for SuperAdmin
+              DEPENDS ON: 28.0
+28.25 [TODO] Tests: Re-run visual regression snapshots after Phase 2 Angular consumer is done
+              Command: npx playwright test --update-snapshots
+              WHY: APP_CONFIG references replaced by config-driven values may shift text in layout
+              DEPENDS ON: 28.15
+28.26 [TODO] Tests: Add Playwright config-regression spec
+              File: GHCAA.Web/tests/e2e/config-regression.spec.ts
+              Cases: org name from intercepted config (not hardcoded); feature=false route redirects
+              DEPENDS ON: 28.12, 28.16
+
+### PRIORITY 5 - ADMIN UI (PHASE 4, OPTIONAL)
+> DEPENDS ON: 28.12 (Angular OrgConfigService)
+28.27 [TODO] Angular: Create OrgConfig admin editor component
+              File: GHCAA.Web/src/app/pages/admin/org-config/org-config.component.ts
+              Tabs: Branding | Contact | Features | Localization-EN | Localization-BN | Workflow
+              Route: /admin/org-config guarded by superAdminGuard
+              DEPENDS ON: 28.12
+28.28 [TODO] Angular: Add Organization Config link to admin sidebar in nav.service.ts
+
+### PRIORITY 6 - TECH DEBT CLEANUP (after all phases pass regression)
+> DEPENDS ON: All of 28.1-28.28 green; do NOT delete Constants.cs fields before this
+28.29 [TODO] Cleanup: Add DEPRECATED comment to Constants.Branding.* and Constants.EmailSubjects.*
+              Mark: // DEPRECATED: use IOrgConfigService; pending deletion after 28.30 complete
+28.30 [TODO] Cleanup: Migrate call sites - CommunicationService email subjects + any service using Constants.Branding.*
+              Grep: Constants.Branding | Constants.EmailSubjects | Constants.Defaults.SupportEmail
+              DEPENDS ON: 28.29
+28.31 [TODO] Cleanup: Add RowVersion/xmin concurrency token to OrganizationConfig entity
+              Prevents last-write-wins on concurrent SuperAdmin edits
+28.32 [TODO] Angular: Install ngx-translate for UI-layer strings (form labels, buttons, page titles)
+              Separate from OrgConfigService locale packs which cover org terminology
+              RELATES TO: 8.8 (Mobile i18n)
+28.33 [TODO] Mobile: Add Flutter intl + .arb files for UI-layer strings
+              RELATES TO: 8.8 [TODO] i18n: Unified Localization (English + Bengali)

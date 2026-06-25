@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { filter } from 'rxjs';
 import { APP_CONFIG } from '../../core/constants/app.constants';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-public-layout',
@@ -16,6 +17,7 @@ import { APP_CONFIG } from '../../core/constants/app.constants';
 })
 export class PublicLayout implements OnDestroy {
   themeService = inject(ThemeService);
+  orgConfigService = inject(OrgConfigService);
   private titleService = inject(Title);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);

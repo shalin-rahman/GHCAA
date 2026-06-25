@@ -9,6 +9,7 @@ import '../../features/auth/auth_service.dart';
 import '../../core/config/app_config.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/services/app_localizations.dart';
 
 // Persistent Layout State
 final dashboardLayoutProvider = StateNotifierProvider<DashboardLayoutNotifier, bool>((ref) {
@@ -129,14 +130,14 @@ class DashboardScreen extends ConsumerWidget {
 
                       _buildCategoryHeader('DASHBOARD NAVIGATION', AppTheme.royalGold),
                         _buildResponsiveGrid(context, isCompact, [
-                        _buildActionCard(context, Icons.account_circle_outlined, 'Digital ID', 'Profile', '/digital_id', isCompact: isCompact),
-                        _buildActionCard(context, Icons.groups_outlined, 'Member Directory', 'Directory', '/directory', isCompact: isCompact),
+                        _buildActionCard(context, Icons.account_circle_outlined, AppLocalizations.of(context).translate('digital_id'), 'Profile', '/digital_id', isCompact: isCompact),
+                        _buildActionCard(context, Icons.groups_outlined, AppLocalizations.of(context).translate('directory'), 'Directory', '/directory', isCompact: isCompact),
                         _buildActionCard(context, Icons.account_balance_wallet_outlined, 'Payments', 'Dues', '/financials', isCompact: isCompact, accentColor: Colors.tealAccent),
-                        _buildActionCard(context, Icons.work_outline, 'Jobs', 'Listings', '/jobs', isCompact: isCompact),
-                        _buildActionCard(context, Icons.event_available_outlined, 'Events', 'Announcements', '/events', isCompact: isCompact),
+                        _buildActionCard(context, Icons.work_outline, AppLocalizations.of(context).translate('jobs'), 'Listings', '/jobs', isCompact: isCompact),
+                        _buildActionCard(context, Icons.event_available_outlined, AppLocalizations.of(context).translate('events'), 'Announcements', '/events', isCompact: isCompact),
                         _buildActionCard(context, Icons.how_to_vote_outlined, 'Polls', 'Voting', '/polls', isCompact: isCompact, accentColor: Colors.blueAccent),
                         _buildActionCard(context, Icons.newspaper_outlined, 'News', 'Feed', '/news', isCompact: isCompact, accentColor: Colors.purpleAccent),
-                        _buildActionCard(context, Icons.photo_library_outlined, 'Gallery', 'Photos', '/gallery', isCompact: isCompact, accentColor: Colors.purpleAccent),
+                        _buildActionCard(context, Icons.photo_library_outlined, AppLocalizations.of(context).translate('gallery'), 'Photos', '/gallery', isCompact: isCompact, accentColor: Colors.purpleAccent),
                         _buildActionCard(context, Icons.corporate_fare_outlined, 'EC Committee', 'Members', '/committee', isCompact: isCompact),
                         _buildActionCard(context, Icons.history_outlined, 'Activity Log', 'Logs', '/activity', isCompact: isCompact),
                         _buildActionCard(context, Icons.notifications_active_outlined, 'Notifications', 'Alerts', '/notifications', isCompact: isCompact, accentColor: Colors.orangeAccent),

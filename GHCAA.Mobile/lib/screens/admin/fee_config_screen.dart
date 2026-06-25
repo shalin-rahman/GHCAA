@@ -118,7 +118,7 @@ class FeeConfigScreen extends ConsumerWidget {
   }
 
   String _getMembershipTypeName(int type) {
-    const names = ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory'];
+    const names = ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory', 'Guest'];
     if (type >= 0 && type < names.length) return names[type].toUpperCase();
     return 'UNKNOWN';
   }

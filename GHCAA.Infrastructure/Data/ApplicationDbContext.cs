@@ -133,6 +133,9 @@ namespace GHCAA.Infrastructure.Data
         public DbSet<ForumTopic> ForumTopics { get; set; } = null!;
         public DbSet<ForumPost> ForumPosts { get; set; } = null!;
 
+        // Config-Driven Framework
+        public DbSet<OrganizationConfig> OrganizationConfigs { get; set; } = null!;
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

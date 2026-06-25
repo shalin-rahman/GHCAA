@@ -10,7 +10,7 @@
             <h4>Alumni Hub</h4>
             <a routerLink="/directory">Member Directory</a>
             <a routerLink="/register">Member Registry</a>
-            <a routerLink="/jobs">Career Hub</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableJobBoard')" routerLink="/jobs">Career Hub</a>
             <a routerLink="/mentorship">Mentorship Hub</a>
             <a routerLink="/professionals">Professional Hub</a>
         </div>
@@ -18,9 +18,9 @@
         <div class="footer-links">
             <h4>Resources</h4>
             <a routerLink="/news">News & Media</a>
-            <a routerLink="/events">Global Events</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableEBook')" routerLink="/events">Global Events</a>
             <a routerLink="/magazine">Digital Magazine</a>
-            <a routerLink="/gallery">Photo Gallery</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableAlumniGallery')" routerLink="/gallery">Photo Gallery</a>
             <a routerLink="/articles">Community Blog</a>
         </div>
 
@@ -35,12 +35,12 @@
         <div class="footer-contact">
             <h4>Sitemap</h4>
             <p><a routerLink="/login" class="footer-tag-link">Secretariat Login</a></p>
-            <p><strong>Registered Office:</strong> {{ appConfig.registeredOffice }}</p>
-            <p><strong>Enquiries:</strong> {{ appConfig.contactEmail }}</p>
-            <div class="social-icons">
-                <a [href]="appConfig.socialLinks.facebook" class="social-icon">FB</a>
-                <a [href]="appConfig.socialLinks.whatsapp" class="social-icon">WA</a>
-                <a [href]="appConfig.socialLinks.youtube" class="social-icon">YT</a>
+            <p><strong>Registered Office:</strong> {{ orgConfigService.config()?.contact?.address || appConfig.registeredOffice }}</p>
+            <p><strong>Enquiries:</strong> {{ orgConfigService.config()?.contact?.email || appConfig.contactEmail }}</p>
+            <div class="social-icons" *ngIf="orgConfigService.config()?.contact?.socialLinks as links">
+                <a *ngIf="links.facebook" [href]="links.facebook" class="social-icon">FB</a>
+                <a *ngIf="links.whatsapp" [href]="links.whatsapp" class="social-icon">WA</a>
+                <a *ngIf="links.youtube" [href]="links.youtube" class="social-icon">YT</a>
             </div>
         </div>
     </div>

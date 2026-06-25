@@ -199,6 +199,25 @@ app.MapHealthChecks("/health");
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");
 app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");
 
+// Seed OrganizationConfig with GHCAA defaults on first boot (idempotent, fault-tolerant)
+// Wrapped in try/catch so a missing table (pre-migration) or transient DB error never prevents boot.
+try
+{
+    using var scope = app.Services.CreateScope();
+    var dbCtx = scope.ServiceProvider.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
+    if (await dbCtx.Database.CanConnectAsync() && !await dbCtx.OrganizationConfigs.AnyAsync())
+    {
+        var configService = scope.ServiceProvider.GetRequiredService<GHCAA.Application.Interfaces.IOrgConfigService>();
+        // GetConfigAsync returns in-memory defaults when DB is empty; persist them so PUT works from day one
+        var defaults = await configService.GetConfigAsync();
+        await configService.UpdateConfigAsync(defaults, "system");
+    }
+}
+catch (Exception ex)
+{
+    app.Logger.LogWarning(ex, "OrgConfig seed skipped — table may not exist yet. Run migrations first.");
+}
+
 // Automatic Database Initialization for Visual Testing Profile
 if (app.Configuration["ASP_SEED_PROFILE"] == "Visual")
 {

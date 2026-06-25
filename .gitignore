@@ -363,6 +363,8 @@ MigrationBackup/
 **/appsettings.*.local.json
 .env.local
 .env
+.env.preprod
+.env.prod
 !.env.example
 
 # Fody - auto-generated XML schema

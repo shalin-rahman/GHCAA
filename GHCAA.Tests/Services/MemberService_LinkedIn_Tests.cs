@@ -43,6 +43,7 @@ public class MemberService_LinkedIn_Tests : TestBase
         _mockConfig = new Mock<IConfiguration>();
         _mockGamification = new Mock<IGamificationService>();
         _mockFinancialService = new Mock<IFinancialService>();
+        var mockOrgConfigService = new Mock<IOrgConfigService>();
 
         _service = new MemberService(
             _context,
@@ -57,7 +58,8 @@ public class MemberService_LinkedIn_Tests : TestBase
             _mockConfig.Object,
             _mockGamification.Object,
             _mockFinancialService.Object,
-            new Mock<IRealTimeService>().Object
+            new Mock<IRealTimeService>().Object,
+            mockOrgConfigService.Object
         );
     }
 

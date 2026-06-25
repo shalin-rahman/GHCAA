@@ -30,6 +30,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly IGamificationService _gamification;
         private readonly IFinancialService _financialService;
         private readonly IRealTimeService _realTimeService;
+        private readonly IOrgConfigService _orgConfigService;
 
         public MemberService(
             ApplicationDbContext db,
@@ -45,7 +46,8 @@ namespace GHCAA.Infrastructure.Services
             IConfiguration config,
             IGamificationService gamification,
             IFinancialService financialService,
-            IRealTimeService realTimeService)
+            IRealTimeService realTimeService,
+            IOrgConfigService orgConfigService)
         {
             _db = db;
             _storage = storage;
@@ -61,6 +63,7 @@ namespace GHCAA.Infrastructure.Services
             _gamification = gamification;
             _financialService = financialService;
             _realTimeService = realTimeService;
+            _orgConfigService = orgConfigService;
         }
 
         public async Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default)
@@ -1324,13 +1327,15 @@ namespace GHCAA.Infrastructure.Services
             }
             else
             {
-                // Fallback to hardcoded HTML
-                subject = Constants.EmailSubjects.PasswordReset;
+                var config = await _orgConfigService.GetConfigAsync();
+                var locale = config.Localization.Locales.TryGetValue(config.Localization.DefaultLocale, out var lp) ? lp : null;
+                subject = locale?.EmailSubjects.PasswordReset ?? "GHCAA Account Password Reset";
+                
                 body = $@"
                 <div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;'>
                     <h2 style='color: #c5a059;'>Password Reset Initiated</h2>
                     <p>Hello <strong>{member.FullName}</strong>,</p>
-                    <p>An administrator has initiated a password reset for your {Constants.Branding.AppName} account.</p>
+                    <p>An administrator has initiated a password reset for your {config.Branding.ShortName} account.</p>
                     <p>Please click the button below to set a new password. This link is valid for 24 hours.</p>
                     <div style='text-align: center; margin: 30px 0;'>
                         <a href='{resetUrl}' style='background: #111; color: #c5a059; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; border: 1px solid #c5a059;'>Reset My Password</a>

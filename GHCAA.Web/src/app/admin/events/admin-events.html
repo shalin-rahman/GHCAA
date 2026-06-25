@@ -12,7 +12,7 @@
                 title="Event Registrations Export">
             </app-export-buttons>
             }
-            <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
+            <button *ngIf="orgConfigService.isFeatureEnabled('enableEBook')" (click)="openCreateForm()" class="btn btn-accent shadow-gold">
                 <span class="icon">✨</span> Launch New Event
             </button>
         </div>

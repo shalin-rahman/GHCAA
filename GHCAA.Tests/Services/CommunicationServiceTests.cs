@@ -19,6 +19,7 @@ public class CommunicationServiceTests : TestBase
 {
     private Mock<IEmailService> _mockEmail = null!;
     private Mock<ILogger<CommunicationService>> _mockLogger = null!;
+    private Mock<IOrgConfigService> _mockOrgConfig = null!;
     private CommunicationService _service = null!;
 
     [SetUp]
@@ -26,7 +27,12 @@ public class CommunicationServiceTests : TestBase
     {
         _mockEmail = new Mock<IEmailService>();
         _mockLogger = new Mock<ILogger<CommunicationService>>();
-        _service = new CommunicationService(_context, _mockEmail.Object, _mockLogger.Object);
+        _mockOrgConfig = new Mock<IOrgConfigService>();
+
+        var mockConfig = new GHCAA.Application.DTOs.OrgConfigDto();
+        _mockOrgConfig.Setup(x => x.GetConfigAsync()).ReturnsAsync(mockConfig);
+
+        _service = new CommunicationService(_context, _mockEmail.Object, _mockLogger.Object, _mockOrgConfig.Object);
     }
 
     [Test]

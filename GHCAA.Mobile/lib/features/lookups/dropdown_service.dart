@@ -32,7 +32,7 @@ class DropdownService {
   ];
 
   static const List<String> defaultMembershipTypes = [
-    'Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory'
+    'Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory', 'Guest'
   ];
 
   static const List<String> defaultRelationshipTypes = [
