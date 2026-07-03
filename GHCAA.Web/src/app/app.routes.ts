@@ -235,7 +235,7 @@ export const routes: Routes = [
             },
             {
                 path: 'org-config',
-                loadComponent: () => import('./admin/org-config/org-config').then(m => m.OrgConfig),
+                loadComponent: () => import('./admin/org-config/org-config').then(m => m.AdminOrgConfig),
                 canActivate: [superAdminGuard]
             }
         ]

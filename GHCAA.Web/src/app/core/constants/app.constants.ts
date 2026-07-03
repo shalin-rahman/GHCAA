@@ -479,7 +479,8 @@ export const API_ENDPOINTS = {
         ACTIVE: '/api/polls/active'
     },
     ORG: '/api/org',
-    CONFIG: '/api/config'
+    CONFIG: '/api/config',
+    FORUM: '/api/forum'
 } as const;
 
 export const APP_CONFIG = {

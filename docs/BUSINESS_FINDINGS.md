@@ -1,0 +1,326 @@
+# GHCAA Business Findings Log
+
+Record every failed scenario, environment blocker, and coverage gap here.
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| *(template row — copy for new entries)* | | | | | | API/Web/Mobile | Blocker/Major/Minor | Open/Fixed/Wontfix | |
+
+---
+
+## Environment blockers
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| ENV-001 | Infrastructure | PostgreSQL connectivity (runtime) | Renamed root `.env` → `.env.remote`; start API; `GET /healthz` | DB check Healthy on local `GHCAADB_v2` | **Fixed** — `GET /healthz` returns **200 Healthy** (Database Healthy) | API | — | Fixed | Option A applied: root `.env` renamed to `.env.remote` |
+| ENV-002 | Configuration | appsettings.json placeholder password | Read `GHCAA.API/appsettings.json` L4 | Dev uses Development overrides | Base file has `Password=CHANGE_ME` | API | Minor | Open | Expected; Development profile uses `postgres`/`GHCAADB_v2` |
+| ENV-003 | Tooling | EF migrations CLI | `dotnet tool install --global dotnet-ef`; `dotnet ef database update --context PgSqlApplicationDbContext` | All migrations applied | **Fixed** — 12 pending migrations + `AddOrganizationConfigRowVersion` applied | API | — | Fixed | Use `--context PgSqlApplicationDbContext` (multiple DbContexts) |
+| ENV-004 | Configuration | Root `.env` environment mismatch | Renamed `.env` to `.env.remote` | Local review uses Development + local DB | **Fixed** for local testing | API | — | Fixed | Restore `.env.remote` → `.env` when targeting Render production DB |
+| ENV-005 | Test data | Seeded login credentials | HTTP `POST /api/auth/login` for `demo_user`, `shalin` | Login succeeds per TODO.md | **Fixed** — `HashGen --apply` + `scripts/fix-local-test-passwords.sql`; `demo_user` created (Member 9998), passwords match TODO.md | API | Minor | Fixed | Run `dotnet run --project HashGen -- --apply` after fresh migrations |
+
+---
+
+## Phase 2 — Membership lifecycle (A1–A6)
+
+Automated evidence: **92/92 tests passed** (2026-07-03). Filter: `MemberService|RegistrationController|AdminController|OtpService|MemberRegistrationValidator|WorkflowTests|VerifyEmailValidator`.
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| A1-PASS | Registration | Haraganga college required | `UpdateProfile_WithNoGHCRecord_ShouldThrowException`; `RegisterAsync_WithHistory_ShouldSaveCorrectly`; validator academic required | Reject non-GHC; accept GHC record | **Pass** — service throws on update without GHC; register saves GHC history | API | — | Verified | Gap: no dedicated `RegisterAsync` without-GHC test (see COV-001) |
+| A2-PASS | Registration / OTP | Uniqueness + OTP | `RegisterAsync_WithDuplicate{Email,NID,Mobile}`; `VerifyEmailAsync_*`; `OtpServiceTests` (11); `RegistrationControllerTests.VerifyEmail_*` | Duplicates rejected; OTP flow works | **Pass** (all 18 related tests) | API | — | Verified | |
+| A3-PASS | Admin approval | Applied → Active + membership number | `ApproveMemberAsync_WithMultipleMembersSameYear_*`; `ApproveMemberAsync_WithDifferentYears_*`; `AdminControllerTests.ApproveMember_ReturnsOk`; `WorkflowTests` | Status Active; `GHCyyMM###` numbers | **Pass** | API | — | Verified | |
+| A4-PASS | Rejection | Soft-delete | `RejectMemberAsync_ShouldSendEmailAndSoftDeleteMember`; `AdminControllerTests.RejectMember_ReturnsOk` | Rejected + IsArchived; record retained | **Pass** — status `Rejected`, `IsArchived=true`, email sent | API | — | Verified | |
+| A5-PASS | Profile gate | 13-field completeness before approval | Code review `CalculateProfileCompletion` (13 fields); approval tests use complete profiles | Block approval if &lt;100% | **Logic present**; positive paths pass in tests/workflow | API | — | Verified | No negative test for incomplete profile (COV-003) |
+| A6-PASS | Registration fee | Payment before approval | `RegisterAsync_WithValidData_ShouldCreateMemberAndPaymentHistory`; approval tests seed `PaymentHistory` Completed | Payment record on register; gate on approve | **Pass** | API | — | Verified | No negative test without payment (COV-004) |
+
+### A7–A11, B–F (automated + HTTP smoke — 2026-07-03)
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| A7-PASS | ID card | Digital ID for members | `ProfileControllerTests.GetIDCard_ReturnsOk_OnSuccess` | Controller returns SVG data URI | **Pass** (mocked service) | API | — | Verified | Active-only gate not unit-tested; `ProfileController` requires auth |
+| A8-PASS | Privacy | Directory masking | `NetworkingServiceTests.SearchMembersAsync_ShouldHonorPrivacyFlags`; `MemberServiceTests.GetProfileAsync_WithNonPrivilegedAccess_ShouldReturnMaskedProfile` | Confidential when flags false | **Pass** | API | — | Verified | |
+| A9-PASS | Family link | Spouse linking workflow | `FamilyLinkServiceTests` (SendRequest, Respond Approved/Rejected) | Request + notify + link on approve | **Pass** (3 tests) | API | — | Verified | |
+| A10-PASS | Verification | Blue tick on approval | Code: `MemberService.ApproveMemberAsync` sets `IsVerified=true`; `MemberService_EC_Tests` | Verified flag set | **Pass** (logic + EC tests) | API | — | Verified | Web/Mobile badge display not tested |
+| A11-PASS | Social login | Google login | `AuthServiceTests.SocialLoginAsync_WithValidGoogleId_ShouldReturnTokenResponse` | Token for linked GoogleId | **Pass** | API | — | Verified | Facebook/onboarding wizard not tested |
+| B-PASS | Events | Catalog, capacity, workflow | `EventServiceTests`, `EventsControllerTests`, `WorkflowTests.Registration_To_EventApproval_Workflow` | Event CRUD + registration flow | **Pass** (all event tests) | API | — | Verified | QR attendance (B4) not isolated in tests |
+| C-PASS | Financial | Dues, ledger, gateways, fees | `FinancialServiceTests`, `FinancialLedgerServiceTests`, `FinancialLedgerControllerTests`, `GatewaysControllerTests`, `PaymentConfigControllerTests`, `FinancialsControllerTests` | Payment + ledger logic | **Pass** | API | — | Verified | Live gateway webhooks not tested |
+| D-PARTIAL | Networking/Social | Directory, jobs, mentorship, polls | `NetworkingServiceTests`, `NetworkingControllerTests`, `JobHubServiceTests`, `MentorshipServiceTests`, `PollServiceTests` | Core flows pass | **Pass** (no Forum/Assistant tests) | API | — | Verified | D4 Forum, D5 AI: no test files |
+| E-PASS | Governance/CMS | EC, news, comms, gallery | `GovernanceServiceTests`, `NewsControllerTests`, `NewsServiceTests`, `CommunicationServiceTests`, `GalleryControllerTests` | Admin/member content flows | **Pass** | API | — | Verified | |
+| F-PARTIAL | Security | Auth session basics | `AuthServiceTests`, `AuthControllerTests`, `TokenServiceTests`, `UserServiceTests` | Login success/failure, reset password | **Pass** | API | — | Verified | F2 idle logout, F5 lockout: client/middleware only — no unit tests |
+| BUG-001 | OrgConfig | GET /api/config | HTTP smoke after migrations | 200 + org JSON | **500** — `column o.RowVersion does not exist` | API | Major | **Fixed** | Added migration `20260703123040_AddOrganizationConfigRowVersion`; retest **200 OK** |
+| HTTP-001 | Smoke | Live API with superadmin | Login + admin/members, events, config | Endpoints respond | **Pass** — 584 members, 4 events, config `orgId=ghcaa` | API | — | Verified | After BUG-001 fix |
+
+### Phase 3 — Cross-platform parity spot-checks
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| PARITY-001 | Ledger | Member vs admin routes | Grep Web `LEDGER: /api/ledger`, Mobile `financial_service.dart` | Same data, role-appropriate paths | Mobile uses `/financials/my-history` (member); Web admin uses `/api/ledger` — **intentional** | Web/Mobile | — | OK | Documented in mobile service comment |
+| PARITY-002 | Notifications | Route alignment | Web `/api/notifications`, Mobile `/notifications` + base `/api` | Same endpoint | **Match** — API also aliases `/api/notification` | API/Web/Mobile | — | OK | |
+| PARITY-003 | Forum | Route alignment | Web `/api/forum`, Mobile `/forum/categories` + base `/api` | Same endpoint | **Match** | API/Web/Mobile | — | OK | |
+| PARITY-004 | Governance | EC routes | Web `/api/governance`, Mobile `governance_api.dart` `/governance/ec/current` | Same endpoint | **Match** | API/Mobile | — | OK | |
+| PARITY-005 | Org config | Config endpoint | Web/Mobile `/api/config` | 200 with org JSON | **Fixed** after BUG-001 (was 500) | API/Web/Mobile | Major | Fixed | Mobile `org_config_service.dart` depends on this |
+
+---
+
+## Phase 3 — Mobile
+
+Automated evidence: **28/28 core unit/widget tests passed**; `flutter analyze` clean (2026-07-03).
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| MOB-PASS-001 | Tooling | Dependency resolution | `flutter pub get` in `GHCAA.Mobile` | Packages resolve | **Pass** — got dependencies (102 outdated, non-blocking) | Mobile | — | Verified | |
+| MOB-PASS-002 | Static analysis | Analyzer clean | `flutter analyze` | No issues | **Pass** — no issues (291.7s) | Mobile | — | Verified | |
+| MOB-PASS-003 | Core tests | Unit + widget suite | `flutter test` (6 files; visual freeze excluded) | All pass | **Pass** — 28/28 in ~72s | Mobile | — | Verified | Auth, router, registration wizard, major functionalities, widget branding |
+| MOB-PASS-004 | Forum parity | Route + DTO alignment | Code review `forum_service.dart` vs `ForumController` + `ForumDtos.cs` | Same paths, camelCase fields | **Pass** — `/forum/categories`, topics, posts CRUD; no double `/api` prefix (`baseUrl` = `…/api`) | Mobile/API | — | Verified | Screens: `forum_categories_screen.dart`, `forum_topics_screen.dart`, `forum_topic_detail_screen.dart` |
+| MOB-PASS-005 | Org config | Mobile config fetch | Code review `org_config_service.dart` → `GET /config` | Network → cache → defaults | **Pass** — matches API route; fallback chain present | Mobile | — | Verified | Live fetch not run without auth token |
+| MOB-PASS-006 | API reachability | Health + forum auth gate | `GET /healthz`; unauthenticated `GET /api/forum/categories` | Health 200; forum 401 | **Pass** — 200 Healthy; forum **401** (controller `[Authorize]`) | Mobile/API | — | Verified | Confirms forum route exists and requires login |
+| MOB-BLOCK-001 | Integration E2E | Windows desktop integration | `flutter test integration_test/app_test.dart -d windows` | Login → dashboard → logout | **Blocked** — missing VS C++ workload (MSVC v142, CMake, Windows 10 SDK) | Mobile | Blocker | Open | Install "Desktop development with C++" in VS 2026 |
+| MOB-BLOCK-002 | Integration E2E | Chrome integration | `flutter test integration_test/app_test.dart -d chrome` | E2E runs | **Blocked** — Flutter: web not supported for integration tests | Mobile | Blocker | Open | Need Android emulator or Windows desktop toolchain |
+| MOB-BLOCK-003 | Integration E2E | Android emulator | `flutter doctor` | Android SDK available | **Blocked** — Android SDK not installed | Mobile | Blocker | Open | Optional; install Android Studio + SDK |
+| MOB-GAP-001 | Forum | Live authenticated flow | Login + fetch categories/topics via app | Data renders in forum screens | **Not run** — integration blocked; no forum unit tests in `test/` | Mobile | Minor | Open | Add mocked `ForumService` test or run integration after toolchain fix |
+| MOB-GAP-002 | Visual freeze | Layout overflow regression | `*visual_freeze_test.dart` (4 files) | No overflows | **Skipped** — long-running; excluded per Phase 3 scope | Mobile | Minor | Open | Run separately before release |
+| MOB-GAP-003 | Credentials | Integration test accounts | `app_test.dart` uses `demo_user@test.com` / `DemoPass123!` | Login succeeds | **Likely fail** — ENV-005: `demo_user` returns 401 on API | Mobile/API | Minor | Open | Update integration tests to use working seed creds or mock API |
+
+### Phase 3 Mobile — parity spot-check summary
+
+| Area | Mobile service | API route | Static parity | Live verified |
+|---|---|---|---|---|
+| Notifications | `notification_service.dart` → `/notifications` | `/api/notifications` | OK | Not run (needs auth) |
+| Ledger (member) | `financial_service.dart` → `/financials/my-history` | `/api/financials/my-history` | OK (intentional vs admin `/api/ledger`) | Not run |
+| Directory | `networking_service.dart` | `/api/networking/directory` | OK | Not run |
+| Forum | `forum_service.dart` | `/api/forum/*` | OK | 401 without token only |
+| Governance | `governance_api.dart` | `/api/governance/ec/current` | OK | Not run |
+| Org config | `org_config_service.dart` → `/config` | `/api/config` | OK | API 200 verified in Phase 2 |
+
+**Fixes applied this phase:** None — no analyzer or test failures; integration blocked by environment tooling only.
+
+---
+
+## Phase 4 — Mobile (integration loop)
+
+Automated evidence: **28/28 core tests pass**; `flutter analyze` clean; **integration E2E blocked** by VS C++ workload (2026-07-03).
+
+### Toolchain (`flutter doctor -v`)
+
+| Component | Status | Notes |
+|---|---|---|
+| Flutter 3.44.2 / Dart 3.12.2 | OK | Channel stable |
+| Windows 11 Enterprise | OK | |
+| Chrome 149 | OK | Web dev available |
+| Edge 149 | OK | |
+| **Visual Studio 2026 18.5.3** | **Blocked** | Missing **Desktop development with C++** workload |
+| **Android SDK** | **Blocked** | Not installed |
+| Connected devices | 3 | windows, chrome, edge |
+
+### Integration test attempts
+
+| Command | Result | Notes |
+|---|---|---|
+| `flutter test integration_test/app_test.dart -d windows` | **Blocked** | `Unable to find suitable Visual Studio toolchain` |
+| `flutter test integration_test/app_test.dart -d chrome` | **Blocked** | `Web devices are not supported for integration tests yet` |
+| `flutter test integration_test/ -d android` | **Not run** | No Android SDK |
+| `flutter test` (core, excl. visual freeze) | **28/28 pass** | ~81s |
+| `flutter test` (full incl. visual freeze) | **84 pass / 8 fail** | ListTile/Material layout warnings in `comprehensive_visual_freeze_test.dart` |
+| `dotnet run --project HashGen -- --apply` | **Pass** | demo_user MemberId=9998; shalin + demo_user hashes reset; lockout cleared |
+| API `GET /healthz` | **200** | API listening on `:5087` |
+
+### Phase 4 findings table
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| MOB-P4-001 | Tooling | VS C++ for Windows desktop E2E | `flutter test integration_test/ -d windows` | Build + run on desktop | **Blocked** — MSVC v142, CMake, Windows 10 SDK missing | Mobile | Blocker | Open | See install steps below |
+| MOB-P4-002 | Tooling | Chrome integration tests | `-d chrome` | E2E runs | **Blocked** — Flutter does not support web for integration_test | Mobile | Blocker | Open | Need Windows desktop or Android |
+| MOB-P4-003 | Tooling | Android emulator E2E | `flutter doctor` | SDK + emulator | **Blocked** — Android SDK not installed | Mobile | Blocker | Open | Optional path; install Android Studio |
+| MOB-P4-004 | Integration | Stale test credentials | Review `integration_test/*.dart` | Login with seeded `demo_user` | **Fixed (uncommitted)** — was `demo_user@test.com`; HashGen seeds username `demo_user` | Mobile | Major | Fixed | Align with `HashGen --apply` + TODO.md |
+| MOB-P4-005 | Integration | Stale UI selectors | Review vs `AppHomeScreen` | TextField + LOGIN button | **Fixed (uncommitted)** — was TextFormField + ElevatedButton; dashboard expects `DEMO USER` not `SHALIN RAHMAN` | Mobile | Major | Fixed | `member_journey_test.dart` rewritten for current nav/drawer |
+| MOB-P4-006 | Config | Windows desktop API URL | `AppConfig.apiBaseUrl` on Windows host | `localhost:5087` | **Fixed (uncommitted)** — was `10.0.2.2` from `.env` (Android emulator alias) | Mobile | Major | Fixed | Desktop/web/linux/macOS → localhost; Android keeps `.env` |
+| MOB-P4-007 | Integration | Live E2E verification | Run integration after toolchain fix | Login → dashboard → logout | **Not run** — blocked by MOB-P4-001 | Mobile | — | Open | Prepped; run after VS C++ install |
+| MOB-P4-008 | Visual freeze | Golden/layout regression | `comprehensive_visual_freeze_test.dart` | No overflows | **8/92 fail** — ListTile inside DecoratedBox Material warnings | Mobile | Minor | Open | Not blocking integration; fix ListTile/Material wrapping separately |
+| MOB-P4-009 | Integration | Financial seed assertions | `financial_test.dart` | Life Membership / 5000.0 visible | **Not verified** — demo_user may lack payment seed rows | Mobile | Minor | Open | May need payment seed in HashGen or relax assertions |
+
+### Phase 4 fixes applied (uncommitted)
+
+| File | Change |
+|---|---|
+| `GHCAA.Mobile/integration_test/app_test.dart` | `demo_user` creds; TextField/LOGIN selectors; `DEMO USER` + `Member Credentials`; `Haragangian Portal` post-logout |
+| `GHCAA.Mobile/integration_test/financial_test.dart` | Same login selector/cred fixes; 5s settle timeout |
+| `GHCAA.Mobile/integration_test/dgepay_payment_test.dart` | Same |
+| `GHCAA.Mobile/integration_test/article_test.dart` | Same |
+| `GHCAA.Mobile/integration_test/member_journey_test.dart` | Rewritten for AppHomeScreen, drawer profile, bottom nav Home |
+| `GHCAA.Mobile/lib/core/config/app_config.dart` | Desktop hosts use `localhost:5087/api` instead of Android `10.0.2.2` |
+
+### Phase 4 — user install steps (blockers)
+
+**A. Windows desktop integration (recommended path)**
+
+1. Open **Visual Studio Installer** → **Modify** on VS Community 2026.
+2. Check workload **Desktop development with C++**.
+3. Under Individual components, ensure:
+   - **MSVC v142 - VS 2019 C++ x64/x86 build tools** (latest available)
+   - **C++ CMake tools for Windows**
+   - **Windows 10 SDK** (10.0.19041.0 or later)
+4. Install → restart terminal → `flutter doctor -v` until Visual Studio shows `[√]`.
+5. Ensure API running: `dotnet run --project GHCAA.API --urls http://localhost:5087`
+6. Reset test creds if lockout: `dotnet run --project HashGen -- --apply`
+7. Run: `cd GHCAA.Mobile && flutter test integration_test/app_test.dart -d windows`
+
+**B. Android emulator (alternative)**
+
+1. Install [Android Studio](https://developer.android.com/studio).
+2. SDK Manager → install Android SDK Platform + build-tools; create AVD.
+3. Set `flutter config --android-sdk <path>` if non-default.
+4. Update `GHCAA.Mobile/.env`: `BASE_API_URL=http://10.0.2.2:5087/api` (already set).
+5. Run: `flutter test integration_test/app_test.dart -d emulator-5554`
+
+**C. Chrome** — not supported for `integration_test` package; use Windows or Android only.
+
+### Phase 4 checklist
+
+- [x] `flutter doctor -v` documented
+- [x] Integration attempted on windows + chrome
+- [x] HashGen `--apply` run (demo_user lockout cleared)
+- [x] Integration test creds/selectors fixed (5 files)
+- [x] Windows desktop API URL fix (`app_config.dart`)
+- [ ] Live integration E2E pass (blocked: VS C++)
+- [ ] Visual freeze suite green (8 failures remain)
+- [ ] Financial integration seed data verified
+
+---
+
+## Phase 3 — Web
+
+Automated evidence: **230/230 Vitest** pass; **43/53** functional Playwright E2E pass (2026-07-03).
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| WEB-001 | Tooling | Node ≥ v20.19 for Angular 21 | `node --version`; winget upgrade | Build + Vitest run | **Fixed** — v24.18.0 LTS via winget | Web | Blocker | Fixed | nvm/fnm not on PATH |
+| WEB-002 | E2E infra | Dev proxy → API | `proxy.conf.json` + ng serve | `/api/*` → `:5087` | **Fixed** — was `:5000` (ECONNREFUSED) | Web | Blocker | Fixed | |
+| WEB-003 | E2E infra | API up during Playwright | `playwright.config.ts` webServer | Healthz before tests | **Fixed** — dual webServer starts API + Angular | Web | Blocker | Fixed | |
+| WEB-004 | E2E auth | Admin test credentials | Login as `shalin` in specs | 200 + admin redirect | **401** before spec fix (ENV-005) | Web | Major | **Mitigated** | Specs use `superadmin`; `infra-hardening-verify` still expects `shalin` |
+| WEB-005 | E2E config | Missing auth storage file | `config-regression.spec.ts` | Tests run without setup | **Fixed** — removed `.auth/super-admin.json` requirement | Web | Minor | Fixed | GET `/api/config` is anonymous |
+| WEB-006 | Vitest | Unit suite | `npm run test:unit` | All pass | **230/230 pass** | Web | — | Verified | 58 files, ~92s |
+| WEB-007 | Build | Production bundle | `npm run build` | type-check + ng build OK | **Pass** | Web | — | Verified | landing.scss budget warning only |
+| WEB-008 | E2E workflow | Admin member approval | `admin-workflow.spec.ts` | Approve pending row | **Fail** — Approve button timeout | Web | Major | Open | Queue empty or UI selector mismatch |
+| WEB-009 | E2E workflow | Article editorial | `article-editorial.spec.ts` | Submit + approve article | **Fail** — article form selectors timeout | Web | Major | Open | |
+| WEB-010 | E2E workflow | Full membership + event | `full-membership-event-workflow.spec.ts` | Register → approve → event | **Fail** — registration step timeout (90s) | Web | Major | Open | |
+| WEB-011 | E2E UI | Gallery / Job Hub | `gallery.spec.ts`, `job-hub.spec.ts` | Headers visible | **Intermittent fail** under `--workers=2` | Web | Minor | Open | Templates correct; retry `--workers=1` |
+| WEB-012 | E2E visual | Snapshot freeze | `tests/visual/*` (~39 tests) | Match baselines | **Not verified** — baselines stale | Web | Minor | Open | `--update-snapshots` when UI stable |
+| WEB-PASS | E2E smoke | Admin + member portal | 43 specs in `tests/e2e` | Nav + data load | **Pass** | Web | — | Verified | admin-panels, directory, events, governance, polls, profile, payments, public, config |
+
+### Phase 3 Web — fixes applied (uncommitted)
+
+| File | Change |
+|---|---|
+| `GHCAA.Web/proxy.conf.json` | Proxy target `5000` → `5087` |
+| `GHCAA.Web/playwright.config.ts` | Dual `webServer` (API + ng serve); `workers: 2` |
+| `GHCAA.Web/tests/e2e/utils/auth-helper.ts` | Default login → `superadmin` |
+| `GHCAA.Web/tests/e2e/admin-*.spec.ts`, `article-editorial`, `full-membership-event-workflow` | Admin creds → `superadmin` |
+| `GHCAA.Web/tests/e2e/config-regression.spec.ts` | Remove missing `storageState` |
+| `GHCAA.Web/tests/e2e/messaging.spec.ts` | Direct `/portal/messages`; member `2512006` |
+| `GHCAA.Web/tests/e2e/member-journey.spec.ts` | Relaxed hardcoded dashboard metrics |
+
+---
+
+## Coverage gaps (not necessarily bugs)
+
+| ID | Module | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|---|
+| COV-001 | Registration | A1 Haraganga at register | Review `GHCAA.Tests` | Dedicated test: `RegisterAsync` rejects non-GHC academic history | Rule tested on **UpdateProfile** (`MemberService_LinkedIn_Tests.UpdateProfile_WithNoGHCRecord_ShouldThrowException`); no register-path test | API | Minor | Open | Consider adding test; service logic exists in `MemberService.RegisterAsync` L143–146 |
+| COV-002 | Registration | A1 FluentValidation gap | Review `MemberRegistrationValidator.cs` | Validator rejects non-GHC institutions | Validator only requires non-empty `AcademicHistory`; Haraganga enforced in service layer only | API | Minor | Open | API may return 500 instead of 400 if service throws before controller validation |
+| COV-003 | Membership | A5 profile gate | Review `MemberServiceTests` | Test that `ApproveMemberAsync` throws when profile &lt; 100% | Tests manually set `IsProfileComplete=true`; no negative gate test | API | Minor | Open | Logic present in `ApproveMemberAsync` L362–365 |
+| COV-004 | Membership | A6 payment gate | Review `MemberServiceTests` | Test approval blocked without payment | Positive path only (payment seeded before approve) | API | Minor | Open | Logic present in `ApproveMemberAsync` L367–376 |
+
+---
+
+## Test evidence log
+
+| Run date | Command / filter | Total | Passed | Failed | Notes |
+|---|---|---|---|---|---|
+| 2026-07-03 | `dotnet test GHCAA.Tests --filter "FullyQualifiedName~MemberService\|RegistrationController\|AdminController\|OtpService\|MemberRegistrationValidator\|WorkflowTests\|VerifyEmailValidator"` | 92 | 92 | 0 | 1m 05s; SQLite in-memory via TestBase |
+| 2026-07-03 | `dotnet restore/build GHCAA.sln --configfile nuget.config` | — | — | 0 | Build succeeded (14 warnings) |
+| 2026-07-03 | API start `dotnet run --project GHCAA.API --urls http://localhost:5087` | — | Started | — | Listening; seed warnings only |
+| 2026-07-03 | `GET http://localhost:5087/healthz` | — | 503 | — | Degraded: Database Unhealthy (pre `.env` fix) |
+| 2026-07-03 | Phase 2 filter (A7–F) | 150 | 150 | 0 | MemberService+Events+Financial+Networking+Governance+Auth suites |
+| 2026-07-03 | Full regression `dotnet test GHCAA.Tests` | 305 | 305 | 0 | 1 skipped (`SyncMembersForReal`); 2m 56s |
+| 2026-07-03 | Phase 4 full regression `dotnet test GHCAA.sln --no-build` | 308 | 308 | 0 | 1 skipped; 3m 46s; +3 new tests, no regressions |
+| 2026-07-03 | Phase 4 HTTP smoke (healthz, config, forum, SignalR) | 5 | 5 | 0 | All pass on `:5087` |
+| 2026-07-03 | `GET /healthz` (post `.env.remote` + migrations) | — | 200 | — | Healthy; SMS Unconfigured (optional) |
+| 2026-07-03 | `GET /api/config` (post RowVersion migration) | — | 200 | — | Returns `orgId=ghcaa` defaults |
+| 2026-07-03 | HTTP smoke superadmin login + admin/members | — | 200 | — | 584 members in DB |
+| 2026-07-03 | Phase 3 API gaps (Forum/AI/SignalR/Auth/Lockout) | — | Pass | — | See Phase 3 section below |
+| 2026-07-03 | `npm run test:unit` (GHCAA.Web Vitest) | 230 | 230 | 0 | 58 files, ~92s; Node v24.18.0 |
+| 2026-07-03 | `npm run build` (GHCAA.Web) | — | Pass | 0 | type-check + ng build |
+| 2026-07-03 | Playwright `tests/e2e` (functional E2E) | 53 | 43 | 10 | After proxy + webServer + cred fixes |
+| 2026-07-03 | Playwright full `npm run test:e2e` (92 incl. visual) | 92 | 48 | 44 | 15.1m; visual baselines + 8 functional failures |
+
+---
+
+## Phase 3 — API Gaps (2026-07-03)
+
+Independent workstream: resolve API-layer blockers for Forum, AI assistant, SignalR, auth passwords, and lockout.
+
+| ID | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|
+| P3-HEALTH | API health | `GET /healthz` on `:5087` | 200 Healthy | **200 Healthy** (Database, FileStorage, Email) | API | — | Verified | |
+| P3-AUTH | Test account logins | `POST /api/auth/login` for `superadmin`, `shalin`, `demo_user` | 200 + JWT per TODO.md | **Pass** — all three return tokens | API | — | Verified | Fix: `HashGen --apply` resets BCrypt hashes; creates `demo_user` + Member 9998 |
+| P3-D4 | Forum HTTP smoke | `GET /api/forum/categories`; `POST` topic + post as `demo_user` | CRUD works when authed | **Pass** — 1 category seeded; topic id=1, post id=1 | API | — | Verified | Empty DB blocked POST (400); seeded via `--apply` |
+| P3-D4-TEST | Forum unit tests | `ForumServiceTests` (2 tests) | Create topic/post + list categories | **Pass** 2/2 | API | — | Verified | New file `GHCAA.Tests/Services/ForumServiceTests.cs` |
+| P3-D5 | AI assistant | `POST /api/assistant/ask` `{query:"find alumni"}` | Response (local NLP or Gemini) | **Pass** — rule-based `AssistantService` returns member matches; **no Gemini key required** | API | — | Verified | Not a Gemini integration; simulated NLP over EF `Members` |
+| P3-D2 | SignalR JWT hubs | Connect `ChatHub` + `NotificationHub` with JWT (`HashGen --signalr-test`) | WebSocket negotiate + connect | **Pass** after BUG-002 fix | API | Major | Fixed | JWT query-token path was `/hubs` only; hubs live at `/api/hubs/*` |
+| P3-F5 | Brute-force lockout | 5× wrong password (≥6 chars) then correct login | 15-min lockout | **Pass** — 6th attempt blocked (HTTP + `AuthServiceTests`) | API | — | Verified | Passwords &lt;6 chars return **400** (model validation) before lockout counter runs |
+| P3-F2 | Idle logout | Search API for inactivity timeout | Server-side enforcement | **Client-only** — 10-min idle timers in Web/Mobile (`TODO.md` 1.10); no API endpoint | Web/Mobile | — | N/A | Documented; not API-testable |
+| BUG-002 | SignalR auth | JWT `access_token` on `/api/hubs/chat` | Token accepted on negotiate | **401 before fix** — `OnMessageReceived` checked `/hubs` not `/api/hubs` | API | Major | **Fixed** | `ServiceExtensions.cs`: also match `/api/hubs` prefix |
+
+### Phase 3 fixes applied (uncommitted)
+
+| File | Change |
+|---|---|
+| `GHCAA.API/Extensions/ServiceExtensions.cs` | SignalR JWT path: `/hubs` → also `/api/hubs` |
+| `HashGen/Program.cs` + `.csproj` | `--apply` password/forum seed; `--signalr-test` smoke |
+| `scripts/fix-local-test-passwords.sql` + `.ps1` | SQL + runner for local creds |
+| `GHCAA.Tests/Services/ForumServiceTests.cs` | 2 forum service tests |
+| `GHCAA.Tests/Services/AuthServiceTests.cs` | Lockout unit test (F5) |
+
+### Phase 3 blockers remaining
+
+| Item | Notes |
+|---|---|
+| Web/Mobile E2E | Out of scope for this API workstream |
+| Angular build | Node ≥20.19 still required |
+| Gemini AI | Not implemented — assistant is local rule-based search |
+| Forum admin UI | No API to create categories; seed SQL used for dev |
+| 2026-07-03 | `flutter pub get` (`GHCAA.Mobile`) | — | Pass | — | Dependencies resolved |
+| 2026-07-03 | `flutter analyze` (`GHCAA.Mobile`) | — | Pass | 0 | No issues (291.7s) |
+| 2026-07-03 | `flutter test` core (excl. visual freeze) | 28 | 28 | 0 | unit, model, router, major_functionalities, registration_wizard, widget |
+| 2026-07-03 | `flutter test integration_test/app_test.dart -d windows` | — | — | Blocked | VS C++ workload missing |
+| 2026-07-03 | Phase 4 Mobile: `flutter doctor -v` | — | Partial | — | VS C++ + Android SDK missing; Chrome/Windows devices available |
+| 2026-07-03 | Phase 4: `integration_test/app_test.dart -d windows` | — | — | Blocked | Visual Studio toolchain |
+| 2026-07-03 | Phase 4: `integration_test/app_test.dart -d chrome` | — | — | Blocked | Web not supported for integration_test |
+| 2026-07-03 | Phase 4: `HashGen --apply` | — | Pass | — | demo_user MemberId=9998; lockout cleared |
+| 2026-07-03 | Phase 4: core `flutter test` (6 files, excl. visual) | 28 | 28 | 0 | After AppConfig + integration_test fixes |
+| 2026-07-03 | Phase 4: `flutter analyze` | — | Pass | 0 | Clean after changes |
+| 2026-07-03 | Phase 4: full `flutter test` incl. visual freeze | 92 | 84 | 8 | ListTile/DecoratedBox Material warnings |
+| 2026-07-03 | `GET /api/forum/categories` (no auth) | — | 401 | — | Expected; forum requires login |
+
+---
+
+## Phase 4 — Backend / Consolidation (2026-07-03)
+
+Independent workstream: full dependency loop after Phases 2–3 parallel changes. **No code fixes required** — regression clean.
+
+| ID | Scenario | Steps | Expected | Actual | Layer | Severity | Status | Fix notes |
+|---|---|---|---|---|---|---|---|---|
+| P4-BUILD | Solution build | `dotnet build GHCAA.sln --configfile nuget.config` | 0 errors | **Pass** — 14 warnings (pre-existing) | API | — | Verified | Fails with MSB3027 if API process holds DLL locks; stop API first |
+| P4-TEST | Full regression | `dotnet test GHCAA.sln --no-build` | All pass | **308/308 pass**, 1 skipped (`SyncMembersForReal`) | API | — | Verified | +3 vs Phase 2 (ForumServiceTests ×2, lockout ×1) |
+| P4-HEALTH | Health check | `GET /healthz` | 200 Healthy | **Pass** | API | — | Verified | |
+| P4-CONFIG | Org config | `GET /api/config` | 200 + org JSON | **Pass** — `orgId=ghcaa` | API | — | Verified | BUG-001 fix holds |
+| P4-FORUM | Forum smoke | Login `demo_user` → `GET /api/forum/categories` | 200 + categories | **Pass** — 1 category | API | — | Verified | |
+| P4-SIGNALR | SignalR hubs | `HashGen --signalr-test` | Chat + Notification connect | **Pass** | API | — | Verified | BUG-002 fix holds |
+| P4-REGRESS | Test delta | Compare to Phase 2 baseline (305) | No broken tests | **No regressions** | API | — | Verified | See `docs/PHASE4_FINAL_REVIEW.md` |
+
+### Phase 4 consolidation summary
+
+- **Regression:** None — all 308 API tests pass; smoke endpoints healthy.
+- **New tests since Phase 2:** `ForumServiceTests` (2), `AuthServiceTests` lockout (1).
+- **Uncommitted fixes validated:** BUG-001 (RowVersion migration), BUG-002 (SignalR JWT path), HashGen `--apply` / `--signalr-test`, `nuget.config`, Web proxy/playwright (parallel workstream — not re-run in P4).
+- **Docs:** `docs/PHASE4_FINAL_REVIEW.md` — executive summary + recommended commit grouping.

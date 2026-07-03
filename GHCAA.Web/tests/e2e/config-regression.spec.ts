@@ -1,9 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Configuration-Driven Framework', () => {
-  // Use a SuperAdmin to bypass role checks for the config endpoint
-  test.use({ storageState: 'tests/e2e/.auth/super-admin.json' });
-
   test('should load default configuration from API', async ({ request }) => {
     const response = await request.get('/api/config');
     expect(response.ok()).toBeTruthy();

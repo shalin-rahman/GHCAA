@@ -13,35 +13,31 @@ test.describe('Article Editorial E2E (Web)', () => {
     await page.goto('/portal/articles');
     await expect(page).toHaveURL(/.*portal\/articles/);
 
-    // Open article form
-    await page.click('button[aria-label*="New"], button:has-text("Write Article"), button:has-text("New")');
-    await page.fill('input[formControlName="title"]', testArticleTitle);
-    await page.fill('textarea[formControlName="body"], [formControlName="content"], .editor-content',
+    await page.click('button:has-text("Write New Article")');
+    await page.fill('input[placeholder*="Enter a catchy title"]', testArticleTitle);
+    await page.fill('textarea[placeholder*="Write your story"]',
       'This is an automated test article submitted via Playwright E2E test suite.');
 
-    await page.click('button[type="submit"], button:has-text("Submit")');
-    
-    // Wait for success toast or redirection
-    await expect(page.locator('.success-toast, .alert-success, text=/success/i').first()).toBeVisible({ timeout: 10000 });
+    await Promise.all([
+      page.waitForResponse(
+        (r) => r.url().includes('/api/news/submit') && r.status() < 400,
+        { timeout: 15000 }
+      ),
+      page.getByRole('button', { name: /Submit for Approval/i }).click(),
+    ]);
+    await expect(page.getByRole('heading', { name: 'Articles & Submissions' })).toBeVisible({ timeout: 10000 });
 
     await auth.logout();
 
     // ==== STEP 2: Admin approves article ====
-    await auth.login('shalin', 'Shalin@2024!');
+    await auth.login('superadmin', 'SuperAdminPassword123!');
     await page.goto('/admin/article-approvals');
     await expect(page).toHaveURL(/.*admin\/article-approvals/);
 
-    const articleRow = page.locator('tr, .article-card, .approval-item', { hasText: testArticleTitle });
+    const articleRow = page.locator('tbody tr', { hasText: testArticleTitle });
     await expect(articleRow).toBeVisible({ timeout: 10000 });
-    
-    await articleRow.locator('button.btn-approve, button:has-text("Approve")').click();
-    
-    // Confirm modal if present
-    const confirmBtn = page.locator('button:has-text("Confirm"), button:has-text("Yes")');
-    if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
-    
+    await articleRow.locator('button:has-text("Review Article")').click();
+    await page.locator('button:has-text("Approve & Publish")').click();
     await expect(articleRow).not.toBeVisible({ timeout: 10000 });
 
     // ==== STEP 3: Verify article is published in News ====

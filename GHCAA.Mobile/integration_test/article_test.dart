@@ -12,10 +12,10 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextFormField).first, 'demo_user@test.com');
-      await tester.enterText(find.byType(TextFormField).last, 'DemoPass123!');
-      await tester.tap(find.byType(ElevatedButton));
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await tester.enterText(find.byType(TextField).first, 'demo_user');
+      await tester.enterText(find.byType(TextField).last, 'DemoPass123!');
+      await tester.tap(find.text('LOGIN'));
+      await tester.pumpAndSettle(const Duration(seconds: 5));
 
       // 2. Open Articles
       await tester.tap(find.byTooltip('Open navigation menu'));

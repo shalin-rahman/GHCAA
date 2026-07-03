@@ -12,20 +12,19 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      // 2. Perform Login
-      final usernameField = find.byType(TextFormField).first;
-      final passwordField = find.byType(TextFormField).last;
-      final loginButton = find.byType(ElevatedButton);
+      // 2. Perform Login (AppHomeScreen: TextField + LOGIN button)
+      final usernameField = find.byType(TextField).first;
+      final passwordField = find.byType(TextField).last;
 
-      await tester.enterText(usernameField, 'demo_user@test.com');
+      await tester.enterText(usernameField, 'demo_user');
       await tester.enterText(passwordField, 'DemoPass123!');
-      await tester.tap(loginButton);
+      await tester.tap(find.text('LOGIN'));
       
       // Wait for navigation and animations
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await tester.pumpAndSettle(const Duration(seconds: 5));
 
-      // 3. Verify Dashboard
-      expect(find.text('SHALIN RAHMAN'), findsOneWidget);
+      // 3. Verify Dashboard (HashGen --apply seeds Member 9998 "Demo User")
+      expect(find.text('DEMO USER'), findsOneWidget);
       expect(find.text('AUTHORIZED ACCESS'), findsOneWidget);
 
       // 4. Navigate to Digital ID
@@ -33,7 +32,7 @@ void main() {
       await tester.tap(idCardAction);
       await tester.pumpAndSettle();
       
-      expect(find.text('Digital ID Card'), findsOneWidget);
+      expect(find.text('Member Credentials'), findsOneWidget);
 
       // 5. Logout
       final logoutButton = find.byIcon(Icons.power_settings_new);
@@ -45,7 +44,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 6. Verify back at login
-      expect(find.text('Haragangian Alumni'), findsOneWidget);
+      expect(find.text('Haragangian Portal'), findsOneWidget);
     });
   });
 }

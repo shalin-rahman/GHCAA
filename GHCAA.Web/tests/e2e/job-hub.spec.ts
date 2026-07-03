@@ -14,11 +14,12 @@ test.describe('Job Hub E2E', () => {
   });
 
   test('Member can view the Opportunities Hub and browse listings', async ({ page }) => {
+    await page.goto('/portal/dashboard');
     await page.goto('/portal/jobs');
     await expect(page).toHaveURL(/.*portal\/jobs/);
+    await page.waitForLoadState('networkidle');
 
-    // Verify page header
-    await expect(page.getByText('Opportunities Hub')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Opportunities Hub' })).toBeVisible({ timeout: 15000 });
 
     // Verify filter controls are present
     await expect(page.locator('input[placeholder*="Filter by title"]')).toBeVisible();

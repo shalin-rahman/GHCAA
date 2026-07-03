@@ -41,7 +41,7 @@ namespace GHCAA.API.Extensions
 
                         // SignalR hubs pass token via query string.
                         var qsToken = context.Request.Query["access_token"];
-                        if (!string.IsNullOrEmpty(qsToken) && path.StartsWithSegments("/hubs"))
+                        if (!string.IsNullOrEmpty(qsToken) && (path.StartsWithSegments("/hubs") || path.StartsWithSegments("/api/hubs")))
                         {
                             context.Token = qsToken;
                             return Task.CompletedTask;

@@ -12,64 +12,47 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      // 2. Login Phase
-      final loginIdField = find.byType(TextField).at(0); // Quick Login ID
-      final passwordField = find.byType(TextField).at(1); // PasswordField uses TextField internally
-      final loginButton = find.text('LOGIN');
+      // 2. Login Phase (AppHomeScreen)
+      await tester.enterText(find.byType(TextField).first, 'demo_user');
+      await tester.enterText(find.byType(TextField).last, 'DemoPass123!');
+      await tester.tap(find.text('LOGIN'));
 
-      await tester.enterText(loginIdField, '9000001');
-      await tester.enterText(passwordField, 'DemoPass123!');
-      await tester.tap(loginButton);
-      
       // Allow time for API call and transitions
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+
+      // 3. Dashboard Verification (HashGen --apply: Member 9998)
+      expect(find.text('DEMO USER'), findsOneWidget);
+      expect(find.text('AUTHORIZED ACCESS'), findsOneWidget);
+
+      // 4. Directory Navigation
+      await tester.tap(find.text('Alumni Directory'));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
-      // 3. Dashboard Verification
-      // Check for presence of key dashboard elements
-      expect(find.text('TEST MEMBER ONE (COMPLETE)'), findsOneWidget);
-      expect(find.text('GHC-9000001'), findsOneWidget);
-      expect(find.text('AUTHORIZED ACCESS'), findsOneWidget);
-      
-      // 4. Directory Navigation & Search
-      final directoryCard = find.text('Directory');
-      await tester.tap(directoryCard);
+      expect(find.text('Member Directory'), findsOneWidget);
+
+      // 5. Return to Dashboard and open Profile via drawer
+      await tester.pageBack();
       await tester.pumpAndSettle();
-      
-      expect(find.text('ALUMNI DIRECTORY'), findsOneWidget);
-      
-      // Perform a search
-      final searchField = find.byIcon(Icons.search);
-      await tester.tap(searchField);
-      await tester.enterText(find.byType(TextField), 'Professor');
-      await tester.pumpAndSettle(const Duration(milliseconds: 500));
-      
-      // 5. Profile Verification
-      // Navigate back to Dashboard (using bottom nav if present, or pop)
-      if (find.byIcon(Icons.home).evaluate().isNotEmpty) {
-        await tester.tap(find.byIcon(Icons.home));
-      } else {
-        await tester.pageBack();
-      }
+
+      await tester.tap(find.byIcon(Icons.menu_rounded));
       await tester.pumpAndSettle();
-      
-      // Go to Profile
-      final profileAction = find.byIcon(Icons.person_outline);
-      await tester.tap(profileAction);
+      await tester.tap(find.text('My Profile'));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      expect(find.text('My Profile'), findsOneWidget);
+
+      // 6. Logout Flow (return to dashboard first)
+      await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
-      
-      expect(find.text('MEMBER PROFILE'), findsOneWidget);
-      expect(find.text('tester1@example.com'), findsOneWidget);
-      
-      // 6. Logout Flow
-      final logoutBtn = find.byIcon(Icons.power_settings_new);
-      await tester.tap(logoutBtn);
+
+      await tester.tap(find.byIcon(Icons.power_settings_new));
       await tester.pumpAndSettle();
-      
+
       await tester.tap(find.text('LOGOUT'));
       await tester.pumpAndSettle();
-      
-      // Verify back at Welcome screen
-      expect(find.text('QUICK LOGIN'), findsOneWidget);
+
+      // Verify back at portal home
+      expect(find.text('Haragangian Portal'), findsOneWidget);
     });
   });
 }

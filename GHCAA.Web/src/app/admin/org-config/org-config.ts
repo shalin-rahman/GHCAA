@@ -10,7 +10,7 @@ import { OrgConfig } from '../../core/models/org-config.model';
   imports: [CommonModule, FormsModule],
   templateUrl: './org-config.html'
 })
-export class OrgConfig implements OnInit {
+export class AdminOrgConfig implements OnInit {
   private configService = inject(OrgConfigService);
   
   configJson: string = '';

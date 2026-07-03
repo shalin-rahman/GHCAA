@@ -3,6 +3,7 @@ import { test, expect, Page } from '@playwright/test';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Buffer } from 'buffer';
+import { completeRegistrationPayment, getAuthToken } from './utils/api-helper';
 
 declare const __dirname: string;
 
@@ -16,8 +17,8 @@ const NEW_MOBILE = `017${RUN_ID.toString().slice(-8)}`; // 11-digit Mobile
 const NEW_NAME  = `E2E Member ${RUN_ID}`;
 const EVENT_TITLE = `E2E Event ${RUN_ID}`;
 
-const ADMIN_USER = 'shalin';
-const ADMIN_PASS = 'Shalin@2024!';
+const ADMIN_USER = 'superadmin';
+const ADMIN_PASS = 'SuperAdminPassword123!';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tiny stub image – created in-memory so no external asset is needed
@@ -75,8 +76,9 @@ async function logout(page: Page) {
 // ─────────────────────────────────────────────────────────────────────────────
 // UNIFIED E2E WORKFLOW — Optimized for speed and deterministic execution
 // ─────────────────────────────────────────────────────────────────────────────
-test('Comprehensive GHCAA Ecosystem Workflow', async ({ page }) => {
+test('Comprehensive GHCAA Ecosystem Workflow', async ({ page, request }) => {
   test.slow();
+  page.on('dialog', (dialog) => dialog.accept());
   const imgPath = stubImagePath();
   page.on('console', msg => console.log(`BROWSER [${msg.type()}]: ${msg.text()}`));
   page.on('pageerror', err => console.log(`BROWSER ERROR: ${err.message}`));
@@ -121,12 +123,11 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page }) => {
   await page.locator('button:has-text("Continue Assessment")').click();
   await page.waitForSelector('text=Background & Milestones', { timeout: 15000 });
 
-  // Academic Info - Using container-based targeting for robust selection
-  const academicSection = page.locator('.history-item').first();
-  await academicSection.locator('.form-group', { hasText: /Degree Conferred/i }).locator('select').selectOption('HSC');
-  await academicSection.locator('.form-group', { hasText: /Subject/i }).locator('select').selectOption('Science');
-  await academicSection.locator('.form-group', { hasText: /Admission/i }).locator('select').selectOption('2006');
-  await academicSection.locator('.form-group', { hasText: /Passing Year/i }).locator('select').selectOption('2008');
+  // Academic Info — first record is pre-seeded with Haraganga College
+  await page.locator('select[name="deg_0"]').selectOption('HSC');
+  await page.locator('select[name="sub_0"]').selectOption('Science');
+  await page.locator('select[name="adm_0"]').selectOption('2006');
+  await page.locator('select[name="pass_0"]').selectOption('2008');
 
   // Professional History (Standard date format)
   await page.getByPlaceholder(/Employer Title/i).first().fill('GHCAA Test Corp');
@@ -145,8 +146,9 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page }) => {
   // Wait for the actual content of Step 3, not the stepper
   await page.waitForSelector('h2:has-text("Registry Filing")', { timeout: 15000 });
   
-  // Explicitly select Cash / Manual Receipt
-  await page.locator('.payment-card', { hasText: /Cash.*Receipt/i }).click();
+  const cashPayment = page.locator('.payment-card', { hasText: /Cash.*Manual Receipt/i }).first();
+  await cashPayment.waitFor({ state: 'visible', timeout: 30000 });
+  await cashPayment.click();
   
   // Targeted file uploads using container labels for precision
   const photoContainer = page.locator('.form-group', { hasText: /Profile Photo/i });
@@ -179,21 +181,21 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page }) => {
 
   // ── STEP 2: Admin Approval ────────────────────────────────────────────────
   console.log('--- Step 2: Admin Approval ---');
+  const adminToken = await getAuthToken(request, ADMIN_USER, ADMIN_PASS);
+  await completeRegistrationPayment(request, adminToken, NEW_EMAIL);
   await loginAs(page, ADMIN_USER, ADMIN_PASS, 'admin');
   await page.goto('/admin/approvals');
-  
+
   const searchInput = page.locator('input[placeholder*="Search"]').first();
   if (await searchInput.isVisible()) {
-    await searchInput.fill(NEW_NID);
-    await page.waitForSelector(`tr:has-text("${NEW_NID}")`, { timeout: 10000 });
+    await searchInput.fill(NEW_EMAIL);
+    await page.waitForSelector(`tr:has-text("${NEW_EMAIL}")`, { timeout: 10000 });
   }
 
-  const pendingRow = page.locator('tr', { hasText: NEW_NID }).first();
-  await pendingRow.locator('button:has-text("Approve")').click();
-  const confirmBtn = page.locator('button:has-text("Confirm"), button:has-text("Yes"), button:has-text("Approve")').last();
-  if (await confirmBtn.isVisible({ timeout: 5000 })) await confirmBtn.click();
+  const pendingRow = page.locator('tr', { hasText: NEW_EMAIL }).first();
+  await pendingRow.locator('button:has-text("Direct Verify")').click();
 
-  await expect(pendingRow).not.toBeVisible({ timeout: 10000 });
+  await expect(pendingRow).not.toBeVisible({ timeout: 15000 });
   console.log('✅ Member Approved.');
 
   // ── STEP 3: Admin Event Creation ──────────────────────────────────────────

@@ -42,9 +42,9 @@ void main() {
       // Assert Presence of Mission Motto
       expect(find.text(AppConfig.organizationTagline), findsOneWidget);
 
-      // Assert Interaction Touch-points (inline login + register link)
-      expect(find.text('LOGIN'), findsOneWidget);
-      expect(find.text('NEW TO GHCAA? REGISTER HERE'), findsOneWidget);
+      // Assert Interaction Touch-points (section label + submit button + register link)
+      expect(find.text('LOGIN'), findsNWidgets(2));
+      expect(find.text('REGISTER HERE'), findsOneWidget);
     });
 
     testWidgets('ElevatedButtons should follow the royalGold design system',

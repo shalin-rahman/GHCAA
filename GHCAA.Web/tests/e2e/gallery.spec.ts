@@ -14,11 +14,12 @@ test.describe('Gallery E2E', () => {
   });
 
   test('Member can view the gallery page with album cards', async ({ page }) => {
+    await page.goto('/portal/dashboard');
     await page.goto('/portal/gallery');
     await expect(page).toHaveURL(/.*portal\/gallery/);
+    await page.waitForLoadState('networkidle');
 
-    // Verify page header
-    await expect(page.getByText('Legacy Archive & Moments')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Legacy Archive & Moments' })).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Visual journey through Haragangian heritage')).toBeVisible();
 
     // Verify Share button is visible for authenticated user

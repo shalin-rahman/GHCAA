@@ -3,9 +3,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
   static String get apiBaseUrl {
-    // Universal Bridge Logic: 
-    // Web browsers use localhost. Android emulators use 10.0.2.2.
-    if (kIsWeb) {
+    // Web and desktop hosts reach the API on localhost; Android emulator uses 10.0.2.2.
+    if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
       return 'http://localhost:5087/api';
     }
     return dotenv.env['BASE_API_URL'] ?? 'http://10.0.2.2:5087/api';

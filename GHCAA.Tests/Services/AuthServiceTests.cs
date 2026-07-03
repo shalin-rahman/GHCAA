@@ -92,6 +92,29 @@ namespace GHCAA.Tests.Services
         }
 
         [Test]
+        public async Task LoginAsync_AfterFiveFailedAttempts_ShouldLockOutForFifteenMinutes()
+        {
+            var username = "lockout_user";
+            var password = "ValidPass1!";
+            var member = await CreateAndSaveTestMemberAsync("Lockout Member", "lockout@e.com", "126", "126");
+            var user = await CreateAndSaveTestUserAsync(member.Id, username, password);
+
+            for (var i = 0; i < 5; i++)
+            {
+                var fail = await _service.LoginAsync(new LoginDto { Username = username, Password = $"WrongPass{i}!" });
+                fail.Should().BeNull();
+            }
+
+            var locked = await _service.LoginAsync(new LoginDto { Username = username, Password = password });
+            locked.Should().BeNull();
+
+            var updated = await _context.Users.FindAsync(user.Id);
+            updated!.FailedLoginAttempts.Should().BeGreaterOrEqualTo(5);
+            updated.LockoutUntil.Should().NotBeNull();
+            updated.LockoutUntil!.Value.Should().BeAfter(DateTime.UtcNow);
+        }
+
+        [Test]
         public async Task ResetPasswordAsync_WithValidToken_ShouldChangePassword()
         {
             // Arrange

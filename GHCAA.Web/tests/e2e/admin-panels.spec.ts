@@ -6,7 +6,7 @@ test.describe('Admin Dashboard & Management E2E', () => {
 
   test.beforeEach(async ({ page }) => {
     auth = new AuthHelper(page);
-    await auth.login('shalin', 'Shalin@2024!');
+    await auth.login('superadmin', 'SuperAdminPassword123!');
   });
 
   test.afterEach(async ({ page }) => {

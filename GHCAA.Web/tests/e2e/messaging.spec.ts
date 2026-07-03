@@ -7,7 +7,7 @@ test.describe('Messaging Feature', () => {
   test.beforeEach(async ({ page }) => {
     auth = new AuthHelper(page);
     // Login as one of the new test members
-    await auth.login('9000001', '2512006');
+    await auth.login('2512006', '2512006');
   });
 
   test.afterEach(async ({ page }) => {
@@ -15,8 +15,7 @@ test.describe('Messaging Feature', () => {
   });
 
   test('should allow a member to view the messaging interface and type a message', async ({ page }) => {
-    // Navigate to messaging
-    await page.click('text=MESSAGING');
+    await page.goto('/portal/messages');
     await expect(page).toHaveURL(/.*\/portal\/messages/);
 
     // Verify UI elements

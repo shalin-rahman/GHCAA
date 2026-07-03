@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OrgConfig } from './org-config';
+import { AdminOrgConfig } from './org-config';
 
-describe('OrgConfig', () => {
-  let component: OrgConfig;
-  let fixture: ComponentFixture<OrgConfig>;
+describe('AdminOrgConfig', () => {
+  let component: AdminOrgConfig;
+  let fixture: ComponentFixture<AdminOrgConfig>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [OrgConfig]
+      imports: [AdminOrgConfig]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(OrgConfig);
+    fixture = TestBed.createComponent(AdminOrgConfig);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
