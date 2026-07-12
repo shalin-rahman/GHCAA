@@ -5,6 +5,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_tile.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../features/activity/activity_service.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final auditSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
@@ -92,7 +93,7 @@ class _AdminAuditScreenState extends ConsumerState<AdminAuditScreen> {
                       ),
                     Expanded(
                       child: filtered.isEmpty
-                        ? Center(child: Text(searchQuery.isEmpty ? 'No audit logs found.' : 'No logs match your search.', style: const TextStyle(color: Colors.white38, fontSize: 11, fontStyle: FontStyle.italic)))
+                        ? EmptyStateWidget(searchQuery.isEmpty ? 'No audit logs found.' : 'No logs match your search.', icon: Icons.history_edu)
                         : ListView.builder(
                             padding: const EdgeInsets.all(20.0),
                             itemCount: filtered.length,

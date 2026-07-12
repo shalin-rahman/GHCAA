@@ -1,5 +1,6 @@
 using GHCAA.Application.Interfaces;
 using GHCAA.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +23,7 @@ namespace GHCAA.API.Controllers
             _config = config;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetHealth(CancellationToken ct)
         {

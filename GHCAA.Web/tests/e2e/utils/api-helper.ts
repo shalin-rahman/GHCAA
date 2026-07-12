@@ -66,3 +66,47 @@ export async function completeRegistrationPayment(
   }
   return memberId;
 }
+
+/** Look up a member's numeric id by email via the admin search endpoint. */
+export async function findMemberIdByEmail(
+  request: APIRequestContext,
+  adminToken: string,
+  memberEmail: string
+): Promise<number> {
+  const headers = { Authorization: `Bearer ${adminToken}` };
+  const membersRes = await request.get(
+    `${API_BASE}/api/admin/members?searchQuery=${encodeURIComponent(memberEmail)}&statusFilter=all&pageSize=5`,
+    { headers }
+  );
+  if (!membersRes.ok()) {
+    throw new Error(`Member lookup failed: ${membersRes.status()}`);
+  }
+  const members = await membersRes.json();
+  const member = (members.items ?? []).find(
+    (m: { email?: string; Email?: string }) =>
+      (m.email ?? m.Email)?.toLowerCase() === memberEmail.toLowerCase()
+  );
+  if (!member) {
+    throw new Error(`No member found for ${memberEmail}`);
+  }
+  return member.id ?? member.Id;
+}
+
+/** Fully approve a member (payment + direct verify) so they can log in. */
+export async function approveMember(
+  request: APIRequestContext,
+  adminToken: string,
+  memberEmail: string
+): Promise<number> {
+  const headers = { Authorization: `Bearer ${adminToken}` };
+  const memberId = await completeRegistrationPayment(request, adminToken, memberEmail);
+
+  const approveRes = await request.post(`${API_BASE}/api/admin/members/${memberId}/approve`, {
+    headers,
+    data: { approvedByAdminId: 1 },
+  });
+  if (!approveRes.ok()) {
+    throw new Error(`Member approval failed: ${approveRes.status()}`);
+  }
+  return memberId;
+}

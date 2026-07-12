@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import '../../features/admin/admin_service.dart';
 
 final feeConfigsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
@@ -88,7 +89,7 @@ class FeeConfigScreen extends ConsumerWidget {
         onRetry: () => ref.invalidate(feeConfigsProvider),
         data: (configs) {
           if (configs.isEmpty) {
-            return const Center(child: Text('No fee configurations defined.', style: TextStyle(color: Colors.white54)));
+            return const EmptyStateWidget('No fee configurations defined.', icon: Icons.payments_outlined);
           }
 
           return ListView.builder(

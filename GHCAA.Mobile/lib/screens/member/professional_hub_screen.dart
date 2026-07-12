@@ -7,6 +7,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/api/api_client.dart';
 import '../../core/config/app_config.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final profHubSearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -169,7 +170,7 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
                       ? ListView(
                           children: const [
                             SizedBox(height: 100),
-                            Center(child: Text('No professionals found.', style: TextStyle(color: Colors.white38))),
+                            EmptyStateWidget('No professionals found.', icon: Icons.people_outline),
                           ],
                         )
                       : ListView.builder(

@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import '../../features/messaging/chat_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/real_time/notification_hub_service.dart';
@@ -69,7 +70,12 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
       onRetry: () => ref.invalidate(conversationsProvider),
       data: (conversations) {
         if (conversations.isEmpty) {
-          return _buildEmptyState('No active conversations yet.', Icons.forum_outlined, () => context.push('/directory'));
+          return EmptyStateWidget(
+            'No active conversations yet.',
+            icon: Icons.forum_outlined,
+            actionLabel: 'SEARCH ALUMNI DIRECTORY',
+            onAction: () => context.push('/directory'),
+          );
         }
 
         return ListView.builder(
@@ -221,23 +227,6 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildEmptyState(String message, IconData icon, VoidCallback onAction) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: Colors.white24),
-          const SizedBox(height: AppTheme.spaceL),
-          Text(message, style: const TextStyle(color: Colors.white54, fontSize: 16)),
-          const SizedBox(height: AppTheme.spaceS),
-          TextButton(
-            onPressed: onAction,
-            child: const Text('SEARCH ALUMNI DIRECTORY', style: TextStyle(color: AppTheme.royalGold, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAvatar(String? url, String? name) {
     return Container(

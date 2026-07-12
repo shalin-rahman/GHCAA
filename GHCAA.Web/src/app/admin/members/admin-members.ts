@@ -350,9 +350,8 @@ export class AdminMembers implements OnInit {
                 startDate: this.datePipe.transform(ph.startDate || ph.StartDate, 'dd-MM-yyyy') || ''
             }));
         }
-        
-        console.log('Member Details Loaded (Mapped):', mappedMember);
-        this.selectedMember.set(mappedMember); 
+
+        this.selectedMember.set(mappedMember);
         this.isEditing.set(false); 
         this.photoToUpload = null; 
         this.photoPreview.set(null); 

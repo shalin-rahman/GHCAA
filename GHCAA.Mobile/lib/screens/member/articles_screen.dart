@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import 'package:flutter/services.dart';
 import '../../core/config/app_config.dart';
 import '../../features/content/content_service.dart';
@@ -154,16 +155,12 @@ class _MemberArticlesScreenState extends ConsumerState<MemberArticlesScreen> {
                         ),
                       Expanded(
                         child: filtered.isEmpty
-                          ? Center(child: Padding(
-                              padding: const EdgeInsets.all(60.0),
-                              child: Text(
-                                searchQuery.isEmpty
-                                  ? 'No community stories submitted yet.\nBe the first to share a legacy contribution.'
-                                  : 'No articles match your search.',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 13, height: 1.5)
-                              ),
-                            ))
+                          ? EmptyStateWidget(
+                              searchQuery.isEmpty
+                                ? 'No community stories submitted yet.\nBe the first to share a legacy contribution.'
+                                : 'No articles match your search.',
+                              icon: Icons.article_outlined,
+                            )
                           : ListView.builder(
                               padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
                               itemCount: filtered.length,

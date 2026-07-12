@@ -110,6 +110,12 @@ class FakeStorageService implements StorageService {
   Future<Map<String, String>?> getCredentials() async => null;
   @override
   Future<void> clearCredentials() async {}
+  @override
+  Future<void> saveRefreshToken(String token) async {}
+  @override
+  Future<String?> getRefreshToken() async => null;
+  @override
+  Future<void> removeRefreshToken() async {}
 }
 
 class FakeDropdownService implements DropdownService {

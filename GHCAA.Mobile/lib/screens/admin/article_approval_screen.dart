@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_tile.dart';
 import '../../core/widgets/async_value_widget.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import '../../features/content/content_service.dart';
 import 'package:flutter/services.dart';
 
@@ -97,7 +98,7 @@ class _ArticleApprovalScreenState extends ConsumerState<ArticleApprovalScreen> {
                         ),
                       Expanded(
                         child: filtered.isEmpty 
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No pending submissions found.' : 'No items match your search.', style: const TextStyle(color: Colors.white54, fontSize: 11, fontStyle: FontStyle.italic)))
+                          ? EmptyStateWidget(searchQuery.isEmpty ? 'No pending submissions found.' : 'No items match your search.', icon: Icons.article_outlined)
                           : ListView.builder(
                               padding: const EdgeInsets.all(20.0),
                               itemCount: filtered.length,

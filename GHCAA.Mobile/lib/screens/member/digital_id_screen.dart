@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:screen_protector/screen_protector.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -14,11 +15,28 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/skeleton_loader.dart';
 import '../../features/auth/auth_service.dart';
 
-class DigitalIDScreen extends ConsumerWidget {
+class DigitalIDScreen extends ConsumerStatefulWidget {
   const DigitalIDScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DigitalIDScreen> createState() => _DigitalIDScreenState();
+}
+
+class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
+  @override
+  void initState() {
+    super.initState();
+    ScreenProtector.preventScreenshotOn();
+  }
+
+  @override
+  void dispose() {
+    ScreenProtector.preventScreenshotOff();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profileAsync = ref.watch(userProfileProvider);
     
     return AppScaffold(

@@ -1,3 +1,4 @@
+using Ganss.Xss;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
@@ -13,6 +14,8 @@ namespace GHCAA.Infrastructure.Services
     public class ForumService : IForumService
     {
         private readonly ApplicationDbContext _context;
+        // 1d: Shared, stateless sanitizer instance — HtmlSanitizer is thread-safe.
+        private static readonly HtmlSanitizer _sanitizer = new();
 
         public ForumService(ApplicationDbContext context)
         {
@@ -129,7 +132,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 CategoryId = dto.CategoryId,
                 Title = dto.Title,
-                Content = dto.Content, // Needs HTML sanitization in real app (handled by Ganss.HtmlSanitizer later)
+                Content = _sanitizer.Sanitize(dto.Content ?? ""), // 1d: strip XSS before storage
                 AuthorId = authorId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
@@ -153,7 +156,7 @@ namespace GHCAA.Infrastructure.Services
             var post = new ForumPost
             {
                 TopicId = dto.TopicId,
-                Content = dto.Content,
+                Content = _sanitizer.Sanitize(dto.Content ?? ""), // 1d: strip XSS before storage
                 AuthorId = authorId,
                 ParentPostId = dto.ParentPostId,
                 CreatedAt = DateTime.UtcNow,

@@ -1,5 +1,6 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GHCAA.API.Controllers
@@ -16,6 +17,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Submit([FromBody] ContactMessageDto dto, CancellationToken cancellationToken)
         {
             await _contactService.SubmitMessageAsync(dto, cancellationToken);

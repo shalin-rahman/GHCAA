@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { APP_CONFIG } from '../../core/constants/app.constants';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-about',
@@ -9,7 +9,7 @@ import { APP_CONFIG } from '../../core/constants/app.constants';
   templateUrl: './about.html',
   styleUrl: './about.scss'
 })
-export class About { 
-  appConfig = APP_CONFIG;
+export class About {
+  orgConfigService = inject(OrgConfigService);
 }
 

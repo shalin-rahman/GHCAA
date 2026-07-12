@@ -10,6 +10,7 @@ import '../../features/auth/auth_service.dart';
 import '../../core/utils/app_utils.dart';
 import '../../core/widgets/admin_action_circle.dart';
 import '../../core/widgets/app_search_field.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final galleryItemsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   final role = await ref.read(authServiceProvider).getRole();
@@ -254,16 +255,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 final filtered = galleries.where((g) => g['title'].toString().toLowerCase().contains(searchQuery)).toList();
                 
                 if (filtered.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.photo_library_outlined, color: Colors.white10, size: 64),
-                        const SizedBox(height: AppTheme.spaceM),
-                        Text('No galleries found.', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white12)),
-                      ],
-                    ),
-                  );
+                  return const EmptyStateWidget('No galleries found.', icon: Icons.photo_library_outlined);
                 }
  
                 return ListView.builder(

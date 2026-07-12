@@ -13,6 +13,7 @@ import '../../core/config/app_config.dart';
 import '../../core/widgets/custom_network_image.dart';
 import '../../core/utils/app_utils.dart';
 import '../../core/widgets/app_search_field.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final eventSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
@@ -149,7 +150,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                         ),
                       Expanded(
                         child: filtered.isEmpty
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No active events found.' : 'No events match your search.', style: Theme.of(context).textTheme.bodyMedium))
+                          ? EmptyStateWidget(searchQuery.isEmpty ? 'No active events found.' : 'No events match your search.', icon: Icons.event_outlined)
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceM),
                               itemCount: filtered.length,

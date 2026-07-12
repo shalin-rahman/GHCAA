@@ -24,20 +24,23 @@ class GlassTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassContainer(
         padding: EdgeInsets.zero,
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          leading: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppTheme.royalGold.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+        child: Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            leading: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.royalGold.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: AppTheme.royalGold, size: 20),
             ),
-            child: Icon(icon, color: AppTheme.royalGold, size: 20),
+            title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+            subtitle: subtitle != null ? Text(subtitle!, style: TextStyle(fontSize: 12, color: AppTheme.textSecondaryDark.withValues(alpha: 0.8))) : null,
+            trailing: trailing ?? const Icon(Icons.chevron_right, size: 16, color: AppTheme.royalGold),
+            onTap: onTap,
           ),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-          subtitle: subtitle != null ? Text(subtitle!, style: TextStyle(fontSize: 12, color: AppTheme.textSecondaryDark.withValues(alpha: 0.8))) : null,
-          trailing: trailing ?? const Icon(Icons.chevron_right, size: 16, color: AppTheme.royalGold),
-          onTap: onTap,
         ),
       ),
     );

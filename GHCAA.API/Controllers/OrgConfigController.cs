@@ -11,6 +11,7 @@ namespace GHCAA.API.Controllers
     {
         // Server-side caching is handled by OrgConfigService (IMemoryCache, 10-min TTL).
         // No [ResponseCache] here — AddResponseCaching middleware is not registered in this project.
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetConfig()
             => Ok(await configService.GetConfigAsync());

@@ -1,15 +1,29 @@
 import { test, expect } from '@playwright/test';
 import { AuthHelper } from './utils/auth-helper';
+import { approveMember, getAuthToken } from './utils/api-helper';
+import { registerNewMemberViaUi, NewMember } from './utils/ui-helper';
 
 test.describe('Article Editorial E2E (Web)', () => {
+  let member: NewMember;
+
+  // Own freshly seeded member instead of the hardcoded '2512006' shared with
+  // gallery/job-hub specs, so parallel workers never race over one session.
+  test.beforeAll(async ({ browser, request }) => {
+    const setupPage = await browser.newPage();
+    member = await registerNewMemberViaUi(setupPage);
+    await setupPage.close();
+
+    const adminToken = await getAuthToken(request, 'superadmin', 'SuperAdminPassword123!');
+    await approveMember(request, adminToken, member.email);
+  });
+
   test('Member submits article, Admin approves, it appears in News', async ({ page }) => {
     const auth = new AuthHelper(page);
     const testArticleTitle = `E2E Automated Article - ${Date.now()}`;
 
     // ==== STEP 1: Member submits article ====
-    // Using a regular member for feature testing as per latest instructions
-    await auth.login('2512006', '2512006');
-    
+    await auth.login(member.mobile, member.nid);
+
     await page.goto('/portal/articles');
     await expect(page).toHaveURL(/.*portal\/articles/);
 

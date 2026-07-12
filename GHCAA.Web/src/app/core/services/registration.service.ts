@@ -21,8 +21,8 @@ export class RegistrationService {
         return this.http.post(API_ENDPOINTS.AUTH.RESEND_OTP, { email });
     }
 
-    getStatus(id: number): Observable<any> {
-        return this.http.get(`${API_ENDPOINTS.AUTH.STATUS}/${id}`);
+    getStatus(id: number, email: string): Observable<any> {
+        return this.http.get(`${API_ENDPOINTS.AUTH.STATUS}/${id}`, { params: { email } });
     }
 
     getPublicPaymentConfigs(): Observable<any[]> {

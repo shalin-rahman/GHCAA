@@ -22,6 +22,7 @@ namespace GHCAA.API.Controllers
             _memberService = memberService;
         }
 
+        [AllowAnonymous]
         [HttpGet("stats")]
         public async Task<IActionResult> GetPublicStats(CancellationToken cancellationToken)
         {
@@ -29,6 +30,7 @@ namespace GHCAA.API.Controllers
             return Ok(stats);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAllLookups(CancellationToken cancellationToken)
         {
@@ -36,6 +38,7 @@ namespace GHCAA.API.Controllers
             return Ok(lookups);
         }
 
+        [AllowAnonymous]
         [HttpGet("{group}")]
         public async Task<IActionResult> GetByGroup(string group, CancellationToken cancellationToken)
         {

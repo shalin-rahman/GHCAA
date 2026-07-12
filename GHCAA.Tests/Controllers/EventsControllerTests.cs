@@ -18,13 +18,17 @@ namespace GHCAA.Tests.Controllers
     public class EventsControllerTests : ControllerTestBase
     {
         private Mock<IEventService> _eventServiceMock;
+        private Mock<IFileValidationService> _fileValidationServiceMock;
         private EventsController _controller;
 
         [SetUp]
         public void Setup()
         {
             _eventServiceMock = new Mock<IEventService>();
-            _controller = new EventsController(_eventServiceMock.Object);
+            _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                       .Returns(FileValidationResult.Ok());
+            _controller = new EventsController(_eventServiceMock.Object, _fileValidationServiceMock.Object);
             
             SetUserContext(_controller, 10, "Admin", 1); // Admin 1, Member 10
             // Optional: if tests need MemberId 10, we can use SetMemberContext(_controller, 10);

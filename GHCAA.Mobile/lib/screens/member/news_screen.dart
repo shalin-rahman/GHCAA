@@ -9,6 +9,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/utils/app_utils.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/async_value_widget.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import '../../features/content/content_service.dart';
 
 final newsSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
@@ -85,7 +86,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                         ),
                       Expanded(
                         child: filtered.isEmpty
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No news articles found.' : 'No stories match your search.', style: const TextStyle(color: AppTheme.textSecondaryDark)))
+                          ? EmptyStateWidget(searchQuery.isEmpty ? 'No news articles found.' : 'No stories match your search.', icon: Icons.article_outlined)
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceM),
                               itemCount: filtered.length,

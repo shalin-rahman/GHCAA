@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -13,14 +14,17 @@ namespace GHCAA.API.Controllers
     public class EventsController : ControllerBase
     {
         private readonly IEventService _eventService;
+        private readonly IFileValidationService _fileValidationService;
 
-        public EventsController(IEventService eventService)
+        public EventsController(IEventService eventService, IFileValidationService fileValidationService)
         {
             _eventService = eventService;
+            _fileValidationService = fileValidationService;
         }
 
         // --- PUBLIC / MEMBER ENDPOINTS ---
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetActiveEvents(CancellationToken cancellationToken)
         {
@@ -36,6 +40,7 @@ namespace GHCAA.API.Controllers
             return Ok(participants);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEventById(int id, CancellationToken cancellationToken)
         {
@@ -82,6 +87,9 @@ namespace GHCAA.API.Controllers
             UploadedFileDto? receiptDto = null;
             if (receipt != null)
             {
+                var receiptValidation = _fileValidationService.ValidateFormFile(receipt, FileCategory.Document, 10 * 1024 * 1024);
+                if (!receiptValidation.IsValid) return BadRequest(new { Message = receiptValidation.ErrorMessage });
+
                 var ms = new MemoryStream();
                 await receipt.CopyToAsync(ms, cancellationToken);
                 ms.Position = 0;
@@ -180,7 +188,8 @@ namespace GHCAA.API.Controllers
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> UploadEventLogo(int id, IFormFile logo, CancellationToken cancellationToken)
         {
-            if (logo == null || logo.Length == 0) return BadRequest("No file uploaded");
+            var logoValidation = _fileValidationService.ValidateFormFile(logo, FileCategory.Image, 5 * 1024 * 1024);
+            if (!logoValidation.IsValid) return BadRequest(new { Message = logoValidation.ErrorMessage });
 
             using var ms = new MemoryStream();
             await logo.CopyToAsync(ms, cancellationToken);

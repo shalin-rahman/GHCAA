@@ -236,9 +236,9 @@ test('Comprehensive GHCAA Ecosystem Workflow', async ({ page, request }) => {
   await page.goto('/portal/events');
   await page.waitForSelector(`text=${EVENT_TITLE}`);
   const eventCard = page.locator('.event-card', { hasText: EVENT_TITLE }).first();
-  await eventCard.locator('button:has-text("Register")').click();
+  await eventCard.locator('button', { hasText: /Secure Pass|Join Event/ }).click();
   await page.waitForSelector('text=Event Registration');
-  await page.locator('button:has-text("Confirm Participation")').click();
+  await page.locator('button:has-text("Confirm My Spot")').click();
   await expect(page.locator('text=Registered')).toBeVisible({ timeout: 10000 });
   console.log('✅ Member Registered for Event.');
 

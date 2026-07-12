@@ -362,19 +362,6 @@ p {
   }
 }
 
-/* Standard Grid for Forms */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem 2.5rem;
-  width: 100%;
-
-  .form-group.full,
-  .input-group.full {
-    grid-column: 1 / -1;
-  }
-}
-
 /* Validation & Form Feedback */
 input.border-red-500,
 textarea.border-red-500,
@@ -1192,11 +1179,14 @@ select.border-red-500 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
+  width: 100%;
 
   @media (max-width: 992px) {
     grid-template-columns: 1fr;
   }
 
+  .form-group.full,
+  .input-group.full,
   .full-width,
   .full {
     grid-column: 1 / -1;
@@ -1204,19 +1194,6 @@ select.border-red-500 {
 }
 
 /* Institutional Popup / Modal System */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  animation: fadeIn 0.3s ease;
-}
-
 .modal-content {
   max-width: 900px;
   width: 100%;
@@ -1298,55 +1275,6 @@ select.border-red-500 {
 
     button {
       font-size: 0.75rem !important;
-    }
-  }
-}
-
-/* Common History & Timeline Styles */
-.history-container {
-  .history-item {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 24px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-
-    &:hover {
-      background: rgba(var(--accent-color-rgb), 0.03);
-      border-color: rgba(var(--accent-color-rgb), 0.2);
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-    }
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: var(--accent-color);
-      opacity: 0.5;
-    }
-
-    .remove-btn {
-      background: rgba(255, 0, 0, 0.1);
-      color: #ff4d4d;
-      border: none;
-      padding: 4px 12px;
-      border-radius: 6px;
-      font-size: 0.7rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: 0.3s;
-
-      &:hover {
-        background: #ff4d4d;
-        color: white;
-      }
     }
   }
 }
@@ -1590,6 +1518,24 @@ select.border-red-500 {
       color: var(--text-muted);
       border-top: 1px dashed var(--glass-border);
       padding-top: 0.75rem;
+    }
+
+    .remove-btn {
+      background: rgba(255, 0, 0, 0.1);
+      color: #ff4d4d;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.3s;
+
+      &:hover {
+        background: #ff4d4d;
+        color: white;
+      }
     }
   }
 }

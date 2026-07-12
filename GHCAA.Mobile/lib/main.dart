@@ -12,6 +12,7 @@ import 'features/auth/auth_service.dart';
 import 'features/notifications/push_notification_service.dart'; // Keep this import
 import 'core/widgets/no_internet_banner.dart';
 import 'core/services/app_localizations.dart';
+import 'core/services/org_config_service.dart';
 
 void main() async {
   // 1. Ensure Flutter binding is valid
@@ -157,7 +158,9 @@ class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBin
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final locale = ref.watch(languageProvider);
-    
+    final branding = ref.watch(orgBrandingProvider);
+    final theme = AppTheme.buildTheme(branding);
+
     // 5. Initialize Push Notifications on startup (Defensive check)
     try {
       if (Firebase.apps.isNotEmpty) {
@@ -171,8 +174,8 @@ class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBin
       child: ConnectivityAwareWrapper(
         child: MaterialApp.router(
           title: AppConfig.appName,
-          theme: AppTheme.darkTheme,
-          darkTheme: AppTheme.darkTheme,
+          theme: theme,
+          darkTheme: theme,
           themeMode: ThemeMode.dark,
           locale: locale,
           localizationsDelegates: const [

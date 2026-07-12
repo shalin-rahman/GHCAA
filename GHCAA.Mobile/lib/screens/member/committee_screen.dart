@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import '../../features/networking/networking_service.dart';
 import '../../core/config/app_config.dart';
 
@@ -156,7 +157,7 @@ class _CommitteeScreenState extends ConsumerState<CommitteeScreen> {
                         ),
                       Expanded(
                         child: filtered.isEmpty
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No active committee records found.' : 'No members match your search.', style: const TextStyle(color: AppTheme.textSecondaryDark)))
+                          ? EmptyStateWidget(searchQuery.isEmpty ? 'No active committee records found.' : 'No members match your search.', icon: Icons.people_outline)
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                               itemCount: filtered.length,

@@ -74,6 +74,20 @@ builder.Services.AddRateLimiter(options =>
         });
     });
 
+    // 3c: Refresh policy — keyed per IP, lenient enough for legit silent-refresh retries
+    // but bounded so a stolen/guessed refresh token can't be replayed unlimited times.
+    options.AddPolicy<string>("refresh", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var key = isTestEnv ? "__test__" : ip;
+        return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(1),
+            PermitLimit = isTestEnv ? 500 : 20,
+            QueueLimit = 0
+        });
+    });
+
     // Registration Policy: Moderate (10 requests per 5 minutes)
     options.AddFixedWindowLimiter("registration", opt =>
     {
@@ -193,6 +207,7 @@ app.UseAuthentication();
 if (app.Environment.IsDevelopment() && app.Configuration["ASP_SEED_PROFILE"] == "Visual")
     app.UseMiddleware<GHCAA.API.Middleware.VisualTestAuthMiddleware>();
 app.UseMiddleware<SecurityStampMiddleware>(); // Invalidates sessions on status change
+app.UseMiddleware<GHCAA.API.Middleware.XsrfMiddleware>(); // 1a: CSRF protection for cookie-authenticated clients
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");

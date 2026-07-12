@@ -34,7 +34,8 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final token = data['token']; 
+        final token = data['token'];
+        final refreshToken = data['refreshToken'];
         final role = data['role'] ?? 'Member';
 
         // SECURITY: Clear ALL previous session data before saving new credentials.
@@ -42,6 +43,7 @@ class AuthService {
         await _storage.clearAll();
 
         await _storage.saveToken(token);
+        if (refreshToken != null) await _storage.saveRefreshToken(refreshToken);
         await _storage.saveRole(role);
         
         if (enableBiometric) {
@@ -89,11 +91,13 @@ class AuthService {
       final response = await _dio.post(path, data: data);
       if (response.statusCode == 200) {
         final respData = response.data;
-        final token = respData['token']; 
+        final token = respData['token'];
+        final refreshToken = respData['refreshToken'];
         final role = respData['role'] ?? 'Member';
 
         await _storage.clearAll();
         await _storage.saveToken(token);
+        if (refreshToken != null) await _storage.saveRefreshToken(refreshToken);
         await _storage.saveRole(role);
         
         return null; // Success

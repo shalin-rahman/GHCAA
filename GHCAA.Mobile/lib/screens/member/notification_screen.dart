@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import '../../features/notifications/notification_service.dart';
 
 final notificationsListProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
@@ -99,7 +100,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                         ),
                       Expanded(
                         child: filtered.isEmpty
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No active notifications found.' : 'No alerts match your search.', style: const TextStyle(color: AppTheme.textSecondaryDark)))
+                          ? EmptyStateWidget(searchQuery.isEmpty ? 'No active notifications found.' : 'No alerts match your search.', icon: Icons.notifications_none_outlined)
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                               itemCount: filtered.length,

@@ -5,6 +5,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../features/networking/family_service.dart';
 import '../../core/config/app_config.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final familyListProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(familyServiceProvider).getMyFamily();
@@ -87,7 +88,7 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
   Widget _buildFamilyList(AsyncValue<List<dynamic>> async) {
     return async.when(
       data: (members) => members.isEmpty
-          ? const Center(child: Text('No family members linked yet.', style: TextStyle(color: Colors.white24)))
+          ? const EmptyStateWidget('No family members linked yet.', icon: Icons.people_outline)
           : ListView.builder(
               padding: const EdgeInsets.all(20),
               itemCount: members.length,
@@ -104,7 +105,7 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
   Widget _buildReceivedList(AsyncValue<List<dynamic>> async) {
     return async.when(
       data: (requests) => requests.isEmpty
-          ? const Center(child: Text('No pending received requests.', style: TextStyle(color: Colors.white24)))
+          ? const EmptyStateWidget('No pending received requests.', icon: Icons.move_to_inbox_outlined)
           : ListView.builder(
               padding: const EdgeInsets.all(20),
               itemCount: requests.length,
@@ -121,7 +122,7 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
   Widget _buildSentList(AsyncValue<List<dynamic>> async) {
     return async.when(
       data: (requests) => requests.isEmpty
-          ? const Center(child: Text('No pending sent requests.', style: TextStyle(color: Colors.white24)))
+          ? const EmptyStateWidget('No pending sent requests.', icon: Icons.outbox_outlined)
           : ListView.builder(
               padding: const EdgeInsets.all(20),
               itemCount: requests.length,

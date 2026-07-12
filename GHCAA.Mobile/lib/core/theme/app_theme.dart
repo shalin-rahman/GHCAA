@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/org_config.dart';
 
 class AppTheme {
   // Core Brand Palette - "Obsidian & Gold Leaf"
@@ -60,122 +61,145 @@ class AppTheme {
     end: Alignment.bottomCenter,
   );
 
-  static final ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-    scaffoldBackgroundColor: obsidianBlack,
-    dividerTheme: const DividerThemeData(color: glassBorder, thickness: 1),
-    cardTheme: CardThemeData(
-      color: deepCharcoal,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(radiusL),
-        side: const BorderSide(color: glassBorder, width: 1),
-      ),
-      margin: const EdgeInsets.symmetric(vertical: spaceS, horizontal: spaceM),
-    ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: TextStyle(
-        fontFamily: 'Outfit',
-        fontSize: 18,
-        fontWeight: FontWeight.w800,
-        color: brightGold,
-        letterSpacing: 1.2,
-      ),
-      iconTheme: IconThemeData(color: royalGold),
-    ),
-    colorScheme: const ColorScheme.dark(
-      primary: royalGold,
-      onPrimary: obsidianBlack,
-      secondary: brightGold,
-      surface: deepCharcoal,
-      onSurface: textMain,
-      surfaceContainerHighest: Color(0xFF161616),
-      outline: glassBorder,
-    ),
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontFamily: 'Outfit',
-        fontWeight: FontWeight.w800,
-        color: textMain,
-        letterSpacing: -0.02,
-        fontSize: 32,
-      ),
-      headlineMedium: TextStyle(
-        fontFamily: 'Outfit',
-        fontWeight: FontWeight.w700,
-        color: brightGold,
-        fontSize: 24,
-      ),
-      titleLarge: TextStyle(
-        fontFamily: 'Outfit',
-        fontWeight: FontWeight.w600,
-        color: textMain,
-        fontSize: 18,
-      ),
-      bodyLarge: TextStyle(
-        fontFamily: 'Outfit',
-        color: textMain,
-        fontSize: 16,
-      ),
-      bodyMedium: TextStyle(
-        fontFamily: 'Outfit',
-        color: textMuted,
-        fontSize: 14,
-      ),
-      labelLarge: TextStyle(
-        fontFamily: 'Outfit',
-        fontWeight: FontWeight.w800,
-        color: royalGold,
-        fontSize: 12,
-        letterSpacing: 1.2,
-      ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: royalGold,
-        foregroundColor: obsidianBlack,
-        textStyle: const TextStyle(
-          fontFamily: 'Outfit',
-          fontWeight: FontWeight.w800,
-          letterSpacing: 1.2,
-        ),
-        padding: const EdgeInsets.symmetric(vertical: spaceM + 2, horizontal: spaceXL),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radiusM),
-        ),
-        elevation: 12,
-        shadowColor: royalGold.withValues(alpha: 0.5),
-      ),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: deepCharcoal,
-      labelStyle: const TextStyle(color: textMuted, fontFamily: 'Outfit'),
-      hintStyle: const TextStyle(color: Colors.white24, fontFamily: 'Outfit'),
-      contentPadding: const EdgeInsets.all(spaceM),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(radiusM),
-        borderSide: const BorderSide(color: glassBorder),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(radiusM),
-        borderSide: const BorderSide(color: glassBorder),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(radiusM),
-        borderSide: const BorderSide(color: royalGold, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(radiusM),
-        borderSide: const BorderSide(color: Colors.redAccent),
-      ),
-    ),
-  );
+  static final ThemeData darkTheme = buildTheme(OrgConfig.ghcaaDefaults.branding);
 
   /// Legacy alias — the "Midnight Gold" branding name used in tests and docs.
   static ThemeData get midnightTheme => darkTheme;
+
+  /// Parses a "#RRGGBB" (or "#AARRGGBB") hex string into a [Color].
+  /// Falls back to [fallback] on any parse failure so a malformed tenant
+  /// config value never crashes theme construction.
+  static Color _colorFromHex(String hex, Color fallback) {
+    try {
+      var value = hex.replaceFirst('#', '');
+      if (value.length == 6) value = 'FF$value';
+      return Color(int.parse(value, radix: 16));
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  /// Builds the app [ThemeData] from tenant [OrgBranding], so white-labeled
+  /// orgs get their configured primary/accent colors applied to
+  /// theme-driven surfaces (buttons, app bar, inputs, color scheme).
+  static ThemeData buildTheme(OrgBranding branding) {
+    final primary = _colorFromHex(branding.primaryColor, royalGold);
+    final secondary = _colorFromHex(branding.accentColor, brightGold);
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: obsidianBlack,
+      dividerTheme: const DividerThemeData(color: glassBorder, thickness: 1),
+      cardTheme: CardThemeData(
+        color: deepCharcoal,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusL),
+          side: const BorderSide(color: glassBorder, width: 1),
+        ),
+        margin: const EdgeInsets.symmetric(vertical: spaceS, horizontal: spaceM),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontFamily: 'Outfit',
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
+          color: secondary,
+          letterSpacing: 1.2,
+        ),
+        iconTheme: IconThemeData(color: primary),
+      ),
+      colorScheme: ColorScheme.dark(
+        primary: primary,
+        onPrimary: obsidianBlack,
+        secondary: secondary,
+        surface: deepCharcoal,
+        onSurface: textMain,
+        surfaceContainerHighest: const Color(0xFF161616),
+        outline: glassBorder,
+      ),
+      textTheme: TextTheme(
+        displayLarge: const TextStyle(
+          fontFamily: 'Outfit',
+          fontWeight: FontWeight.w800,
+          color: textMain,
+          letterSpacing: -0.02,
+          fontSize: 32,
+        ),
+        headlineMedium: TextStyle(
+          fontFamily: 'Outfit',
+          fontWeight: FontWeight.w700,
+          color: secondary,
+          fontSize: 24,
+        ),
+        titleLarge: const TextStyle(
+          fontFamily: 'Outfit',
+          fontWeight: FontWeight.w600,
+          color: textMain,
+          fontSize: 18,
+        ),
+        bodyLarge: const TextStyle(
+          fontFamily: 'Outfit',
+          color: textMain,
+          fontSize: 16,
+        ),
+        bodyMedium: const TextStyle(
+          fontFamily: 'Outfit',
+          color: textMuted,
+          fontSize: 14,
+        ),
+        labelLarge: TextStyle(
+          fontFamily: 'Outfit',
+          fontWeight: FontWeight.w800,
+          color: primary,
+          fontSize: 12,
+          letterSpacing: 1.2,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: obsidianBlack,
+          textStyle: const TextStyle(
+            fontFamily: 'Outfit',
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+          ),
+          padding: const EdgeInsets.symmetric(vertical: spaceM + 2, horizontal: spaceXL),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusM),
+          ),
+          elevation: 12,
+          shadowColor: primary.withValues(alpha: 0.5),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: deepCharcoal,
+        labelStyle: const TextStyle(color: textMuted, fontFamily: 'Outfit'),
+        hintStyle: const TextStyle(color: Colors.white24, fontFamily: 'Outfit'),
+        contentPadding: const EdgeInsets.all(spaceM),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: const BorderSide(color: glassBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: const BorderSide(color: glassBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: BorderSide(color: primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+      ),
+    );
+  }
 }

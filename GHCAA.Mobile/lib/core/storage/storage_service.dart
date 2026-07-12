@@ -11,9 +11,12 @@ class StorageService {
   static const _legacyJwtPrefsKey = 'jwt_token';
   static const _credUserKey = 'cred_user';
   static const _credPassKey = 'cred_pass';
+  static const _refreshTokenKey = 'refresh_token';
+  static const _legacyRefreshTokenPrefsKey = 'refresh_token';
 
   final FlutterSecureStorage _secure = const FlutterSecureStorage();
   String? _cachedToken;
+  String? _cachedRefreshToken;
 
   Future<void> saveToken(String token) async {
     _cachedToken = token;
@@ -62,6 +65,43 @@ class StorageService {
     await prefs.remove(_legacyJwtPrefsKey);
   }
 
+  Future<void> saveRefreshToken(String token) async {
+    _cachedRefreshToken = token;
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_legacyRefreshTokenPrefsKey, token);
+      return;
+    }
+    await _secure.write(key: _refreshTokenKey, value: token);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_legacyRefreshTokenPrefsKey);
+  }
+
+  Future<String?> getRefreshToken() async {
+    if (_cachedRefreshToken != null) return _cachedRefreshToken;
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      _cachedRefreshToken = prefs.getString(_legacyRefreshTokenPrefsKey);
+      return _cachedRefreshToken;
+    }
+    final token = await _secure.read(key: _refreshTokenKey);
+    if (token != null && token.isNotEmpty) {
+      _cachedRefreshToken = token;
+      return token;
+    }
+    return null;
+  }
+
+  Future<void> removeRefreshToken() async {
+    _cachedRefreshToken = null;
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_legacyRefreshTokenPrefsKey);
+      return;
+    }
+    await _secure.delete(key: _refreshTokenKey);
+  }
+
   Future<void> saveRole(String role) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_role', role);
@@ -98,6 +138,7 @@ class StorageService {
 
   Future<void> clearAll() async {
     await removeToken();
+    await removeRefreshToken();
     await clearCredentials();
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();

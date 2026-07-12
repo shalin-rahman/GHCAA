@@ -6,6 +6,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../features/activity/activity_service.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../core/widgets/glass_tile.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final activityHistoryTrackerProvider = FutureProvider.autoDispose<List<dynamic>>((ref) => ref.read(activityServiceProvider).getMyActivity());
 
@@ -97,7 +98,7 @@ class _ActivityLogScreenState extends ConsumerState<ActivityLogScreen> {
                         ),
                       Expanded(
                         child: filtered.isEmpty
-                          ? Center(child: Text(searchQuery.isEmpty ? 'Your activity registry is currently empty.' : 'No logs match your search.', style: const TextStyle(color: AppTheme.textSecondaryDark)))
+                          ? EmptyStateWidget(searchQuery.isEmpty ? 'Your activity registry is currently empty.' : 'No logs match your search.', icon: Icons.history)
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                               itemCount: filtered.length,

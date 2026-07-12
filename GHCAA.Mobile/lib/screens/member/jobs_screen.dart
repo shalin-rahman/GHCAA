@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/async_value_widget.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import '../../features/jobs/job_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/utils/app_utils.dart';
@@ -150,8 +151,8 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                           ),
                         ),
                       Expanded(
-                        child: filtered.isEmpty 
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No active jobs found.' : 'No jobs match your search.', style: const TextStyle(color: AppTheme.textSecondaryDark)))
+                        child: filtered.isEmpty
+                          ? EmptyStateWidget(searchQuery.isEmpty ? 'No active jobs found.' : 'No jobs match your search.', icon: Icons.work_outline)
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                               itemCount: filtered.length,

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace GHCAA.API.Controllers
 {
@@ -37,6 +38,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto, CancellationToken cancellationToken)
         {
             var result = await _authService.LoginAsync(loginDto, cancellationToken);
@@ -70,7 +72,7 @@ namespace GHCAA.API.Controllers
         // 24.27+24.44: Issue a new access token from a valid refresh token cookie.
         [HttpPost("refresh")]
         [AllowAnonymous]
-        [DisableRateLimiting]
+        [EnableRateLimiting("refresh")]
         public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
         {
             if (!Request.Cookies.TryGetValue("refresh_token", out var oldRefreshToken) || string.IsNullOrEmpty(oldRefreshToken))
@@ -92,8 +94,31 @@ namespace GHCAA.API.Controllers
             var newAccessToken = _tokenService.CreateToken(user);
             SetCookie("access_token", newAccessToken, TimeSpan.FromMinutes(65));
             SetCookie("refresh_token", newRefreshToken, TimeSpan.FromDays(7));
+            SetXsrfCookie(TimeSpan.FromDays(7));
 
             return Ok(new { Token = newAccessToken });
+        }
+
+        // Mobile equivalent of /refresh: no cookie jar, so the refresh token
+        // travels in the request/response body instead.
+        [HttpPost("refresh-mobile")]
+        [AllowAnonymous]
+        [EnableRateLimiting("refresh")]
+        public async Task<IActionResult> RefreshMobile([FromBody] RefreshRequestDto dto, CancellationToken cancellationToken)
+        {
+            var rotation = await _tokenService.RotateRefreshTokenAsync(dto.RefreshToken, cancellationToken);
+            if (rotation == null)
+                return Unauthorized(new { Message = "Invalid or expired refresh token." });
+
+            var (newRefreshToken, userId) = rotation.Value;
+
+            var user = await _db.Users.Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+            if (user == null) return Unauthorized();
+
+            var newAccessToken = _tokenService.CreateToken(user);
+
+            return Ok(new { Token = newAccessToken, RefreshToken = newRefreshToken });
         }
 
         // 24.39: Angular calls this on app init to restore auth state from the httpOnly cookie.
@@ -130,6 +155,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("reset-password")]
+        [AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto, CancellationToken cancellationToken)
         {
             var success = await _authService.ResetPasswordAsync(dto.Email, dto.Token, dto.NewPassword, cancellationToken);
@@ -161,6 +187,11 @@ namespace GHCAA.API.Controllers
             }
 
             SetCookie("refresh_token", refreshToken, TimeSpan.FromDays(7));
+            SetXsrfCookie(TimeSpan.FromDays(7));
+
+            // Cookie-based (web) clients ignore this; mobile clients (no cookie
+            // jar) persist it and send it back to /auth/refresh-mobile.
+            result.RefreshToken = refreshToken;
         }
 
         private void SetCookie(string name, string value, TimeSpan maxAge)
@@ -175,10 +206,27 @@ namespace GHCAA.API.Controllers
             });
         }
 
+        // 1a: Readable (non-httpOnly) double-submit-cookie token. Angular's HttpClient
+        // reads this and echoes it back as the X-XSRF-TOKEN header; XsrfMiddleware
+        // validates the two match on state-changing requests.
+        private void SetXsrfCookie(TimeSpan maxAge)
+        {
+            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+            Response.Cookies.Append("XSRF-TOKEN", token, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                MaxAge = maxAge,
+                Path = "/"
+            });
+        }
+
         private void ClearAuthCookies()
         {
             Response.Cookies.Delete("access_token");
             Response.Cookies.Delete("refresh_token");
+            Response.Cookies.Delete("XSRF-TOKEN");
         }
 
         public class SocialLoginRequest

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace GHCAA.Tests.Controllers
     {
         private Mock<IMemberService> _memberServiceMock;
         private Mock<IIDCardService> _idCardServiceMock;
+        private Mock<IFileValidationService> _fileValidationServiceMock;
         private AdminController _controller;
 
         [SetUp]
@@ -24,8 +26,11 @@ namespace GHCAA.Tests.Controllers
         {
             _memberServiceMock = new Mock<IMemberService>();
             _idCardServiceMock = new Mock<IIDCardService>();
+            _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                       .Returns(FileValidationResult.Ok());
 
-            _controller = new AdminController(_memberServiceMock.Object, _idCardServiceMock.Object);
+            _controller = new AdminController(_memberServiceMock.Object, _idCardServiceMock.Object, _fileValidationServiceMock.Object);
 
             SetSuperAdminContext(_controller, 1);
         }

@@ -1,3 +1,4 @@
+using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -14,11 +15,13 @@ namespace GHCAA.API.Controllers
     {
         private readonly IMemberService _memberService;
         private readonly IIDCardService _idCardService;
+        private readonly IFileValidationService _fileValidationService;
 
-        public AdminController(IMemberService memberService, IIDCardService idCardService)
+        public AdminController(IMemberService memberService, IIDCardService idCardService, IFileValidationService fileValidationService)
         {
             _memberService = memberService;
             _idCardService = idCardService;
+            _fileValidationService = fileValidationService;
         }
 
         [HttpGet("stats")]
@@ -181,7 +184,8 @@ namespace GHCAA.API.Controllers
         [HttpPost("members/{id}/photo")]
         public async Task<IActionResult> UpdateMemberPhoto(int id, IFormFile photo, CancellationToken cancellationToken)
         {
-            if (photo == null || photo.Length == 0) return BadRequest(new { Message = "No file provided." });
+            var validation = _fileValidationService.ValidateFormFile(photo, FileCategory.Image, 5 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
             var dto = new UploadedFileDto { FileName = photo.FileName, Length = photo.Length, Content = photo.OpenReadStream() };
             var path = await _memberService.UpdateMemberPhotoAsync(id, dto, cancellationToken);
             return Ok(new { Message = "Photo updated.", PhotoPath = path });
@@ -190,7 +194,8 @@ namespace GHCAA.API.Controllers
         [HttpPost("members/{id}/signature")]
         public async Task<IActionResult> UpdateMemberSignature(int id, IFormFile signature, CancellationToken cancellationToken)
         {
-            if (signature == null || signature.Length == 0) return BadRequest(new { Message = "No file provided." });
+            var validation = _fileValidationService.ValidateFormFile(signature, FileCategory.Image, 2 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
             var dto = new UploadedFileDto { FileName = signature.FileName, Length = signature.Length, Content = signature.OpenReadStream() };
             var path = await _memberService.UpdateMemberSignatureAsync(id, dto, cancellationToken);
             return Ok(new { Message = "Signature updated.", SignaturePath = path });
@@ -202,6 +207,9 @@ namespace GHCAA.API.Controllers
             UploadedFileDto? certFile = null;
             if (certificate != null)
             {
+                var certValidation = _fileValidationService.ValidateFormFile(certificate, FileCategory.Document, 10 * 1024 * 1024);
+                if (!certValidation.IsValid) return BadRequest(new { Message = certValidation.ErrorMessage });
+
                 certFile = new UploadedFileDto
                 {
                     FileName = certificate.FileName,
@@ -213,6 +221,9 @@ namespace GHCAA.API.Controllers
             UploadedFileDto? payFile = null;
             if (paymentProof != null)
             {
+                var payValidation = _fileValidationService.ValidateFormFile(paymentProof, FileCategory.Document, 10 * 1024 * 1024);
+                if (!payValidation.IsValid) return BadRequest(new { Message = payValidation.ErrorMessage });
+
                 payFile = new UploadedFileDto
                 {
                     FileName = paymentProof.FileName,

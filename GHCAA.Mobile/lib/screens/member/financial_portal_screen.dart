@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:screen_protector/screen_protector.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -10,6 +11,7 @@ import '../../core/widgets/app_search_field.dart';
 import '../../features/financials/financial_service.dart';
 import '../../features/financials/gateway_service.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final ledgerProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(financialServiceProvider).getLedger());
 final duesProvider = FutureProvider<double>((ref) async => ref.read(financialServiceProvider).getOutstandingDues());
@@ -27,7 +29,14 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    ScreenProtector.preventScreenshotOn();
+  }
+
+  @override
   void dispose() {
+    ScreenProtector.preventScreenshotOff();
     _searchController.dispose();
     super.dispose();
   }
@@ -172,8 +181,8 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                 child: Text('SAVED PAYMENT METHODS', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: AppTheme.royalGold, letterSpacing: 1.5)),
               ),
               methodsAsync.when(
-                data: (methods) => methods.isEmpty 
-                  ? const GlassContainer(child: Center(child: Text('No saved payment methods', style: TextStyle(color: Colors.white38, fontSize: 11))))
+                data: (methods) => methods.isEmpty
+                  ? const GlassContainer(child: EmptyStateWidget('No saved payment methods', icon: Icons.credit_card_outlined))
                   : Column(
                       children: methods.map((m) => Padding(
                         padding: const EdgeInsets.only(bottom: 8),
@@ -239,13 +248,10 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                   }).toList();
 
                   if (filtered.isEmpty) {
-                    return Center(child: Padding(
-                      padding: const EdgeInsets.all(40), 
-                      child: Text(
-                        searchQuery.isEmpty ? 'No transaction history found.' : 'No transactions match your search.', 
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 12))
-                    ));
+                    return EmptyStateWidget(
+                      searchQuery.isEmpty ? 'No transaction history found.' : 'No transactions match your search.',
+                      icon: Icons.receipt_long_outlined,
+                    );
                   }
 
                   return Column(

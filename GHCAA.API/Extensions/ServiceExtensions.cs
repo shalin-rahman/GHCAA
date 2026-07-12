@@ -1,6 +1,7 @@
 using System.Text;
 using GHCAA.Application.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
@@ -71,6 +72,12 @@ namespace GHCAA.API.Extensions
                 options.AddPolicy("SuperAdminOnly", policy => policy.RequireRole("SuperAdmin"));
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("SuperAdmin", "Admin"));
                 options.AddPolicy("MemberOnly", policy => policy.RequireRole("SuperAdmin", "Admin", "Member"));
+
+                // 3d: Secure-by-default — any action without an explicit [Authorize]/[AllowAnonymous]
+                // now requires authentication instead of being implicitly public.
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
             });
 
             return services;

@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../features/forum/forum_service.dart';
 
@@ -108,11 +109,9 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                     ref.invalidate(forumTopicsProvider(widget.categoryId));
                   },
                   child: filtered.isEmpty
-                      ? Center(
-                          child: Text(
-                            searchQuery.isEmpty ? 'No topics created in this category yet.' : 'No topics match your search.',
-                            style: const TextStyle(color: AppTheme.textSecondaryDark),
-                          ),
+                      ? EmptyStateWidget(
+                          searchQuery.isEmpty ? 'No topics created in this category yet.' : 'No topics match your search.',
+                          icon: Icons.forum_outlined,
                         )
                       : ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),

@@ -10,5 +10,6 @@ namespace GHCAA.Application.DTOs
         public string? Email { get; set; }
         public string? MobileNo { get; set; }
         public bool MustChangePassword { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }

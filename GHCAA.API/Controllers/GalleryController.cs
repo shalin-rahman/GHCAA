@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.API.Extensions;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -16,19 +17,22 @@ namespace GHCAA.API.Controllers
     {
         private readonly IGalleryService _galleryService;
         private readonly IFileStorageService _fileStorage;
+        private readonly IFileValidationService _fileValidationService;
 
-        public GalleryController(IGalleryService galleryService, IFileStorageService fileStorage)
+        public GalleryController(IGalleryService galleryService, IFileStorageService fileStorage, IFileValidationService fileValidationService)
         {
             _galleryService = galleryService;
             _fileStorage = fileStorage;
+            _fileValidationService = fileValidationService;
         }
 
         [HttpPost("upload-photo")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> UploadPhoto(IFormFile file, CancellationToken cancellationToken)
         {
-            if (file == null || file.Length == 0) return BadRequest("No file uploaded");
-            
+            var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Image, 10 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
             if (!int.TryParse(memberIdClaim, out var memberId))
             {

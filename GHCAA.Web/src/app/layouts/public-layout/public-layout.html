@@ -26,10 +26,10 @@
 <nav class="glass-nav" [class.with-banner]="activeTheme">
     <div class="container nav-content">
         <div class="logo">
-            <img [src]="appConfig.logoUrl" alt="Logo" class="mini-logo">
+            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo" class="mini-logo">
             <div class="logo-text">
-                <span class="abbr">{{ appConfig.shortName }}</span>
-                <span class="full hide-mobile hidden md:block">{{ appConfig.fullName }}</span>
+                <span class="abbr">{{ orgConfigService.config()?.branding?.shortName }}</span>
+                <span class="full hide-mobile hidden md:block">{{ orgConfigService.config()?.branding?.fullName }}</span>
             </div>
         </div>
 
@@ -43,10 +43,10 @@
              [class.active]="isMobileMenuOpen">
             <a routerLink="/" class="nav-link">Home</a>
             <a routerLink="/about" class="nav-link">About</a>
-            <a *ngIf="orgConfigService.isFeatureEnabled('enableEBook')" routerLink="/events" class="nav-link">Events</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableEvents')" routerLink="/events" class="nav-link">Events</a>
             <a routerLink="/news" class="nav-link" title="Latest News">News</a>
-            <a *ngIf="orgConfigService.isFeatureEnabled('enableAlumniGallery')" routerLink="/gallery" class="nav-link">Gallery</a>
-            <a *ngIf="orgConfigService.isFeatureEnabled('enableJobBoard')" routerLink="/jobs" class="nav-link">Jobs</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableGallery')" routerLink="/gallery" class="nav-link">Gallery</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableJobHub')" routerLink="/jobs" class="nav-link">Jobs</a>
             <a routerLink="/contact" class="nav-link">Contact</a>
             <a routerLink="/login" class="nav-link">Login</a>
         </div>

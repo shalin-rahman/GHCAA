@@ -34,7 +34,7 @@ export const routes: Routes = [
             {
                 path: 'gallery',
                 loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery),
-                canActivate: [featureGuard('enableAlumniGallery')]
+                canActivate: [featureGuard('enableGallery')]
             },
             {
                 path: 'magazine',
@@ -46,7 +46,7 @@ export const routes: Routes = [
             },
             {
                 path: 'events',
-                canActivate: [featureGuard('enableEBook')], // We use enableEBook to guard Events as aligned in requirements/plan
+                canActivate: [featureGuard('enableEvents')],
                 children: [
                     { path: '', loadComponent: () => import('./common/events/events').then(m => m.Events) },
                     { path: ':id', loadComponent: () => import('./common/events/events').then(m => m.Events) }
@@ -59,7 +59,7 @@ export const routes: Routes = [
             {
                 path: 'jobs',
                 loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs),
-                canActivate: [featureGuard('enableJobBoard')]
+                canActivate: [featureGuard('enableJobHub')]
             },
             {
                 path: 'payment',
@@ -87,7 +87,7 @@ export const routes: Routes = [
             {
                 path: 'jobs',
                 loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs),
-                canActivate: [featureGuard('enableJobBoard')]
+                canActivate: [featureGuard('enableJobHub')]
             },
             {
                 path: 'id-card',
@@ -120,7 +120,7 @@ export const routes: Routes = [
             {
                 path: 'gallery',
                 loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery),
-                canActivate: [featureGuard('enableAlumniGallery')]
+                canActivate: [featureGuard('enableGallery')]
             },
             {
                 path: 'news',
@@ -128,7 +128,7 @@ export const routes: Routes = [
             },
             {
                 path: 'events',
-                canActivate: [featureGuard('enableEBook')],
+                canActivate: [featureGuard('enableEvents')],
                 children: [
                     { path: '', loadComponent: () => import('./common/events/events').then(m => m.Events) },
                     { path: ':id', loadComponent: () => import('./common/events/events').then(m => m.Events) }
@@ -145,12 +145,12 @@ export const routes: Routes = [
             {
                 path: 'forum',
                 loadComponent: () => import('./member/forum/forum').then(m => m.Forum),
-                canActivate: [featureGuard('enableDiscussionForums')]
+                canActivate: [featureGuard('enableForum')]
             },
             {
                 path: 'forum/:id',
                 loadComponent: () => import('./member/forum/topic-detail').then(m => m.TopicDetail),
-                canActivate: [featureGuard('enableDiscussionForums')]
+                canActivate: [featureGuard('enableForum')]
             }
         ]
     },

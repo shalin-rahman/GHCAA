@@ -9,6 +9,7 @@ import '../../features/lookups/dropdown_service.dart';
 import '../../core/config/app_config.dart';
 import '../../core/widgets/custom_network_image.dart';
 import '../../core/widgets/skeleton_loader.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final directorySearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -222,16 +223,7 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                       await _fetchAlumni(refresh: true);
                     },
                     child: _alumni.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.search_off_rounded, color: Colors.white10, size: 48),
-                                const SizedBox(height: 16),
-                                Text('No members found.', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.white12)),
-                              ],
-                            ),
-                          )
+                        ? const EmptyStateWidget('No members found.', icon: Icons.people_outline)
                         : ListView.builder(
                             controller: _scrollController,
                             padding: const EdgeInsets.only(bottom: 100),

@@ -273,10 +273,11 @@ namespace GHCAA.Infrastructure.Services
             }
         }
 
-        public async Task<MemberRegistrationResultDto> GetStatusAsync(int memberId, CancellationToken cancellationToken = default)
+        public async Task<MemberRegistrationResultDto> GetStatusAsync(int memberId, string email, CancellationToken cancellationToken = default)
         {
             var m = await _db.Members.FirstOrDefaultAsync(mm => mm.Id == memberId, cancellationToken);
-            if (m == null) throw new KeyNotFoundException("Member not found");
+            if (m == null || !string.Equals(m.Email, email, StringComparison.OrdinalIgnoreCase))
+                throw new KeyNotFoundException("Member not found");
             return new MemberRegistrationResultDto
             {
                 MemberId = m.Id,

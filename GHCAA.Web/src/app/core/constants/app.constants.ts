@@ -482,22 +482,3 @@ export const API_ENDPOINTS = {
     CONFIG: '/api/config',
     FORUM: '/api/forum'
 } as const;
-
-export const APP_CONFIG = {
-    shortName: 'GHCAA',
-    fullName: 'Govt. Haraganga College Alumni Association',
-    tagline: 'Sharing Heritage, Aligning Lives, Integrating Networks',
-    bengaliTagline: 'ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন',
-    approvalSeal: 'GHC APPROVED',
-    logoUrl: '/assets/logo.png',
-    memberNickname: 'Haragangian',
-    institutionName: 'Govt. Haraganga College',
-    institutionAcronym: 'GHC',
-    registeredOffice: 'Govt. Haraganga College Campus, Munshiganj, Bangladesh.',
-    contactEmail: 'haragangian@gmail.com',
-    socialLinks: {
-        facebook: '#',
-        whatsapp: '#',
-        youtube: '#'
-    }
-};

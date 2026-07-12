@@ -6,6 +6,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../features/networking/mentorship_service.dart';
 import '../../core/config/app_config.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final sentMentorshipsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(mentorshipServiceProvider).getSentRequests();
@@ -76,7 +77,7 @@ class _MentorshipHubScreenState extends ConsumerState<MentorshipHubScreen> with 
     return asyncData.when(
       data: (list) {
         if (list.isEmpty) {
-          return Center(child: Text(isSent ? 'You have not requested mentorship.' : 'No active mentees.', style: const TextStyle(color: Colors.white38, fontSize: 13)));
+          return EmptyStateWidget(isSent ? 'You have not requested mentorship.' : 'No active mentees.', icon: Icons.people_outline);
         }
         return ListView.builder(
           padding: const EdgeInsets.all(16),

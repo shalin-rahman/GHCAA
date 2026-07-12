@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -15,12 +16,14 @@ namespace GHCAA.API.Controllers
         private readonly IMemberService _memberService;
         private readonly IUserService _userService;
         private readonly IIDCardService _idCardService;
+        private readonly IFileValidationService _fileValidationService;
 
-        public ProfileController(IMemberService memberService, IUserService userService, IIDCardService idCardService)
+        public ProfileController(IMemberService memberService, IUserService userService, IIDCardService idCardService, IFileValidationService fileValidationService)
         {
             _memberService = memberService;
             _userService = userService;
             _idCardService = idCardService;
+            _fileValidationService = fileValidationService;
         }
 
         [HttpGet]
@@ -110,14 +113,8 @@ namespace GHCAA.API.Controllers
         {
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
-            if (photo == null || photo.Length == 0) return BadRequest(new { Message = "No file provided." });
-
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-            if (!allowedTypes.Contains(photo.ContentType.ToLower()))
-                return BadRequest(new { Message = "Only JPG, PNG, or WebP images are allowed." });
-
-            if (photo.Length > 5 * 1024 * 1024)
-                return BadRequest(new { Message = "Photo must be under 5MB." });
+            var validation = _fileValidationService.ValidateFormFile(photo, FileCategory.Image, 5 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
 
             var dto = new UploadedFileDto
             {
@@ -135,14 +132,8 @@ namespace GHCAA.API.Controllers
         {
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
-            if (signature == null || signature.Length == 0) return BadRequest(new { Message = "No file provided." });
-
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-            if (!allowedTypes.Contains(signature.ContentType.ToLower()))
-                return BadRequest(new { Message = "Only JPG, PNG, or WebP images are allowed." });
-
-            if (signature.Length > 2 * 1024 * 1024)
-                return BadRequest(new { Message = "Signature must be under 2MB." });
+            var validation = _fileValidationService.ValidateFormFile(signature, FileCategory.Image, 2 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
 
             var dto = new UploadedFileDto
             {

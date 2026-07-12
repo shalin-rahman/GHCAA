@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,7 @@ namespace GHCAA.Tests.Controllers
     {
         private Mock<INewsService> _newsServiceMock;
         private Mock<IFileStorageService> _fileStorageServiceMock;
+        private Mock<IFileValidationService> _fileValidationServiceMock;
         private NewsController _controller;
 
         [SetUp]
@@ -25,7 +27,10 @@ namespace GHCAA.Tests.Controllers
         {
             _newsServiceMock = new Mock<INewsService>();
             _fileStorageServiceMock = new Mock<IFileStorageService>();
-            _controller = new NewsController(_newsServiceMock.Object, _fileStorageServiceMock.Object);
+            _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                       .Returns(FileValidationResult.Ok());
+            _controller = new NewsController(_newsServiceMock.Object, _fileStorageServiceMock.Object, _fileValidationServiceMock.Object);
 
             SetUserContext(_controller, null, "Admin", 1); // UserId 1, no specific MemberId
         }

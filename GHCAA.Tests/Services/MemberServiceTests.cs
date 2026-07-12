@@ -294,7 +294,7 @@ public class MemberServiceTests : TestBase
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetStatusAsync(member.Id);
+        var result = await _service.GetStatusAsync(member.Id, "test@example.com");
 
         // Assert
         result.Should().NotBeNull();
@@ -434,7 +434,7 @@ public class MemberServiceTests : TestBase
     public async Task GetStatusAsync_WithInvalidMemberId_ShouldThrowException()
     {
         // Act & Assert
-        var act = async () => await _service.GetStatusAsync(999);
+        var act = async () => await _service.GetStatusAsync(999, "anything@example.com");
         await act.Should().ThrowAsync<KeyNotFoundException>()
             .WithMessage("Member not found");
     }

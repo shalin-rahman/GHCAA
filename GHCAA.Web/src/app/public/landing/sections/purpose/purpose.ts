@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { APP_CONFIG } from '../../../../core/constants/app.constants';
+import { Component, inject } from '@angular/core';
+import { OrgConfigService } from '../../../../core/services/org-config.service';
 
 @Component({
     selector: 'landing-purpose',
@@ -8,6 +8,6 @@ import { APP_CONFIG } from '../../../../core/constants/app.constants';
     styleUrl: './purpose.scss',
 })
 export class LandingPurpose {
-    appConfig = APP_CONFIG;
+    orgConfigService = inject(OrgConfigService);
 }
 

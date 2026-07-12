@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LookupService } from '../../../../core/services/lookup.service';
-import { APP_CONFIG } from '../../../../core/constants/app.constants';
+import { OrgConfigService } from '../../../../core/services/org-config.service';
 
 @Component({
     selector: 'landing-cta-banner',
@@ -13,7 +13,7 @@ import { APP_CONFIG } from '../../../../core/constants/app.constants';
 })
 export class LandingCtaBanner implements OnInit {
     private lookupService = inject(LookupService);
-    appConfig = APP_CONFIG;
+    orgConfigService = inject(OrgConfigService);
     stats = signal<any>(null);
 
     ngOnInit() {

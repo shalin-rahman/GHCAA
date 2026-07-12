@@ -6,6 +6,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/api/api_client.dart';
 import '../../features/admin/admin_service.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final ecPeriodsAdminProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(adminServiceProvider).getECPeriods();
@@ -181,7 +182,7 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
                           ref.invalidate(ecPeriodsAdminProvider);
                         },
                         child: filtered.isEmpty 
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No committee periods found.' : 'No terms match your search.', style: const TextStyle(color: Colors.white54, fontSize: 11, fontStyle: FontStyle.italic)))
+                          ? EmptyStateWidget(searchQuery.isEmpty ? 'No committee periods found.' : 'No terms match your search.', icon: Icons.groups_outlined)
                           : ListView.builder(
                               padding: const EdgeInsets.all(20),
                               itemCount: filtered.length,
@@ -363,7 +364,7 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
               child: _members == null
                 ? const Center(child: CircularProgressIndicator())
                 : _members!.isEmpty 
-                  ? const Center(child: Text('No members assigned to this committee.', style: TextStyle(color: Colors.white24)))
+                  ? const EmptyStateWidget('No members assigned to this committee.', icon: Icons.people_alt_outlined)
                   : ListView.builder(
                       itemCount: _members!.length,
                       itemBuilder: (context, index) {

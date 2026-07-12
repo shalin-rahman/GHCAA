@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/widgets/glass_container.dart';
 
 import '../../features/auth/auth_service.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final pendingApprovalsProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(adminServiceProvider).getPendingApprovals());
 
@@ -73,7 +74,7 @@ class ApprovalQueueScreen extends ConsumerWidget {
                       ),
                     Expanded(
                       child: filtered.isEmpty 
-                        ? Center(child: Text(searchQuery.isEmpty ? 'No pending approvals found.' : 'No items match your search.', style: const TextStyle(color: Colors.white54, fontSize: 12, fontStyle: FontStyle.italic)))
+                        ? EmptyStateWidget(searchQuery.isEmpty ? 'No pending approvals found.' : 'No items match your search.', icon: Icons.task_alt)
                         : ListView.builder(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                             itemCount: filtered.length,

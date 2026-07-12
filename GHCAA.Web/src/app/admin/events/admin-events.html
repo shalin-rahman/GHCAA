@@ -12,7 +12,7 @@
                 title="Event Registrations Export">
             </app-export-buttons>
             }
-            <button *ngIf="orgConfigService.isFeatureEnabled('enableEBook')" (click)="openCreateForm()" class="btn btn-accent shadow-gold">
+            <button *ngIf="orgConfigService.isFeatureEnabled('enableEvents')" (click)="openCreateForm()" class="btn btn-accent shadow-gold">
                 <span class="icon">✨</span> Launch New Event
             </button>
         </div>
@@ -499,11 +499,11 @@
 
                     <div class="card-header">
                         <div class="card-logo">
-                            <img [src]="appConfig.logoUrl" alt="Logo">
+                            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo">
                         </div>
                         <div class="org-info">
-                            <h1 class="text-green-800">{{ appConfig.fullName }}</h1>
-                            <p class="subtitle text-green-700">{{ appConfig.tagline }}</p>
+                            <h1 class="text-green-800">{{ orgConfigService.config()?.branding?.fullName }}</h1>
+                            <p class="subtitle text-green-700">{{ orgConfigService.localePack()?.tagline }}</p>
                         </div>
                     </div>
 
@@ -553,7 +553,7 @@
                             </div>
                             <div class="approval-seal">
                                 <div class="seal">
-                                    <span class="seal-txt">{{ appConfig.approvalSeal }}</span>
+                                    <span class="seal-txt">{{ orgConfigService.config()?.branding?.approvalSeal }}</span>
                                 </div>
                                 <p class="seal-date">Validated on {{ invitationData()?.registeredAt | date:'dd-MM-yyyy'
                                     }}</p>

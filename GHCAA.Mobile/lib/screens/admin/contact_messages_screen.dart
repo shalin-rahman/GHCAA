@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import '../../features/admin/admin_service.dart';
 import 'package:flutter/services.dart';
 
@@ -97,7 +98,7 @@ class _ContactMessagesScreenState extends ConsumerState<ContactMessagesScreen> {
                         ),
                       Expanded(
                         child: filtered.isEmpty 
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No enquiries found.' : 'No messages match your search.', style: const TextStyle(color: Colors.white54, fontSize: 11, fontStyle: FontStyle.italic)))
+                          ? EmptyStateWidget(searchQuery.isEmpty ? 'No enquiries found.' : 'No messages match your search.', icon: Icons.mail_outline)
                           : ListView.builder(
                               padding: const EdgeInsets.all(20.0),
                               itemCount: filtered.length,

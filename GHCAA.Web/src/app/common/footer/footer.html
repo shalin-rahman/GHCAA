@@ -1,16 +1,15 @@
 <footer class="footer">
     <div class="container footer-grid">
         <div class="footer-brand">
-            <img [src]="appConfig.logoUrl" alt="Official Seal" class="footer-logo mb-6">
-            <p class="motto">"{{ appConfig.tagline }}"</p>
-            <p class="bengali-motto hide-mobile">{{ appConfig.bengaliTagline }}</p>
+            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Official Seal" class="footer-logo mb-6">
+            <p class="motto">"{{ orgConfigService.localePack()?.tagline }}"</p>
         </div>
 
         <div class="footer-links">
             <h4>Alumni Hub</h4>
             <a routerLink="/directory">Member Directory</a>
             <a routerLink="/register">Member Registry</a>
-            <a *ngIf="orgConfigService.isFeatureEnabled('enableJobBoard')" routerLink="/jobs">Career Hub</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableJobHub')" routerLink="/jobs">Career Hub</a>
             <a routerLink="/mentorship">Mentorship Hub</a>
             <a routerLink="/professionals">Professional Hub</a>
         </div>
@@ -18,9 +17,9 @@
         <div class="footer-links">
             <h4>Resources</h4>
             <a routerLink="/news">News & Media</a>
-            <a *ngIf="orgConfigService.isFeatureEnabled('enableEBook')" routerLink="/events">Global Events</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableEvents')" routerLink="/events">Global Events</a>
             <a routerLink="/magazine">Digital Magazine</a>
-            <a *ngIf="orgConfigService.isFeatureEnabled('enableAlumniGallery')" routerLink="/gallery">Photo Gallery</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableGallery')" routerLink="/gallery">Photo Gallery</a>
             <a routerLink="/articles">Community Blog</a>
         </div>
 
@@ -35,8 +34,8 @@
         <div class="footer-contact">
             <h4>Sitemap</h4>
             <p><a routerLink="/login" class="footer-tag-link">Secretariat Login</a></p>
-            <p><strong>Registered Office:</strong> {{ orgConfigService.config()?.contact?.address || appConfig.registeredOffice }}</p>
-            <p><strong>Enquiries:</strong> {{ orgConfigService.config()?.contact?.email || appConfig.contactEmail }}</p>
+            <p><strong>Registered Office:</strong> {{ orgConfigService.config()?.contact?.registeredOffice }}</p>
+            <p><strong>Enquiries:</strong> {{ orgConfigService.config()?.contact?.supportEmail }}</p>
             <div class="social-icons" *ngIf="orgConfigService.config()?.contact?.socialLinks as links">
                 <a *ngIf="links.facebook" [href]="links.facebook" class="social-icon">FB</a>
                 <a *ngIf="links.whatsapp" [href]="links.whatsapp" class="social-icon">WA</a>
@@ -46,8 +45,8 @@
     </div>
     <div class="footer-bottom">
         <div class="container flex items-center justify-center gap-4">
-            <img [src]="appConfig.logoUrl" alt="Logo" class="footer-bot-logo">
-            <p>&copy; {{ currentYear }} | {{ appConfig.fullName }} <span class="footer-tag">({{ appConfig.memberNickname | uppercase }})</span>. 
+            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo" class="footer-bot-logo">
+            <p>&copy; {{ currentYear }} | {{ orgConfigService.config()?.branding?.fullName }} <span class="footer-tag">({{ orgConfigService.config()?.branding?.memberNickname | uppercase }})</span>.
                 <br class="show-mobile"> 
                 Registered under the Registrar of Societies.
             </p>

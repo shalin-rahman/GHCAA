@@ -9,7 +9,6 @@ import { ExportUtil } from '../../core/utils/export.util';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
-import { APP_CONFIG } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
 
 
@@ -26,8 +25,6 @@ export class AdminEvents implements OnInit {
     private notify = inject(NotificationService);
     public nav = inject(NavService);
     public orgConfigService = inject(OrgConfigService);
-
-    appConfig = APP_CONFIG;
 
 
     events = signal<AlumniEvent[]>([]);

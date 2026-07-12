@@ -5,7 +5,6 @@ import { ThemeService } from '../../core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { filter } from 'rxjs';
-import { APP_CONFIG } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
@@ -21,8 +20,6 @@ export class PublicLayout implements OnDestroy {
   private titleService = inject(Title);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
-  
-  appConfig = APP_CONFIG;
 
   @HostBinding('style.background')
   get hostBackground(): string {
@@ -63,14 +60,14 @@ export class PublicLayout implements OnDestroy {
       const url = this.router.url;
       let title = 'Home';
       if (url.includes('login')) title = 'Members Login';
-      else if (url.includes('register')) title = `Join ${this.appConfig.shortName}`;
+      else if (url.includes('register')) title = `Join ${this.orgConfigService.config()?.branding?.shortName}`;
       else if (url.includes('about')) title = 'About Us';
       else if (url.includes('contact')) title = 'Contact Us';
       else if (url.includes('gallery')) title = 'Event Gallery';
       else if (url.includes('events')) title = 'Association Events';
       else if (url.includes('news')) title = 'Latest News';
 
-      this.titleService.setTitle(`${title} | ${this.appConfig.fullName}`);
+      this.titleService.setTitle(`${title} | ${this.orgConfigService.config()?.branding?.fullName}`);
     });
   }
 

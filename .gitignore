@@ -361,6 +361,8 @@ MigrationBackup/
 
 # Local secrets overrides (never commit)
 **/appsettings.*.local.json
+GHCAA.API/appsettings.Production.json
+GHCAA.API/appsettings.Preprod.json
 .env.local
 .env
 .env.preprod

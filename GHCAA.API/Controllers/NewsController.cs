@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
@@ -18,13 +19,16 @@ namespace GHCAA.API.Controllers
     {
         private readonly INewsService _newsService;
         private readonly IFileStorageService _fileStorageService;
+        private readonly IFileValidationService _fileValidationService;
 
-        public NewsController(INewsService newsService, IFileStorageService fileStorageService)
+        public NewsController(INewsService newsService, IFileStorageService fileStorageService, IFileValidationService fileValidationService)
         {
             _newsService = newsService;
             _fileStorageService = fileStorageService;
+            _fileValidationService = fileValidationService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetActiveNews([FromQuery] Enums.ArticleCategory? articleCategory, CancellationToken cancellationToken)
         {
@@ -32,6 +36,7 @@ namespace GHCAA.API.Controllers
             return Ok(news);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetNewsById(int id, CancellationToken cancellationToken)
         {
@@ -168,8 +173,8 @@ namespace GHCAA.API.Controllers
         [Authorize] // Allow members to upload images for their articles too
         public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded.");
+            var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Image, 10 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
 
             var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(authorIdClaim, out var authorId))

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/empty_state_widget.dart';
 import '../../features/admin/admin_service.dart';
 
 final adminLedgerRecordsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async => ref.read(adminServiceProvider).getLedgerRecords());
@@ -110,7 +111,7 @@ class _AdminLedgerScreenState extends ConsumerState<AdminLedgerScreen> {
                           ref.invalidate(adminLedgerSummaryProvider);
                         },
                         child: filtered.isEmpty
-                          ? Center(child: Text(searchQuery.isEmpty ? 'No financial history found.' : 'No items match your search.', style: const TextStyle(color: Colors.white38, fontSize: 11, fontStyle: FontStyle.italic)))
+                          ? EmptyStateWidget(searchQuery.isEmpty ? 'No financial history found.' : 'No items match your search.', icon: Icons.receipt_long_outlined)
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                               itemCount: filtered.length,

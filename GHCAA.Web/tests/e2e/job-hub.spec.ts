@@ -1,12 +1,26 @@
 import { test, expect } from '@playwright/test';
 import { AuthHelper } from './utils/auth-helper';
+import { approveMember, getAuthToken } from './utils/api-helper';
+import { registerNewMemberViaUi, NewMember } from './utils/ui-helper';
 
 test.describe('Job Hub E2E', () => {
   let auth: AuthHelper;
+  let member: NewMember;
+
+  // Each spec file gets its own freshly seeded member so parallel workers
+  // never contend over a shared login session.
+  test.beforeAll(async ({ browser, request }) => {
+    const setupPage = await browser.newPage();
+    member = await registerNewMemberViaUi(setupPage);
+    await setupPage.close();
+
+    const adminToken = await getAuthToken(request, 'superadmin', 'SuperAdminPassword123!');
+    await approveMember(request, adminToken, member.email);
+  });
 
   test.beforeEach(async ({ page }) => {
     auth = new AuthHelper(page);
-    await auth.login('2512006', '2512006');
+    await auth.login(member.mobile, member.nid);
   });
 
   test.afterEach(async ({ page }) => {

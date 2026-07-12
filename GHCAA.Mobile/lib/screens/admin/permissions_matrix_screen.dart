@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../features/admin/roles_service.dart';
+import '../../core/widgets/empty_state_widget.dart';
 
 final _usersProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(rolesServiceProvider).getUsers();
@@ -84,7 +85,7 @@ class _PermissionsMatrixScreenState
   Widget _buildUsersTab(AsyncValue<List<dynamic>> usersAsync) {
     return usersAsync.when(
       data: (users) => users.isEmpty
-          ? const Center(child: Text('No system users found.', style: TextStyle(color: Colors.white38)))
+          ? const EmptyStateWidget('No system users found.', icon: Icons.people_outline)
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: users.length,
@@ -219,7 +220,7 @@ class _PermissionsMatrixScreenState
           ),
           Expanded(
             child: roles.isEmpty
-                ? const Center(child: Text('No custom roles defined.', style: TextStyle(color: Colors.white38)))
+                ? const EmptyStateWidget('No custom roles defined.', icon: Icons.shield_outlined)
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: roles.length,
