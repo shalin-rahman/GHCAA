@@ -57,8 +57,8 @@ class OrgBranding {
       membershipNumberPrefix: json['membershipNumberPrefix'] ?? '',
       approvalSeal: json['approvalSeal'] ?? '',
       logoUrl: json['logoUrl'] ?? '',
-      primaryColor: json['primaryColor'] ?? '#1a237e',
-      accentColor: json['accentColor'] ?? '#e53935',
+      primaryColor: json['primaryColor'] ?? '#121212',
+      accentColor: json['accentColor'] ?? '#c5a059',
     );
   }
 }
@@ -355,8 +355,8 @@ class OrgConfig {
           membershipNumberPrefix: 'GHC-',
           approvalSeal: 'GHC APPROVED',
           logoUrl: '/assets/logo.png',
-          primaryColor: '#1a237e',
-          accentColor: '#e53935',
+          primaryColor: '#121212',
+          accentColor: '#c5a059',
         ),
         contact: OrgContact(
           supportEmail: 'haragangian@gmail.com',

@@ -22,8 +22,8 @@ namespace GHCAA.Application.DTOs
         public string MembershipNumberPrefix { get; init; } = string.Empty;
         public string ApprovalSeal { get; init; } = string.Empty;
         public string LogoUrl { get; init; } = string.Empty;
-        public string PrimaryColor { get; init; } = "#1a237e";
-        public string AccentColor { get; init; } = "#e53935";
+        public string PrimaryColor { get; init; } = "#121212";
+        public string AccentColor { get; init; } = "#c5a059";
     }
 
     public record ContactDto

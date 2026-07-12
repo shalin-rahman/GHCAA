@@ -58,6 +58,7 @@ namespace GHCAA.Infrastructure
 
             // 3. Manual Registrations for non-standard services
             services.AddScoped<IFileStorageService, LocalFileStorageService>();
+            services.AddScoped<IThemeService, ThemeService>();
             services.AddScoped<IFileUploadRepository, FileUploadRepository>();
             services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
             

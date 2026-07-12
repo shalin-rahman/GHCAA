@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -171,23 +172,25 @@ class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBin
     return Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: (_) => ref.read(lastActivityProvider.notifier).update(),
-      child: ConnectivityAwareWrapper(
-        child: MaterialApp.router(
-          title: AppConfig.appName,
-          theme: theme,
-          darkTheme: theme,
-          themeMode: ThemeMode.dark,
-          locale: locale,
-          localizationsDelegates: const [
-            DefaultMaterialLocalizations.delegate,
-            DefaultWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en', ''),
-            Locale('bn', ''),
-          ],
-          routerConfig: router,
-          debugShowCheckedModeBanner: false,
+      child: MaterialApp.router(
+        title: AppConfig.appName,
+        theme: theme,
+        darkTheme: theme,
+        themeMode: ThemeMode.dark,
+        locale: locale,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', ''),
+          Locale('bn', ''),
+        ],
+        routerConfig: router,
+        debugShowCheckedModeBanner: false,
+        builder: (context, child) => ConnectivityAwareWrapper(
+          child: child ?? const SizedBox.shrink(),
         ),
       ),
     );

@@ -74,8 +74,8 @@ namespace GHCAA.Infrastructure.Services
                 MembershipNumberPrefix = "GHC-",
                 ApprovalSeal = "GHC APPROVED",
                 LogoUrl = "/assets/logo.png",
-                PrimaryColor = "#1a237e",
-                AccentColor = "#e53935"
+                PrimaryColor = "#121212",
+                AccentColor = "#c5a059"
             },
             Contact = new()
             {

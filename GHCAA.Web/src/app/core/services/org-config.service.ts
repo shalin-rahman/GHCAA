@@ -47,8 +47,8 @@ export class OrgConfigService {
           membershipNumberPrefix: 'GHC-',
           approvalSeal: 'GHC APPROVED',
           logoUrl: '/assets/logo.png',
-          primaryColor: '#1a237e',
-          accentColor: '#e53935'
+          primaryColor: '#121212',
+          accentColor: '#c5a059'
         },
         contact: {
           supportEmail: 'haragangian@gmail.com',
