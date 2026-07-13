@@ -259,6 +259,11 @@
             color: #000;
             font-weight: 900;
             font-size: 0.8rem;
+
+            &.avatar-img {
+                object-fit: cover;
+                background: none;
+            }
         }
 
         .user-details {

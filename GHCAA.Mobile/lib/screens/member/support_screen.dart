@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../features/support/support_service.dart';
 
 class SupportScreen extends ConsumerStatefulWidget {
@@ -89,7 +90,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                     if (context.mounted) setState(() => _sending = false);
                   }
                 },
-                icon: _sending ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black)) : const Icon(Icons.send_rounded, size: 18),
+                icon: _sending ? SizedBox(width: 16, height: 16, child: LogoSpinner.small(size: 16)) : const Icon(Icons.send_rounded, size: 18),
                 label: Text(_sending ? 'SYNCHRONIZING...' : 'SEND SUPPORT TICKET', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1)),
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 18)),
               ),

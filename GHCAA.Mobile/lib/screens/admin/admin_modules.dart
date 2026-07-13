@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/api/api_client.dart';
 import '../../features/lookups/dropdown_service.dart';
@@ -158,7 +159,7 @@ class _AdminCommState extends ConsumerState<AdminCommunicationHub> {
               height: 56,
               child: ElevatedButton.icon(
                 onPressed: _isLoading ? null : _broadcast, 
-                icon: _isLoading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black)) : const Icon(Icons.campaign, color: Colors.black),
+                icon: _isLoading ? SizedBox(width: 20, height: 20, child: LogoSpinner.small()) : const Icon(Icons.campaign, color: Colors.black),
                 label: const Text('SEND', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1)),
                 style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold),
               )
@@ -340,7 +341,7 @@ class AdminCMS extends ConsumerWidget {
                   ],
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+              loading: () => const Center(child: LogoSpinner(size: 120)),
               error: (e, s) => Center(child: Text('Error: $e')),
             ),
           ),

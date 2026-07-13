@@ -5,11 +5,12 @@ import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { ARTICLE_CATEGORIES, getArticleCategoryLabel } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-admin-news',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent],
     templateUrl: './admin-news.html',
     styleUrl: './admin-news.scss'
 })

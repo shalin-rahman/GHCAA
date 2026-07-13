@@ -10,6 +10,7 @@ import '../../core/config/app_config.dart';
 import '../../core/widgets/custom_network_image.dart';
 import '../../core/widgets/skeleton_loader.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final directorySearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -231,9 +232,9 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                             itemCount: _alumni.length + (_hasMore || _isLoadingMore ? 1 : 0),
                             itemBuilder: (context, index) {
                               if (index == _alumni.length) {
-                                return const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 32.0),
-                                  child: Center(child: CircularProgressIndicator(color: AppTheme.royalGold, strokeWidth: 1.5)),
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 32.0),
+                                  child: Center(child: LogoSpinner.small()),
                                 );
                               }
  

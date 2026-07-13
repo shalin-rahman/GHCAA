@@ -1,5 +1,6 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -17,12 +18,14 @@ namespace GHCAA.API.Controllers
         private readonly IAuthService _authService;
         private readonly ITokenService _tokenService;
         private readonly GHCAA.Infrastructure.Data.ApplicationDbContext _db;
+        private readonly IWebHostEnvironment _env;
 
-        public AuthController(IAuthService authService, ITokenService tokenService, GHCAA.Infrastructure.Data.ApplicationDbContext db)
+        public AuthController(IAuthService authService, ITokenService tokenService, GHCAA.Infrastructure.Data.ApplicationDbContext db, IWebHostEnvironment env)
         {
             _authService = authService;
             _tokenService = tokenService;
             _db = db;
+            _env = env;
         }
 
         [HttpGet("providers")]
@@ -199,7 +202,7 @@ namespace GHCAA.API.Controllers
             Response.Cookies.Append(name, value, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = !_env.IsDevelopment(),
                 SameSite = SameSiteMode.Strict,
                 MaxAge = maxAge,
                 Path = "/"
@@ -215,7 +218,7 @@ namespace GHCAA.API.Controllers
             Response.Cookies.Append("XSRF-TOKEN", token, new CookieOptions
             {
                 HttpOnly = false,
-                Secure = true,
+                Secure = !_env.IsDevelopment(),
                 SameSite = SameSiteMode.Strict,
                 MaxAge = maxAge,
                 Path = "/"

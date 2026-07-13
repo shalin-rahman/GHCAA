@@ -10,6 +10,7 @@ import '../../core/config/app_config.dart';
 import '../../core/storage/storage_service.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/services/app_localizations.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 // Persistent Layout State
 final dashboardLayoutProvider = StateNotifierProvider<DashboardLayoutNotifier, bool>((ref) {
@@ -155,7 +156,7 @@ class DashboardScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+        loading: () => const Center(child: LogoSpinner(size: 120)),
         error: (err, stack) => Center(child: Text('Initialization Error: $err', style: const TextStyle(color: Colors.red))),
       ),
     );

@@ -6,6 +6,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../features/admin/admin_service.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final adminLedgerRecordsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async => ref.read(adminServiceProvider).getLedgerRecords());
 final adminLedgerSummaryProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async => ref.read(adminServiceProvider).getLedgerSummary(DateTime.now().year));
@@ -140,7 +141,7 @@ class _AdminLedgerScreenState extends ConsumerState<AdminLedgerScreen> {
                   ],
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+              loading: () => const Center(child: LogoSpinner(size: 120)),
               error: (e, s) => Center(child: Text('Registry Sync Error: $e')),
             ),
           ),

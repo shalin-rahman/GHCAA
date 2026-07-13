@@ -6,6 +6,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../features/admin/roles_service.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final _usersProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(rolesServiceProvider).getUsers();
@@ -91,7 +92,7 @@ class _PermissionsMatrixScreenState
               itemCount: users.length,
               itemBuilder: (context, i) => _buildUserCard(users[i]),
             ),
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      loading: () => const Center(child: LogoSpinner(size: 120)),
       error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.redAccent))),
     );
   }
@@ -233,7 +234,7 @@ class _PermissionsMatrixScreenState
           ),
         ],
       ),
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      loading: () => const Center(child: LogoSpinner(size: 120)),
       error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.redAccent))),
     );
   }

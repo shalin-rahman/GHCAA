@@ -12,6 +12,7 @@ import '../../features/financials/financial_service.dart';
 import '../../features/financials/gateway_service.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final ledgerProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(financialServiceProvider).getLedger());
 final duesProvider = FutureProvider<double>((ref) async => ref.read(financialServiceProvider).getOutstandingDues());
@@ -57,7 +58,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      builder: (context) => const Center(child: LogoSpinner(size: 120)),
     );
 
     try {
@@ -170,7 +171,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                     ],
                   ),
                 ),
-                loading: () => const Center(child: Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator(color: AppTheme.royalGold))),
+                loading: () => const Center(child: Padding(padding: EdgeInsets.all(40), child: LogoSpinner(size: 120))),
                 error: (e, s) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.redAccent))),
               ),
               const SizedBox(height: 32),
@@ -208,7 +209,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                         ),
                       )).toList(),
                     ),
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: LogoSpinner(size: 120)),
                 error: (e, s) => const SizedBox(),
               ),
               const SizedBox(height: 40),
@@ -297,7 +298,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                     )).toList(),
                   );
                 },
-                loading: () => const Center(child: Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator(color: AppTheme.royalGold))),
+                loading: () => const Center(child: Padding(padding: EdgeInsets.all(40), child: LogoSpinner(size: 120))),
                 error: (e, s) => Center(child: Text('Error: $e')),
               ),
               const SizedBox(height: 40),

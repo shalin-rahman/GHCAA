@@ -8,6 +8,7 @@ import '../../core/widgets/glass_container.dart';
 
 import '../../features/auth/auth_service.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final pendingApprovalsProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(adminServiceProvider).getPendingApprovals());
 
@@ -156,7 +157,7 @@ class ApprovalQueueScreen extends ConsumerWidget {
                   ],
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+              loading: () => const Center(child: LogoSpinner(size: 120)),
               error: (e, s) => Center(child: Text('Error loading queue: $e')),
             ),
           ),

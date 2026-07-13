@@ -77,7 +77,7 @@
     <div class="member-list">
         @if (loading()) {
         <div class="loading-state">
-            <div class="spinner"></div>
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
             <p>Searching directory...</p>
         </div>
         } @else {
@@ -148,7 +148,7 @@
         <div #sentinel class="scroll-sentinel">
             @if (loadingMore()) {
             <div class="load-more-spinner">
-                <div class="spinner-sm"></div>
+                <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
                 <span>Syncing Haragangian records...</span>
             </div>
             } @else if (hasMore()) {

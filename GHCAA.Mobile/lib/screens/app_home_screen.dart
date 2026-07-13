@@ -10,6 +10,7 @@ import '../core/widgets/password_field.dart';
 import '../core/services/biometric_service.dart';
 import '../core/storage/storage_service.dart';
 import '../core/services/app_localizations.dart';
+import '../core/widgets/logo_spinner.dart';
 import '../features/auth/auth_service.dart';
 
 class AppHomeScreen extends ConsumerStatefulWidget {
@@ -185,8 +186,8 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
                            child: Text(_errorMessage!, style: const TextStyle(color: Colors.redAccent, fontSize: 11)),
                          ),
                        const SizedBox(height: AppTheme.spaceL),
-                       _isLoading 
-                         ? const Center(child: CircularProgressIndicator(color: AppTheme.royalGold))
+                       _isLoading
+                         ? Center(child: LogoSpinner.small())
                          : ElevatedButton(
                              onPressed: _handleLogin,
                              child: Text(AppLocalizations.of(context).translate('login').toUpperCase()),

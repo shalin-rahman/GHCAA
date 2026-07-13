@@ -15,7 +15,7 @@
     <div class="glass-card table-wrap reveal-bottom">
         @if (loading()) {
         <div class="loading-state">
-            <span class="spinner">🎨</span>
+            <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
             <p>Syncing theme registry...</p>
         </div>
         } @else if (themes().length === 0) {

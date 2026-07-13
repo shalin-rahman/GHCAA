@@ -66,7 +66,11 @@
                         {{ theme.theme() === 'light' ? '🌙' : '☀️' }}
                     </button>
                     <div class="user-profile">
+                        @if (profilePhotoUrl()) {
+                        <img [src]="profilePhotoUrl()" alt="Profile" class="avatar avatar-img">
+                        } @else {
                         <div class="avatar">{{ auth.currentUser()?.username?.[0]?.toUpperCase() }}</div>
+                        }
                         <div class="user-details hide-mobile">
                             <span class="username">{{ auth.currentUser()?.fullName || auth.currentUser()?.username }}</span>
                             <small class="role">{{ nav.isAdmin() ? 'Administrator' : 'Alumni Member' }}</small>

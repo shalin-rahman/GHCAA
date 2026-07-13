@@ -6,6 +6,7 @@ import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/password_field.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../features/auth/auth_service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -244,7 +245,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         const SizedBox(height: AppTheme.spaceL),
                         _isLoading
-                          ? const Center(child: CircularProgressIndicator(color: AppTheme.royalGold))
+                          ? Center(child: LogoSpinner.small())
                           : ElevatedButton(
                               onPressed: () {
                                 HapticFeedback.mediumImpact();

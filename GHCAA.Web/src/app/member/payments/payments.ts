@@ -10,11 +10,12 @@ import {
     getPaymentStatusClass,
     getPaymentStatusLabel
 } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-payments',
     standalone: true,
-    imports: [CommonModule, FormsModule, PaymentPortalComponent],
+    imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent],
     templateUrl: './payments.html',
     styleUrl: './payments.scss'
 })

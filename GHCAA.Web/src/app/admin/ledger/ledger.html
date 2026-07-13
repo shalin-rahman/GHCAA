@@ -106,7 +106,7 @@
     <div class="glass-card table-section" *ngIf="!showForm()">
         @if (loading()) {
         <div class="loading-state">
-            <span class="spinner">⏳</span>
+            <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
             <p>Gathering financial legacy...</p>
         </div>
         } @else {

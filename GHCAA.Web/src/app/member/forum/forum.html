@@ -48,7 +48,7 @@
   <!-- Category Grid -->
   @if (!selectedCategory() && !showCreateForm()) {
     @if (loading()) {
-      <div class="loader-wrap"><div class="spinner"></div><p>Loading categories…</p></div>
+      <div class="loader-wrap"><app-logo-spinner [size]="48" label="Loading categories…"></app-logo-spinner></div>
     } @else {
       <div class="category-grid">
         @for (cat of categories(); track cat.id) {
@@ -77,7 +77,7 @@
   <!-- Topics List -->
   @if (selectedCategory() && !showCreateForm()) {
     @if (topicsLoading()) {
-      <div class="loader-wrap"><div class="spinner"></div><p>Loading topics…</p></div>
+      <div class="loader-wrap"><app-logo-spinner [size]="48" label="Loading topics…"></app-logo-spinner></div>
     } @else {
       <div class="topics-list">
         @for (topic of topics(); track topic.id) {

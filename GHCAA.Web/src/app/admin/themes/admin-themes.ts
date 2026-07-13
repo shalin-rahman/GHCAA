@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ThemeService, SpecialDayTheme } from '../../core/services/theme.service';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-admin-themes',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent],
     templateUrl: './admin-themes.html',
     styleUrl: './admin-themes.scss'
 })

@@ -77,46 +77,6 @@
         }
     }
 
-    .logo-spinner-ring {
-        position: relative;
-        width: 160px;
-        height: 160px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .spinner-arc {
-        position: absolute;
-        inset: -14px;
-        border-radius: 50%;
-        border: 3px solid transparent;
-        border-top-color: var(--accent-color);
-        border-right-color: rgba(197, 160, 89, 0.3);
-        animation: hero-spin 2.4s linear infinite;
-
-        &.spinner-arc--reverse {
-            inset: -22px;
-            border-top-color: transparent;
-            border-bottom-color: var(--accent-color);
-            border-left-color: rgba(197, 160, 89, 0.2);
-            animation-direction: reverse;
-            animation-duration: 3.6s;
-        }
-    }
-
-    .hero-seal {
-        width: 160px;
-        height: 160px;
-        border-radius: 50%;
-        // border: 1px solid var(--accent-color);
-        // background: white;
-        padding: 5px;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(var(--accent-color-rgb), 0.2);
-        object-fit: contain;
-        position: relative;
-        z-index: 1;
-    }
 }
 
 @keyframes hero-ripple {
@@ -130,16 +90,6 @@
         width: 220px;
         height: 220px;
         opacity: 0;
-    }
-}
-
-@keyframes hero-spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
     }
 }
 

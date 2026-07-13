@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/admin/admin_service.dart';
 import '../../features/lookups/dropdown_service.dart';
@@ -256,7 +257,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_initialized) {
-      return const AppScaffold(child: Center(child: CircularProgressIndicator(color: AppTheme.royalGold)));
+      return const AppScaffold(child: Center(child: LogoSpinner(size: 120)));
     }
 
     return AppScaffold(
@@ -272,8 +273,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       actions: [
         IconButton(
           onPressed: _isLoading ? null : _save,
-          icon: _isLoading 
-            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.royalGold))
+          icon: _isLoading
+            ? SizedBox(width: 20, height: 20, child: LogoSpinner.small())
             : const Icon(Icons.check_circle_outline, color: AppTheme.royalGold),
         ),
       ],

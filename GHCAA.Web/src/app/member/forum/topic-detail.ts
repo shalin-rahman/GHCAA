@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { ForumService } from '../../core/services/forum.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ForumTopic, ForumPost, CreateForumPostDto } from '../../core/models/business.models';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-topic-detail',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule],
+    imports: [CommonModule, RouterModule, FormsModule, LogoSpinnerComponent],
     templateUrl: './topic-detail.html',
     styleUrls: ['./topic-detail.scss']
 })

@@ -8,11 +8,12 @@ import { ExportButtonsComponent } from '../../common/export-buttons/export-butto
 import { PaginationComponent } from '../../common/pagination/pagination.component';
 import { ExportUtil } from '../../core/utils/export.util';
 import { getFinancialCategoryLabel } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-ledger',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent],
   templateUrl: './ledger.html',
   styleUrl: './ledger.scss'
 })

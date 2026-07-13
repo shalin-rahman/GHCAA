@@ -4,11 +4,12 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ForumService } from '../../core/services/forum.service';
 import { ForumCategory, ForumTopic, CreateForumTopicDto } from '../../core/models/business.models';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-forum',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule],
+    imports: [CommonModule, RouterModule, FormsModule, LogoSpinnerComponent],
     templateUrl: './forum.html',
     styleUrls: ['./forum.scss']
 })

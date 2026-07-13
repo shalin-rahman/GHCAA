@@ -11,6 +11,7 @@ import '../../core/api/api_client.dart';
 import '../../features/auth/auth_service.dart';
 import '../../features/admin/admin_service.dart';
 import '../../features/networking/mentorship_service.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final isAdminProvider = FutureProvider.autoDispose<bool>((ref) async {
   final role = await ref.read(authServiceProvider).getRole();
@@ -83,7 +84,7 @@ class MemberDetailsScreen extends ConsumerWidget {
       loading: () => const AppScaffold(
         title: 'Member Details',
         breadcrumb: 'Management > Profile',
-        child: Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+        child: Center(child: LogoSpinner(size: 120)),
       ),
       error: (e, s) => AppScaffold(
         title: 'Member Details',
@@ -321,7 +322,7 @@ class MemberDetailsScreen extends ConsumerWidget {
                   fit: BoxFit.contain,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
-                    return const Center(child: CircularProgressIndicator(color: AppTheme.royalGold));
+                    return Center(child: LogoSpinner.small());
                   },
                   errorBuilder: (context, error, stackTrace) => Container(
                     padding: const EdgeInsets.all(20),

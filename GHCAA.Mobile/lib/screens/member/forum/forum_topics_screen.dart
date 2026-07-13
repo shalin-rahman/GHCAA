@@ -7,6 +7,7 @@ import '../../../core/widgets/glass_container.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/empty_state_widget.dart';
+import '../../../core/widgets/logo_spinner.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../features/forum/forum_service.dart';
 
@@ -328,11 +329,7 @@ class _ForumTopicsScreenState extends ConsumerState<ForumTopicsScreen> {
                       }
                     },
               child: isSubmitting
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2),
-                    )
+                  ? LogoSpinner.small()
                   : const Text('POST TOPIC', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             ),
           ],

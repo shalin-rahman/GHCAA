@@ -429,7 +429,7 @@
                             <button type="button" class="btn btn-accent px-10 shadow-gold h-14" (click)="nextStep(regForm)"
                                 *ngIf="currentStep() < 3">Continue Assessment →</button>
                             <button type="submit" class="btn btn-accent px-10 shadow-gold h-14" *ngIf="currentStep() === 3">
-                                @if (loading()) { <span class="spinner">⏳</span> Initiating Filing... }
+                                @if (loading()) { <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> Initiating Filing... }
                                 @else { <span class="icon">🚀</span> Finalize Registry }
                              </button>
                         </div>
@@ -453,7 +453,7 @@
                         <input type="text" [(ngModel)]="otpCode" placeholder="000000" maxlength="6">
                     </div>
                     <button (click)="verify()" class="btn btn-accent btn-lg h-16 shadow-gold w-full text-xl" [disabled]="loading()">
-                        @if (loading()) { <span class="spinner">⏳</span> Authenticating... }
+                        @if (loading()) { <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> Authenticating... }
                         @else { Confirm Security Identity }
                     </button>
                     <div class="mt-4">

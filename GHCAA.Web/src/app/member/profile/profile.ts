@@ -7,11 +7,12 @@ import { MemberProfile } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName, TSHIRT_SIZES } from '../../core/constants/app.constants';
 import { DatePipe } from '@angular/common';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent],
     providers: [DatePipe],
     templateUrl: './profile.html',
     styleUrl: './profile.scss'

@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/glass_tile.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../features/admin/admin_service.dart';
 
 final adminAnalyticsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
@@ -49,7 +50,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboardScreen> {
                   _buildStatCard('APPROVALS', '${analytics['pendingApprovals'] ?? 0}', Icons.priority_high, Colors.orangeAccent),
                 ],
               ),
-              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+              loading: () => const Center(child: LogoSpinner(size: 120)),
               error: (e, s) => Center(child: Text('Sync Error: $e')),
             ),
             const SizedBox(height: 32),

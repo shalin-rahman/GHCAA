@@ -5,6 +5,7 @@ import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NavService } from '../../core/services/nav.service';
+import { ProfileService } from '../../core/services/profile.service';
 import { filter } from 'rxjs';
 
 @Component({
@@ -19,17 +20,24 @@ export class PortalLayout {
   auth = inject(AuthService);
   theme = inject(ThemeService);
   nav = inject(NavService);
+  private profileService = inject(ProfileService);
   private router = inject(Router);
   private titleService = inject(Title);
 
   isSidebarCollapsed = signal(false);
   currentPageTitle = signal('Dashboard');
+  profilePhotoUrl = signal<string | null>(null);
 
   constructor() {
     // Collapse sidebar by default on mobile
     if (typeof window !== 'undefined' && window.innerWidth <= 768) {
       this.isSidebarCollapsed.set(true);
     }
+
+    this.profileService.getProfile().subscribe({
+      next: (p) => this.profilePhotoUrl.set(this.getImageUrl(p.photoPath)),
+      error: () => {}
+    });
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -49,5 +57,12 @@ export class PortalLayout {
 
   toggleSidebar() {
     this.isSidebarCollapsed.update(v => !v);
+  }
+
+  private getImageUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    const cleanPath = path.startsWith('/') ? path : '/' + path;
+    return cleanPath.replace(/^\/\//, '/');
   }
 }

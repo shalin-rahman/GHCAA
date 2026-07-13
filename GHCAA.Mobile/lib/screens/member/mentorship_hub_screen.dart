@@ -7,6 +7,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../features/networking/mentorship_service.dart';
 import '../../core/config/app_config.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final sentMentorshipsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(mentorshipServiceProvider).getSentRequests();
@@ -201,7 +202,7 @@ class _MentorshipHubScreenState extends ConsumerState<MentorshipHubScreen> with 
           },
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      loading: () => const Center(child: LogoSpinner(size: 120)),
       error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.redAccent))),
     );
   }

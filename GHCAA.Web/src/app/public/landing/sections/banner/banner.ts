@@ -2,11 +2,12 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LookupService } from '../../../../core/services/lookup.service';
 import { CommonModule } from '@angular/common';
+import { LogoSpinnerComponent } from '../../../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'landing-banner',
     standalone: true,
-    imports: [RouterLink, CommonModule],
+    imports: [RouterLink, CommonModule, LogoSpinnerComponent],
     templateUrl: './banner.html',
     styleUrl: './banner.scss',
 })

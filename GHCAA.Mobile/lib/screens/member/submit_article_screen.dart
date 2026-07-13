@@ -9,6 +9,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/api/api_client.dart';
 import '../../features/lookups/dropdown_service.dart';
 import '../../features/files/file_service.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../core/config/app_config.dart';
 
 class SubmitArticleScreen extends ConsumerStatefulWidget {
@@ -127,7 +128,7 @@ class _SubmitArticleScreenState extends ConsumerState<SubmitArticleScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _isSubmitting ? null : _submitArticle,
                   icon: _isSubmitting 
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2)) 
+                      ? SizedBox(width: 20, height: 20, child: LogoSpinner.small()) 
                       : const Icon(Icons.send_rounded, color: Colors.black, size: 20),
                   label: Text(_isSubmitting ? 'SYNCHRONIZING...' : 'SUBMIT FOR REVIEW', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 1.5, color: Colors.black)),
                   style: ElevatedButton.styleFrom(backgroundColor: AppTheme.royalGold, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),

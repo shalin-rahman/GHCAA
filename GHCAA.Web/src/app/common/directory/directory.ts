@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { getECPositionName, getCurrentECPosition, getAcademicYears, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBER_CATEGORY_OPTIONS } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-directory',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent],
     templateUrl: './directory.html',
     styleUrl: './directory.scss'
 })

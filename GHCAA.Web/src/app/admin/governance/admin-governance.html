@@ -204,7 +204,7 @@
                            [ngModel]="searchQuery()"
                            (ngModelChange)="searchQuery.set($event); searchMembers($event)">
                     @if (isSearching()) {
-                        <span class="loading-icon animate-spin">⏳</span>
+                        <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
                     }
                 </div>
                 <!-- Selection feedback -->

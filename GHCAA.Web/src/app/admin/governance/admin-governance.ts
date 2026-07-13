@@ -5,11 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINTS, EC_ROLES, getECPositionName, getMembershipTypeLabel, getCategoryLabel } from '../../core/constants/app.constants';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-admin-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent],
     templateUrl: './admin-governance.html',
     styleUrl: './admin-governance.scss'
 })

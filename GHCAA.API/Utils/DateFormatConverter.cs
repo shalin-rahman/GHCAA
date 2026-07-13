@@ -24,7 +24,9 @@ namespace GHCAA.API.Utils
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(value.ToString(_format));
+            // ISO-8601 so browser Date parsing (and Angular's DatePipe) is unambiguous;
+            // dd-MM-yyyy on the wire was invalid input to `new Date(...)` client-side.
+            writer.WriteStringValue(value.ToString("yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture));
         }
     }
 
@@ -48,7 +50,7 @@ namespace GHCAA.API.Utils
         public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)
         {
             if (value.HasValue)
-                writer.WriteStringValue(value.Value.ToString(_format));
+                writer.WriteStringValue(value.Value.ToString("yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture));
             else
                 writer.WriteNullValue();
         }

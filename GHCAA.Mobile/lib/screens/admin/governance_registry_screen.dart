@@ -7,6 +7,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/api/api_client.dart';
 import '../../features/admin/admin_service.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final ecPeriodsAdminProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(adminServiceProvider).getECPeriods();
@@ -239,7 +240,7 @@ class _AdminGovernanceState extends ConsumerState<AdminGovernanceScreen> {
                   ],
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+              loading: () => const Center(child: LogoSpinner(size: 120)),
               error: (e, s) => Center(child: Text('Sync Error: $e')),
             ),
           ),
@@ -350,8 +351,8 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                _isAdding 
-                  ? const CircularProgressIndicator(strokeWidth: 2)
+                _isAdding
+                  ? LogoSpinner.small()
                   : IconButton.filled(
                       onPressed: _assign, 
                       style: IconButton.styleFrom(backgroundColor: AppTheme.royalGold),
@@ -362,8 +363,8 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
             const SizedBox(height: 24),
             Expanded(
               child: _members == null
-                ? const Center(child: CircularProgressIndicator())
-                : _members!.isEmpty 
+                ? const Center(child: LogoSpinner(size: 120))
+                : _members!.isEmpty
                   ? const EmptyStateWidget('No members assigned to this committee.', icon: Icons.people_alt_outlined)
                   : ListView.builder(
                       itemCount: _members!.length,

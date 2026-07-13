@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/app_scaffold.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../features/assistant/assistant_service.dart';
 
 class Message {
@@ -74,10 +75,10 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
               child: Row(
                 children: [
-                  const SizedBox(
-                    width: 10,
-                    height: 10,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.royalGold),
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: LogoSpinner.small(size: 16),
                   ),
                   const SizedBox(width: 8),
                   Text('SYNTHESIZING...', style: TextStyle(fontSize: 9, color: AppTheme.royalGold.withValues(alpha: 0.7), fontWeight: FontWeight.w900, letterSpacing: 1.5)),

@@ -16,7 +16,7 @@
 
   @if (loadingTopic()) {
     <div class="loader-wrap">
-      <div class="spinner"></div>
+      <app-logo-spinner [size]="48"></app-logo-spinner>
       <p>Loading topic discussion…</p>
     </div>
   } @else if (topic()) {
@@ -110,7 +110,7 @@
 
       @if (loadingPosts()) {
         <div class="loader-wrap">
-          <div class="spinner"></div>
+          <app-logo-spinner [size]="48"></app-logo-spinner>
         </div>
       }
     </div>

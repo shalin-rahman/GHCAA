@@ -4,11 +4,12 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { FinancialService } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { FINANCIAL_CATEGORY_OPTIONS, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-admin-fee-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LogoSpinnerComponent],
   templateUrl: './admin-fee-config.html',
   styleUrl: './admin-fee-config.scss'
 })

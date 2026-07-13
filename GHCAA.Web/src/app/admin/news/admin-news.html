@@ -80,7 +80,7 @@
                             [class.border-red-500]="imageUrlInput.invalid && imageUrlInput.touched">
                         <label class="btn btn-secondary btn-sm" style="margin: 0; cursor: pointer;">
                             @if (!uploadingImage()) { <span class="icon">📁</span> }
-                            @if (uploadingImage()) { <span class="icon animate-spin">⏳</span> }
+                            @if (uploadingImage()) { <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> }
                             {{ uploadingImage() ? 'Uploading...' : 'Upload' }}
                             <input type="file" style="display: none;" accept="image/*" (change)="onImageSelect($event)"
                                 [disabled]="uploadingImage()">

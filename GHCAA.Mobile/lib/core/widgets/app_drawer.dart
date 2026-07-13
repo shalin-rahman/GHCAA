@@ -8,6 +8,7 @@ import '../config/app_config.dart';
 import '../config/org_config.dart';
 import '../services/org_config_service.dart';
 import 'async_value_widget.dart';
+import 'logo_spinner.dart';
 import '../../features/theme/dynamic_theme_service.dart';
 
 class AppDrawer extends ConsumerWidget {
@@ -91,7 +92,7 @@ class AppDrawer extends ConsumerWidget {
                         ],
                       );
                     },
-                    loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+                    loading: () => const Center(child: LogoSpinner(size: 120)),
                     error: (_, __) => const Center(child: Text('Role sync error')),
                   ),
                 ],

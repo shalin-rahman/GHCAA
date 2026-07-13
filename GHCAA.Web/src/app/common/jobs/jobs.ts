@@ -6,11 +6,12 @@ import { Job } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { JOB_CATEGORIES, getJobCategoryLabel } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-jobs',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
   templateUrl: './jobs.html',
   styleUrl: './jobs.scss'
 })

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/logo_spinner.dart';
 import 'poll_service.dart';
 
 class PollsScreen extends ConsumerWidget {
@@ -19,7 +20,7 @@ class PollsScreen extends ConsumerWidget {
         elevation: 0,
       ),
       body: pollsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+        loading: () => const Center(child: LogoSpinner(size: 120)),
         error: (err, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -197,7 +198,7 @@ class _PollCardState extends ConsumerState<_PollCard> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: _isSubmitting 
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
+                  ? SizedBox(width: 20, height: 20, child: LogoSpinner.small())
                   : const Text('SUBMIT VOTE', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               if (widget.poll.allowMultipleChoice)

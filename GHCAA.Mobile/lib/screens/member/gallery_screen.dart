@@ -11,6 +11,7 @@ import '../../core/utils/app_utils.dart';
 import '../../core/widgets/admin_action_circle.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final galleryItemsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   final role = await ref.read(authServiceProvider).getRole();
@@ -51,7 +52,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 child: Image.network(
                   url,
                   fit: BoxFit.contain,
-                  loadingBuilder: (c, child, progress) => progress == null ? child : const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+                  loadingBuilder: (c, child, progress) => progress == null ? child : Center(child: LogoSpinner.small()),
                   errorBuilder: (c, e, s) => Container(
                     padding: const EdgeInsets.all(AppTheme.spaceXXL),
                     child: Column(
@@ -355,7 +356,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+              loading: () => const Center(child: LogoSpinner(size: 120)),
               error: (e, s) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.redAccent))),
             ),
           ),

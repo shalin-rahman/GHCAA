@@ -4,11 +4,12 @@ import { ProfileService } from '../../core/services/profile.service';
 import { MemberProfile } from '../../core/models/business.models';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-digital-id',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LogoSpinnerComponent],
   templateUrl: './digital-id.html',
   styleUrl: './digital-id.scss'
 })

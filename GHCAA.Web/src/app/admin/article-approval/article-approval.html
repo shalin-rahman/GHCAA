@@ -20,7 +20,7 @@
 
     @if (loading()) {
     <div class="loading-state glass-card py-20 text-center">
-        <div class="spinner mx-auto mb-4"></div>
+        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
         <p>Checking for pending submissions...</p>
     </div>
     } @else {

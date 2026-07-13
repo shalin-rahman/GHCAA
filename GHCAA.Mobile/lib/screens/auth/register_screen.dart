@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../core/constants/app_constants.dart';
 import '../../features/auth/register_wizard_provider.dart';
 import '../../features/auth/auth_service.dart';
@@ -89,7 +90,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: _isLoading
-                          ? const Center(child: CircularProgressIndicator(color: AppTheme.royalGold))
+                          ? Center(child: LogoSpinner.small())
                           : ElevatedButton(
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
@@ -402,7 +403,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           future: ref.read(dropdownDataProvider).getOptions('NotificationType'),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator(color: AppTheme.royalGold));
+              return const Center(child: LogoSpinner(size: 120));
             }
             final preferences = snapshot.data?.isNotEmpty == true
                 ? snapshot.data!

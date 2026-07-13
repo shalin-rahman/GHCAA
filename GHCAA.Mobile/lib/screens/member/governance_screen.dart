@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/api/governance_api.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/config/app_config.dart';
 import '../../core/utils/app_utils.dart';
@@ -140,7 +141,7 @@ class GovernanceScreen extends ConsumerWidget {
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
                                 color: AppTheme.deepCharcoal,
-                                child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.royalGold)),
+                                child: Center(child: LogoSpinner.small()),
                               ),
                               errorWidget: (context, url, error) => Container(
                                 width: 56,
@@ -196,7 +197,7 @@ class GovernanceScreen extends ConsumerWidget {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      loading: () => const Center(child: LogoSpinner(size: 120)),
       error: (e, s) => Center(child: Text('Synchronizing Registry Error: $e', style: const TextStyle(color: Colors.redAccent))),
     );
   }
@@ -293,7 +294,7 @@ class GovernanceScreen extends ConsumerWidget {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      loading: () => const Center(child: LogoSpinner(size: 120)),
       error: (e, s) => Center(child: Text('Governance Data Error: $e', style: const TextStyle(color: Colors.redAccent))),
     );
   }

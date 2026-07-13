@@ -10,11 +10,12 @@ import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GE
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { GatewaysService } from '../../core/services/gateways.service';
 import { PaymentGateway } from '../../core/models/business.models';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaymentPortalComponent],
+  imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })

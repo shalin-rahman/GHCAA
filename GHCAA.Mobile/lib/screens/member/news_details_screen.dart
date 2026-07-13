@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/api/api_client.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/config/app_config.dart';
 
@@ -130,7 +131,7 @@ class NewsDetailsScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+        loading: () => const Center(child: LogoSpinner(size: 120)),
         error: (e, s) => Center(child: Text('Sync Error: $e', style: const TextStyle(color: Colors.red))),
       ),
     );
@@ -198,7 +199,7 @@ class NewsDetailsScreen extends ConsumerWidget {
                   }
                 },
                 child: saving
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
+                    ? SizedBox(height: 20, width: 20, child: LogoSpinner.small())
                     : const Text('SAVE CHANGES', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1)),
               ),
             ],

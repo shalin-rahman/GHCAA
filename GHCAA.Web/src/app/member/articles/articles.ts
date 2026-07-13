@@ -11,11 +11,12 @@ import {
   getArticleCategoryLabel
 } from '../../core/constants/app.constants';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-member-articles',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
   templateUrl: './articles.html',
   styleUrl: './articles.scss'
 })

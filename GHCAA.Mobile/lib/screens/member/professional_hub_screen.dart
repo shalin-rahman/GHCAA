@@ -8,6 +8,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../core/api/api_client.dart';
 import '../../core/config/app_config.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final profHubSearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -159,7 +160,7 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
             const SizedBox(height: 12),
             Expanded(
               child: _isLoading 
-                ? const Center(child: CircularProgressIndicator(color: AppTheme.royalGold))
+                ? const Center(child: LogoSpinner(size: 120))
                 : RefreshIndicator(
                     color: AppTheme.royalGold,
                     onRefresh: () async {
@@ -178,9 +179,9 @@ class _ProfessionalHubScreenState extends ConsumerState<ProfessionalHubScreen> {
                           itemCount: _professionals.length + (_hasMore ? 1 : 0),
                           itemBuilder: (context, index) {
                             if (index == _professionals.length) {
-                              return const Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+                              return Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Center(child: LogoSpinner.small()),
                               );
                             }
                             

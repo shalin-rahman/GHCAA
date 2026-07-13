@@ -6,11 +6,12 @@ import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
+import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
   templateUrl: './gallery.html',
   styleUrl: './gallery.scss'
 })

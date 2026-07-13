@@ -61,7 +61,7 @@
     <div class="table-wrap">
         @if (loading()) {
         <div class="loading-state">
-            <span class="spinner">⏳</span>
+            <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
             <p>Gathering member data...</p>
         </div>
         } @else if (allMembers().length === 0) {
@@ -872,7 +872,7 @@
             <button class="btn btn-accent px-10 shadow-gold" [disabled]="!importFile() || isImporting()"
                 (click)="executeImport()">
                 @if (isImporting()) {
-                <span class="spinner">⏳</span> Importing...
+                <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> Importing...
                 } @else {
                 Import
                 }

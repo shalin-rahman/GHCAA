@@ -5,6 +5,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../core/api/api_client.dart';
 import '../../core/config/app_config.dart';
 
@@ -234,7 +235,7 @@ class _GatekeeperScreenState extends ConsumerState<GatekeeperScreen> {
 
   Widget _buildResultView() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.royalGold));
+      return const Center(child: LogoSpinner(size: 120));
     }
 
     if (_error != null) {

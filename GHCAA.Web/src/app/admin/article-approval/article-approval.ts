@@ -5,11 +5,12 @@ import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { ARTICLE_CATEGORIES, SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-article-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
   templateUrl: './article-approval.html',
   styleUrl: './article-approval.scss'
 })

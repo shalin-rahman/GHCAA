@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { AdminPollService, CreatePollDto } from '../../core/services/admin-poll.service';
 import { PollDto } from '../../core/services/poll.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-admin-polls',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
   templateUrl: './polls.html',
   styleUrl: './polls.scss'
 })

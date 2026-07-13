@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/logo_spinner.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../features/forum/forum_service.dart';
 import '../../../features/auth/auth_service.dart';
@@ -381,11 +382,11 @@ class _ForumTopicDetailScreenState extends ConsumerState<ForumTopicDetailScreen>
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: _isSubmitting 
-                    ? const SizedBox(
-                        width: 20, 
-                        height: 20, 
-                        child: CircularProgressIndicator(color: AppTheme.royalGold, strokeWidth: 2),
+                  icon: _isSubmitting
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: LogoSpinner.small(),
                       )
                     : const Icon(Icons.send_rounded, color: AppTheme.royalGold),
                   onPressed: _isSubmitting ? null : _submitReply,

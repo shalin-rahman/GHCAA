@@ -6,7 +6,7 @@
 
     @if (loading()) {
     <div class="glass-card loading-box">
-        <span class="spinner">⏳</span>
+        <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
         <p>Syncing profile with registry...</p>
     </div>
     } @else {
@@ -583,7 +583,7 @@
             <div class="form-actions mt-14 border-t pt-10">
                 <button type="submit" class="btn btn-accent btn-lg px-12 h-14 shadow-gold" [disabled]="saving()">
                     @if (saving()) {
-                        <span class="spinner">⏳</span> Synchronizing Metadata...
+                        <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> Synchronizing Metadata...
                     } @else {
                         <span class="icon">🚀</span> Update Registry Information
                     }

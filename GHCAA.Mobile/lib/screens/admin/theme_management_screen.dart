@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../core/constants/app_constants.dart';
 import '../../features/theme/dynamic_theme_service.dart';
 
@@ -42,7 +43,7 @@ class ThemeManagementScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+            loading: () => const Center(child: LogoSpinner(size: 120)),
             error: (e, s) => Center(child: Text('Error: $e')),
           ),
           const SizedBox(height: 32),

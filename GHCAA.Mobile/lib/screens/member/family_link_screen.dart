@@ -6,6 +6,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../features/networking/family_service.dart';
 import '../../core/config/app_config.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 
 final familyListProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.read(familyServiceProvider).getMyFamily();
@@ -97,7 +98,7 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
                 return _buildMemberCard(m, isMember: true);
               },
             ),
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      loading: () => const Center(child: LogoSpinner(size: 120)),
       error: (e, s) => Center(child: Text('Error: $e')),
     );
   }
@@ -114,7 +115,7 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
                 return _buildRequestCard(r, isReceived: true);
               },
             ),
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      loading: () => const Center(child: LogoSpinner(size: 120)),
       error: (e, s) => Center(child: Text('Error: $e')),
     );
   }
@@ -131,7 +132,7 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
                 return _buildRequestCard(r, isReceived: false);
               },
             ),
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      loading: () => const Center(child: LogoSpinner(size: 120)),
       error: (e, s) => Center(child: Text('Error: $e')),
     );
   }
@@ -265,8 +266,8 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
                       )
                     ),
                     IconButton(
-                      icon: isSearching 
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: AppTheme.royalGold, strokeWidth: 2)) 
+                      icon: isSearching
+                        ? LogoSpinner.small()
                         : const Icon(Icons.search, color: AppTheme.royalGold),
                       onPressed: () async {
                         if (searchCtrl.text.length < 3) return;

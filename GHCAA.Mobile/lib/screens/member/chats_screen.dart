@@ -7,6 +7,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/logo_spinner.dart';
 import '../../features/messaging/chat_service.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/real_time/notification_hub_service.dart';
@@ -155,7 +156,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> with SingleTickerProv
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.royalGold)),
+      loading: () => const Center(child: LogoSpinner(size: 120)),
       error: (e, s) => Center(child: Text('Registry Sync Error: $e')),
     );
   }
