@@ -22,10 +22,6 @@ https://merchant-payment-uat.dgepay.net/merchant-payment-form?paymentRef=1778136
 
 
 
-
-
-
-
 --- Integrating guide - --------------
 
 https://github.com/IamTIqbal/dgepay-php-client

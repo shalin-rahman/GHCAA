@@ -64,7 +64,7 @@ $ApiProcess = Start-Process dotnet -ArgumentList "run --project `"$ApiProj`" --n
 $ApiId = $ApiProcess.Id
 
 # Wait for API to be ready (health check)
-$maxRetries = 30
+$maxRetries = 90
 $retryCount = 0
 $apiReady = $false
 while (-not $apiReady -and $retryCount -lt $maxRetries) {

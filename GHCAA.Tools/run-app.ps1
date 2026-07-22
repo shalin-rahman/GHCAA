@@ -121,7 +121,7 @@ if ($NoWeb) {
     Write-Host "  [--] Skipping Web (-NoWeb): start manually with: cd GHCAA.Web ; npm start" -ForegroundColor DarkGray
 } elseif (Test-Path $WebPath) {
     Write-Host "  Launching Frontend    (http://localhost:4200)..." -ForegroundColor Yellow
-    Start-Process cmd -ArgumentList "/c npm start" -WorkingDirectory $WebPath
+    Start-Process cmd -ArgumentList @("/c", "npm start") -WorkingDirectory $WebPath
 } else {
     Write-Host "  [--] GHCAA.Web not found; skipping Angular (path: $WebPath)" -ForegroundColor Yellow
 }
