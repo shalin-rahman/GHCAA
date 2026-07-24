@@ -23,7 +23,12 @@ export class AdminPaymentConfig implements OnInit {
   editingId = signal<number | null>(null);
   submitting = signal(false);
 
+  // PaymentMethod enum names (see Domain/Enums.cs). Drives the create-form method dropdown so
+  // any method — including CashOnHand — can be created, not just ManualReceipt (29G.3).
+  methodOptions = ['ManualReceipt', 'BKash', 'Nagad', 'Rocket', 'CreditCard', 'BankTransfer', 'CashOnHand'];
+
   form = this.fb.group({
+    method: ['ManualReceipt', Validators.required],
     displayName: ['', Validators.required],
     description: [''],
     icon: [''],
@@ -96,6 +101,7 @@ export class AdminPaymentConfig implements OnInit {
   openCreateForm() {
     this.editingId.set(null);
     this.form.reset({
+      method: 'ManualReceipt',
       gateway: 'None',
       sortOrder: 0,
       requiresReceipt: true,
@@ -122,9 +128,9 @@ export class AdminPaymentConfig implements OnInit {
     const id = this.editingId();
     const data = this.form.value;
 
-    const req = id 
+    const req = id
         ? this.paymentService.updateConfig(id, data)
-        : this.paymentService.createConfig({ ...data, method: 'ManualReceipt' }); // Default to Manual if creating new
+        : this.paymentService.createConfig(data); // method now comes from the form dropdown
 
     req.subscribe({
       next: () => {

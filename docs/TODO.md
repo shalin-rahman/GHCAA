@@ -587,7 +587,7 @@
 
 ### 29-G: PAYMENT GAPS (all 5 methods work manually/config-driven; no keys required — these are gaps only)
 
-29G.1 [TODO] Mobile: Dues-payment sheet doesn't surface config methods (bKash/Nagad/Rocket/BankTransfer/ManualReceipt) — only DGePay + a dead Stripe tile
-29G.2 [TODO] Mobile: record-payment drops walletNumber/bankName/accountNumber fields
-29G.3 [TODO] Web+Mobile: Dead options — remove Stripe tile, NagadGateway stub dropdown entry; CashOnHand uncreatable in UI
-29G.4 [TODO] API: /api/gateways/webhook/{gateway} throws unhandled 500 for unregistered gateway — guard the factory (GatewaysController.cs:252-257)
+29G.1 [DONE 2026-07-25] Mobile: financial_portal_screen now fetches admin-configured methods from GET /api/payment-config/active (new activePaymentConfigsProvider + FinancialService.getActivePaymentConfigs) and renders them in the payment sheet, replacing the hardcoded DGePay+Stripe tiles. Manual channels open a submission form; online channels (isOnline) route to the gateway via _gatewayFromString. (flutter analyze clean)
+29G.2 [DONE 2026-07-25] Mobile: new FinancialService.recordPayment (multipart POST /api/financials/record-payment) + manual-payment form surfaces the config's walletNumber/accountNumber/accountHolder/bank/branch/routing as display-only "where to pay" details and captures the member's transaction reference + receipt. (walletNumber/bankName/accountNumber are display-only by design — the record-payment DTO carries transactionId/method/receipt, mirroring web member/payments.)
+29G.3 [DONE 2026-07-25] Web+Mobile: dead Stripe tile removed (mobile sheet is now config-driven, no hardcoded gateways). Admin payment-config create form gained a Payment Method Type dropdown (methodOptions incl. CashOnHand) so any method is creatable — was hardcoding method:'ManualReceipt'. (Note: the web gateway dropdown's SSLCommerz/BkashGateway/NagadGateway all have registered implementations — not dead — so left intact.) (web tests 9/9)
+29G.4 [DONE 2026-07-25] API: GatewaysController.GatewayWebhook now wraps _gatewayFactory.GetGateway in try/catch(NotSupportedException) → returns 404 {status:"unsupported_gateway"} instead of an unhandled 500 for unregistered gateways.

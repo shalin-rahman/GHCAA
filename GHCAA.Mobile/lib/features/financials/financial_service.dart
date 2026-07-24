@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
@@ -59,5 +60,51 @@ class FinancialService {
     // Build URL without the /api suffix to get clean base host URL
     final baseHost = _dio.options.baseUrl.replaceFirst('/api', '');
     return '$baseHost/api/financials/receipt/$paymentId';
+  }
+
+  /// Admin-configured, enabled payment methods (bKash/Nagad/Rocket/Bank/Manual, etc).
+  /// These are the manual-payment channels the member pays into; no live gateway keys required.
+  /// GET /api/payment-config/active (AllowAnonymous). Enum fields arrive as string names.
+  Future<List<dynamic>> getActivePaymentConfigs() async {
+    try {
+      final response = await _dio.get('/payment-config/active');
+      return response.data as List<dynamic>;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Submit a manual payment for admin verification.
+  /// POST /api/financials/record-payment ([FromForm] multipart). MemberId is derived
+  /// server-side from the JWT. [paymentMethod] must be a PaymentMethod enum name
+  /// (e.g. "BKash"); [financialCategory] a FinancialCategory enum name (e.g. "MembershipFee").
+  Future<bool> recordPayment({
+    required String transactionId,
+    required double amount,
+    required String paymentMethod,
+    required String financialCategory,
+    String? notes,
+    File? receipt,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'transactionId': transactionId,
+        'amount': amount,
+        'paidAt': DateTime.now().toUtc().toIso8601String(),
+        'financialCategory': financialCategory,
+        'paymentMethod': paymentMethod,
+        if (notes != null && notes.isNotEmpty) 'notes': notes,
+      });
+      if (receipt != null) {
+        formData.files.add(MapEntry(
+          'receipt',
+          await MultipartFile.fromFile(receipt.path, filename: receipt.path.split('/').last),
+        ));
+      }
+      final response = await _dio.post('/financials/record-payment', data: formData);
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
   }
 }

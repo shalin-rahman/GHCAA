@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,7 @@ import '../../core/utils/app_utils.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../features/financials/financial_service.dart';
 import '../../features/financials/gateway_service.dart';
+import '../../features/files/file_service.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
@@ -17,6 +19,8 @@ import '../../core/widgets/logo_spinner.dart';
 final ledgerProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(financialServiceProvider).getLedger());
 final duesProvider = FutureProvider<double>((ref) async => ref.read(financialServiceProvider).getOutstandingDues());
 final savedMethodsProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(financialServiceProvider).getSavedMethods());
+// 29G.1: admin-configured, enabled payment methods (manual channels work without live gateway keys).
+final activePaymentConfigsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async => ref.read(financialServiceProvider).getActivePaymentConfigs());
 final ledgerSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
 class FinancialPortalScreen extends ConsumerStatefulWidget {
@@ -82,46 +86,249 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
     }
   }
 
-  void _showGatewaySelection(double amount) {
+  // 29G.1/29G.3: surface admin-configured methods from /payment-config/active instead of
+  // hardcoded gateways. Manual channels (bKash/Nagad/Rocket/Bank/Cash) submit for verification
+  // without any live gateway keys; online channels (if an admin enables one) route to the gateway.
+  void _showPaymentSheet(double amount) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => GlassContainer(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      isScrollControlled: true,
+      builder: (sheetContext) => Consumer(
+        builder: (context, ref, _) {
+          final configsAsync = ref.watch(activePaymentConfigsProvider);
+          return GlassContainer(
+            padding: const EdgeInsets.all(24),
+            child: configsAsync.when(
+              data: (methods) {
+                if (methods.isEmpty) {
+                  return const EmptyStateWidget(
+                    'No payment methods are currently available. Please contact the association office.',
+                    icon: Icons.payments_outlined,
+                  );
+                }
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('SELECT PAYMENT METHOD', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: AppTheme.royalGold, letterSpacing: 1.5)),
+                    const SizedBox(height: 24),
+                    ...methods.map((m) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _methodTile(m, amount),
+                        )),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+              loading: () => const Padding(padding: EdgeInsets.all(40), child: Center(child: LogoSpinner(size: 100))),
+              error: (e, s) => Text('Error loading payment methods: $e', style: const TextStyle(color: Colors.redAccent)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _methodTile(dynamic m, double amount) {
+    final isOnline = m['isOnline'] == true;
+    final iconStr = (m['icon'] as String?)?.trim();
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        if (isOnline) {
+          _initiatePayment(amount, _gatewayFromString(m['gateway']?.toString()));
+        } else {
+          _showManualPaymentForm(m, amount);
+        }
+      },
+      child: GlassContainer(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
           children: [
-            const Text('SELECT PAYMENT GATEWAY', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: AppTheme.royalGold, letterSpacing: 1.5)),
-            const SizedBox(height: 24),
-            _gatewayTile('DGePay (UAT)', Icons.payment, () => _initiatePayment(amount, PaymentGateway.dgePay)),
-            const SizedBox(height: 12),
-            _gatewayTile('Stripe', Icons.credit_card, () => _initiatePayment(amount, PaymentGateway.stripe)),
-            const SizedBox(height: 32),
+            (iconStr != null && iconStr.isNotEmpty)
+                ? Text(iconStr, style: const TextStyle(fontSize: 22))
+                : const Icon(Icons.account_balance_wallet_outlined, color: AppTheme.royalGold),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(m['displayName'] ?? 'Payment', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                  if ((m['description'] as String?)?.isNotEmpty == true)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(m['description'], style: const TextStyle(color: Colors.white38, fontSize: 10)),
+                    ),
+                ],
+              ),
+            ),
+            Icon(isOnline ? Icons.open_in_new : Icons.chevron_right, color: Colors.white24, size: 18),
           ],
         ),
       ),
     );
   }
 
-  Widget _gatewayTile(String title, IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        onTap();
-      },
-      child: GlassContainer(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Icon(icon, color: AppTheme.royalGold),
-            const SizedBox(width: 16),
-            Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-            const Spacer(),
-            const Icon(Icons.chevron_right, color: Colors.white24),
-          ],
+  // Manual submission: show where to pay (admin-configured wallet/bank details), collect the
+  // member's transaction reference + optional receipt, and POST to record-payment for verification.
+  void _showManualPaymentForm(dynamic config, double amount) {
+    final txnController = TextEditingController();
+    File? receipt;
+    bool submitting = false;
+    final requiresReference = config['requiresReference'] == true;
+    final requiresReceipt = config['requiresReceipt'] == true;
+    final displayName = config['displayName']?.toString() ?? 'Payment';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(sheetContext).viewInsets.bottom),
+        child: StatefulBuilder(
+          builder: (context, setSheetState) {
+            Future<void> pickReceipt() async {
+              final file = await ref.read(fileServiceProvider).pickImage();
+              if (file != null) setSheetState(() => receipt = file);
+            }
+
+            Future<void> submit() async {
+              final txn = txnController.text.trim();
+              if (requiresReference && txn.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter the transaction / reference ID.')));
+                return;
+              }
+              if (requiresReceipt && receipt == null) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please attach your payment receipt.')));
+                return;
+              }
+              setSheetState(() => submitting = true);
+              final ok = await ref.read(financialServiceProvider).recordPayment(
+                    transactionId: txn.isEmpty ? 'MANUAL-${config['method']}' : txn,
+                    amount: amount,
+                    paymentMethod: config['method']?.toString() ?? 'ManualReceipt',
+                    financialCategory: 'MembershipFee',
+                    notes: 'Paid via $displayName (pending verification)',
+                    receipt: receipt,
+                  );
+              if (!context.mounted) return;
+              setSheetState(() => submitting = false);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(ok ? 'Payment submitted for verification.' : 'Failed to submit payment. Please try again.'),
+              ));
+              if (ok) {
+                ref.invalidate(ledgerProvider);
+                ref.invalidate(duesProvider);
+              }
+            }
+
+            return GlassContainer(
+              padding: const EdgeInsets.all(24),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(displayName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: AppTheme.royalGold, letterSpacing: 1.2)),
+                    const SizedBox(height: 4),
+                    Text('Payable: ${AppUtils.formatCurrency(amount)}', style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 20),
+                    // Where to pay — display-only account details from the admin config.
+                    _detailRow('Wallet Number', config['walletNumber']),
+                    _detailRow('Account Number', config['accountNumber']),
+                    _detailRow('Account Holder', config['accountHolderName']),
+                    _detailRow('Bank', config['bankName']),
+                    _detailRow('Branch', config['branchName']),
+                    _detailRow('Routing', config['routingNumber']),
+                    if ((config['instructions'] as String?)?.isNotEmpty == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 4),
+                        child: Text(config['instructions'], style: const TextStyle(color: Colors.white54, fontSize: 11, height: 1.4)),
+                      ),
+                    const SizedBox(height: 20),
+                    if (requiresReference) ...[
+                      TextField(
+                        controller: txnController,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        decoration: const InputDecoration(
+                          labelText: 'Transaction ID / Reference *',
+                          labelStyle: TextStyle(color: Colors.white54, fontSize: 12),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    // Receipt upload
+                    InkWell(
+                      onTap: submitting ? null : pickReceipt,
+                      child: GlassContainer(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        child: Row(
+                          children: [
+                            Icon(receipt != null ? Icons.check_circle_outline : Icons.upload_file_outlined, color: AppTheme.royalGold, size: 18),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                receipt != null ? receipt!.path.split('/').last : (requiresReceipt ? 'Attach receipt *' : 'Attach receipt (optional)'),
+                                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: submitting ? null : submit,
+                        style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+                        child: submitting
+                            ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                            : const Text('SUBMIT PAYMENT', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1)),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  Widget _detailRow(String label, dynamic value) {
+    final str = value?.toString();
+    if (str == null || str.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(label.toUpperCase(), style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+          ),
+          Expanded(
+            child: Text(str, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Map the config's PaymentGateway enum name (e.g. "SSLCommerz", "BkashGateway", "DGePay")
+  // to the mobile PaymentGateway enum, tolerating case and the "Gateway" suffix.
+  PaymentGateway _gatewayFromString(String? gw) {
+    if (gw == null) return PaymentGateway.none;
+    final key = gw.toLowerCase().replaceAll('gateway', '');
+    return PaymentGateway.values.firstWhere(
+      (g) => g.name.toLowerCase() == key,
+      orElse: () => PaymentGateway.none,
     );
   }
 
@@ -162,7 +369,7 @@ class _FinancialPortalScreenState extends ConsumerState<FinancialPortalScreen> {
                         child: ElevatedButton(
                           onPressed: dues > 0 ? () {
                             HapticFeedback.mediumImpact();
-                            _showGatewaySelection(dues);
+                            _showPaymentSheet(dues);
                           } : null, 
                           style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                           child: const Text('PAY OUTSTANDING', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1))

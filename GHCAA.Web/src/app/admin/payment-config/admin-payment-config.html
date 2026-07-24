@@ -91,6 +91,13 @@
           <form [formGroup]="form" (ngSubmit)="submitForm()" class="glass-card p-10 mt-6">
               <div class="form-grid mb-8">
                   <div class="form-group">
+                      <label>Payment Method Type *</label>
+                      <select formControlName="method" [attr.disabled]="editingId() ? true : null">
+                          <option *ngFor="let m of methodOptions" [value]="m">{{ m }}</option>
+                      </select>
+                      <p class="text-[9px] text-muted uppercase font-black px-2 mt-1">Underlying method class (e.g. CashOnHand). Fixed after creation.</p>
+                  </div>
+                  <div class="form-group">
                       <label>Frontend Display Name *</label>
                       <input type="text" formControlName="displayName" [class.border-red-500]="form.get('displayName')?.invalid && form.get('displayName')?.touched">
                       <div *ngIf="form.get('displayName')?.invalid && form.get('displayName')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Display name is required</div>
