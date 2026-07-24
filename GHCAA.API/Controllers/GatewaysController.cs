@@ -260,7 +260,19 @@ namespace GHCAA.API.Controllers
 
             _logger.LogInformation("Webhook received for {Gateway}", gatewayType);
 
-            var gatewayService = _gatewayFactory.GetGateway(gatewayType);
+            // 29G.4: A value that parses as a valid enum name (e.g. Stripe, NagadGateway) may still
+            // have no registered implementation — GetGateway throws NotSupportedException in that
+            // case. Guard it so an unconfigured gateway returns 404 instead of an unhandled 500.
+            IPaymentGatewayService gatewayService;
+            try
+            {
+                gatewayService = _gatewayFactory.GetGateway(gatewayType);
+            }
+            catch (NotSupportedException ex)
+            {
+                _logger.LogWarning(ex, "Webhook for unregistered gateway {Gateway}", gatewayType);
+                return NotFound(new { status = "unsupported_gateway" });
+            }
             var headers = Request.Headers.ToDictionary(h => h.Key, h => h.Value.ToString());
             
             var isValid = await gatewayService.ProcessWebhookAsync(Request.Body, headers, cancellationToken);

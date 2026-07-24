@@ -231,12 +231,22 @@ namespace GHCAA.Infrastructure.Services
             }
 
             var initialStatus = EventRegistrationStatus.Pending;
-            if (alumniEvent.HasWaitlist && alumniEvent.ParticipantLimit.HasValue)
+            if (alumniEvent.ParticipantLimit.HasValue)
             {
-                var approvedCount = await _context.EventRegistrations
-                    .CountAsync(r => r.EventId == dto.EventId && r.Status == EventRegistrationStatus.Approved, cancellationToken);
-                if (approvedCount >= alumniEvent.ParticipantLimit.Value)
+                // 29A.4: Count every registration that occupies a slot — both Pending (awaiting
+                // payment/approval) and Approved. Counting only Approved (the old behavior) let an
+                // unlimited number of Pending registrations pile up and overfill the event once they
+                // were approved. Waitlisted/Rejected registrations do not consume a slot.
+                var occupiedCount = await _context.EventRegistrations
+                    .CountAsync(r => r.EventId == dto.EventId &&
+                        (r.Status == EventRegistrationStatus.Pending || r.Status == EventRegistrationStatus.Approved),
+                        cancellationToken);
+                if (occupiedCount >= alumniEvent.ParticipantLimit.Value)
                 {
+                    // The old code only handled HasWaitlist; when HasWaitlist was false the cap was
+                    // skipped entirely, allowing unlimited registrations. Reject instead.
+                    if (!alumniEvent.HasWaitlist)
+                        throw new InvalidOperationException("This event has reached its participant limit.");
                     initialStatus = EventRegistrationStatus.Waitlisted;
                 }
             }
@@ -262,6 +272,34 @@ namespace GHCAA.Infrastructure.Services
             
             _context.EventRegistrations.Add(registration);
             await _context.SaveChangesAsync(cancellationToken);
+
+            // 29A.4: Close the overfill race. Two concurrent registrations can both pass the
+            // pre-insert capacity check above. After persisting, re-count the slot-consuming
+            // registrations at or before this one's Id; if this registration pushed the event past
+            // its limit, demote it to the waitlist (or reject and roll it back when no waitlist is
+            // configured). Ordering by Id makes the outcome deterministic — only the latest inserts
+            // that crossed the line are demoted, so the cap is never exceeded under concurrency.
+            if (alumniEvent.ParticipantLimit.HasValue && registration.Status != EventRegistrationStatus.Waitlisted)
+            {
+                var slotOrdinal = await _context.EventRegistrations
+                    .CountAsync(r => r.EventId == dto.EventId && r.Id <= registration.Id &&
+                        (r.Status == EventRegistrationStatus.Pending || r.Status == EventRegistrationStatus.Approved),
+                        cancellationToken);
+                if (slotOrdinal > alumniEvent.ParticipantLimit.Value)
+                {
+                    if (alumniEvent.HasWaitlist)
+                    {
+                        registration.Status = EventRegistrationStatus.Waitlisted;
+                        await _context.SaveChangesAsync(cancellationToken);
+                    }
+                    else
+                    {
+                        _context.EventRegistrations.Remove(registration);
+                        await _context.SaveChangesAsync(cancellationToken);
+                        throw new InvalidOperationException("This event has reached its participant limit.");
+                    }
+                }
+            }
 
             // Send "Participation Received" email
             try {
@@ -628,6 +666,9 @@ namespace GHCAA.Infrastructure.Services
                 .FirstOrDefaultAsync(r => r.Id == registrationId, cancellationToken);
 
             if (reg == null || reg.IsCheckedIn) return false;
+            // 29A.5: Only approved participants may check in. Previously any status (Pending,
+            // Rejected, Waitlisted) could check in and earn attendance points.
+            if (reg.Status != EventRegistrationStatus.Approved) return false;
 
             reg.IsCheckedIn = true;
             reg.CheckedInAt = DateTime.UtcNow;
@@ -650,6 +691,8 @@ namespace GHCAA.Infrastructure.Services
                 .FirstOrDefaultAsync(r => r.TicketCode == ticketCode, cancellationToken);
 
             if (reg == null || reg.IsCheckedIn) return false;
+            // 29A.5: Only approved participants may check in (see CheckInParticipantAsync).
+            if (reg.Status != EventRegistrationStatus.Approved) return false;
 
             reg.IsCheckedIn = true;
             reg.CheckedInAt = DateTime.UtcNow;

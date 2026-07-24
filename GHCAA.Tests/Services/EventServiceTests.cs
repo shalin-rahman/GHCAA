@@ -288,5 +288,59 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
         // Assert
         result.Status.Should().Be(EventRegistrationStatus.Waitlisted);
     }
+
+    [Test]
+    public async Task RegisterForEventAsync_ShouldThrow_WhenCapacityFull_AndNoWaitlist()
+    {
+        // 29A.4: with a participant limit but no waitlist, registrations past the cap must be
+        // rejected — previously the cap was skipped entirely, allowing unlimited registrations.
+        var ev = new AlumniEvent {
+            Title = "Capped Event", Description = "D",
+            StartDate = DateTime.UtcNow.AddDays(1), EndDate = DateTime.UtcNow.AddDays(2), Location = "L",
+            ParticipantLimit = 1, HasWaitlist = false, IsActive = true
+        };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        // A single Pending registration already occupies the one available slot.
+        _context.EventRegistrations.Add(new EventRegistration {
+            EventId = ev.Id, Status = EventRegistrationStatus.Pending,
+            PaymentReference = "P1", TicketCode = "C1", RegisteredAt = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
+
+        var member = new Member { FullName = "Latecomer", Email = "l@t.com", NID = "L1", MobileNo = "L1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        Func<Task> act = async () => await _service.RegisterForEventAsync(
+            new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P2" }, member.Id, null);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*participant limit*");
+    }
+
+    [Test]
+    public async Task CheckInParticipantAsync_ShouldFail_WhenNotApproved()
+    {
+        // 29A.5: a Pending (or Rejected/Waitlisted) registration must not be able to check in
+        // or earn attendance points.
+        var member = new Member { FullName = "Pend", Email = "p@t.com", NID = "P1", MobileNo = "P1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        var ev = new AlumniEvent { Title = "E", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
+        _context.Members.Add(member);
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var reg = new EventRegistration { EventId = ev.Id, MemberId = member.Id, Status = EventRegistrationStatus.Pending, TicketCode = "TC-P" };
+        _context.EventRegistrations.Add(reg);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.CheckInParticipantAsync(reg.Id);
+
+        result.Should().BeFalse();
+        var updated = await _context.EventRegistrations.FindAsync(reg.Id);
+        updated!.IsCheckedIn.Should().BeFalse();
+        updated.CheckedInAt.Should().BeNull();
+    }
 }
 

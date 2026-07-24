@@ -534,11 +534,11 @@
 
 ### 29-A: CRITICAL — SHIP-BLOCKERS
 
-29A.1 [TODO] Web: Add missing /portal/change-password route — mustChangePassword users are redirected there by auth.guard but the route 404s → hard login lockout (auth.guard.ts:17-19)
-29A.2 [TODO] Mobile: Session expiry is a no-op — clearSession only removes a prefs key, real token in FlutterSecureStorage survives, no login redirect (session_manager.dart:31-39)
-29A.3 [TODO] Mobile: Digital ID reads data['batch']/data['membershipId'] but API returns membershipNumber → every QR/barcode encodes literal "PENDING" (digital_id_screen.dart:109-129)
-29A.4 [TODO] API: Event capacity never enforced — waitlist counts only Approved (0 at registration time); HasWaitlist=false skips cap entirely → unlimited registrations + overfill race (EventService.cs:234-242)
-29A.5 [TODO] API: Check-in accepts any ticket status — Pending/Rejected/Waitlisted can check in and earn points (EventService.cs:624-666)
+29A.1 [DONE 2026-07-25] Web: Added /portal/change-password route + ChangePassword component; authGuard now URL-bypasses that page to avoid a redirect loop, and auth.service.clearMustChangePassword() clears the flag on success. (guard spec 7/7)
+29A.2 [DONE 2026-07-25] Mobile: session_manager._handleSessionExpiry now clears the REAL secure-storage token via storageService.clearAll() (was only removing a stale SharedPreferences 'jwt_token'); authStateProvider's 2s poll then sees null and the router redirects to /login. (flutter analyze clean)
+29A.3 [DONE 2026-07-25] Mobile: digital_id_screen now reads data['membershipNumber'] (was data['membershipId']) and data['passingYear'] (was data['batch']) across QR/barcode/share/PDF/filename — no more literal "PENDING".
+29A.4 [DONE 2026-07-25] API: EventService capacity now counts slot-consuming registrations (Pending+Approved, not just Approved), rejects when full and HasWaitlist=false (was skipping the cap entirely), and closes the overfill race with a deterministic post-insert Id-ordinal re-check that demotes/rejects the overflow. (+regression test)
+29A.5 [DONE 2026-07-25] API: CheckInParticipantAsync + CheckInByTicketCodeAsync now reject any non-Approved registration (Pending/Rejected/Waitlisted can no longer check in or earn points). (+regression test)
 
 ### 29-B: HIGH — SECURITY
 
