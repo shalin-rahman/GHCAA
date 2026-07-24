@@ -1,11 +1,13 @@
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+
+const CHANGE_PASSWORD_URL = '/portal/change-password';
 
 /**
  * Functional guard to protect portal routes
  */
-export const authGuard = () => {
+export const authGuard = (_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     const auth = inject(AuthService);
     const router = inject(Router);
 
@@ -14,8 +16,11 @@ export const authGuard = () => {
     }
 
     // S7.6: Force password change before accessing any protected route.
-    if (auth.currentUser()?.mustChangePassword) {
-        return router.parseUrl('/portal/change-password');
+    // 29A.1: Never redirect the change-password page onto itself — that route is where we send
+    // the user, so allowing it here prevents an infinite guard→redirect loop (and a 404 when the
+    // route was previously missing entirely).
+    if (auth.currentUser()?.mustChangePassword && !state.url.startsWith(CHANGE_PASSWORD_URL)) {
+        return router.parseUrl(CHANGE_PASSWORD_URL);
     }
 
     return true;

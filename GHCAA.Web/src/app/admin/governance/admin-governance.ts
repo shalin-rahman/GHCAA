@@ -6,6 +6,7 @@ import { API_ENDPOINTS, EC_ROLES, getECPositionName, getMembershipTypeLabel, get
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
     selector: 'app-admin-governance',
@@ -95,13 +96,7 @@ export class AdminGovernance implements OnInit {
     }
 
     formatDateToDMY(d: any) {
-        if (!d) return '';
-        const date = new Date(d);
-        if (isNaN(date.getTime())) return d;
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
+        return toDisplayDate(d);
     }
 
     editPeriod(period: any) {
@@ -126,8 +121,8 @@ export class AdminGovernance implements OnInit {
         const isEdit = !!data.id;
         const api = isEdit ? `${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${data.id}` : `${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods`;
 
-        // Format payload to ensure empty dates are sent as null, avoiding ASP.NET 400 JSON conversion errors
-        const payload = { ...data, endDate: data.endDate ? data.endDate : null };
+        // Format payload to ISO wire dates; empty dates are sent as null, avoiding ASP.NET 400 JSON conversion errors
+        const payload = { ...data, startDate: toWireDate(data.startDate), endDate: toWireDate(data.endDate) };
         const request = isEdit ? this.http.put(api, payload) : this.http.post(api, payload);
         
         request.subscribe({

@@ -106,13 +106,13 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                                 const SizedBox(height: AppTheme.spaceL),
                                 Text(data['fullName'] ?? 'N/A', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white, height: 1.2), textAlign: TextAlign.center),
                                 const SizedBox(height: AppTheme.spaceS),
-                                Text('${data['currentDesignation'] ?? 'Alumnus'} • BATCH ${data['batch'] ?? ''}', style: const TextStyle(fontSize: 13, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+                                Text('${data['currentDesignation'] ?? 'Alumnus'} • BATCH ${data['passingYear'] ?? ''}', style: const TextStyle(fontSize: 13, color: AppTheme.textSecondaryDark, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
                                 const SizedBox(height: AppTheme.spaceXL),
                                 Container(
                                   padding: const EdgeInsets.all(AppTheme.spaceXS),
                                   decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppTheme.radiusM)),
                                   child: QrImageView(
-                                    data: data['membershipId']?.toString() ?? 'PENDING',
+                                    data: data['membershipNumber']?.toString() ?? 'PENDING',
                                     version: QrVersions.auto,
                                     size: 64,
                                     gapless: false,
@@ -126,7 +126,7 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                                   decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppTheme.radiusXS)),
                                   child: BarcodeWidget(
                                     barcode: Barcode.code128(),
-                                    data: data['membershipId']?.toString() ?? 'PENDING',
+                                    data: data['membershipNumber']?.toString() ?? 'PENDING',
                                     width: 140,
                                     height: 30,
                                     color: Colors.black,
@@ -162,7 +162,7 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             HapticFeedback.lightImpact();
-                            Share.share('Alumni Registry ID: ${data['membershipId'] ?? 'Pending'}\n${data['fullName']}');
+                            Share.share('Alumni Registry ID: ${data['membershipNumber'] ?? 'Pending'}\n${data['fullName']}');
                           },
                           icon: const Icon(Icons.share_outlined, size: 18), 
                           label: const Text('SHARE ID', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
@@ -225,11 +225,11 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
                     ),
                     pw.SizedBox(height: 20),
                     pw.Text(data['fullName'] ?? 'N/A', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                    pw.Text(data['membershipId'] ?? 'PENDING', style: const pw.TextStyle(fontSize: 14)),
+                    pw.Text(data['membershipNumber'] ?? 'PENDING', style: const pw.TextStyle(fontSize: 14)),
                     pw.SizedBox(height: 30),
                     pw.BarcodeWidget(
                       barcode: pw.Barcode.qrCode(),
-                      data: data['membershipId'] ?? 'PENDING',
+                      data: data['membershipNumber'] ?? 'PENDING',
                       width: 80,
                       height: 80,
                     ),
@@ -246,7 +246,7 @@ class _DigitalIDScreenState extends ConsumerState<DigitalIDScreen> {
 
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'ID_Card_${data['membershipId'] ?? 'Member'}.pdf',
+      name: 'ID_Card_${data['membershipNumber'] ?? 'Member'}.pdf',
     );
   }
 }

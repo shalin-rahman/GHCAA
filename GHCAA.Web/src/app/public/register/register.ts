@@ -8,6 +8,7 @@ import { PaymentPortalComponent } from '../../common/payment-portal/payment-port
 import { FinancialService } from '../../core/services/financial.service';
 import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
+import { parseDisplayDate } from '../../core/utils/date.util';
 import { GatewaysService } from '../../core/services/gateways.service';
 import { PaymentGateway } from '../../core/models/business.models';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
@@ -148,7 +149,7 @@ export class Register implements OnDestroy {
       // Handle both YYYY-MM-DD and DD-MM-YYYY
       birthYear = parts[0].length === 4 ? parseInt(parts[0]) : parseInt(parts[2]);
     } else {
-      birthYear = new Date(this.model.DateOfBirth).getFullYear();
+      birthYear = parseDisplayDate(this.model.DateOfBirth)?.getFullYear() ?? NaN;
     }
 
     if (isNaN(birthYear)) return this.years;
@@ -204,7 +205,7 @@ export class Register implements OnDestroy {
 
     // Birth year validation for academic records
     if (this.model.DateOfBirth) {
-      const birthYear = new Date(this.model.DateOfBirth).getFullYear();
+      const birthYear = parseDisplayDate(this.model.DateOfBirth)?.getFullYear() ?? NaN;
       for (const item of this.model.AcademicHistory) {
         if (item.admissionYear < birthYear + 15 || item.passingYear < birthYear + 15) {
           this.notify.error(`Academic milestones must be at least 15 years after your birth year (${birthYear}).`);

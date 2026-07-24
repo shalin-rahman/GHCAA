@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { EventsService } from '../../core/services/events.service';
 import { AlumniEvent } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
+import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-admin-event-operations',
@@ -25,13 +26,7 @@ export class AdminEventOperations implements OnInit {
   activeOpTab = signal<'tasks' | 'budget'>('tasks');
 
   formatDateToDMY(d: any) {
-    if (!d) return '';
-    const date = new Date(d);
-    if (isNaN(date.getTime())) return d;
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    return toDisplayDate(d);
   }
 
   // Task Form
@@ -64,7 +59,7 @@ export class AdminEventOperations implements OnInit {
 
   addTask() {
     if (!this.newTask.title) return;
-    this.eventsService.createTask({ ...this.newTask, eventId: this.event.id }).subscribe(() => {
+    this.eventsService.createTask({ ...this.newTask, dueDate: toWireDate(this.newTask.dueDate), eventId: this.event.id }).subscribe(() => {
       this.notify.success('Task assigned!');
       this.newTask = { title: '', description: '', assignedMemberId: null, dueDate: '' };
       this.loadTasks();
@@ -93,7 +88,7 @@ export class AdminEventOperations implements OnInit {
 
   addExpense() {
     if (!this.newExpense.category || this.newExpense.amount <= 0) return;
-    this.eventsService.addExpense({ ...this.newExpense, eventId: this.event.id }).subscribe(() => {
+    this.eventsService.addExpense({ ...this.newExpense, spentAt: toWireDate(this.newExpense.spentAt), eventId: this.event.id }).subscribe(() => {
       this.notify.success('Expense recorded!');
       this.newExpense = { category: '', amount: 0, note: '', spentAt: this.formatDateToDMY(new Date()) };
       this.loadBudget();

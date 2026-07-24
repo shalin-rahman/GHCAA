@@ -286,7 +286,7 @@ class _JobsScreenState extends ConsumerState<JobsScreen> {
                   'location': locCtrl.text,
                   'externalUrl': linkCtrl.text,
                   'description': descCtrl.text,
-                  'postedAt': AppUtils.formatDate(DateTime.now()),
+                  'postedAt': AppUtils.toWire(DateTime.now()),
                   'isActive': true,
                 };
                 final success = await ref.read(jobServiceProvider).postJob(payload);

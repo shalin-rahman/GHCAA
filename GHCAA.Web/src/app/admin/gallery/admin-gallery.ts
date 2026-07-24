@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { GalleryService } from '../../core/services/gallery.service';
 import { EventGallery, EventPhoto } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
+import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
     selector: 'app-admin-gallery',
@@ -49,13 +50,7 @@ export class AdminGallery implements OnInit {
     showForm = signal(false);
     editingId = signal<number | null>(null);
     formatDateToDMY(d: any) {
-        if (!d) return '';
-        const date = new Date(d);
-        if (isNaN(date.getTime())) return d;
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
+        return toDisplayDate(d);
     }
 
     newGallery = {
@@ -134,9 +129,10 @@ export class AdminGallery implements OnInit {
         const editId = this.editingId();
         this.isSubmitting.set(true);
 
-        const request = editId 
-            ? this.galleryService.updateGallery(editId, this.newGallery)
-            : this.galleryService.createGallery(this.newGallery);
+        const payload = { ...this.newGallery, eventDate: toWireDate(this.newGallery.eventDate) };
+        const request = editId
+            ? this.galleryService.updateGallery(editId, payload)
+            : this.galleryService.createGallery(payload);
 
         request.subscribe({
             next: () => {

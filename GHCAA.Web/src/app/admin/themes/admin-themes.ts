@@ -5,6 +5,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ThemeService, SpecialDayTheme } from '../../core/services/theme.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
     selector: 'app-admin-themes',
@@ -25,13 +26,7 @@ export class AdminThemes implements OnInit {
     isSaving = signal(false);
 
     formatDateToDMY(d: any) {
-        if (!d) return '';
-        const date = new Date(d);
-        if (isNaN(date.getTime())) return d;
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
+        return toDisplayDate(d);
     }
 
     selectedTheme: SpecialDayTheme = this.resetTheme();
@@ -81,9 +76,14 @@ export class AdminThemes implements OnInit {
         }
 
         this.isSaving.set(true);
+        const payload = {
+            ...this.selectedTheme,
+            startDate: toWireDate(this.selectedTheme.startDate),
+            endDate: toWireDate(this.selectedTheme.endDate)
+        };
         const obs = this.isEditing()
-            ? this.adminService.updateTheme(this.selectedTheme.id, this.selectedTheme)
-            : this.adminService.createTheme(this.selectedTheme);
+            ? this.adminService.updateTheme(this.selectedTheme.id, payload)
+            : this.adminService.createTheme(payload);
 
         obs.subscribe({
             next: () => {

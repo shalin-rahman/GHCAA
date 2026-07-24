@@ -114,7 +114,7 @@
                     <td><span class="font-bold">{{ member.ghcLastCertificatePassingYear || '—' }}</span></td>
                     <td class="actions-cell">
                         @if (member.status === 'Applied' || member.status === 0) {
-                        <button class="icon-btn approve" (click)="approveMember(member.id, 1)"
+                        <button class="icon-btn approve" (click)="approveMember(member.id)"
                             title="Approve Member">✅</button>
                         }
                         @if (nav.isSuperAdmin()) {

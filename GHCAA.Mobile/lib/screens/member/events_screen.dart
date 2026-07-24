@@ -439,14 +439,14 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                     'title': titleCtrl.text.trim(),
                     'description': descCtrl.text.trim(),
                     'location': locCtrl.text.trim(),
-                    'startDate': AppUtils.formatDate(startDate),
-                    'endDate': AppUtils.formatDate(endDate),
+                    'startDate': AppUtils.toWire(startDate),
+                    'endDate': AppUtils.toWire(endDate),
                     'requiresPayment': !isFree,
                     'registrationFee': fee,
                     'allowNonMembers': allowNonMembers,
                     'isActive': true,
-                    if (regStart != null) 'registrationStartDate': AppUtils.formatDate(regStart!),
-                    if (regEnd != null) 'registrationEndDate': AppUtils.formatDate(regEnd!),
+                    if (regStart != null) 'registrationStartDate': AppUtils.toWire(regStart!),
+                    if (regEnd != null) 'registrationEndDate': AppUtils.toWire(regEnd!),
                   };
                   final success = await ref.read(eventsServiceProvider).createEvent(payload);
                   if (success) {

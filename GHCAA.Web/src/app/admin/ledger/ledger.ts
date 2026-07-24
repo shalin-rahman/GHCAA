@@ -9,6 +9,7 @@ import { PaginationComponent } from '../../common/pagination/pagination.componen
 import { ExportUtil } from '../../core/utils/export.util';
 import { getFinancialCategoryLabel } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-ledger',
@@ -49,13 +50,7 @@ export class Ledger implements OnInit {
 
 
   formatDateToDMY(d: any) {
-    if (!d) return '';
-    const date = new Date(d);
-    if (isNaN(date.getTime())) return d;
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    return toDisplayDate(d);
   }
 
   newRecord: any = {
@@ -148,10 +143,15 @@ export class Ledger implements OnInit {
 
   addRecord() {
     this.submitting.set(true);
-    // Ensure year is correct based on date
-    this.newRecord.year = new Date(this.newRecord.date).getFullYear();
+    // Ensure year is correct based on date (parse dd-MM-yyyy safely)
+    const recordDate = parseDisplayDate(this.newRecord.date);
+    const payload = {
+      ...this.newRecord,
+      date: toWireDate(this.newRecord.date),
+      year: recordDate ? recordDate.getFullYear() : this.newRecord.year
+    };
 
-    this.ledgerService.addRecord(this.newRecord).subscribe({
+    this.ledgerService.addRecord(payload).subscribe({
       next: () => {
         this.notify.success('Financial transaction recorded successfully.');
         this.submitting.set(false);

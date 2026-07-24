@@ -5,6 +5,7 @@ import { FinancialService } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { FINANCIAL_CATEGORY_OPTIONS, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-admin-fee-config',
@@ -25,13 +26,7 @@ export class AdminFeeConfig implements OnInit {
   submitting = signal(false);
 
   formatDateToDMY(d: any) {
-    if (!d) return '';
-    const date = new Date(d);
-    if (isNaN(date.getTime())) return d;
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    return toDisplayDate(d);
   }
 
   feeCategories = FINANCIAL_CATEGORY_OPTIONS;
@@ -110,9 +105,13 @@ export class AdminFeeConfig implements OnInit {
 
     this.submitting.set(true);
     const id = this.editingId();
-    const data = this.form.value;
+    const data = {
+      ...this.form.value,
+      effectiveDate: toWireDate(this.form.value.effectiveDate),
+      effectiveTo: toWireDate(this.form.value.effectiveTo)
+    };
 
-    const req = id 
+    const req = id
       ? this.financialService.updateFeeConfig({ ...data, id })
       : this.financialService.addFeeConfig(data);
 

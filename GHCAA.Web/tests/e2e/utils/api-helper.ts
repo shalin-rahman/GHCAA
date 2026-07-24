@@ -101,9 +101,10 @@ export async function approveMember(
   const headers = { Authorization: `Bearer ${adminToken}` };
   const memberId = await completeRegistrationPayment(request, adminToken, memberEmail);
 
+  // Acting admin is resolved from the bearer token server-side; no admin id in the body.
   const approveRes = await request.post(`${API_BASE}/api/admin/members/${memberId}/approve`, {
     headers,
-    data: { approvedByAdminId: 1 },
+    data: {},
   });
   if (!approveRes.ok()) {
     throw new Error(`Member approval failed: ${approveRes.status()}`);

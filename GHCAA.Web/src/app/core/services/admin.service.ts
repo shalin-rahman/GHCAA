@@ -90,12 +90,15 @@ export class AdminService {
         return this.http.get<any>(`${this.apiUrl}${params}`);
     }
 
-    approveMember(id: number, adminId: number): Observable<any> {
-        return this.http.post(`${this.apiUrl}/${id}/approve`, { approvedByAdminId: adminId });
+    // 29F.1: The acting admin's identity is taken from the JWT server-side (AdminController reads the
+    // MemberId claim and ignores any client-supplied id). The old approvedByAdminId/rejectedByAdminId
+    // body fields were dead and misleading (callers hardcoded 1 / fell back to `|| 1`), so they are gone.
+    approveMember(id: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${id}/approve`, {});
     }
 
-    rejectMember(id: number, adminId: number, reason: string): Observable<any> {
-        return this.http.post(`${this.apiUrl}/${id}/reject`, { rejectedByAdminId: adminId, reason });
+    rejectMember(id: number, reason: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/${id}/reject`, { reason });
     }
 
     getStats(): Observable<DashboardStats> {

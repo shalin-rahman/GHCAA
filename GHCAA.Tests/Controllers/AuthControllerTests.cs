@@ -4,6 +4,7 @@ using GHCAA.API.Controllers;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -29,7 +30,12 @@ namespace GHCAA.Tests.Controllers
             _tokenServiceMock.Setup(x => x.StoreRefreshTokenAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            _controller = new AuthController(_authServiceMock.Object, _tokenServiceMock.Object, _context);
+            // AuthController uses IWebHostEnvironment only for `Secure = !_env.IsDevelopment()` on the
+            // auth cookies; a Development env keeps Secure=false so cookie append works over the test's http context.
+            var envMock = new Mock<IWebHostEnvironment>();
+            envMock.SetupGet(x => x.EnvironmentName).Returns("Development");
+
+            _controller = new AuthController(_authServiceMock.Object, _tokenServiceMock.Object, _context, envMock.Object);
 
             // Provide a real DefaultHttpContext so Response.Cookies.Append works.
             _controller.ControllerContext = new ControllerContext

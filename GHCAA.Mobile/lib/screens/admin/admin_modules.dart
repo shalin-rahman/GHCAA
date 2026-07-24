@@ -380,7 +380,7 @@ class AdminCMS extends ConsumerWidget {
                 final payload = {
                   'title': titleCtrl.text,
                   'description': descCtrl.text,
-                  'eventDate': dateCtrl.text.isNotEmpty ? dateCtrl.text : AppUtils.formatDate(DateTime.now()),
+                  'eventDate': dateCtrl.text.isNotEmpty ? AppUtils.toWire(dateCtrl.text) : AppUtils.toWire(DateTime.now()),
                   'isActive': true,
                   'isFeatured': false,
                 };

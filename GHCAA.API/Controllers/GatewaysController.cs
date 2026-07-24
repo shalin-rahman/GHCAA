@@ -179,7 +179,11 @@ namespace GHCAA.API.Controllers
 
             if (isValid)
             {
-                var amount = data.TryGetValue("amount", out var a) && decimal.TryParse(a, out var amt) ? amt : 0;
+                // 29B.2: pass null when the gateway did not include an amount at all (verification is skipped);
+                // pass the parsed value — including 0 for a present-but-unparseable amount — when it did (verify).
+                decimal? amount = data.TryGetValue("amount", out var a)
+                    ? (decimal.TryParse(a, out var amt) ? amt : 0m)
+                    : (decimal?)null;
                 // 24.13: Pass SSLCommerz's val_id as the idempotency key.
                 var valId = data.TryGetValue("val_id", out var vi) ? vi : null;
                 await HandleSuccessfulPayment(trunkTrxId, cancellationToken, amount, valId);
@@ -234,8 +238,10 @@ namespace GHCAA.API.Controllers
 
             if (isValid)
             {
-                var amountStr = callbackData.TryGetValue("amount", out var a) ? a : "0";
-                decimal.TryParse(amountStr, out var amount);
+                // 29B.2: verify the amount only when the gateway actually reported one.
+                decimal? amount = callbackData.TryGetValue("amount", out var a)
+                    ? (decimal.TryParse(a, out var amt) ? amt : 0m)
+                    : (decimal?)null;
 
                 await HandleSuccessfulPayment(trunkTrxId, cancellationToken, amount, gatewayPaymentId: trunkTrxId);
                 return Redirect($"{GetClientUrl()}/payment/success?trxId={trunkTrxId}");
@@ -283,7 +289,7 @@ namespace GHCAA.API.Controllers
             return BadRequest(new { status = "failed" });
         }
 
-        private async Task HandleSuccessfulPayment(string transactionId, CancellationToken cancellationToken, decimal confirmedAmount = 0, string? gatewayPaymentId = null)
+        private async Task HandleSuccessfulPayment(string transactionId, CancellationToken cancellationToken, decimal? confirmedAmount = null, string? gatewayPaymentId = null)
         {
             // 24.13: Idempotency check — short-circuit if this gateway payment was already processed.
             if (!string.IsNullOrEmpty(gatewayPaymentId))
@@ -305,11 +311,16 @@ namespace GHCAA.API.Controllers
             if (!string.IsNullOrEmpty(gatewayPaymentId))
                 payment.GatewayPaymentId = gatewayPaymentId;
 
-            // Security Check: Verify amount matches the record (if provided)
-            if (confirmedAmount > 0 && Math.Abs(payment.Amount - confirmedAmount) > 0.01m)
+            // 29B.2 Security Check: whenever the gateway REPORTS an amount it must match the recorded
+            // amount — including a reported 0. The old `confirmedAmount > 0` guard let a 0 (or absent)
+            // amount skip verification entirely and silently complete an unverified payment. A null now
+            // means the gateway did not echo an amount at all (e.g. bKash's GET callback, whose amount is
+            // authenticated separately inside VerifyCallbackAsync); a value of 0 is treated as reported and
+            // will fail against any positive expected amount.
+            if (confirmedAmount.HasValue && Math.Abs(payment.Amount - confirmedAmount.Value) > 0.01m)
             {
-                _logger.LogWarning("Payment amount mismatch for {TrxID}. Expected {E}, Received {R}. Mark as discrepancy.", transactionId, payment.Amount, confirmedAmount);
-                await _financialService.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Failed, $"Amount mismatch detected. Paid: {confirmedAmount}, Expected: {payment.Amount}", cancellationToken);
+                _logger.LogWarning("Payment amount mismatch for {TrxID}. Expected {E}, Received {R}. Mark as discrepancy.", transactionId, payment.Amount, confirmedAmount.Value);
+                await _financialService.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Failed, $"Amount mismatch detected. Paid: {confirmedAmount.Value}, Expected: {payment.Amount}", cancellationToken);
                 return;
             }
 
@@ -346,8 +357,12 @@ namespace GHCAA.API.Controllers
                 }
             }
 
-            // 3. If it was Registration/Membership fee for 'Applied' status, Auto-Approve Member
-            if (payment.MemberId > 0)
+            // 3. If it was a MEMBERSHIP fee for an 'Applied' member, Auto-Approve the member.
+            //    29B.3: Scope strictly to membership-fee payments. Event-registration payments also carry a
+            //    MemberId, so without this FinancialCategory guard a member paying an event fee would be
+            //    silently auto-inducted as a full member. Gateway-initiated payments always set the category
+            //    at initiation (see InitiatePayment), so this is a reliable discriminator on this code path.
+            if (payment.MemberId > 0 && payment.FinancialCategory == Enums.FinancialCategory.MembershipFee)
             {
                 var member = await _db.Members.FindAsync(new object[] { payment.MemberId }, cancellationToken);
                 if (member != null && member.Status == Enums.MembershipStatus.Applied)

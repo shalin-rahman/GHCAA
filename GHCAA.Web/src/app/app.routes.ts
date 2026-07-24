@@ -81,6 +81,12 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             {
+                // 29A.1: mustChangePassword users are redirected here by authGuard; the route must exist
+                // (previously 404'd → hard login lockout).
+                path: 'change-password',
+                loadComponent: () => import('./member/change-password/change-password').then(m => m.ChangePassword)
+            },
+            {
                 path: 'dashboard',
                 loadComponent: () => import('./member/dashboard/dashboard').then(m => m.Dashboard)
             },

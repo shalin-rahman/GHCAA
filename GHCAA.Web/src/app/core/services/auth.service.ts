@@ -116,6 +116,16 @@ export class AuthService {
         return this._currentUser()?.token || null;
     }
 
+    // 29A.1: Clear the forced-password-change flag after a successful change so authGuard
+    // stops redirecting to /portal/change-password and the user can reach the portal.
+    clearMustChangePassword(): void {
+        const current = this._currentUser();
+        if (!current || !current.mustChangePassword) return;
+        const updated: User = { ...current, mustChangePassword: false };
+        this._currentUser.set(updated);
+        sessionStorage.setItem('user_session', JSON.stringify(this.toSessionUser(updated)));
+    }
+
     private mapAndSetUser(response: TokenResponseDto): User {
         const user: User = {
             username: response.username,

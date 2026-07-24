@@ -259,6 +259,53 @@ namespace GHCAA.Tests.Controllers
         }
 
         [Test]
+        public async Task SSLCommerzCallback_MarksFailedAndDoesNotApprove_WhenReportedAmountMismatches()
+        {
+            // 29B.2: a callback that REPORTS an amount which disagrees with the recorded payment must be
+            // treated as a discrepancy (marked Failed) and must NOT auto-approve the registration —
+            // even though VerifyCallbackAsync (the primary gate) is mocked to succeed.
+            var txnId = "TXN-MISMATCH";
+            var ev = new AlumniEvent { Title = "Event", Description = "Desc", Location = "Loc", RegistrationFee = 100 };
+            _context.AlumniEvents.Add(ev);
+            await _context.SaveChangesAsync();
+
+            var registration = new EventRegistration
+            {
+                EventId = ev.Id,
+                PaymentReference = "EVT-REG-MISMATCH",
+                Status = Enums.EventRegistrationStatus.Pending
+            };
+            _context.EventRegistrations.Add(registration);
+            await _context.SaveChangesAsync();
+
+            var payment = new PaymentHistory
+            {
+                MemberId = _testMember.Id,
+                Amount = 100,
+                TransactionId = txnId,
+                Status = Enums.PaymentStatus.Pending,
+                Notes = "Initiated via SSLCommerz. Ref: EVT-REG-MISMATCH"
+            };
+            _context.PaymentHistories.Add(payment);
+            await _context.SaveChangesAsync();
+
+            var callbackData = new Dictionary<string, string>
+            {
+                { "status", "VALID" },
+                { "tran_id", txnId },
+                { "amount", "999" } // gateway reports a wildly different amount
+            };
+
+            await _controller.SSLCommerzCallback(callbackData, CancellationToken.None);
+
+            var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.Id == registration.Id);
+            Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Pending));
+
+            _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Failed, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+            _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(It.IsAny<int>(), Enums.PaymentStatus.Completed, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
         public async Task BkashCallbackGet_AutoApprovesRegistration_WhenValid()
         {
             var txnId = "BKASH123";

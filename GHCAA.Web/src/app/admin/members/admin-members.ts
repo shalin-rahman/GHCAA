@@ -13,6 +13,7 @@ import { PaginationComponent } from '../../common/pagination/pagination.componen
 import { ExportUtil } from '../../core/utils/export.util';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { toWireDate } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-admin-members',
@@ -258,8 +259,8 @@ export class AdminMembers implements OnInit {
     this.loadMembers();
   }
 
-  approveMember(id: number, adminId: number) {
-    this.adminService.approveMember(id, adminId).subscribe({
+  approveMember(id: number) {
+    this.adminService.approveMember(id).subscribe({
       next: (res: any) => {
         this.notify.success(`Approved! Membership: ${res.membershipNumber}`);
         this.loadMembers();
@@ -450,7 +451,7 @@ export class AdminMembers implements OnInit {
       status: member.status,
       fatherName: member.fatherName,
       motherName: member.motherName,
-      dateOfBirth: member.dateOfBirth,
+      dateOfBirth: toWireDate(member.dateOfBirth),
       nid: member.nid,
       mobileNo: member.mobileNo,
       email: member.email,
@@ -490,8 +491,16 @@ export class AdminMembers implements OnInit {
       emergencyContactRelation: member.emergencyContactRelation,
       emergencyContactPhone: member.emergencyContactPhone,
       academicHistory: member.academicHistory,
-      professionalHistory: member.professionalHistory,
-      ecHistory: member.ecHistory,
+      professionalHistory: (member.professionalHistory || []).map((ph: any) => ({
+        ...ph,
+        startDate: toWireDate(ph.startDate),
+        endDate: toWireDate(ph.endDate)
+      })),
+      ecHistory: (member.ecHistory || []).map((h: any) => ({
+        ...h,
+        startDate: toWireDate(h.startDate),
+        endDate: toWireDate(h.endDate)
+      })),
       ecChangeReason: member.ecChangeReason
     }).subscribe({
       next: () => {

@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../storage/storage_service.dart';
 
 final sessionProvider = StateNotifierProvider<SessionManager, DateTime>((ref) => SessionManager(ref));
 
 class SessionManager extends StateNotifier<DateTime> {
     Timer? _timer;
-  
+    final Ref _ref;
+
   // Set inactivity limit to 15 minutes by default
   static const Duration inactivityLimit = Duration(minutes: 15);
 
-  SessionManager(Ref ref) : super(DateTime.now()) {
+  SessionManager(this._ref) : super(DateTime.now()) {
     _startTimer();
   }
 
@@ -30,12 +31,10 @@ class SessionManager extends StateNotifier<DateTime> {
 
   Future<void> _handleSessionExpiry() async {
     _timer?.cancel();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('jwt_token');
-    
-    // We cannot access context directly here, so we reset state or use a global router approach
-    // We'll use the 'ref' to trigger a logout state or coordinate with AuthState
-    // For now, we'll rely on the Router listening to changes or redirecting on next build
+    // 29A.2: The real auth token lives in secure storage (StorageService), NOT the stale
+    // SharedPreferences 'jwt_token' key the old code removed. Clear it the same way logout does
+    // so authStateProvider's poll sees a null token and the router redirects to /login.
+    await _ref.read(storageServiceProvider).clearAll();
   }
 
   @override

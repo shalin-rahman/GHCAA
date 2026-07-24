@@ -44,9 +44,9 @@ class AdminService {
   Future<bool> resolveApproval(int memberId, bool approve, {required int adminId, String? reason}) async {
     try {
       final endpoint = approve ? 'approve' : 'reject';
+      // 29F.1: The acting admin is resolved from the JWT server-side; the client no longer sends an
+      // admin id (the previous approvedByAdminId/rejectedByAdminId fields were ignored by the API).
       final response = await _dio.post('/admin/members/$memberId/$endpoint', data: {
-        'approvedByAdminId': adminId,
-        'rejectedByAdminId': adminId,
         'reason': reason ?? (approve ? 'Approved' : 'Rejected'),
       });
       return response.statusCode == 200;

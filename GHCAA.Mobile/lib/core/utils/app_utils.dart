@@ -8,11 +8,11 @@ class AppUtils {
       if (date is DateTime) {
         dt = date;
       } else {
-        // Try parsing as dd-MM-yyyy first
+        // Try parsing as ISO first (wire format), then dd-MM-yyyy fallback
         try {
-          dt = DateFormat('dd-MM-yyyy').parse(date.toString());
-        } catch (_) {
           dt = DateTime.parse(date.toString());
+        } catch (_) {
+          dt = DateFormat('dd-MM-yyyy').parse(date.toString());
         }
       }
       return DateFormat('dd-MM-yyyy').format(dt);
@@ -24,14 +24,37 @@ class AppUtils {
   static DateTime? parseDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return null;
     try {
-      return DateFormat('dd-MM-yyyy').parse(dateStr);
+      return DateTime.parse(dateStr);
     } catch (_) {
       try {
-        return DateTime.parse(dateStr);
+        return DateFormat('dd-MM-yyyy').parse(dateStr);
       } catch (_) {
         return null;
       }
     }
+  }
+
+  /// Converts a DateTime, dd-MM-yyyy string, or ISO string to the API wire
+  /// format 'yyyy-MM-dd' (date-only, no timezone shift). Returns null for empty.
+  static String? toWire(dynamic date) {
+    if (date == null) return null;
+    DateTime? dt;
+    if (date is DateTime) {
+      dt = date;
+    } else {
+      final s = date.toString().trim();
+      if (s.isEmpty) return null;
+      try {
+        dt = DateTime.parse(s); // ISO first
+      } catch (_) {
+        try {
+          dt = DateFormat('dd-MM-yyyy').parse(s); // legacy dd-MM-yyyy
+        } catch (_) {
+          return s;
+        }
+      }
+    }
+    return DateFormat('yyyy-MM-dd').format(dt);
   }
 
   static String formatCurrency(dynamic amount) {

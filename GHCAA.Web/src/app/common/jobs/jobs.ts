@@ -7,6 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { JOB_CATEGORIES, getJobCategoryLabel } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-jobs',
@@ -72,9 +73,10 @@ export class Jobs implements OnInit {
     }
 
     this.submitting.set(true);
+    const payload = { ...this.newJob, applicationDeadline: toWireDate(this.newJob.applicationDeadline) };
     const obs = this.isEditing() && this.editingId()
-      ? this.jobService.updateJob(this.editingId()!, this.newJob)
-      : this.jobService.createJob(this.newJob);
+      ? this.jobService.updateJob(this.editingId()!, payload)
+      : this.jobService.createJob(payload);
 
     obs.subscribe({
       next: () => {
@@ -108,13 +110,7 @@ export class Jobs implements OnInit {
   }
 
   formatDateToDMY(d: any) {
-    if (!d) return '';
-    const date = new Date(d);
-    if (isNaN(date.getTime())) return d;
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    return toDisplayDate(d);
   }
 
   closeForm() {

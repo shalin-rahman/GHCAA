@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/utils/app_utils.dart';
 
 // ── Typed model ─────────────────────────────────────────────────────────────
 class RegisterModel {
@@ -167,7 +168,7 @@ class RegisterModel {
               ],
         'membershipType': membershipType,
         'bloodGroup': bloodGroup,
-        'dateOfBirth': dateOfBirth,
+        'dateOfBirth': AppUtils.toWire(dateOfBirth),
         'degree': degree,
         'subject': subject,
         'designation': designation,

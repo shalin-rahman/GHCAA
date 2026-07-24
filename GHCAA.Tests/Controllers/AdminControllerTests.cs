@@ -52,7 +52,8 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task ApproveMember_ReturnsOk_OnSuccess()
         {
-            var dto = new ApproveMemberDto { ApprovedByAdminId = 1 };
+            // Admin identity (1) comes from the JWT MemberId claim set by SetSuperAdminContext, not the DTO.
+            var dto = new ApproveMemberDto();
             _memberServiceMock.Setup(x => x.ApproveMemberAsync(100, 1, It.IsAny<CancellationToken>()))
                               .ReturnsAsync(new ApproveMemberResultDto { MembershipNumber = "GHC-2023-0001", DefaultPassword = "GHC" });
 
@@ -64,7 +65,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task RejectMember_ReturnsOk_OnSuccess()
         {
-            var dto = new RejectMemberDto { RejectedByAdminId = 1, Reason = "Invalid Data" };
+            var dto = new RejectMemberDto { Reason = "Invalid Data" };
             _memberServiceMock.Setup(x => x.RejectMemberAsync(100, 1, "Invalid Data", It.IsAny<CancellationToken>()))
                               .ReturnsAsync(true);
 

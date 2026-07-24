@@ -2,7 +2,6 @@ import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
-import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { ACADEMIC_CERTIFICATES, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getAcademicYears, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
@@ -17,7 +16,6 @@ import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 })
 export class MemberApproval implements OnInit {
   private adminService = inject(AdminService);
-  private auth = inject(AuthService);
   private router = inject(Router);
   private notify = inject(NotificationService);
 
@@ -85,8 +83,7 @@ export class MemberApproval implements OnInit {
 
   approve(id: number) {
     if (confirm('Verify this registry entry? This will officially induct the member and dispatch credentials.')) {
-      const adminId = this.auth.currentUser()?.memberId || 1;
-      this.adminService.approveMember(id, adminId).subscribe({
+      this.adminService.approveMember(id).subscribe({
         next: () => {
           this.notify.success('Registry verified. Member successfully inducted.');
           this.selectedMember.set(null);
@@ -100,8 +97,7 @@ export class MemberApproval implements OnInit {
   confirmReject() {
     if (!this.rejectionReason) return;
     if (confirm('Permanently decline this registry filing? The applicant will be notified with your reason.')) {
-      const adminId = this.auth.currentUser()?.memberId || 1;
-      this.adminService.rejectMember(this.selectedMember().id, adminId, this.rejectionReason).subscribe({
+      this.adminService.rejectMember(this.selectedMember().id, this.rejectionReason).subscribe({
         next: () => {
           this.notify.success('Application declined. Record removed from active queue.');
           this.selectedMember.set(null);

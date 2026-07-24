@@ -147,7 +147,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       var prof = rawP.map((e) => Map<String, dynamic>.from(e as Map)).toList();
       var idx = prof.indexWhere((e) => e['isCurrent'] == true);
       if (idx < 0 && prof.isNotEmpty) idx = 0;
-      final nowIso = AppUtils.formatDate(DateTime.now());
+      final nowIso = AppUtils.toWire(DateTime.now());
       if (idx >= 0) {
         final row = Map<String, dynamic>.from(prof[idx]);
         if (designation.isNotEmpty) row['designation'] = designation;
@@ -421,7 +421,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                       onPressed: () => setState(() {
                         _data['professionalHistory'] ??= [];
                         (_data['professionalHistory'] as List).add({
-                          'organizationName': '', 'designation': '', 'sector': 'Services', 'location': '', 'isCurrent': true, 'startDate': AppUtils.formatDate(DateTime.now())
+                          'organizationName': '', 'designation': '', 'sector': 'Services', 'location': '', 'isCurrent': true, 'startDate': AppUtils.toWire(DateTime.now())
                         });
                       }),
                       icon: const Icon(Icons.add_circle_outline, color: AppTheme.royalGold, size: 18),

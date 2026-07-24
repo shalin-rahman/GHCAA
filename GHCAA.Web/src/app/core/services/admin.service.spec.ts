@@ -42,23 +42,23 @@ describe('AdminService', () => {
         req.flush({ items: [] });
     });
 
-    it('should approve member', () => {
-        service.approveMember(1, 100).subscribe(res => {
+    it('should approve member (admin identity taken from JWT, not body)', () => {
+        service.approveMember(1).subscribe(res => {
             expect(res.success).toBe(true);
         });
         const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}/1/approve`);
         expect(req.request.method).toBe('POST');
-        expect(req.request.body).toEqual({ approvedByAdminId: 100 });
+        expect(req.request.body).toEqual({});
         req.flush({ success: true });
     });
 
     it('should reject member', () => {
-        service.rejectMember(2, 100, 'spam').subscribe(res => {
+        service.rejectMember(2, 'spam').subscribe(res => {
             expect(res.success).toBe(true);
         });
         const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.MEMBERS}/2/reject`);
         expect(req.request.method).toBe('POST');
-        expect(req.request.body).toEqual({ rejectedByAdminId: 100, reason: 'spam' });
+        expect(req.request.body).toEqual({ reason: 'spam' });
         req.flush({ success: true });
     });
 

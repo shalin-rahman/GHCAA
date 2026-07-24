@@ -8,6 +8,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getCategoryLabel, getMembershipTypeLabel, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName, TSHIRT_SIZES } from '../../core/constants/app.constants';
 import { DatePipe } from '@angular/common';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { toWireDate } from '../../core/utils/date.util';
 
 @Component({
     selector: 'app-profile',
@@ -192,8 +193,17 @@ export class Profile implements OnInit {
                 this.signaturePreview.set(null);
             }
 
-            // 2. Sync Metadata
-            await firstValueFrom(this.profileService.updateProfile(this.profile));
+            // 2. Sync Metadata (convert display dd-MM-yyyy dates to ISO wire format on a copy)
+            const payload = {
+                ...this.profile,
+                dateOfBirth: toWireDate(this.profile.dateOfBirth),
+                professionalHistory: (this.profile.professionalHistory || []).map((ph: any) => ({
+                    ...ph,
+                    startDate: toWireDate(ph.startDate),
+                    endDate: toWireDate(ph.endDate)
+                }))
+            };
+            await firstValueFrom(this.profileService.updateProfile(payload));
             
             this.notify.success('Profile information updated');
             
