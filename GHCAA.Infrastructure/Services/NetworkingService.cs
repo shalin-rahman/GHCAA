@@ -47,8 +47,8 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrEmpty(filter.Query))
             {
                 var q = filter.Query.ToLower();
-                query = query.Where(m => 
-                    m.FullName.ToLower().Contains(q) || 
+                query = query.Where(m =>
+                    m.FullName.ToLower().Contains(q) ||
                     (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(q)) ||
                     (m.Email != null && m.Email.ToLower().Contains(q)));
             }
@@ -67,7 +67,7 @@ namespace GHCAA.Infrastructure.Services
 
             if (!string.IsNullOrEmpty(filter.ECPosition) && System.Enum.TryParse<Enums.ECPosition>(filter.ECPosition, true, out var pos))
                 query = query.Where(m => m.ECMembers.Any(em => em.Position == pos && em.EndDate == null));
-            
+
             if (!string.IsNullOrEmpty(filter.Category) && System.Enum.TryParse<Enums.MemberCategory>(filter.Category, true, out var cat))
                 query = query.Where(m => m.Category == cat);
 
@@ -107,7 +107,7 @@ namespace GHCAA.Infrastructure.Services
                     .ThenInclude(m => m!.AcademicHistory)
                 .Include(em => em.ECPeriod)
                 .AsQueryable();
-            
+
             if (periodId.HasValue)
             {
                 query = query.Where(em => em.ECPeriodId == periodId.Value);
@@ -155,7 +155,7 @@ namespace GHCAA.Infrastructure.Services
                 MobileNo = m.IsMobilePublic ? m.MobileNo : "Confidential",
                 MembershipNumber = m.MembershipNumber,
                 Status = m.Status,
-                
+
                 // Personal
                 FatherName = m.FatherName,
                 MotherName = m.MotherName,
@@ -170,7 +170,8 @@ namespace GHCAA.Infrastructure.Services
                 EmergencyContactPhone = m.EmergencyContactPhone,
 
                 // History
-                AcademicHistory = m.AcademicHistory.Select(a => new AcademicRecordDto {
+                AcademicHistory = m.AcademicHistory.Select(a => new AcademicRecordDto
+                {
                     Id = a.Id,
                     InstitutionName = a.InstitutionName,
                     Degree = a.Degree,
@@ -181,7 +182,8 @@ namespace GHCAA.Infrastructure.Services
                     Result = a.Result,
                     CertificatePath = a.CertificatePath
                 }).ToList(),
-                ProfessionalHistory = m.ProfessionalHistory.Select(p => new ProfessionalRecordDto {
+                ProfessionalHistory = m.ProfessionalHistory.Select(p => new ProfessionalRecordDto
+                {
                     Id = p.Id,
                     OrganizationName = p.OrganizationName,
                     Designation = p.Designation,

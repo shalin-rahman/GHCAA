@@ -12,7 +12,7 @@ namespace GHCAA.Domain.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsRead { get; set; } = false;
         public string Type { get; set; } = "General"; // Approval, Job, Payment, etc.
-        
+
         [System.Text.Json.Serialization.JsonIgnore]
         public Member? Member { get; set; }
     }

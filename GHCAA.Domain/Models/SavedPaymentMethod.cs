@@ -12,7 +12,7 @@ namespace GHCAA.Domain.Models
         public string Method { get; set; } = string.Empty; // e.g., "Bkash", "Nagad"
         public string AccountNumber { get; set; } = string.Empty; // Masked or full depending on security
         public string? Icon { get; set; }
-        
+
         public bool IsDefault { get; set; }
         public DateTime LastUsedAt { get; set; }
         public DateTime CreatedAt { get; set; }

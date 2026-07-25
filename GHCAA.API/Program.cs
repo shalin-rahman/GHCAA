@@ -44,7 +44,7 @@ builder.Services.AddResponseCompression(options =>
 builder.Services.AddOutputCache(options =>
 {
     options.AddBasePolicy(builder => builder.Cache());
-    options.AddPolicy("StaticData", builder => 
+    options.AddPolicy("StaticData", builder =>
         builder.Expire(TimeSpan.FromMinutes(5)).SetVaryByQuery("*"));
 });
 
@@ -109,7 +109,7 @@ builder.Services.AddRateLimiter(options =>
 
 // Configure Request Limits from Settings
 var maxBodySize = configuration.GetValue<long>("AppSettings:MaxRequestBodySize", 104857600);
-builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options => 
+builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = maxBodySize;
 });
@@ -122,7 +122,8 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x =>
 });
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options => {
+    .AddJsonOptions(options =>
+    {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         options.JsonSerializerOptions.Converters.Add(new GHCAA.API.Utils.DateFormatConverter());
         options.JsonSerializerOptions.Converters.Add(new GHCAA.API.Utils.NullableDateFormatConverter());
@@ -163,7 +164,7 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseCors("AngularApp");
- 
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

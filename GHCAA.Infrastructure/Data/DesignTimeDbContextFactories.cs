@@ -29,7 +29,7 @@ namespace GHCAA.Infrastructure.Data
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
             var conn = Configuration.GetConnectionString("PgSqlConnection");
             optionsBuilder.UseNpgsql(conn, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-            
+
             optionsBuilder.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             return new PgSqlApplicationDbContext(optionsBuilder.Options);
         }
@@ -43,7 +43,7 @@ namespace GHCAA.Infrastructure.Data
             var conn = Configuration.GetConnectionString("MySqlConnection");
             var mysqlVersion = new MySqlServerVersion(new Version(8, 0, 36));
             optionsBuilder.UseMySql(conn, mysqlVersion, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-            
+
             optionsBuilder.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             return new MySqlApplicationDbContext(optionsBuilder.Options);
         }
@@ -56,7 +56,7 @@ namespace GHCAA.Infrastructure.Data
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
             var conn = Configuration.GetConnectionString("SqliteConnection");
             optionsBuilder.UseSqlite(conn, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-            
+
             optionsBuilder.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             return new SqliteApplicationDbContext(optionsBuilder.Options);
         }

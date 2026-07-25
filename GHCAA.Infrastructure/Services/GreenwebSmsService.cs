@@ -20,9 +20,9 @@ namespace GHCAA.Infrastructure.Services
         private readonly string _baseUrl;
 
         public GreenwebSmsService(
-            HttpClient httpClient, 
-            IConfiguration config, 
-            ILogger<GreenwebSmsService> logger, 
+            HttpClient httpClient,
+            IConfiguration config,
+            ILogger<GreenwebSmsService> logger,
             ApplicationDbContext db)
         {
             _httpClient = httpClient;
@@ -45,7 +45,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 // Format: token=YOUR_TOKEN&to=RECIPIENT_NUMBER&message=YOUR_MESSAGE
                 var url = $"{_baseUrl}?token={_token}&to={mobileNo.TrimStart('+')}&message={Uri.EscapeDataString(message)}";
-                
+
                 var response = await _httpClient.GetAsync(url, cancellationToken);
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
 

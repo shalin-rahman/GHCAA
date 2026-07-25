@@ -29,10 +29,10 @@ namespace GHCAA.Infrastructure.Gateways
         {
             // Nagad integration is multi-step (sensitive data encryption, order creation).
             // Placeholder implementation.
-            return Task.FromResult(new PaymentGatewayResponseDto 
-            { 
-                Success = false, 
-                Message = "Nagad automatic gateway integration is coming soon. Please use manual method for now." 
+            return Task.FromResult(new PaymentGatewayResponseDto
+            {
+                Success = false,
+                Message = "Nagad automatic gateway integration is coming soon. Please use manual method for now."
             });
         }
 

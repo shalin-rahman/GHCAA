@@ -92,7 +92,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDto dto, CancellationToken cancellationToken)
         {
             var isVerified = await _memberService.VerifyEmailAsync(dto.Email, dto.OtpCode, cancellationToken);
-            
+
             if (!isVerified)
             {
                 return BadRequest(new { Message = "Invalid or expired OTP code" });

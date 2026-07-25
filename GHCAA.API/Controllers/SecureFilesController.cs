@@ -26,10 +26,10 @@ namespace GHCAA.API.Controllers
         {
             // The filePath coming from the route might need normalization
             var normalizedPath = filePath.TrimStart('/');
-            
+
             // Check if user is SuperAdmin or Admin
             bool isAdmin = User.IsInRole("SuperAdmin") || User.IsInRole("Admin");
-            
+
             // Find the file in the database to get the owner
             var fileUpload = await _db.FileUploads
                 .FirstOrDefaultAsync(f => f.FilePath == normalizedPath, cancellationToken);

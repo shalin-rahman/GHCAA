@@ -35,17 +35,17 @@ namespace GHCAA.Infrastructure.Gateways
             var config = await _db.PaymentConfigurations
                 .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled, cancellationToken);
 
-            if (config == null) 
+            if (config == null)
                 return new PaymentGatewayResponseDto { Success = false, Message = "SSLCommerz configuration not found or disabled." };
 
             var storeId = config.GatewayPublicKey;
             var storePass = config.GatewaySecretKey;
-            
+
             var isSandbox = config.IsSandbox;
             var sandboxUrl = _config["PaymentGateways:SSLCommerz:SandboxUrl"] ?? "https://sandbox.sslcommerz.com";
             var prodUrl = _config["PaymentGateways:SSLCommerz:ProductionUrl"] ?? "https://securepay.sslcommerz.com";
-            var url = isSandbox 
-                ? $"{sandboxUrl.TrimEnd('/')}/gwprocess/v4/api.php" 
+            var url = isSandbox
+                ? $"{sandboxUrl.TrimEnd('/')}/gwprocess/v4/api.php"
                 : $"{prodUrl.TrimEnd('/')}/gwprocess/v4/api.php";
 
             var formData = new Dictionary<string, string>
@@ -77,9 +77,9 @@ namespace GHCAA.Infrastructure.Gateways
 
                 if (result?.status == "SUCCESS")
                 {
-                    return new PaymentGatewayResponseDto 
-                    { 
-                        Success = true, 
+                    return new PaymentGatewayResponseDto
+                    {
+                        Success = true,
                         GatewayUrl = result.GatewayPageURL,
                         TransactionId = formData["tran_id"]
                     };
@@ -138,7 +138,7 @@ namespace GHCAA.Infrastructure.Gateways
             var isSandbox = config.IsSandbox;
             var sandboxUrl = _config["PaymentGateways:SSLCommerz:SandboxUrl"] ?? "https://sandbox.sslcommerz.com";
             var prodUrl = _config["PaymentGateways:SSLCommerz:ProductionUrl"] ?? "https://securepay.sslcommerz.com";
-            
+
             var baseValidationUrl = isSandbox ? sandboxUrl : prodUrl;
             var validationUrl = $"{baseValidationUrl.TrimEnd('/')}/validator/api/validationserverAPI.php?val_id={valId}&store_id={config.GatewayPublicKey}&store_passwd={config.GatewaySecretKey}&format=json";
 

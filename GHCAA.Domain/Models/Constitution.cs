@@ -13,7 +13,7 @@ namespace GHCAA.Domain.Models
         public DateTime? SupersededDate { get; set; }
         public bool IsActive { get; set; }
         public string ChangeSummary { get; set; } = null!;
-        
+
         public ICollection<AmendmentVote> Votes { get; set; } = new List<AmendmentVote>();
     }
 

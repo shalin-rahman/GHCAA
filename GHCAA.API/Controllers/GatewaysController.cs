@@ -21,7 +21,7 @@ namespace GHCAA.API.Controllers
         private readonly IConfiguration _config;
 
         public GatewaysController(
-            IPaymentGatewayFactory gatewayFactory, 
+            IPaymentGatewayFactory gatewayFactory,
             IFinancialService financialService,
             IMemberService memberService,
             ApplicationDbContext db,
@@ -124,11 +124,11 @@ namespace GHCAA.API.Controllers
             }
 
             var gatewayService = _gatewayFactory.GetGateway(request.Gateway);
-            
+
             // Create a pending payment history record first
             var prefix = _config["GeneralSettings:AssociationNamePrefix"] ?? "GHCAA-";
             var trxId = prefix + Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
-            
+
             // S4.3: Derive CallbackUrl from server-side config, never from client-supplied BaseUrl.
             var publicApiBase = _config["AppSettings:PublicApiBaseUrl"]
                 ?? throw new InvalidOperationException("AppSettings:PublicApiBaseUrl is not configured.");
@@ -147,7 +147,7 @@ namespace GHCAA.API.Controllers
             };
 
             var response = await gatewayService.InitiatePaymentAsync(initiateDto, cancellationToken);
-            
+
             if (response.Success)
             {
                 // Record the intent in history
@@ -203,7 +203,7 @@ namespace GHCAA.API.Controllers
 
             if (string.IsNullOrEmpty(status) || status.ToLower() != "success")
             {
-                 return Redirect($"{GetClientUrl()}/payment/failed?trxId={paymentID}");
+                return Redirect($"{GetClientUrl()}/payment/failed?trxId={paymentID}");
             }
 
             var gateway = _gatewayFactory.GetGateway(Enums.PaymentGateway.BkashGateway);
@@ -274,9 +274,9 @@ namespace GHCAA.API.Controllers
                 return NotFound(new { status = "unsupported_gateway" });
             }
             var headers = Request.Headers.ToDictionary(h => h.Key, h => h.Value.ToString());
-            
+
             var isValid = await gatewayService.ProcessWebhookAsync(Request.Body, headers, cancellationToken);
-            
+
             if (isValid)
             {
                 // Note: ProcessWebhookAsync might need to return the transactionId or we need to extract it again.
@@ -284,17 +284,17 @@ namespace GHCAA.API.Controllers
                 // I'll update IPaymentGatewayService to return a result object instead of bool if needed,
                 // but for now, I'll assume SSL/bKash implementations might handle the DB update internally OR 
                 // we'll need to parse the body here.
-                
+
                 // Let's parse the body into a string to get the TrxId if needed for HandleSuccessfulPayment
                 // Actually, I'll update ProcessWebhookAsync to handle the internal logic if possible, 
                 // but HandleSuccessfulPayment is in the controller.
-                
+
                 // Better approach: Have ProcessWebhookAsync return a 'WebhookResult' with TrxId.
                 // But given the current structure, I'll just LOG and ensure the 'Validity' was checked.
-                
+
                 // I'll make a minor update to HandleSuccessfulPayment to be callable from within gateways? No.
                 // I'll parse the TransactionId from the body if possible here.
-                
+
                 return Ok(new { status = "success" });
             }
 
@@ -345,7 +345,7 @@ namespace GHCAA.API.Controllers
                 var regRef = payment.Notes.Split("EVT-REG-")[1].Split(" ")[0]; // Extract just the reference
                 var fullRef = "EVT-REG-" + regRef;
                 var registration = await _db.EventRegistrations.Include(r => r.Event).FirstOrDefaultAsync(r => r.PaymentReference == fullRef, cancellationToken);
-                
+
                 if (registration != null && registration.Status == Enums.EventRegistrationStatus.Pending && registration.Event != null)
                 {
                     // Verify sufficient amount paid for the event
@@ -355,7 +355,7 @@ namespace GHCAA.API.Controllers
                     {
                         var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";
                         int.TryParse(adminIdStr, out var adminId);
-                        
+
                         _logger.LogInformation("Auto-Approving Event Registration {Id} for reference {Ref}", registration.Id, fullRef);
                         registration.Status = Enums.EventRegistrationStatus.Approved;
                         registration.ApprovedAt = DateTime.UtcNow;
@@ -410,7 +410,7 @@ namespace GHCAA.API.Controllers
             }
         }
 
-        private string GetClientUrl() 
+        private string GetClientUrl()
         {
             return _config.GetSection("AppSettings:AllowedOrigins")?.Get<string[]>()?.FirstOrDefault() ?? "http://localhost:4200";
         }

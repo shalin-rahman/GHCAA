@@ -27,7 +27,8 @@ namespace GHCAA.Infrastructure.Services
         {
             var utcNow = DateTime.UtcNow;
             try { return TimeZoneInfo.ConvertTimeFromUtc(utcNow, TimeZoneInfo.FindSystemTimeZoneById("Asia/Dhaka")); }
-            catch (TimeZoneNotFoundException) { 
+            catch (TimeZoneNotFoundException)
+            {
                 try { return TimeZoneInfo.ConvertTimeFromUtc(utcNow, TimeZoneInfo.FindSystemTimeZoneById("Bangladesh Standard Time")); }
                 catch (TimeZoneNotFoundException) { return utcNow.AddHours(6); }
             }

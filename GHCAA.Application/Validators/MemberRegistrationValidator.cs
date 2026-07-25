@@ -38,7 +38,8 @@ namespace GHCAA.Application.Validators
             RuleFor(x => x.PaymentMethodId).GreaterThan(0).WithMessage("Please select a valid payment method");
 
             RuleFor(x => x.AcademicHistory).NotEmpty().WithMessage("At least one academic record is required");
-            RuleForEach(x => x.AcademicHistory).ChildRules(academic => {
+            RuleForEach(x => x.AcademicHistory).ChildRules(academic =>
+            {
                 academic.RuleFor(a => a.InstitutionName).NotEmpty().MaximumLength(250);
                 academic.RuleFor(a => a.Degree).NotEmpty().MaximumLength(100);
                 academic.RuleFor(a => a.Subject).MaximumLength(100);

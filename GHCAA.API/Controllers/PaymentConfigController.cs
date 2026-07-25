@@ -71,7 +71,7 @@ namespace GHCAA.API.Controllers
                         config.GatewayPublicKey = "********";
                 }
             }
-            
+
             return Ok(configs);
         }
 
@@ -105,7 +105,7 @@ namespace GHCAA.API.Controllers
             existing.AccountNumber = config.AccountNumber;
             existing.RoutingNumber = config.RoutingNumber;
             existing.Gateway = config.Gateway;
-            
+
             // Only SuperAdmin can update gateway secrets
             if (User.IsInRole("SuperAdmin"))
             {
@@ -113,7 +113,7 @@ namespace GHCAA.API.Controllers
                     existing.GatewayPublicKey = config.GatewayPublicKey;
                 if (config.GatewaySecretKey != "********")
                     existing.GatewaySecretKey = config.GatewaySecretKey;
-                
+
                 existing.GatewayCallbackUrl = config.GatewayCallbackUrl;
                 existing.IsSandbox = config.IsSandbox;
             }
@@ -157,12 +157,27 @@ namespace GHCAA.API.Controllers
 
         private static object MaskSecrets(PaymentConfiguration c) => new
         {
-            c.Id, c.Method, c.DisplayName, c.Description, c.Icon,
-            c.IsEnabled, c.IsSandbox, c.SortOrder, c.Gateway,
-            c.WalletNumber, c.AccountHolderName, c.BankName, c.BranchName,
-            c.AccountNumber, c.RoutingNumber, c.Instructions,
-            c.RequiresReceipt, c.RequiresReference,
-            c.GatewayCallbackUrl, c.CreatedAt, c.UpdatedAt,
+            c.Id,
+            c.Method,
+            c.DisplayName,
+            c.Description,
+            c.Icon,
+            c.IsEnabled,
+            c.IsSandbox,
+            c.SortOrder,
+            c.Gateway,
+            c.WalletNumber,
+            c.AccountHolderName,
+            c.BankName,
+            c.BranchName,
+            c.AccountNumber,
+            c.RoutingNumber,
+            c.Instructions,
+            c.RequiresReceipt,
+            c.RequiresReference,
+            c.GatewayCallbackUrl,
+            c.CreatedAt,
+            c.UpdatedAt,
             GatewayPublicKey = string.IsNullOrEmpty(c.GatewayPublicKey) ? null : "••••••••",
             GatewaySecretKey = string.IsNullOrEmpty(c.GatewaySecretKey) ? null : "••••••••"
         };

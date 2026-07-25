@@ -35,14 +35,14 @@ namespace GHCAA.Infrastructure.Services
             if (member == null) return;
 
             member.ContributionPoints += config.Points;
-            
+
             await _db.SaveChangesAsync(cancellationToken);
 
             await _activity.LogActivityAsync(
-                memberId, 
-                "PointsAwarded", 
-                $"Earned {config.Points} pts for: {config.Name}", 
-                metadata: metadata, 
+                memberId,
+                "PointsAwarded",
+                $"Earned {config.Points} pts for: {config.Name}",
+                metadata: metadata,
                 cancellationToken: cancellationToken);
 
             _logger.LogInformation("Awarded {Points} points to Member {MemberId} for {Activity}", config.Points, memberId, activityCode);

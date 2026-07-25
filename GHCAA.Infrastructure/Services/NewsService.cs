@@ -40,7 +40,7 @@ namespace GHCAA.Infrastructure.Services
                 .OrderByDescending(n => n.PublishDate)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
-                
+
             return posts.Select(MapToDto);
         }
 
@@ -91,7 +91,7 @@ namespace GHCAA.Infrastructure.Services
                     .ThenInclude(c => c.User)
                         .ThenInclude(u => u!.Member)
                 .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
-            
+
             return post == null ? null : MapToDto(post);
         }
 

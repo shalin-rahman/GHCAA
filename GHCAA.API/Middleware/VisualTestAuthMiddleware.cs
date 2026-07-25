@@ -26,7 +26,7 @@ namespace GHCAA.API.Middleware
         public async Task InvokeAsync(HttpContext context)
         {
             var authHeader = context.Request.Headers["Authorization"].ToString();
-            
+
             if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer visual_"))
             {
                 var token = authHeader.Replace("Bearer ", "");

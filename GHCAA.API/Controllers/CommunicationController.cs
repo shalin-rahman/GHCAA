@@ -66,7 +66,7 @@ namespace GHCAA.API.Controllers
         {
             var years = dto.PassingYears ?? (dto.PassingYear.HasValue ? new List<int> { dto.PassingYear.Value } : null);
             if (years == null || !years.Any()) return BadRequest("At least one PassingYear is required");
-            
+
             await _commService.SendBatchEmailAsync(years, dto.TemplateCode, dto.CustomVars, cancellationToken);
             return Ok(new { Message = $"Emails queued for batches: {string.Join(", ", years)}" });
         }
@@ -76,7 +76,7 @@ namespace GHCAA.API.Controllers
         {
             var types = dto.MembershipTypes ?? (!string.IsNullOrEmpty(dto.MembershipType) ? new List<string> { dto.MembershipType } : null);
             if (types == null || !types.Any()) return BadRequest("At least one MembershipType is required");
-            
+
             await _commService.SendTypeEmailAsync(types, dto.TemplateCode, dto.CustomVars, cancellationToken);
             return Ok(new { Message = $"Emails queued for types: {string.Join(", ", types)}" });
         }
@@ -91,7 +91,7 @@ namespace GHCAA.API.Controllers
             {
                 var years = dto.TargetValues?.Select(int.Parse).ToList() ?? (string.IsNullOrEmpty(dto.TargetValue) ? null : new List<int> { int.Parse(dto.TargetValue) });
                 if (years == null) return BadRequest("Target batch values required");
-                
+
                 if (sendEmail) await _commService.SendBatchCustomEmailAsync(years, dto.Subject ?? "Broadcast Update", dto.Body ?? "", cancellationToken);
                 if (sendPush) await _notificationService.BroadcastNotificationAsync(dto.Subject ?? "Broadcast Update", dto.Body ?? "", Enums.NotificationType.GeneralSystem, "/portal/notifications", cancellationToken);
             }
@@ -99,7 +99,7 @@ namespace GHCAA.API.Controllers
             {
                 var types = dto.TargetValues ?? (string.IsNullOrEmpty(dto.TargetValue) ? null : new List<string> { dto.TargetValue });
                 if (types == null) return BadRequest("Target membership type values required");
-                
+
                 if (sendEmail) await _commService.SendTypeCustomEmailAsync(types, dto.Subject ?? "Broadcast Update", dto.Body ?? "", cancellationToken);
                 if (sendPush) await _notificationService.BroadcastNotificationAsync(dto.Subject ?? "Broadcast Update", dto.Body ?? "", Enums.NotificationType.GeneralSystem, "/portal/notifications", cancellationToken);
             }
@@ -107,7 +107,7 @@ namespace GHCAA.API.Controllers
             {
                 if (sendEmail) await _commService.SendCustomEmailAsync(dto.Emails, dto.TemplateCode, dto.Subject, dto.Body, null, cancellationToken);
             }
-            
+
             return Ok(new { Message = "Communications queued for delivery via " + dto.Channel });
         }
     }

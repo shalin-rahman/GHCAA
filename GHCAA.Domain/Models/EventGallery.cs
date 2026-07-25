@@ -14,7 +14,7 @@ namespace GHCAA.Domain.Models
         public int CreatedByAdminId { get; set; }
         public bool IsActive { get; set; } = true;
         public bool IsFeatured { get; set; } = false;
-        
+
         // Navigation
         public ICollection<EventPhoto> Photos { get; set; } = new List<EventPhoto>();
     }
@@ -26,7 +26,7 @@ namespace GHCAA.Domain.Models
         public string PhotoPath { get; set; } = null!;
         public string? Caption { get; set; }
         public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
-        
+
         // Navigation
         public EventGallery? EventGallery { get; set; }
     }

@@ -13,7 +13,7 @@ namespace GHCAA.Application.DTOs
         public MemberCategory Category { get; set; }
         public DateTime AppliedDate { get; set; }
         public DateTime? ApprovedDate { get; set; }
-        
+
         public bool IsVerified { get; set; }
         public bool IsProfileComplete { get; set; }
         public string? PrimaryMemberNumber { get; set; }
@@ -25,7 +25,7 @@ namespace GHCAA.Application.DTOs
         public int ContributionPoints { get; set; }
         public int Rank { get; set; }
         public decimal ProfileCompletionPercentage { get; set; }
-        
+
         public bool HasAcceptedTerms { get; set; }
         public bool HasAcceptedGdpr { get; set; }
 

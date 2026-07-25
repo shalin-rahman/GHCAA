@@ -50,7 +50,7 @@ namespace GHCAA.API.Controllers
 
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
             var success = await _jobService.UpdateJobAsync(id, job, memberId, isAdmin, cancellationToken);
-            
+
             if (!success) return Forbid();
             return Ok(new { Message = "Job updated successfully" });
         }
@@ -70,7 +70,7 @@ namespace GHCAA.API.Controllers
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
-            
+
             var job = await _jobService.GetJobByIdAsync(id, cancellationToken);
             if (job == null) return NotFound();
 

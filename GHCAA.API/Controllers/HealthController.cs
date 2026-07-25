@@ -27,7 +27,8 @@ namespace GHCAA.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetHealth(CancellationToken ct)
         {
-            var health = new {
+            var health = new
+            {
                 Status = "Healthy",
                 Timestamp = DateTime.UtcNow,
                 Checks = new List<object>()
@@ -36,20 +37,20 @@ namespace GHCAA.API.Controllers
             bool allHealthy = true;
 
             // 1. DB check
-            try 
+            try
             {
                 var canConnect = await _db.Database.CanConnectAsync(ct);
                 health.Checks.Add(new { Name = "Database", Status = canConnect ? "Healthy" : "Unhealthy" });
                 if (!canConnect) allHealthy = false;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 health.Checks.Add(new { Name = "Database", Status = "Error", Message = ex.Message });
                 allHealthy = false;
             }
 
             // 2. Storage Check
-            try 
+            try
             {
                 // Test writing/reading a small temp file logic or just check directory
                 health.Checks.Add(new { Name = "FileStorage", Status = "Healthy" });

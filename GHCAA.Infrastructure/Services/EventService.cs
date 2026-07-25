@@ -260,8 +260,8 @@ namespace GHCAA.Infrastructure.Services
                 GuestEmail = dto.GuestEmail,
                 GuestMobile = dto.GuestMobile,
                 PaymentReference = alumniEvent.RequiresPayment ? (dto.PaymentReference ?? "PENDING") : "FREE-ENTRY",
-                PaymentMethod = alumniEvent.RequiresPayment 
-                    ? (dto.PaymentMethod ?? GHCAA.Domain.Enums.PaymentMethod.ManualReceipt) 
+                PaymentMethod = alumniEvent.RequiresPayment
+                    ? (dto.PaymentMethod ?? GHCAA.Domain.Enums.PaymentMethod.ManualReceipt)
                     : GHCAA.Domain.Enums.PaymentMethod.ManualReceipt,
                 ReceiptPath = receiptPath,
                 ContributionAmount = dto.ContributionAmount,
@@ -269,7 +269,7 @@ namespace GHCAA.Infrastructure.Services
                 Status = initialStatus,
                 RegisteredAt = DateTime.UtcNow
             };
-            
+
             _context.EventRegistrations.Add(registration);
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -302,9 +302,11 @@ namespace GHCAA.Infrastructure.Services
             }
 
             // Send "Participation Received" email
-            try {
+            try
+            {
                 await SendEventEmailAsync(registration, "EVENT_PARTICIPATION_RECEIVED", cancellationToken);
-            } catch { /* Suppress email errors to ensure registration succeeds */ }
+            }
+            catch { /* Suppress email errors to ensure registration succeeds */ }
 
             return registration;
         }
@@ -335,7 +337,7 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrEmpty(search))
             {
                 var s = search.ToLower();
-                query = query.Where(r => 
+                query = query.Where(r =>
                     (r.GuestName != null && r.GuestName.ToLower().Contains(s)) ||
                     (r.GuestEmail != null && r.GuestEmail.ToLower().Contains(s)) ||
                     (r.Member != null && r.Member.FullName.ToLower().Contains(s)) ||
@@ -355,7 +357,8 @@ namespace GHCAA.Infrastructure.Services
                 TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize),
                 CurrentPage = page,
                 PageSize = pageSize,
-                Items = items.Select(r => new {
+                Items = items.Select(r => new
+                {
                     r.Id,
                     r.EventId,
                     EventTitle = r.Event?.Title,
@@ -408,8 +411,8 @@ namespace GHCAA.Infrastructure.Services
                 { "PassId", $"REG-{registration.Id.ToString().PadLeft(6, '0')}" }
             };
 
-            string subject = templateCode.Contains("RECEIVED") 
-                ? $"Participation Received: {registration.Event.Title}" 
+            string subject = templateCode.Contains("RECEIVED")
+                ? $"Participation Received: {registration.Event.Title}"
                 : $"Participation Approved: {registration.Event.Title}";
 
             if (registration.MemberId.HasValue)
@@ -419,11 +422,11 @@ namespace GHCAA.Infrastructure.Services
             else
             {
                 await _communicationService.SendCustomEmailAsync(
-                    new List<string> { email }, 
-                    templateCode, 
-                    subject, 
-                    null, 
-                    customVars, 
+                    new List<string> { email },
+                    templateCode,
+                    subject,
+                    null,
+                    customVars,
                     cancellationToken);
             }
 
@@ -448,7 +451,7 @@ namespace GHCAA.Infrastructure.Services
             if (approve)
             {
                 await SendEventEmailAsync(registration, "EVENT_PARTICIPATION_APPROVED", cancellationToken);
-                
+
                 if (registration.MemberId.HasValue)
                 {
                     await _notificationService.CreateNotificationAsync(
@@ -477,10 +480,10 @@ namespace GHCAA.Infrastructure.Services
 
             // Save the file. Use eventId for organization.
             string logoPath = await _fileStorageService.SaveFileAsync(logo.Content, logo.FileName, eventId, FileUploadType.NewsImage, cancellationToken); // Reusing NewsImage type as it's generic public image
-            
+
             alumniEvent.ImageUrl = logoPath;
             await _context.SaveChangesAsync(cancellationToken);
-            
+
             return logoPath;
         }
 
@@ -633,7 +636,7 @@ namespace GHCAA.Infrastructure.Services
             };
 
             _context.EventExpenses.Add(expense);
-            
+
             // Re-calculate actual total
             budget.ActualTotal += dto.Amount;
             budget.UpdatedAt = DateTime.UtcNow;

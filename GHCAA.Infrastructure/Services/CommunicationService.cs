@@ -21,45 +21,45 @@ namespace GHCAA.Infrastructure.Services
 
         private static readonly List<EmailTemplate> DefaultTemplates = new()
         {
-            new EmailTemplate 
-            { 
-                Code = "OTP_EMAIL", 
-                Subject = "GHCAA Verification Code: {{OtpCode}}", 
+            new EmailTemplate
+            {
+                Code = "OTP_EMAIL",
+                Subject = "GHCAA Verification Code: {{OtpCode}}",
                 Description = "Security code for login/registration",
                 Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Verification Code</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>Your security code is:</p><div style='font-size: 24px; font-weight: bold; background: #f8f9fa; padding: 15px; text-align: center; border-radius: 5px; color: #3498db;'>{{OtpCode}}</div><p>Valid for 10 minutes. Do not share this code.</p></div>",
             },
-            new EmailTemplate 
-            { 
-                Code = "WELCOME_EMAIL", 
-                Subject = "Welcome to GHC Alumni Association!", 
+            new EmailTemplate
+            {
+                Code = "WELCOME_EMAIL",
+                Subject = "Welcome to GHC Alumni Association!",
                 Description = "Official induction message",
                 Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Welcome to GHCAA</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your membership has been approved! We are excited to have you as part of our community.</p><div style='background: #e8f4fd; padding: 15px; border-radius: 5px;'><p><strong>Membership No:</strong> {{MembershipNumber}}</p><p><strong>Default Password:</strong> <code style='background:#fff; padding:2px 5px;'>{{DefaultPassword}}</code></p></div><p>Please log in and change your password immediately.</p></div>",
             },
-            new EmailTemplate 
-            { 
-                Code = "FEE_REMINDER", 
-                Subject = "Annual Membership Subscription Due", 
+            new EmailTemplate
+            {
+                Code = "FEE_REMINDER",
+                Subject = "Annual Membership Subscription Due",
                 Description = "Friendly reminder for yearly dues",
                 Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;'><h2 style='color: #2c3e50;'>Subscription Reminder</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>This is a reminder that your annual membership subscription is now due.</p><p>Maintaining an active status ensures you continue to receive all alumni benefits and voting rights.</p><p>Thank you for your continued support!</p></div>",
             },
-            new EmailTemplate 
-            { 
-                Code = "PASSWORD_RESET", 
+            new EmailTemplate
+            {
+                Code = "PASSWORD_RESET",
                 Subject = "GHCAA Account Password Reset",
                 Description = "Admin-initiated secure password reset link",
                 Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;'><h2 style='color: #c5a059;'>Password Reset</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>An administrator has initiated a password reset for your GHCAA account. Click below to set a new password — the link is valid for 24 hours.</p><div style='text-align: center; margin: 30px 0;'><a href='{{ResetUrl}}' style='background: #111; color: #c5a059; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; border: 1px solid #c5a059;'>Reset My Password</a></div><p style='color: #666; font-size: 0.9rem;'>If you did not request this, please ignore this email.</p></div>",
             },
-            new EmailTemplate 
-            { 
-                Code = "EVENT_PARTICIPATION_RECEIVED", 
-                Subject = "Participation Received: {{EventTitle}}", 
+            new EmailTemplate
+            {
+                Code = "EVENT_PARTICIPATION_RECEIVED",
+                Subject = "Participation Received: {{EventTitle}}",
                 Description = "Initial acknowledgement for event registration",
                 Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;'><h2 style='color: #2c3e50;'>Registration Received</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>We have received your registration for <strong>{{EventTitle}}</strong>.</p><div style='background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px dashed #c5a059;'><p><strong>Status:</strong> Pending Approval</p><p><strong>Reference:</strong> {{PassId}}</p></div><p>Our team will review your details/payment and send a final confirmation soon.</p></div>",
             },
-            new EmailTemplate 
-            { 
-                Code = "EVENT_PARTICIPATION_APPROVED", 
-                Subject = "Participation Approved: {{EventTitle}}", 
+            new EmailTemplate
+            {
+                Code = "EVENT_PARTICIPATION_APPROVED",
+                Subject = "Participation Approved: {{EventTitle}}",
                 Description = "Final confirmation with entry pass details",
                 Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto; background: #fff;'><h2 style='color: #27ae60;'>Registration Confirmed!</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your participation in <strong>{{EventTitle}}</strong> has been officially approved.</p><div style='background: #111; color: #fff; padding: 25px; border-radius: 12px; margin: 25px 0; border: 2px solid #c5a059; text-align: center;'><h3 style='color: #c5a059; margin-top: 0; font-size: 1.2rem;'>ENTRY PASS</h3><div style='font-size: 1.1rem; font-weight: bold;'>{{FullName}}</div><div style='font-size: 0.8rem; margin: 10px 0; opacity: 0.7;'>Pass ID: {{PassId}}</div><div style='border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0; padding-top: 15px;'><p style='margin: 5px 0;'>📍 {{EventLocation}}</p><p style='margin: 5px 0;'>⏰ {{EventDate}}</p></div></div><p>Please present this email or your pass at the registration desk. We look forward to seeing you!</p></div>",
             },
@@ -127,12 +127,12 @@ namespace GHCAA.Infrastructure.Services
                 if (!results.Any(t => t.Code == def.Code))
                 {
                     // Add codebase template as virtual entry (Id 0)
-                    results.Add(new EmailTemplate 
-                    { 
-                        Id = 0, 
-                        Code = def.Code, 
-                        Subject = def.Subject, 
-                        Body = def.Body, 
+                    results.Add(new EmailTemplate
+                    {
+                        Id = 0,
+                        Code = def.Code,
+                        Subject = def.Subject,
+                        Body = def.Body,
                         Description = def.Description + " (System Default)"
                     });
                 }
@@ -331,7 +331,7 @@ namespace GHCAA.Infrastructure.Services
             }
 
             var vars = new Dictionary<string, string>();
-            
+
             if (member != null)
             {
                 vars["FullName"] = member.FullName;
@@ -347,7 +347,7 @@ namespace GHCAA.Infrastructure.Services
                 vars["MobileNo"] = member.MobileNo;
                 vars["PresentAddress"] = member.PresentAddress;
                 vars["PermanentAddress"] = member.PermanentAddress;
-                
+
                 var ghc = member.AcademicHistory.FirstOrDefault(a => a.IsGHC);
                 var hsc = member.AcademicHistory.FirstOrDefault(a => a.Degree == "HSC");
                 var prof = member.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent);

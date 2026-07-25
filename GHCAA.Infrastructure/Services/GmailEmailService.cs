@@ -38,8 +38,8 @@ namespace GHCAA.Infrastructure.Services
 
                 using var client = new SmtpClient();
                 // Increased timeout for potentially slow cloud networks (Render/Docker)
-                client.Timeout = 30000; 
-                
+                client.Timeout = 30000;
+
                 // Compatibility for environments with strict certificate validation
                 client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 

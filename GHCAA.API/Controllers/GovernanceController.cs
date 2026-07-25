@@ -29,7 +29,7 @@ namespace GHCAA.API.Controllers
         {
             var period = await _governanceService.GetActivePeriodAsync(cancellationToken);
             if (period == null) return NotFound("No active EC period found.");
-            
+
             var members = await _governanceService.GetCommitteeMembersAsync(period.Id, cancellationToken);
             return Ok(new { Period = period, Members = members });
         }

@@ -26,7 +26,7 @@ namespace GHCAA.Infrastructure.Services
             var periods = await _db.ECPeriods
                 .OrderByDescending(p => p.StartDate)
                 .ToListAsync(cancellationToken);
-            
+
             return periods.Select(MapToPeriodDto);
         }
 
@@ -36,7 +36,7 @@ namespace GHCAA.Infrastructure.Services
                 .Include(p => p.ECMembers)
                 .ThenInclude(m => m.Member)
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
-            
+
             return period == null ? null : MapToPeriodDto(period);
         }
 
@@ -44,7 +44,7 @@ namespace GHCAA.Infrastructure.Services
         {
             var period = await _db.ECPeriods
                 .FirstOrDefaultAsync(p => p.IsActive, cancellationToken);
-            
+
             return period == null ? null : MapToPeriodDto(period);
         }
 
@@ -107,7 +107,7 @@ namespace GHCAA.Infrastructure.Services
         private async Task EnsureNoOverlapAsync(int? excludeId, DateTime start, DateTime? end, CancellationToken ct)
         {
             var query = _db.ECPeriods.Where(p => (!excludeId.HasValue || p.Id != excludeId.Value));
-            var overlapping = await query.AnyAsync(p => 
+            var overlapping = await query.AnyAsync(p =>
                 (p.EndDate == null || p.EndDate >= start) && (end == null || p.StartDate <= end), ct);
 
             if (overlapping)
@@ -243,7 +243,7 @@ namespace GHCAA.Infrastructure.Services
 
             target.IsActive = true;
             target.SupersededDate = null;
-            
+
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }

@@ -68,13 +68,13 @@ namespace GHCAA.Infrastructure.Services
                 .Where(p => p.MemberId == memberId)
                 .OrderByDescending(p => p.PaidAt)
                 .ToListAsync(cancellationToken);
-            
+
             return history.Select(MapToPaymentDto);
         }
 
         public async Task<PaymentHistoryDto> RecordPaymentAsync(CreatePaymentHistoryDto dto, CancellationToken cancellationToken = default)
         {
-            if (!dto.MemberId.HasValue) 
+            if (!dto.MemberId.HasValue)
                 throw new ArgumentException("MemberId is required for recording payment.");
 
             var payment = new PaymentHistory
@@ -98,22 +98,22 @@ namespace GHCAA.Infrastructure.Services
                 using var ms = new MemoryStream();
                 await dto.Receipt.CopyToAsync(ms, cancellationToken);
                 ms.Position = 0;
-                
+
                 var path = await _storage.SaveFileAsync(ms, dto.Receipt.FileName, payment.MemberId, Enums.FileUploadType.PaymentProof, cancellationToken);
-                
+
                 payment.ReceiptPath = path;
-                
+
                 // Track in FileUploads table too
-                var fu = new FileUpload 
-                { 
-                    MemberId = payment.MemberId, 
-                    UploadType = Enums.FileUploadType.PaymentProof, 
-                    FileName = dto.Receipt.FileName, 
-                    FilePath = path, 
-                    SizeBytes = dto.Receipt.Length 
+                var fu = new FileUpload
+                {
+                    MemberId = payment.MemberId,
+                    UploadType = Enums.FileUploadType.PaymentProof,
+                    FileName = dto.Receipt.FileName,
+                    FilePath = path,
+                    SizeBytes = dto.Receipt.Length
                 };
                 await _db.FileUploads.AddAsync(fu, cancellationToken);
-                
+
                 await _db.SaveChangesAsync(cancellationToken);
             }
 
@@ -121,7 +121,7 @@ namespace GHCAA.Infrastructure.Services
             // We use simple fire-and-forget or await? The interface awaits.
             // Using try-catch for notification to not block payment recording if email fails?
             // Existing code awaited it. keeping it consistent.
-            try 
+            try
             {
                 await _communication.SendIndividualEmailAsync(payment.MemberId, "PAYMENT_RECEIVED", new Dictionary<string, string>
                 {
@@ -129,7 +129,7 @@ namespace GHCAA.Infrastructure.Services
                     { "TrxID", payment.TransactionId }
                 }, cancellationToken);
             }
-            catch 
+            catch
             {
                 // Log warning? For now just continue as payment is recorded.
             }
@@ -158,17 +158,18 @@ namespace GHCAA.Infrastructure.Services
             }
 
             await _db.SaveChangesAsync(cancellationToken);
-            
+
             if (status == Enums.PaymentStatus.Completed)
             {
                 await _notification.CreateNotificationAsync(payment.MemberId, "Payment Verified", $"Your payment of {payment.Amount:N2} has been successfully verified.", Enums.NotificationType.GeneralSystem, "/finance/history", cancellationToken);
-                
+
                 // Trigger Live Admin Alert (Real-time Audit Trace)
-                await _realTime.SendAdminAlertAsync("NEW_PAYMENT", new { 
-                    MemberId = payment.MemberId, 
-                    Amount = payment.Amount, 
-                    TransactionId = payment.TransactionId, 
-                    Timestamp = DateTime.UtcNow 
+                await _realTime.SendAdminAlertAsync("NEW_PAYMENT", new
+                {
+                    MemberId = payment.MemberId,
+                    Amount = payment.Amount,
+                    TransactionId = payment.TransactionId,
+                    Timestamp = DateTime.UtcNow
                 });
             }
 
@@ -203,7 +204,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 var regMatch = payment.Notes.Split("EVT-REG-")[1].Split(" ")[0];
                 var regRef = "EVT-REG-" + regMatch;
-                
+
                 var registration = await _db.EventRegistrations.Include(r => r.Event).FirstOrDefaultAsync(r => r.PaymentReference == regRef, cancellationToken);
                 if (registration != null && registration.Status == Enums.EventRegistrationStatus.Pending)
                 {
@@ -212,12 +213,12 @@ namespace GHCAA.Infrastructure.Services
                     {
                         var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";
                         int.TryParse(adminIdStr, out var adminId);
-                        
+
                         registration.Status = Enums.EventRegistrationStatus.Approved;
                         registration.ApprovedAt = DateTime.UtcNow;
                         registration.ApprovedByAdminId = adminId; // System Admin
                         await _db.SaveChangesAsync(cancellationToken);
-                        
+
                         await _notification.CreateNotificationAsync(registration.MemberId ?? 0, "Registration Approved", $"Your registration for {registration.Event?.Title} is now confirmed.", Enums.NotificationType.RegistrationUpdate, "/events", cancellationToken);
                     }
                 }
@@ -420,10 +421,10 @@ namespace GHCAA.Infrastructure.Services
             // Pre-fetch fees to avoid N+1 queries
             var membershipTypes = Enum.GetValues<Enums.MembershipType>();
             var feeMap = new Dictionary<Enums.MembershipType, decimal>();
-            
+
             foreach (var type in membershipTypes)
             {
-                 feeMap[type] = await GetApplicableMembershipFeeAsync(type, year, cancellationToken);
+                feeMap[type] = await GetApplicableMembershipFeeAsync(type, year, cancellationToken);
             }
 
             foreach (var member in activeMembers)
@@ -447,7 +448,7 @@ namespace GHCAA.Infrastructure.Services
                     DueDate = new DateTime(year, 3, 31, 0, 0, 0, DateTimeKind.Utc),
                     IsPaid = false
                 };
-                
+
                 _db.MembershipDues.Add(due);
             }
 
@@ -639,7 +640,7 @@ namespace GHCAA.Infrastructure.Services
         {
             var method = await _db.SavedPaymentMethods
                 .FirstOrDefaultAsync(s => s.Id == id && s.MemberId == memberId, cancellationToken);
-            
+
             if (method == null) return false;
 
             _db.SavedPaymentMethods.Remove(method);

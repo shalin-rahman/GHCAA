@@ -95,7 +95,7 @@ namespace GHCAA.Infrastructure.Services
 
             // Check choice constraints
             if (!poll.AllowMultipleChoice && optionIds.Count > 1) return false;
-            
+
             // Check if all optionIds belong to this poll
             var validOptions = poll.Options.Select(o => o.Id).ToList();
             if (optionIds.Any(id => !validOptions.Contains(id))) return false;

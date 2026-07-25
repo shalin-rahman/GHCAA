@@ -68,9 +68,9 @@ namespace GHCAA.Infrastructure.Gateways
 
                 if (result?.StatusCode == "0000")
                 {
-                    return new PaymentGatewayResponseDto 
-                    { 
-                        Success = true, 
+                    return new PaymentGatewayResponseDto
+                    {
+                        Success = true,
                         GatewayUrl = result.BkashURL,
                         TransactionId = result.PaymentID
                     };
@@ -205,13 +205,15 @@ namespace GHCAA.Infrastructure.Gateways
         }
 
         private class BkashTokenResponse { [JsonPropertyName("id_token")] public string? IdToken { get; set; } }
-        private class BkashCreateResponse { 
-            public string? StatusCode { get; set; } 
-            public string? StatusMessage { get; set; } 
-            public string? BkashURL { get; set; } 
-            public string? PaymentID { get; set; } 
+        private class BkashCreateResponse
+        {
+            public string? StatusCode { get; set; }
+            public string? StatusMessage { get; set; }
+            public string? BkashURL { get; set; }
+            public string? PaymentID { get; set; }
         }
-        private class BkashExecuteResponse {
+        private class BkashExecuteResponse
+        {
             public string? StatusCode { get; set; }
             public string? StatusMessage { get; set; }
             public string? PaymentID { get; set; }

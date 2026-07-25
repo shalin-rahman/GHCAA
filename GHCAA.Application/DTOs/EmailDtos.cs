@@ -6,7 +6,7 @@ namespace GHCAA.Application.DTOs
     {
         public string TemplateCode { get; set; } = null!;
         public Dictionary<string, string>? CustomVars { get; set; }
-        
+
         // Target filters
         public int? PassingYear { get; set; }
         public List<int>? PassingYears { get; set; } // Support multiple
@@ -21,7 +21,7 @@ namespace GHCAA.Application.DTOs
         public string? TemplateCode { get; set; }
         public string? Subject { get; set; }
         public string? Body { get; set; }
-        
+
         // Optional filters for manual message
         public string? TargetMethod { get; set; }
         public string? TargetValue { get; set; }

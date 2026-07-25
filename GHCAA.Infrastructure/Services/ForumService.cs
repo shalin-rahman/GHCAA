@@ -164,7 +164,7 @@ namespace GHCAA.Infrastructure.Services
             };
 
             _context.ForumPosts.Add(post);
-            
+
             topic.LastUpdatedAt = DateTime.UtcNow; // Bump topic
 
             await _context.SaveChangesAsync();

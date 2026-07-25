@@ -40,7 +40,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("id-card")]
         public async Task<IActionResult> GetMyIDCard(CancellationToken cancellationToken)
         {
-             // Only active members get an ID card
+            // Only active members get an ID card
             var profile = await _memberService.GetProfileAsync(GetMemberId(), isPrivileged: false, cancellationToken);
             if (profile == null || profile.Status != GHCAA.Domain.Enums.MembershipStatus.Active)
                 return Forbid();

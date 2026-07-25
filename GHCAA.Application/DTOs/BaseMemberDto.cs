@@ -75,7 +75,7 @@ namespace GHCAA.Application.DTOs
         public bool IsAddressPublic { get; set; }
         public bool IsNIDPublic { get; set; }
         public DateTime? LastUpdateDate { get; set; }
-        
+
         // Notification Preferences
         public bool NotifyEventCreation { get; set; } = true;
         public bool NotifyParticipationApproval { get; set; } = true;

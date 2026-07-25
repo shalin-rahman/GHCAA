@@ -56,7 +56,13 @@ namespace GHCAA.Infrastructure.Services
                 .OrderByDescending(r => r.RequestedAt)
                 .Select(r => new
                 {
-                    r.Id, r.Domain, r.Message, r.Status, r.RequestedAt, r.RespondedAt, r.ResponseNote,
+                    r.Id,
+                    r.Domain,
+                    r.Message,
+                    r.Status,
+                    r.RequestedAt,
+                    r.RespondedAt,
+                    r.ResponseNote,
                     Mentor = new { r.Mentor!.Id, r.Mentor.FullName, r.Mentor.PhotoPath, r.Mentor.MembershipNumber }
                 })
                 .ToListAsync(ct);
@@ -70,7 +76,13 @@ namespace GHCAA.Infrastructure.Services
                 .OrderByDescending(r => r.RequestedAt)
                 .Select(r => new
                 {
-                    r.Id, r.Domain, r.Message, r.Status, r.RequestedAt, r.RespondedAt, r.ResponseNote,
+                    r.Id,
+                    r.Domain,
+                    r.Message,
+                    r.Status,
+                    r.RequestedAt,
+                    r.RespondedAt,
+                    r.ResponseNote,
                     Requester = new { r.Requester!.Id, r.Requester.FullName, r.Requester.PhotoPath, r.Requester.MembershipNumber }
                 })
                 .ToListAsync(ct);
@@ -114,7 +126,11 @@ namespace GHCAA.Infrastructure.Services
                 .OrderByDescending(r => r.RequestedAt)
                 .Select(r => new
                 {
-                    r.Id, r.Domain, r.Message, r.Status, r.RequestedAt,
+                    r.Id,
+                    r.Domain,
+                    r.Message,
+                    r.Status,
+                    r.RequestedAt,
                     Requester = r.Requester == null ? null : new { r.Requester.Id, r.Requester.FullName },
                     Mentor = r.Mentor == null ? null : new { r.Mentor.Id, r.Mentor.FullName }
                 })

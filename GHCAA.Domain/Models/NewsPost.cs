@@ -26,7 +26,7 @@ namespace GHCAA.Domain.Models
         public bool IsActive { get; set; } = true;
         public string? ImageUrl { get; set; }
         public int AuthorId { get; set; }
-        
+
         public DateTime? LastModified { get; set; }
         public string? ExternalCollaborators { get; set; }
 

@@ -42,7 +42,7 @@ namespace GHCAA.API.Controllers
 
             using var stream = file.OpenReadStream();
             var path = await _fileStorage.SaveFileAsync(stream, file.FileName, memberId, Domain.Enums.FileUploadType.GalleryPhoto, cancellationToken);
-            
+
             // Return single path string or object
             return Ok(new { Path = path });
         }

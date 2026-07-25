@@ -105,12 +105,12 @@ namespace GHCAA.API.Controllers
             // The service already uses user.MemberId if needed, but here it wants memberId.
             // Actually, I'll update the service to take userId directly or handle it there.
             // For now, I'll just pass the userId if it's the authorId.
-            
+
             // Re-evaluating GetMySubmissionsAsync logic in NewsService:
             // It searches for user by memberId. 
             // Let's just bypass and use the authorId directly in a new service method or update it.
             // I'll update the service method to take userId.
-            
+
             var news = await _newsService.GetMySubmissionsAsync(userId, cancellationToken); // I'll fix service next
             return Ok(news);
         }
@@ -127,7 +127,7 @@ namespace GHCAA.API.Controllers
             {
                 if (dto.Status != Enums.SubmissionStatus.Draft)
                     dto.Status = Enums.SubmissionStatus.Pending;
-                
+
                 dto.IsActive = false; // Members cannot set active directly
             }
 
@@ -186,12 +186,12 @@ namespace GHCAA.API.Controllers
             var extension = Path.GetExtension(file.FileName);
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var uniqueFileName = $"news_{timestamp}_{Guid.NewGuid().ToString().Substring(0, 8)}{extension}";
-            
+
             var relativePath = await _fileStorageService.SaveFileAsync(
-                stream, 
-                uniqueFileName, 
-                authorId, 
-                Enums.FileUploadType.NewsImage, 
+                stream,
+                uniqueFileName,
+                authorId,
+                Enums.FileUploadType.NewsImage,
                 cancellationToken
             );
 

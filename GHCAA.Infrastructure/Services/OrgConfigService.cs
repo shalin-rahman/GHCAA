@@ -111,133 +111,133 @@ namespace GHCAA.Infrastructure.Services
                         MembershipLabel = "Membership",
                         MembershipTypeLabels = new()
                         {
-                            ["Founding"]  = "Founding Member",
+                            ["Founding"] = "Founding Member",
                             ["Executive"] = "Executive Member",
-                            ["General"]   = "General Member",
+                            ["General"] = "General Member",
                             ["Associate"] = "Associate Member",
-                            ["Honorary"]  = "Honorary Member",
-                            ["Advisory"]  = "Advisory Member",
-                            ["Guest"]     = "Guest Member"
+                            ["Honorary"] = "Honorary Member",
+                            ["Advisory"] = "Advisory Member",
+                            ["Guest"] = "Guest Member"
                         },
                         MemberCategoryLabels = new()
                         {
-                            ["None"]          = "None",
+                            ["None"] = "None",
                             ["LifelongPatron"] = "Lifelong Patron",
-                            ["Sponsor"]       = "Sponsor",
-                            ["Advisor"]       = "Advisor",
-                            ["Mentor"]        = "Mentor",
-                            ["Recruiter"]     = "Recruiter",
-                            ["Active"]        = "Active",
-                            ["Volunteer"]     = "Volunteer",
-                            ["Contributor"]   = "Contributor",
-                            ["Guest"]         = "Guest",
-                            ["Student"]       = "Student"
+                            ["Sponsor"] = "Sponsor",
+                            ["Advisor"] = "Advisor",
+                            ["Mentor"] = "Mentor",
+                            ["Recruiter"] = "Recruiter",
+                            ["Active"] = "Active",
+                            ["Volunteer"] = "Volunteer",
+                            ["Contributor"] = "Contributor",
+                            ["Guest"] = "Guest",
+                            ["Student"] = "Student"
                         },
                         EcRoleLabels = new()
                         {
-                            ["None"]                              = "None",
-                            ["President"]                         = "President",
-                            ["VicePresident"]                     = "Vice President",
-                            ["GeneralSecretary"]                  = "General Secretary",
-                            ["OfficeSecretary"]                   = "Office Secretary",
-                            ["JointSecretary1"]                   = "Joint Secretary (1)",
-                            ["JointSecretary2"]                   = "Joint Secretary (2)",
-                            ["Treasurer"]                         = "Treasurer",
-                            ["MediaCulturalAndSportsSecretary"]   = "Media Cultural & Sports Secretary",
-                            ["OrganizationalSecretary"]           = "Organizational Secretary",
+                            ["None"] = "None",
+                            ["President"] = "President",
+                            ["VicePresident"] = "Vice President",
+                            ["GeneralSecretary"] = "General Secretary",
+                            ["OfficeSecretary"] = "Office Secretary",
+                            ["JointSecretary1"] = "Joint Secretary (1)",
+                            ["JointSecretary2"] = "Joint Secretary (2)",
+                            ["Treasurer"] = "Treasurer",
+                            ["MediaCulturalAndSportsSecretary"] = "Media Cultural & Sports Secretary",
+                            ["OrganizationalSecretary"] = "Organizational Secretary",
                             ["InformationAndTechnologySecretary"] = "Information and Technology Secretary",
-                            ["Member1"]                           = "Member-1",
-                            ["Member2"]                           = "Member-2",
-                            ["LawSecretary"]                      = "Law Secretary",
-                            ["ImmediatePastPresident"]            = "Immediate Past President",
-                            ["InstitutionalRepresentative"]       = "Institutional Representative"
+                            ["Member1"] = "Member-1",
+                            ["Member2"] = "Member-2",
+                            ["LawSecretary"] = "Law Secretary",
+                            ["ImmediatePastPresident"] = "Immediate Past President",
+                            ["InstitutionalRepresentative"] = "Institutional Representative"
                         },
                         Nav = new()
                         {
                             Administration = "ADMINISTRATION",
-                            MyAccount      = "MY ACCOUNT",
-                            Community      = "COMMUNITY",
-                            MediaAndTools  = "MEDIA & TOOLS",
-                            AdminRoleLabel  = "ADMINISTRATOR",
+                            MyAccount = "MY ACCOUNT",
+                            Community = "COMMUNITY",
+                            MediaAndTools = "MEDIA & TOOLS",
+                            AdminRoleLabel = "ADMINISTRATOR",
                             MemberRoleLabel = "ALUMNI MEMBER",
-                            BatchPrefix     = "Batch: "
+                            BatchPrefix = "Batch: "
                         },
                         EmailSubjects = new()
                         {
-                            PasswordReset   = "GHCAA Account Password Reset",
+                            PasswordReset = "GHCAA Account Password Reset",
                             OtpVerification = "GHCAA Verification Code",
-                            Welcome         = "Welcome to GHCAA",
-                            FeeReminder     = "GHCAA Membership Fee Reminder"
+                            Welcome = "Welcome to GHCAA",
+                            FeeReminder = "GHCAA Membership Fee Reminder"
                         }
                     },
                     ["bn"] = new()
                     {
-                        OrgName          = "সরকারি হারাগঙ্গা কলেজ প্রাক্তন ছাত্রছাত্রী সমিতি",
-                        Tagline          = "ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন",
-                        MemberLabel      = "সদস্য",
+                        OrgName = "সরকারি হারাগঙ্গা কলেজ প্রাক্তন ছাত্রছাত্রী সমিতি",
+                        Tagline = "ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন",
+                        MemberLabel = "সদস্য",
                         MemberPluralLabel = "সদস্যগণ",
-                        MemberNickname   = "হারাগঙ্গিয়ান",
-                        AlumniLabel      = "প্রাক্তন ছাত্রছাত্রী",
-                        MembershipLabel  = "সদস্যপদ",
+                        MemberNickname = "হারাগঙ্গিয়ান",
+                        AlumniLabel = "প্রাক্তন ছাত্রছাত্রী",
+                        MembershipLabel = "সদস্যপদ",
                         MembershipTypeLabels = new()
                         {
-                            ["Founding"]  = "প্রতিষ্ঠাতা সদস্য",
+                            ["Founding"] = "প্রতিষ্ঠাতা সদস্য",
                             ["Executive"] = "নির্বাহী সদস্য",
-                            ["General"]   = "সাধারণ সদস্য",
+                            ["General"] = "সাধারণ সদস্য",
                             ["Associate"] = "সহযোগী সদস্য",
-                            ["Honorary"]  = "সম্মানসূচক সদস্য",
-                            ["Advisory"]  = "উপদেষ্টা সদস্য",
-                            ["Guest"]     = "অতিথি সদস্য"
+                            ["Honorary"] = "সম্মানসূচক সদস্য",
+                            ["Advisory"] = "উপদেষ্টা সদস্য",
+                            ["Guest"] = "অতিথি সদস্য"
                         },
                         MemberCategoryLabels = new()
                         {
-                            ["None"]          = "কোনোটি নয়",
+                            ["None"] = "কোনোটি নয়",
                             ["LifelongPatron"] = "আজীবন পৃষ্ঠপোষক",
-                            ["Sponsor"]       = "স্পনসর",
-                            ["Advisor"]       = "উপদেষ্টা",
-                            ["Mentor"]        = "মেন্টর",
-                            ["Recruiter"]     = "নিয়োগকর্তা",
-                            ["Active"]        = "সক্রিয়",
-                            ["Volunteer"]     = "স্বেচ্ছাসেবক",
-                            ["Contributor"]   = "অবদানকারী",
-                            ["Guest"]         = "অতিথি",
-                            ["Student"]       = "ছাত্র"
+                            ["Sponsor"] = "স্পনসর",
+                            ["Advisor"] = "উপদেষ্টা",
+                            ["Mentor"] = "মেন্টর",
+                            ["Recruiter"] = "নিয়োগকর্তা",
+                            ["Active"] = "সক্রিয়",
+                            ["Volunteer"] = "স্বেচ্ছাসেবক",
+                            ["Contributor"] = "অবদানকারী",
+                            ["Guest"] = "অতিথি",
+                            ["Student"] = "ছাত্র"
                         },
                         EcRoleLabels = new()
                         {
-                            ["None"]                              = "কোনোটি নয়",
-                            ["President"]                         = "সভাপতি",
-                            ["VicePresident"]                     = "সহ-সভাপতি",
-                            ["GeneralSecretary"]                  = "সাধারণ সম্পাদক",
-                            ["OfficeSecretary"]                   = "কার্যালয় সম্পাদক",
-                            ["JointSecretary1"]                   = "যুগ্ম সম্পাদক (১)",
-                            ["JointSecretary2"]                   = "যুগ্ম সম্পাদক (২)",
-                            ["Treasurer"]                         = "কোষাধ্যক্ষ",
-                            ["MediaCulturalAndSportsSecretary"]   = "মিডিয়া, সাংস্কৃতিক ও ক্রীড়া সম্পাদক",
-                            ["OrganizationalSecretary"]           = "সাংগঠনিক সম্পাদক",
+                            ["None"] = "কোনোটি নয়",
+                            ["President"] = "সভাপতি",
+                            ["VicePresident"] = "সহ-সভাপতি",
+                            ["GeneralSecretary"] = "সাধারণ সম্পাদক",
+                            ["OfficeSecretary"] = "কার্যালয় সম্পাদক",
+                            ["JointSecretary1"] = "যুগ্ম সম্পাদক (১)",
+                            ["JointSecretary2"] = "যুগ্ম সম্পাদক (২)",
+                            ["Treasurer"] = "কোষাধ্যক্ষ",
+                            ["MediaCulturalAndSportsSecretary"] = "মিডিয়া, সাংস্কৃতিক ও ক্রীড়া সম্পাদক",
+                            ["OrganizationalSecretary"] = "সাংগঠনিক সম্পাদক",
                             ["InformationAndTechnologySecretary"] = "তথ্য ও প্রযুক্তি সম্পাদক",
-                            ["Member1"]                           = "সদস্য-১",
-                            ["Member2"]                           = "সদস্য-২",
-                            ["LawSecretary"]                      = "আইন সম্পাদক",
-                            ["ImmediatePastPresident"]            = "সাবেক সভাপতি",
-                            ["InstitutionalRepresentative"]       = "প্রাতিষ্ঠানিক প্রতিনিধি"
+                            ["Member1"] = "সদস্য-১",
+                            ["Member2"] = "সদস্য-২",
+                            ["LawSecretary"] = "আইন সম্পাদক",
+                            ["ImmediatePastPresident"] = "সাবেক সভাপতি",
+                            ["InstitutionalRepresentative"] = "প্রাতিষ্ঠানিক প্রতিনিধি"
                         },
                         Nav = new()
                         {
                             Administration = "প্রশাসন",
-                            MyAccount      = "আমার অ্যাকাউন্ট",
-                            Community      = "সম্প্রদায়",
-                            MediaAndTools  = "মিডিয়া ও সরঞ্জাম",
-                            AdminRoleLabel  = "প্রশাসক",
+                            MyAccount = "আমার অ্যাকাউন্ট",
+                            Community = "সম্প্রদায়",
+                            MediaAndTools = "মিডিয়া ও সরঞ্জাম",
+                            AdminRoleLabel = "প্রশাসক",
                             MemberRoleLabel = "প্রাক্তন সদস্য",
-                            BatchPrefix     = "ব্যাচ: "
+                            BatchPrefix = "ব্যাচ: "
                         },
                         EmailSubjects = new()
                         {
-                            PasswordReset   = "GHCAA অ্যাকাউন্ট পাসওয়ার্ড রিসেট",
+                            PasswordReset = "GHCAA অ্যাকাউন্ট পাসওয়ার্ড রিসেট",
                             OtpVerification = "GHCAA যাচাইকরণ কোড",
-                            Welcome         = "GHCAA-তে স্বাগতম",
-                            FeeReminder     = "GHCAA সদস্যপদ ফি স্মারক"
+                            Welcome = "GHCAA-তে স্বাগতম",
+                            FeeReminder = "GHCAA সদস্যপদ ফি স্মারক"
                         }
                     }
                 }

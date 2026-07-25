@@ -15,7 +15,7 @@ namespace GHCAA.API.Middleware
         public async Task InvokeAsync(HttpContext context)
         {
             // Security Headers
-            
+
             // 1. Prevent MIME-type sniffing
             context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
 
@@ -33,7 +33,7 @@ namespace GHCAA.API.Middleware
 
             // 6. Content Security Policy (CSP)
             // A basic restrictive CSP - can be tuned based on needs
-            context.Response.Headers.Append("Content-Security-Policy", 
+            context.Response.Headers.Append("Content-Security-Policy",
                 "default-src 'self'; " +
                 "script-src 'self'; " +
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +

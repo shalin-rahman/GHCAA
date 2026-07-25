@@ -17,7 +17,7 @@ namespace GHCAA.Domain.Models
         [Required]
         [MaxLength(200)]
         public string Label { get; set; } = null!; // Display name for frontend
-        
+
         [MaxLength(500)]
         public string? Description { get; set; }
 

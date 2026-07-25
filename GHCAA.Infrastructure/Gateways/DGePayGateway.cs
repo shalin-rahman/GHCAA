@@ -54,7 +54,7 @@ namespace GHCAA.Infrastructure.Gateways
                 var baseUrl = dbConfig.IsSandbox
                     ? _config["PaymentGateways:DGePay:SandboxUrl"] ?? "https://api-uat.dgepay.net/dipon/v3"
                     : _config["PaymentGateways:DGePay:ProductionUrl"] ?? "https://api.dgepay.net/dipon/v3";
-                
+
                 var clientId = dbConfig.GatewayPublicKey;
                 var clientSecret = dbConfig.GatewaySecretKey;
                 var apiKey = dbConfig.WalletNumber;
@@ -186,7 +186,7 @@ namespace GHCAA.Infrastructure.Gateways
                 var baseUrl = dbConfig.IsSandbox
                     ? _config["PaymentGateways:DGePay:SandboxUrl"] ?? "https://api-uat.dgepay.net/dipon/v3"
                     : _config["PaymentGateways:DGePay:ProductionUrl"] ?? "https://api.dgepay.net/dipon/v3";
-                
+
                 var clientSecret = dbConfig.GatewaySecretKey;
                 var apiKey = dbConfig.WalletNumber;
 
@@ -229,7 +229,7 @@ namespace GHCAA.Infrastructure.Gateways
             var baseUrl = dbConfig.IsSandbox
                 ? _config["PaymentGateways:DGePay:SandboxUrl"] ?? "https://api-uat.dgepay.net/dipon/v3"
                 : _config["PaymentGateways:DGePay:ProductionUrl"] ?? "https://api.dgepay.net/dipon/v3";
-            
+
             var clientId = dbConfig.GatewayPublicKey;
             var clientSecret = dbConfig.GatewaySecretKey;
 
@@ -305,7 +305,7 @@ namespace GHCAA.Infrastructure.Gateways
         {
             var json = JsonSerializer.Serialize(data);
             var keyBytes = Encoding.UTF8.GetBytes(secretKey);
-            
+
             // AES-128-ECB
             // .NET's Aes defaults to CBC, we must change it.
             // Secret key must be 16 bytes for AES-128.
@@ -330,7 +330,7 @@ namespace GHCAA.Infrastructure.Gateways
             {
                 var encryptedBytes = Convert.FromBase64String(encryptedBase64);
                 var keyBytes = Encoding.UTF8.GetBytes(secretKey);
-                
+
                 var key = new byte[16];
                 Array.Copy(keyBytes, key, Math.Min(keyBytes.Length, 16));
 

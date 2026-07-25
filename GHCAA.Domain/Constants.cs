@@ -14,12 +14,12 @@ namespace GHCAA.Domain
             public const string MaxFileSizeBytes = "FileStorage:MaxFileSizeBytes";
             public const string UploadsRelativePath = "FileStorage:UploadsRelativePath";
             public const string SecureRelativePath = "FileStorage:SecureRelativePath";
-            
+
             public const string ImageCompressionEnabled = "FileStorage:ImageCompression:Enabled";
             public const string ImageCompressionQuality = "FileStorage:ImageCompression:Quality";
             public const string ImageCompressionFallbackQuality = "FileStorage:ImageCompression:FallbackQuality";
             public const string ImageCompressionTargetSizeKB = "FileStorage:ImageCompression:TargetSizeKB";
-            
+
             public const string AllowedOrigins = "AppSettings:AllowedOrigins";
             public const string ClientUrl = "AppSettings:ClientUrl";
         }

@@ -14,7 +14,7 @@ namespace GHCAA.Domain.Models
         public string? UserAgent { get; set; }
         public string? Source { get; set; } // e.g., Web, Mobile, API, System
         public string? Metadata { get; set; } // Detailed audit trail (JSON)
-        
+
         // Navigation
         public Member? Member { get; set; }
     }

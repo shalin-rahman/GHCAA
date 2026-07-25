@@ -30,7 +30,7 @@ namespace GHCAA.Infrastructure.Services
             var role = new Role { Name = roleName };
             _db.Roles.Add(role);
             await _db.SaveChangesAsync(cancellationToken);
-            
+
             _logger.LogInformation("Role {RoleName} created", roleName);
             return role;
         }
@@ -51,7 +51,7 @@ namespace GHCAA.Infrastructure.Services
 
             user.Roles.Add(role);
             await _db.SaveChangesAsync(cancellationToken);
-            
+
             _logger.LogInformation("Role {RoleName} assigned to User {UserId}", roleName, userId);
             return true;
         }
@@ -66,7 +66,7 @@ namespace GHCAA.Infrastructure.Services
 
             user.Roles.Remove(role);
             await _db.SaveChangesAsync(cancellationToken);
-            
+
             _logger.LogInformation("Role {RoleName} removed from User {UserId}", roleName, userId);
             return true;
         }

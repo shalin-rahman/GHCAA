@@ -34,7 +34,7 @@ namespace GHCAA.Domain.Models
         public DateTime EndDate { get; set; }
         public DateTime? RegistrationStartDate { get; set; }
         public DateTime? RegistrationEndDate { get; set; }
-        
+
         public string? AdminNote { get; set; }
 
         public int? ParticipantLimit { get; set; }

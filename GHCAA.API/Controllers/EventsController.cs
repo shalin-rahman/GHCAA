@@ -78,7 +78,7 @@ namespace GHCAA.API.Controllers
 
             // If unauthenticated, check if non-member registration is requested
             bool isGuestFullfilled = dto.IsNonMember || (!string.IsNullOrEmpty(dto.GuestEmail) && !string.IsNullOrEmpty(dto.GuestName));
-            
+
             if (!memberId.HasValue && !isGuestFullfilled)
             {
                 return Unauthorized("A member account is required for this registration.");
@@ -115,7 +115,7 @@ namespace GHCAA.API.Controllers
             {
                 if (User.IsInRole("SuperAdmin"))
                     return Ok(new List<object>());
-                
+
                 return BadRequest("User is not associated with a member account.");
             }
 

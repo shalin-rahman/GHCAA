@@ -21,9 +21,9 @@ namespace GHCAA.Infrastructure.Services
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public AuthService(ApplicationDbContext db, 
-            ITokenService tokenService, 
-            ILogger<AuthService> logger, 
+        public AuthService(ApplicationDbContext db,
+            ITokenService tokenService,
+            ILogger<AuthService> logger,
             IActivityService activityService,
             IConfiguration configuration,
             IHttpClientFactory httpClientFactory)
@@ -57,7 +57,7 @@ namespace GHCAA.Infrastructure.Services
             if (user == null)
             {
                 _logger.LogInformation("Direct username lookup failed for '{Username}', trying member fallbacks...", input);
-                
+
                 var member = await _db.Members
                     .IgnoreQueryFilters() // Just for lookup, we'll check status/archived later
                     .FirstOrDefaultAsync(m => m.Email == input || m.NID == normalizedInput || m.MembershipNumber == normalizedInput || m.MembershipNumber == input, cancellationToken);
@@ -67,7 +67,7 @@ namespace GHCAA.Infrastructure.Services
                     user = await _db.Users
                         .Include(u => u.Roles)
                         .FirstOrDefaultAsync(u => u.MemberId == member.Id, cancellationToken);
-                    
+
                     if (user == null)
                     {
                         _logger.LogWarning("Member found for '{Username}' but has no associated user account", input);
@@ -307,7 +307,7 @@ namespace GHCAA.Infrastructure.Services
 
                 _db.Users.Add(user);
                 await _db.SaveChangesAsync(cancellationToken);
-                
+
                 user = await _db.Users.Include(u => u.Roles).FirstAsync(u => u.Id == user.Id, cancellationToken);
             }
 
@@ -315,9 +315,9 @@ namespace GHCAA.Infrastructure.Services
             if (!user.IsActive) return null;
 
             var token = _tokenService.CreateToken(user);
-            
+
             var memberProfile = await _db.Members.FindAsync(user.MemberId);
-            
+
             return new TokenResponseDto
             {
                 Token = token,
@@ -376,7 +376,7 @@ namespace GHCAA.Infrastructure.Services
 
             var user = await _db.Users
                 .FirstOrDefaultAsync(u => u.MemberId == member.Id && u.ResetToken == token, cancellationToken);
-            
+
             if (user == null) return false;
 
             if (!user.ResetTokenExpiry.HasValue || user.ResetTokenExpiry.Value < DateTime.UtcNow)
@@ -393,9 +393,9 @@ namespace GHCAA.Infrastructure.Services
 
             await _db.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Password reset successful for user {Username}", user.Username);
-            
+
             await _activityService.LogActivityAsync(member.Id, "Password Reset", "User reset their password via email link.", cancellationToken: cancellationToken);
-            
+
             return true;
         }
     }

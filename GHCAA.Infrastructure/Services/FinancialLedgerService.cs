@@ -29,7 +29,7 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrEmpty(search))
             {
                 var s = search.ToLower();
-                query = query.Where(r => 
+                query = query.Where(r =>
                     (r.Description != null && r.Description.ToLower().Contains(s)) ||
                     (r.Reference != null && r.Reference.ToLower().Contains(s)));
             }
@@ -124,7 +124,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<byte[]> ExportRecordsAsync(int? year = null, CancellationToken cancellationToken = default)
         {
             var records = await GetAllRecordsForExportAsync(year, cancellationToken);
-            
+
             var csv = new System.Text.StringBuilder();
             csv.AppendLine("Date,Type,Category,Amount,Description,Reference");
 

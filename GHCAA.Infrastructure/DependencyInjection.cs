@@ -61,7 +61,7 @@ namespace GHCAA.Infrastructure
             services.AddScoped<IThemeService, ThemeService>();
             services.AddScoped<IFileUploadRepository, FileUploadRepository>();
             services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
-            
+
             // Payment Gateways (HttpClient instances)
             services.AddHttpClient<SSLCommerzGateway>();
             services.AddHttpClient<BkashGateway>();
@@ -87,7 +87,7 @@ namespace GHCAA.Infrastructure
             // PgSql (with DATABASE_URL support)
             var conn = configuration.GetConnectionString("PgSqlConnection");
             var envUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-            
+
             if (!string.IsNullOrEmpty(envUrl) && (envUrl.StartsWith("postgres://") || envUrl.StartsWith("postgresql://")))
             {
                 var uri = new Uri(envUrl);

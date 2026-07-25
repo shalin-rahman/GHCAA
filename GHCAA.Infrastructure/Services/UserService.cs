@@ -28,7 +28,7 @@ namespace GHCAA.Infrastructure.Services
         {
             username = username.Replace(" ", "");
             password = password.Replace(" ", "");
-            
+
             // Check if user already exists for this member
             var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
             if (existingUser != null)
@@ -87,7 +87,7 @@ namespace GHCAA.Infrastructure.Services
             user.Roles.Add(role);
             await _db.Users.AddAsync(user, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
-            
+
             _logger.LogInformation("System {Role} account created: {Username}", roleName, username);
             return user;
         }

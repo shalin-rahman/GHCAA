@@ -15,7 +15,7 @@ namespace GHCAA.Infrastructure.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly IRealTimeService _realTime;
-        
+
         public NotificationService(ApplicationDbContext db, IRealTimeService realTime)
         {
             _db = db;
@@ -52,7 +52,7 @@ namespace GHCAA.Infrastructure.Services
 
             _db.Notifications.Add(notification);
             await _db.SaveChangesAsync(cancellationToken);
-            
+
             await _realTime.SendNotificationToUserAsync(memberId, notification);
         }
 
@@ -116,7 +116,7 @@ namespace GHCAA.Infrastructure.Services
             var notifications = await _db.Notifications
                 .Where(n => n.MemberId == memberId && !n.IsRead)
                 .ToListAsync(cancellationToken);
-            
+
             foreach (var n in notifications) n.IsRead = true;
             await _db.SaveChangesAsync(cancellationToken);
         }

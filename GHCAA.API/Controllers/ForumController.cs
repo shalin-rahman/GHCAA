@@ -36,7 +36,7 @@ namespace GHCAA.API.Controllers
         {
             var topic = await _forumService.GetTopicByIdAsync(topicId);
             if (topic == null) return NotFound("Topic not found.");
-            
+
             return Ok(topic);
         }
 
@@ -62,7 +62,7 @@ namespace GHCAA.API.Controllers
         public async Task<ActionResult<ForumPostDto>> CreatePost(int topicId, [FromBody] CreateForumPostDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            
+
             if (dto.TopicId != topicId) return BadRequest("Topic ID mismatch.");
 
             var memberId = GetMemberId();

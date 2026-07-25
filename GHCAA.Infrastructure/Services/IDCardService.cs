@@ -123,7 +123,7 @@ namespace GHCAA.Infrastructure.Services
             if (member == null) throw new KeyNotFoundException();
 
             var verifyUrl = $"{_config["GeneralSettings:PortalBaseUrl"]}/verify/{member.MembershipNumber ?? member.Id.ToString()}";
-            
+
             var document = Document.Create(container =>
             {
                 container.Page(page =>
@@ -160,7 +160,7 @@ namespace GHCAA.Infrastructure.Services
                             using var qrCodeData = qrGenerator.CreateQrCode(verifyUrl, QRCodeGenerator.ECCLevel.Q);
                             using var qrCode = new PngByteQRCode(qrCodeData);
                             byte[] qrBytes = qrCode.GetGraphic(20);
-                            
+
                             row.ConstantItem(30).Height(30).Image(qrBytes);
                             row.RelativeItem().PaddingLeft(5).AlignMiddle().Text("Scan to verify alumni status").FontSize(6).FontColor(Colors.Grey.Lighten2);
                         });
@@ -190,24 +190,27 @@ namespace GHCAA.Infrastructure.Services
                     {
                         col.Item().AlignCenter().Text("CERTIFICATE OF MEMBERSHIP").FontSize(40).ExtraBold().FontColor("#111");
                         col.Item().PaddingTop(20).AlignCenter().Text("This institutional record certifies that").FontSize(18).Italic().FontColor(Colors.Grey.Darken1);
-                        
+
                         col.Item().PaddingTop(30).AlignCenter().Text(member.FullName).FontSize(48).Black().FontColor("#c5a059");
-                        
+
                         col.Item().PaddingTop(30).AlignCenter().Text("is a lifetime recognized member of the").FontSize(18).FontColor(Colors.Grey.Darken1);
                         col.Item().AlignCenter().Text("Govt. Haraganga College Alumni Association").FontSize(24).Bold().FontColor("#111");
-                        
+
                         col.Item().PaddingTop(50).Row(row =>
                         {
-                            row.RelativeItem().Column(c => {
+                            row.RelativeItem().Column(c =>
+                            {
                                 c.Item().PaddingTop(20).BorderTop(1).AlignCenter().Text("President").FontSize(12).FontColor(Colors.Grey.Medium);
                             });
                             row.ConstantItem(100);
-                            row.RelativeItem().Column(c => {
+                            row.RelativeItem().Column(c =>
+                            {
                                 c.Item().PaddingTop(20).BorderTop(1).AlignCenter().Text("General Secretary").FontSize(12).FontColor(Colors.Grey.Medium);
                             });
                         });
 
-                        col.Item().AlignBottom().AlignCenter().Column(c => {
+                        col.Item().AlignBottom().AlignCenter().Column(c =>
+                        {
                             using var qrGenerator = new QRCodeGenerator();
                             using var qrCodeData = qrGenerator.CreateQrCode(verifyUrl, QRCodeGenerator.ECCLevel.Q);
                             using var qrCode = new PngByteQRCode(qrCodeData);

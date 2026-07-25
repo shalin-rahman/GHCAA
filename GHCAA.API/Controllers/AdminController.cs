@@ -55,7 +55,7 @@ namespace GHCAA.API.Controllers
             [FromQuery] string statusFilter = "all",
             [FromQuery] string categoryFilter = "all",
             [FromQuery] string membershipTypeFilter = "all",
-            [FromQuery] bool includeArchived = false, 
+            [FromQuery] bool includeArchived = false,
             CancellationToken cancellationToken = default)
         {
             // Standard Admins cannot see archived records
@@ -258,7 +258,8 @@ namespace GHCAA.API.Controllers
             {
                 var result = await _memberService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
                 if (!result.Success) return NotFound(new { Message = "Member or user account not found. Please ensure the member is approved and active." });
-                return Ok(new {
+                return Ok(new
+                {
                     Message = "Password reset link has been sent to the member's registered email address."
                 });
             }

@@ -30,35 +30,35 @@ namespace GHCAA.Infrastructure.Services
             var qry = _db.JobOpportunities
                 .Include(j => j.PostedBy)
                 .Where(j => j.IsActive && (j.ExpiryDate == null || j.ExpiryDate > DateTime.UtcNow));
- 
+
             if (category.HasValue)
                 qry = qry.Where(j => j.JobCategory == category.Value);
-                
+
             if (!string.IsNullOrEmpty(query))
             {
                 var s = query.ToLower();
-                qry = qry.Where(j => 
-                    j.Title.ToLower().Contains(s) || 
-                    j.Company.ToLower().Contains(s) || 
+                qry = qry.Where(j =>
+                    j.Title.ToLower().Contains(s) ||
+                    j.Company.ToLower().Contains(s) ||
                     j.Description.ToLower().Contains(s) ||
                     j.Location.ToLower().Contains(s));
             }
- 
+
             var jobs = await qry
                 .OrderByDescending(j => j.PostedDate)
                 .ToListAsync(cancellationToken);
- 
+
             return jobs.Select(MapToDto);
         }
-        
+
         public async Task<bool> UpdateJobAsync(int id, CreateJobDto dto, int memberId, bool isAdmin, CancellationToken cancellationToken = default)
         {
             var job = await _db.JobOpportunities.FindAsync(new object[] { id }, cancellationToken);
             if (job == null) return false;
-            
+
             // Security: Must be original poster or Admin
             if (job.PostedByMemberId != memberId && !isAdmin) return false;
-            
+
             job.Title = dto.Title;
             job.Company = dto.CompanyName;
             job.Location = dto.Location;
@@ -67,10 +67,10 @@ namespace GHCAA.Infrastructure.Services
             job.ContactEmail = dto.ApplicationEmail ?? "";
             job.ApplicationLink = dto.ApplicationLink;
             job.JobCategory = dto.JobCategory;
-            job.ExpiryDate = dto.ApplicationDeadline.HasValue 
-                ? DateTime.SpecifyKind(dto.ApplicationDeadline.Value, DateTimeKind.Utc) 
+            job.ExpiryDate = dto.ApplicationDeadline.HasValue
+                ? DateTime.SpecifyKind(dto.ApplicationDeadline.Value, DateTimeKind.Utc)
                 : null;
-            
+
             _db.JobOpportunities.Update(job);
             await _db.SaveChangesAsync(cancellationToken);
             return true;
@@ -90,8 +90,8 @@ namespace GHCAA.Infrastructure.Services
                 JobCategory = dto.JobCategory,
                 PostedByMemberId = memberId,
                 PostedDate = DateTime.UtcNow,
-                ExpiryDate = dto.ApplicationDeadline.HasValue 
-                    ? DateTime.SpecifyKind(dto.ApplicationDeadline.Value, DateTimeKind.Utc) 
+                ExpiryDate = dto.ApplicationDeadline.HasValue
+                    ? DateTime.SpecifyKind(dto.ApplicationDeadline.Value, DateTimeKind.Utc)
                     : null,
                 IsActive = true
             };
@@ -121,7 +121,7 @@ namespace GHCAA.Infrastructure.Services
             var job = await _db.JobOpportunities
                 .Include(j => j.PostedBy)
                 .FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
-            
+
             return job == null ? null : MapToDto(job);
         }
 

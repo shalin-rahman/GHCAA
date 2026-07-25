@@ -31,10 +31,10 @@ namespace GHCAA.Infrastructure.Services
             if (requesterId == dto.TargetMemberId) return false;
 
             // Check if request already exists (either way) that is NOT rejected/cancelled
-            var existing = await _db.FamilyLinkRequests.AnyAsync(r => 
-                ((r.RequesterId == requesterId && r.TargetMemberId == dto.TargetMemberId) || 
+            var existing = await _db.FamilyLinkRequests.AnyAsync(r =>
+                ((r.RequesterId == requesterId && r.TargetMemberId == dto.TargetMemberId) ||
                  (r.RequesterId == dto.TargetMemberId && r.TargetMemberId == requesterId)) &&
-                r.Status != FamilyLinkStatus.Rejected && r.Status != FamilyLinkStatus.Cancelled, 
+                r.Status != FamilyLinkStatus.Rejected && r.Status != FamilyLinkStatus.Cancelled,
                 cancellationToken);
 
             if (existing) return false;
@@ -55,14 +55,14 @@ namespace GHCAA.Infrastructure.Services
             // Notify Target Member
             var requester = await _db.Members.FindAsync(new object[] { requesterId }, cancellationToken);
             await _notification.CreateNotificationAsync(
-                dto.TargetMemberId, 
-                "Family Link Request", 
-                $"{requester?.FullName ?? "An alumnus"} has requested to link with you as {dto.Relationship}.", 
-                NotificationType.GeneralSystem, 
-                "/portal/family", 
+                dto.TargetMemberId,
+                "Family Link Request",
+                $"{requester?.FullName ?? "An alumnus"} has requested to link with you as {dto.Relationship}.",
+                NotificationType.GeneralSystem,
+                "/portal/family",
                 cancellationToken);
 
-        await _realTime.SendNotificationToUserAsync(dto.TargetMemberId, new { Type = "NEW_FAMILY_REQUEST", RequestId = request.Id, Requester = requester?.FullName });
+            await _realTime.SendNotificationToUserAsync(dto.TargetMemberId, new { Type = "NEW_FAMILY_REQUEST", RequestId = request.Id, Requester = requester?.FullName });
 
             return true;
         }
@@ -84,16 +84,16 @@ namespace GHCAA.Infrastructure.Services
             // Notify Requester
             var responder = request.TargetMember?.FullName ?? "An alumnus";
             var outcome = status == FamilyLinkStatus.Accepted ? "accepted" : "declined";
-            
+
             await _notification.CreateNotificationAsync(
-                request.RequesterId, 
-                "Family Link Update", 
-                $"{responder} has {outcome} your family link request.", 
-                NotificationType.GeneralSystem, 
-                "/portal/family", 
+                request.RequesterId,
+                "Family Link Update",
+                $"{responder} has {outcome} your family link request.",
+                NotificationType.GeneralSystem,
+                "/portal/family",
                 cancellationToken);
 
-        await _realTime.SendNotificationToUserAsync(request.RequesterId, new { Type = "FAMILY_REQUEST_RESPONDED", RequestId = requestId, Status = status.ToString() });
+            await _realTime.SendNotificationToUserAsync(request.RequesterId, new { Type = "FAMILY_REQUEST_RESPONDED", RequestId = requestId, Status = status.ToString() });
 
             return true;
         }
@@ -188,11 +188,11 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<bool> UnlinkAsync(int memberId, int linkedMemberId, CancellationToken cancellationToken = default)
         {
-             var link = await _db.FamilyLinkRequests.FirstOrDefaultAsync(r => 
-                ((r.RequesterId == memberId && r.TargetMemberId == linkedMemberId) || 
-                 (r.RequesterId == linkedMemberId && r.TargetMemberId == memberId)) &&
-                r.Status == FamilyLinkStatus.Accepted, 
-                cancellationToken);
+            var link = await _db.FamilyLinkRequests.FirstOrDefaultAsync(r =>
+               ((r.RequesterId == memberId && r.TargetMemberId == linkedMemberId) ||
+                (r.RequesterId == linkedMemberId && r.TargetMemberId == memberId)) &&
+               r.Status == FamilyLinkStatus.Accepted,
+               cancellationToken);
 
             if (link == null) return false;
 
@@ -200,7 +200,7 @@ namespace GHCAA.Infrastructure.Services
             // Existing logic for status-based audit suggests moving to "Cancelled".
             link.Status = FamilyLinkStatus.Cancelled;
             link.RespondedAt = DateTime.UtcNow;
-            
+
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
@@ -210,9 +210,9 @@ namespace GHCAA.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(name)) return Array.Empty<MemberSummaryDto>();
 
             var members = await _db.Members
-                .Where(m => m.Id != excludeMemberId && 
-                            m.IsFamilyPublic && 
-                            m.Status == MembershipStatus.Active && 
+                .Where(m => m.Id != excludeMemberId &&
+                            m.IsFamilyPublic &&
+                            m.Status == MembershipStatus.Active &&
                             m.FullName.Contains(name))
                 .Take(20)
                 .ToListAsync(cancellationToken);

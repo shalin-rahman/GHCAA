@@ -9,7 +9,7 @@ namespace GHCAA.Domain.Models
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public bool IsActive { get; set; } = false;
-        
+
         // Navigation
         public ICollection<ECMember> ECMembers { get; set; } = new List<ECMember>();
     }

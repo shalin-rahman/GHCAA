@@ -40,7 +40,7 @@ namespace GHCAA.API.Controllers
         [HttpPost("respond/{requestId}")]
         public async Task<IActionResult> RespondToRequest(int requestId, [FromQuery] FamilyLinkStatus status, CancellationToken cancellationToken)
         {
-             if (status != FamilyLinkStatus.Accepted && status != FamilyLinkStatus.Rejected)
+            if (status != FamilyLinkStatus.Accepted && status != FamilyLinkStatus.Rejected)
                 return BadRequest("Invalid response status.");
 
             var success = await _familyService.RespondAsync(GetMemberId(), requestId, status, cancellationToken);

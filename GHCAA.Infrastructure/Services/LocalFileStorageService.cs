@@ -20,17 +20,17 @@ namespace GHCAA.Infrastructure.Services
         {
             _config = config;
             _logger = logger;
-            
+
             var publicRelative = _config[Constants.ConfigKeys.UploadsRelativePath] ?? "uploads/members";
             var secureRelative = _config[Constants.ConfigKeys.SecureRelativePath] ?? "secure_uploads/members";
-            
+
             // Normalize relative paths to use forward slashes for cross-platform consistency
             publicRelative = publicRelative.Replace("\\", "/").TrimEnd('/');
             secureRelative = secureRelative.Replace("\\", "/").TrimEnd('/');
 
             _publicRoot = Path.Combine(_config["FileStorage:BasePhysicalPath"] ?? "wwwroot", publicRelative);
             _secureRoot = Path.Combine(_config["FileStorage:BasePhysicalPath"] ?? AppDomain.CurrentDomain.BaseDirectory, secureRelative);
-            
+
             _maxFileSize = long.TryParse(_config[Constants.ConfigKeys.MaxFileSizeBytes], out var v) ? v : Constants.Defaults.MaxFileSizeBytes;
         }
 
@@ -52,10 +52,10 @@ namespace GHCAA.Infrastructure.Services
         {
             var safeFileName = Path.GetFileName(fileName);
             var prefix = uploadType.ToString().ToLower();
-            var relativeRoot = IsSecureType(uploadType) 
+            var relativeRoot = IsSecureType(uploadType)
                     ? (_config[Constants.ConfigKeys.SecureRelativePath] ?? "secure_uploads/members")
                     : (_config[Constants.ConfigKeys.UploadsRelativePath] ?? "uploads/members");
-            
+
             // World-class nested structure: members/{id}/{type}/{fileName}
             return Path.Combine(relativeRoot, memberId.ToString(), prefix, safeFileName).Replace("\\", "/");
         }
@@ -69,12 +69,12 @@ namespace GHCAA.Infrastructure.Services
             var rootPath = isSecure ? _secureRoot : _publicRoot;
             var safeFileName = Path.GetFileName(fileName);
             var prefix = uploadType.ToString().ToLower();
-            
+
             // Create nested directory for member and upload type
-            var relativePrefix = isSecure 
+            var relativePrefix = isSecure
                 ? (_config[Constants.ConfigKeys.SecureRelativePath] ?? "secure_uploads/members")
                 : (_config[Constants.ConfigKeys.UploadsRelativePath] ?? "uploads/members");
-            
+
             var targetDir = Path.Combine(rootPath, memberId.ToString(), prefix);
             Directory.CreateDirectory(targetDir);
 
@@ -84,7 +84,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 uniqueName = Path.ChangeExtension(uniqueName, ".jpg");
             }
-            
+
             var diskPath = Path.Combine(targetDir, uniqueName);
 
             if (uploadType == Enums.FileUploadType.Photo && IsCompressionEnabled)
@@ -93,20 +93,20 @@ namespace GHCAA.Infrastructure.Services
                 {
                     // Reset position just in case
                     if (fileStream.CanSeek) fileStream.Position = 0;
-                    
+
                     using var image = await Image.LoadAsync(fileStream, cancellationToken);
-                    
+
                     var encoder = new JpegEncoder { Quality = DefaultQuality };
-                    
+
                     using var ms = new MemoryStream();
                     await image.SaveAsJpegAsync(ms, encoder, cancellationToken);
-                    
+
                     // Check against target size
                     if (ms.Length > (TargetSizeKB * 1024))
                     {
                         encoder = new JpegEncoder { Quality = FallbackQuality };
                     }
-                    
+
                     await image.SaveAsJpegAsync(diskPath, encoder, cancellationToken);
                 }
                 catch (Exception ex)
@@ -146,7 +146,7 @@ namespace GHCAA.Infrastructure.Services
             {
                 File.Delete(securePath);
             }
-            
+
             return Task.CompletedTask;
         }
     }

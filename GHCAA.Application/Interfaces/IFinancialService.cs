@@ -9,7 +9,7 @@ namespace GHCAA.Application.Interfaces
         Task<PaymentHistoryDto> RecordPaymentAsync(CreatePaymentHistoryDto dto, CancellationToken cancellationToken = default);
         Task<bool> UpdatePaymentStatusAsync(int paymentId, Enums.PaymentStatus status, string? notes = null, CancellationToken cancellationToken = default);
         Task<bool> ProcessGatewayPaymentAsync(string transactionId, decimal confirmedAmount = 0, string gatewayNotes = "", CancellationToken cancellationToken = default);
-        
+
         // Membership History
         Task<IEnumerable<MembershipHistoryDto>> GetMemberMembershipHistoryAsync(int memberId, CancellationToken cancellationToken = default);
         Task RecordMembershipChangeAsync(int memberId, string from, string to, int? adminId = null, string? reason = null, CancellationToken cancellationToken = default);
