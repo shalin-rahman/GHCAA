@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -15,8 +16,9 @@ class RolesService {
     try {
       final r = await _dio.get('/roles/users');
       return r.data as List<dynamic>;
-    } catch (_) {
-      return [];
+    } catch (e) {
+      debugPrint('RolesService.getUsers failed: $e');
+      rethrow;
     }
   }
 
@@ -38,8 +40,9 @@ class RolesService {
     try {
       final r = await _dio.get('/roles');
       return r.data as List<dynamic>;
-    } catch (_) {
-      return [];
+    } catch (e) {
+      debugPrint('RolesService.getRoles failed: $e');
+      rethrow;
     }
   }
 

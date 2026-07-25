@@ -285,8 +285,17 @@ class _CommitteeMemberPanelState extends ConsumerState<_CommitteeMemberPanel> {
   }
 
   Future<void> _load() async {
-    final list = await ref.read(adminServiceProvider).getCommitteeMembers(widget.periodId);
-    if (mounted) setState(() => _members = list);
+    try {
+      final list = await ref.read(adminServiceProvider).getCommitteeMembers(widget.periodId);
+      if (mounted) setState(() => _members = list);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _members = _members ?? []);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to load committee members. Please try again.')),
+        );
+      }
+    }
   }
 
   Future<void> _assign() async {

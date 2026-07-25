@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -13,7 +14,8 @@ class NotificationService {
       final response = await _dio.get('/notifications');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('NotificationService.getMyNotifications failed: $e');
+      rethrow;
     }
   }
 

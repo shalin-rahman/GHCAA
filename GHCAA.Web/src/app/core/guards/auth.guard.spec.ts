@@ -43,7 +43,7 @@ describe('AuthGuards', () => {
             authServiceMock.isAuthenticated.mockReturnValue(false);
             const result = TestBed.runInInjectionContext(() => authGuard(anyRoute, stateFor('/portal/dashboard')));
             expect(result).toBe('/login');
-            expect(routerMock.createUrlTree).toHaveBeenCalledWith('/login', { queryParams: { returnUrl: '/portal/dashboard' } });
+            expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login'], { queryParams: { returnUrl: '/portal/dashboard' } });
         });
 
         it('should redirect mustChangePassword users to change-password', () => {

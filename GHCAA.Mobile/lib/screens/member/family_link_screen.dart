@@ -272,8 +272,17 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
                       onPressed: () async {
                         if (searchCtrl.text.length < 3) return;
                         setState(() => isSearching = true);
-                        searchResults = await ref.read(familyServiceProvider).searchFamilyMembers(searchCtrl.text);
-                        setState(() => isSearching = false);
+                        try {
+                          searchResults = await ref.read(familyServiceProvider).searchFamilyMembers(searchCtrl.text);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Search failed. Please try again.')),
+                            );
+                          }
+                        } finally {
+                          setState(() => isSearching = false);
+                        }
                       },
                     )
                   ],

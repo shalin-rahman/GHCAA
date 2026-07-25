@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -27,8 +28,9 @@ class MentorshipService {
     try {
       final r = await _dio.get('/mentorship/sent');
       return r.data as List<dynamic>;
-    } catch (_) {
-      return [];
+    } catch (e) {
+      debugPrint('MentorshipService.getSentRequests failed: $e');
+      rethrow;
     }
   }
 
@@ -36,8 +38,9 @@ class MentorshipService {
     try {
       final r = await _dio.get('/mentorship/received');
       return r.data as List<dynamic>;
-    } catch (_) {
-      return [];
+    } catch (e) {
+      debugPrint('MentorshipService.getReceivedRequests failed: $e');
+      rethrow;
     }
   }
 

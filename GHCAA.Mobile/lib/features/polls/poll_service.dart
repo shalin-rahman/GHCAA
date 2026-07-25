@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -84,7 +85,10 @@ class PollService {
       if (response.statusCode == 200) {
         return (response.data as List).map((p) => Poll.fromJson(p)).toList();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('PollService.getActivePolls failed: $e');
+      rethrow;
+    }
     return [];
   }
 

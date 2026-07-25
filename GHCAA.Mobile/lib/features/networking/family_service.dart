@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -15,7 +16,8 @@ class FamilyService {
       final response = await _dio.get('/family-links/my-family');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('FamilyService.getMyFamily failed: $e');
+      rethrow;
     }
   }
 
@@ -24,7 +26,8 @@ class FamilyService {
       final response = await _dio.get('/family-links/sent');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('FamilyService.getSentRequests failed: $e');
+      rethrow;
     }
   }
 
@@ -33,7 +36,8 @@ class FamilyService {
       final response = await _dio.get('/family-links/received');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('FamilyService.getReceivedRequests failed: $e');
+      rethrow;
     }
   }
 
@@ -85,7 +89,8 @@ class FamilyService {
       final response = await _dio.get('/family/search', queryParameters: {'name': name});
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('FamilyService.searchFamilyMembers failed: $e');
+      rethrow;
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,9 +91,10 @@ void main() async {
 
 Future<void> _initAndRunApp() async {
   // 4. Initialize Cloud Infrastructure (Firebase)
-  const bool isWeb = bool.fromEnvironment('dart.library.js_util'); // Simple web check
-  
-  if (!isWeb) {
+  // 29E.5: kIsWeb is the real compile-time web flag. bool.fromEnvironment('dart.library.js_util')
+  // is NOT set by the toolchain, so it was always false — meaning Firebase init would still run
+  // (and crash) on web builds. kIsWeb (from foundation, re-exported by material) is correct.
+  if (!kIsWeb) {
     try {
       await Firebase.initializeApp();
       try {

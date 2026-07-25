@@ -77,25 +77,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  Future<void> _handleSocialLogin(String provider) async {
-    // Note: To make this robust without pub get failing dynamically, 
-    // we assume the Auth service handles the SDK communication or 
-    // we would invoke GoogleSignIn and FacebookAuth here.
-    // For this demonstration, we'll notify the user it's configured.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Connecting to $provider...')),
-    );
-    
-    // In a full implementation with the packages resolved:
-    // if (provider == 'Google') {
-    //   final googleSignIn = GoogleSignIn();
-    //   final account = await googleSignIn.signIn();
-    //   final auth = await account?.authentication;
-    //   if (auth?.idToken != null) {
-    //     await ref.read(authServiceProvider).googleLogin(auth!.idToken!);
-    //   }
-    // }
-  }
+  // 29E.1: The social login buttons were dead stubs — they only showed a "Connecting…"
+  // snackbar and never authenticated (the Google/Facebook SDK packages aren't in the
+  // pubspec, and the org has no gateway keys configured). Rather than ship a button that
+  // silently does nothing, the social section is hidden until real SDK wiring lands. The
+  // auth_service googleLogin/facebookLogin plumbing is retained for that future work.
 
   @override
   Widget build(BuildContext context) {
@@ -252,40 +238,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 _handleLogin();
                               },
                               child: const Text('ENGAGE PORTAL')),
-                        
-                        const SizedBox(height: AppTheme.spaceL),
-                        const Row(
-                          children: [
-                            Expanded(child: Divider(color: Colors.white12)),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: AppTheme.spaceS),
-                              child: Text('OR', style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)),
-                            ),
-                            Expanded(child: Divider(color: Colors.white12)),
-                          ],
-                        ),
-                        const SizedBox(height: AppTheme.spaceL),
-                        
-                        // Social Login Buttons
-                        OutlinedButton.icon(
-                          onPressed: () => _handleSocialLogin('Google'),
-                          icon: const Icon(Icons.g_mobiledata, color: Colors.white),
-                          label: const Text('Continue with Google', style: TextStyle(color: Colors.white)),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.white12),
-                            padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
-                          ),
-                        ),
-                        const SizedBox(height: AppTheme.spaceM),
-                        OutlinedButton.icon(
-                          onPressed: () => _handleSocialLogin('Facebook'),
-                          icon: const Icon(Icons.facebook, color: Colors.blue),
-                          label: const Text('Continue with Facebook', style: TextStyle(color: Colors.white)),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.white12),
-                            padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
-                          ),
-                        ),
+                        // 29E.1: social login section removed — see note above _LoginScreenState.build.
                       ],
                     ),
                   ),

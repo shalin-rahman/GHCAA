@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 import '../../core/services/device_info_service.dart';
 import '../../core/storage/storage_service.dart';
+import '../../core/real_time/notification_hub_service.dart';
 
 
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -166,6 +167,10 @@ class AuthService {
   }
 
   Future<void> logout() async {
+    // 29E.3: tear down the SignalR NotificationHub (socket + 4 broadcast controllers) on
+    // logout. Invalidating the provider fires its ref.onDispose → dispose(); otherwise the
+    // authenticated hub would keep streaming for the previous user until app kill.
+    _ref.invalidate(notificationHubServiceProvider);
     await _storage.clearAll();
   }
 

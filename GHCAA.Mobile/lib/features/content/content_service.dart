@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -14,7 +15,8 @@ class NewsService {
       final response = await _dio.get('/news');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('NewsService.getLatestNews failed: $e');
+      rethrow;
     }
   }
 
@@ -23,7 +25,8 @@ class NewsService {
       final response = await _dio.get('/news', queryParameters: {'articleCategory': category});
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('NewsService.getNewsByCategory failed: $e');
+      rethrow;
     }
   }
 
@@ -32,7 +35,8 @@ class NewsService {
       final response = await _dio.get('/news/my-submissions');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('NewsService.getMySubmissions failed: $e');
+      rethrow;
     }
   }
 
@@ -44,7 +48,10 @@ class NewsService {
     try {
       final response = await _dio.get('/news/admin/pending');
       return response.data as List<dynamic>;
-    } catch (_) { return []; }
+    } catch (e) {
+      debugPrint('NewsService.getPendingSubmissions failed: $e');
+      rethrow;
+    }
   }
 
   Future<bool> resolveArticle(int id, bool approve) async {
@@ -60,7 +67,8 @@ class NewsService {
       final response = await _dio.get('/gallery');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('NewsService.getGalleryItems failed: $e');
+      rethrow;
     }
   }
 
@@ -90,7 +98,8 @@ class GalleryService {
       final response = await _dio.get(endpoint);
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('GalleryService.getGalleries failed: $e');
+      rethrow;
     }
   }
 

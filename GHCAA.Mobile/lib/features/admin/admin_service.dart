@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -19,7 +20,8 @@ class AdminService {
       });
       return response.data['items'] ?? [];
     } catch (e) {
-      return [];
+      debugPrint('AdminService.getPendingApprovals failed: $e');
+      rethrow;
     }
   }
 
@@ -28,7 +30,8 @@ class AdminService {
       final response = await _dio.get('/admin/contact-messages');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('AdminService.getContactMessages failed: $e');
+      rethrow;
     }
   }
 
@@ -69,7 +72,10 @@ class AdminService {
     try {
       final response = await _dio.get('/admin/governance/periods');
       return response.data as List<dynamic>;
-    } catch (_) { return []; }
+    } catch (e) {
+      debugPrint('AdminService.getECPeriods failed: $e');
+      rethrow;
+    }
   }
 
   Future<bool> createECPeriod(Map<String, dynamic> data) async {
@@ -95,7 +101,10 @@ class AdminService {
         'pageSize': 200, // Batch fetch for admin view
       });
       return response.data['items'] ?? [];
-    } catch (_) { return []; }
+    } catch (e) {
+      debugPrint('AdminService.getLedgerRecords failed: $e');
+      rethrow;
+    }
   }
 
   Future<Map<String, dynamic>> getLedgerSummary(int year) async {
@@ -117,7 +126,10 @@ class AdminService {
     try {
       final response = await _dio.get('/financials/fees/config');
       return response.data as List<dynamic>;
-    } catch (_) { return []; }
+    } catch (e) {
+      debugPrint('AdminService.getFeeConfigs failed: $e');
+      rethrow;
+    }
   }
 
   Future<bool> addFeeConfig(Map<String, dynamic> data) async {
@@ -139,7 +151,10 @@ class AdminService {
     try {
       final response = await _dio.get('/admin/governance/periods/$periodId/members');
       return response.data as List<dynamic>;
-    } catch (_) { return []; }
+    } catch (e) {
+      debugPrint('AdminService.getCommitteeMembers failed: $e');
+      rethrow;
+    }
   }
 
   Future<bool> assignMemberToCommittee(int periodId, Map<String, dynamic> data) async {

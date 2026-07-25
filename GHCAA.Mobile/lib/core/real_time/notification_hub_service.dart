@@ -6,7 +6,13 @@ import '../../core/config/app_config.dart';
 import '../../core/storage/storage_service.dart';
 
 final notificationHubServiceProvider = Provider<NotificationHubService>((ref) {
-  return NotificationHubService(ref);
+  final service = NotificationHubService(ref);
+  // 29E.3: previously dispose() was dead code — the SignalR connection and the four
+  // broadcast StreamControllers leaked for the app's lifetime and survived logout. Wiring
+  // onDispose ties teardown to the provider lifecycle; logout invalidates this provider
+  // (see auth logout call-sites), which fires this and closes the socket + controllers.
+  ref.onDispose(() => service.dispose());
+  return service;
 });
 
 class NotificationHubService {

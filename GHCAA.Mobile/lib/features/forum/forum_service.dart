@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -130,7 +131,10 @@ class ForumService {
       if (response.statusCode == 200) {
         return (response.data as List).map((c) => ForumCategory.fromJson(c)).toList();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('ForumService.getCategories failed: $e');
+      rethrow;
+    }
     return [];
   }
 
@@ -143,7 +147,10 @@ class ForumService {
       if (response.statusCode == 200) {
         return (response.data as List).map((t) => ForumTopic.fromJson(t)).toList();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('ForumService.getTopics failed: $e');
+      rethrow;
+    }
     return [];
   }
 
@@ -166,7 +173,10 @@ class ForumService {
       if (response.statusCode == 200) {
         return (response.data as List).map((p) => ForumPost.fromJson(p)).toList();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('ForumService.getPosts failed: $e');
+      rethrow;
+    }
     return [];
   }
 

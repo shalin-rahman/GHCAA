@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -29,7 +30,8 @@ class FinancialService {
         };
       }).toList();
     } catch (e) {
-      return [];
+      debugPrint('FinancialService.getLedger failed: $e');
+      rethrow;
     }
   }
 
@@ -46,7 +48,10 @@ class FinancialService {
     try {
       final response = await _dio.get('/financials/saved-methods');
       return response.data as List<dynamic>;
-    } catch (_) { return []; }
+    } catch (e) {
+      debugPrint('FinancialService.getSavedMethods failed: $e');
+      rethrow;
+    }
   }
 
   Future<bool> deleteSavedMethod(int id) async {
@@ -69,8 +74,9 @@ class FinancialService {
     try {
       final response = await _dio.get('/payment-config/active');
       return response.data as List<dynamic>;
-    } catch (_) {
-      return [];
+    } catch (e) {
+      debugPrint('FinancialService.getActivePaymentConfigs failed: $e');
+      rethrow;
     }
   }
 

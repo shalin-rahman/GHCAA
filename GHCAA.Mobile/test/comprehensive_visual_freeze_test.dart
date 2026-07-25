@@ -314,6 +314,17 @@ class FakeFinancialService implements FinancialService {
   Future<bool> deleteSavedMethod(int id) async => true;
   @override
   Future<String?> getReceiptUrl(int paymentId) async => 'mock/receipt';
+  @override
+  Future<List<dynamic>> getActivePaymentConfigs() async => [];
+  @override
+  Future<bool> recordPayment({
+    required String transactionId,
+    required double amount,
+    required String paymentMethod,
+    required String financialCategory,
+    String? notes,
+    dynamic receipt,
+  }) async => true;
 }
 
 class FakeActivityService implements ActivityService {

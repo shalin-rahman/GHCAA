@@ -558,32 +558,32 @@
 
 ### 29-D: HIGH — WEB (Angular)
 
-29D.1 [TODO] Web: Article rejection crashes — [(ngModel)] bound to a signal → "rejectReason is not a function" (article-approval.html:97)
-29D.2 [TODO] Web: Admins approve members blind — approval panel maps only 8 fields, no detail fetch (academic/professional/NID/addresses blank) (member-approval.ts:58-66)
-29D.3 [TODO] Web: Chat dead after reload — token in-memory only, sends silently dropped (chat.service.ts:41-42)
-29D.4 [TODO] Web: Payments page infinite spinner on error — nested subscribes, no error callback (payments.ts:48-60)
-29D.5 [TODO] Web: Digital-ID download is a fake setTimeout stub; real getIDCard() unused (digital-id.ts:35-41)
-29D.6 [TODO] Web: Gallery empty <img [src]=""> triggers spurious request (gallery.html:42)
-29D.7 [TODO] Web: Router-event subscription leaks in all 3 layouts (unsubscribe on destroy)
-29D.8 [TODO] Web: Login ignores token expiry/returnUrl; profile update drops fields; governance page has no error handler
+29D.1 [DONE 2026-07-25] Web: Article rejection fixed — bound rejectReason to a plain field/model instead of a signal via [(ngModel)]; reject flow no longer throws "is not a function". (article-approval)
+29D.2 [DONE 2026-07-25] Web: Member-approval panel now fetches full member detail (academic/professional/NID/addresses) before decision instead of the 8-field summary. (member-approval.ts)
+29D.3 [DONE 2026-07-25] Web: Chat token persisted (no longer in-memory only); sends survive reload and error handlers added on loadRecentChats/loadHistory. (chat.service.ts)
+29D.4 [DONE 2026-07-25] Web: Payments page no longer spins forever on error — flattened nested subscribes and added error callbacks (incl. deleteSavedMethod). (payments.ts)
+29D.5 [DONE 2026-07-25] Web: Digital-ID download wired to the real getIDCard() endpoint, replacing the fake setTimeout stub. (digital-id.ts)
+29D.6 [DONE 2026-07-25] Web: Gallery no longer emits an empty <img [src]=""> request — src guarded until a real URL exists. (gallery.html)
+29D.7 [DONE 2026-07-25] Web: Router-event subscriptions in all 3 layouts now torn down via takeUntilDestroyed()/unsubscribe on destroy — no leak.
+29D.8 [DONE 2026-07-25] Web: Login honors token expiry + returnUrl (createUrlTree(['/login'],{queryParams})); profile update no longer drops fields; governance page has an error handler.
 
 ### 29-E: HIGH — MOBILE (Flutter)
 
-29E.1 [TODO] Mobile: Social login buttons are dead stubs (wire or hide)
-29E.2 [TODO] Mobile: Error-swallowing services render failures as empty lists (surface errors)
-29E.3 [TODO] Mobile: NotificationHub stream/SignalR leaks — Provider not autoDispose
-29E.4 [TODO] Mobile: Dropdown service re-fetches every keystroke (debounce/cache)
-29E.5 [TODO] Mobile: bool.fromEnvironment('dart.library.js_util') always false — should be kIsWeb
+29E.1 [DONE 2026-07-25] Mobile: Removed the dead social-login stubs (Google/Facebook buttons only showed a "Connecting…" snackbar; no SDK, no keys). Section hidden until real SDK wiring; auth_service googleLogin/facebookLogin plumbing retained for future. (login_screen.dart)
+29E.2 [DONE 2026-07-25] Mobile: List-fetch services now debugPrint+rethrow instead of catch→return [], so network failures surface as AsyncValue.error (shared AsyncValueWidget renders an error+retry state) instead of a misleading empty list. ~40 methods across 18 services; 2 imperative call-sites (governance_registry, family_link) wrapped in try/catch+SnackBar. Intentional swallowers kept: lookup/dropdown static-fallback + auth getSocialProviders. (flutter analyze clean)
+29E.3 [DONE 2026-07-25] Mobile: NotificationHub leak fixed — provider now registers ref.onDispose(() => service.dispose()) (previously dead code; SignalR socket + 4 broadcast StreamControllers leaked and survived logout). AuthService.logout() invalidates notificationHubServiceProvider so teardown fires on logout. (notification_hub_service.dart, auth_service.dart)
+29E.4 [DONE 2026-07-25] Mobile: AppSearchField converted to a StatefulWidget with an internal 350ms debounce Timer (cancelled on dispose; clear bypasses debounce), so search consumers no longer re-fetch per keystroke — one call after typing settles. (app_search_field.dart)
+29E.5 [DONE 2026-07-25] Mobile: Replaced bool.fromEnvironment('dart.library.js_util') (always false → Firebase init ran on web and crashed) with kIsWeb (imported from foundation). (main.dart)
 
 ### 29-F: CROSS-CUTTING THEMES (repeat offenders)
 
 29F.1 [DONE 2026-07-25] Web/Mobile: Admin-ID attribution — server already resolves the acting admin from the JWT MemberId claim (item 24.51, AdminController), ignoring any client-supplied id, so this was client-side dead/misleading code, not live audit corruption. Removed the hardcoded adminId=1 fallbacks and the now-unused approvedByAdminId/rejectedByAdminId fields across web (admin.service, member-approval, admin-members + specs), mobile (admin_service.dart), e2e helper, and DTOs (ApproveMemberDto/RejectMemberDto).
-29F.2 [TODO] All: Silent-failure sweep — next-only .subscribe() (web) + try/catch-return-empty (mobile) turn errors into blank screens / stuck spinners; add error handlers app-wide
+29F.2 [DONE 2026-07-25] All: Silent-failure sweep — web: converted next-only .subscribe() to object form with error: handlers across admin-roles, payments, login (quiet-degrade optional social), chat.service (loadRecentChats/loadHistory) + prior admin components. Mobile: try/catch-return-empty list fetches now debugPrint+rethrow so failures surface (see 29E.2). Errors no longer become blank screens / stuck spinners.
 29F.3 [DONE] All: Date contract settled — ISO-8601 is canonical wire format; dd-MM-yyyy is display/input only.
               API unchanged (Write=ISO, Read accepts both). Web: added core/utils/date.util.ts (toDisplayDate/toWireDate/parseDisplayDate); routed 9 write-path components + register.ts through toWire; type-check clean.
               Mobile: AppUtils hardened ISO-first + added toWire(); fixed 6 send sites incl. RegisterModel.toJson DOB; flutter analyze clean.
               Skill doc ghcaa-date-standard/SKILL.md rewritten to the two-format contract. (2026-07-25)
-29F.4 [TODO] Web: White-labeling half-wired — nav shows feature-gated links regardless of flags; logos/brand strings hardcoded instead of OrgConfigService; admin layout missing logout/mobile toggle (RELATES TO Area 28)
+29F.4 [DONE 2026-07-25] Web: White-labeling wired — admin-layout now pulls logo/brand strings from OrgConfigService (branding.shortName/logoUrl) instead of hardcoded values, adds a Sign Out control (footer + header) and a mobile off-canvas sidebar toggle (hamburger + backdrop, translateX). Feature-gated nav links honor OrgConfigService.isFeatureEnabled. (admin-layout .ts/.html/.scss)
 
 ### 29-G: PAYMENT GAPS (all 5 methods work manually/config-driven; no keys required — these are gaps only)
 

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -14,7 +15,8 @@ class ActivityService {
       final response = await _dio.get('/activity/me');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('ActivityService.getMyActivity failed: $e');
+      rethrow;
     }
   }
 
@@ -24,7 +26,8 @@ class ActivityService {
       final response = await _dio.get('/activity/admin/global');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('ActivityService.getGlobalActivity failed: $e');
+      rethrow;
     }
   }
 
@@ -34,7 +37,8 @@ class ActivityService {
       final response = await _dio.get('/activity/admin/$memberId');
       return response.data as List<dynamic>;
     } catch (e) {
-      return [];
+      debugPrint('ActivityService.getMemberActivity failed: $e');
+      rethrow;
     }
   }
 }
