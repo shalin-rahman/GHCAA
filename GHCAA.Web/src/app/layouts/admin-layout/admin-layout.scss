@@ -127,6 +127,22 @@
     background: var(--bg-color);
 }
 
+// 29F.4: logout button styled as a full-width nav item (button reset + danger accent)
+.logout-item {
+    width: 100%;
+    margin-top: 0.4rem;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+
+    &:hover {
+        color: #ef4444;
+        border-color: #ef4444;
+        background: color-mix(in srgb, #ef4444 8%, transparent);
+    }
+}
+
 .admin-user-info {
     display: flex;
     align-items: center;
@@ -242,12 +258,67 @@
     box-shadow: 0 4px 10px rgba(197, 160, 89, 0.3);
 }
 
+// 29F.4: sign-out gets a danger hover instead of the gold treatment
+.logout-btn:hover {
+    background: #ef4444;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+}
+
 .admin-content {
     flex: 1;
 }
 
+// 29F.4: hamburger + backdrop are desktop-hidden; only surface on mobile
+.sidebar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--text-main);
+    padding: 0 0.5rem 0 0;
+    line-height: 1;
+}
+
+.admin-backdrop {
+    display: none;
+}
+
 @media (max-width: 768px) {
+    .sidebar-toggle {
+        display: block;
+    }
+
+    // Drawer: fixed off-canvas, slides in when .sidebar-open is set on the wrapper
     .admin-sidebar {
-        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 110;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .admin-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 105;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+    .sidebar-open {
+        .admin-sidebar {
+            transform: translateX(0);
+        }
+
+        .admin-backdrop {
+            opacity: 1;
+            pointer-events: auto;
+        }
     }
 }

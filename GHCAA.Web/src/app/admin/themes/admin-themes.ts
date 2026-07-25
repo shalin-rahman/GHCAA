@@ -105,7 +105,9 @@ export class AdminThemes implements OnInit {
             next: () => {
                 this.notify.success('Theme deleted');
                 this.loadThemes();
-            }
+            },
+            // 29F.2: surface HTTP failures instead of failing silently
+            error: () => this.notify.error('Failed to delete theme.')
         });
     }
 

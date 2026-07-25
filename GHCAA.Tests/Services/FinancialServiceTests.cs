@@ -45,7 +45,8 @@ public class FinancialServiceTests : TestBase
             userMock.Object,
             activityMock.Object,
             gamificationMock.Object,
-            orgConfigMock.Object);
+            orgConfigMock.Object,
+            new Mock<IServiceProvider>().Object);
 
         if (!await _context.MembershipFeeConfigs.AnyAsync())
         {

@@ -82,7 +82,11 @@ export class Ledger implements OnInit {
   loadData() {
     const year = new Date().getFullYear();
     this.loading.set(true);
-    this.ledgerService.getSummary(year).subscribe(s => this.summary.set(s));
+    // 29F.2: surface HTTP failures instead of failing silently
+    this.ledgerService.getSummary(year).subscribe({
+      next: s => this.summary.set(s),
+      error: () => this.notify.error('Failed to load ledger summary.')
+    });
     
     const params: any = {
       page: this.currentPage(),

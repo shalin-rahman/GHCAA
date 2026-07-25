@@ -66,13 +66,17 @@ export class MemberPolls implements OnInit {
       next: (updatedPoll) => {
         this.notify.success('Thank you for voting!');
         // Refresh the specific poll
-        this.pollService.getPollById(poll.id).subscribe(data => {
-            const index = this.polls().findIndex(p => p.id === poll.id);
-            if (index > -1) {
-                const newPolls = [...this.polls()];
-                newPolls[index] = data;
-                this.polls.set(newPolls);
-            }
+        this.pollService.getPollById(poll.id).subscribe({
+            // 29F.2: surface HTTP failures instead of failing silently
+            next: data => {
+                const index = this.polls().findIndex(p => p.id === poll.id);
+                if (index > -1) {
+                    const newPolls = [...this.polls()];
+                    newPolls[index] = data;
+                    this.polls.set(newPolls);
+                }
+            },
+            error: () => this.notify.error('Failed to refresh poll results.')
         });
       },
       error: (err) => this.notify.error(err.error?.message || 'Failed to submit vote.')

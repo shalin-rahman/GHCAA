@@ -212,10 +212,14 @@ export class AdminGallery implements OnInit {
                 this.notify.success(`🚀 ${paths.length} Photo(s) uploaded successfully!`);
                 
                 // Refresh data from server
-                this.galleryService.getAllGalleries().subscribe(all => {
-                    this.galleries.set(all);
-                    const fresh = all.find(g => g.id === gallery.id);
-                    if (fresh) this.selectedGallery.set(fresh);
+                this.galleryService.getAllGalleries().subscribe({
+                    // 29F.2: surface HTTP failures instead of failing silently
+                    next: all => {
+                        this.galleries.set(all);
+                        const fresh = all.find(g => g.id === gallery.id);
+                        if (fresh) this.selectedGallery.set(fresh);
+                    },
+                    error: () => this.notify.error('Failed to refresh gallery.')
                 });
             }
         } catch (error) {

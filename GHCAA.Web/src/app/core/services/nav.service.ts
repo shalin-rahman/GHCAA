@@ -1,5 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { AuthService } from './auth.service';
+import { OrgConfigService } from './org-config.service';
+import { OrgConfig } from '../models/org-config.model';
 
 export interface NavItem {
     path: string;
@@ -10,23 +12,25 @@ export interface NavItem {
     fragment?: string;
     roles?: string[];
     section?: string;
+    // 29F.4: when set, the item is only shown if this OrgConfig feature flag is enabled.
+    feature?: keyof OrgConfig['features'];
 }
 
 // All portal navigation items
 const ALL_NAV_ITEMS: NavItem[] = [
     { path: '/portal/dashboard', label: 'Dashboard', icon: '📊', mobileVisible: true },
     { path: '/portal/news', label: 'News', icon: '📰', mobileVisible: true },
-    { path: '/portal/events', label: 'Events', icon: '🎟️', mobileVisible: true },
+    { path: '/portal/events', label: 'Events', icon: '🎟️', mobileVisible: true, feature: 'enableEvents' },
     { path: '/portal/assistant', label: 'Assistance', icon: '✨', mobileVisible: true },
     { path: '/portal/messages', label: 'Messaging', icon: '💬' },
-    { path: '/portal/forum', label: 'Discussions', icon: '🗣️' },
-    { path: '/portal/jobs', label: 'Job Hub', icon: '💼', mobileVisible: true },
-    { path: '/portal/directory', label: 'Alumni Directory', icon: '🔍' },
-    { path: '/portal/gallery', label: 'Event Gallery', icon: '🖼️' },
+    { path: '/portal/forum', label: 'Discussions', icon: '🗣️', feature: 'enableForum' },
+    { path: '/portal/jobs', label: 'Job Hub', icon: '💼', mobileVisible: true, feature: 'enableJobHub' },
+    { path: '/portal/directory', label: 'Alumni Directory', icon: '🔍', feature: 'enablePublicDirectory' },
+    { path: '/portal/gallery', label: 'Event Gallery', icon: '🖼️', feature: 'enableGallery' },
     { path: '/portal/governance', label: 'Governance', icon: '⚖️' },
-    { path: '/portal/id-card', label: 'Digital ID', icon: '🆔' },
+    { path: '/portal/id-card', label: 'Digital ID', icon: '🆔', feature: 'enableDigitalIdCard' },
     { path: '/portal/payments', label: 'Payments', icon: '💰', mobileVisible: true },
-    { path: '/portal/articles', label: 'My Articles', icon: '✍️' },
+    { path: '/portal/articles', label: 'My Articles', icon: '✍️', feature: 'enableMagazine' },
     { path: '/portal/profile', label: 'My Profile', icon: '👤', mobileVisible: true },
 ];
 
@@ -57,13 +61,17 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
 @Injectable({ providedIn: 'root' })
 export class NavService {
     private auth = inject(AuthService);
+    private orgConfig = inject(OrgConfigService);
 
     /** Returns nav items the current user is allowed to see in the Portal */
     portalNavItems = computed<NavItem[]>(() => {
         const user = this.auth.currentUser();
         if (!user) return [];
-        // All authenticated users get all portal nav items
-        return ALL_NAV_ITEMS;
+        // 29F.4: honor OrgConfig feature flags — items tied to a disabled feature are
+        // hidden (was returning the full list regardless of the tenant's configuration).
+        return ALL_NAV_ITEMS.filter(item =>
+            !item.feature || this.orgConfig.isFeatureEnabled(item.feature)
+        );
     });
 
     /** Mobile quick-nav items (subset) */

@@ -305,7 +305,9 @@ export class PaymentPortalComponent implements OnInit {
                 ...c,
                 isOnline: !!c.gateway && c.gateway !== 'None'
             })));
-        }
+        },
+        // 29F.2: surface HTTP failures instead of failing silently
+        error: (err) => console.error('Failed to load payment methods', err)
       });
     }
   }
@@ -317,7 +319,8 @@ export class PaymentPortalComponent implements OnInit {
         if (methods.length > 0) {
           this.activePortalTab.set('saved');
         }
-      }
+      },
+      error: (err) => console.error('Failed to load saved payment methods', err)
     });
   }
 
@@ -346,7 +349,10 @@ export class PaymentPortalComponent implements OnInit {
   removeSavedMethod(id: number, event: Event) {
     event.stopPropagation();
     if (confirm('Are you sure you want to remove this saved payment method?')) {
-        this.finService.deleteSavedMethod(id).subscribe(() => this.loadSavedMethods());
+        this.finService.deleteSavedMethod(id).subscribe({
+            next: () => this.loadSavedMethods(),
+            error: (err) => console.error('Failed to remove saved payment method', err)
+        });
     }
   }
 

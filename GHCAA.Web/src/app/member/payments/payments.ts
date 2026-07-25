@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { FinancialService, PaymentRecord, MembershipDue } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
@@ -47,15 +48,24 @@ export class Payments implements OnInit {
 
     loadData() {
         this.loading.set(true);
-        this.financialService.getMyDues().subscribe(dues => {
-            this.dues.set(dues);
-            this.financialService.getMyHistory().subscribe(history => {
+        // 29D.4: Load the three sources in parallel with a single error path. The previous
+        // nested-subscribe chain had no error callback, so any failure left loading=true
+        // forever (infinite spinner). forkJoin resolves/errors once for the whole set.
+        forkJoin({
+            dues: this.financialService.getMyDues(),
+            history: this.financialService.getMyHistory(),
+            methods: this.financialService.getSavedMethods()
+        }).subscribe({
+            next: ({ dues, history, methods }) => {
+                this.dues.set(dues);
                 this.history.set(history);
-                this.financialService.getSavedMethods().subscribe(methods => {
-                    this.savedMethods.set(methods);
-                    this.loading.set(false);
-                });
-            });
+                this.savedMethods.set(methods);
+                this.loading.set(false);
+            },
+            error: () => {
+                this.notify.error('Failed to load payment information. Please try again.');
+                this.loading.set(false);
+            }
         });
     }
 
@@ -70,7 +80,9 @@ export class Payments implements OnInit {
             next: () => {
                 this.notify.success('Identity wallet updated.');
                 this.loadData();
-            }
+            },
+            // 29F.2: report deletion failures instead of leaving the method silently in place.
+            error: () => this.notify.error('Failed to remove the payment method.')
         });
     }
 

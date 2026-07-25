@@ -33,21 +33,38 @@ export class DigitalId implements OnInit {
   }
 
   download() {
+    // 29D.5: Call the real server-rendered ID card (was a fake setTimeout that claimed
+    // success without producing any file).
     this.notify.info('Preparing your high-resolution ID card image. Please wait...');
-    // In a real app, use html2canvas or similar
-    setTimeout(() => {
-      this.notify.success('ID Card generated successfully! Download started.');
-    }, 2000);
+    this.profileService.getIDCard().subscribe({
+      next: (res) => {
+        if (res.dataUri) {
+          const link = document.createElement('a');
+          link.href = res.dataUri;
+          link.download = 'GHCAA_ID_Card.png';
+          link.click();
+          this.notify.success('ID Card downloaded.');
+        } else {
+          this.notify.error('ID card is not available yet.');
+        }
+      },
+      error: () => this.notify.error('Failed to generate ID card. Please try again.')
+    });
   }
 
   downloadCert() {
-    this.profileService.getCertificate().subscribe(res => {
-      if (res.dataUri) {
-        const link = document.createElement('a');
-        link.href = res.dataUri;
-        link.download = 'GHCAA_Certificate.png';
-        link.click();
-      }
+    this.profileService.getCertificate().subscribe({
+      next: (res) => {
+        if (res.dataUri) {
+          const link = document.createElement('a');
+          link.href = res.dataUri;
+          link.download = 'GHCAA_Certificate.png';
+          link.click();
+        } else {
+          this.notify.error('Certificate is not available yet.');
+        }
+      },
+      error: () => this.notify.error('Failed to download certificate. Please try again.')
     });
   }
 }

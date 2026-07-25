@@ -62,7 +62,8 @@ namespace GHCAA.Tests.Workflows
                 _userServiceMock.Object,
                 _activityMock.Object,
                 gamificationMock.Object,
-                orgConfigMock.Object);
+                orgConfigMock.Object,
+                new Mock<IServiceProvider>().Object);
 
             _memberService = new MemberService(
                 _context, 

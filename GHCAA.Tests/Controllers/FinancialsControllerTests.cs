@@ -19,13 +19,17 @@ namespace GHCAA.Tests.Controllers
     public class FinancialsControllerTests : ControllerTestBase
     {
         private Mock<IFinancialService> _financialServiceMock;
+        private Mock<IFileValidationService> _fileValidationServiceMock;
         private FinancialsController _controller;
 
         [SetUp]
         public void Setup()
         {
             _financialServiceMock = new Mock<IFinancialService>();
-            _controller = new FinancialsController(_financialServiceMock.Object, _context);
+            _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<System.IO.Stream>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                      .Returns(new FileValidationResult { IsValid = true });
+            _controller = new FinancialsController(_financialServiceMock.Object, _context, _fileValidationServiceMock.Object);
         }
 
         [Test]

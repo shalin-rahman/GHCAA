@@ -12,9 +12,9 @@ using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using QuestPDF.Infrastructure;
 using QuestPDF.Previewer;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace GHCAA.Infrastructure.Services
@@ -32,11 +32,12 @@ namespace GHCAA.Infrastructure.Services
         private readonly IActivityService _activityService;
         private readonly IGamificationService _gamification;
         private readonly IOrgConfigService _orgConfigService;
+        private readonly IServiceProvider _serviceProvider;
 
         public FinancialService(
-            ApplicationDbContext db, 
-            ICommunicationService communication, 
-            INotificationService notification, 
+            ApplicationDbContext db,
+            ICommunicationService communication,
+            INotificationService notification,
             IFileStorageService storage,
             IRealTimeService realTime,
             ILogger<FinancialService> logger,
@@ -44,7 +45,8 @@ namespace GHCAA.Infrastructure.Services
             IUserService userService,
             IActivityService activityService,
             IGamificationService gamification,
-            IOrgConfigService orgConfigService)
+            IOrgConfigService orgConfigService,
+            IServiceProvider serviceProvider)
         {
             _db = db;
             _communication = communication;
@@ -57,6 +59,7 @@ namespace GHCAA.Infrastructure.Services
             _activityService = activityService;
             _gamification = gamification;
             _orgConfigService = orgConfigService;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<IEnumerable<PaymentHistoryDto>> GetMemberPaymentHistoryAsync(int memberId, CancellationToken cancellationToken = default)
@@ -230,46 +233,29 @@ namespace GHCAA.Infrastructure.Services
                     var fee = await GetApplicableMembershipFeeAsync(member.MembershipType, DateTime.UtcNow.Year, cancellationToken);
                     if (payment.Amount >= fee)
                     {
-                        // Duplicate logic from MemberService.ApproveMemberAsync to avoid circular dependency
-                        await ApproveMemberInternalAsync(member, cancellationToken);
+                        // 29C.1: Delegate to the single canonical approval path in MemberService
+                        // (Serializable transaction, Id-ordered serial generation, profile/status/
+                        // payment validation, user-account creation inside the transaction) instead
+                        // of a divergent inline copy. MemberService depends on IFinancialService, so
+                        // resolve it lazily to avoid a constructor DI cycle. If approval fails
+                        // (member ineligible / transient error), log and leave the member Applied for
+                        // manual admin review rather than half-approving.
+                        var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";
+                        int.TryParse(adminIdStr, out var adminId);
+                        try
+                        {
+                            var memberService = _serviceProvider.GetRequiredService<IMemberService>();
+                            await memberService.ApproveMemberAsync(member.Id, adminId, cancellationToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Auto-approval after payment failed for member {MemberId}; left as Applied for manual review.", member.Id);
+                        }
                     }
                 }
             }
         }
 
-        private async Task ApproveMemberInternalAsync(Member member, CancellationToken cancellationToken)
-        {
-             // 1. Membership number generation
-            var prefix = $"GHC{DateTime.UtcNow:yyMM}";
-            var lastBound = await _db.Members.Where(m => m.MembershipNumber != null && m.MembershipNumber.StartsWith(prefix)).OrderByDescending(m => m.MembershipNumber).FirstOrDefaultAsync(cancellationToken);
-            int nextId = (lastBound != null && int.TryParse(lastBound.MembershipNumber?.Substring(prefix.Length), out int lastId)) ? lastId + 1 : 1;
-            var membershipNumber = $"{prefix}{nextId:D3}";
-
-            var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";
-            int.TryParse(adminIdStr, out var adminId);
-
-            // 2. Update Member
-            member.Status = Enums.MembershipStatus.Active;
-            member.IsVerified = true;
-            member.MembershipNumber = membershipNumber;
-            member.ApprovedDate = DateTime.UtcNow;
-            member.ApprovedBy = adminId;
-
-            await _db.SaveChangesAsync(cancellationToken);
-
-            // 3. User account
-            var cleanNid = member.NID.Replace(" ", "");
-            await _userService.CreateUserAccountAsync(member.Id, cleanNid, cleanNid, cancellationToken);
-
-            // 4. Activity & Gamification
-            await _gamification.AwardPointsAsync(member.Id, "PROFILE_VERIFIED", metadata: "System Auto-approval via PaymentGateway", cancellationToken: cancellationToken);
-            await _activityService.LogActivityAsync(member.Id, "Approved", $"Auto-approved by System after successful payment. # {membershipNumber}", adminId, cancellationToken: cancellationToken);
-
-            // 5. Notification & Email
-            await _communication.SendIndividualEmailAsync(member.Id, "WELCOME_EMAIL", new Dictionary<string, string> { { "DefaultPassword", cleanNid } }, cancellationToken);
-            await _notification.CreateNotificationAsync(member.Id, "Welcome to GHCAA!", "Your membership is now active.", Enums.NotificationType.RegistrationUpdate, "/portal/dashboard", cancellationToken);
-        }
-    
         public async Task<IEnumerable<MembershipHistoryDto>> GetMemberMembershipHistoryAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var history = await _db.MembershipHistories

@@ -12,11 +12,13 @@ namespace GHCAA.API.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly ILogger<SecureFilesController> _logger;
+        private readonly IConfiguration _config;
 
-        public SecureFilesController(ApplicationDbContext db, ILogger<SecureFilesController> logger)
+        public SecureFilesController(ApplicationDbContext db, ILogger<SecureFilesController> logger, IConfiguration config)
         {
             _db = db;
             _logger = logger;
+            _config = config;
         }
 
         [HttpGet("{*filePath}")]
@@ -57,20 +59,30 @@ namespace GHCAA.API.Controllers
                 return NotFound();
             }
 
-            var secureRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "uploads"));
-            var fullPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, normalizedPath));
+            // 29B.8: Secure files live under secure_uploads/ (certificates, payment proofs,
+            // signatures) while public assets live under wwwroot/uploads/. Resolve against the
+            // same bases LocalFileStorageService writes to, and accept the file only if it lands
+            // inside one of those two roots.
+            var basePath = _config["FileStorage:BasePhysicalPath"];
+            var publicRoot = Path.GetFullPath(basePath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot"));
+            var secureRoot = Path.GetFullPath(basePath ?? AppDomain.CurrentDomain.BaseDirectory);
 
-            // Ensure the resolved path is inside the intended uploads root.
-            if (!fullPath.StartsWith(secureRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-                && !fullPath.Equals(secureRoot, StringComparison.OrdinalIgnoreCase))
-            {
-                _logger.LogWarning("Path traversal blocked — resolved path {Full} is outside root {Root}", fullPath, secureRoot);
-                return NotFound();
-            }
+            var publicCandidate = Path.GetFullPath(Path.Combine(publicRoot, normalizedPath));
+            var secureCandidate = Path.GetFullPath(Path.Combine(secureRoot, normalizedPath));
 
-            if (!System.IO.File.Exists(fullPath))
+            static bool IsInside(string candidate, string root) =>
+                candidate.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                || candidate.Equals(root, StringComparison.OrdinalIgnoreCase);
+
+            string? fullPath = null;
+            if (IsInside(secureCandidate, secureRoot) && System.IO.File.Exists(secureCandidate))
+                fullPath = secureCandidate;
+            else if (IsInside(publicCandidate, publicRoot) && System.IO.File.Exists(publicCandidate))
+                fullPath = publicCandidate;
+
+            if (fullPath == null)
             {
-                _logger.LogError("Secure file record exists in DB but file is missing on disk: {Path}", fullPath);
+                _logger.LogError("Secure file record exists in DB but file is missing/out-of-root: {Path}", normalizedPath);
                 return NotFound();
             }
 

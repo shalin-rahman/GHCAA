@@ -198,8 +198,34 @@ namespace GHCAA.Infrastructure.Services
                 }
 
                 var client = _httpClientFactory.CreateClient();
-                var response = await client.GetAsync($"https://graph.facebook.com/me?fields=id,name,email&access_token={accessToken}", cancellationToken);
-                
+
+                // 29B.1: Verify the access token was actually issued for OUR app before trusting it.
+                // A token minted for any other Facebook app the user authorized would otherwise
+                // resolve to a valid /me response, letting an attacker take over the matching account.
+                if (string.IsNullOrEmpty(config.ClientSecret))
+                {
+                    _logger.LogWarning("Facebook login rejected: app secret not configured, cannot verify token audience.");
+                    return null;
+                }
+
+                var appAccessToken = $"{config.ClientId}|{config.ClientSecret}";
+                var debugResponse = await client.GetAsync(
+                    $"https://graph.facebook.com/debug_token?input_token={Uri.EscapeDataString(accessToken)}&access_token={Uri.EscapeDataString(appAccessToken)}",
+                    cancellationToken);
+
+                if (!debugResponse.IsSuccessStatusCode) return null;
+
+                var debugContent = await debugResponse.Content.ReadAsStringAsync(cancellationToken);
+                var debugResult = System.Text.Json.JsonSerializer.Deserialize<FacebookDebugTokenResponse>(debugContent, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (debugResult?.Data == null || !debugResult.Data.IsValid || debugResult.Data.AppId != config.ClientId)
+                {
+                    _logger.LogWarning("Facebook login rejected: token failed app_id/validity verification.");
+                    return null;
+                }
+
+                var response = await client.GetAsync($"https://graph.facebook.com/me?fields=id,name,email&access_token={Uri.EscapeDataString(accessToken)}", cancellationToken);
+
                 if (!response.IsSuccessStatusCode) return null;
 
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -310,6 +336,21 @@ namespace GHCAA.Infrastructure.Services
             public string Id { get; set; } = null!;
             public string? Name { get; set; }
             public string? Email { get; set; }
+        }
+
+        private class FacebookDebugTokenResponse
+        {
+            [System.Text.Json.Serialization.JsonPropertyName("data")]
+            public FacebookDebugTokenData? Data { get; set; }
+        }
+
+        private class FacebookDebugTokenData
+        {
+            [System.Text.Json.Serialization.JsonPropertyName("app_id")]
+            public string? AppId { get; set; }
+
+            [System.Text.Json.Serialization.JsonPropertyName("is_valid")]
+            public bool IsValid { get; set; }
         }
 
         /// <summary>

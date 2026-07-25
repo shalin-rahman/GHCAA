@@ -1,5 +1,6 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.API.Extensions;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +15,13 @@ namespace GHCAA.API.Controllers
     {
         private readonly IFinancialService _financialService;
         private readonly GHCAA.Infrastructure.Data.ApplicationDbContext _db;
+        private readonly IFileValidationService _fileValidationService;
 
-        public FinancialsController(IFinancialService financialService, GHCAA.Infrastructure.Data.ApplicationDbContext db)
+        public FinancialsController(IFinancialService financialService, GHCAA.Infrastructure.Data.ApplicationDbContext db, IFileValidationService fileValidationService)
         {
             _financialService = financialService;
             _db = db;
+            _fileValidationService = fileValidationService;
         }
 
         [HttpGet("fees/applicable")]
@@ -53,6 +56,14 @@ namespace GHCAA.API.Controllers
             if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var memberId))
             {
                 dto.MemberId = memberId;
+            }
+
+            // 29B.7: Content-validate the uploaded receipt (magic-byte check) so a renamed
+            // executable/script can't be stored under a .jpg/.pdf name in the secure tree.
+            if (dto.Receipt != null)
+            {
+                var receiptValidation = _fileValidationService.ValidateFormFile(dto.Receipt, FileCategory.Document, 10 * 1024 * 1024);
+                if (!receiptValidation.IsValid) return BadRequest(new { Message = receiptValidation.ErrorMessage });
             }
 
             var result = await _financialService.RecordPaymentAsync(dto, cancellationToken);

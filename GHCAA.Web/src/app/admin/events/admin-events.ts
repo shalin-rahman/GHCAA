@@ -275,8 +275,15 @@ export class AdminEvents implements OnInit {
             next: (savedEvent) => {
                 const logo = this.selectedLogo();
                 if (logo) {
-                    this.eventsService.uploadEventLogo(savedEvent.id, logo).subscribe(() => {
-                        this.finishSubmission(id ? 'Event updated!' : 'Event created!');
+                    this.eventsService.uploadEventLogo(savedEvent.id, logo).subscribe({
+                        // 29F.2: surface HTTP failures instead of failing silently
+                        next: () => {
+                            this.finishSubmission(id ? 'Event updated!' : 'Event created!');
+                        },
+                        error: () => {
+                            this.notify.error('Event saved but logo upload failed.');
+                            this.isSubmitting.set(false);
+                        }
                     });
                 } else {
                     this.finishSubmission(id ? 'Event updated!' : 'Event created!');

@@ -41,7 +41,11 @@ namespace GHCAA.Infrastructure.Services
 
         private bool IsSecureType(Enums.FileUploadType type)
         {
-            return type == Enums.FileUploadType.Certificate || type == Enums.FileUploadType.PaymentProof;
+            // 29B.6: Signatures are sensitive (forgery risk) and must live under the auth-gated
+            // secure_uploads tree, not the publicly served uploads tree.
+            return type == Enums.FileUploadType.Certificate
+                || type == Enums.FileUploadType.PaymentProof
+                || type == Enums.FileUploadType.Signature;
         }
 
         public string GetRelativeFilePath(int memberId, Enums.FileUploadType uploadType, string fileName)

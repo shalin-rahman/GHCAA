@@ -59,9 +59,11 @@ export class ContactMessages implements OnInit {
 
   markAsRead(msg: any) {
     this.contactService.markAsRead(msg.id).subscribe({
+      // 29F.2: surface HTTP failures instead of failing silently
       next: () => {
         msg.isRead = true;
-      }
+      },
+      error: () => this.notify.error('Failed to mark message as read.')
     });
   }
 }

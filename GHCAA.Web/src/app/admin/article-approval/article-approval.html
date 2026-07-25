@@ -94,7 +94,7 @@
 
                 <div class="rejection-box mt-10 p-6 glass-card bg-white/5">
                     <label class="text-xs uppercase font-black mb-4 block">Rejection Note (Only if rejecting)</label>
-                    <textarea [(ngModel)]="rejectReason"
+                    <textarea [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)"
                         placeholder="Explain why this article is being rejected..."></textarea>
                 </div>
             </div>

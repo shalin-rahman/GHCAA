@@ -12,7 +12,9 @@ export const authGuard = (_route: ActivatedRouteSnapshot, state: RouterStateSnap
     const router = inject(Router);
 
     if (!auth.isAuthenticated()) {
-        return router.parseUrl('/login');
+        // 29D.8: Preserve the attempted URL so login can return the user to where they were
+        // headed instead of always dumping them on the dashboard.
+        return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
     }
 
     // S7.6: Force password change before accessing any protected route.

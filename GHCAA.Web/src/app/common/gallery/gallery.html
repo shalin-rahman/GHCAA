@@ -39,10 +39,12 @@
                     </div>
                 } @else {
                     <div class="preview-box relative w-full h-40">
-                        <img [src]="" class="w-full h-full object-cover rounded-xl opacity-50"> <!-- Preview logic needed if really want complex -->
+                        @if (photoPreview()) {
+                        <img [src]="photoPreview()" alt="Selected photo preview" class="w-full h-full object-cover rounded-xl opacity-50">
+                        }
                         <div class="preview-info absolute inset-0 flex flex-col items-center justify-center">
                             <span class="text-accent text-xs font-black">{{ newMemory.photo.name }}</span>
-                            <button type="button" class="mt-4 text-[9px] underline uppercase font-black" (click)="newMemory.photo = null">Change Photo</button>
+                            <button type="button" class="mt-4 text-[9px] underline uppercase font-black" (click)="clearPhoto()">Change Photo</button>
                         </div>
                     </div>
                 }

@@ -7,6 +7,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { NavService } from '../../core/services/nav.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-portal-layout',
@@ -39,8 +40,10 @@ export class PortalLayout {
       error: () => {}
     });
 
+    // 29D.7: tie the router subscription to component lifecycle to avoid a leak.
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+      filter(event => event instanceof NavigationEnd),
+      takeUntilDestroyed()
     ).subscribe(() => {
       const url = this.router.url;
       const match = this.nav.portalNavItems().find(x => url.includes(x.path.replace('/portal/', '')));

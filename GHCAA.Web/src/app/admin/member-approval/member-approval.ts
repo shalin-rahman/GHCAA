@@ -70,10 +70,30 @@ export class MemberApproval implements OnInit {
     });
   }
 
+  detailLoading = signal(false);
+
   viewDetails(member: any) {
+    // 29D.2: The list row only carries 8 summary fields, but the audit panel binds
+    // ~15 (father/mother name, DOB, NID, addresses, academic/professional history,
+    // certificatePath). Show the summary immediately, then fetch the full record so
+    // those sections populate instead of rendering blank.
     this.selectedMember.set(member);
     this.rejecting.set(false);
     this.rejectionReason = '';
+    this.detailLoading.set(true);
+    this.adminService.getMemberById(member.id).subscribe({
+      next: (full) => {
+        // Guard against a stale response if the admin closed/switched panels meanwhile.
+        if (this.selectedMember()?.id === member.id) {
+          this.selectedMember.set({ ...member, ...full });
+        }
+        this.detailLoading.set(false);
+      },
+      error: () => {
+        this.detailLoading.set(false);
+        this.notify.error('Failed to load full applicant details.');
+      }
+    });
   }
 
   closeAudit() {

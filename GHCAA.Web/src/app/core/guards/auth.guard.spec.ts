@@ -15,7 +15,8 @@ describe('AuthGuards', () => {
             currentUser: vi.fn()
         };
         routerMock = {
-            parseUrl: vi.fn().mockImplementation((url: string) => url)
+            parseUrl: vi.fn().mockImplementation((url: string) => url),
+            createUrlTree: vi.fn().mockImplementation((commands: any[], _extras?: any) => commands[0])
         };
 
         TestBed.configureTestingModule({
@@ -42,7 +43,7 @@ describe('AuthGuards', () => {
             authServiceMock.isAuthenticated.mockReturnValue(false);
             const result = TestBed.runInInjectionContext(() => authGuard(anyRoute, stateFor('/portal/dashboard')));
             expect(result).toBe('/login');
-            expect(routerMock.parseUrl).toHaveBeenCalledWith('/login');
+            expect(routerMock.createUrlTree).toHaveBeenCalledWith('/login', { queryParams: { returnUrl: '/portal/dashboard' } });
         });
 
         it('should redirect mustChangePassword users to change-password', () => {

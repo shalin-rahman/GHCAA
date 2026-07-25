@@ -86,7 +86,10 @@ export class AdminGovernance implements OnInit {
 
     loadCommittee(periodId: number) {
         this.http.get<any[]>(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${periodId}/members`).subscribe({
-            next: (data) => this.committeeMembers.set(data)
+            next: (data) => this.committeeMembers.set(data),
+            // 29D.8: without this the committee list silently stayed empty on failure,
+            // indistinguishable from a genuinely empty committee.
+            error: () => this.notify.error('Failed to load committee members.')
         });
     }
 
@@ -145,7 +148,8 @@ export class AdminGovernance implements OnInit {
             next: () => {
                 this.notify.success('Period activated');
                 this.loadPeriods();
-            }
+            },
+            error: () => this.notify.error('Failed to activate period.')
         });
     }
 
@@ -212,7 +216,8 @@ export class AdminGovernance implements OnInit {
             next: () => {
                 this.notify.success('Member removed');
                 this.loadCommittee(this.selectedPeriod().id);
-            }
+            },
+            error: () => this.notify.error('Failed to remove member.')
         });
     }
 

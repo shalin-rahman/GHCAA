@@ -5,6 +5,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
@@ -53,8 +54,11 @@ export class PublicLayout implements OnDestroy {
       }
     });
 
+    // 29D.7: takeUntilDestroyed() ties this long-lived router subscription to the
+    // component lifecycle so it's torn down on destroy instead of leaking.
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+      filter(event => event instanceof NavigationEnd),
+      takeUntilDestroyed()
     ).subscribe(() => {
       this.closeMobileMenu();
       const url = this.router.url;

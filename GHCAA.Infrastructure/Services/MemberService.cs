@@ -851,6 +851,8 @@ namespace GHCAA.Infrastructure.Services
         public async Task<object?> GetMemberDocumentsAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
+            // 29C.2: Return null for an unknown id instead of dereferencing a null member (NRE → 500).
+            if (member == null) return null;
 
             return new
             {

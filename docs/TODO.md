@@ -542,19 +542,19 @@
 
 ### 29-B: HIGH — SECURITY
 
-29B.1 [TODO] API: Facebook login does not verify token app_id → account takeover; mirror the Google verification path (AuthService.cs:189-217)
+29B.1 [DONE 2026-07-25] API: FacebookLoginAsync now verifies the token via graph.facebook.com/debug_token using an app access token (`{ClientId}|{ClientSecret}`) and rejects unless data.is_valid && data.app_id == config.ClientId (also rejects when ClientSecret unconfigured). Blocks tokens minted for a different app → account takeover. (AuthService.cs)
 29B.2 [DONE 2026-07-25] API: Amount-verification bypass fixed. HandleSuccessfulPayment now takes `decimal? confirmedAmount`; check is `if (confirmedAmount.HasValue && Math.Abs(payment.Amount - confirmedAmount.Value) > 0.01m)` → mark payment Failed + return. SSLCommerz/DGePay callbacks now pass `null` when the amount key is ABSENT (skip verification, VerifyCallbackAsync remains primary gate) vs the parsed value — incl. 0 — when PRESENT (verify). Regression test SSLCommerzCallback_MarksFailedAndDoesNotApprove_WhenReportedAmountMismatches. (GatewaysController.cs)
 29B.3 [DONE 2026-07-25] API: Membership auto-approval now scoped to membership fees only — gate is `if (payment.MemberId > 0 && payment.FinancialCategory == Enums.FinancialCategory.MembershipFee)`. FinancialCategory is set at initiation (RegistrationFee for EVT-REG refs, else MembershipFee), so event payments no longer trigger member approval. (GatewaysController.cs)
-29B.4 [TODO] API: JWT accepted in query string on file routes → token leaks to proxy logs / Referer (QueryStringTokenMiddleware.cs:29-37)
-29B.5 [TODO] API: Password-spray gap — limiter keyed per {ip}:{username}, one IP sprays unlimited accounts (Program.cs:64-75)
-29B.6 [TODO] API: Signatures stored in public upload tree (served with no auth) — move to secure_uploads, forgery risk (LocalFileStorageService.cs:42-45)
-29B.7 [TODO] API: record-payment receipt uploads not content-validated (Register/Profile paths are) (FinancialService.cs:92-114)
-29B.8 [TODO] API: Confirm SecureFilesController root — computed as .../uploads but secure files live under secure_uploads/ (likely rejects legitimate reads)
+29B.4 [DONE 2026-07-25] API: Removed QueryStringTokenMiddleware (deleted file + registration in Program.cs). JWT is only accepted via the Authorization header now; no web/mobile client appended ?token=/?access_token= to secure-file URLs, so the query-token path was pure attack surface (leaked into proxy/access logs and the Referer header).
+29B.5 [DONE 2026-07-25] API: Auth rate-limiter now keyed on source IP alone (was {ip}:{username}, which gave each username its own bucket so one IP could spray N×limit accounts). PermitLimit 10/min per IP bounds total auth attempts regardless of account count. (Program.cs)
+29B.6 [DONE 2026-07-25] API: Signatures moved to the auth-gated secure_uploads tree — IsSecureType now includes FileUploadType.Signature (forgery risk; was served publicly with no auth). (LocalFileStorageService.cs)
+29B.7 [DONE 2026-07-25] API: record-payment now content-validates dto.Receipt via IFileValidationService.ValidateFormFile(FileCategory.Document, 10MB) before RecordPaymentAsync (magic-byte check; blocks a renamed executable/script stored under a .jpg/.pdf name in the secure tree). (FinancialsController.cs)
+29B.8 [DONE 2026-07-25] API: SecureFilesController now resolves against BOTH roots LocalFileStorageService writes to (publicRoot=wwwroot, secureRoot=BaseDirectory, driven by FileStorage:BasePhysicalPath) and serves the file only if it lands inside one of them — secure files under secure_uploads/ are now readable (were rejected) while path-traversal is still blocked. (SecureFilesController.cs)
 
 ### 29-C: HIGH — BACKEND CORRECTNESS
 
-29C.1 [TODO] API: Duplicated buggy approval path in FinancialService — lexicographic membership-number sort (collides at #1000), no transaction, skips payment/profile checks; consolidate onto MemberService path (FinancialService.cs:240-246)
-29C.2 [TODO] API: GetMemberDocumentsAsync NRE → 500 on non-existent id (MemberService.cs:851-859)
+29C.1 [DONE 2026-07-25] API: Deleted the divergent ApproveMemberInternalAsync copy (lexicographic serial sort colliding at #1000, no transaction, skipped profile/status/payment checks). Auto-approval after payment now delegates to the canonical MemberService.ApproveMemberAsync (Serializable txn, Id-ordered serial, full validation, user-account creation in-txn), resolved lazily via IServiceProvider to avoid the MemberService→IFinancialService DI cycle; on failure it logs and leaves the member Applied for manual review. (FinancialService.cs)
+29C.2 [DONE 2026-07-25] API: GetMemberDocumentsAsync now returns null for an unknown id instead of dereferencing a null member (NRE → 500); AdminController already maps null → 404. (MemberService.cs)
 
 ### 29-D: HIGH — WEB (Angular)
 

@@ -59,17 +59,18 @@ builder.Services.AddRateLimiter(options =>
 
     bool isTestEnv = configuration["ASP_SEED_PROFILE"] == "Visual" || builder.Environment.IsDevelopment();
 
-    // 24.48: Login policy keyed per (IP, username) — each distinct caller gets its own
-    // 5-req/min bucket so a single attacker cannot consume the global quota.
+    // 29B.5: Login policy keyed per source IP (not per {ip,username}). The previous per-username
+    // key handed each distinct username its own 5/min bucket, so one IP could password-spray
+    // thousands of accounts (N usernames × 5/min). Keying on IP alone bounds the total auth
+    // attempts a single source can make regardless of how many accounts it targets.
     options.AddPolicy<string>("auth", httpContext =>
     {
         var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-        var username = httpContext.Items.TryGetValue("LoginUsername", out var u) ? u?.ToString() ?? "" : "";
-        var key = isTestEnv ? "__test__" : $"{ip}:{username}";
+        var key = isTestEnv ? "__test__" : ip;
         return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
         {
             Window = TimeSpan.FromMinutes(1),
-            PermitLimit = isTestEnv ? 500 : 5,
+            PermitLimit = isTestEnv ? 500 : 10,
             QueueLimit = 0
         });
     });
@@ -202,7 +203,10 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/api/uploads"
 });
 
-app.UseMiddleware<QueryStringTokenMiddleware>();
+// 29B.4: Removed QueryStringTokenMiddleware. Accepting the JWT via ?token=/?access_token=
+// leaked it into proxy/access logs and the browser Referer header. No client relies on it —
+// secure files are fetched with the Authorization header — so the query-token path was pure
+// attack surface with no functional use.
 app.UseAuthentication();
 if (app.Environment.IsDevelopment() && app.Configuration["ASP_SEED_PROFILE"] == "Visual")
     app.UseMiddleware<GHCAA.API.Middleware.VisualTestAuthMiddleware>();

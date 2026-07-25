@@ -123,7 +123,9 @@ export class Register implements OnDestroy {
 
   loadPaymentInfo() {
     this.regService.getPublicPaymentConfigs().subscribe({
-      next: (configs: any[]) => this.paymentConfigs.set(configs)
+      // 29F.2: surface HTTP failures instead of failing silently
+      next: (configs: any[]) => this.paymentConfigs.set(configs),
+      error: () => this.notify.error('Failed to load payment information.')
     });
   }
 

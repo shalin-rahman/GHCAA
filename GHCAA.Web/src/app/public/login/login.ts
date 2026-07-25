@@ -1,7 +1,7 @@
 import { Component, inject, ChangeDetectorRef, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LoginDto, User } from '../../core/models/auth.models';
@@ -19,6 +19,7 @@ declare var FB: any;
 export class Login implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private notify = inject(NotificationService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -27,9 +28,18 @@ export class Login implements OnInit {
   errorMessage = signal('');
   showPassword = signal(false);
   socialProviders = signal<any[]>([]);
+  // 29D.8: where to send the user after a successful login (set by authGuard).
+  private returnUrl: string | null = null;
 
   ngOnInit() {
     this.loadSocialProviders();
+    // 29D.8: honor the guard's returnUrl and surface the session-expired reason instead
+    // of silently discarding both (previously every login went to a fixed default page).
+    const params = this.route.snapshot.queryParamMap;
+    this.returnUrl = params.get('returnUrl');
+    if (params.get('expired')) {
+      this.errorMessage.set('Your session expired. Please sign in again to continue.');
+    }
   }
 
   loadSocialProviders() {
@@ -44,7 +54,10 @@ export class Login implements OnInit {
         if (fbConfig) {
           this.initFacebookAuth(fbConfig.clientId);
         }
-      }
+      },
+      // 29F.2: social login is optional — degrade quietly (hide the buttons) rather than
+      // showing a scary error on the login page, but don't swallow the failure silently.
+      error: (err) => console.error('Failed to load social login providers', err)
     });
   }
 
@@ -118,6 +131,16 @@ export class Login implements OnInit {
 
   private handleAuthSuccess(user: User) {
     this.loading.set(false);
+    this.navigateAfterLogin(user);
+  }
+
+  private navigateAfterLogin(user: User) {
+    // 29D.8: prefer the guard-supplied returnUrl (only for in-app paths, never an external
+    // or protocol-relative URL) before falling back to the role default.
+    if (this.returnUrl && this.returnUrl.startsWith('/') && !this.returnUrl.startsWith('//')) {
+      this.router.navigateByUrl(this.returnUrl);
+      return;
+    }
     if (user.role === 'Admin' || user.role === 'SuperAdmin') {
       this.router.navigate(['/admin/approvals']);
     } else {
@@ -146,11 +169,7 @@ export class Login implements OnInit {
     this.auth.login(this.credentials).subscribe({
       next: (user) => {
         this.loading.set(false);
-        if (user.role === 'Admin' || user.role === 'SuperAdmin') {
-          this.router.navigate(['/admin/approvals']);
-        } else {
-          this.router.navigate(['/portal/dashboard']);
-        }
+        this.navigateAfterLogin(user);
       },
       error: (err) => {
         this.loading.set(false);

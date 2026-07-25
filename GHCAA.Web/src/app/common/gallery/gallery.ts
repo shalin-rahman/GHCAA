@@ -31,6 +31,9 @@ export class Gallery implements OnInit {
     description: '',
     photo: null as File | null
   };
+  // 29D.6: object-URL preview of the chosen file (was an empty <img src=""> firing a
+  // spurious request to the current page URL).
+  photoPreview = signal<string | null>(null);
 
   ngOnInit() {
     this.refresh();
@@ -53,6 +56,18 @@ export class Gallery implements OnInit {
     const err = validateUploadFile(file, 'image');
     if (err) { this.notify.error(err); e.target.value = ''; return; }
     this.newMemory.photo = file;
+    this.setPreview(file);
+  }
+
+  private setPreview(file: File | null) {
+    const prev = this.photoPreview();
+    if (prev) URL.revokeObjectURL(prev);
+    this.photoPreview.set(file ? URL.createObjectURL(file) : null);
+  }
+
+  clearPhoto() {
+    this.newMemory.photo = null;
+    this.setPreview(null);
   }
 
   submitMemory() {
@@ -67,6 +82,7 @@ export class Gallery implements OnInit {
             this.submitting.set(false);
             this.showUpload.set(false);
             this.newMemory = { title: '', description: '', photo: null };
+            this.setPreview(null);
             this.refresh();
         },
         error: () => {

@@ -63,7 +63,9 @@ export class AdminRoles implements OnInit {
 
         // Fetch available roles
         this.http.get<any[]>('/api/roles').subscribe({
-            next: (roles) => this.roles.set(roles)
+            next: (roles) => this.roles.set(roles),
+            // 29F.2: surface failures instead of leaving the role list silently empty.
+            error: () => this.notify.error('Failed to load available roles.')
         });
     }
 

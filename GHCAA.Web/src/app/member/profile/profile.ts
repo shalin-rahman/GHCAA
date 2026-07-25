@@ -49,45 +49,52 @@ export class Profile implements OnInit {
     ngOnInit() {
         this.profileService.getProfile().subscribe({
             next: (p: any) => {
-                // Robust case-insensitive property mapping
-                const mapping = (obj: any) => {
-                    const result: any = {};
-                    const props = [
-                        'id', 'fullName', 'mobileNo', 'email', 'fatherName', 'motherName', 'dateOfBirth', 
-                        'nid', 'gender', 'bloodGroup', 'presentAddress', 'permanentAddress', 
-                        'emergencyContactName', 'emergencyContactRelation', 'emergencyContactPhone',
-                        'membershipNumber', 'membershipType', 'category', 'status', 'photoPath', 'signaturePath',
-                        'isVerified', 'contributionPoints', 'tShirtSize', 'isMobilePublic', 'isEmailPublic',
-                        'isAddressPublic', 'isNIDPublic', 'isFamilyPublic', 'notifyEventCreation',
-                        'notifyParticipationApproval', 'notifyRegistrationUpdate', 'notifyRelevantUpdates',
-                        'certificatePath', 'paymentProofPath'
-                    ];
-                    props.forEach(prop => {
-                        const pascal = prop.charAt(0).toUpperCase() + prop.slice(1);
-                        result[prop] = obj[prop] !== undefined ? obj[prop] : (obj[pascal] !== undefined ? obj[pascal] : (prop === 'nid' ? obj['NID'] : undefined));
-                    });
-                    result.academicHistory = obj.academicHistory || obj.AcademicHistory || [];
-                    result.professionalHistory = obj.professionalHistory || obj.ProfessionalHistory || [];
-                    return result;
-                };
-
-                this.profile = mapping(p);
-                
-                if (this.profile.dateOfBirth) {
-                    this.profile.dateOfBirth = this.datePipe.transform(this.profile.dateOfBirth, 'dd-MM-yyyy') || '';
-                }
-                
-                if (this.profile.professionalHistory) {
-                    this.profile.professionalHistory = this.profile.professionalHistory.map((ph: any) => ({
-                        ...ph,
-                        startDate: this.datePipe.transform(ph.startDate || ph.StartDate, 'dd-MM-yyyy') || '',
-                        endDate: ph.endDate || ph.EndDate ? this.datePipe.transform(ph.endDate || ph.EndDate, 'dd-MM-yyyy') : ''
-                    }));
-                }
+                this.applyProfileResponse(p);
                 this.loading.set(false);
             },
             error: () => this.loading.set(false)
         });
+    }
+
+    // 29D.8: Single normalization path for a profile response (case-insensitive property
+    // mapping + display-date formatting). Previously only ngOnInit applied this; the
+    // post-save re-sync did `this.profile = {...p}` on the RAW response, so PascalCase keys
+    // and ISO dates leaked through and half the form fields rendered blank after saving.
+    private applyProfileResponse(p: any) {
+        const mapping = (obj: any) => {
+            const result: any = {};
+            const props = [
+                'id', 'fullName', 'mobileNo', 'email', 'fatherName', 'motherName', 'dateOfBirth',
+                'nid', 'gender', 'bloodGroup', 'presentAddress', 'permanentAddress',
+                'emergencyContactName', 'emergencyContactRelation', 'emergencyContactPhone',
+                'membershipNumber', 'membershipType', 'category', 'status', 'photoPath', 'signaturePath',
+                'isVerified', 'contributionPoints', 'tShirtSize', 'isMobilePublic', 'isEmailPublic',
+                'isAddressPublic', 'isNIDPublic', 'isFamilyPublic', 'notifyEventCreation',
+                'notifyParticipationApproval', 'notifyRegistrationUpdate', 'notifyRelevantUpdates',
+                'certificatePath', 'paymentProofPath'
+            ];
+            props.forEach(prop => {
+                const pascal = prop.charAt(0).toUpperCase() + prop.slice(1);
+                result[prop] = obj[prop] !== undefined ? obj[prop] : (obj[pascal] !== undefined ? obj[pascal] : (prop === 'nid' ? obj['NID'] : undefined));
+            });
+            result.academicHistory = obj.academicHistory || obj.AcademicHistory || [];
+            result.professionalHistory = obj.professionalHistory || obj.ProfessionalHistory || [];
+            return result;
+        };
+
+        this.profile = mapping(p);
+
+        if (this.profile.dateOfBirth) {
+            this.profile.dateOfBirth = this.datePipe.transform(this.profile.dateOfBirth, 'dd-MM-yyyy') || '';
+        }
+
+        if (this.profile.professionalHistory) {
+            this.profile.professionalHistory = this.profile.professionalHistory.map((ph: any) => ({
+                ...ph,
+                startDate: this.datePipe.transform(ph.startDate || ph.StartDate, 'dd-MM-yyyy') || '',
+                endDate: ph.endDate || ph.EndDate ? this.datePipe.transform(ph.endDate || ph.EndDate, 'dd-MM-yyyy') : ''
+            }));
+        }
     }
 
     addAcademicRecord() {
@@ -207,11 +214,11 @@ export class Profile implements OnInit {
             
             this.notify.success('Profile information updated');
             
-            // 3. Force re-sync from server to ensure UI is exact
-            this.profileService.getProfile().subscribe(p => {
-                this.profile = { ...p };
-                if (!this.profile.academicHistory) this.profile.academicHistory = [];
-                if (!this.profile.professionalHistory) this.profile.professionalHistory = [];
+            // 3. Force re-sync from server to ensure UI is exact — through the SAME
+            // normalization path as the initial load so no fields are dropped (29D.8).
+            this.profileService.getProfile().subscribe({
+                next: p => this.applyProfileResponse(p),
+                error: () => this.notify.error('Saved, but failed to refresh. Reload to see the latest.')
             });
 
         } catch (error: any) {
