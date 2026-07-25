@@ -122,7 +122,7 @@ namespace GHCAA.Tests.Services
             var token = "token123";
             var member = await CreateAndSaveTestMemberAsync("Test", email, "333", "333");
             var user = await CreateAndSaveTestUserAsync(member.Id, "testuser_reset", "old_password");
-            
+
             user.ResetToken = token;
             user.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
             await _context.SaveChangesAsync();
@@ -145,7 +145,7 @@ namespace GHCAA.Tests.Services
             var token = "expired_token";
             var member = await CreateAndSaveTestMemberAsync("Test", email, "444", "444");
             var user = await CreateAndSaveTestUserAsync(member.Id, "expired_user", "old_password");
-            
+
             user.ResetToken = token;
             user.ResetTokenExpiry = DateTime.UtcNow.AddHours(-1);
             await _context.SaveChangesAsync();

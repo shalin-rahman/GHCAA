@@ -24,7 +24,7 @@ public class FinancialServiceTests : TestBase
     {
         _communicationMock = new Mock<ICommunicationService>();
         _notificationMock = new Mock<INotificationService>();
-        
+
         var storageMock = new Mock<IFileStorageService>();
         var realTimeMock = new Mock<IRealTimeService>();
         var loggerMock = new Mock<ILogger<FinancialService>>();
@@ -35,8 +35,8 @@ public class FinancialServiceTests : TestBase
         var orgConfigMock = new Mock<IOrgConfigService>();
 
         _service = new FinancialService(
-            _context, 
-            _communicationMock.Object, 
+            _context,
+            _communicationMock.Object,
             _notificationMock.Object,
             storageMock.Object,
             realTimeMock.Object,
@@ -58,19 +58,19 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task RecordPaymentAsync_ShouldAddPaymentAndReturnDto()
     {
-        var member = new Member 
-        { 
-            FullName = "Payer", 
-            Email = "fsp@e.com", 
-            NID = "FSP1", 
-            MobileNo = "FSP1", 
+        var member = new Member
+        {
+            FullName = "Payer",
+            Email = "fsp@e.com",
+            NID = "FSP1",
+            MobileNo = "FSP1",
             Status = Enums.MembershipStatus.Active,
-            FatherName = "F", 
-            MotherName = "M", 
-            PresentAddress = "A", 
-            PermanentAddress = "A", 
-            EmergencyContactName = "E", 
-            EmergencyContactRelation = "R", 
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
         };
@@ -92,19 +92,19 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task GetMemberPaymentHistoryAsync_ShouldReturnDtoList()
     {
-        var member = new Member 
-        { 
-            FullName = "History User", 
-            Email = "fsh@e.com", 
-            NID = "FSH1", 
-            MobileNo = "FSH1", 
+        var member = new Member
+        {
+            FullName = "History User",
+            Email = "fsh@e.com",
+            NID = "FSH1",
+            MobileNo = "FSH1",
             Status = Enums.MembershipStatus.Active,
-            FatherName = "F", 
-            MotherName = "M", 
-            PresentAddress = "A", 
-            PermanentAddress = "A", 
-            EmergencyContactName = "E", 
-            EmergencyContactRelation = "R", 
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
         };
@@ -124,19 +124,19 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task GenerateAnnualDuesAsync_ShouldCreateDuesForActiveMembers()
     {
-        var member = new Member 
-        { 
-            FullName = "Active User", 
-            Email = "fsg@e.com", 
-            NID = "FSG1", 
-            MobileNo = "FSG1", 
+        var member = new Member
+        {
+            FullName = "Active User",
+            Email = "fsg@e.com",
+            NID = "FSG1",
+            MobileNo = "FSG1",
             Status = Enums.MembershipStatus.Active,
-            FatherName = "F", 
-            MotherName = "M", 
-            PresentAddress = "A", 
-            PermanentAddress = "A", 
-            EmergencyContactName = "E", 
-            EmergencyContactRelation = "R", 
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
         };
@@ -154,19 +154,19 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task MarkDueAsPaidAsync_ShouldUpdateStatus()
     {
-        var member = new Member 
-        { 
-            FullName = "M", 
-            Email = "fsm@e.com", 
-            NID = "FSM1", 
-            MobileNo = "FSM1", 
+        var member = new Member
+        {
+            FullName = "M",
+            Email = "fsm@e.com",
+            NID = "FSM1",
+            MobileNo = "FSM1",
             Status = Enums.MembershipStatus.Active,
-            FatherName = "F", 
-            MotherName = "M", 
-            PresentAddress = "A", 
-            PermanentAddress = "A", 
-            EmergencyContactName = "E", 
-            EmergencyContactRelation = "R", 
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
             EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
         };
@@ -279,9 +279,9 @@ public class FinancialServiceTests : TestBase
     {
         var current = await _context.MembershipFeeConfigs.FirstAsync();
         var dto = new UpdateMembershipFeeConfigDto { Id = current.Id, Amount = 9999, EffectiveDate = current.EffectiveDate, Description = "Updated" };
-        
+
         var result = await _service.UpdateMembershipFeeConfigAsync(dto, 1);
-        
+
         result.Amount.Should().Be(9999);
         var updated = await _context.MembershipFeeConfigs.FindAsync(current.Id);
         updated!.Amount.Should().Be(9999);
@@ -292,7 +292,7 @@ public class FinancialServiceTests : TestBase
     {
         var member = await CreateAndSaveTestMemberAsync("CHG", "chg@e.com", "CHG1", "CHG1");
         await _service.RecordMembershipChangeAsync(member.Id, "General", "Life", 1, "Upgrade");
-        
+
         var history = await _context.MembershipHistories.Where(h => h.MemberId == member.Id).ToListAsync();
         history.Should().HaveCount(1);
         history[0].ChangedFrom.Should().Be("General");
@@ -305,9 +305,9 @@ public class FinancialServiceTests : TestBase
         var p = new PaymentHistory { MemberId = 1, TransactionId = "DEL-T1", Amount = 100, Status = Enums.PaymentStatus.Completed, PaidAt = DateTime.UtcNow };
         _context.PaymentHistories.Add(p);
         await _context.SaveChangesAsync();
-        
+
         var result = await _service.DeletePaymentAsync(p.Id);
-        
+
         result.Should().BeTrue();
         var exists = await _context.PaymentHistories.AnyAsync(ph => ph.Id == p.Id);
         exists.Should().BeFalse();

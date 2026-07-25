@@ -24,7 +24,7 @@ namespace GHCAA.Tests.Services
         [Test]
         public async Task CreateUserAccountAsync_WithValidData_ShouldCreateUser()
         {
-var member = new Member { FullName = "Test Member", Email = "valid@e.com", NID = "V1", MobileNo = "V1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+            var member = new Member { FullName = "Test Member", Email = "valid@e.com", NID = "V1", MobileNo = "V1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 
@@ -39,7 +39,7 @@ var member = new Member { FullName = "Test Member", Email = "valid@e.com", NID =
         [Test]
         public async Task CreateUserAccountAsync_WithDuplicateMemberId_ShouldThrowException()
         {
-var member = new Member { FullName = "Test Member", Email = "dup@e.com", NID = "D1", MobileNo = "D1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+            var member = new Member { FullName = "Test Member", Email = "dup@e.com", NID = "D1", MobileNo = "D1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 
@@ -53,8 +53,8 @@ var member = new Member { FullName = "Test Member", Email = "dup@e.com", NID = "
         [Test]
         public async Task CreateUserAccountAsync_WithDuplicateUsername_ShouldThrowException()
         {
-var member1 = new Member { FullName = "Test Member 1", Email = "test1un@e.com", NID = "UN1", MobileNo = "UN1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
-var member2 = new Member { FullName = "Test Member 2", Email = "test2un@e.com", NID = "UN2", MobileNo = "UN2", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+            var member1 = new Member { FullName = "Test Member 1", Email = "test1un@e.com", NID = "UN1", MobileNo = "UN1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+            var member2 = new Member { FullName = "Test Member 2", Email = "test2un@e.com", NID = "UN2", MobileNo = "UN2", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddRangeAsync(member1, member2);
             await _context.SaveChangesAsync();
 
@@ -87,7 +87,7 @@ var member2 = new Member { FullName = "Test Member 2", Email = "test2un@e.com", 
         [Test]
         public async Task CreateUserAccountAsync_ShouldHashPasswordWithBCrypt()
         {
-var member = new Member { FullName = "BCrypt Test", Email = "bcrypt@e.com", NID = "BCRYPT1", MobileNo = "BCRYPT1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+            var member = new Member { FullName = "BCrypt Test", Email = "bcrypt@e.com", NID = "BCRYPT1", MobileNo = "BCRYPT1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 
@@ -101,7 +101,7 @@ var member = new Member { FullName = "BCrypt Test", Email = "bcrypt@e.com", NID 
         [Test]
         public async Task ChangePasswordAsync_WithValidData_ShouldUpdatePassword()
         {
-var member = new Member { FullName = "Test Member", Email = "cp1@e.com", NID = "CP1", MobileNo = "CP1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+            var member = new Member { FullName = "Test Member", Email = "cp1@e.com", NID = "CP1", MobileNo = "CP1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 
@@ -116,7 +116,7 @@ var member = new Member { FullName = "Test Member", Email = "cp1@e.com", NID = "
         [Test]
         public async Task ChangePasswordAsync_WithWrongOldPassword_ShouldReturnFalse()
         {
-var member = new Member { FullName = "Test Member", Email = "cp2@e.com", NID = "CP2", MobileNo = "CP2", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+            var member = new Member { FullName = "Test Member", Email = "cp2@e.com", NID = "CP2", MobileNo = "CP2", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
             await _context.Members.AddAsync(member);
             await _context.SaveChangesAsync();
 

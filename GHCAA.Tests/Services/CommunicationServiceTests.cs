@@ -43,9 +43,15 @@ public class CommunicationServiceTests : TestBase
         {
             FullName = "John Doe",
             Email = "john@example.com",
-            NID = "123", MobileNo = "01", FatherName = "F", MotherName = "M", 
-            PresentAddress = "A", PermanentAddress = "A", 
-            EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0"
+            NID = "123",
+            MobileNo = "01",
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0"
         };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();

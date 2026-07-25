@@ -42,7 +42,7 @@ namespace GHCAA.Tests.Services
             var orgConfig = new Mock<IOrgConfigService>();
 
             _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object, financials.Object, new Mock<IRealTimeService>().Object, orgConfig.Object);
-        
+
             if (!_context.ECPeriods.Any(p => p.Title == "Interim Executive Committee"))
             {
                 _context.ECPeriods.Add(new ECPeriod { Title = "Interim Executive Committee", StartDate = DateTime.UtcNow.AddYears(-1), IsActive = true });
@@ -58,7 +58,7 @@ namespace GHCAA.Tests.Services
             period.Should().NotBeNull();
 
             var member = await CreateAndSaveTestMemberAsync("Tester");
-            
+
             var updateDto = CreateUpdateDto(member);
             updateDto.ECHistory = new List<ECHistoryDto>
             {
@@ -89,7 +89,7 @@ namespace GHCAA.Tests.Services
             period.Should().NotBeNull();
 
             var member = await CreateAndSaveTestMemberAsync("Tester");
-            
+
             var oldRecord = new ECMember { MemberId = member.Id, ECPeriodId = period!.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow.AddMonths(-2) };
             _context.ECMembers.Add(oldRecord);
             await _context.SaveChangesAsync();
@@ -97,7 +97,7 @@ namespace GHCAA.Tests.Services
             var updateDto = CreateUpdateDto(member);
             updateDto.ECHistory = new List<ECHistoryDto>(); // EMPTY history essentially removes current role if the logic wipes and replaces.
 
-            updateDto.ECHistory.Add(new ECHistoryDto 
+            updateDto.ECHistory.Add(new ECHistoryDto
             {
                 PeriodTitle = "Interim Executive Committee",
                 Position = Enums.ECPosition.President,
@@ -120,21 +120,21 @@ namespace GHCAA.Tests.Services
         {
             return new AdminMemberUpdateDto
             {
-                FullName = m.FullName, 
-                Email = m.Email, 
-                MobileNo = m.MobileNo, 
+                FullName = m.FullName,
+                Email = m.Email,
+                MobileNo = m.MobileNo,
                 NID = m.NID,
-                FatherName = m.FatherName, 
-                MotherName = m.MotherName, 
+                FatherName = m.FatherName,
+                MotherName = m.MotherName,
                 PresentAddress = m.PresentAddress,
-                PermanentAddress = m.PermanentAddress, 
+                PermanentAddress = m.PermanentAddress,
                 DateOfBirth = m.DateOfBirth,
                 Gender = m.Gender,
                 BloodGroup = m.BloodGroup,
                 EmergencyContactName = m.EmergencyContactName,
                 EmergencyContactRelation = m.EmergencyContactRelation,
                 EmergencyContactPhone = m.EmergencyContactPhone,
-                MembershipType = m.MembershipType, 
+                MembershipType = m.MembershipType,
                 Category = m.Category,
                 Status = m.Status,
                 IsVerified = m.IsVerified

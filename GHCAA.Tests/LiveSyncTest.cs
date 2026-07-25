@@ -14,10 +14,10 @@ namespace GHCAA.Tests
         public async Task SyncMembersForReal()
         {
             Console.WriteLine("🚀 Haragangian Global Directory RESTORATION Initialized...");
-            
+
             // Live Connection String for restoration
             var connectionString = "Host=localhost;Database=GHCAADB_v2;Username=postgres;Password=postgres;SslMode=Prefer";
-            
+
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
             // Use Npgsql directly if it's transitive from GHCAA.API
             optionsBuilder.UseNpgsql(connectionString);
@@ -25,7 +25,7 @@ namespace GHCAA.Tests
             using (var db = new ApplicationDbContext(optionsBuilder.Options))
             {
                 Console.WriteLine("🛡️ Executing Bulk Promotion (Status 0 -> 1)...");
-                
+
                 var count = await db.Database.ExecuteSqlRawAsync(
                     "UPDATE \"Members\" SET \"Status\" = 1 WHERE \"Status\" = 0 AND \"IsArchived\" = false");
 

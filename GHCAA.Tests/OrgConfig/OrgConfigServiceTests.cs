@@ -45,9 +45,9 @@ namespace GHCAA.Tests.OrgConfig
             var service = new OrgConfigService(dbContext, cache);
 
             var initialConfig = await service.GetConfigAsync();
-            var modifiedConfig = initialConfig with 
-            { 
-                Branding = initialConfig.Branding with { ShortName = "NEW_TEST_ORG" } 
+            var modifiedConfig = initialConfig with
+            {
+                Branding = initialConfig.Branding with { ShortName = "NEW_TEST_ORG" }
             };
 
             // Act
@@ -74,7 +74,7 @@ namespace GHCAA.Tests.OrgConfig
 
             // Act
             var config = await service.GetConfigAsync();
-            
+
             // Assert
             var bnPack = config.Localization.Locales["bn"];
             bnPack.Should().NotBeNull();

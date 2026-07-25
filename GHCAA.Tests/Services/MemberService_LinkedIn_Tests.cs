@@ -17,7 +17,7 @@ namespace GHCAA.Tests.Services;
 public class MemberService_LinkedIn_Tests : TestBase
 {
     private Mock<IFileStorageService> _mockStorage = null!;
-        private Mock<IOtpService> _mockOtp = null!;
+    private Mock<IOtpService> _mockOtp = null!;
     private Mock<IEmailService> _mockEmail = null!;
     private Mock<IUserService> _mockUserService = null!;
     private Mock<ILogger<MemberService>> _mockLogger = null!;
@@ -33,7 +33,7 @@ public class MemberService_LinkedIn_Tests : TestBase
     public void Setup()
     {
         _mockStorage = new Mock<IFileStorageService>();
-                _mockOtp = new Mock<IOtpService>();
+        _mockOtp = new Mock<IOtpService>();
         _mockEmail = new Mock<IEmailService>();
         _mockUserService = new Mock<IUserService>();
         _mockLogger = new Mock<ILogger<MemberService>>();
@@ -65,15 +65,24 @@ public class MemberService_LinkedIn_Tests : TestBase
 
     private Member CreateTestMember(string email, string nid)
     {
-        return new Member 
-        { 
-            FullName = "Test", Email = email, NID = nid, MobileNo = nid, 
-            FatherName = "F", MotherName = "M", PresentAddress="A", PermanentAddress="A", 
-            EmergencyContactName="C", EmergencyContactRelation="R", EmergencyContactPhone="P",
-//             HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
-//             GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
-//             ProfessionalSector="IT", Designation="Dev",
-            Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive
+        return new Member
+        {
+            FullName = "Test",
+            Email = email,
+            NID = nid,
+            MobileNo = nid,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "C",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "P",
+            //             HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
+            //             GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
+            //             ProfessionalSector="IT", Designation="Dev",
+            Gender = Enums.Gender.Male,
+            BloodGroup = Enums.BloodGroup.APositive
         };
     }
 
@@ -148,10 +157,16 @@ public class MemberService_LinkedIn_Tests : TestBase
             MobileNo = "333",
             Gender = GHCAA.Domain.Enums.Gender.Male,
             BloodGroup = GHCAA.Domain.Enums.BloodGroup.APositive,
-            FatherName = "F", MotherName = "M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="C", EmergencyContactRelation="R", EmergencyContactPhone="P",
-//             HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
-//             GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
-//             ProfessionalSector="IT", Designation="Dev",
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "C",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "P",
+            //             HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
+            //             GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
+            //             ProfessionalSector="IT", Designation="Dev",
             AcademicHistory = new List<AcademicRecordDto>
             {
                 new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject="S", PassingYear = 2010, IsGHC = true }

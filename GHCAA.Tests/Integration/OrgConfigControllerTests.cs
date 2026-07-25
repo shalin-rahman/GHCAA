@@ -20,7 +20,7 @@ namespace GHCAA.Tests.Integration
             var mockService = new Mock<IOrgConfigService>();
             var expectedConfig = new OrgConfigDto { OrgId = "test_org" };
             mockService.Setup(s => s.GetConfigAsync()).ReturnsAsync(expectedConfig);
-            
+
             var controller = new OrgConfigController(mockService.Object);
 
             // Act
@@ -55,11 +55,11 @@ namespace GHCAA.Tests.Integration
             // Arrange
             var mockService = new Mock<IOrgConfigService>();
             var expectedConfig = new OrgConfigDto { OrgId = "test_org" };
-            
+
             var claims = new[] { new Claim("MemberId", "admin_123") };
             var identity = new ClaimsIdentity(claims, "TestAuth");
             var claimsPrincipal = new ClaimsPrincipal(identity);
-            
+
             var controller = new OrgConfigController(mockService.Object)
             {
                 ControllerContext = new ControllerContext
@@ -75,7 +75,7 @@ namespace GHCAA.Tests.Integration
             var noContentResult = result as NoContentResult;
             noContentResult.Should().NotBeNull();
             noContentResult!.StatusCode.Should().Be(204);
-            
+
             mockService.Verify(s => s.UpdateConfigAsync(expectedConfig, "admin_123"), Times.Once);
         }
     }

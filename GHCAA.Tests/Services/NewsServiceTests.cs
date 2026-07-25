@@ -19,7 +19,7 @@ public class NewsServiceTests : TestBase
 
         // Clear seed data so count assertions are deterministic
         _context.NewsPosts.RemoveRange(_context.NewsPosts);
-        
+
         // Ensure an author exists
         var user = new User { Username = "author", PasswordHash = "hash" };
         _context.Users.Add(user);

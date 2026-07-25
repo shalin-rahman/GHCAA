@@ -156,3 +156,38 @@ jobs:
         with:
           name: ghcaa-preprod-deployment
           path: ./publish/api
+
+  deploy-preprod:
+    name: Deploy to Preprod (Render)
+    needs: [integrated-build]
+    # Only deploy on a real push to preprod — never on PRs.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/preprod'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preflight — verify preprod DB is reachable
+        continue-on-error: true
+        env:
+          DATABASE_URL: ${{ secrets.PREPROD_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::PREPROD_DATABASE_URL secret not set — skipping DB reachability check."
+            exit 0
+          fi
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client >/dev/null
+          if pg_isready -d "$DATABASE_URL" -t 15; then
+            echo "Preprod DB is accepting connections."
+          else
+            echo "::warning::Preprod DB not reachable — check Render Access Control (IP allowlist) / that the DB is not suspended. Deploy will still proceed; the app connects from inside Render via the internal URL."
+          fi
+
+      - name: Trigger Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "::error::RENDER_DEPLOY_HOOK_URL secret is not set. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          echo "Triggering Render deploy for preprod..."
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+          echo "Render deploy triggered. Render will build the Dockerfile and roll out the new revision."

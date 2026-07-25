@@ -29,7 +29,7 @@ namespace GHCAA.Tests.Controllers
             _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
                                        .Returns(FileValidationResult.Ok());
             _controller = new EventsController(_eventServiceMock.Object, _fileValidationServiceMock.Object);
-            
+
             SetUserContext(_controller, 10, "Admin", 1); // Admin 1, Member 10
             // Optional: if tests need MemberId 10, we can use SetMemberContext(_controller, 10);
             // Looking at RegisterForEvent test, it uses 10.
@@ -38,8 +38,8 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetActiveEvents_ReturnsOk()
         {
-             _eventServiceMock.Setup(x => x.GetActiveEventsAsync(It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(new List<EventDto>());
+            _eventServiceMock.Setup(x => x.GetActiveEventsAsync(It.IsAny<CancellationToken>()))
+                             .ReturnsAsync(new List<EventDto>());
 
             var result = await _controller.GetActiveEvents(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
@@ -48,8 +48,8 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetEventById_ReturnsOk_IfFound()
         {
-             _eventServiceMock.Setup(x => x.GetEventByIdAsync(1, It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(new EventDto { Id = 1 });
+            _eventServiceMock.Setup(x => x.GetEventByIdAsync(1, It.IsAny<CancellationToken>()))
+                             .ReturnsAsync(new EventDto { Id = 1 });
 
             var result = await _controller.GetEventById(1, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
@@ -96,12 +96,12 @@ namespace GHCAA.Tests.Controllers
             var okResult = result as OkObjectResult;
             Assert.That(okResult!.Value, Is.Empty);
         }
-        
+
         [Test]
         public async Task GetAllEventsForAdmin_ReturnsOk()
         {
-             _eventServiceMock.Setup(x => x.GetAllEventsForAdminAsync(It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(new List<EventDto>());
+            _eventServiceMock.Setup(x => x.GetAllEventsForAdminAsync(It.IsAny<CancellationToken>()))
+                             .ReturnsAsync(new List<EventDto>());
 
             var result = await _controller.GetAllEventsForAdmin(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());

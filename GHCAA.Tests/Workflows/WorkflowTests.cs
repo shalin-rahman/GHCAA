@@ -23,7 +23,7 @@ namespace GHCAA.Tests.Workflows
         private FinancialService _financialService;
         private Mock<IEmailService> _emailMock;
         private Mock<IFileStorageService> _storageMock;
-                private Mock<IOtpService> _otpMock;
+        private Mock<IOtpService> _otpMock;
         private Mock<INotificationService> _notificationMock;
         private Mock<IActivityService> _activityMock;
         private Mock<IUserService> _userServiceMock;
@@ -34,7 +34,7 @@ namespace GHCAA.Tests.Workflows
         {
             _emailMock = new Mock<IEmailService>();
             _storageMock = new Mock<IFileStorageService>();
-            
+
             _otpMock = new Mock<IOtpService>();
             _notificationMock = new Mock<INotificationService>();
             _activityMock = new Mock<IActivityService>();
@@ -52,8 +52,8 @@ namespace GHCAA.Tests.Workflows
             var orgConfigMock = new Mock<IOrgConfigService>();
 
             _financialService = new FinancialService(
-                _context, 
-                _commMock.Object, 
+                _context,
+                _commMock.Object,
                 _notificationMock.Object,
                 _storageMock.Object,
                 realTimeMock.Object,
@@ -66,12 +66,12 @@ namespace GHCAA.Tests.Workflows
                 new Mock<IServiceProvider>().Object);
 
             _memberService = new MemberService(
-                _context, 
+                _context,
                 _storageMock.Object,
                 _otpMock.Object,
                 _emailMock.Object,
-                _userServiceMock.Object, 
-                _commMock.Object, 
+                _userServiceMock.Object,
+                _commMock.Object,
                 loggerMock.Object,
                 _activityMock.Object,
                 _notificationMock.Object,
@@ -135,7 +135,7 @@ namespace GHCAA.Tests.Workflows
             // 2. Admin Approves Member
             var approveResult = await _memberService.ApproveMemberAsync(member.Id, 1, CancellationToken.None);
             Assert.That(approveResult.MembershipNumber, Is.Not.Null);
-            
+
             _context.Entry(member).Reload();
             Assert.That(member.Status, Is.EqualTo(Enums.MembershipStatus.Active));
 

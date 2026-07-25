@@ -36,7 +36,7 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.GetActivePaymentMethods(CancellationToken.None);
             var okResult = result as OkObjectResult;
-            
+
             Assert.That(okResult, Is.Not.Null);
             var items = okResult.Value as IEnumerable<object>;
             Assert.That(items, Is.Not.Null);
@@ -50,9 +50,9 @@ namespace GHCAA.Tests.Controllers
         public async Task GetAllConfigs_ObfuscatesSecretsForAdmin()
         {
             SetUserContext(_controller, null, "Admin");
-            _context.PaymentConfigurations.Add(new PaymentConfiguration 
-            { 
-                DisplayName = "Gateway", 
+            _context.PaymentConfigurations.Add(new PaymentConfiguration
+            {
+                DisplayName = "Gateway",
                 GatewaySecretKey = "super-secret",
                 GatewayPublicKey = "pub-key",
                 Method = Domain.Enums.PaymentMethod.CreditCard
@@ -71,9 +71,9 @@ namespace GHCAA.Tests.Controllers
         public async Task GetAllConfigs_ShowsSecretsForSuperAdmin()
         {
             SetUserContext(_controller, null, "SuperAdmin");
-            _context.PaymentConfigurations.Add(new PaymentConfiguration 
-            { 
-                DisplayName = "Gateway", 
+            _context.PaymentConfigurations.Add(new PaymentConfiguration
+            {
+                DisplayName = "Gateway",
                 GatewaySecretKey = "super-secret",
                 GatewayPublicKey = "pub-key",
                 Method = Domain.Enums.PaymentMethod.CreditCard
@@ -121,10 +121,10 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetActivePaymentMethods_ReturnsProperlyMappedObjects()
         {
-            _context.PaymentConfigurations.Add(new PaymentConfiguration 
-            { 
-                DisplayName = "Wallet", 
-                IsEnabled = true, 
+            _context.PaymentConfigurations.Add(new PaymentConfiguration
+            {
+                DisplayName = "Wallet",
+                IsEnabled = true,
                 Method = Domain.Enums.PaymentMethod.BKash,
                 WalletNumber = "017"
             });
@@ -132,11 +132,11 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.GetActivePaymentMethods(CancellationToken.None);
             var okResult = result as OkObjectResult;
-            
+
             Assert.That(okResult, Is.Not.Null);
             var items = okResult.Value as IEnumerable<object>;
             Assert.That(items, Is.Not.Null);
-            
+
             // Check mapping by serializing/deserializing to a JObject or just checking properties via reflection if needed
             // But for simple test, we can just check if we can get the values
             foreach (var item in items)
@@ -154,11 +154,11 @@ namespace GHCAA.Tests.Controllers
         {
             SetUserContext(_controller, null, "Admin");
             var result = await _controller.SeedDefaults(CancellationToken.None);
-            
+
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var items = await _context.PaymentConfigurations.CountAsync();
             Assert.That(items, Is.GreaterThan(0));
-            
+
             var bkash = await _context.PaymentConfigurations.FirstOrDefaultAsync(p => p.DisplayName == "bKash");
             Assert.That(bkash, Is.Not.Null);
             Assert.That(bkash!.RequiresReceipt, Is.True);

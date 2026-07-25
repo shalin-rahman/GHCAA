@@ -16,7 +16,7 @@ namespace GHCAA.Tests.Services;
 public class MemberServiceTests : TestBase
 {
     private Mock<IFileStorageService> _mockStorage = null!;
-        private Mock<IOtpService> _mockOtp = null!;
+    private Mock<IOtpService> _mockOtp = null!;
     private Mock<IEmailService> _mockEmail = null!;
     private Mock<IUserService> _mockUserService = null!;
     private Mock<ILogger<MemberService>> _mockLogger = null!;
@@ -33,7 +33,7 @@ public class MemberServiceTests : TestBase
     public void Setup()
     {
         _mockStorage = new Mock<IFileStorageService>();
-                _mockOtp = new Mock<IOtpService>();
+        _mockOtp = new Mock<IOtpService>();
         _mockEmail = new Mock<IEmailService>();
         _mockUserService = new Mock<IUserService>();
         _mockLogger = new Mock<ILogger<MemberService>>();
@@ -71,7 +71,7 @@ public class MemberServiceTests : TestBase
             FatherName = "Father Name",
             MotherName = "Mother Name",
             DateOfBirth = new DateTime(1990, 1, 1),
-            Gender =  GHCAA.Domain.Enums.Gender.Male,
+            Gender = GHCAA.Domain.Enums.Gender.Male,
             BloodGroup = GHCAA.Domain.Enums.BloodGroup.APositive,
             NID = "1234567890",
             MobileNo = "01712345678",
@@ -106,14 +106,14 @@ public class MemberServiceTests : TestBase
     {
         // Arrange
         var dto = CreateValidDto();
-        
+
         // Ensure a bKash config is available (seeded by EnsureCreated)
         var payConfig = await _context.PaymentConfigurations.FirstOrDefaultAsync(x => x.Method == Enums.PaymentMethod.BKash);
         if (payConfig == null)
         {
             throw new Exception("PaymentConfigurations should be seeded by EnsureCreated in TestBase.");
         }
-        
+
         dto.PaymentMethodId = payConfig.Id;
 
         _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -236,7 +236,7 @@ public class MemberServiceTests : TestBase
 
         // Assert
         var member = await _context.Members.FindAsync(memberId);
-//         member!.CertificatePath.Should().Be(expectedPath);
+        //         member!.CertificatePath.Should().Be(expectedPath);
         var fileUploads = await _context.FileUploads.CountAsync(f => f.MemberId == memberId);
         fileUploads.Should().BeGreaterThan(0);
     }
@@ -265,7 +265,7 @@ public class MemberServiceTests : TestBase
 
         // Assert
         var member = await _context.Members.FindAsync(memberId);
-//         member!.PaymentProofPath.Should().Be(expectedPath);
+        //         member!.PaymentProofPath.Should().Be(expectedPath);
         var fileUploads = await _context.FileUploads.CountAsync(f => f.MemberId == memberId);
         fileUploads.Should().BeGreaterThan(0);
     }
@@ -426,7 +426,7 @@ public class MemberServiceTests : TestBase
         result.Should().BeTrue();
         var updatedMember = await _context.Members.FindAsync(member.Id);
         updatedMember!.PresentAddress.Should().Be("New Address");
-//         updatedMember.Designation.Should().Be("Senior Dev");
+        //         updatedMember.Designation.Should().Be("Senior Dev");
         updatedMember.IsMobilePublic.Should().BeTrue();
     }
 
@@ -466,8 +466,8 @@ public class MemberServiceTests : TestBase
         // Assert
         var member = await _context.Members.FindAsync(memberId);
         member!.PhotoPath.Should().NotBeNullOrEmpty();
-//         member.CertificatePath.Should().NotBeNullOrEmpty();
-//         member.PaymentProofPath.Should().NotBeNullOrEmpty();
+        //         member.CertificatePath.Should().NotBeNullOrEmpty();
+        //         member.PaymentProofPath.Should().NotBeNullOrEmpty();
         var fileUploads = await _context.FileUploads.CountAsync(f => f.MemberId == memberId);
         fileUploads.Should().BeGreaterThan(0);
     }
@@ -491,7 +491,12 @@ public class MemberServiceTests : TestBase
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
-            IsProfileComplete = true, PhotoPath = "test.jpg", DateOfBirth = new DateTime(1990, 1, 1), Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive, ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
+            IsProfileComplete = true,
+            PhotoPath = "test.jpg",
+            DateOfBirth = new DateTime(1990, 1, 1),
+            Gender = Enums.Gender.Male,
+            BloodGroup = Enums.BloodGroup.APositive,
+            ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
         };
         var member2 = new Member
         {
@@ -508,7 +513,12 @@ public class MemberServiceTests : TestBase
             EmergencyContactRelation = "Relation",
             EmergencyContactPhone = "01999999999",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
-            IsProfileComplete = true, PhotoPath = "test.jpg", DateOfBirth = new DateTime(1990, 1, 1), Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive, ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
+            IsProfileComplete = true,
+            PhotoPath = "test.jpg",
+            DateOfBirth = new DateTime(1990, 1, 1),
+            Gender = Enums.Gender.Male,
+            BloodGroup = Enums.BloodGroup.APositive,
+            ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
         };
         await _context.Members.AddRangeAsync(member1, member2);
         await _context.SaveChangesAsync();
@@ -539,21 +549,47 @@ public class MemberServiceTests : TestBase
         // Arrange
         var member2007 = new Member
         {
-            FullName = "Member 2007", Email = "m2007@e.com", NID = "N1", MobileNo = "M1",
-            Status = Enums.MembershipStatus.Applied, FatherName = "F", MotherName = "M",
-            PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E",
-            EmergencyContactRelation = "R", EmergencyContactPhone = "0",
+            FullName = "Member 2007",
+            Email = "m2007@e.com",
+            NID = "N1",
+            MobileNo = "M1",
+            Status = Enums.MembershipStatus.Applied,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
-            IsProfileComplete = true, PhotoPath = "test.jpg", DateOfBirth = new DateTime(1990, 1, 1), Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive, ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
+            IsProfileComplete = true,
+            PhotoPath = "test.jpg",
+            DateOfBirth = new DateTime(1990, 1, 1),
+            Gender = Enums.Gender.Male,
+            BloodGroup = Enums.BloodGroup.APositive,
+            ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
         };
         var member2008 = new Member
         {
-            FullName = "Member 2008", Email = "m2008@e.com", NID = "N2", MobileNo = "M2",
-            Status = Enums.MembershipStatus.Applied, FatherName = "F", MotherName = "M",
-            PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E",
-            EmergencyContactRelation = "R", EmergencyContactPhone = "0",
+            FullName = "Member 2008",
+            Email = "m2008@e.com",
+            NID = "N2",
+            MobileNo = "M2",
+            Status = Enums.MembershipStatus.Applied,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2008, IsGHC = true } },
-            IsProfileComplete = true, PhotoPath = "test.jpg", DateOfBirth = new DateTime(1990, 1, 1), Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive, ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
+            IsProfileComplete = true,
+            PhotoPath = "test.jpg",
+            DateOfBirth = new DateTime(1990, 1, 1),
+            Gender = Enums.Gender.Male,
+            BloodGroup = Enums.BloodGroup.APositive,
+            ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
         };
         await _context.Members.AddRangeAsync(member2007, member2008);
         await _context.PaymentHistories.AddRangeAsync(
@@ -580,12 +616,25 @@ public class MemberServiceTests : TestBase
         // Arrange
         var member = new Member
         {
-            FullName = "P1", Email = "p1@e.com", NID = "123", MobileNo = "017",
-            Status = Enums.MembershipStatus.Applied, FatherName = "F", MotherName = "M",
-            PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E",
-            EmergencyContactRelation = "R", EmergencyContactPhone = "0",
+            FullName = "P1",
+            Email = "p1@e.com",
+            NID = "123",
+            MobileNo = "017",
+            Status = Enums.MembershipStatus.Applied,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } },
-            IsProfileComplete = true, PhotoPath = "test.jpg", DateOfBirth = new DateTime(1990, 1, 1), Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive, ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
+            IsProfileComplete = true,
+            PhotoPath = "test.jpg",
+            DateOfBirth = new DateTime(1990, 1, 1),
+            Gender = Enums.Gender.Male,
+            BloodGroup = Enums.BloodGroup.APositive,
+            ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } }
         };
         await _context.Members.AddAsync(member);
         await _context.PaymentHistories.AddAsync(new PaymentHistory { Member = member, Amount = 500, Status = Enums.PaymentStatus.Completed, FinancialCategory = Enums.FinancialCategory.RegistrationFee, TransactionId = "TRX-AWD" });
@@ -607,10 +656,18 @@ public class MemberServiceTests : TestBase
         // Arrange
         var member = new Member
         {
-            FullName = "To Reject", Email = "reject@example.com", NID = "111", MobileNo = "011",
-            Status = Enums.MembershipStatus.Applied, FatherName = "F", MotherName = "M",
-            PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E",
-            EmergencyContactRelation = "R", EmergencyContactPhone = "0",
+            FullName = "To Reject",
+            Email = "reject@example.com",
+            NID = "111",
+            MobileNo = "011",
+            Status = Enums.MembershipStatus.Applied,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
         };
         await _context.Members.AddAsync(member);
@@ -638,10 +695,19 @@ public class MemberServiceTests : TestBase
         // Arrange
         var member = new Member
         {
-            FullName = "Original Name", Email = "original@e.com", NID = "123", MobileNo = "017",
-            Status = Enums.MembershipStatus.Active, MembershipType = Enums.MembershipType.Founding,
-            FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P",
-            EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0",
+            FullName = "Original Name",
+            Email = "original@e.com",
+            NID = "123",
+            MobileNo = "017",
+            Status = Enums.MembershipStatus.Active,
+            MembershipType = Enums.MembershipType.Founding,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "P",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2007, IsGHC = true } }
         };
         await _context.Members.AddAsync(member);

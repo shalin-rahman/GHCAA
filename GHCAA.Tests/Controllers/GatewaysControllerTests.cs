@@ -66,7 +66,7 @@ namespace GHCAA.Tests.Controllers
             _testMember = await CreateAndSaveTestMemberAsync("Test Member", "test@test.com", "123", "123");
 
             await EnsureSslCommerzPaymentConfigExistsAsync();
-            
+
             SetMemberContext(_controller, _testMember.Id);
         }
 
@@ -184,12 +184,12 @@ namespace GHCAA.Tests.Controllers
             _context.AlumniEvents.Add(ev);
             await _context.SaveChangesAsync();
             var eventId = ev.Id;
-            
-            var registration = new EventRegistration 
-            { 
-                EventId = eventId, 
-                PaymentReference = "EVT-REG-ABCD", 
-                Status = Enums.EventRegistrationStatus.Pending 
+
+            var registration = new EventRegistration
+            {
+                EventId = eventId,
+                PaymentReference = "EVT-REG-ABCD",
+                Status = Enums.EventRegistrationStatus.Pending
             };
             _context.EventRegistrations.Add(registration);
             await _context.SaveChangesAsync();
@@ -215,10 +215,10 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.SSLCommerzCallback(callbackData, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<RedirectResult>());
-            
+
             var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.Id == registrationId);
             Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
-            
+
             _financialServiceMock.Verify(x => x.UpdatePaymentStatusAsync(It.IsAny<int>(), Enums.PaymentStatus.Completed, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -229,15 +229,15 @@ namespace GHCAA.Tests.Controllers
             var ev = new AlumniEvent { Title = "Event Complex", Description = "D", Location = "L", RegistrationFee = 500 };
             _context.AlumniEvents.Add(ev);
             await _context.SaveChangesAsync();
-            
-            var reg = new EventRegistration 
-            { 
-                EventId = ev.Id, 
-                PaymentReference = "EVT-REG-COMPLEX-99", 
-                Status = Enums.EventRegistrationStatus.Pending 
+
+            var reg = new EventRegistration
+            {
+                EventId = ev.Id,
+                PaymentReference = "EVT-REG-COMPLEX-99",
+                Status = Enums.EventRegistrationStatus.Pending
             };
             _context.EventRegistrations.Add(reg);
-            
+
             // Note the space and extra text after the unique prefix
             var payment = new PaymentHistory
             {
@@ -312,12 +312,12 @@ namespace GHCAA.Tests.Controllers
             var ev = new AlumniEvent { Title = "Bkash Event", Description = "Desc", Location = "Loc", RegistrationFee = 200 };
             _context.AlumniEvents.Add(ev);
             await _context.SaveChangesAsync();
-            
-            var registration = new EventRegistration 
-            { 
-                EventId = ev.Id, 
-                PaymentReference = "EVT-REG-BK", 
-                Status = Enums.EventRegistrationStatus.Pending 
+
+            var registration = new EventRegistration
+            {
+                EventId = ev.Id,
+                PaymentReference = "EVT-REG-BK",
+                Status = Enums.EventRegistrationStatus.Pending
             };
             _context.EventRegistrations.Add(registration);
             await _context.SaveChangesAsync();
@@ -336,7 +336,7 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.BkashCallbackGet(txnId, "success", CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<RedirectResult>());
-            
+
             var updatedReg = await _context.EventRegistrations.FirstOrDefaultAsync(r => r.Id == registration.Id);
             Assert.That(updatedReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
         }

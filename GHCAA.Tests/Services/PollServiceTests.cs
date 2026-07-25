@@ -139,13 +139,13 @@ namespace GHCAA.Tests.Services
             var resultPoll = polls.First();
             resultPoll.HasVoted.Should().BeTrue();
             resultPoll.TotalVotes.Should().Be(4);
-            
+
             var resOptA = resultPoll.Options.First(o => o.Id == optionAId);
             var resOptB = resultPoll.Options.First(o => o.Id == optionBId);
-            
+
             resOptA.VoteCount.Should().Be(3);
             resOptA.Percentage.Should().Be(75.0);
-            
+
             resOptB.VoteCount.Should().Be(1);
             resOptB.Percentage.Should().Be(25.0);
         }

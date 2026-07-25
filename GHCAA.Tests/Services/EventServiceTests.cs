@@ -46,7 +46,7 @@ public class EventServiceTests : TestBase
     [Test]
     public async Task RegisterForEventAsync_ShouldCreateRegistration()
     {
-var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", MobileNo = "12", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", MobileNo = "12", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
         var ev = new AlumniEvent { Title = "Event 1", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
         _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);
@@ -63,7 +63,7 @@ var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", Mobil
     [Test]
     public async Task ApproveRegistrationAsync_ShouldUpdateStatusAndSendEmail()
     {
-var member = new Member { FullName = "Test Member", Email = "evtest@example.com", NID = "EVT1", MobileNo = "EVT1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        var member = new Member { FullName = "Test Member", Email = "evtest@example.com", NID = "EVT1", MobileNo = "EVT1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
         var ev = new AlumniEvent { Title = "Grand Reunion", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "Campus" };
         _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);
@@ -91,7 +91,7 @@ var member = new Member { FullName = "Test Member", Email = "evtest@example.com"
     [Test]
     public async Task RegisterForEventAsync_ShouldIncludeReceiptPath_WhenFileProvided()
     {
-var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", MobileNo = "123", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", MobileNo = "123", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
         var ev = new AlumniEvent { Title = "E", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
         _context.Members.Add(member);
         _context.AlumniEvents.Add(ev);
@@ -139,7 +139,7 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
 
         var dto = new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P", IsNonMember = true, GuestName = "Guest" };
         Func<Task> act = async () => await _service.RegisterForEventAsync(dto, null, null);
-        
+
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("This event is for members only.");
     }
 
@@ -184,23 +184,23 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
-        var reg = new EventRegistration 
-        { 
-            EventId = ev.Id, 
-            PaymentReference = "P1", 
+        var reg = new EventRegistration
+        {
+            EventId = ev.Id,
+            PaymentReference = "P1",
             ReceiptPath = "/uploads/receipt.pdf",
-            Status = EventRegistrationStatus.Pending 
+            Status = EventRegistrationStatus.Pending
         };
         _context.EventRegistrations.Add(reg);
         await _context.SaveChangesAsync();
 
         var result = await _service.GetAllRegistrationsForAdminAsync(1, 10);
-        
+
         // Dynamic dynamic check or reflection if result is anonymous
         var items = (System.Collections.IEnumerable)result.GetType().GetProperty("Items")!.GetValue(result, null)!;
         var firstItem = items.Cast<object>().First();
         var path = firstItem.GetType().GetProperty("ReceiptPath")!.GetValue(firstItem, null);
-        
+
         path.Should().Be("/uploads/receipt.pdf");
     }
 
@@ -250,15 +250,16 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
         _context.EventExpenses.Any(ex => ex.Id == result.Id).Should().BeTrue();
     }
 
-     [Test]
+    [Test]
     public async Task RegisterForEventAsync_ShouldWaitlist_WhenCapacityExceeded()
     {
         // Arrange
-        var ev = new AlumniEvent { 
-            Title = "Full Event", 
-            Description = "D", 
-            StartDate = DateTime.UtcNow.AddDays(1), 
-            EndDate = DateTime.UtcNow.AddDays(2), 
+        var ev = new AlumniEvent
+        {
+            Title = "Full Event",
+            Description = "D",
+            StartDate = DateTime.UtcNow.AddDays(1),
+            EndDate = DateTime.UtcNow.AddDays(2),
             Location = "L",
             ParticipantLimit = 1,
             HasWaitlist = true,
@@ -266,14 +267,15 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
         };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
-        
+
         // Add one approved registration to fill capacity
-        var reg1 = new EventRegistration { 
-            EventId = ev.Id, 
-            Status = EventRegistrationStatus.Approved, 
-            PaymentReference = "P1", 
-            TicketCode = "T1", 
-            RegisteredAt = DateTime.UtcNow 
+        var reg1 = new EventRegistration
+        {
+            EventId = ev.Id,
+            Status = EventRegistrationStatus.Approved,
+            PaymentReference = "P1",
+            TicketCode = "T1",
+            RegisteredAt = DateTime.UtcNow
         };
         _context.EventRegistrations.Add(reg1);
         await _context.SaveChangesAsync();
@@ -294,18 +296,28 @@ var member = new Member { FullName = "EVT2", Email = "e2@t.com", NID = "123", Mo
     {
         // 29A.4: with a participant limit but no waitlist, registrations past the cap must be
         // rejected — previously the cap was skipped entirely, allowing unlimited registrations.
-        var ev = new AlumniEvent {
-            Title = "Capped Event", Description = "D",
-            StartDate = DateTime.UtcNow.AddDays(1), EndDate = DateTime.UtcNow.AddDays(2), Location = "L",
-            ParticipantLimit = 1, HasWaitlist = false, IsActive = true
+        var ev = new AlumniEvent
+        {
+            Title = "Capped Event",
+            Description = "D",
+            StartDate = DateTime.UtcNow.AddDays(1),
+            EndDate = DateTime.UtcNow.AddDays(2),
+            Location = "L",
+            ParticipantLimit = 1,
+            HasWaitlist = false,
+            IsActive = true
         };
         _context.AlumniEvents.Add(ev);
         await _context.SaveChangesAsync();
 
         // A single Pending registration already occupies the one available slot.
-        _context.EventRegistrations.Add(new EventRegistration {
-            EventId = ev.Id, Status = EventRegistrationStatus.Pending,
-            PaymentReference = "P1", TicketCode = "C1", RegisteredAt = DateTime.UtcNow
+        _context.EventRegistrations.Add(new EventRegistration
+        {
+            EventId = ev.Id,
+            Status = EventRegistrationStatus.Pending,
+            PaymentReference = "P1",
+            TicketCode = "C1",
+            RegisteredAt = DateTime.UtcNow
         });
         await _context.SaveChangesAsync();
 

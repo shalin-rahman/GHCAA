@@ -40,7 +40,7 @@ namespace GHCAA.Tests.Controllers
         {
             _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync(new List<NewsPostDto>());
- 
+
             var result = await _controller.GetActiveNews(null, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }

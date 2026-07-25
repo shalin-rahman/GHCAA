@@ -58,7 +58,7 @@ public class FamilyLinkServiceTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.Status.Should().Be(Enums.FamilyLinkStatus.Requested);
-        
+
         var request = await _context.FamilyLinkRequests.FirstOrDefaultAsync();
         request.Should().NotBeNull();
         request!.RequesterId.Should().Be(requester.Id);
@@ -66,7 +66,7 @@ public class FamilyLinkServiceTests : TestBase
 
         _mockNotifications.Verify(x => x.CreateNotificationAsync(
             target.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<GHCAA.Domain.Enums.NotificationType>(), null, It.IsAny<CancellationToken>()), Times.Once);
-            
+
         _mockCommunication.Verify(x => x.SendIndividualEmailAsync(
             target.Id, "FAMILY_LINK_REQUEST", It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -77,7 +77,7 @@ public class FamilyLinkServiceTests : TestBase
         // Arrange
         var requester = await CreateTestMemberAsync("R001");
         var target = await CreateTestMemberAsync("T001");
-        
+
         var request = new FamilyLinkRequest
         {
             RequesterId = requester.Id,
@@ -112,7 +112,7 @@ public class FamilyLinkServiceTests : TestBase
         var requester = await CreateTestMemberAsync("R001");
         var target = await CreateTestMemberAsync("T001");
         // Connection is handled by requests
-        
+
         var request = new FamilyLinkRequest
         {
             RequesterId = requester.Id,
