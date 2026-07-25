@@ -68,7 +68,9 @@ void main() {
               ?.backgroundColor
               ?.resolve({});
 
-      expect(color, AppTheme.royalGold);
+      // The theme is tenant-driven (buildTheme(branding)); the design-system
+      // gold for interactive surfaces is the accent = colorScheme.secondary.
+      expect(color, AppTheme.midnightTheme.colorScheme.secondary);
     });
   });
 }

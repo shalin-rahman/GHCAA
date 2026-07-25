@@ -162,7 +162,10 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primary,
+          // Interactive buttons use the gold accent (visible against the dark
+          // obsidian surfaces, with dark foreground text). `primary` is the
+          // dark brand base and would render dark-on-dark here.
+          backgroundColor: secondary,
           foregroundColor: obsidianBlack,
           textStyle: const TextStyle(
             fontFamily: 'Outfit',
