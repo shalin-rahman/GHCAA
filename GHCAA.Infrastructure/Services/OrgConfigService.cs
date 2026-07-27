@@ -46,6 +46,9 @@ namespace GHCAA.Infrastructure.Services
             record.ConfigJson = JsonSerializer.Serialize(dto, JsonOpts);
             record.UpdatedAt = DateTime.UtcNow;
             record.UpdatedByAdminId = updatedByAdminId;
+            // App-managed concurrency token: set a fresh value each write (Npgsql/SQLite do not
+            // auto-generate it, and NOT NULL would otherwise be violated on insert).
+            record.RowVersion = Guid.NewGuid().ToByteArray();
 
             if (record.Id == 0)
                 db.OrganizationConfigs.Add(record);
