@@ -3,7 +3,7 @@
 > **One Render service** builds and serves **both** the .NET API and the Angular web app
 > from the same origin. The database is **Neon** Postgres.
 >
-> ⚠️ **SECURITY:** This file and `docs/db_connection.txt` contain live credentials.
+> ⚠️ **SECURITY:** This file and `docs/deploy_connection.txt` contain live credentials.
 > After setup, **rotate the Neon password** and remove both files from the repo
 > (see [Step 7](#step-7--security-cleanup)).
 
@@ -28,7 +28,7 @@ You only need to do the dashboard/Git steps below. **No further code changes req
 - A **Neon** account/project (already created) → https://console.neon.tech
 - Push access to this GitHub repo
 - The two secret values (keep them handy):
-  - **Neon DATABASE_URL** (from `docs/db_connection.txt`, last line):
+  - **Neon DATABASE_URL** (from `docs/deploy_connection.txt`, last line):
     ```
     postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
     ```
@@ -68,13 +68,27 @@ git push -u origin preprod
    - **Runtime / Language:** **Docker**
    - **Dockerfile Path:** `./Dockerfile` (root — leave default)
    - **Instance Type:** Free or Starter
-   - **Auto-Deploy:** **No** ⭐ — see note below.
+   - **Auto-Deploy:** set to **Off** ⭐ — see note below.
 4. Click **Create Web Service** (it will start a first build — that's fine; we set env vars next).
 
-> **⭐ Why Auto-Deploy = No?** Deploys are driven by **CI** (`ghcaa-ci-preprod.yml`): on every
-> push to `preprod` it runs the full test suite, and only if tests pass does it fire the Render
-> deploy hook. If you *also* leave Render's native auto-deploy on, each push deploys **twice**
-> and skips the test gate. Keep the CI path as the single source of truth.
+> ### ⭐ The Auto-Deploy dropdown — pick the right one
+> Render's **Settings → Auto-Deploy** has three choices. What each does, and which to use:
+>
+> | Option | What Render does | Use it? |
+> |---|---|---|
+> | **On Commit** | Deploys immediately on *every* push to `preprod` — **before/ignoring** tests. | ❌ No — skips the test gate; also double-deploys with the CI hook. |
+> | **After CI Checks Pass** | Waits for the GitHub Actions checks on the commit to go **green**, then deploys itself. | ✅ Alternative — clean & native. **If you use this, you must delete the deploy-hook step** from the workflow (see note), else it deploys twice. No `RENDER_DEPLOY_HOOK_URL` secret needed. |
+> | **Off** | Render never auto-deploys; deploys only when its **Deploy Hook** is called. | ✅ **Recommended** — our CI (`ghcaa-ci-preprod.yml`) runs tests then curls the hook. Zero workflow changes; tests always gate the deploy. |
+>
+> **Recommended = Off**, because the workflow is already wired to fire the hook after tests pass —
+> nothing else to change. Do **Step 4** (add the deploy-hook secret).
+>
+> **If you instead pick "After CI Checks Pass":** skip the hook — remove the whole `deploy-preprod`
+> job from `.github/workflows/ghcaa-ci-preprod.yml` (and you don't need the `RENDER_DEPLOY_HOOK_URL`
+> secret). Render will deploy on its own once the CI checks are green. Tell Claude and it'll make that edit.
+>
+> ⚠️ **Never leave a native auto-deploy (On Commit / After CI Checks Pass) on *at the same time* as the
+> CI deploy-hook — that deploys twice per push.** Exactly one path should be active.
 
 ---
 
@@ -98,7 +112,11 @@ Click **Save Changes** — Render redeploys automatically.
 
 ## Step 4 — Get the Render deploy hook (for CI auto-deploy)
 
-1. Service → **Settings** → scroll to **Deploy Hook** → **Copy** the URL.
+1. Service → **Settings** → scroll to **Deploy Hook** → click the 👁 to reveal, then **Copy** the URL.
+   - Your current hook (already in `docs/deploy_connection.txt`, line 7):
+     `https://api.render.com/deploy/srv-d9brj1t7vvec73cc5npg?key=QyJsiWt9fYM`
+   - This URL is a **secret** — anyone with it can trigger a deploy. If it has ever been shared/committed,
+     click **Regenerate hook** and use the new one (then update the GitHub secret below).
 2. In GitHub → repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
    - Name: `RENDER_DEPLOY_HOOK_URL`
    - Value: *(paste the deploy hook URL)*
@@ -147,15 +165,15 @@ Once Render shows **Live**:
 
 ## Step 7 — Security cleanup (do this!)
 
-The repo currently commits live DB passwords in `docs/db_connection.txt`. After setup:
+The repo currently commits live DB passwords in `docs/deploy_connection.txt`. After setup:
 
 ```bash
 # 1. Rotate the Neon password in Neon Console → Roles → reset password,
 #    then update DATABASE_URL on Render + the GitHub secret.
 
 # 2. Stop tracking the secret files
-git rm --cached docs/db_connection.txt docs/RENDER_DEPLOYMENT.md
-echo "docs/db_connection.txt"     >> .gitignore
+git rm --cached docs/deploy_connection.txt docs/RENDER_DEPLOYMENT.md
+echo "docs/deploy_connection.txt"     >> .gitignore
 echo "docs/RENDER_DEPLOYMENT.md"  >> .gitignore
 git commit -m "chore: stop tracking files containing DB credentials"
 git push

@@ -1,0 +1,10 @@
+Render DB----------------------------------
+External DB URL (optional): postgresql://ghcaa_db_prepod_user:UD97DOIWTbwwwECfEhMi3xSDwRAWPt1W@dpg-d7r26jq8qa3s73d8mnp0-a.oregon-postgres.render.com/ghcaa_db_prepod
+Internal DB URL (for backend): postgresql://ghcaa_db_prepod_user:UD97DOIWTbwwwECfEhMi3xSDwRAWPt1W@dpg-d7r26jq8qa3s73d8mnp0-a/ghcaa_db_prepod
+postgresql://ghcaa_db_prepod_user:UD97DOIWTbwwwECfEhMi3xSDwRAWPt1W@dpg-d7r26jq8qa3s73d8mnp0-a.oregon-postgres.render.com/ghcaa_db_prepod
+
+Render Hook----------------------------------
+https://api.render.com/deploy/srv-d9brj1t7vvec73cc5npg?key=QyJsiWt9fYM
+
+NEON DB-------------------------------------------------------------
+postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
