@@ -157,9 +157,13 @@ Once Render shows **Live**:
 4. **DB:** log in / load data → confirms the app reached Neon. First boot auto-creates the
    schema via `EnsureCreated()` (no migration step needed).
 
-**If the log shows exit 139 on startup** → `Jwt__Key` is missing or under 32 chars (Step 3).
-**If the web app loads but API calls 404/CORS** → confirm you're hitting the same origin
-(the `/api` path), not an old absolute URL.
+**Troubleshooting startup:**
+- **`exit 139` immediately** → `Jwt__Key` is missing or under 32 chars (Step 3).
+- **`Hosting failed to start` / `Kestrel BindAsync` / `TaskCanceledException`, "Application is shutting down"**
+  → the app wasn't listening on Render's `PORT`. **Fixed in code**: `Program.cs` now binds to
+  `http://0.0.0.0:$PORT` when the `PORT` env var is present (Render sets it automatically). Make sure
+  the deployed commit includes this fix.
+- **Web app loads but API calls 404/CORS** → confirm same origin (the `/api` path), not an old absolute URL.
 
 ---
 

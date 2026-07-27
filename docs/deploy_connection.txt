@@ -8,3 +8,37 @@ https://api.render.com/deploy/srv-d9brj1t7vvec73cc5npg?key=QyJsiWt9fYM
 
 NEON DB-------------------------------------------------------------
 postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+JWT KEY (Jwt__Key)-------------------------------------------------
+ahpleDW6hI1zvQ/F2x0fo8+o0Y1KX44P5tKqPFvNSgiVJ5+se8OSYwhfGlND49hf
+
+=====================================================================
+RENDER SERVICE ENV VARS  (Dashboard -> service -> Environment)
+=====================================================================
+Jwt__Key                 = ahpleDW6hI1zvQ/F2x0fo8+o0Y1KX44P5tKqPFvNSgiVJ5+se8OSYwhfGlND49hf
+ASPNETCORE_ENVIRONMENT   = Preprod
+DATABASE_URL             = postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+# NOTE: do NOT set PORT -- Render injects it automatically; the app binds to it.
+
+=====================================================================
+GITHUB ACTIONS SECRETS  (repo -> Settings -> Secrets and variables -> Actions -> Secrets)
+=====================================================================
+RENDER_DEPLOY_HOOK_URL   = https://api.render.com/deploy/srv-d9brj1t7vvec73cc5npg?key=QyJsiWt9fYM
+PREPROD_DATABASE_URL     = postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require   (optional - CI reachability preflight)
+NEON_API_KEY             = <create in Neon Console -> Account Settings -> API Keys>
+
+=====================================================================
+GITHUB ACTIONS VARIABLES  (same page -> Variables tab)
+=====================================================================
+NEON_PROJECT_ID          = <Neon Console -> project -> Settings -> Project ID>
+
+=====================================================================
+RENDER SERVICE SETTINGS
+=====================================================================
+Branch        = preprod
+Runtime       = Docker   (Dockerfile at repo root)
+Auto-Deploy   = Off      (CI fires the deploy hook after tests pass; avoids double deploy)
+
+*** SECURITY: this file holds LIVE credentials + deploy hook. After setup, rotate the Neon
+*** password, regenerate the Render hook, and git-remove + .gitignore this file. It is NOT
+*** erased from git history by untracking -- treat anything ever pushed as compromised.
