@@ -30,7 +30,7 @@ You only need to do the dashboard/Git steps below. **No further code changes req
 - The two secret values (keep them handy):
   - **Neon DATABASE_URL** (from `docs/deploy_connection.txt`, last line):
     ```
-    postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+    postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/GhcaaDB?sslmode=require&channel_binding=require
     ```
   - **JWT signing key** (32+ chars — generate your own or use this one):
     ```
@@ -100,7 +100,7 @@ In the service → **Environment** tab → **Add Environment Variable**, add the
 |---|---|
 | `Jwt__Key` | `ahpleDW6hI1zvQ/F2x0fo8+o0Y1KX44P5tKqPFvNSgiVJ5+se8OSYwhfGlND49hf` |
 | `ASPNETCORE_ENVIRONMENT` | `Preprod` |
-| `DATABASE_URL` | `postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require` |
+| `DATABASE_URL` | `postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/GhcaaDB?sslmode=require&channel_binding=require` |
 
 > **Why `Jwt__Key` (double underscore)?** .NET maps `Jwt__Key` → config key `Jwt:Key`.
 > Outside Development the app **refuses to start** without it (exit 139) — this was the
