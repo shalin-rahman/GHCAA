@@ -32,7 +32,7 @@ The platform follows **Clean Architecture** principles to ensure maintainability
 | **Database**  | PostgreSQL 16+        | Relational storage with Global Query Filters |
 | **Frontend**  | Angular 21 (Signals)  | Admin Command Center & Public Portal         |
 | **Mobile**    | Flutter (Dart)        | Member Hub (iOS/Android)                     |
-| **AI**        | Google Gemini 1.5     | Intelligent Alumni Assistant & Support       |
+| **Assistant** | Rule-based engine (C#) | Intent/keyword classifier over internal data |
 | **Real-time** | SignalR               | Instant Notifications & Peer Messaging       |
 | **Auth**      | JWT + BCrypt          | Stateless Authentication & Secure Hashing    |
 
@@ -88,10 +88,10 @@ Fostering professional and personal growth within the network.
 * **3.4.3 Job & Mentorship Hub**: Internal boards for sharing career opportunities and requesting formal mentorship.
 * **3.4.4 Gamification**: "Contribution Points" and "Badges" (Legend, Elite, Active) awarded for engagement and attendance.
 
-### 3.5 AI Assistant (Haraganga AI)
+### 3.5 In-App Assistant (Haraganga Assistant)
 
-* **3.5.1 NLP Search**: Gemini-powered agent allowing members to find alumni using natural language (e.g., "Find engineers from the 1995 batch").
-* **3.5.2 Policy Support**: Intelligent support for association rules and portal navigation.
+* **3.5.1 Guided Search**: A rule-based intent/keyword classifier that maps member questions to internal lookups (e.g., finding alumni by batch or profession) over existing directory data — no external LLM dependency.
+* **3.5.2 Policy Support**: Answers association rules and portal-navigation questions from a curated internal knowledge base. (The service is structured so a generative provider could be added later without changing the API surface.)
 
 ### 3.6 Governance & CMS
 

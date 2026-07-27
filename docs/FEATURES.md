@@ -183,16 +183,16 @@ The platform operates without live payment-gateway credentials. All payment meth
 
 ---
 
-## 6. Intelligent Assistant (AI)
+## 6. In-App Assistant
 
-The assistant is optional and degrades gracefully when no Gemini API key is configured.
+The assistant runs entirely on internal data with a rule-based engine — it has no external LLM dependency. The service is structured so a generative provider could be added later without changing its API surface.
 
 ### 6.1 Alumni Assistant
-- **Business description**: A Gemini-powered assistant helping members find information and alumni through natural language.
+- **Business description**: A rule-based assistant that helps members find alumni and information by mapping their questions to internal directory lookups.
 - **User roles**: Member.
 - **Inputs / outputs**: Screen `/portal/assistant`; API `POST /api/assistant/ask`.
-- **Validations & rules**: NLP intent parsing for years, sectors, and help topics.
-- **Dependencies**: Google Gemini API, Assistant service.
+- **Validations & rules**: Intent/keyword classification for years, sectors, and help topics (no generative model call).
+- **Dependencies**: Assistant service, Networking service (directory data).
 
 ### 6.2 Intelligent Support Chat
 - **Business description**: Real-time support for common queries and system navigation.
@@ -239,7 +239,7 @@ Open access for alumni and the general public.
 ### 2. Member Portal (the alumni hub)
 Secured area for approved alumni using membership-number credentials.
 - Personal dashboard with membership status and recent activity.
-- Alumni assistant (natural-language search over alumni by batch, sector, or profession).
+- Alumni assistant (rule-based guided search over alumni by batch, sector, or profession).
 - Self-service profile with dynamic privacy toggles and editable academic/professional history.
 - Networking engine: peer chat and career (job) hub.
 - Financial transparency: membership-due tracking, payment history, and manual payment-proof upload.
