@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://preprod.haragangian.com/api' // The exact Preprod backend API
+  // API and SPA are served from the same Render origin (multi-stage Docker build),
+  // so call the API relatively — works at any host/domain Render assigns.
+  apiUrl: '/api'
 };

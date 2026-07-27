@@ -519,7 +519,7 @@ namespace GHCAA.Infrastructure.Services
                 MotherName = member.MotherName,
                 DateOfBirth = member.DateOfBirth,
                 Gender = member.Gender,
-                NID = (isPrivileged || member.IsNIDPublic) ? member.NID : MaskPii(member.NID, 3, 2),
+                NID = (isPrivileged || member.IsNIDPublic) ? member.NID : (MaskPii(member.NID, 3, 2) ?? string.Empty),
                 IsNIDPublic = member.IsNIDPublic,
                 EmergencyContactName = member.EmergencyContactName,
                 EmergencyContactRelation = member.EmergencyContactRelation,

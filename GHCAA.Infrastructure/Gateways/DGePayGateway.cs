@@ -155,6 +155,7 @@ namespace GHCAA.Infrastructure.Gateways
                 }
 
                 // Verify with server-to-server check
+                if (string.IsNullOrEmpty(data.UniqueTxnId)) return false;
                 return await VerifyStatusWithServerAsync(data.UniqueTxnId, cancellationToken);
             }
             catch (Exception ex)
@@ -164,11 +165,11 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
-        public async Task<bool> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        public Task<bool> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
         {
             // Webhooks for DGePay often send the same structure as callbacks or similar.
             // For now, we'll focus on the callback redirect flow.
-            return false;
+            return Task.FromResult(false);
         }
 
         private async Task<bool> VerifyStatusWithServerAsync(string uniqueTxnId, CancellationToken cancellationToken)

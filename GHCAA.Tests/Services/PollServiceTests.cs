@@ -9,14 +9,6 @@ using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using FluentAssertions;
-
-using GHCAA.Application.DTOs;
-using GHCAA.Domain.Models;
-using GHCAA.Infrastructure.Data;
-using GHCAA.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 

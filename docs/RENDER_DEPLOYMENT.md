@@ -1,0 +1,179 @@
+# GHCAA — Render Deployment Guide (API + Web App, Neon DB)
+
+> **One Render service** builds and serves **both** the .NET API and the Angular web app
+> from the same origin. The database is **Neon** Postgres.
+>
+> ⚠️ **SECURITY:** This file and `docs/db_connection.txt` contain live credentials.
+> After setup, **rotate the Neon password** and remove both files from the repo
+> (see [Step 7](#step-7--security-cleanup)).
+
+---
+
+## What was changed in the code (already done)
+
+| File | Change |
+|---|---|
+| `Dockerfile` | Multi-stage: Node 22 builds Angular → copied into the API's `wwwroot`. One image serves both. |
+| `GHCAA.API/Program.cs` | SPA fallback — serves `index.html` for non-`/api` routes so deep-links work on refresh. |
+| `GHCAA.Web/src/environments/environment.preprod.ts` | `apiUrl` → `/api` (relative, same-origin). Old `preprod.haragangian.com` domain does not exist. |
+| `.github/workflows/neon_workflow.yml` | Creates/deletes a Neon DB branch per pull request. |
+
+You only need to do the dashboard/Git steps below. **No further code changes required.**
+
+---
+
+## Prerequisites
+
+- A **Render** account → https://dashboard.render.com
+- A **Neon** account/project (already created) → https://console.neon.tech
+- Push access to this GitHub repo
+- The two secret values (keep them handy):
+  - **Neon DATABASE_URL** (from `docs/db_connection.txt`, last line):
+    ```
+    postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+    ```
+  - **JWT signing key** (32+ chars — generate your own or use this one):
+    ```
+    ahpleDW6hI1zvQ/F2x0fo8+o0Y1KX44P5tKqPFvNSgiVJ5+se8OSYwhfGlND49hf
+    ```
+    > To generate a fresh one in PowerShell:
+    > `[Convert]::ToBase64String((1..48 | % {Get-Random -Max 256}))`
+
+---
+
+## Step 1 — Push the code to the `preprod` branch
+
+The Render deploy hook fires on pushes to **`preprod`**. The last failed deploy ran an
+old `master` commit, so the fix must land on `preprod`.
+
+```bash
+# from the repo root
+git checkout -b preprod        # or: git checkout preprod  (if it already exists)
+git merge dev                  # bring in this session's changes (or commit them directly)
+git push -u origin preprod
+```
+
+> If you want me (Claude) to commit + push for you, just say so and name the branch.
+
+---
+
+## Step 2 — Create the Render Web Service
+
+1. Go to https://dashboard.render.com → **New +** → **Web Service**.
+2. **Connect** this GitHub repository.
+3. Fill in:
+   - **Name:** `ghcaa` (or any name)
+   - **Branch:** `preprod`
+   - **Region:** Oregon (or nearest)
+   - **Runtime / Language:** **Docker**
+   - **Dockerfile Path:** `./Dockerfile` (root — leave default)
+   - **Instance Type:** Free or Starter
+   - **Auto-Deploy:** **No** ⭐ — see note below.
+4. Click **Create Web Service** (it will start a first build — that's fine; we set env vars next).
+
+> **⭐ Why Auto-Deploy = No?** Deploys are driven by **CI** (`ghcaa-ci-preprod.yml`): on every
+> push to `preprod` it runs the full test suite, and only if tests pass does it fire the Render
+> deploy hook. If you *also* leave Render's native auto-deploy on, each push deploys **twice**
+> and skips the test gate. Keep the CI path as the single source of truth.
+
+---
+
+## Step 3 — Set the environment variables
+
+In the service → **Environment** tab → **Add Environment Variable**, add these **three**:
+
+| Key | Value |
+|---|---|
+| `Jwt__Key` | `ahpleDW6hI1zvQ/F2x0fo8+o0Y1KX44P5tKqPFvNSgiVJ5+se8OSYwhfGlND49hf` |
+| `ASPNETCORE_ENVIRONMENT` | `Preprod` |
+| `DATABASE_URL` | `postgresql://neondb_owner:npg_keJCzc13FsIy@ep-green-fog-ax3l40f0-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require` |
+
+> **Why `Jwt__Key` (double underscore)?** .NET maps `Jwt__Key` → config key `Jwt:Key`.
+> Outside Development the app **refuses to start** without it (exit 139) — this was the
+> cause of the earlier deploy crash. It must be **32+ characters**.
+
+Click **Save Changes** — Render redeploys automatically.
+
+---
+
+## Step 4 — Get the Render deploy hook (for CI auto-deploy)
+
+1. Service → **Settings** → scroll to **Deploy Hook** → **Copy** the URL.
+2. In GitHub → repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
+   - Name: `RENDER_DEPLOY_HOOK_URL`
+   - Value: *(paste the deploy hook URL)*
+3. (Optional) Add secret `PREPROD_DATABASE_URL` = the Neon URL above (used only by the
+   CI reachability pre-check in `ghcaa-ci-preprod.yml`).
+
+**This is the whole automation:** every push to `preprod` → CI runs tests → on success it curls
+this hook → Render rebuilds the Dockerfile (API + Angular) and rolls out. Nothing manual after this.
+
+> The deploy job (`deploy-preprod` in the workflow) only runs on a **real push to `preprod`** —
+> never on pull requests — so PRs are tested but not deployed.
+
+---
+
+## Step 5 — Configure the Neon PR-branch workflow
+
+`neon_workflow.yml` spins up a throwaway Neon DB branch for each pull request. It needs:
+
+1. In **Neon Console** → your project → **Settings** → copy the **Project ID**.
+2. Neon Console → **Account Settings** → **API Keys** → **Create API Key** → copy it.
+3. In GitHub → repo **Settings** → **Secrets and variables** → **Actions**:
+   - Tab **Variables** → **New repository variable**: `NEON_PROJECT_ID` = *(the Project ID)*
+   - Tab **Secrets** → **New repository secret**: `NEON_API_KEY` = *(the API key)*
+
+> If you don't need per-PR DB branches yet, you can skip this step — it won't affect the
+> main deploy. The workflow simply won't run successfully until these are set.
+
+---
+
+## Step 6 — Verify the deployment
+
+Once Render shows **Live**:
+
+1. **API health:** open `https://<your-service>.onrender.com/health` → expect `Healthy`.
+2. **Web app:** open `https://<your-service>.onrender.com/` → the Angular login screen loads.
+3. **Deep-link refresh:** navigate into the app, then hit browser **refresh** on a route
+   like `/portal/...` → it should still load (SPA fallback working).
+4. **DB:** log in / load data → confirms the app reached Neon. First boot auto-creates the
+   schema via `EnsureCreated()` (no migration step needed).
+
+**If the log shows exit 139 on startup** → `Jwt__Key` is missing or under 32 chars (Step 3).
+**If the web app loads but API calls 404/CORS** → confirm you're hitting the same origin
+(the `/api` path), not an old absolute URL.
+
+---
+
+## Step 7 — Security cleanup (do this!)
+
+The repo currently commits live DB passwords in `docs/db_connection.txt`. After setup:
+
+```bash
+# 1. Rotate the Neon password in Neon Console → Roles → reset password,
+#    then update DATABASE_URL on Render + the GitHub secret.
+
+# 2. Stop tracking the secret files
+git rm --cached docs/db_connection.txt docs/RENDER_DEPLOYMENT.md
+echo "docs/db_connection.txt"     >> .gitignore
+echo "docs/RENDER_DEPLOYMENT.md"  >> .gitignore
+git commit -m "chore: stop tracking files containing DB credentials"
+git push
+```
+
+> Removing from tracking does **not** erase them from git **history**. If these were ever
+> pushed to a shared/remote repo, treat the credentials as compromised and rotate them.
+
+---
+
+## Quick reference — env vars at a glance
+
+| Where | Key | Purpose |
+|---|---|---|
+| Render service | `Jwt__Key` | JWT signing key (32+ chars) — required or app won't boot |
+| Render service | `ASPNETCORE_ENVIRONMENT` | `Preprod` |
+| Render service | `DATABASE_URL` | Neon Postgres connection (parsed automatically) |
+| GitHub secret | `RENDER_DEPLOY_HOOK_URL` | CI triggers Render redeploy on `preprod` push |
+| GitHub secret | `PREPROD_DATABASE_URL` | (optional) CI DB reachability pre-check |
+| GitHub variable | `NEON_PROJECT_ID` | Neon PR-branch workflow |
+| GitHub secret | `NEON_API_KEY` | Neon PR-branch workflow |

@@ -219,6 +219,25 @@ app.MapHealthChecks("/health");
 app.MapHub<GHCAA.API.Hubs.ChatHub>("/api/hubs/chat");
 app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");
 
+// SPA fallback: serve the Angular index.html for any non-API, non-file route so
+// client-side deep links (e.g. /portal/members) resolve on refresh. Only active
+// when the SPA has been copied into wwwroot (Docker multi-stage build).
+var spaIndexPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "index.html");
+if (File.Exists(spaIndexPath))
+{
+    app.MapFallback(async ctx =>
+    {
+        // Keep unknown /api requests as API 404s — never swallow them with index.html.
+        if (ctx.Request.Path.StartsWithSegments("/api"))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+        ctx.Response.ContentType = "text/html";
+        await ctx.Response.SendFileAsync(spaIndexPath);
+    });
+}
+
 // Seed OrganizationConfig with GHCAA defaults on first boot (idempotent, fault-tolerant)
 // Wrapped in try/catch so a missing table (pre-migration) or transient DB error never prevents boot.
 try

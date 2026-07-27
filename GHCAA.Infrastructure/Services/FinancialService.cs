@@ -497,6 +497,7 @@ namespace GHCAA.Infrastructure.Services
                 .FirstOrDefaultAsync(p => p.Id == paymentId, cancellationToken);
 
             if (payment == null) throw new KeyNotFoundException("Payment record not found.");
+            if (payment.Member == null) throw new InvalidOperationException("Payment has no associated member.");
 
             var config = await _orgConfigService.GetConfigAsync();
 

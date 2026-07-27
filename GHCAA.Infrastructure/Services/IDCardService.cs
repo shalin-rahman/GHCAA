@@ -130,7 +130,7 @@ namespace GHCAA.Infrastructure.Services
                 {
                     page.Size(250, 150);
                     page.Margin(0);
-                    page.Background("#111");
+                    page.PageColor("#111");
 
                     page.Content().Padding(10).Column(col =>
                     {
@@ -184,7 +184,7 @@ namespace GHCAA.Infrastructure.Services
                 {
                     page.Size(PageSizes.A4.Landscape());
                     page.Margin(40);
-                    page.Background("#fffaf0");
+                    page.PageColor("#fffaf0");
 
                     page.Content().Border(5).BorderColor("#c5a059").Padding(50).Column(col =>
                     {
