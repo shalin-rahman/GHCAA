@@ -30,7 +30,7 @@ The platform follows **Clean Architecture** principles to ensure maintainability
 | :------------------ | :-------------------- | :------------------------------------------- |
 | **Backend**   | ASP.NET Core 9.0 (C#) | RESTful API, RBAC, SignalR Hubs              |
 | **Database**  | PostgreSQL 16+        | Relational storage with Global Query Filters |
-| **Frontend**  | Angular 18+ (Signals) | Admin Command Center & Public Portal         |
+| **Frontend**  | Angular 21 (Signals)  | Admin Command Center & Public Portal         |
 | **Mobile**    | Flutter (Dart)        | Member Hub (iOS/Android)                     |
 | **AI**        | Google Gemini 1.5     | Intelligent Alumni Assistant & Support       |
 | **Real-time** | SignalR               | Instant Notifications & Peer Messaging       |
@@ -76,7 +76,7 @@ Ensuring absolute transparency and automated revenue collection.
 
 * **3.3.1 Immutable Ledger**: Tracking all income (Dues, Donations, Fees) and expenses with audit-ready records.
 * **3.3.2 Automated Dues**: Generation and notification of annual membership fees based on configurable types (General, Life, etc.).
-* **3.3.3 Payment Gateways**: Integrated support for **SSLCommerz**, **bKash**, and **Nagad** with automated status updates via webhooks.
+* **3.3.3 Manual, Admin-Configurable Payments**: The platform operates without live payment-gateway credentials. Administrators configure wallet, bank, and mobile-financial-service (**bKash**, **Nagad**, bank transfer) instructions; members pay through the displayed channel and upload proof of payment, which an administrator verifies and approves. Automated gateway callback handling (**SSLCommerz**, **bKash**, **Nagad** webhooks) exists in the codebase and can be enabled later by supplying gateway keys, but is not required for operation.
 * **3.3.4 Digital Receipts**: Instant generation of PDF tax receipts for all successful contributions.
 
 ### 3.4 Networking & Social Ecosystem
