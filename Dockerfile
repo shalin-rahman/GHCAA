@@ -52,6 +52,9 @@ RUN dotnet publish "GHCAA.API/GHCAA.API.csproj" -c $BUILD_CONFIGURATION -o /app/
 FROM base AS final
 WORKDIR /app
 ENV ASPNETCORE_ENVIRONMENT=Production
+# Disable config-file FileSystemWatcher: Render containers hit the host inotify
+# instance limit (128), crashing WebApplication.CreateBuilder at startup (exit 139).
+ENV DOTNET_hostBuilder__reloadConfigOnChange=false
 COPY --from=publish /app/publish .
 # Copy the built Angular SPA into wwwroot so UseStaticFiles serves it at /
 COPY --from=web /web/dist/GHCAA.Web/browser ./wwwroot

@@ -608,9 +608,9 @@
     align-items: center;
     padding: 0.5rem 1.25rem;
     min-height: 52px;
-    background: rgba(12, 12, 12, 0.4);
+    background: var(--surface-subtle);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(197, 160, 89, 0.08);
+    border: 1px solid var(--hairline);
     border-radius: 6px;
     gap: 1.25rem;
     transition: all 0.25s ease;
@@ -1289,6 +1289,12 @@
             opacity: 0.8;
         }
 
+        // Icon lives in every card but only shows when the card falls back
+        // to the placeholder state (missing/broken photo).
+        .photo-placeholder {
+            display: none;
+        }
+
         .gallery-overlay {
             position: absolute;
             inset: 0;
@@ -1324,12 +1330,24 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(197, 160, 89, 0.02);
+            // Faint gold sheen reads as a card in BOTH themes: subtle warm
+            // tint on white (light) and a soft glow on black (dark) instead
+            // of a flat black / broken box.
+            background: linear-gradient(135deg, rgba(197, 160, 89, 0.12), rgba(197, 160, 89, 0.03));
             border-style: dashed;
 
             .photo-placeholder {
+                display: block;
                 font-size: 3rem;
-                opacity: 0.2;
+                opacity: 0.35;
+            }
+
+            // No photo behind the label: drop the dark scrim so the card
+            // matches the theme (was fading to black over an empty card).
+            .gallery-overlay {
+                background: transparent;
+                justify-content: center;
+                align-items: flex-end;
             }
         }
     }

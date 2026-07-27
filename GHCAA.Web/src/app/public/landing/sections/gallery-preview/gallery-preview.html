@@ -10,7 +10,8 @@
         <div class="gallery-grid">
             @for (photo of getFeaturedPhotos(); track photo.id) {
             <div class="gallery-item glass-card" (click)="viewFull(photo.photoPath)">
-                <img [src]="photo.photoPath" [alt]="photo.galleryTitle">
+                <img [src]="photo.photoPath" [alt]="photo.galleryTitle" (error)="onImgError($event)">
+                <div class="photo-placeholder">📸</div>
                 <div class="gallery-overlay">
                     <span>{{ photo.galleryTitle }}</span>
                 </div>
