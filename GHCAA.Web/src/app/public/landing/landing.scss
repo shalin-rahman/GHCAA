@@ -341,6 +341,28 @@
         }
     }
 
+    /* Shared label colors for BOTH columns (values + symbolism).
+       Without this the values column inherits the dark-first default
+       and its text is invisible in light theme. */
+    .s-cnt {
+        flex: 1;
+
+        strong {
+            display: block;
+            font-size: 1rem;
+            color: var(--accent-color);
+            margin-bottom: 0.2rem;
+            font-weight: 800;
+        }
+
+        p {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin: 0;
+            line-height: 1.4;
+        }
+    }
+
     .column-logo {
         text-align: center;
         padding: 2rem;
@@ -421,25 +443,6 @@
             background: rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
         }
-
-    .s-cnt {
-        flex: 1;
-
-        strong {
-            display: block;
-            font-size: 1rem;
-            color: var(--accent-color);
-            margin-bottom: 0.2rem;
-            font-weight: 800;
-        }
-
-        p {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            margin: 0;
-            line-height: 1.4;
-        }
-    }
     }
 }
 
