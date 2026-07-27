@@ -78,7 +78,7 @@
 
     .option-item {
         padding: 1.25rem 1.75rem;
-        background: rgba(255, 255, 255, 0.03);
+        background: var(--card-bg);
         border: 1px solid var(--border-color);
         border-radius: 16px;
         display: flex;

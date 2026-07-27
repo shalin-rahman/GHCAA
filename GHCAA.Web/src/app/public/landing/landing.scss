@@ -878,6 +878,13 @@
             font-weight: 300;
         }
     }
+
+    // "Join This Tier" CTA: full-width, spaced block button (was a bare
+    // inline link with no surrounding margin).
+    > .btn {
+        margin-top: 1rem;
+        width: 100%;
+    }
 }
 
 .criteria-summary {

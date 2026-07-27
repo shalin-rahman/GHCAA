@@ -166,7 +166,7 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 2rem;
-        border-left: 1px solid rgba(255,255,255,0.05);
+        border-left: 1px solid var(--card-border);
         align-items: center;
 
         @media (max-width: 1280px) {
@@ -177,7 +177,7 @@
         @media (max-width: 1024px) {
             grid-column: 1 / -1;
             border-left: none;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid var(--card-border);
         }
 
         .meta-sub {
@@ -198,9 +198,9 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: rgba(255,255,255,0.03);
+                background: var(--card-bg);
                 border-radius: 8px;
-                border: 1px solid rgba(255,255,255,0.05);
+                border: 1px solid var(--card-border);
                 flex-shrink: 0;
             }
 
@@ -241,14 +241,14 @@
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
-        border-left: 1px solid rgba(255,255,255,0.05);
+        border-left: 1px solid var(--card-border);
         background: rgba(var(--accent-color-rgb), 0.015);
         min-width: 280px;
 
         @media (max-width: 1024px) {
             grid-column: 1 / -1;
             border-left: none;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid var(--card-border);
             min-width: 0;
         }
 
@@ -282,8 +282,8 @@
 
         .count-btn {
             width: 100%;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 12px;
             padding: 0.75rem 1rem;
             display: flex;
@@ -453,7 +453,7 @@
         align-items: center;
         justify-content: space-between;
         padding: 0.6rem 1rem;
-        background: rgba(255, 255, 255, 0.03);
+        background: var(--card-bg);
         border: 1px solid rgba(197, 160, 89, 0.1);
         border-radius: 12px;
         font-size: 0.85rem;

@@ -28,7 +28,7 @@
 
         &:hover {
             color: var(--text-main);
-            background: rgba(255, 255, 255, 0.04);
+            background: var(--card-bg-hover);
         }
 
         &.active {
@@ -206,7 +206,7 @@
     padding: 0.4rem 0.5rem;
     border-radius: 6px;
     border: 1px solid transparent;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--card-bg);
     cursor: pointer;
     font-weight: 700;
     font-size: 0.78rem;
@@ -231,7 +231,7 @@
 }
 
 .year-filter-input {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 0.25rem 0.6rem;
@@ -243,7 +243,7 @@
     &:focus {
         outline: none;
         border-color: var(--accent-color);
-        background: rgba(255, 255, 255, 0.06);
+        background: var(--card-bg-hover);
         width: 160px;
     }
 }

@@ -63,6 +63,13 @@
 
 .nav-section {
     padding: 0.75rem 0.75rem 0.25rem;
+
+    /* Clearer grouping: separate each section (except the first) with spacing + a hairline */
+    & + & {
+        margin-top: 0.35rem;
+        border-top: 1px solid var(--glass-border);
+        padding-top: 1rem;
+    }
 }
 
 .nav-section-label {
@@ -91,7 +98,7 @@
 }
 
 .nav-item:hover {
-    background: var(--bg-color);
+    background: var(--card-bg-hover);
 }
 
 .nav-item.active {

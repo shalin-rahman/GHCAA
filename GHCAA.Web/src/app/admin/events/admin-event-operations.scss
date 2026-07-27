@@ -1,6 +1,6 @@
 .operations-container {
   padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--card-bg);
   border-radius: 12px;
 }
 
@@ -8,7 +8,7 @@
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--card-border);
   padding-bottom: 0.5rem;
 
   .op-tab {
@@ -25,7 +25,7 @@
     }
 
     &:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--card-bg-hover);
       opacity: 0.8;
     }
   }

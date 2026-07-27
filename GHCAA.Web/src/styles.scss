@@ -14,6 +14,9 @@
 
   --accent-color: #c5a059;
   --accent-color-rgb: 197, 160, 89;
+  /* Alias: many component SCSS files reference var(--accent-rgb) (the real token
+     is --accent-color-rgb). Defining both keeps those hover borders/badges working. */
+  --accent-rgb: 197, 160, 89;
   --accent-gold-bright: #e5c15e;
   --accent-gold-dark: #8e6d2a;
 
@@ -37,6 +40,14 @@
   --border-color: #e9ecef;
   --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(197, 160, 89, 0.12);
+
+  /* Card/elevated-surface tokens — the fix for dark-first components that hardcoded
+     rgba(255,255,255,x) surfaces (invisible on the light page). Point components at
+     these instead. Light = solid white card + real hairline; dark values below keep
+     today's translucent look. */
+  --card-bg: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.08);
+  --card-bg-hover: #f8f9fa;
 
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -85,6 +96,11 @@ body.dark-theme {
   --glass-bg: rgba(12, 12, 12, 0.9);
   --glass-border: rgba(255, 255, 255, 0.08);
   --shadow-md: 0 15px 45px rgba(0, 0, 0, 0.6);
+
+  /* Dark-theme card surfaces = the translucent look components were built around */
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-bg-hover: rgba(255, 255, 255, 0.05);
 }
 
 * {
@@ -173,7 +189,8 @@ p {
 
 .btn-accent {
   background: var(--gold-gradient);
-  color: var(--bg-color);
+  /* Dark text on gold in BOTH themes; var(--bg-color) would flip to white in light theme (low contrast). */
+  color: #121212;
   box-shadow: var(--shadow-gold);
 
   &:hover {
@@ -188,7 +205,7 @@ p {
   color: var(--text-main);
 
   &:hover {
-    background: rgba(0, 0, 0, 0.02);
+    background: var(--card-bg-hover);
     border-color: var(--accent-color);
   }
 }
