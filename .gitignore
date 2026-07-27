@@ -386,3 +386,10 @@ GHCAA.Mobile/test_output.txt
 playwright-report/
 blob-report/
 test-results/
+# Build / run log artifacts (generated, not tracked)
+api_stdout.txt
+api_stderr.txt
+build_current.txt
+build_errors.txt
+build_output.txt
+test_results.txt
