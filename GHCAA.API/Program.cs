@@ -16,6 +16,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 var configuration = builder.Configuration;
 
+// Hosting platforms (Render, Railway, Heroku, etc.) inject the port to listen on via the
+// PORT env var. Bind to it so the platform's health probe finds an open socket; otherwise
+// it never detects the app, times out, and SIGTERMs startup (Kestrel BindAsync → TaskCanceledException).
+var listenPort = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(listenPort))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{listenPort}");
+}
+
 JwtSigningKeyResolver.Resolve(configuration, builder.Environment);
 
 var keyRingPath = configuration["DataProtection:KeyRingPath"];
