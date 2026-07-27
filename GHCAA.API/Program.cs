@@ -244,7 +244,18 @@ if (File.Exists(spaIndexPath))
         }
         ctx.Response.ContentType = "text/html";
         await ctx.Response.SendFileAsync(spaIndexPath);
-    });
+    }).AllowAnonymous(); // exempt the SPA shell from the global RequireAuthenticatedUser FallbackPolicy
+}
+
+// Ensure the database schema exists on boot for non-Visual profiles (Preprod/Production).
+// EnsureCreated builds the schema + HasData seed from the model on an empty database; it is a
+// no-op once the tables exist. The Visual profile has its own recreate/seed path below.
+// Migrations are not applied at runtime for this project.
+if (app.Configuration["ASP_SEED_PROFILE"] != "Visual")
+{
+    using var schemaScope = app.Services.CreateScope();
+    var schemaCtx = schemaScope.ServiceProvider.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
+    schemaCtx.Database.EnsureCreated();
 }
 
 // Seed OrganizationConfig with GHCAA defaults on first boot (idempotent, fault-tolerant)

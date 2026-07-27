@@ -163,6 +163,8 @@ Once Render shows **Live**:
   → the app wasn't listening on Render's `PORT`. **Fixed in code**: `Program.cs` now binds to
   `http://0.0.0.0:$PORT` when the `PORT` env var is present (Render sets it automatically). Make sure
   the deployed commit includes this fix.
+- **`relation "..." does not exist` in logs / login fails** → the schema wasn't created. **Fixed in code**: `Program.cs` now calls `EnsureCreated()` on boot for non-Visual profiles (builds schema + seed on the empty Neon DB). Ensure the deployed commit includes it.
+- **`GET /` returns 401 instead of the web app** → the SPA fallback was caught by the global `RequireAuthenticatedUser` policy. **Fixed in code**: the `MapFallback` now has `.AllowAnonymous()`.
 - **Web app loads but API calls 404/CORS** → confirm same origin (the `/api` path), not an old absolute URL.
 
 ---
