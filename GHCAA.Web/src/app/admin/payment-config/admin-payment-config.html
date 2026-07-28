@@ -4,7 +4,7 @@
     emptySubtitle="Configure how members pay dues and fees">
     <small subtitle>Showing {{ configs().length }} active payment gateway configurations</small>
     <div actions class="flex gap-4">
-        <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
+        <button (click)="openCreateForm()" class="btn btn-accent shadow-gold header-cta">
             <span class="icon">✨</span> Add Payment Method
         </button>
         <button *ngIf="configs().length === 0" (click)="seedDefaults()" class="btn btn-secondary">

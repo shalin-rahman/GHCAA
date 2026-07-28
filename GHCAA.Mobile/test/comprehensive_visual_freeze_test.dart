@@ -78,6 +78,7 @@ import 'package:ghcaa_mobile/features/admin/roles_service.dart';
 import 'package:ghcaa_mobile/features/networking/family_service.dart';
 import 'package:ghcaa_mobile/core/services/biometric_service.dart';
 import 'package:ghcaa_mobile/core/theme/app_theme.dart';
+import 'package:ghcaa_mobile/features/theme/dynamic_theme_service.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -444,6 +445,12 @@ Widget wrapInApp(Widget child, {List<Override> overrides = const []}) {
       rolesServiceProvider.overrideWith((ref) => FakeRolesService()),
       familyServiceProvider.overrideWith((ref) => FakeFamilyService()),
       biometricServiceProvider.overrideWith((ref) => FakeBiometricService()),
+      // Resolve the special-theme future to null (= default theme) so no test
+      // depends on a live `/Theme/active` Dio call. Without this it stays in the
+      // loading state through the 2-frame pump; ThemeManagementScreen then renders
+      // its `LogoSpinner` loading branch (infinite AnimationController.repeat() +
+      // an un-precached Image.asset) which throws during pump on Linux CI only.
+      activeSpecialThemeProvider.overrideWith((ref) async => null),
       ...overrides,
     ],
     child: MaterialApp.router(

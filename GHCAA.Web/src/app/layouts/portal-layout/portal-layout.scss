@@ -1,3 +1,27 @@
+/* ─── Shell layout (co-located, not only in global styles.scss) ───
+   The portal shell previously relied ENTIRELY on the global `.app-shell` /
+   `.main-content` rules in styles.scss. If that global sheet is even slightly
+   out of sync with the component bundle (stale CDN cache, partial load), the
+   flex row is lost and the whole portal collapses to a vertical stack (sidebar
+   on top, content below). admin-layout never has this problem because it owns
+   its `.admin-wrapper` layout in-component — so mirror that here. These are
+   scoped to portal-layout only; the public about/contact pages keep the global
+   `.main-content`. */
+.app-shell {
+    display: flex;
+    height: 100vh;
+    background: var(--bg-color);
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+    min-width: 0;
+}
+
 .sidebar {
     width: 280px;
     background: var(--surface-color);
