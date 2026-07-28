@@ -202,9 +202,14 @@
 }
 
 .admin-header-inner {
+    // Shares the `portal-content` class with .admin-content so the breadcrumb lines
+    // up with the page body below. But portal-content's 2.5rem (40px) all-round padding
+    // overflows this 60px-tall bar, so override to horizontal-only padding here.
+    padding: 0 2.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 }
 
 .admin-breadcrumbs {

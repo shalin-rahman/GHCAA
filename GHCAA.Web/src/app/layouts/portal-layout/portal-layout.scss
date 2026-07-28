@@ -182,9 +182,14 @@
 }
 
 .top-bar-inner {
+    // Shares `portal-content` with .page-content so the bar aligns with the page
+    // body below, but portal-content's 2.5rem all-round padding overflows this
+    // fixed-height bar — restrict to horizontal padding here.
+    padding: 0 2.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
 }
 
 .left-section,
