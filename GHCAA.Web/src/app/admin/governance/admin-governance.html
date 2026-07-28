@@ -1,15 +1,11 @@
 <div class="admin-feature">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Executive Committee</h2>
-            <small>Showing {{ filteredMembers().length }} of {{ committeeMembers().length }} assignments for {{ selectedPeriod()?.title || 'selected term' }}</small>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-accent btn-md" (click)="openNewPeriod()">
-                <span class="icon">📅</span> New EC Period
-            </button>
-        </div>
-    </div>
+    <app-page-header title="Executive Committee" [total]="committeeMembers().length"
+        emptySubtitle="Executive Committee assignments for {{ selectedPeriod()?.title || 'selected term' }}">
+        <small subtitle>Showing {{ filteredMembers().length }} of {{ committeeMembers().length }} assignments for {{ selectedPeriod()?.title || 'selected term' }}</small>
+        <button actions class="btn btn-accent btn-md" (click)="openNewPeriod()">
+            <span class="icon">📅</span> New EC Period
+        </button>
+    </app-page-header>
 
     <div class="governance-grid">
         <!-- Sidebar: Periods List -->
@@ -43,17 +39,13 @@
                 <div class="title-wrap">
                     <h3>{{ selectedPeriod().title }}</h3>
                     <div class="filter-bar">
-                        <div class="search-wrap">
-                            <span class="search-icon">🔍</span>
-                            <input type="text" [ngModel]="committeeSearch()" (ngModelChange)="committeeSearch.set($event)"
-                                placeholder="Search users by name or email…" class="search-input">
-                            @if (committeeSearch()) {
-                            <button class="clear-search" (click)="committeeSearch.set('')" title="Clear search">×</button>
-                            }
-                        </div>
+                        <app-search-bar [value]="committeeSearch()" (valueChange)="committeeSearch.set($event)"
+                            placeholder="Search users by name or email…"></app-search-bar>
+                        @if (committeeMembers().length) {
                         <div class="record-meta">
                             Showing {{ filteredMembers().length }} of {{ committeeMembers().length }} assignments
                         </div>
+                        }
                     </div>
                     <div class="actions flex items-center gap-3">
                         @if (!selectedPeriod().isActive) {
@@ -90,7 +82,7 @@
                         <tr>
                             <td class="member-cell" style="display: flex; gap: 1rem; align-items: center;">
                                 @if (em.member?.photoPath) {
-                                <img [src]="getImageUrl(em.member.photoPath)" class="member-avatar photo" alt="Photo" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid rgba(255,255,255,0.1)">
+                                <img [src]="getImageUrl(em.member.photoPath)" class="member-avatar photo" alt="Photo" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid var(--glass-border)">
                                 } @else {
                                 <div class="avatar" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(212,175,55,0.1);color:#d4af37;font-weight:bold;">{{ em.member?.fullName?.[0] }}</div>
                                 }
@@ -119,7 +111,7 @@
                         </tr>
                         } @empty {
                         <tr>
-                            <td colspan="4">
+                            <td colspan="6">
                                 <div class="empty-state py-12">
                                     <span class="text-3xl mb-2 block">🎗️</span>
                                     <p class="text-muted italic">{{ committeeSearch() ? 'No assignments match your search.' : 'No roles assigned to this period yet.' }}</p>

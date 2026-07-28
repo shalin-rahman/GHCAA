@@ -1,15 +1,11 @@
 <div class="admin-feature reveal-top">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>User Roles</h2>
-            <small>Showing {{ filteredUsers().length }} of {{ users().length }} identities with administrative privilege levels</small>
-        </div>
-        <div class="header-actions">
-            <button (click)="showCreateForm.set(true)" class="btn btn-accent shadow-gold">
-                Create System Administrator
-            </button>
-        </div>
-    </div>
+    <app-page-header title="User Roles" [total]="users().length"
+        emptySubtitle="Administrative access and role assignment">
+        <small subtitle>Showing {{ filteredUsers().length }} of {{ users().length }} identities with administrative privilege levels</small>
+        <button actions (click)="showCreateForm.set(true)" class="btn btn-accent shadow-gold">
+            Create System Administrator
+        </button>
+    </app-page-header>
 
     <!-- Create Admin Modal -->
     <div class="modal-overlay" *ngIf="showCreateForm()" (click)="showCreateForm.set(false)">
@@ -38,7 +34,8 @@
                             <input [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                                 [class.border-red-500]="createForm.get('password')?.touched && createForm.get('password')?.invalid"
                                 placeholder="••••••••"
-                                class="w-full pr-12 bg-black/40 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-accent">
+                                style="background:rgba(var(--primary-rgb),0.05);border:1px solid var(--glass-border);color:var(--text-main)"
+                                class="w-full pr-12 rounded-lg px-4 py-2 outline-none focus:border-accent">
                             <button type="button"
                                 class="toggle-password absolute right-3 text-white/40 hover:text-accent transition-colors"
                                 (click)="togglePassword()" tabindex="-1">
@@ -75,7 +72,8 @@
         <div class="flex gap-4 max-w-md">
             <input type="text" [ngModel]="customRoleName()" (ngModelChange)="customRoleName.set($event)"
                 placeholder="e.g. Content Editor"
-                class="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-accent">
+                style="background:rgba(var(--primary-rgb),0.05);border:1px solid var(--glass-border);color:var(--text-main)"
+                class="flex-1 rounded-lg px-4 py-2 outline-none focus:border-accent">
             <button class="btn btn-primary" (click)="createCustomRole()"
                 [disabled]="creatingRole() || !customRoleName()">
                 {{ creatingRole() ? 'Creating...' : 'Create' }}
@@ -85,17 +83,13 @@
 
     <div class="glass-card table-wrap overflow-hidden">
         <div class="filter-bar">
-            <div class="search-wrap">
-                <span class="search-icon">🔍</span>
-                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-                    placeholder="Search users by name or email…" class="search-input">
-                @if (searchQuery()) {
-                <button class="clear-search" (click)="searchQuery.set('')" title="Clear search">×</button>
-                }
-            </div>
+            <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+                placeholder="Search users by name or email…"></app-search-bar>
+            @if (users().length) {
             <div class="record-meta">
                 Showing {{ filteredUsers().length }} of {{ users().length }} system administrators
             </div>
+            }
         </div>
         @if (loading()) {
         <div class="loading-state py-20 text-center animate-pulse">

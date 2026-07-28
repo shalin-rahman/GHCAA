@@ -5,12 +5,13 @@ import { FinancialService } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { FINANCIAL_CATEGORY_OPTIONS, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-admin-fee-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LogoSpinnerComponent, PageHeaderComponent],
   templateUrl: './admin-fee-config.html',
   styleUrl: './admin-fee-config.scss'
 })

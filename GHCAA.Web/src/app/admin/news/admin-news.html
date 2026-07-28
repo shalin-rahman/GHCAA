@@ -1,27 +1,17 @@
 <div class="admin-feature">
     @if (!showForm()) {
-    <div class="page-header">
-        <div class="header-text">
-            <h2>News Posts</h2>
-            <small>Showing {{ filteredNews().length }} of {{ newsList().length }} news entries</small>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-accent shadow-gold" (click)="openForm()">
-                <span class="icon">✍️</span> Draft New Story
-            </button>
-        </div>
-    </div>
+    <app-page-header title="News Posts" [total]="newsList().length"
+        emptySubtitle="Publish and manage news announcements">
+        <small subtitle>Showing {{ filteredNews().length }} of {{ newsList().length }} news entries</small>
+        <button actions class="btn btn-accent shadow-gold" (click)="openForm()">
+            <span class="icon">✍️</span> Draft New Story
+        </button>
+    </app-page-header>
 
     <!-- Toolbar for Search and Filters -->
     <div class="filter-bar">
-        <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-                placeholder="Search headlines or categories…" class="search-input">
-            @if (searchQuery()) {
-            <button class="clear-search" (click)="searchQuery.set('')" title="Clear search">×</button>
-            }
-        </div>
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search headlines or categories…"></app-search-bar>
     </div>
     } @else {
     <div class="page-header flex items-center gap-6 mb-8">

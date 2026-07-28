@@ -58,7 +58,7 @@
 
     <!-- Replies / Posts Section -->
     <div class="replies-section">
-      <h3>Discussion Replies ({{ posts().length }})</h3>
+      <h3>Discussion Replies@if (posts().length) { ({{ posts().length }})}</h3>
 
       <div class="replies-list">
         @for (post of posts(); track post.id) {

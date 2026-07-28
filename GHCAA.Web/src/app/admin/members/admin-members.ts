@@ -10,6 +10,8 @@ import { DatePipe } from '@angular/common';
 import * as XLSX from 'xlsx';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
@@ -18,7 +20,7 @@ import { toWireDate } from '../../core/utils/date.util';
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
   providers: [DatePipe],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'

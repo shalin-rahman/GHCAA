@@ -76,7 +76,7 @@
                                     <span class="text-[10px] payment-date">{{ item.paidAt | date:'dd-MM-yyyy' }}</span>
                                 </td>
                                 <td>
-                                    <span class="text-white font-black">৳{{ item.amount }}</span>
+                                    <span class="font-black">৳{{ item.amount }}</span>
                                 </td>
                                 <td>
                                     <span class="badge" [ngClass]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>

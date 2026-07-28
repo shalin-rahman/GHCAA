@@ -1,16 +1,11 @@
 <div class="admin-feature reveal-top">
     @if (!showForm()) {
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Special Themes</h2>
-            <small>Manage dynamic navigation bar appearance for specific dates.</small>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-accent shadow-gold" (click)="openCreate()">
-                <span class="icon">✨</span> Add New Theme
-            </button>
-        </div>
-    </div>
+    <app-page-header title="Special Themes"
+        emptySubtitle="Manage dynamic navigation bar appearance for specific dates.">
+        <button actions class="btn btn-accent shadow-gold" (click)="openCreate()">
+            <span class="icon">✨</span> Add New Theme
+        </button>
+    </app-page-header>
 
     <div class="glass-card table-wrap reveal-bottom">
         @if (loading()) {

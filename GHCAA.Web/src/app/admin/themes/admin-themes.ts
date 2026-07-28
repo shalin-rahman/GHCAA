@@ -5,12 +5,13 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ThemeService, SpecialDayTheme } from '../../core/services/theme.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
     selector: 'app-admin-themes',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent],
     templateUrl: './admin-themes.html',
     styleUrl: './admin-themes.scss'
 })

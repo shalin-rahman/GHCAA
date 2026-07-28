@@ -1,11 +1,10 @@
 <div class="admin-feature reveal-top">
     @if (!showForm()) {
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Manage Events</h2>
-            <small>Showing {{ activeTab() === 'manage' ? filteredEvents().length : totalItems() }} {{ activeTab() === 'manage' ? 'events' : 'participations' }}</small>
-        </div>
-        <div class="header-actions flex items-center gap-3">
+    <app-page-header title="Manage Events"
+        [total]="activeTab() === 'manage' ? events().length : totalItems()"
+        emptySubtitle="Create and manage events and registrations">
+        <small subtitle>Showing {{ activeTab() === 'manage' ? filteredEvents().length : totalItems() }} {{ activeTab() === 'manage' ? 'events' : 'participations' }}</small>
+        <div actions class="flex items-center gap-3">
             @if (activeTab() === 'approvals') {
             <app-export-buttons [data]="registrations()" fileName="event_registrations" [pdfHeaders]="pdfHeaders"
                 [pdfDataMapper]="pdfMapper" [exporting]="isExporting()" (exportStart)="handleExport($event)"
@@ -16,7 +15,7 @@
                 <span class="icon">✨</span> Launch New Event
             </button>
         </div>
-    </div>
+    </app-page-header>
     } @else {
     <div class="page-header flex items-center gap-6 mb-10">
         <button (click)="showForm.set(false)" class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
@@ -222,14 +221,8 @@
     <div class="animate-fade-in">
         <!-- Search Bar for Management Hub -->
         <div class="filter-bar">
-            <div class="search-wrap">
-                <span class="search-icon">🔍</span>
-                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-                    placeholder="Search events by title or location…" class="search-input">
-                @if (searchQuery()) {
-                <button class="clear-search" (click)="searchQuery.set('')" title="Clear search">×</button>
-                }
-            </div>
+            <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+                placeholder="Search events by title or location…"></app-search-bar>
         </div>
         <div class="grid gap-4">
             @for (ev of filteredEvents(); track ev.id) {
@@ -287,14 +280,8 @@
     <div class="animate-fade-in">
         <!-- Filters Area -->
         <div class="filter-bar">
-            <div class="search-wrap">
-                <span class="search-icon">🔍</span>
-                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
-                    placeholder="Search participant or reference…" class="search-input">
-                @if (searchQuery()) {
-                <button class="clear-search" (click)="searchQuery.set(''); onFilterChange()" title="Clear search">×</button>
-                }
-            </div>
+            <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event); onFilterChange()"
+                placeholder="Search participant or reference…"></app-search-bar>
 
             <select [ngModel]="selectedEventIdFilter()"
                 (ngModelChange)="selectedEventIdFilter.set($event); onFilterChange()" class="status-select">
@@ -353,7 +340,7 @@
                         </td>
                         <td class="px-6 py-4 text-sm opacity-80">{{ reg.eventTitle }}</td>
                         <td class="px-6 py-4">
-                            <div class="text-xs font-black text-white/90">
+                            <div class="text-xs font-black">
                                 {{ (reg.contributionAmount || reg.eventFee || 0) > 0 ? (reg.contributionAmount ||
                                 reg.eventFee | currency:'BDT ':'code') : 'Free' }}
                             </div>

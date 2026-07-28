@@ -1,23 +1,20 @@
 <div class="articles-container admin-feature">
-    <header class="page-header">
-        <div class="header-text">
-            <h2>Articles & Submissions</h2>
-            <small>Share your stories, event highlights, and magazine entries with the community.</small>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-accent" (click)="openCreate()">
-                <span class="icon">✍️</span> Write New Article
-            </button>
-        </div>
-    </header>
+    <app-page-header title="Articles & Submissions"
+        emptySubtitle="Share your stories, event highlights, and magazine entries with the community.">
+        <button actions class="btn btn-accent" (click)="openCreate()">
+            <span class="icon">✍️</span> Write New Article
+        </button>
+    </app-page-header>
 
     @if (!showForm()) {
     <div class="submissions-list animate-fade-in">
+        @if (mySubmissions().length) {
         <div class="filter-bar glass-card mb-6">
             <div class="stat-group">
                 <span class="text-muted">You have submitted {{ mySubmissions().length }} articles</span>
             </div>
         </div>
+        }
 
         @if (loading()) {
         <div class="loading-state glass-card py-20 text-center">

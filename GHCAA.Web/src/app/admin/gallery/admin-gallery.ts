@@ -1,4 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -10,7 +12,7 @@ import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 @Component({
     selector: 'app-admin-gallery',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent],
     templateUrl: './admin-gallery.html',
     styleUrl: './admin-gallery.scss'
 })

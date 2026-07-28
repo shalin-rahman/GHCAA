@@ -1,21 +1,13 @@
 <div class="admin-feature">
-    <header class="page-header">
-        <div class="header-text">
-            <h2>Submission Review</h2>
-            <small>Showing {{ filteredArticles().length }} of {{ pendingArticles().length }} pending submissions</small>
-        </div>
-    </header>
+    <app-page-header title="Submission Review" [total]="pendingArticles().length"
+        emptySubtitle="Review member-submitted articles">
+        <small subtitle>Showing {{ filteredArticles().length }} of {{ pendingArticles().length }} pending submissions</small>
+    </app-page-header>
 
     <!-- Search Bar -->
     <div class="filter-bar">
-        <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-                placeholder="Search by title, author or category…" class="search-input">
-            @if (searchQuery()) {
-            <button class="clear-search" (click)="searchQuery.set('')" title="Clear search">×</button>
-            }
-        </div>
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search by title, author or category…"></app-search-bar>
     </div>
 
     @if (loading()) {

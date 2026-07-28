@@ -1,4 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -7,7 +9,7 @@ import { NotificationService } from '../../core/services/notification.service';
 @Component({
     selector: 'app-admin-roles',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, SearchBarComponent],
     templateUrl: './admin-roles.html',
     styleUrl: './admin-roles.scss'
 })

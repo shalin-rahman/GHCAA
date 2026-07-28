@@ -1,11 +1,9 @@
 <div class="admin-feature reveal-top">
   @if (!showForm()) {
-  <div class="page-header">
-    <div class="header-text">
-      <h2>Payment Settings</h2>
-      <small>Showing {{ configs().length }} active payment gateway configurations</small>
-    </div>
-    <div class="header-actions flex gap-4">
+  <app-page-header title="Payment Settings" [total]="configs().length"
+    emptySubtitle="Configure how members pay dues and fees">
+    <small subtitle>Showing {{ configs().length }} active payment gateway configurations</small>
+    <div actions class="flex gap-4">
         <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
             <span class="icon">✨</span> Add Payment Method
         </button>
@@ -13,7 +11,7 @@
             Restore Defaults
         </button>
     </div>
-  </div>
+  </app-page-header>
 
   <div class="glass-card mb-8 p-6" *ngIf="loading()">
       <p class="opacity-50 text-center animate-pulse">Synchronizing financial logic networks...</p>

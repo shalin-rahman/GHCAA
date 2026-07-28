@@ -83,19 +83,19 @@ import { AuthService } from '../../core/services/auth.service';
                           @if (selectedMethod()?.walletNumber) {
                               <div class="detail-item">
                                   <small class="text-muted text-[9px] uppercase font-black block mb-1">Wallet Number</small>
-                                  <span class="text-xl font-black text-white tracking-widest">{{ selectedMethod()?.walletNumber }}</span>
+                                  <span class="text-xl font-black text-main tracking-widest">{{ selectedMethod()?.walletNumber }}</span>
                               </div>
                           }
                           @if (selectedMethod()?.accountNumber) {
                               <div class="detail-item">
                                   <small class="text-muted text-[9px] uppercase font-black block mb-1">Account Number</small>
-                                  <span class="text-xl font-black text-white tracking-widest">{{ selectedMethod()?.accountNumber }}</span>
+                                  <span class="text-xl font-black text-main tracking-widest">{{ selectedMethod()?.accountNumber }}</span>
                               </div>
                           }
                           @if (selectedMethod()?.accountHolderName) {
                               <div class="detail-item">
                                   <small class="text-muted text-[9px] uppercase font-black block mb-1">Account Holder</small>
-                                  <span class="text-sm font-bold text-white">{{ selectedMethod()?.accountHolderName }}</span>
+                                  <span class="text-sm font-bold text-main">{{ selectedMethod()?.accountHolderName }}</span>
                               </div>
                           }
                       </div>
@@ -119,7 +119,7 @@ import { AuthService } from '../../core/services/auth.service';
                         Transaction ID / Reference Number *
                     </label>
                     <input type="text" [(ngModel)]="referenceValue" (ngModelChange)="onReferenceChange($event)" 
-                           class="w-full bg-surface-color/50 border-2 border-border-color rounded-xl px-4 py-3 text-white font-mono text-sm"
+                           class="w-full bg-surface-color/50 border-2 border-border-color rounded-xl px-4 py-3 text-main font-mono text-sm"
                            placeholder="Enter TxnID / Reference">
                 </div>
               }
@@ -152,7 +152,7 @@ import { AuthService } from '../../core/services/auth.service';
                         <div class="animate-fade-in">
                             <label class="block text-[9px] font-black uppercase tracking-widest text-accent mb-2">Method Label (e.g. My Pink bKash)</label>
                             <input type="text" [(ngModel)]="saveLabel" 
-                                   class="w-full bg-surface-color border border-border-color rounded-lg px-3 py-2 text-xs text-white" 
+                                   class="w-full bg-surface-color border border-border-color rounded-lg px-3 py-2 text-xs text-main"
                                    placeholder="Give this method a name">
                         </div>
                     }

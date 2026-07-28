@@ -6,11 +6,13 @@ import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { ACADEMIC_CERTIFICATES, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getAcademicYears, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-member-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
   templateUrl: './member-approval.html',
   styleUrl: './member-approval.scss'
 })

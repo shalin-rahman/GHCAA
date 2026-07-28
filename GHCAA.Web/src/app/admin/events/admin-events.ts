@@ -5,6 +5,8 @@ import { EventsService } from '../../core/services/events.service';
 import { AlumniEvent, EventRegistration } from '../../core/models/business.models';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { NotificationService } from '../../core/services/notification.service';
@@ -15,7 +17,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 @Component({
     selector: 'app-admin-events',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent],
     templateUrl: './admin-events.html',
     styleUrl: './admin-events.scss'
 })

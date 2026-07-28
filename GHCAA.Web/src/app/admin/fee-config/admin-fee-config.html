@@ -1,16 +1,12 @@
 <div class="admin-feature reveal-top">
     @if (!showForm()) {
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Fee Policy</h2>
-            <small>Showing {{ configs().length }} fee configuration schedules</small>
-        </div>
-        <div class="header-actions flex gap-4">
-            <button class="btn btn-accent shadow-gold" (click)="openCreateForm()" [disabled]="loading()">
-                <span class="icon">➕</span> New Fee Schedule
-            </button>
-        </div>
-    </div>
+    <app-page-header title="Fee Policy" [total]="configs().length"
+        emptySubtitle="Define membership fee schedules">
+        <small subtitle>Showing {{ configs().length }} fee configuration schedules</small>
+        <button actions class="btn btn-accent shadow-gold" (click)="openCreateForm()" [disabled]="loading()">
+            <span class="icon">➕</span> New Fee Schedule
+        </button>
+    </app-page-header>
 
     <div class="glass-card mb-8 p-6" *ngIf="loading()">
         <div class="loading-state">
@@ -41,7 +37,7 @@
                             {{ getCategoryLabel(c.category) }}
                         </span>
                     </td>
-                    <td><span class="text-white font-bold">{{ c.membershipType }}</span></td>
+                    <td><span class="font-bold">{{ c.membershipType }}</span></td>
                     <td class="amount font-mono text-accent">৳ {{ c.amount | number }}</td>
                     <td><span class="text-xs">{{ c.effectiveDate | date:'dd-MM-yyyy' }}</span></td>
                     <td><span class="text-xs opacity-60">{{ c.effectiveTo ? (c.effectiveTo | date:'dd-MM-yyyy') :

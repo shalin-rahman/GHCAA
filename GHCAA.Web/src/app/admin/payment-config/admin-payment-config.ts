@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { PaymentConfigService, PaymentConfig } from '../../core/services/payment-config.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 
 @Component({
   selector: 'app-admin-payment-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './admin-payment-config.html',
   styleUrl: './admin-payment-config.scss'
 })

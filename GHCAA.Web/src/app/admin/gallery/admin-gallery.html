@@ -1,15 +1,11 @@
 <div class="admin-feature">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Gallery Albums</h2>
-            <small>Showing {{ filteredGalleries().length }} of {{ galleries().length }} albums</small>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-accent btn-md" (click)="showForm.set(!showForm())">
-                {{ showForm() ? '✕ Close Form' : '📸 New Album' }}
-            </button>
-        </div>
-    </div>
+    <app-page-header title="Gallery Albums" [total]="galleries().length"
+        emptySubtitle="Photo gallery albums">
+        <small subtitle>Showing {{ filteredGalleries().length }} of {{ galleries().length }} albums</small>
+        <button actions class="btn btn-accent btn-md" (click)="showForm.set(!showForm())">
+            {{ showForm() ? '✕ Close Form' : '📸 New Album' }}
+        </button>
+    </app-page-header>
 
     @if (showForm()) {
     <div class="admin-card glass-card animate-fade mb-8">
@@ -57,14 +53,8 @@
 
     <!-- Search Bar -->
     <div class="filter-bar">
-        <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-                placeholder="Search albums by title or location…" class="search-input">
-            @if (searchQuery()) {
-            <button class="clear-search" (click)="searchQuery.set('')" title="Clear search">×</button>
-            }
-        </div>
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search albums by title or location…"></app-search-bar>
     </div>
 
     <div class="album-grid mt-4">

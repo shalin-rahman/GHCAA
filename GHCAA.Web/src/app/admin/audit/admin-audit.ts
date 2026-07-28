@@ -1,4 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -6,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
 @Component({
     selector: 'app-admin-audit',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent],
     templateUrl: './admin-audit.html',
     styleUrl: './admin-audit.scss'
 })

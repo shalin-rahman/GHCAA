@@ -1,10 +1,8 @@
 <div class="admin-feature">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Financial Ledger</h2>
-            <small>Showing {{ transactions().length }} of {{ totalItems() }} financial records</small>
-        </div>
-        <div class="header-actions flex items-center gap-3">
+    <app-page-header title="Financial Ledger" [total]="totalItems()"
+        emptySubtitle="Association financial transaction ledger">
+        <small subtitle>Showing {{ transactions().length }} of {{ totalItems() }} financial records</small>
+        <div actions class="flex items-center gap-3">
             <app-export-buttons [data]="transactions()" fileName="ghcaa_ledger" [pdfHeaders]="pdfHeaders"
                 [pdfDataMapper]="pdfMapper" [exporting]="isExporting()" (exportStart)="handleExport($event)"
                 title="Financial Ledger Export">
@@ -13,7 +11,7 @@
                 {{ showForm() ? '✕ Close Form' : '+ Add Record' }}
             </button>
         </div>
-    </div>
+    </app-page-header>
 
     <!-- Quick Summary -->
     <div class="balance-cards" *ngIf="!showForm()">
@@ -88,11 +86,8 @@
 
     <!-- Filters area -->
     <div class="filter-bar" *ngIf="!showForm()">
-        <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
-                placeholder="Search description or reference...">
-        </div>
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event); onFilterChange()"
+            placeholder="Search description or reference..."></app-search-bar>
 
         <select [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event); onFilterChange()"
             class="status-select">
@@ -140,7 +135,7 @@
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="5">
+                    <td colspan="6">
                         <div class="empty-state py-12">
                             <span class="text-3xl mb-2 block">💸</span>
                             <p class="text-muted italic">{{ searchQuery() ? 'No records match your search.' : 'No financial records found.' }}</p>

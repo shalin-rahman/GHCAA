@@ -1,22 +1,14 @@
 <div class="admin-feature">
-    <header class="page-header">
-        <div class="header-text">
-            <h2>Portal Enquiries</h2>
-            <small>Showing {{ filteredMessages().length }} of {{ messages().length }} enquiries</small>
-        </div>
-        <button class="btn btn-secondary btn-sm" (click)="loadMessages()">🔄 Refresh</button>
-    </header>
+    <app-page-header title="Portal Enquiries" [total]="messages().length"
+        emptySubtitle="Member and visitor enquiries">
+        <small subtitle>Showing {{ filteredMessages().length }} of {{ messages().length }} enquiries</small>
+        <button actions class="btn btn-secondary btn-sm" (click)="loadMessages()">🔄 Refresh</button>
+    </app-page-header>
 
     <!-- Search Bar -->
     <div class="filter-bar">
-        <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-                placeholder="Search by name, email or subject…" class="search-input">
-            @if (searchQuery()) {
-            <button class="clear-search" (click)="searchQuery.set('')" title="Clear search">×</button>
-            }
-        </div>
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search by name, email or subject…"></app-search-bar>
     </div>
 
     @if (loading()) {

@@ -6,12 +6,14 @@ import { API_ENDPOINTS, EC_ROLES, getECPositionName, getMembershipTypeLabel, get
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
     selector: 'app-admin-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
     templateUrl: './admin-governance.html',
     styleUrl: './admin-governance.scss'
 })

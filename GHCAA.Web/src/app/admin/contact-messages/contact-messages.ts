@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ContactService } from '../../core/services/contact.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-contact-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
   templateUrl: './contact-messages.html',
   styleUrl: './contact-messages.scss'
 })

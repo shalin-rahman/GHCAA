@@ -1,10 +1,8 @@
 <div class="admin-feature">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>All Members</h2>
-            <small>Showing {{ allMembers().length }} of {{ totalItems() }} total members</small>
-        </div>
-        <div class="header-actions flex items-center gap-3">
+    <app-page-header title="All Members" [total]="totalItems()"
+        emptySubtitle="Directory of all registered members">
+        <small subtitle>Showing {{ allMembers().length }} of {{ totalItems() }} total members</small>
+        <div actions class="flex items-center gap-3">
             <app-export-buttons [data]="allMembers()" fileName="ghcaa_members" [pdfHeaders]="pdfHeaders"
                 [pdfDataMapper]="pdfMapper" [exporting]="isExporting()" (exportStart)="handleExport($event)"
                 title="Member Registry Export">
@@ -15,18 +13,12 @@
             </button>
             }
         </div>
-    </div>
+    </app-page-header>
 
     <!-- Filters Section -->
     <div class="filter-bar">
-        <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
-                placeholder="Search by name, email, membership no…" class="search-input">
-            @if (searchQuery()) {
-            <button class="clear-search" (click)="searchQuery.set(''); onFilterChange()" title="Clear search">×</button>
-            }
-        </div>
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event); onFilterChange()"
+            placeholder="Search by name, email, membership no…"></app-search-bar>
         <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()"
             class="status-select ml-2">
             <option value="all">All Membership Statuses</option>

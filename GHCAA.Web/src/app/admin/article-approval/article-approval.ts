@@ -6,11 +6,13 @@ import { NewsPost } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { ARTICLE_CATEGORIES, SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-article-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
   templateUrl: './article-approval.html',
   styleUrl: './article-approval.scss'
 })
