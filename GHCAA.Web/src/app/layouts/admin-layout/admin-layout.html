@@ -50,11 +50,8 @@
             <div class="admin-header-inner portal-content">
                 <!-- 29F.4: hamburger toggles the sidebar drawer on mobile -->
                 <button type="button" class="sidebar-toggle" (click)="toggleSidebar()" aria-label="Toggle menu">☰</button>
-                <div class="admin-breadcrumbs">
-                    <span class="text-muted">{{ orgConfig.config()?.branding?.shortName || 'Admin' }} Admin</span>
-                    <span class="separator">/</span>
-                    <span class="current-page">{{ currentPageTitle() }}</span>
-                </div>
+                <app-breadcrumb [root]="(orgConfig.config()?.branding?.shortName || 'Admin') + ' Admin'"
+                    [current]="currentPageTitle()"></app-breadcrumb>
                 <div class="header-right">
                     <div class="header-user">
                         <span class="header-username">{{ auth.currentUser()?.username }}</span>

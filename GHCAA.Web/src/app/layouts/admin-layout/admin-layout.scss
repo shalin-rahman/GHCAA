@@ -216,27 +216,12 @@
     gap: 1rem;
 }
 
-.admin-breadcrumbs {
+/* Breadcrumb markup + styling now live in the self-contained <app-breadcrumb>
+   component. Only the host element's layout role in this header row is page-specific. */
+app-breadcrumb {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-
-    .text-muted {
-        color: var(--text-muted);
-    }
-
-    .separator {
-        color: var(--glass-border);
-        font-weight: 400;
-    }
-
-    .current-page {
-        color: var(--text-main);
-    }
+    min-width: 0;
 }
 
 .header-right {

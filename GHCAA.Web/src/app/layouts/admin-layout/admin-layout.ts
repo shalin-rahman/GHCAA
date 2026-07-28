@@ -7,11 +7,12 @@ import { NavService } from '../../core/services/nav.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { BreadcrumbComponent } from '../../common/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, BreadcrumbComponent],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss'
 })
