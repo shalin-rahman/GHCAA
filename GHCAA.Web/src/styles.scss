@@ -118,6 +118,21 @@ body {
   overflow-x: hidden;
 }
 
+/* Global link default. Without this, any anchor whose class doesn't set a color
+   (e.g. the footer "Secretariat Login" .footer-tag-link) falls back to the UA
+   blue underline, which reads as off-theme in both light and dark. Anchors that
+   carry a color from a more specific selector (.btn*, .nav-item, .footer-links a,
+   etc.) still win by specificity — this only catches the un-themed ones. */
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent-gold-bright);
+}
+
 /* Typography Overhaul */
 h1,
 h2,
