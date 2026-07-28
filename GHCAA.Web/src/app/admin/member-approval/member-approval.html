@@ -2,11 +2,17 @@
     <div class="page-header">
         <div class="header-text">
             <h2>Approvals</h2>
+            @if (pendingRequests().length) {
             <small>Showing {{ filteredRequests().length }} of {{ pendingRequests().length }} pending applications</small>
+            } @else {
+            <small>Membership admission queue</small>
+            }
         </div>
+        @if (pendingRequests().length) {
         <div class="header-actions">
             <div class="stat-badge">Pending: {{ pendingRequests().length }}</div>
         </div>
+        }
     </div>
 
     <!-- Search Bar -->

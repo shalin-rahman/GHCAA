@@ -56,7 +56,10 @@
                     <span class="current-page">{{ currentPageTitle() }}</span>
                 </div>
                 <div class="header-right">
-                    <span class="header-role-badge">{{ auth.currentUser()?.role }}</span>
+                    <div class="header-user">
+                        <span class="header-username">{{ auth.currentUser()?.username }}</span>
+                        <span class="header-role-badge">{{ auth.currentUser()?.role }}</span>
+                    </div>
                     <a routerLink="/portal/dashboard" class="header-btn">Exit Admin</a>
                     <button type="button" class="header-btn logout-btn" (click)="logout()">Sign Out</button>
                 </div>
