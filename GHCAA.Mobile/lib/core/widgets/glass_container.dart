@@ -32,9 +32,18 @@ class GlassContainer extends StatelessWidget {
               width: 1.5,
             ),
           ),
-          child: DefaultTextStyle(
-            style: const TextStyle(color: AppTheme.textPrimaryDark, fontFamily: 'Outfit'),
-            child: child,
+          // Transparent Material ancestor so ListTile/InkWell children have a
+          // surface to paint ink + background on. Without it, a ListTile sees
+          // the DecoratedBox background above it and throws the debug assertion
+          // "ListTile background color or ink splashes may be invisible" during
+          // pump (fails golden tests on CI). Transparency paints nothing, so
+          // the glass look is unchanged.
+          child: Material(
+            type: MaterialType.transparency,
+            child: DefaultTextStyle(
+              style: const TextStyle(color: AppTheme.textPrimaryDark, fontFamily: 'Outfit'),
+              child: child,
+            ),
           ),
         ),
       ),

@@ -292,7 +292,12 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
                     height: 100,
                     margin: const EdgeInsets.only(top: 8, bottom: 8),
                     decoration: BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.circular(8)),
-                    child: ListView.builder(
+                    // Transparent Material so the inner ListTiles have a surface to
+                    // paint on above this DecoratedBox background (avoids the
+                    // "ink splashes may be invisible" pump assertion on CI).
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: ListView.builder(
                       shrinkWrap: true,
                       itemCount: searchResults.length,
                       itemBuilder: (c, i) {
@@ -306,7 +311,8 @@ class _FamilyLinkScreenState extends ConsumerState<FamilyLinkScreen> with Single
                           },
                         );
                       }
-                    )
+                    ),
+                    ),
                   ),
                 const SizedBox(height: 12),
                 TextField(controller: membershipCtrl, style: const TextStyle(color: Colors.white, fontSize: 12), decoration: const InputDecoration(labelText: 'Target Membership No (e.g. REG-001)')),
