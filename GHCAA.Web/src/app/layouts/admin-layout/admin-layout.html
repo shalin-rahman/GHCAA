@@ -3,7 +3,7 @@
     <div class="admin-backdrop" (click)="isSidebarOpen.set(false)"></div>
     <nav class="admin-sidebar">
         <div class="admin-brand">
-            <img [src]="orgConfig.config()?.branding?.logoUrl || '/assets/logo.jpg'"
+            <img [src]="orgConfig.config()?.branding?.logoUrl || '/assets/logo.png'"
                 [alt]="orgConfig.config()?.branding?.shortName || 'Logo'" class="logo">
             <div class="brand-text">
                 <span class="brand-name">{{ orgConfig.config()?.branding?.shortName || 'Admin' }} Admin</span>
