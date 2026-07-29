@@ -22,7 +22,8 @@ have burned time before. Details live in `.claude/memory/` — follow the `[[lin
    `feedback_keep_lightweight.md`.
 4. **Theme/design changes go CENTRAL.** Fix in the shared token/util/widget layer
    (`styles.scss`, shared components, Flutter `app_theme.dart` / `glass_container.dart`), not
-   per-component.
+   per-component. For any UI/layout/theme work, invoke the **`ghcaa-design`** skill — it maps
+   the `styles.scss` tokens, `.form-group`/`.btn` classes, and the raw-native-control trap.
 
 ## Traps that have cost whole sessions
 
