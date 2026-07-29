@@ -47,11 +47,14 @@ A new color that no token covers → add the token (and its `body.dark-theme` va
 
 ## Traps (from real sessions)
 
-- **Live "raw controls / gray buttons" ≠ code bug.** If the shell is styled but form controls
-  and buttons look native on the LIVE site, and a fresh `npm run build` includes `.form-group`
-  and `.btn-accent` in the emitted CSS, it's a **stale `preprod` deploy** of an unpromoted
-  branch, not a regression. CSS reaches live only via deploy; a deploy carries the already-
-  correct CSS. Do NOT rewrite templates to "fix" it. See `session_reusable_controls_refactor.md`.
+- **Live "shell styled but form controls / portal internals raw" = inlineCritical × CSP, NOT
+  a stale deploy.** Angular's `inlineCritical` (on by default in preprod/production) inlines
+  above-fold CSS and defers the full `styles.css` via `<link media="print"
+  onload="this.media='all'">`; the app CSP blocks the inline `onload`, so the stylesheet stays
+  print-only and only critical CSS applies. FIXED centrally by `inlineCritical: false` in both
+  `angular.json` configs. Check the built `dist/.../index.html` for the `media="print"/onload`
+  pattern before blaming a stale bundle. See `gotcha_inlinecritical_csp.md`. (A genuinely stale
+  `preprod` deploy is still possible separately — see `session_reusable_controls_refactor.md`.)
 - **Light-theme invisible text** = a shared class colored only under one parent scope; the other
   theme inherits the dark-first white. Fix the token/scope centrally. See
   `gotcha_lighttheme_scoped_color.md`.
