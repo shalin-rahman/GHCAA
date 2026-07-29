@@ -118,6 +118,9 @@
     top: 0;
     z-index: 10100; /* Above all landing page elements */
     background: rgba(12, 12, 12, 0.9);
+    /* Public top nav is always dark in BOTH themes → keep gold text bright (undo the
+       light-theme dark-gold swap; descendant dropdown inherits this reset). */
+    --accent-text: var(--accent-color);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -163,7 +166,7 @@
     font-weight: 800;
     font-size: 1.1rem;
     letter-spacing: 1px;
-    color: var(--accent-color);
+    color: var(--accent-text);
 }
 
 .full {
@@ -280,7 +283,7 @@
     }
 
     &:hover {
-        color: var(--accent-color);
+        color: var(--accent-text);
         transform: translateY(-1px);
     }
 }

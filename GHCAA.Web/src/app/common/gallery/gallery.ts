@@ -93,7 +93,21 @@ export class Gallery implements OnInit {
   }
 
   viewFull(path: string) {
-    window.open(path, '_blank', 'noopener,noreferrer');
+    window.open(this.validImg(path), '_blank', 'noopener,noreferrer');
+  }
+
+  // A real image path is absolute (/uploads/…) or a full URL. Anything else — empty,
+  // or bad seed data like "..." — falls back to the bundled logo so the card/detail
+  // shows a placeholder instead of a broken-image glyph.
+  validImg(path?: string | null): string {
+    return path && (path.startsWith('/') || path.startsWith('http')) ? path : '/assets/logo.jpg';
+  }
+
+  // Runtime 404 (file missing on server / ephemeral disk): swap to the placeholder once.
+  onImgError(e: Event) {
+    const img = e.target as HTMLImageElement;
+    if (img.src.endsWith('/assets/logo.jpg')) return;
+    img.src = '/assets/logo.jpg';
   }
 }
 

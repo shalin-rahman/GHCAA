@@ -30,19 +30,7 @@
             }
         </nav>
 
-        <div class="sidebar-footer">
-            <div class="user-info" *ngIf="!isSidebarCollapsed()">
-                <div class="user-avatar">{{ auth.currentUser()?.username?.[0]?.toUpperCase() }}</div>
-                <div class="user-details">
-                    <span class="user-name">{{ auth.currentUser()?.fullName || auth.currentUser()?.username }}</span>
-                    <small class="user-role">{{ nav.isAdmin() ? 'Administrator' : 'Alumni Member' }}</small>
-                </div>
-            </div>
-            <button (click)="auth.logout()" class="btn btn-secondary logout-btn">
-                <span class="icon">🚪</span>
-                <span *ngIf="!isSidebarCollapsed()">Logout</span>
-            </button>
-        </div>
+        <!-- User identity + Logout live in the top-right header only (no duplication). -->
     </aside>
 
     <!-- Main Content Area -->
@@ -76,6 +64,9 @@
                             <small class="role">{{ nav.isAdmin() ? 'Administrator' : 'Alumni Member' }}</small>
                         </div>
                     </div>
+                    <button class="touch-target btn-icon logout-toggle" (click)="auth.logout()" title="Sign Out">
+                        🚪
+                    </button>
                 </div>
             </div>
         </header>

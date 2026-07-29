@@ -1,6 +1,9 @@
 .footer {
     background: #111111;
     color: white;
+    /* Footer is always dark in BOTH themes → keep gold text bright (undo the light-theme
+       dark-gold swap that only makes sense on surfaces that go light). Central per-shell reset. */
+    --accent-text: var(--accent-color);
     padding-top: 5rem;
     margin-top: 0;
     border-top: 1px solid var(--glass-border);
@@ -25,7 +28,7 @@
 
 .motto {
     font-style: italic;
-    color: var(--accent-color);
+    color: var(--accent-text);
     font-weight: 850;
     margin-bottom: 0.5rem;
     font-size: 0.82rem;
@@ -64,7 +67,7 @@
 }
 
 .footer-links a:hover {
-    color: var(--accent-color);
+    color: var(--accent-text);
     transform: translateX(5px);
 }
 
@@ -164,7 +167,7 @@
         .footer-tag {
             display: inline-block;
             white-space: nowrap;
-            color: var(--accent-color);
+            color: var(--accent-text);
             font-weight: 800;
         }
     }

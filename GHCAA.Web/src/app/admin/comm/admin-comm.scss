@@ -167,7 +167,7 @@
     &.active {
         border-color: var(--accent-color);
         background: rgba(var(--accent-color-rgb, 212, 175, 55), 0.1);
-        color: var(--accent-color);
+        color: var(--accent-text);
         box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 212, 175, 55), 0.08);
     }
 }
@@ -222,7 +222,7 @@
 
     &.checked {
         background: rgba(var(--accent-color-rgb, 212, 175, 55), 0.15);
-        color: var(--accent-color);
+        color: var(--accent-text);
         border-color: rgba(var(--accent-color-rgb, 212, 175, 55), 0.3);
         font-weight: 900;
         transform: scale(1.05);
@@ -306,7 +306,7 @@
 .btn-link {
     background: none;
     border: none;
-    color: var(--accent-color);
+    color: var(--accent-text);
     font-weight: 800;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
@@ -335,7 +335,7 @@ hr.full {
 }
 
 .text-accent {
-    color: var(--accent-color);
+    color: var(--accent-text);
 }
 
 // ─── Modal ────────────────────────────────────────

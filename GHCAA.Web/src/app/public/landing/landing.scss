@@ -135,7 +135,7 @@
     display: inline-block;
     margin-bottom: 2rem;
     box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 25px rgba(197, 160, 89, 0.15);
-    color: var(--accent-color);
+    color: var(--accent-text);
     font-weight: 900;
     letter-spacing: 1px;
     font-size: 0.95rem;
@@ -194,7 +194,7 @@
     .btn-accent {
         background: transparent;
         border: 1px solid var(--accent-color);
-        color: var(--accent-color);
+        color: var(--accent-text);
 
         &:hover {
             background: rgba(197, 160, 89, 0.1);
@@ -227,7 +227,7 @@
         .stat-value {
             font-size: 2.5rem;
             font-weight: 900;
-            color: var(--accent-color);
+            color: var(--accent-text);
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             background-clip: text;
@@ -350,7 +350,7 @@
         strong {
             display: block;
             font-size: 1rem;
-            color: var(--accent-color);
+            color: var(--accent-text);
             margin-bottom: 0.2rem;
             font-weight: 800;
         }
@@ -383,7 +383,7 @@
         margin-top: 1.5rem;
 
         h3 {
-            color: var(--accent-color);
+            color: var(--accent-text);
             font-size: 1.25rem;
             margin-bottom: 0.4rem;
         }
@@ -466,7 +466,7 @@
 
     .p-text {
         strong {
-            color: var(--accent-color);
+            color: var(--accent-text);
             display: block;
             font-size: 1.1rem;
             margin-bottom: 0.25rem;
@@ -517,7 +517,7 @@
         }
 
         p {
-            color: var(--accent-color);
+            color: var(--accent-text);
             font-weight: 800;
             font-size: 0.75rem;
             text-transform: uppercase;
@@ -572,7 +572,7 @@
     height: 45px;
     flex-shrink: 0;
     background: transparent;
-    color: var(--accent-color);
+    color: var(--accent-text);
     border: 1px solid var(--accent-color);
     display: flex;
     align-items: center;
@@ -583,7 +583,7 @@
 
     &:hover {
         background: transparent;
-        color: var(--accent-color);
+        color: var(--accent-text);
         transform: scale(1.1);
     }
 }
@@ -641,7 +641,7 @@
         }
         .company {
             font-size: 0.8rem;
-            color: var(--accent-color);
+            color: var(--accent-text);
             margin: 0;
             opacity: 0.8;
         }
@@ -671,7 +671,7 @@
 
         .btn-view {
             font-size: 0.7rem;
-            color: var(--accent-color);
+            color: var(--accent-text);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 900;
@@ -845,7 +845,7 @@
         }
 
         .tier-tag {
-            color: var(--accent-color);
+            color: var(--accent-text);
         }
     }
 
@@ -894,7 +894,7 @@
     margin-bottom: 3rem;
 
     .summary-col h6 {
-        color: var(--accent-color);
+        color: var(--accent-text);
         text-transform: uppercase;
         letter-spacing: 2px;
         font-size: 0.75rem;
@@ -925,7 +925,7 @@
 
     li::before {
         content: "•";
-        color: var(--accent-color);
+        color: var(--accent-text);
         position: absolute;
         left: 0;
         font-weight: 900;
@@ -1002,7 +1002,7 @@
     .btn-secondary[disabled] {
         background: var(--surface-subtle);
         border: 1px solid rgba(197, 160, 89, 0.2);
-        color: var(--accent-color);
+        color: var(--accent-text);
         opacity: 0.8;
         font-size: 0.65rem;
         padding: 0.5rem 0.75rem;
@@ -1025,7 +1025,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--accent-color);
+    color: var(--accent-text);
     flex-shrink: 0;
     transition: 0.3s;
 
@@ -1171,7 +1171,7 @@
 }
 
 .ec-role {
-    color: var(--accent-color);
+    color: var(--accent-text);
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -1208,7 +1208,7 @@
 .stat-item .label {
     font-size: 0.75rem;
     font-weight: 900;
-    color: var(--accent-color);
+    color: var(--accent-text);
     text-transform: uppercase;
     letter-spacing: 2px;
     opacity: 1;
@@ -1313,7 +1313,7 @@
             transition: 0.4s;
 
             span {
-                color: var(--accent-color) !important;
+                color: var(--accent-text) !important;
                 font-weight: 900;
                 font-size: 1rem;
                 text-transform: uppercase;

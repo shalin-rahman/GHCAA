@@ -13,7 +13,7 @@
         margin-top: 0;
         margin-bottom: 2rem;
         font-size: 1.25rem;
-        color: var(--accent-color);
+        color: var(--accent-text);
         font-weight: 800;
         letter-spacing: -0.5px;
         text-transform: uppercase;
@@ -164,7 +164,7 @@
     }
 
     &.featured {
-        color: var(--accent-color);
+        color: var(--accent-text);
         border-color: rgba(var(--accent-rgb), 0.3);
     }
 

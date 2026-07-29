@@ -1,0 +1,20 @@
+/* The JSON editor textarea was styled with non-existent + light-only utilities
+   (border, focus:border-indigo-300 focus:ring-indigo-200 — no Tailwind here, and
+   indigo is off-palette). Theme it centrally with tokens so it renders correctly
+   in both themes and uses the brand accent on focus. */
+textarea {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  resize: vertical;
+
+  &:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
+  }
+
+  &::placeholder { color: var(--text-muted); opacity: 0.5; }
+}

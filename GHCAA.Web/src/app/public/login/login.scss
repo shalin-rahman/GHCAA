@@ -165,7 +165,7 @@
         justify-content: center;
 
         &:hover {
-            color: var(--accent-color);
+            color: var(--accent-text);
         }
 
         &:focus {
@@ -227,7 +227,7 @@
     color: var(--text-muted);
 
     a {
-        color: var(--accent-color);
+        color: var(--accent-text);
         font-weight: 800;
         text-decoration: none;
         transition: 0.3s;

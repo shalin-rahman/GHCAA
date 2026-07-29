@@ -71,7 +71,7 @@
         @for (g of galleries(); track g.id) {
         <div class="gallery-card glass-card reveal-card" (click)="selectedGallery.set(g)">
             <div class="card-img"
-                [style.background-image]="'url(' + (g.photos[0]?.photoPath || '/assets/logo.jpg') + ')'">
+                [style.background-image]="'url(' + validImg(g.photos[0]?.photoPath) + ')'">
                 <div class="photo-count">{{ g.photos.length }} Photos</div>
             </div>
             <div class="card-body">
@@ -110,7 +110,7 @@
             <div class="photo-grid-immersive">
                 @for (p of gallery?.photos; track p.id) {
                 <div class="photo-reveal">
-                    <img [src]="p.photoPath" [alt]="gallery?.title" (click)="viewFull(p.photoPath)">
+                    <img [src]="validImg(p.photoPath)" [alt]="gallery?.title" (error)="onImgError($event)" (click)="viewFull(p.photoPath)">
                 </div>
                 }
             </div>

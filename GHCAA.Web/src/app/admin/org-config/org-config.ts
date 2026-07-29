@@ -8,7 +8,8 @@ import { OrgConfig } from '../../core/models/org-config.model';
   selector: 'app-org-config',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './org-config.html'
+  templateUrl: './org-config.html',
+  styleUrl: './org-config.scss'
 })
 export class AdminOrgConfig implements OnInit {
   private configService = inject(OrgConfigService);

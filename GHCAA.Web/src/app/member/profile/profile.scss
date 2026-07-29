@@ -13,7 +13,7 @@
 
         .m-number {
             background: rgba(var(--accent-color-rgb), 0.1);
-            color: var(--accent-color);
+            color: var(--accent-text);
             padding: 0.25rem 0.6rem;
             border-radius: 4px;
             font-size: 0.75rem;
@@ -83,7 +83,7 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: var(--accent-color);
+    color: var(--accent-text);
     margin-bottom: 1.5rem;
     border-left: 3px solid var(--accent-color);
     padding-left: 1rem;
@@ -136,7 +136,7 @@
         
         &:hover {
             transform: scale(1.1);
-            background: #ff0000;
+            background: var(--danger-color);
         }
     }
 }
@@ -211,7 +211,7 @@
         font-weight: 900;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: var(--accent-color);
+        color: var(--accent-text);
         opacity: 0.8;
         min-width: 120px;
     }

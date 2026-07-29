@@ -19,6 +19,12 @@
   --accent-rgb: 197, 160, 89;
   --accent-gold-bright: #e5c15e;
   --accent-gold-dark: #8e6d2a;
+  /* Accent used as TEXT on theme-adaptive surfaces (cards/sections that go light in
+     light mode). The raw --accent-color (#c5a059) is a light gold tuned for dark
+     backgrounds; on a white card it fails contrast. Light theme => dark gold; dark
+     theme (below) => bright gold. Use this for gold text on .glass-card/section
+     surfaces; keep --accent-color for borders, fills, and always-dark hero text. */
+  --accent-text: var(--accent-gold-dark);
 
   --danger-color: #d63031;
   --success-color: #27ae60;
@@ -101,6 +107,9 @@ body.dark-theme {
   --card-bg: rgba(255, 255, 255, 0.03);
   --card-border: rgba(255, 255, 255, 0.06);
   --card-bg-hover: rgba(255, 255, 255, 0.05);
+
+  /* Dark theme keeps the original light-gold text (no-op vs dev's dark look). */
+  --accent-text: var(--accent-color);
 }
 
 * {
@@ -124,7 +133,7 @@ body {
    carry a color from a more specific selector (.btn*, .nav-item, .footer-links a,
    etc.) still win by specificity — this only catches the un-themed ones. */
 a {
-  color: var(--accent-color);
+  color: var(--accent-text);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -228,7 +237,7 @@ p {
 .btn-outline {
   background: transparent;
   border: 1px solid var(--accent-color);
-  color: var(--accent-color);
+  color: var(--accent-text);
 
   &:hover {
     background: var(--gold-gradient);
@@ -600,7 +609,7 @@ select.border-red-500 {
 
 /* Helper classes for specific scenarios */
 .text-accent {
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .bg-accent {
@@ -753,7 +762,7 @@ select.border-red-500 {
 .badge-info {
   font-size: 10px;
   background: rgba(var(--accent-color-rgb), 0.1);
-  color: var(--accent-color);
+  color: var(--accent-text);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-weight: 900;
@@ -903,7 +912,7 @@ select.border-red-500 {
 }
 
 .text-accent {
-  color: var(--accent-color);
+  color: var(--accent-text);
 }
 
 .font-bold {
@@ -1245,7 +1254,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
       margin: 0;
       font-size: 2.25rem;
       font-weight: 900;
-      color: var(--accent-color);
+      color: var(--accent-text);
       letter-spacing: -1.5px;
       filter: drop-shadow(0 0 15px rgba(var(--accent-color-rgb), 0.2));
       text-transform: capitalize;
@@ -1351,7 +1360,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
       &:hover {
         background: rgba(var(--accent-color-rgb), 0.15);
         border-color: rgba(var(--accent-color-rgb), 0.3);
-        color: var(--accent-color);
+        color: var(--accent-text);
         transform: translateY(-50%) scale(1.1);
       }
     }
@@ -1480,7 +1489,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
 
   &.dark {
     background: rgba(0, 0, 0, 0.4);
-    color: var(--accent-color);
+    color: var(--accent-text);
 
     p {
       color: rgba(255, 255, 255, 0.5);
@@ -1574,7 +1583,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     }
 
     &.active {
-      color: var(--accent-color) !important;
+      color: var(--accent-text) !important;
 
       &::after {
         width: 100%;
@@ -1672,7 +1681,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
 
     .t-is-ghc {
       font-size: 0.65rem;
-      color: var(--accent-color);
+      color: var(--accent-text);
       background: rgba(var(--accent-color-rgb), 0.1);
       padding: 2px 8px;
       border-radius: 4px;
@@ -1699,7 +1708,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
 
     .t-years {
       font-weight: 700;
-      color: var(--accent-color);
+      color: var(--accent-text);
       opacity: 0.8;
     }
   }
@@ -1801,7 +1810,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
         font-weight: 900;
         text-transform: uppercase;
         background: rgba(var(--accent-color-rgb), 0.1);
-        color: var(--accent-color);
+        color: var(--accent-text);
         padding: 0.2rem 0.6rem;
         border-radius: 4px;
       }
@@ -1820,7 +1829,7 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
       }
 
       .h-period {
-        color: var(--accent-color);
+        color: var(--accent-text);
         font-weight: 800;
       }
     }

@@ -15,7 +15,7 @@
 
 .ai-badge {
     background: #000;
-    color: var(--accent-color);
+    color: var(--accent-text);
     padding: 0.4rem 1rem;
     border-radius: 20px;
     font-weight: 800;
@@ -60,7 +60,7 @@
     width: 40px;
     height: 40px;
     background: var(--primary-color);
-    color: var(--accent-color);
+    color: var(--accent-text);
     border-radius: 12px;
     display: flex;
     align-items: center;

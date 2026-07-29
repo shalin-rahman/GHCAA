@@ -16,7 +16,7 @@
 .title-cell {
     font-weight: 700;
     font-size: 0.95rem;
-    color: var(--accent-color);
+    color: var(--accent-text);
     max-width: 400px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -76,7 +76,7 @@
 
     &:hover {
         background: var(--surface-color);
-        color: var(--accent-color);
+        color: var(--accent-text);
         border-color: var(--accent-color);
         transform: translateY(-1px);
     }
