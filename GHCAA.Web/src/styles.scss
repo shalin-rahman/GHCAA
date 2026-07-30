@@ -252,6 +252,9 @@ p {
 }
 
 /* Dashboard & Portal Specific Utilities */
+/* Status badge — SINGLE SOURCE OF TRUTH (layout + state colours). A second
+   `.status-badge` block used to live near the bottom of this file holding only the
+   state modifiers; both are merged here. Do NOT re-add a block elsewhere. */
 .status-badge {
   padding: 0.3rem 0.75rem;
   font-size: 0.65rem;
@@ -260,6 +263,27 @@ p {
   letter-spacing: 1px;
   border-radius: 20px;
   display: inline-flex;
+
+  &.pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+
+  &.active {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+  }
+
+  &.inactive {
+    background: rgba(107, 114, 128, 0.12);
+    color: #4b5563;
+  }
+
+  &.resigned,
+  &.terminated {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+  }
 }
 
 .shadow-gold {
@@ -1284,115 +1308,10 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   animation: slideInUp 0.6s cubic-bezier(0.2, 1, 0.2, 1);
 }
 
-/* Global Filter & Protocol Bar */
-.filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
-  padding: 1.25rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  backdrop-filter: blur(10px);
-
-  .search-wrap {
-    flex: 1;
-    min-width: 280px;
-    position: relative;
-
-    .search-icon {
-      position: absolute;
-      left: 1.25rem;
-      top: 50%;
-      transform: translateY(-50%);
-      opacity: 0.6;
-      font-size: 1rem;
-    }
-
-    input,
-    .search-input {
-      width: 100%;
-      height: 3.25rem;
-      padding: 0 3rem 0 3.25rem;
-      background: rgba(var(--primary-rgb), 0.05);
-      border: 1px solid var(--glass-border);
-      border-radius: 12px;
-      color: var(--text-main);
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-      &::placeholder {
-        color: var(--text-muted);
-        opacity: 0.5;
-      }
-
-      &:focus {
-        border-color: var(--accent-color);
-        background: rgba(var(--accent-color-rgb), 0.08);
-        box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.15);
-        outline: none;
-      }
-    }
-
-    .clear-search {
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-muted);
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      line-height: 1;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      padding: 0;
-
-      &:hover {
-        background: rgba(var(--accent-color-rgb), 0.15);
-        border-color: rgba(var(--accent-color-rgb), 0.3);
-        color: var(--accent-text);
-        transform: translateY(-50%) scale(1.1);
-      }
-    }
-  }
-
-  .status-select {
-    height: 3.25rem;
-    padding: 0 1.5rem;
-    background: rgba(var(--primary-rgb), 0.05);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    color: var(--text-main);
-    font-size: 0.82rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.3s;
-    min-width: 180px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-
-    &:focus {
-      border-color: var(--accent-color);
-      outline: none;
-    }
-
-    option {
-      background: var(--bg-color);
-      color: var(--text-main);
-      padding: 1rem;
-    }
-  }
-}
+/* Global Filter & Protocol Bar — single authoritative definition lives further down
+   ("Advanced Filter Bar - Global Standard"). Two competing blocks used to define
+   `.filter-bar` here and there; the later one silently won every conflicting property,
+   so density fixes applied here appeared to do nothing. Do NOT re-add a block here. */
 
 /* Advanced Table Design System - Pro Standard */
 .table-wrap,
@@ -1951,7 +1870,12 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   }
 }
 
-/* Advanced Filter Bar - Global Standard */
+/* ============================================================================
+   Advanced Filter Bar - Global Standard  (SINGLE SOURCE OF TRUTH)
+   Merged from two competing `.filter-bar` blocks. The declarations below are the
+   *effective* cascade result of the old pair, so appearance is unchanged — but
+   there is now exactly one place to edit. Change filter/search density HERE.
+   ============================================================================ */
 .filter-bar,
 .action-bar {
   display: flex;
@@ -1975,13 +1899,13 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     .search-icon {
       position: absolute;
       left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
       opacity: 0.5;
       font-size: 1rem;
       z-index: 1;
     }
 
-    // Matches the primary search style above (was a second, shorter duplicate
-    // that won by source order and rendered the box tiny + white/off-theme).
     input,
     .search-input {
       width: 100%;
@@ -2007,6 +1931,34 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
         outline: none;
       }
     }
+
+    .clear-search {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0;
+
+      &:hover {
+        background: rgba(var(--accent-color-rgb), 0.15);
+        border-color: rgba(var(--accent-color-rgb), 0.3);
+        color: var(--accent-text);
+        transform: translateY(-50%) scale(1.1);
+      }
+    }
   }
 
   select,
@@ -2026,31 +1978,36 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
       border-color: var(--accent-color);
     }
   }
-}
 
-/* Badge System Enhancements */
-.status-badge {
-  &.pending {
-    background: rgba(245, 158, 11, 0.12);
-    color: #d97706;
-  }
+  /* Carried over from the removed duplicate: `.status-select` keeps its fixed
+     height, uppercase treatment and themed <option> list. */
+  .status-select {
+    height: 3.25rem;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 
-  &.active {
-    background: rgba(16, 185, 129, 0.12);
-    color: #059669;
-  }
+    &:focus {
+      border-color: var(--accent-color);
+      outline: none;
+    }
 
-  &.inactive {
-    background: rgba(107, 114, 128, 0.12);
-    color: #4b5563;
-  }
-
-  &.resigned,
-  &.terminated {
-    background: rgba(239, 68, 68, 0.12);
-    color: #dc2626;
+    option {
+      background: var(--bg-color);
+      color: var(--text-main);
+      padding: 1rem;
+    }
   }
 }
+
+/* `.filter-bar` alone keeps the glass blur (the old duplicate applied it only here,
+   never to `.action-bar`). */
+.filter-bar {
+  backdrop-filter: blur(10px);
+}
+
+/* Badge System — state modifiers now live with the `.status-badge` base definition
+   near the top of this file. Do NOT re-add a block here. */
 
 @media (max-width: 768px) {
   .modal-box {

@@ -591,3 +591,71 @@
 29G.2 [DONE 2026-07-25] Mobile: new FinancialService.recordPayment (multipart POST /api/financials/record-payment) + manual-payment form surfaces the config's walletNumber/accountNumber/accountHolder/bank/branch/routing as display-only "where to pay" details and captures the member's transaction reference + receipt. (walletNumber/bankName/accountNumber are display-only by design — the record-payment DTO carries transactionId/method/receipt, mirroring web member/payments.)
 29G.3 [DONE 2026-07-25] Web+Mobile: dead Stripe tile removed (mobile sheet is now config-driven, no hardcoded gateways). Admin payment-config create form gained a Payment Method Type dropdown (methodOptions incl. CashOnHand) so any method is creatable — was hardcoding method:'ManualReceipt'. (Note: the web gateway dropdown's SSLCommerz/BkashGateway/NagadGateway all have registered implementations — not dead — so left intact.) (web tests 9/9)
 29G.4 [DONE 2026-07-25] API: GatewaysController.GatewayWebhook now wraps _gatewayFactory.GetGateway in try/catch(NotSupportedException) → returns 404 {status:"unsupported_gateway"} instead of an unhandled 500 for unregistered gateways.
+
+## AREA 30: UI/UX REMEDIATION (2026-07-30)
+
+> Full plan with root-cause analysis and file:line targets: **docs/UI_UX_REMEDIATION_PLAN.md**
+> Source: ~30-symptom UI/UX defect list (admin panel + member portal + public landing), traced to 8 shared-layer root causes.
+> RULE: anything specified for one panel applies to BOTH admin and member portal.
+> RULE: fix centrally (styles.scss tokens / shared classes / shared components) — never per-component.
+> Baselines to protect: web `npm run type-check` clean, `npm run build` clean, vitest 58 files / 233 tests, `dotnet test` exit 0.
+> Approved decisions: compute ProfileCompletionPercentage server-side and DROP the Global Rank tile (no fake `#---`);
+> portal nav sections = Overview / Community / Directory / Career / My Account;
+> replace emoji nav/action icons with a monochrome inline-SVG `app-icon` set using `currentColor`.
+
+### 30-0: PHASE 0 — CENTRAL/SHARED LAYER (do first; these unblock the rest)
+
+30.1  [DONE 2026-07-30] Web: De-duplicate styles.scss — merged the two competing `.filter-bar` blocks and the two `.status-badge` blocks into one authoritative definition each, preserving the effective cascade exactly (`.search-icon` centring, full `.clear-search` rule, `.status-select` height/uppercase/`option` styling, `backdrop-filter` on `.filter-bar` only — never `.action-bar`). "Do NOT re-add a block here" comments left at both old sites. WHY IT GATED EVERYTHING: the later duplicate silently won every conflicting property, so density fixes applied to the earlier block did nothing. Verified type-check + build clean.
+30.2  [TODO] Web: Central action-control taxonomy — add `.btn-danger` / `.btn-icon` / `.action-group` to styles.scss + `core/constants/actions.constants.ts` for canonical action labels (Save / Edit / Delete / Close / Cancel / New identical app-wide, text included). Remove the 5 per-component `.icon-btn` definitions and fix all 7 usage sites; keep `.icon-btn` as an alias for one release. ROOT CAUSE of "delete button not visible" and "delete has white background" — `.icon-btn` is undefined in `admin-comm.html` and `messages.html`, so those buttons render browser-native.
+30.3  [TODO] Web: `app-icon` inline-SVG icon system using `currentColor`; replace emoji icons in nav.service.ts + both layouts and the Font Awesome usages in dashboard; remove the Font Awesome CDN `<link>` from index.html once no `fa-` class remains. ROOT CAUSE of "icons not theme-coloured / inconsistent".
+30.4  [TODO] Web: Density pass — reduce `.page-header` / `.filter-bar` / `.search-wrap` / `.tab-nav` heights so titles+search stop consuming vertical space; make the filter bar sticky at ≥1024px. DEPENDS ON 30.1.
+30.5  [TODO] Web: Add `.empty-state.compact` and apply to profile/dashboard/admin empty sections so "Association Governance History" / "Professional Experience" etc. collapse when there is no data.
+30.6  [TODO] Web: Brighten form-control borders under `body.dark-theme` (`--border-color` / `--hairline`) + add line spacing between stacked checkboxes.
+30.7  [TODO] Web: Enlarge the modal `.close-btn` to a 40px icon button centrally (fixes "popup close cross too small" for every popup at once).
+30.8  [TODO] Web: Shared `app-user-menu` component (avatar photo + name/role + theme toggle + sign-out) wired into BOTH the portal and admin headers. Fixes "no way to change theme from UI" (theme switcher was portal-only), the poor logout icon, and "show user image after login top-right in admin too".
+30.9  [TODO] Web: `appImgFallback` directive + placeholder assets; apply to every `<img>` (gallery covers, submission-review covers, avatars, news, events). ROOT CAUSE of all "cover image missing / images not showing" reports — no `<img>` in the app has a fallback.
+30.10 [TODO] Web: LogoSpinner everywhere — replace ad-hoc loaders and add missing loading states on ~14 pages.
+30.11 [TODO] Web: Nav label == page title — add `NavService.labelFor(url)` and reconcile the mismatch list (e.g. nav "Submission Review" vs page "Review Submission"). Both layouts already derive breadcrumbs from NavService labels, so this is an alignment pass, not new plumbing.
+30.12 [TODO] Web: `app-rich-text-editor` component; replace both `document.getElementById` Quill call sites in admin-comm with a ViewChild-based init and a textarea fallback when `window.Quill` is absent. ROOT CAUSE of "Message Body (Rich Text) — no control found": Quill initialises against a node the `@if` has not rendered yet.
+
+### 30-1: PHASE 1 — NAVIGATION & SHELL
+
+30.13 [TODO] Web: Group the portal sidebar into sections (Overview / Community / Directory / Career / My Account) mirroring the admin pattern, preserving feature-flag filtering.
+30.14 [TODO] Web: Bottom-align the "Admin Panel" link in the portal sidebar — the existing `.nav-spacer` does not actually push.
+30.15 [TODO] Web: Admin header adopts `app-user-menu` including the theme toggle. DEPENDS ON 30.8.
+
+### 30-2: PHASE 2 — PER-PAGE FIXES
+
+30.16 [TODO] Web: jobs-preview "Login to View →" wraps to two lines — replace `.btn-view` with `.btn.btn-sm` + nowrap.
+30.17 [TODO] Web: Admin Special Themes — the LIVE badge ignores the date window (an expired 16-03→23-03 range still shows LIVE); derive SCHEDULED / LIVE / EXPIRED / IDLE from the dates.
+30.18 [TODO] Web: Events — "Reg. Ends: Closed" → "Registration Closed" (events-preview.html already does this; copy that wording).
+30.19 [TODO] Web: Submission-review + gallery-album cover placeholders; fix gallery album delete-button visibility and the Edit/Delete gap. DEPENDS ON 30.2, 30.9.
+30.20 [TODO] Web: Communications — action-button gap and delete styling, replace the bespoke logs filter with the shared search control, and compact the tabs (they eat too much space). DEPENDS ON 30.2, 30.4.
+30.21 [TODO] Web: Executive Committee cards — render the member photo (the card currently has no `<img>` at all, only an initial) and verify the batch line renders. DEPENDS ON 30.9, 30.28.
+30.22 [TODO] Web: Member profile identity line — 'GHC-0000000002 / Shalin Rahman / Associate / A-' uses mixed fonts on one line; unify. Plus compact the empty sections. DEPENDS ON 30.5.
+30.23 [TODO] Web: Member dashboard profile-completion steps (Identity & Photo | GHC History | Professional Info | Registration Payment) — make them interactive/linked and clearly labelled so it is obvious they work.
+30.24 [TODO] Web: Member Directory + Alumni Directory — compact the search panel height and freeze/stick it on scroll for larger screens. DEPENDS ON 30.4.
+30.25 [TODO] Web: New Message flow — add a member picker so a first message can be sent when no conversation exists. ROOT CAUSE: `chat.service.ts` exposes only RECENT and HISTORY/{id}; there is no compose path. DEPENDS ON 30.29.
+30.26 [TODO] Web: Investigate the first-load error on the Events page (reported "Event page got error first time").
+
+### 30-3: PHASE 3 — BACKEND
+
+30.27 [TODO] API: `NetworkingService.MapToSummary` omits `PassingYear` / `Degree` / `Subject` — populate them (+ unit test). ROOT CAUSE of "Executive Committee batch information is missing".
+30.28 [TODO] API: Compute `ProfileCompletionPercentage` server-side from the same criteria the dashboard checklist uses; remove the Global Rank tile from the web profile (APPROVED — `Rank` and `ProfileCompletionPercentage` are never computed anywhere in the solution, so that stat strip is permanently dead, not a loading glitch).
+30.29 [TODO] API: Confirm or add a send-first-message-to-member endpoint for messaging.
+30.30 [TODO] API: Verify special-theme "active" resolution honours the date window server-side (pairs with 30.17).
+
+### 30-4: PHASE 4 — MOBILE PARITY & VERIFICATION
+
+30.31 [TODO] Mobile: Mirror new/changed design tokens and the canonical action labels into `lib/core/theme/app_theme.dart`.
+30.32 [TODO] Verify: `npm run type-check`, `npm run build`, grep the emitted `dist/**/styles-*.css` for new classes/tokens, `npx vitest run` (233 baseline), `dotnet test`, and Playwright light+dark on the fixed 10-page set. Keep `inlineCritical: false` in both angular.json configs (CSP blocks the deferred-stylesheet `onload`).
+
+## AREA 31: DATABASE MIGRATIONS (merged from .claude/memory/outstanding_todos.md)
+
+> This section supersedes `.claude/memory/outstanding_todos.md`, which was stale and is no longer maintained.
+
+31.1 [DONE] DB: `PhaseB_S5S8_OtpHmac_PaymentIdempotency_Indexes` applied (User.FailedLoginAttempts/LockoutUntil, PaymentHistory.GatewayPaymentId + unique partial index, Otp.Code widened to varchar(64) for HMAC-SHA256 hex, Member(Status,IsArchived), User(MemberId), User(ResetToken) partial, User(GoogleId), User(FacebookId), Otp(Email,ExpiryAt)).
+31.2 [DONE] DB: RefreshTokens table shipped — folded into the `AddDiscussionForums` migration rather than a standalone `AddRefreshTokens`. Table: RefreshTokens(Id, UserId FK→Users, TokenHash varchar(64) UNIQUE, ExpiresAt, CreatedAt, IsRevoked); indexes TokenHash (unique) + (UserId, IsRevoked).
+31.3 [NOTE] DB: There are NO pending migrations — the dev database is up to date. Area 28.0's "DEPENDS ON PhaseB_S5S8 + AddRefreshTokens applied first" precondition is therefore already satisfied.
+31.4 [NOTE] DB: EF reporting "pending model changes" on PgSql is spurious, non-deterministic seed churn — NOT schema drift. Never scaffold or apply a migration for it.
+31.5 [DONE] Mobile: JWT refresh flow complete — `/auth/refresh` + `/auth/refresh-mobile` with dedicated rate-limit policies, and the Flutter `api_client.dart` interceptor performs the refresh (no longer forces re-login every 60 min).
