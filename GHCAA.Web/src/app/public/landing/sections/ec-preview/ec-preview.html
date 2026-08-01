@@ -12,7 +12,7 @@
             <div class="ec-card glass-card">
                 <div class="ec-photo">
                     @if (member.photoPath) {
-                    <img [src]="'/' + member.photoPath" [alt]="member.fullName">
+                    <img [src]="'/' + member.photoPath" [alt]="member.fullName" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     👤
                     }

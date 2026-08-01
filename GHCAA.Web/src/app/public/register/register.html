@@ -4,7 +4,7 @@
             <!-- Desktop Wizard Sidebar -->
             <div class="wizard-sidebar hide-mobile">
                 <div class="brand-box">
-                    <img src="/assets/logo.png" alt="GHCAA">
+                    <img src="/assets/logo.png" alt="GHCAA" appImgFallback>
                     <h3>Member<br>Registry</h3>
                 </div>
                 <div class="steps-list">
@@ -137,7 +137,7 @@
                                     @for (m of membershipTypeOptions; track m.value) { <option [value]="m.value">{{ m.label }}</option> }
                                 </select>
                                 <div class="mt-2 text-xs font-bold text-accent animate-pulse" *ngIf="registrationFee() > 0">
-                                    <i class="fas fa-info-circle mr-1"></i> Applicable Registry Filing Fee: {{ registrationFee() | currency:'BDT ':'symbol':'1.0-0' }}
+                                    <app-icon name="info-circle" [size]="14" class="mr-1"></app-icon> Applicable Registry Filing Fee: {{ registrationFee() | currency:'BDT ':'symbol':'1.0-0' }}
                                 </div>
                             </div>
 

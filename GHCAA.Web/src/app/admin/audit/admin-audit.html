@@ -1,5 +1,5 @@
 <div class="admin-feature">
-    <app-page-header title="System Audit Logs" [total]="logs().length"
+    <app-page-header title="Audit Logs" [total]="logs().length"
         emptySubtitle="System activity and audit trail">
         <small subtitle>Showing {{ filteredLogs().length }} of {{ logs().length }} activity records</small>
         <button actions class="btn btn-secondary btn-sm" (click)="loadLogs()">
@@ -16,7 +16,7 @@
     <div class="glass-card audit-container">
         @if (loading()) {
         <div class="loading-state">
-            <span>⏳</span>
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
             <p>Fetching activity stream...</p>
         </div>
         } @else {

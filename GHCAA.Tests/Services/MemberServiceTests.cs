@@ -398,6 +398,47 @@ public class MemberServiceTests : TestBase
     }
 
     [Test]
+    public async Task GetProfileAsync_ProfileCompletionPercentage_ShouldMatchDashboardChecklistCriteria()
+    {
+        // 30.28: ProfileCompletionPercentage must be computed from the same 4-item criteria
+        // as the dashboard "Complete Your Profile" checklist (Identity & Photo / GHC History /
+        // Professional Info / Registration Payment), each worth 25%.
+        var member = await CreateAndSaveTestMemberAsync("Checklist Member", "checklist@example.com", "01712345600", "1234500000");
+        // Test member factory seeds one IsGHC academic record already, so GHC History (25%) is done.
+        member.PhotoPath = null; // Identity & Photo requires a photo -> not done
+        await _context.SaveChangesAsync();
+
+        var partial = await _service.GetProfileAsync(member.Id, isPrivileged: true);
+        partial.Should().NotBeNull();
+        partial!.ProfileCompletionPercentage.Should().Be(25m); // only GHC History done
+
+        // Complete the remaining 3 steps: photo, professional history, registration payment.
+        member.PhotoPath = "photos/checklist.jpg";
+        member.ProfessionalHistory = new List<ProfessionalRecord>
+        {
+            new ProfessionalRecord { OrganizationName = "GHCAA", Designation = "Engineer", IsCurrent = true, StartDate = DateTime.UtcNow.AddYears(-1) }
+        };
+        member.PaymentHistories = new List<PaymentHistory>
+        {
+            new PaymentHistory
+            {
+                MemberId = member.Id,
+                TransactionId = "TXN-CHECKLIST-1",
+                Amount = 500,
+                FinancialCategory = Enums.FinancialCategory.RegistrationFee,
+                Status = Enums.PaymentStatus.Completed,
+                PaidAt = DateTime.UtcNow
+            }
+        };
+        await _context.SaveChangesAsync();
+
+        var complete = await _service.GetProfileAsync(member.Id, isPrivileged: true);
+        complete.Should().NotBeNull();
+        complete!.ProfileCompletionPercentage.Should().Be(100m);
+        complete.PaymentStatus.Should().Be("Completed");
+    }
+
+    [Test]
     public async Task UpdateProfileAsync_WithValidData_ShouldUpdateMember()
     {
         // Arrange

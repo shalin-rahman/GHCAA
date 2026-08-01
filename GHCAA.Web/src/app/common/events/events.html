@@ -1,6 +1,6 @@
 <div class="events-page mb-10">
     <div class="header">
-        <h2 class="text-3xl font-bold">Events & Gatherings</h2>
+        <h2 class="text-3xl font-bold">Events</h2>
         <p class="text-muted">Stay connected with your fellow alumni across the globe</p>
     </div>
 
@@ -23,6 +23,7 @@
                     <!-- Column 1: Asset & Date -->
                     <div class="event-banner">
                         <img [src]="ev.imageUrl || '/assets/images/event-placeholder.jpg'" alt="Event Image"
+                            appImgFallback="/assets/images/event-placeholder.jpg"
                             class="banner-img">
                         <div class="date-badge">
                             <span class="day">{{ ev.startDate | date:'dd' }}</span>
@@ -77,8 +78,8 @@
                             <div class="meta-item" [class.urgent]="!isRegistrationOpen(ev)">
                                 <span class="icon">⏳</span>
                                 <div class="val text-xs">
-                                    <strong>Reg. Ends: {{ isRegistrationOpen(ev) ? (ev.registrationEndDate | date:'MMM d') :
-                                        'Closed' }}</strong>
+                                    <strong>{{ isRegistrationOpen(ev) ? ('Reg. Ends: ' + (ev.registrationEndDate | date:'MMM d')) :
+                                        'Registration Closed' }}</strong>
                                 </div>
                             </div>
                             }
@@ -303,7 +304,7 @@
 
                     <div class="card-header">
                         <div class="card-logo">
-                            <img src="/assets/logo.png" alt="Logo">
+                            <img src="/assets/logo.png" alt="Logo" appImgFallback>
                         </div>
                         <div class="org-info">
                             <h1 class="text-green-800">Govt. Haraganga College Alumni Association</h1>

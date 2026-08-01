@@ -5,11 +5,12 @@ import { EventsService } from '../../core/services/events.service';
 import { AlumniEvent } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
+import { Icon } from '../../common/icon/icon';
 
 @Component({
   selector: 'app-admin-event-operations',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Icon],
   templateUrl: './admin-event-operations.html',
   styleUrl: './admin-event-operations.scss'
 })

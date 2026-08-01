@@ -2,11 +2,12 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GalleryService } from '../../../../core/services/gallery.service';
 import { EventGallery, EventPhoto } from '../../../../core/models/business.models';
+import { ImgFallbackDirective } from '../../../../common/directives/img-fallback.directive';
 
 @Component({
     selector: 'landing-gallery-preview',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, ImgFallbackDirective],
     templateUrl: './gallery-preview.html',
     styleUrl: './gallery-preview.scss'
 })
@@ -44,14 +45,6 @@ export class LandingGalleryPreview implements OnInit {
 
     viewFull(path: string) {
         window.open(path, '_blank');
-    }
-
-    // Gallery image file missing on server (e.g. ephemeral disk / unseeded asset):
-    // hide the broken image and fall back to the light placeholder card.
-    onImgError(e: Event) {
-        const img = e.target as HTMLImageElement;
-        img.style.display = 'none';
-        img.closest('.gallery-item')?.classList.add('placeholder');
     }
 }
 

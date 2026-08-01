@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { AdminService, DashboardStats } from '../../core/services/admin.service';
 import { NavService } from '../../core/services/nav.service';
 import { NewsService } from '../../core/services/news.service';
@@ -21,7 +22,7 @@ interface StatCard {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe],
+  imports: [CommonModule, RouterLink, DatePipe, ImgFallbackDirective],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss'
 })

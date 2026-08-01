@@ -5,11 +5,14 @@ import { AdminCommService, EmailTemplate, EmailLog } from '../../core/services/a
 import { NotificationService } from '../../core/services/notification.service';
 import { ActivatedRoute } from '@angular/router';
 import { getAcademicYears, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { RichTextEditor } from '../../common/rich-text-editor/rich-text-editor';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
     selector: 'app-admin-comm',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RichTextEditor, LogoSpinnerComponent, SearchBarComponent],
     templateUrl: './admin-comm.html',
     styleUrl: './admin-comm.scss'
 })
@@ -85,7 +88,6 @@ export class AdminComm implements OnInit {
                 this.sendOptions.method = params['method'];
                 if (params['method'] === 'custom') {
                     this.isManualMessage = true;
-                    setTimeout(() => this.initBroadcastEditor(), 200);
                 }
             }
         });
@@ -132,59 +134,10 @@ export class AdminComm implements OnInit {
 
     switchToManual() {
         this.isManualMessage = true;
-        setTimeout(() => this.initBroadcastEditor(), 100);
     }
 
     editTemplate(template: EmailTemplate) {
         this.editingTemplate.set({ ...template });
-        // Use timeout to ensure DOM is updated before initializing Quill
-        setTimeout(() => {
-            const content = this.editingTemplate()?.body || '';
-            this.initEditor('template-editor', content, (html) => {
-                const t = this.editingTemplate();
-                if (t) t.body = html;
-            });
-        }, 200);
-    }
-
-    private initEditor(elementId: string, initialContent: string, onChange: (html: string) => void) {
-        const editorDiv = document.getElementById(elementId);
-        if (editorDiv && (window as any).Quill) {
-            // Clear any previous Quill instances or content
-            editorDiv.innerHTML = '';
-
-            const quill = new (window as any).Quill(`#${elementId}`, {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        ['link', 'image'],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                        ['clean']
-                    ]
-                }
-            });
-
-            if (initialContent) {
-                quill.root.innerHTML = initialContent;
-            }
-
-            quill.on('text-change', () => {
-                const html = quill.root.innerHTML;
-                onChange(html);
-            });
-        } else {
-            console.error('Editor DIV not found or Quill not loaded:', elementId);
-        }
-    }
-
-    initBroadcastEditor() {
-        if (!this.isManualMessage) return;
-        this.initEditor('broadcast-editor', this.sendOptions.customBody, (html) => {
-            this.sendOptions.customBody = html;
-        });
     }
 
     saveTemplate() {
@@ -217,10 +170,6 @@ export class AdminComm implements OnInit {
             body: '',
             variables: '[]'
         });
-        setTimeout(() => this.initEditor('template-editor', '', (html) => {
-            const t = this.editingTemplate();
-            if (t) t.body = html;
-        }), 100);
     }
 
     cancelEdit() {

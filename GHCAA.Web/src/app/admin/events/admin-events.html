@@ -44,7 +44,7 @@
                             class="logo-preview-box w-48 h-32 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex items-center justify-center bg-surface relative group">
                             @if (logoPreview()) {
                             <img [src]="logoPreview()?.startsWith('data:') ? logoPreview() : '/' + logoPreview()"
-                                alt="Preview" class="w-full h-full object-cover">
+                                alt="Preview" class="w-full h-full object-cover" appImgFallback>
                             <div
                                 class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
                                 <span class="text-[10px] font-black uppercase text-white">Event Banner</span>
@@ -224,13 +224,19 @@
             <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
                 placeholder="Search events by title or location…"></app-search-bar>
         </div>
+        @if (loading()) {
+        <div class="loading-state py-20 text-center">
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+            <p>Loading events...</p>
+        </div>
+        } @else {
         <div class="grid gap-4">
             @for (ev of filteredEvents(); track ev.id) {
             <div class="event-management-card group">
                 <!-- Event Asset -->
                 <div class="admin-event-asset">
                     @if (ev.imageUrl) {
-                    <img [src]="'/' + ev.imageUrl" alt="Event Asset">
+                    <img [src]="'/' + ev.imageUrl" alt="Event Asset" appImgFallback="/assets/images/event-placeholder.jpg">
                     } @else {
                     <div class="placeholder">🖼️</div>
                     }
@@ -272,6 +278,7 @@
             </div>
             }
         </div>
+        }
     </div>
     }
 
@@ -300,6 +307,12 @@
             </select>
         </div>
 
+        @if (loadingRegistrations()) {
+        <div class="loading-state py-20 text-center">
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+            <p>Loading participations...</p>
+        </div>
+        } @else {
         <div class="glass-card table-container">
             <table class="admin-table">
                 <thead>
@@ -411,6 +424,7 @@
                 </tbody>
             </table>
         </div>
+        }
 
         <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [totalItems]="totalItems()"
             [pageSize]="pageSize()" (pageChange)="currentPage.set($event); loadAllRegistrations()">
@@ -426,7 +440,7 @@
                 <div>
                     @if (ev.imageUrl) {
                     <div class="mb-4 rounded-xl overflow-hidden border border-white/10">
-                        <img [src]="'/' + ev.imageUrl" class="w-full h-40 object-cover" alt="Event Banner">
+                        <img [src]="'/' + ev.imageUrl" class="w-full h-40 object-cover" alt="Event Banner" appImgFallback="/assets/images/event-placeholder.jpg">
                     </div>
                     }
                     <h3 class="text-accent">{{ ev.title }}</h3>
@@ -486,7 +500,7 @@
 
                     <div class="card-header">
                         <div class="card-logo">
-                            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo">
+                            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo" appImgFallback="/assets/logo.png">
                         </div>
                         <div class="org-info">
                             <h1 class="text-green-800">{{ orgConfigService.config()?.branding?.fullName }}</h1>
@@ -573,7 +587,7 @@
             </div>
             <div class="receipt-preview-container rounded-xl overflow-hidden shadow-2xl bg-white/5">
                 <img [src]="activeReceiptUrl()" alt="Receipt Evidence"
-                    class="w-full h-auto max-h-[80vh] object-contain">
+                    class="w-full h-auto max-h-[80vh] object-contain" appImgFallback>
             </div>
             <div class="mt-4 flex justify-center">
                 <a [href]="activeReceiptUrl()" target="_blank" class="btn btn-secondary btn-sm">Open in Full Resolution

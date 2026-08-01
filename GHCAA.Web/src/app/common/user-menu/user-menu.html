@@ -1,0 +1,25 @@
+<button class="touch-target btn-icon theme-toggle" (click)="theme.toggleTheme()"
+    [title]="'Toggle Dark/Light Mode'">
+    <app-icon [name]="theme.theme() === 'light' ? 'theme-dark' : 'theme-light'"></app-icon>
+</button>
+<div class="user-profile">
+    @if (profilePhotoUrl()) {
+    <img [src]="profilePhotoUrl()" alt="Profile" class="avatar avatar-img"
+        appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+    } @else {
+    <div class="avatar">{{ auth.currentUser()?.username?.[0]?.toUpperCase() }}</div>
+    }
+    <div class="user-details hide-mobile">
+        <span class="username">{{ auth.currentUser()?.fullName || auth.currentUser()?.username }}</span>
+        <small class="role">{{ roleLabel }}</small>
+    </div>
+</div>
+@if (isAdmin) {
+<a routerLink="/admin/dashboard" class="touch-target btn-icon admin-panel-link" title="Go to Admin Panel">
+    <app-icon name="admin-panel"></app-icon>
+    <span class="hide-mobile">Admin Panel</span>
+</a>
+}
+<button class="touch-target btn-icon logout-toggle" (click)="auth.logout()" title="Sign Out">
+    <app-icon name="sign-out"></app-icon>
+</button>

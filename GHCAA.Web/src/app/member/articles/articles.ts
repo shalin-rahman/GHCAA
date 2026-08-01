@@ -13,11 +13,12 @@ import {
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 
 @Component({
   selector: 'app-member-articles',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, ImgFallbackDirective],
   templateUrl: './articles.html',
   styleUrl: './articles.scss'
 })

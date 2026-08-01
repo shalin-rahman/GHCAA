@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { PollService, PollDto } from '../../core/services/poll.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { Icon } from '../../common/icon/icon';
 
 @Component({
   selector: 'app-member-polls',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, Icon],
   templateUrl: './polls.html',
   styleUrl: './polls.scss'
 })

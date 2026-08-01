@@ -79,7 +79,7 @@
                 <tr class="animate-fade-in">
                     <td class="member-cell" (click)="openDetail(member)">
                         @if (member.photoPath) {
-                        <img [src]="getImageUrl(member.photoPath)" class="member-avatar photo" alt="Photo">
+                        <img [src]="getImageUrl(member.photoPath)" class="member-avatar photo" alt="Photo" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                         } @else {
                         <div class="member-avatar">{{ member.fullName?.[0] }}</div>
                         }
@@ -139,9 +139,9 @@
                 <div class="relative group cursor-pointer" (click)="isEditing() && photoInput.click()"
                     [title]="isEditing() ? 'Click to change photo' : ''">
                     @if (photoPreview()) {
-                    <img [src]="photoPreview()" class="modal-avatar photo" alt="Preview">
+                    <img [src]="photoPreview()" class="modal-avatar photo" alt="Preview" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else if (selectedMember()?.photoPath) {
-                    <img [src]="getImageUrl(selectedMember().photoPath)" class="modal-avatar photo" alt="Photo">
+                    <img [src]="getImageUrl(selectedMember().photoPath)" class="modal-avatar photo" alt="Photo" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     <div class="modal-avatar">{{ selectedMember()?.fullName?.[0] }}</div>
                     }
@@ -174,9 +174,9 @@
             <div class="header-photo-controls flex items-center gap-4 ml-auto mr-12 bg-black/10 p-2 rounded-xl border border-white/5">
                 <div class="relative group cursor-pointer" (click)="isEditing() && signatureInput.click()" [title]="isEditing() ? 'Click to change signature' : ''">
                     @if (signaturePreview()) {
-                        <img [src]="signaturePreview()" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature Preview">
+                        <img [src]="signaturePreview()" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature Preview" appImgFallback>
                     } @else if (selectedMember()?.signaturePath) {
-                        <img [src]="getImageUrl(selectedMember().signaturePath)" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature">
+                        <img [src]="getImageUrl(selectedMember().signaturePath)" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature" appImgFallback>
                     } @else {
                         <div class="h-12 w-24 border border-dashed border-white/20 rounded-md flex items-center justify-center text-lg">🖋️</div>
                     }

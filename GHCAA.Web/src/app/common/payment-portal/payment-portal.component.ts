@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RegistrationService } from '../../core/services/registration.service';
 import { FinancialService } from '../../core/services/financial.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
   selector: 'app-payment-portal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ImgFallbackDirective],
   template: `
     <div class="payment-portal animate-fade-up">
       <!-- Tabs for Saved vs All -->
@@ -25,7 +26,7 @@ import { AuthService } from '../../core/services/auth.service';
                      [class.active]="selectedMethod()?.id === -s.id" 
                      (click)="selectSavedMethod(s)">
                     <div class="payment-icon">
-                        <img [src]="getLogoByMethod(s.method)" class="w-full h-full object-contain p-1">
+                        <img [src]="getLogoByMethod(s.method)" class="w-full h-full object-contain p-1" appImgFallback>
                     </div>
                     <div class="payment-info">
                         <span class="payment-name">{{ s.displayName }}</span>
@@ -49,7 +50,7 @@ import { AuthService } from '../../core/services/auth.service';
                        [class.active]="selectedMethod()?.id === p.id" 
                        (click)="selectMethod(p)">
                       <div class="payment-icon">
-                          <img [src]="getLogoUrl(p)" [alt]="p.displayName" class="w-full h-full object-contain p-1">
+                          <img [src]="getLogoUrl(p)" [alt]="p.displayName" class="w-full h-full object-contain p-1" appImgFallback>
                       </div>
                       <div class="payment-info">
                           <span class="payment-name">{{ p.displayName }}</span>
@@ -69,7 +70,7 @@ import { AuthService } from '../../core/services/auth.service';
               <div class="p-8">
                   <div class="flex justify-between items-start mb-6">
                     <h4 class="text-accent uppercase tracking-widest text-[10px] font-black flex items-center gap-3">
-                        <img [src]="getLogoUrl(selectedMethod())" class="w-5 h-5 object-contain opacity-80"> {{ selectedMethod()?.displayName }} Payment Protocol
+                        <img [src]="getLogoUrl(selectedMethod())" class="w-5 h-5 object-contain opacity-80" appImgFallback> {{ selectedMethod()?.displayName }} Payment Protocol
                     </h4>
                     @if (amount() > 0) {
                         <div class="amount-badge px-3 py-1 bg-accent rounded-lg text-black font-black text-xs">

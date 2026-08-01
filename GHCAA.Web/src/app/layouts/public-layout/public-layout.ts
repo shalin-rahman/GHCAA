@@ -7,11 +7,12 @@ import { Title } from '@angular/platform-browser';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OrgConfigService } from '../../core/services/org-config.service';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, AppFooter, CommonModule],
+  imports: [RouterOutlet, RouterLink, AppFooter, CommonModule, ImgFallbackDirective],
   templateUrl: './public-layout.html',
   styleUrl: './public-layout.scss'
 })

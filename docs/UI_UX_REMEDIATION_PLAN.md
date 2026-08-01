@@ -35,9 +35,10 @@ These explain most of the reported symptoms and drive the phase ordering.
 6. **`Rank` and `ProfileCompletionPercentage` are never computed anywhere in the solution** (grep
    over `GHCAA.Application` + `GHCAA.Infrastructure` finds assignments only in migration seed
    data). The member-profile stat strip is therefore permanently `#---`, `0 Points`, `0%`.
-7. **Quill editors are wired by `document.getElementById`** (`admin-comm.ts:151`), so the
+7. ~~**Quill editors are wired by `document.getElementById`** (`admin-comm.ts:151`), so the
    broadcast editor initialises against a DOM node that the `@if` block has not rendered yet →
-   "Message Body (Rich Text) — no control found".
+   "Message Body (Rich Text) — no control found".~~ **Fixed 2026-08-01** — see task 0.12 below and
+   `docs/TODO.md` item 30.12; both call sites now use the shared `app-rich-text-editor` component.
 8. **Messaging has no compose path.** `chat.service.ts` only exposes `MESSAGING.RECENT` and
    `MESSAGING.HISTORY/{id}`; `messages.html` only filters existing threads. Starting a first
    conversation is genuinely impossible from the UI.
@@ -114,7 +115,7 @@ who is also a member gets their photo.
 Fixes: no theme switcher in admin · member logout icon looks wrong · admin top-right should match
 member panel · show user image after login top-right in both panels.
 
-### 0.9 `[C]` Image fallback directive
+### 0.9 `[C]` Image fallback directive — **Done 2026-08-01**
 New `appImgFallback` directive + lightweight placeholder assets (album, article, event, news,
 avatar). Behaviour: empty/`null` src or `error` event → token-coloured solid block with the
 relevant `app-icon`, never a broken-image box. Apply to every `<img>` in the app (gallery cards,
@@ -123,7 +124,11 @@ album covers, article/submission covers, news, events, avatars, EC cards).
 Fixes: submission-review cover · gallery album cover · "if anywhere image missing add placeholder
 relevant image".
 
-### 0.10 `[C]` Loading state = LogoSpinner, everywhere
+Shipped as `src/app/common/directives/img-fallback.directive.ts`; see `docs/TODO.md` item 30.9 for
+the full implementation note (closed the last remaining gaps and verified via multiline grep that
+every `<img>` in the app carries the directive).
+
+### 0.10 `[C]` Loading state = LogoSpinner, everywhere — **Done 2026-08-01**
 `app-logo-spinner` already exists and is used on 24 pages. Audit and fix the rest: replace ad-hoc
 markup (e.g. `common/governance/governance.html:18` `<div class="loading">Loading committee
 records...</div>`) and **add** a loading state where none exists — candidates found:
@@ -132,20 +137,42 @@ records...</div>`) and **add** a loading state where none exists — candidates 
 `member/assistant`, `common/events`, `common/news`, `common/governance`, `public/directory`.
 Add a `.form-loading-overlay` wrapper class so form panels get one identical treatment.
 
-### 0.11 `[C]` Nav label == page title (single source of truth)
+All genuine gaps in this candidate list fixed with `<app-logo-spinner>` (`admin/audit`,
+`admin/comm`, `admin/events`, `admin/org-config`, `admin/payment-config`, `admin/roles`,
+`common/governance`, `common/news`). `admin/dashboard` and `member/dashboard` keep their existing
+skeleton-card loaders as a deliberate, symmetric choice (both portals use it identically — not
+ad-hoc). `member/messages` (no async load on entry) and `member/assistant` (per-message
+`typing()` chat-bubble indicator, a different correct pattern) and `public/directory` (thin
+wrapper delegating to `common/directory`, which already has its own spinner) confirmed as
+non-gaps rather than left unaudited. No separate `.form-loading-overlay` wrapper class was
+introduced — each fix reused the existing `<app-logo-spinner>` component directly, which kept the
+change centralized without adding a new shared CSS class for a single-use wrapper. See
+`docs/TODO.md` item 30.10 for the full page-by-page note.
+
+### 0.11 `[C]` Nav label == page title (single source of truth) — **Done 2026-08-01**
 Both layouts already derive the breadcrumb from `NavService` labels. Add
 `NavService.labelFor(url)` and make each page's `<app-page-header [title]>` consume it (or align
 the hardcoded string to the nav label). Reconcile known mismatches, e.g. nav "Submission Review"
 vs page "Review Submission", nav "Job Hub" vs page heading. Produce the full mismatch table as
 the first step of this task.
 
-### 0.12 `[C]` Reusable rich-text editor (`app-rich-text-editor`)
+Added `NavService.labelFor(url, scope)` and reconciled every mismatch found across both portals
+(including an outright copy-paste bug where `member/dashboard`'s header read "Member Dashboard"
+instead of "My Profile", and a page — `member/dashboard` itself — that had no title at all).
+`member/messages` (chat UI) and the two `/polls` pages (not present in either nav list) are
+confirmed out of scope rather than unresolved mismatches. See `docs/TODO.md` item 30.11 for the
+full mismatch-to-fix table.
+
+### 0.12 `[C]` Reusable rich-text editor (`app-rich-text-editor`) — **Done 2026-08-01**
 Wrap Quill in a component that binds to its own `ElementRef` in `ngAfterViewInit` and supports
 `ngModel`. Replace both `document.getElementById` call sites in `admin-comm.ts`
 (`template-editor`, `broadcast-editor`). Show an explicit "editor failed to load" fallback
 `<textarea>` if `window.Quill` is absent, so the field is never simply missing.
 
 Fixes: Broadcast "Message Body (Rich Text) — no control found".
+
+Shipped as `src/app/common/rich-text-editor/`; see `docs/TODO.md` item 30.12 for the full
+implementation note.
 
 ---
 

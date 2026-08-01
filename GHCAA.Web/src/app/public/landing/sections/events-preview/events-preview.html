@@ -13,7 +13,7 @@
                 <!-- Column 1: Photo -->
                 <div class="event-mini-thumb">
                     @if (ev.imageUrl) {
-                        <img [src]="'/' + ev.imageUrl" alt="Event Image">
+                        <img [src]="'/' + ev.imageUrl" alt="Event Image" appImgFallback="/assets/images/event-placeholder.jpg">
                     } @else {
                         <div class="thumb-placeholder">
                             <span>📅</span>

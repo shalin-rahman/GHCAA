@@ -1,10 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
   selector: 'app-logo-spinner',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ImgFallbackDirective],
   templateUrl: './logo-spinner.html',
   styleUrl: './logo-spinner.scss'
 })

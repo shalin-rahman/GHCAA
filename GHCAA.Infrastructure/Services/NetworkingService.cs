@@ -324,6 +324,13 @@ namespace GHCAA.Infrastructure.Services
                 dto.GHCLastCertificatePassingYear = ghcRecord.PassingYear;
                 dto.GHCLastCertificate = ghcRecord.Degree;
                 dto.GHCLastCertificateSubject = ghcRecord.Subject;
+
+                // 30.27: also populate the flattened Directory fields (PassingYear/Degree/Subject) -
+                // these were previously left at their default values, which is the confirmed root
+                // cause of "Executive Committee batch information is missing" on the web EC cards.
+                dto.PassingYear = ghcRecord.PassingYear;
+                dto.Degree = ghcRecord.Degree;
+                dto.Subject = ghcRecord.Subject;
             }
 
             var currentJob = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent);

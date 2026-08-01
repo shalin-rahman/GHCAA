@@ -6,11 +6,12 @@ import { NetworkingService, MemberSummary } from '../../core/services/networking
 import { NotificationService } from '../../core/services/notification.service';
 import { getECPositionName, getCurrentECPosition, getAcademicYears, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBER_CATEGORY_OPTIONS } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
     selector: 'app-directory',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective],
     templateUrl: './directory.html',
     styleUrl: './directory.scss'
 })

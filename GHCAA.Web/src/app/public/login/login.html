@@ -1,7 +1,7 @@
 <div class="login-page">
     <div class="glass-card login-card">
         <div class="login-header">
-            <img src="/assets/logo.png" alt="Logo" class="logo">
+            <img src="/assets/logo.png" alt="Logo" class="logo" appImgFallback>
             <h2>Member Portal</h2>
             <p>Login to your account</p>
         </div>
@@ -27,7 +27,7 @@
                         placeholder="••••••••" class="form-control"
                         [class.is-invalid]="passwordModel.touched && passwordModel.invalid">
                     <button type="button" class="toggle-password" (click)="togglePassword()" tabindex="-1">
-                        <i class="fas" [ngClass]="showPassword() ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></app-icon>
                     </button>
                 </div>
                 <div class="field-error" *ngIf="passwordModel.touched && passwordModel.invalid">
@@ -50,10 +50,10 @@
 
             <div class="social-login-buttons" *ngIf="socialProviders().length > 0">
                 <button *ngIf="isProviderEnabled('Google')" type="button" class="btn btn-social btn-google" (click)="loginWithGoogle()">
-                    <i class="fab fa-google"></i> Continue with Google
+                    <app-icon name="google" [size]="16"></app-icon> Continue with Google
                 </button>
                 <button *ngIf="isProviderEnabled('Facebook')" type="button" class="btn btn-social btn-facebook" (click)="loginWithFacebook()">
-                    <i class="fab fa-facebook-f"></i> Continue with Facebook
+                    <app-icon name="facebook" [size]="16"></app-icon> Continue with Facebook
                 </button>
             </div>
 

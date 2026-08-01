@@ -221,25 +221,7 @@
     }
 }
 
-.icon-btn.delete {
-    width: 34px;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    background: transparent;
-    color: #ef4444;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.2, 0, 0.2, 1);
-
-    &:hover {
-        background: #ef4444;
-        color: #fff;
-        transform: translateY(-2px);
-    }
-}
+/* .icon-btn.delete moved to central styles.scss (30.2) — do NOT re-add a block here. */
 
 .search-box {
     position: relative;

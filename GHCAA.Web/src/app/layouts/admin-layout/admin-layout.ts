@@ -8,11 +8,14 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BreadcrumbComponent } from '../../common/breadcrumb/breadcrumb.component';
+import { Icon } from '../../common/icon/icon';
+import { UserMenu } from '../../common/user-menu/user-menu';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, BreadcrumbComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, BreadcrumbComponent, Icon, UserMenu, ImgFallbackDirective],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss'
 })
@@ -36,9 +39,7 @@ export class AdminLayout {
       takeUntilDestroyed()
     ).subscribe(() => {
       const url = this.router.url;
-      const allAdminItems = this.nav.adminNavItems();
-      const match = allAdminItems.find(x => url.includes(x.path));
-      const title = match?.label ?? 'Control Panel';
+      const title = this.nav.labelFor(url, 'admin');
       this.currentPageTitle.set(title);
       this.titleService.setTitle(`${title} | ${this.orgConfig.config()?.branding?.shortName ?? 'Admin'} Admin`);
       // Auto-close the mobile drawer after navigating.
@@ -48,11 +49,5 @@ export class AdminLayout {
 
   toggleSidebar() {
     this.isSidebarOpen.update(v => !v);
-  }
-
-  // 29F.4: real logout was missing — the header only had an "Exit Admin" link that hopped
-  // to the member portal without ending the session.
-  logout() {
-    this.auth.logout();
   }
 }

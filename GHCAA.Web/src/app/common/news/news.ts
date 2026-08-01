@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
 import { getArticleCategoryLabel } from '../../core/constants/app.constants';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
+import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-news',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ImgFallbackDirective, LogoSpinnerComponent],
   templateUrl: './news.html',
   styleUrl: './news.scss'
 })

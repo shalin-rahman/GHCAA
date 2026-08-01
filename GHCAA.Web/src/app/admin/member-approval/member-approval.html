@@ -35,7 +35,7 @@
                         <div class="member-cell">
                             <div class="avatar-box">
                                 @if (reg.photoPath) {
-                                <img [src]="reg.photoPath" alt="Profile">
+                                <img [src]="reg.photoPath" alt="Profile" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                                 } @else {
                                 <div class="avatar">{{ reg.fullName?.[0] || '?' }}</div>
                                 }
@@ -107,7 +107,7 @@
                         <div class="doc-preview">
                             <span class="text-[10px] uppercase font-bold opacity-40 mb-2 block">Applicant Photo</span>
                             <div class="img-box glass-card w-40 h-40 overflow-hidden">
-                                <img [src]="selectedMember()?.photoPath || '/assets/placeholder.jpg'" alt="Profile">
+                                <img [src]="selectedMember()?.photoPath || '/assets/placeholders/avatar-placeholder.svg'" alt="Profile" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                             </div>
                         </div>
                         <div class="doc-preview flex-1">

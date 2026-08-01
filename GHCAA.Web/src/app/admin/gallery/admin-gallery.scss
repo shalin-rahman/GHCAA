@@ -135,13 +135,17 @@
 
     }
 
+    /* 30.19: was a bespoke `justify-content: space-between` flex row with an inner
+       `.flex.gap-2` sub-wrapper — the two groups sat flush against the card edges,
+       crowding the trailing delete icon-btn against "Edit Info" on narrower cards.
+       Now `.album-actions` also carries the shared `.action-group` class (padding/border
+       stay here, gap/flex-wrap come from `.action-group` in styles.scss); `.ml-auto` on
+       the delete button pushes it to the row end while keeping the same gap as its
+       siblings. */
     .album-actions {
         padding: 1.25rem 1.75rem;
         border-top: 1px solid var(--card-border);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.5rem;
+        flex-wrap: wrap;
     }
 }
 
@@ -173,25 +177,9 @@
     }
 }
 
-.icon-btn {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    transition: all 0.3s;
-    cursor: pointer;
-
-    &:hover {
-        background: #ef4444;
-        color: #fff;
-        transform: scale(1.1);
-    }
-}
+/* .icon-btn moved to central styles.scss (30.2) — do NOT re-add a block here. Delete-album
+   button here previously always rendered red (no .delete modifier) — now uses the modifier
+   explicitly so it matches every other danger icon-button app-wide. */
 
 
 

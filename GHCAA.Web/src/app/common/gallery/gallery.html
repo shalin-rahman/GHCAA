@@ -1,7 +1,7 @@
 <div class="gallery-page">
     <div class="header">
         <div class="title-group">
-            <h2>Legacy Archive & Moments</h2>
+            <h2>Event Gallery</h2>
             <p>Visual journey through Haragangian heritage</p>
         </div>
         <button class="btn btn-accent" (click)="showUpload.set(true)" *ngIf="!showUpload() && auth.isAuthenticated()">
@@ -40,7 +40,7 @@
                 } @else {
                     <div class="preview-box relative w-full h-40">
                         @if (photoPreview()) {
-                        <img [src]="photoPreview()" alt="Selected photo preview" class="w-full h-full object-cover rounded-xl opacity-50">
+                        <img [src]="photoPreview()" alt="Selected photo preview" class="w-full h-full object-cover rounded-xl opacity-50" appImgFallback>
                         }
                         <div class="preview-info absolute inset-0 flex flex-col items-center justify-center">
                             <span class="text-accent text-xs font-black">{{ newMemory.photo.name }}</span>
@@ -110,7 +110,7 @@
             <div class="photo-grid-immersive">
                 @for (p of gallery?.photos; track p.id) {
                 <div class="photo-reveal">
-                    <img [src]="validImg(p.photoPath)" [alt]="gallery?.title" (error)="onImgError($event)" (click)="viewFull(p.photoPath)">
+                    <img [src]="validImg(p.photoPath)" [alt]="gallery?.title" appImgFallback="/assets/logo.jpg" (click)="viewFull(p.photoPath)">
                 </div>
                 }
             </div>

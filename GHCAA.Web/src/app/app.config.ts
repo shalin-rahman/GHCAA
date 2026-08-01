@@ -8,7 +8,9 @@ import { OrgConfigService } from './core/services/org-config.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
+    // 30.23: anchorScrolling lets routerLink [fragment] targets (e.g. dashboard profile-completion
+    // steps linking into /portal/profile#section-…) scroll the matching element into view.
+    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' })),
     provideHttpClient(
       withInterceptors([globalHttpInterceptor]),
       withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' })

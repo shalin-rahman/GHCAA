@@ -29,12 +29,15 @@
             letter-spacing: -0.02em;
         }
 
+        /* 30.22: was uppercase + 1px letter-spacing + weight 600, while its siblings on
+           the same line (.m-number, .display-name) are mixed-case with tight/negative
+           tracking — the all-caps + wide tracking read as a visually different typeface
+           even though all three share the same font-family. Dropped the transform/tracking
+           so the whole line reads as one consistent font treatment. */
         .m-type {
             font-size: 0.85rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .separator {

@@ -73,6 +73,37 @@
     overflow-y: auto;
 }
 
+// TODO 30.14: this had zero CSS rule anywhere, so it did not actually push the
+// Admin Panel link to the bottom of the sidebar despite `.nav-list` being a flex
+// column with `flex: 1` above it — the spacer itself never grew to fill the gap.
+.nav-spacer {
+    flex: 1 1 auto;
+}
+
+// TODO 30.13: grouped-section wrapper for the portal sidebar, mirroring the
+// admin sidebar's `.nav-section`/`.nav-section-label` pattern (admin-layout.scss)
+// adapted to this sidebar's uppercase/letter-spaced nav-item styling.
+.nav-section {
+    padding: 0 0 0.25rem;
+
+    & + & {
+        margin-top: 0.35rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--glass-border);
+    }
+}
+
+.nav-section-label {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    padding: 0 1.25rem;
+    margin-bottom: 0.4rem;
+}
+
 .nav-item {
     display: flex;
     align-items: center;
@@ -257,63 +288,9 @@
     }
 }
 
-.right-section {
-    .theme-toggle {
-        font-size: 1.25rem;
-        border: none;
-        background: none;
-        cursor: pointer;
-        transition: 0.3s;
-
-        &:hover {
-            transform: rotate(15deg);
-        }
-    }
-
-    .user-profile {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding-left: 1.5rem;
-        border-left: 1px solid var(--glass-border);
-
-        .avatar {
-            width: 32px;
-            height: 32px;
-            background: var(--gold-gradient);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-weight: 900;
-            font-size: 0.8rem;
-
-            &.avatar-img {
-                object-fit: cover;
-                background: none;
-            }
-        }
-
-        .user-details {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.2;
-        }
-
-        .username {
-            font-weight: 800;
-            font-size: 0.85rem;
-        }
-
-        .role {
-            font-size: 0.65rem;
-            color: var(--accent-text);
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-    }
-}
+/* .right-section's theme-toggle/user-profile/avatar/logout-toggle markup + styles
+   moved into the shared <app-user-menu> component (TODO 30.8/30.15) — see
+   src/app/common/user-menu/user-menu.scss. */
 
 /* Page Transitions */
 .page-content {
@@ -439,18 +416,10 @@
         display: none; /* hide on very small; title alone is enough */
     }
 
-    /* Make the right-section more compact */
+    /* Make the right-section more compact (user-profile/theme-toggle mobile sizing
+       now lives in the shared user-menu.scss since that markup moved out). */
     .right-section {
         gap: 0.5rem;
-
-        .user-profile {
-            padding-left: 0.5rem;
-            border-left: none;
-        }
-
-        .theme-toggle {
-            font-size: 1rem;
-        }
     }
 
     /* Page content full bleed, no overflow */

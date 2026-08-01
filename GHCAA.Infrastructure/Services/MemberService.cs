@@ -501,6 +501,7 @@ namespace GHCAA.Infrastructure.Services
             if (member == null) return null;
 
             var gains = await GetMemberGainsAsync(member.Id, member.ContributionPoints, cancellationToken);
+            var registrationPaymentCompleted = member.PaymentHistories != null && member.PaymentHistories.Any(p => p.FinancialCategory == Enums.FinancialCategory.RegistrationFee && p.Status == Enums.PaymentStatus.Completed);
             var dto = new MemberProfileDto
             {
                 Id = member.Id,
@@ -536,9 +537,13 @@ namespace GHCAA.Infrastructure.Services
                 // Gamification & Health
                 ContributionPoints = member.ContributionPoints,
                 Rank = gains.rank,
-                ProfileCompletionPercentage = CalculateProfileCompletion(member),
+                // 30.28: computed from the SAME 4-item criteria as the member dashboard's
+                // "Complete Your Profile" checklist (Identity & Photo / GHC History /
+                // Professional Info / Registration Payment), so the percentage bar and the
+                // step indicators never disagree.
+                ProfileCompletionPercentage = CalculateChecklistProfileCompletion(member, registrationPaymentCompleted),
                 IsProfileComplete = member.IsProfileComplete,
-                PaymentStatus = member.PaymentHistories != null && member.PaymentHistories.Any(p => p.FinancialCategory == Enums.FinancialCategory.RegistrationFee && p.Status == Enums.PaymentStatus.Completed) ? "Completed" : "Pending",
+                PaymentStatus = registrationPaymentCompleted ? "Completed" : "Pending",
                 // Family members from Request system
                 FamilyMembers = new List<MemberFamilyDto>(),
 
@@ -1483,6 +1488,25 @@ namespace GHCAA.Infrastructure.Services
             if (hasProfessional) completedFields++;
 
             return Math.Round((decimal)completedFields / totalFields * 100, 2);
+        }
+
+        // 30.28: mirrors the member dashboard's "Complete Your Profile" checklist exactly -
+        // Identity & Photo / GHC History / Professional Info / Registration Payment, each
+        // worth an equal 25% - so the profile page's percentage stat matches the checklist
+        // step indicators the member actually sees. This is intentionally a separate, coarser
+        // calculation from CalculateProfileCompletion, which drives the stricter 100%-complete
+        // gate used before admin approval and must not be changed by this UI-facing metric.
+        private decimal CalculateChecklistProfileCompletion(Member member, bool registrationPaymentCompleted)
+        {
+            const int totalSteps = 4;
+            int completedSteps = 0;
+
+            if (!string.IsNullOrEmpty(member.FullName) && !string.IsNullOrEmpty(member.PhotoPath)) completedSteps++;
+            if (member.AcademicHistory != null && member.AcademicHistory.Any()) completedSteps++;
+            if (member.ProfessionalHistory != null && member.ProfessionalHistory.Any()) completedSteps++;
+            if (registrationPaymentCompleted) completedSteps++;
+
+            return Math.Round((decimal)completedSteps / totalSteps * 100, 2);
         }
 
         private string GetCategoryBadge(int points)

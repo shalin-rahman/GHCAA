@@ -116,7 +116,7 @@
                 <div class="news-feed-item">
                     @if (item.coverImageUrl || item.imageUrl) {
                     <div class="news-thumb">
-                        <img [src]="item.coverImageUrl || item.imageUrl" [alt]="item.title">
+                        <img [src]="item.coverImageUrl || item.imageUrl" [alt]="item.title" appImgFallback>
                     </div>
                     } @else {
                     <div class="news-thumb-placeholder">📄</div>

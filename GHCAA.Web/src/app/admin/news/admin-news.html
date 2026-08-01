@@ -158,7 +158,7 @@
                     <td class="actions-cell">
                         <button class="btn btn-outline btn-sm" (click)="selectedPost.set(post)">Details ↗</button>
                         <button class="icon-btn" (click)="editPost(post)" title="Edit">✏️</button>
-                        <button class="icon-btn" (click)="deletePost(post.id)" title="Delete">🗑️</button>
+                        <button class="icon-btn delete" (click)="deletePost(post.id)" title="Delete">🗑️</button>
                     </td>
                 </tr>
                 }
@@ -184,7 +184,7 @@
             <div class="modal-body">
                 @if (post.imageUrl) {
                 <img [src]="post.imageUrl"
-                    class="w-full h-80 object-cover rounded-2xl mb-10 border border-primary/5 shadow-2xl">
+                    class="w-full h-80 object-cover rounded-2xl mb-10 border border-primary/5 shadow-2xl" appImgFallback>
                 }
                 <div class="prose prose-invert max-w-none">
                     <p class="text-lg leading-relaxed font-light" style="white-space: pre-wrap;">{{ post.content }}</p>

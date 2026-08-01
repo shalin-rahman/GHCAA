@@ -1,7 +1,7 @@
 <div class="ops-container glass-card p-6 border border-white/20 rounded-2xl shadow-2xl">
     <div class="flex items-center justify-between mb-6">
         <h3 class="text-2xl font-bold text-slate-100 flex items-center gap-3">
-            <i class="fas fa-briefcase text-accent"></i>
+            <app-icon name="briefcase" class="text-accent"></app-icon>
             Event Operations: {{ event.title }}
         </h3>
         
@@ -53,7 +53,7 @@
                     <button (click)="toggleTask(task.id)" 
                             class="w-6 h-6 rounded-full border-2 border-accent/50 flex items-center justify-center transition-all"
                             [class.bg-accent]="task.isCompleted">
-                        <i *ngIf="task.isCompleted" class="fas fa-check text-slate-900 text-xs"></i>
+                        <app-icon *ngIf="task.isCompleted" name="check" [size]="14" class="text-slate-900"></app-icon>
                     </button>
                     <div>
                         <p class="font-semibold" [class.line-through]="task.isCompleted" [class.text-slate-400]="task.isCompleted">
@@ -67,7 +67,7 @@
                 </div>
                 
                 <button (click)="deleteTask(task.id)" class="text-slate-600 hover:text-red-400 p-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <i class="fas fa-trash-alt"></i>
+                    <app-icon name="trash" [size]="16"></app-icon>
                 </button>
             </div>
 
@@ -156,7 +156,7 @@
                         <td class="px-4 py-4 text-right font-mono text-emerald-400 font-bold">৳ {{ ex.amount | number:'1.2-2' }}</td>
                         <td class="px-4 py-4 text-right">
                             <button (click)="deleteExpense(ex.id)" class="text-slate-600 hover:text-red-400 transition-all p-2">
-                                <i class="fas fa-times"></i>
+                                <app-icon name="close" [size]="14"></app-icon>
                             </button>
                         </td>
                     </tr>

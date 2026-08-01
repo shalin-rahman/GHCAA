@@ -6,11 +6,12 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { API_ENDPOINTS } from '../../core/constants/app.constants';
+import { Icon } from '../../common/icon/icon';
 
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Icon],
   templateUrl: './change-password.html',
   styleUrl: './change-password.scss'
 })

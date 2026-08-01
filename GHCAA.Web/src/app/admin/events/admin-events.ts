@@ -1,6 +1,8 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { EventsService } from '../../core/services/events.service';
 import { AlumniEvent, EventRegistration } from '../../core/models/business.models';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
@@ -17,7 +19,7 @@ import { OrgConfigService } from '../../core/services/org-config.service';
 @Component({
     selector: 'app-admin-events',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LogoSpinnerComponent],
     templateUrl: './admin-events.html',
     styleUrl: './admin-events.scss'
 })
@@ -31,6 +33,8 @@ export class AdminEvents implements OnInit {
 
     events = signal<AlumniEvent[]>([]);
     registrations = signal<any[]>([]);
+    loading = signal<boolean>(true);
+    loadingRegistrations = signal<boolean>(true);
     activeTab = signal<'manage' | 'approvals'>('manage');
     isExporting = signal(false);
 
@@ -127,26 +131,29 @@ export class AdminEvents implements OnInit {
     }
 
     loadAllEvents() {
+        this.loading.set(true);
         this.eventsService.getAllEventsForAdmin().subscribe({
-            next: data => this.events.set(data),
-            error: () => this.events.set([])
+            next: data => { this.events.set(data); this.loading.set(false); },
+            error: () => { this.events.set([]); this.loading.set(false); }
         });
     }
 
     loadAllRegistrations() {
+        this.loadingRegistrations.set(true);
         this.eventsService.getAllRegistrations(
-            this.currentPage(), 
-            this.pageSize(), 
-            this.selectedEventIdFilter() || undefined, 
-            this.statusFilter(), 
+            this.currentPage(),
+            this.pageSize(),
+            this.selectedEventIdFilter() || undefined,
+            this.statusFilter(),
             this.searchQuery()
         ).subscribe({
             next: res => {
                 this.registrations.set(res.items);
                 this.totalItems.set(res.totalItems);
                 this.totalPages.set(res.totalPages);
+                this.loadingRegistrations.set(false);
             },
-            error: () => this.registrations.set([])
+            error: () => { this.registrations.set([]); this.loadingRegistrations.set(false); }
         });
     }
 

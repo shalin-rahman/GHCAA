@@ -1,5 +1,5 @@
 <div class="articles-container admin-feature">
-    <app-page-header title="Articles & Submissions"
+    <app-page-header title="My Articles"
         emptySubtitle="Share your stories, event highlights, and magazine entries with the community.">
         <button actions class="btn btn-accent" (click)="openCreate()">
             <span class="icon">✍️</span> Write New Article
@@ -87,7 +87,7 @@
                     <label>Cover Photo</label>
                     <div class="photo-upload-zone" (click)="fileInput.click()">
                         @if (photoPreview()) {
-                        <img [src]="photoPreview()" alt="Preview" class="preview-img">
+                        <img [src]="photoPreview()" alt="Preview" class="preview-img" appImgFallback>
                         <div class="overlay">Change Photo</div>
                         } @else {
                         <div class="upload-placeholder">

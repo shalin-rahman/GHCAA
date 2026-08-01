@@ -1,6 +1,6 @@
 <div class="directory-page" [class.compact]="isCompact">
     <div class="header">
-        <h2 *ngIf="!isCompact">Member Directory</h2>
+        <h2 *ngIf="!isCompact">Alumni Directory</h2>
         <p *ngIf="!isCompact">Find and connect with fellow Haragangians</p>
     </div>
 
@@ -87,7 +87,8 @@
                 <div class="member-header">
                     <div class="avatar-container">
                         @if (m.photoPath) {
-                        <img [src]="m.photoPath" alt="Profile" class="avatar-img">
+                        <img [src]="m.photoPath" alt="Profile" class="avatar-img"
+                            appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                         } @else {
                         <div class="avatar">{{ m.fullName[0] }}</div>
                         }
@@ -195,7 +196,8 @@
             <div class="viewer-header">
                 <div class="viewer-avatar">
                     @if (selectedMember()?.photoPath) {
-                    <img [src]="selectedMember()?.photoPath" alt="Profile">
+                    <img [src]="selectedMember()?.photoPath" alt="Profile"
+                        appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     <div class="avatar-ph">{{ selectedMember()?.fullName[0] }}</div>
                     }

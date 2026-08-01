@@ -6,28 +6,7 @@
     gap: 0.5rem;
     align-items: center;
 
-    .icon-btn {
-        background: rgba(var(--primary-rgb), 0.03);
-        border: 1px solid var(--glass-border);
-        cursor: pointer;
-        font-size: 1rem;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        transition: 0.2s;
-
-        &:hover {
-            background: var(--surface-color);
-            transform: scale(1.1);
-        }
-
-        &.approve { border-color: var(--success-color); color: var(--success-color); }
-        &.archive { border-color: var(--danger-color); color: var(--danger-color); }
-        &.contact { border-color: var(--accent-color); color: var(--accent-text); }
-    }
+    /* .icon-btn moved to central styles.scss (30.2) — do NOT re-add a block here. */
 }
 
 /* Member Cell Styling */

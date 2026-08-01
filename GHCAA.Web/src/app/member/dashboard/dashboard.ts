@@ -9,11 +9,13 @@ import { NetworkingService } from '../../core/services/networking.service';
 import { NewsService } from '../../core/services/news.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { Icon } from '../../common/icon/icon';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe],
+  imports: [CommonModule, RouterLink, DatePipe, Icon, ImgFallbackDirective],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })

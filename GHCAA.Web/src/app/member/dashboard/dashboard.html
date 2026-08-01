@@ -1,5 +1,15 @@
 <div class="dashboard-grid">
 
+    <!-- 30.11: page header added so the on-page title matches the "Dashboard" nav
+         label/breadcrumb (previously this page had no title at all, unlike admin's
+         dashboard which already showed one). -->
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Dashboard</h2>
+            <small>Welcome back{{ profile()?.fullName ? ', ' + profile()?.fullName : '' }}</small>
+        </div>
+    </div>
+
     @if (loading()) {
     <div class="dash-loading">
         <div class="skeleton-row">
@@ -27,28 +37,38 @@
                 </div>
             </div>
         </div>
+        <!-- 30.23: steps are now links into the relevant profile (or payments) section instead
+             of static status chips, so members can jump straight to whatever's incomplete. -->
         <div class="wizard-steps">
-            <div class="step" [class.done]="profile()?.fullName && profile()?.photoPath">
-                <i class="fas" [ngClass]="(profile()?.fullName && profile()?.photoPath) ? 'fa-check-circle' : 'fa-circle'"></i>
+            <a class="step" routerLink="/portal/profile" fragment="section-identity-photo"
+                [class.done]="profile()?.fullName && profile()?.photoPath" title="Go to Identity & Photo">
+                <app-icon [name]="(profile()?.fullName && profile()?.photoPath) ? 'check-circle' : 'circle'" [size]="16"></app-icon>
                 <span>Identity & Photo</span>
-            </div>
-            <div class="step" [class.done]="profile()?.academicHistory?.length > 0">
-                <i class="fas" [ngClass]="profile()?.academicHistory?.length > 0 ? 'fa-check-circle' : 'fa-circle'"></i>
+                <span class="step-arrow">→</span>
+            </a>
+            <a class="step" routerLink="/portal/profile" fragment="section-academic-history"
+                [class.done]="profile()?.academicHistory?.length > 0" title="Go to GHC History">
+                <app-icon [name]="profile()?.academicHistory?.length > 0 ? 'check-circle' : 'circle'" [size]="16"></app-icon>
                 <span>GHC History</span>
-            </div>
-            <div class="step" [class.done]="profile()?.professionalHistory?.length > 0">
-                <i class="fas" [ngClass]="profile()?.professionalHistory?.length > 0 ? 'fa-check-circle' : 'fa-circle'"></i>
+                <span class="step-arrow">→</span>
+            </a>
+            <a class="step" routerLink="/portal/profile" fragment="section-professional-history"
+                [class.done]="profile()?.professionalHistory?.length > 0" title="Go to Professional Info">
+                <app-icon [name]="profile()?.professionalHistory?.length > 0 ? 'check-circle' : 'circle'" [size]="16"></app-icon>
                 <span>Professional Info</span>
-            </div>
-            <div class="step" [class.done]="profile()?.paymentStatus === 'Completed'">
-                <i class="fas" [ngClass]="profile()?.paymentStatus === 'Completed' ? 'fa-check-circle' : 'fa-circle'"></i>
+                <span class="step-arrow">→</span>
+            </a>
+            <a class="step" routerLink="/portal/payments"
+                [class.done]="profile()?.paymentStatus === 'Completed'" title="Go to Registration Payment">
+                <app-icon [name]="profile()?.paymentStatus === 'Completed' ? 'check-circle' : 'circle'" [size]="16"></app-icon>
                 <span>Registration Payment</span>
-            </div>
+                <span class="step-arrow">→</span>
+            </a>
         </div>
         <div class="wizard-footer">
             <button class="btn btn-accent" routerLink="/portal/profile">Finish Profile Setup</button>
             <span class="notice" *ngIf="profileCompletion === 100 && profile()?.status === 0">
-                <i class="fas fa-clock"></i> Your profile is 100% complete. Waiting for admin approval.
+                <app-icon name="clock" [size]="14"></app-icon> Your profile is 100% complete. Waiting for admin approval.
             </span>
         </div>
     </div>
@@ -206,7 +226,7 @@
             <div class="compact-member-card">
                 <div class="m-photo">
                     @if (m.photoPath) {
-                    <img [src]="m.photoPath" [alt]="m.fullName">
+                    <img [src]="m.photoPath" [alt]="m.fullName" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     <div class="m-avatar-ph">{{ m.fullName?.[0] || '?' }}</div>
                     }

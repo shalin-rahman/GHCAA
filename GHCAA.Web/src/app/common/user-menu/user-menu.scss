@@ -1,0 +1,99 @@
+/* Co-located here (not styles.scss) because these rules previously lived scoped under
+   portal-layout's `.right-section` in portal-layout.scss. Angular's emulated
+   ViewEncapsulation means a parent component's scoped CSS never reaches a child
+   component's own template content — since this markup moved into its own
+   <app-user-menu> component (TODO 30.8/30.15, shared by portal + admin headers),
+   the rules had to move with it so they still actually apply. Class names are
+   unchanged from the original portal-layout markup, so this is a relocation, not a
+   redesign. */
+:host {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.theme-toggle {
+    font-size: 1.25rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: 0.3s;
+
+    &:hover {
+        transform: rotate(15deg);
+    }
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--glass-border);
+
+    .avatar {
+        width: 32px;
+        height: 32px;
+        background: var(--gold-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-weight: 900;
+        font-size: 0.8rem;
+
+        &.avatar-img {
+            object-fit: cover;
+            background: none;
+        }
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .username {
+        font-weight: 800;
+        font-size: 0.85rem;
+    }
+
+    .role {
+        font-size: 0.65rem;
+        color: var(--accent-text);
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+}
+
+/* 30.36: additive discoverability link — an admin-capable member on the Member Portal
+   previously had to know about the sidebar's "Admin Panel" link; this mirrors it into the
+   shared header menu (visible only when the `isAdmin` input is true) so it's reachable
+   from anywhere, without removing the sidebar link. */
+.admin-panel-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--accent-text);
+    font-weight: 800;
+    font-size: 0.8rem;
+    white-space: nowrap;
+
+    &:hover {
+        color: var(--accent-color);
+    }
+}
+
+@media (max-width: 767px) {
+    .user-profile {
+        padding-left: 0.5rem;
+        border-left: none;
+    }
+
+    .theme-toggle {
+        font-size: 1rem;
+    }
+}

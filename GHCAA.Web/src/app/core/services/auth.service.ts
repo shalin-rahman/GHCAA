@@ -19,6 +19,14 @@ export class AuthService {
     public currentUser = computed(() => this._currentUser());
     public isAuthenticated = computed(() => !!this._currentUser());
 
+    // 30.26: true once the async session-restore below has settled (immediately true if a
+    // cached user was already found in storage, so no consumer waits unnecessarily). Lets
+    // callers that need to distinguish "confirmed guest" from "auth still resolving" (e.g. a
+    // deep-linked page that redirects guests away) avoid mis-classifying a real member as a
+    // guest during the brief window before /auth/me responds on a fresh page load.
+    private _authChecked = signal<boolean>(!!this._currentUser());
+    public authChecked = computed(() => this._authChecked());
+
     private inactivityTimer: any;
     private readonly TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -44,6 +52,7 @@ export class AuthService {
                         sessionStorage.setItem('user_session', JSON.stringify(this.toSessionUser(user)));
                         this.resetTimer();
                     }
+                    this._authChecked.set(true);
                 });
         }
     }

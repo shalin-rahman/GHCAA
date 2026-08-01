@@ -3,12 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { getECPositionName, getECPositionForPeriod } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
     // ... (rest of metadata)
     selector: 'app-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective],
     templateUrl: './governance.html',
     styleUrl: './governance.scss'
 })

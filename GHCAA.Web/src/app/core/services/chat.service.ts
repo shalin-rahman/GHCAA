@@ -97,6 +97,16 @@ export class ChatService {
         });
     }
 
+    // 30.25/30.29: kicks off a brand-new conversation via the REST send endpoint (works even
+    // when no prior history/thread exists, unlike the SignalR hub invoke below which assumes
+    // an already-connected two-way thread). Used by the "New Message" member-picker flow.
+    sendFirstMessage(receiverUserId: number, content: string) {
+        return this.http.post<ChatMessage>(API_ENDPOINTS.MESSAGING.SEND, {
+            receiverId: receiverUserId,
+            content
+        });
+    }
+
     async sendMessage(receiverUserId: number, content: string) {
         const connected = await this.ensureConnected();
         if (connected && this.hubConnection?.state === signalR.HubConnectionState.Connected) {

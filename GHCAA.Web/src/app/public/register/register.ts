@@ -12,11 +12,13 @@ import { parseDisplayDate } from '../../core/utils/date.util';
 import { GatewaysService } from '../../core/services/gateways.service';
 import { PaymentGateway } from '../../core/models/business.models';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { Icon } from '../../common/icon/icon';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent, Icon, ImgFallbackDirective],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })

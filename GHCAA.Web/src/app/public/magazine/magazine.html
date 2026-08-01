@@ -19,7 +19,7 @@
                 <div class="featured-section reveal-in">
                     <div class="magazine-card primary" (click)="selectArticle(articles()[0])">
                         <div class="card-image">
-                            <img [src]="articles()[0].imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070'" alt="Cover">
+                            <img [src]="articles()[0].imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070'" alt="Cover" appImgFallback="/assets/logo.jpg">
                             <span class="category-badge">Featured Story</span>
                         </div>
                         <div class="card-content">
@@ -41,7 +41,7 @@
                         @if (i > 0) {
                             <div class="magazine-card secondary reveal-card" (click)="selectArticle(article)">
                                 <div class="card-image">
-                                    <img [src]="article.imageUrl || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2069'" alt="Article">
+                                    <img [src]="article.imageUrl || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=2069'" alt="Article" appImgFallback="/assets/logo.jpg">
                                 </div>
                                 <div class="card-content">
                                     <div class="meta">
@@ -78,7 +78,7 @@
                     </div>
 
                     <div class="detail-hero" *ngIf="selectedArticle()?.imageUrl">
-                        <img [src]="selectedArticle()?.imageUrl" alt="Hero">
+                        <img [src]="selectedArticle()?.imageUrl" alt="Hero" appImgFallback="/assets/logo.jpg">
                     </div>
 
                     <!-- 24.42: Content is sanitized server-side (HtmlSanitizer) before storage.

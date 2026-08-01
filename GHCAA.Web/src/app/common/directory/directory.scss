@@ -27,16 +27,27 @@
     }
 }
 
+/* 30.24: was 2rem padding / 3rem margin — disproportionately tall for a filter panel,
+   and it scrolled away with the results on long member lists. Compacted to the same
+   scale as the `.compact` variant below, and made sticky on larger screens using the
+   same `position: sticky` / `top: var(--header-height)` pattern as `.filter-bar`/
+   `.action-bar` (styles.scss) so the search stays reachable while scrolling. */
 .filters {
-    padding: 2rem;
-    margin-bottom: 3rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
     border: 1px solid var(--glass-border);
+
+    @media (min-width: 1024px) {
+        position: sticky;
+        top: var(--header-height);
+        z-index: 90;
+    }
 }
 
 .filter-grid {
     display: grid;
     grid-template-columns: 1.5fr 1fr 1fr 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .filter-group {
@@ -44,7 +55,7 @@
         display: block;
         font-size: 0.75rem;
         font-weight: 800;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.4rem;
         color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 1px;
@@ -53,13 +64,13 @@
     input,
     select {
         width: 100%;
-        padding: 0.8rem 1rem;
+        padding: 0.55rem 0.85rem;
         border: 1px solid var(--glass-border);
         border-radius: 10px;
         background: var(--bg-color);
         color: var(--text-main);
         font-family: inherit;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         transition: 0.3s;
 
         &:focus {

@@ -1,11 +1,14 @@
 <div class="news-page">
     <div class="header">
-        <h2>Haraganga News Hub</h2>
+        <h2>News</h2>
         <p>Announcements, updates, and stories from the alumni community</p>
     </div>
 
     @if (loading()) {
-    <div class="loading">Loading news...</div>
+    <div class="loading-state py-20 text-center">
+        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+        <p>Loading news...</p>
+    </div>
     } @else {
     <div class="news-list">
         @for (post of news(); track post.id) {
@@ -41,7 +44,7 @@
                 <span class="cat-tag">{{ getArticleCategoryLabel(post.articleCategory) }}</span>
                 <button class="close-btn" (click)="selectedPost.set(null)">✕ Close</button>
             </div>
-            <img [src]="post.imageUrl || '/assets/logo.jpg'" class="detail-img mb-8" *ngIf="post.imageUrl">
+            <img [src]="post.imageUrl || '/assets/logo.jpg'" class="detail-img mb-8" *ngIf="post.imageUrl" appImgFallback="/assets/logo.jpg">
             <div class="detail-meta mb-4">
                 <span class="date">{{ post.createdAt | date:'fullDate' }}</span>
                 <span class="author ml-4">By <strong>{{ post.authorName }}</strong></span>

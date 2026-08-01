@@ -25,7 +25,7 @@
                         @if (p.isActive) {
                         <span class="status-badge active-badge">Active</span>
                         }
-                        <button class="icon-btn edit-btn" (click)="$event.stopPropagation(); editPeriod(p)" title="Edit Period" style="background:none; border:none; color: var(--text-muted); cursor: pointer;">✏️</button>
+                        <button class="icon-btn" (click)="$event.stopPropagation(); editPeriod(p)" title="Edit Period">✏️</button>
                     </div>
                 </div>
                 }
@@ -82,7 +82,7 @@
                         <tr>
                             <td class="member-cell" style="display: flex; gap: 1rem; align-items: center;">
                                 @if (em.member?.photoPath) {
-                                <img [src]="getImageUrl(em.member.photoPath)" class="member-avatar photo" alt="Photo" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid var(--glass-border)">
+                                <img [src]="getImageUrl(em.member.photoPath)" class="member-avatar photo" alt="Photo" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid var(--glass-border)" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                                 } @else {
                                 <div class="avatar" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(212,175,55,0.1);color:#d4af37;font-weight:bold;">{{ em.member?.fullName?.[0] }}</div>
                                 }

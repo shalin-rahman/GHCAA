@@ -6,17 +6,23 @@
     <!-- Sidebar -->
     <aside class="sidebar glass-effect" [class.collapsed]="isSidebarCollapsed()">
         <div class="sidebar-brand">
-            <img src="/assets/logo.png" alt="GHC" class="mini-logo">
+            <img src="/assets/logo.png" alt="GHC" class="mini-logo" appImgFallback>
             <span class="brand-name" *ngIf="!isSidebarCollapsed()">HARAGANGIAN</span>
         </div>
 
         <nav class="nav-list">
-            <!-- Portal nav items driven by NavService (based on API role) -->
-            @for (item of nav.portalNavItems(); track item.path) {
-            <a [routerLink]="item.path" routerLinkActive="active" class="nav-item">
-                <span class="icon">{{ item.icon }}</span>
-                <span class="label" *ngIf="!isSidebarCollapsed()">{{ item.label }}</span>
-            </a>
+            <!-- Portal nav items driven by NavService (based on API role), grouped into
+                 sections mirroring the admin sidebar's pattern (TODO 30.13). -->
+            @for (section of nav.portalNavSections(); track section.name) {
+            <div class="nav-section">
+                <span class="nav-section-label" *ngIf="!isSidebarCollapsed()">{{ section.name }}</span>
+                @for (item of section.items; track item.path) {
+                <a [routerLink]="item.path" routerLinkActive="active" class="nav-item">
+                    <span class="icon"><app-icon [name]="item.icon"></app-icon></span>
+                    <span class="label" *ngIf="!isSidebarCollapsed()">{{ item.label }}</span>
+                </a>
+                }
+            </div>
             }
 
             <div class="nav-spacer"></div>
@@ -24,7 +30,7 @@
             <!-- Admin Panel link — visible only to Admin/SuperAdmin via NavService -->
             @if (nav.isAdmin()) {
             <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item admin-link">
-                <span class="icon">🛠️</span>
+                <span class="icon"><app-icon name="admin-panel"></app-icon></span>
                 <span class="label" *ngIf="!isSidebarCollapsed()">Admin Panel</span>
             </a>
             }
@@ -39,7 +45,7 @@
             <div class="top-bar-inner portal-content">
                 <div class="left-section">
                     <button class="toggle-btn flex flex-row items-center" (click)="toggleSidebar()" title="Toggle Sidebar">
-                        <img src="/assets/logo.png" alt="GHC" class="mini-logo">
+                        <img src="/assets/logo.png" alt="GHC" class="mini-logo" appImgFallback>
                         <span class="brand-name ml-2">GHCAA Member Portal</span>
                     </button>
                     <div class="breadcrumbs">
@@ -49,24 +55,8 @@
                 </div>
 
                 <div class="right-section">
-                    <button class="touch-target btn-icon theme-toggle" (click)="theme.toggleTheme()"
-                        [title]="'Toggle Dark/Light Mode'">
-                        {{ theme.theme() === 'light' ? '🌙' : '☀️' }}
-                    </button>
-                    <div class="user-profile">
-                        @if (profilePhotoUrl()) {
-                        <img [src]="profilePhotoUrl()" alt="Profile" class="avatar avatar-img">
-                        } @else {
-                        <div class="avatar">{{ auth.currentUser()?.username?.[0]?.toUpperCase() }}</div>
-                        }
-                        <div class="user-details hide-mobile">
-                            <span class="username">{{ auth.currentUser()?.fullName || auth.currentUser()?.username }}</span>
-                            <small class="role">{{ nav.isAdmin() ? 'Administrator' : 'Alumni Member' }}</small>
-                        </div>
-                    </div>
-                    <button class="touch-target btn-icon logout-toggle" (click)="auth.logout()" title="Sign Out">
-                        🚪
-                    </button>
+                    <app-user-menu [roleLabel]="nav.isAdmin() ? 'Administrator' : 'Alumni Member'"
+                        [isAdmin]="nav.isAdmin()"></app-user-menu>
                 </div>
             </div>
         </header>
@@ -80,12 +70,12 @@
     <nav class="mobile-nav show-mobile">
         @for (item of nav.mobileNavItems(); track item.path) {
         <a [routerLink]="item.path" routerLinkActive="active" class="touch-target b-nav-item">
-            <span class="icon">{{ item.icon }}</span>
+            <span class="icon"><app-icon [name]="item.icon"></app-icon></span>
             <span class="label">{{ item.label }}</span>
         </a>
         }
         <button (click)="auth.logout()" class="touch-target b-nav-item">
-            <span class="icon">🚪</span>
+            <span class="icon"><app-icon name="sign-out"></app-icon></span>
             <span class="label">Logout</span>
         </button>
     </nav>

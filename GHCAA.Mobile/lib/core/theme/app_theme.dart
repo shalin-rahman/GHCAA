@@ -13,7 +13,18 @@ class AppTheme {
   static const Color textMuted = Color(0xFFA0AEC0);
   
   static const Color glassBorder = Color(0x33D4AF37); // Royal Gold with low opacity
-  static const Color shadowColor = Color(0x66000000); 
+  static const Color shadowColor = Color(0x66000000);
+
+  // 30.31: mirrors web `--danger-color: #d63031` (styles.scss) used by `.btn-danger` /
+  // destructive-action text — a neutral danger red distinct from the gold brand palette.
+  static const Color dangerColor = Color(0xFFD63031);
+
+  // 30.31: mirrors web's dark-theme `--border-color: rgba(255, 255, 255, 0.18)` (bumped up
+  // from a dimmer hairline during the Area 30 remediation so form/card borders stay visible
+  // on dark surfaces). This is a distinct, neutral-white token from `glassBorder` (which is
+  // intentionally gold-tinted for the brand chrome) — use this where a plain, brighter
+  // neutral border is called for instead of the gold accent border.
+  static const Color borderColorBright = Color(0x2EFFFFFF); // ~18% white
 
 
   // Legacy Aliases for backward compatibility
@@ -47,6 +58,25 @@ class AppTheme {
   static const double radiusM = 12.0;
   static const double radiusL = 16.0;
   static const double radiusXL = 24.0;
+
+  // 30.31: sizing tokens mirrored from web styles.scss so Flutter chrome matches the same
+  // touch-target/hit-area conventions established during the Area 30 remediation.
+  /// Mirrors web `.icon-btn` (36x36px) — the canonical compact icon-button size.
+  static const double iconButtonSize = 36.0;
+  /// Mirrors web modal `.close-btn` (40x40px, circular).
+  static const double closeButtonSize = 40.0;
+  /// Mirrors web `--header-height: 4.5rem` (72px) — use as an AppBar `toolbarHeight` where a
+  /// screen's app bar should visually align with the web header.
+  static const double headerHeight = 72.0;
+  /// Mirrors web `.action-group` gap (0.5rem) between adjacent inline action buttons.
+  static const double actionGroupGap = spaceS;
+
+  // 30.31: mirrors web `.empty-state.compact` (smaller padding/icon/text than the base
+  // `.empty-state`) — used by `EmptyStateWidget(compact: true)` for inline/embedded empty
+  // states (e.g. inside a card or list) where the full-size treatment is too large.
+  static const double emptyStateCompactPadding = spaceL; // 1.5rem ~= 24px
+  static const double emptyStateCompactIconSize = 32.0; // 2rem
+  static const double emptyStateCompactGap = spaceS + spaceXS; // 0.75rem ~= 12px
 
   // Premium Gradients
   static const Gradient goldGradient = LinearGradient(
@@ -121,6 +151,9 @@ class AppTheme {
         onSurface: textMain,
         surfaceContainerHighest: const Color(0xFF161616),
         outline: glassBorder,
+        // 30.31: mirrors web `--danger-color` so Material's built-in error affordances
+        // (e.g. default error text/icon colors) match the web `.btn-danger` red.
+        error: dangerColor,
       ),
       textTheme: TextTheme(
         displayLarge: const TextStyle(
@@ -183,9 +216,14 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: deepCharcoal,
+        // Always float the label above the border so it never sits on top of
+        // the entered text/prefix icon — `auto` centered it inside the field
+        // outline whenever the field was unfocused and empty.
+        floatingLabelBehavior: FloatingLabelBehavior.always,
         labelStyle: const TextStyle(color: textMuted, fontFamily: 'Outfit'),
+        floatingLabelStyle: const TextStyle(color: royalGold, fontFamily: 'Outfit', fontWeight: FontWeight.w700),
         hintStyle: const TextStyle(color: Colors.white24, fontFamily: 'Outfit'),
-        contentPadding: const EdgeInsets.all(spaceM),
+        contentPadding: const EdgeInsets.symmetric(horizontal: spaceM, vertical: spaceM + 4),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusM),
           borderSide: const BorderSide(color: glassBorder),

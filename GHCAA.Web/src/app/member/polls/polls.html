@@ -6,14 +6,14 @@
 
     <div class="polls-container" *ngIf="!loading(); else loader">
         <div class="no-polls" *ngIf="polls().length === 0">
-            <i class="fas fa-poll"></i>
+            <app-icon name="poll" [size]="32"></app-icon>
             <h3>No Active Polls</h3>
             <p>Check back later for new opportunities to contribute.</p>
         </div>
 
         <div class="glass-card poll-vote-card" *ngFor="let poll of polls()" [class.voted]="poll.hasVoted">
             <div class="poll-badge" *ngIf="poll.hasVoted">
-                <i class="fas fa-check-circle"></i> Voted
+                <app-icon name="check-circle" [size]="14"></app-icon> Voted
             </div>
 
             <div class="poll-content">
@@ -26,7 +26,7 @@
                          [class.selected]="isOptionSelected(poll, opt.id)"
                          (click)="toggleSelection(poll, opt.id)">
                         <div class="check-box">
-                            <i class="fas fa-check" *ngIf="isOptionSelected(poll, opt.id)"></i>
+                            <app-icon name="check" [size]="14" *ngIf="isOptionSelected(poll, opt.id)"></app-icon>
                         </div>
                         <span class="opt-text">{{ opt.text }}</span>
                     </div>
@@ -56,7 +56,7 @@
             </div>
 
             <div class="poll-meta">
-                <span><i class="far fa-calendar-alt"></i> Expires: {{ poll.expiryDate | date:'dd-MM-yyyy' }}</span>
+                <span><app-icon name="calendar" [size]="14"></app-icon> Expires: {{ poll.expiryDate | date:'dd-MM-yyyy' }}</span>
             </div>
         </div>
     </div>

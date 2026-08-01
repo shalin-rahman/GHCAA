@@ -1,7 +1,8 @@
 <footer class="footer">
     <div class="container footer-grid">
         <div class="footer-brand">
-            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Official Seal" class="footer-logo mb-6">
+            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Official Seal" class="footer-logo mb-6"
+                appImgFallback="/assets/logo.png">
             <p class="motto">"{{ orgConfigService.localePack()?.tagline }}"</p>
         </div>
 
@@ -45,7 +46,8 @@
     </div>
     <div class="footer-bottom">
         <div class="container flex items-center justify-center gap-4">
-            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo" class="footer-bot-logo">
+            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo" class="footer-bot-logo"
+                appImgFallback="/assets/logo.png">
             <p>&copy; {{ currentYear }} | {{ orgConfigService.config()?.branding?.fullName }} <span class="footer-tag">({{ orgConfigService.config()?.branding?.memberNickname | uppercase }})</span>.
                 <br class="show-mobile"> 
                 Registered under the Registrar of Societies.

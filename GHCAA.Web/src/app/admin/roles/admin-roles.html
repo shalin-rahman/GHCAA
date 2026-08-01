@@ -39,7 +39,7 @@
                             <button type="button"
                                 class="toggle-password absolute right-3 text-white/40 hover:text-accent transition-colors"
                                 (click)="togglePassword()" tabindex="-1">
-                                <i class="fas" [ngClass]="showPassword() ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></app-icon>
                             </button>
                         </div>
                         <div *ngIf="createForm.get('password')?.touched && createForm.get('password')?.invalid"
@@ -92,8 +92,9 @@
             }
         </div>
         @if (loading()) {
-        <div class="loading-state py-20 text-center animate-pulse">
-            <p class="text-accent font-black">Syncing identity matrix...</p>
+        <div class="loading-state py-20 text-center">
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+            <p class="text-accent font-black animate-pulse">Syncing identity matrix...</p>
         </div>
         } @else {
         <table class="data-table w-full">

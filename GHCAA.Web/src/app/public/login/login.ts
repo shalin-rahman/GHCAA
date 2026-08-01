@@ -5,6 +5,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LoginDto, User } from '../../core/models/auth.models';
+import { Icon } from '../../common/icon/icon';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 
 declare var google: any;
 declare var FB: any;
@@ -12,7 +14,7 @@ declare var FB: any;
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, Icon, ImgFallbackDirective],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })

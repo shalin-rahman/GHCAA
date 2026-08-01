@@ -60,27 +60,7 @@
     align-items: center;
 }
 
-.icon-btn {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    border: 1px solid var(--glass-border);
-    background: transparent;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.9rem;
-
-    &:hover {
-        background: var(--surface-color);
-        color: var(--accent-text);
-        border-color: var(--accent-color);
-        transform: translateY(-1px);
-    }
-}
+/* .icon-btn moved to central styles.scss (30.2) — do NOT re-add a block here. */
 
 .loading-state,
 .empty-state {

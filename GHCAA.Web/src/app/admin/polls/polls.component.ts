@@ -5,11 +5,12 @@ import { AdminPollService, CreatePollDto } from '../../core/services/admin-poll.
 import { PollDto } from '../../core/services/poll.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { Icon } from '../../common/icon/icon';
 
 @Component({
   selector: 'app-admin-polls',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, Icon],
   templateUrl: './polls.html',
   styleUrl: './polls.scss'
 })

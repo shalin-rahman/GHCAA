@@ -93,6 +93,9 @@
         @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
         @media (max-width: 480px) { grid-template-columns: 1fr; }
 
+        // 30.23: steps now navigate to the relevant profile section, so they need a
+        // clear clickable affordance (cursor, hover lift/border) instead of reading as
+        // static status chips.
         .step {
             display: flex;
             align-items: center;
@@ -105,14 +108,37 @@
             font-size: 0.85rem;
             font-weight: 700;
             transition: all 0.3s;
+            cursor: pointer;
 
             i { font-size: 1.2rem; opacity: 0.4; }
+
+            .step-arrow {
+                margin-left: auto;
+                opacity: 0.35;
+                transition: transform 0.25s, opacity 0.25s;
+            }
+
+            &:hover {
+                border-color: rgba(var(--accent-color-rgb), 0.4);
+                background: rgba(0, 0, 0, 0.3);
+                transform: translateY(-2px);
+
+                .step-arrow {
+                    opacity: 0.9;
+                    transform: translateX(3px);
+                }
+            }
 
             &.done {
                 background: rgba(39, 174, 96, 0.1);
                 border-color: rgba(39, 174, 96, 0.2);
                 color: var(--success-color);
                 i { color: var(--success-color); opacity: 1; }
+
+                &:hover {
+                    border-color: rgba(39, 174, 96, 0.4);
+                    background: rgba(39, 174, 96, 0.16);
+                }
             }
         }
     }

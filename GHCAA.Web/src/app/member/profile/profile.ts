@@ -9,11 +9,12 @@ import { getECPositionName, getCurrentECPosition, EC_ROLES, ACADEMIC_DATA, IS_HS
 import { DatePipe } from '@angular/common';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { toWireDate } from '../../core/utils/date.util';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective],
     providers: [DatePipe],
     templateUrl: './profile.html',
     styleUrl: './profile.scss'

@@ -2,7 +2,12 @@
     <!-- Sidebar: Recent Chats -->
     <aside class="chat-sidebar glass-card">
         <div class="sidebar-header">
-            <h3>Conversations</h3>
+            <div class="sidebar-header-top">
+                <h3>Conversations</h3>
+                <button class="btn btn-accent btn-sm" (click)="openNewMessage()" title="Start a new conversation">
+                    <span class="icon">✉️</span> New Message
+                </button>
+            </div>
             <div class="search-box">
                 <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
                     placeholder="Search people...">
@@ -14,7 +19,7 @@
                 (click)="selectThread(c.userId)">
                 <div class="avatar-box">
                     @if (c.photoPath) {
-                    <img [src]="c.photoPath" alt="Profile">
+                    <img [src]="c.photoPath" alt="Profile" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     <div class="avatar-ph">{{ c.fullName[0] }}</div>
                     }
@@ -79,8 +84,60 @@
         <div class="no-selection">
             <div class="illu">💬</div>
             <h3>Select a conversation</h3>
-            <p>Pick a colleague from the list or find someone in the Directory to start chatting.</p>
+            <p>Pick a colleague from the list, or use "New Message" to start chatting with someone for the first time.</p>
         </div>
         }
     </main>
 </div>
+
+<!-- New Message: Member Picker Modal (30.25) -->
+@if (showNewMessageModal()) {
+<div class="modal-overlay" (click)="closeNewMessage()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>New Message</h3>
+            <button class="close-btn" (click)="closeNewMessage()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group search-group">
+                <label>To <span class="required-star">*</span></label>
+                <div class="search-box">
+                    <input type="text" class="form-control" placeholder="Search by name or member ID..."
+                        [ngModel]="memberPickerQuery()"
+                        (ngModelChange)="searchMembersForNewMessage($event)">
+                    @if (isSearchingMembers()) {
+                    <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
+                    }
+                </div>
+                @if (selectedNewMember()) {
+                <div class="mt-2 text-[10px] text-accent font-bold uppercase tracking-widest">
+                    ✅ Selected: {{ selectedNewMember()!.fullName }}
+                </div>
+                }
+                @if (memberPickerResults().length > 0) {
+                <ul class="autocomplete-list">
+                    @for (m of memberPickerResults(); track m.id) {
+                    <li (click)="pickNewMessageMember(m)">
+                        <strong>{{ m.fullName }}</strong> ({{ m.membershipNumber || 'No ID' }})
+                    </li>
+                    }
+                </ul>
+                }
+            </div>
+
+            <div class="form-group">
+                <label>Message <span class="required-star">*</span></label>
+                <textarea class="form-control" rows="3" placeholder="Type your first message…"
+                    [(ngModel)]="firstMessageText"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" (click)="closeNewMessage()">Cancel</button>
+            <button class="btn btn-accent shadow-gold" (click)="sendFirstMessage()"
+                [disabled]="!selectedNewMember() || !firstMessageText.trim() || isSendingFirstMessage()">
+                {{ isSendingFirstMessage() ? 'Sending...' : 'Send' }}
+            </button>
+        </div>
+    </div>
+</div>
+}

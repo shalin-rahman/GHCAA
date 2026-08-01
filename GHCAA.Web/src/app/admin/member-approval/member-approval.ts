@@ -1,6 +1,7 @@
 import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { AdminService } from '../../core/services/admin.service';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
@@ -12,7 +13,7 @@ import { SearchBarComponent } from '../../common/search-bar/search-bar.component
 @Component({
   selector: 'app-member-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
   templateUrl: './member-approval.html',
   styleUrl: './member-approval.scss'
 })

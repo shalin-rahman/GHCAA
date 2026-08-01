@@ -58,8 +58,11 @@
                         </div>
                     </td>
                     <td>
-                        <span class="status-pill" [class.active]="theme.isEnabled">
-                            {{ theme.isEnabled ? 'LIVE' : 'IDLE' }}
+                        <span class="status-pill"
+                            [class.active]="themeStatus(theme) === 'LIVE'"
+                            [class.scheduled]="themeStatus(theme) === 'SCHEDULED'"
+                            [class.expired]="themeStatus(theme) === 'EXPIRED'">
+                            {{ themeStatus(theme) }}
                         </span>
                     </td>
                     <td class="text-right">

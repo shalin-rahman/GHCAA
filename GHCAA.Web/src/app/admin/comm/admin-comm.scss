@@ -1,13 +1,16 @@
 
 
 // ─── Tab Navigation ───────────────────────────────
+/* 30.20: was 1.5rem margin + 0.65rem/1.5rem button padding — took up disproportionate
+   vertical space above the panels for a 3-item tab strip. Tightened to the same compact
+   scale already used for `.btn-sm`/dense admin controls elsewhere. */
 .tab-nav {
     display: flex;
-    gap: 0.35rem;
-    margin-bottom: 1.5rem;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
     background: var(--surface-color);
-    padding: 0.35rem;
-    border-radius: 14px;
+    padding: 0.25rem;
+    border-radius: 12px;
     width: fit-content;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
@@ -15,15 +18,15 @@
     button {
         background: none;
         border: none;
-        padding: 0.65rem 1.5rem;
-        border-radius: 10px;
+        padding: 0.45rem 1.1rem;
+        border-radius: 8px;
         color: var(--text-muted);
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.5rem;
         font-weight: 700;
-        font-size: 0.88rem;
+        font-size: 0.82rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
         &:hover {

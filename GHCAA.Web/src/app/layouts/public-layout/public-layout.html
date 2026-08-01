@@ -9,7 +9,7 @@
     [style.color]="activeTheme.textColor">
     <div class="container banner-content">
         @if (activeTheme.imageUrl) {
-            <img [src]="activeTheme.imageUrl" alt="Special Day Banner" class="banner-image">
+            <img [src]="activeTheme.imageUrl" alt="Special Day Banner" class="banner-image" appImgFallback>
         } @else {
             <span class="banner-text"
                 [class.anim-fade]="activeTheme.animationStyle === 'Fade'"
@@ -26,7 +26,7 @@
 <nav class="glass-nav" [class.with-banner]="activeTheme">
     <div class="container nav-content">
         <div class="logo">
-            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo" class="mini-logo">
+            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo" class="mini-logo" appImgFallback="/assets/logo.png">
             <div class="logo-text">
                 <span class="abbr">{{ orgConfigService.config()?.branding?.shortName }}</span>
                 <span class="full hide-mobile hidden md:block">{{ orgConfigService.config()?.branding?.fullName }}</span>

@@ -107,7 +107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(AppTheme.spaceS),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.03),
+                      color: Colors.black,
                       shape: BoxShape.circle,
                       border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.1)),
                     ),
@@ -197,13 +197,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextField(
                         controller: _identifierController,
                         decoration: const InputDecoration(
-                            labelText: 'Member ID (Email / NID)',
+                            labelText: 'Email or Username',
                             prefixIcon: Icon(Icons.badge_outlined)),
                       ),
                       const SizedBox(height: AppTheme.spaceM),
                       PasswordField(
                         controller: _passwordController,
-                        labelText: 'Portal Password',
+                        labelText: 'Password',
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _handleLogin(),
                       ),

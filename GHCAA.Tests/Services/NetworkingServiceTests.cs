@@ -106,6 +106,33 @@ public class NetworkingServiceTests : TestBase
     }
 
     [Test]
+    public async Task GetExecutiveCommitteeAsync_ShouldPopulateBatchInformation()
+    {
+        // 30.27: EC/networking summary cards must show PassingYear/Degree/Subject -
+        // regression test for the "Executive Committee batch information is missing" bug.
+        var president = await CreateAndSaveTestMemberAsync("EC Batch President", "ecbatch.nt@example.com", "01100009999", "NTST9999");
+        president.Status = Enums.MembershipStatus.Active;
+        president.AcademicHistory = new List<AcademicRecord>
+        {
+            new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "Honours", Subject = "Political Science", PassingYear = 2005, IsGHC = true }
+        };
+
+        var period = new ECPeriod { Title = "Batch Test Period", StartDate = DateTime.UtcNow, IsActive = true };
+        _context.ECPeriods.Add(period);
+        await _context.SaveChangesAsync();
+
+        _context.ECMembers.Add(new ECMember { MemberId = president.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+
+        var results = await _service.GetExecutiveCommitteeAsync();
+
+        var summary = results.First(r => r.FullName == "EC Batch President");
+        summary.PassingYear.Should().Be(2005);
+        summary.Degree.Should().Be("Honours");
+        summary.Subject.Should().Be("Political Science");
+    }
+
+    [Test]
     public async Task SearchMembersAsync_ShouldHideInactiveAndArchivedMembers()
     {
         var inactive = await CreateAndSaveTestMemberAsync("Inactive Member", "i.nt@example.com", "01144445555", "NTST5555");

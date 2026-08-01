@@ -17,45 +17,47 @@ export interface NavItem {
 }
 
 // All portal navigation items
+// TODO 30.13: each item carries a `section` bucket (Overview / Community / Directory /
+// Career / My Account) so the sidebar can render grouped headers like the admin panel.
 const ALL_NAV_ITEMS: NavItem[] = [
-    { path: '/portal/dashboard', label: 'Dashboard', icon: '📊', mobileVisible: true },
-    { path: '/portal/news', label: 'News', icon: '📰', mobileVisible: true },
-    { path: '/portal/events', label: 'Events', icon: '🎟️', mobileVisible: true, feature: 'enableEvents' },
-    { path: '/portal/assistant', label: 'Assistance', icon: '✨', mobileVisible: true },
-    { path: '/portal/messages', label: 'Messaging', icon: '💬' },
-    { path: '/portal/forum', label: 'Discussions', icon: '🗣️', feature: 'enableForum' },
-    { path: '/portal/jobs', label: 'Job Hub', icon: '💼', mobileVisible: true, feature: 'enableJobHub' },
-    { path: '/portal/directory', label: 'Alumni Directory', icon: '🔍', feature: 'enablePublicDirectory' },
-    { path: '/portal/gallery', label: 'Event Gallery', icon: '🖼️', feature: 'enableGallery' },
-    { path: '/portal/governance', label: 'Governance', icon: '⚖️' },
-    { path: '/portal/id-card', label: 'Digital ID', icon: '🆔', feature: 'enableDigitalIdCard' },
-    { path: '/portal/payments', label: 'Payments', icon: '💰', mobileVisible: true },
-    { path: '/portal/articles', label: 'My Articles', icon: '✍️', feature: 'enableMagazine' },
-    { path: '/portal/profile', label: 'My Profile', icon: '👤', mobileVisible: true },
+    { path: '/portal/dashboard', label: 'Dashboard', icon: 'dashboard', mobileVisible: true, section: 'Overview' },
+    { path: '/portal/news', label: 'News', icon: 'news', mobileVisible: true, section: 'Overview' },
+    { path: '/portal/events', label: 'Events', icon: 'events', mobileVisible: true, feature: 'enableEvents', section: 'Overview' },
+    { path: '/portal/assistant', label: 'Assistance', icon: 'assistant', mobileVisible: true, section: 'Overview' },
+    { path: '/portal/messages', label: 'Messaging', icon: 'messages', section: 'Community' },
+    { path: '/portal/forum', label: 'Discussions', icon: 'forum', feature: 'enableForum', section: 'Community' },
+    { path: '/portal/governance', label: 'Governance', icon: 'governance', section: 'Community' },
+    { path: '/portal/directory', label: 'Alumni Directory', icon: 'directory', feature: 'enablePublicDirectory', section: 'Directory' },
+    { path: '/portal/gallery', label: 'Event Gallery', icon: 'gallery', feature: 'enableGallery', section: 'Directory' },
+    { path: '/portal/jobs', label: 'Job Hub', icon: 'jobs', mobileVisible: true, feature: 'enableJobHub', section: 'Career' },
+    { path: '/portal/id-card', label: 'Digital ID', icon: 'id-card', feature: 'enableDigitalIdCard', section: 'My Account' },
+    { path: '/portal/payments', label: 'Payments', icon: 'payments', mobileVisible: true, section: 'My Account' },
+    { path: '/portal/articles', label: 'My Articles', icon: 'articles', feature: 'enableMagazine', section: 'My Account' },
+    { path: '/portal/profile', label: 'My Profile', icon: 'profile', mobileVisible: true, section: 'My Account' },
 ];
 
 // Admin panel navigation items
 const ADMIN_NAV_ITEMS: NavItem[] = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊', section: 'Overview' },
-    
-    { path: '/admin/approvals', label: 'Approvals', icon: '📝', section: 'Membership' },
-    { path: '/admin/members', label: 'All Members', icon: '👥', section: 'Membership' },
-    { path: '/admin/members/ec', label: 'Executive Committee', icon: '🎗️', section: 'Membership' },
-    
-    { path: '/admin/news', label: 'News Posts', icon: '📰', section: 'Content' },
-    { path: '/admin/events', label: 'Manage Events', icon: '🗓️', section: 'Content' },
-    { path: '/admin/gallery', label: 'Gallery Albums', icon: '🖼️', section: 'Content' },
-    { path: '/admin/comm', label: 'Communications', icon: '✉️', section: 'Content' },
-    { path: '/admin/article-approvals', label: 'Submission Review', icon: '✅', section: 'Content' },
-    { path: '/admin/contact-messages', label: 'Portal Enquiries', icon: '📥', section: 'Content' },
-    { path: '/admin/themes', label: 'Special Themes', icon: '🎨', section: 'Content' },
-    
-    { path: '/admin/ledger', label: 'Financial Ledger', icon: '📖', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/payments', label: 'Payment Settings', icon: '💳', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/payments/fees', label: 'Fee Policy', icon: '🧾', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/roles', label: 'User Roles', icon: '🛡️', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/audit', label: 'Audit Logs', icon: '📜', roles: ['SuperAdmin'], section: 'Finance & Tools' },
-    { path: '/admin/org-config', label: 'Org Config', icon: '⚙️', roles: ['SuperAdmin'], section: 'Finance & Tools' }
+    { path: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard', section: 'Overview' },
+
+    { path: '/admin/approvals', label: 'Approvals', icon: 'approvals', section: 'Membership' },
+    { path: '/admin/members', label: 'All Members', icon: 'members', section: 'Membership' },
+    { path: '/admin/members/ec', label: 'Executive Committee', icon: 'ec', section: 'Membership' },
+
+    { path: '/admin/news', label: 'News Posts', icon: 'news', section: 'Content' },
+    { path: '/admin/events', label: 'Manage Events', icon: 'events', section: 'Content' },
+    { path: '/admin/gallery', label: 'Gallery Albums', icon: 'gallery', section: 'Content' },
+    { path: '/admin/comm', label: 'Communications', icon: 'comm', section: 'Content' },
+    { path: '/admin/article-approvals', label: 'Submission Review', icon: 'article-approvals', section: 'Content' },
+    { path: '/admin/contact-messages', label: 'Portal Enquiries', icon: 'contact-messages', section: 'Content' },
+    { path: '/admin/themes', label: 'Special Themes', icon: 'themes', section: 'Content' },
+
+    { path: '/admin/ledger', label: 'Financial Ledger', icon: 'ledger', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/payments', label: 'Payment Settings', icon: 'payment-settings', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/payments/fees', label: 'Fee Policy', icon: 'fee-policy', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/roles', label: 'User Roles', icon: 'roles', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/audit', label: 'Audit Logs', icon: 'audit', roles: ['SuperAdmin'], section: 'Finance & Tools' },
+    { path: '/admin/org-config', label: 'Org Config', icon: 'org-config', roles: ['SuperAdmin'], section: 'Finance & Tools' }
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -79,6 +81,18 @@ export class NavService {
         this.portalNavItems().filter(i => i.mobileVisible)
     );
 
+    /** TODO 30.13: grouped portal items for the sidebar, mirroring adminNavSections. */
+    portalNavSections = computed(() => {
+        const items = this.portalNavItems();
+        return [
+            { name: 'Overview', items: items.filter(i => i.section === 'Overview') },
+            { name: 'Community', items: items.filter(i => i.section === 'Community') },
+            { name: 'Directory', items: items.filter(i => i.section === 'Directory') },
+            { name: 'Career', items: items.filter(i => i.section === 'Career') },
+            { name: 'My Account', items: items.filter(i => i.section === 'My Account') }
+        ].filter(s => s.items.length > 0);
+    });
+
     /** Returns admin nav items (only available to Admin/SuperAdmin) */
     adminNavItems = computed<NavItem[]>(() => {
         const user = this.auth.currentUser();
@@ -99,6 +113,21 @@ export class NavService {
             { name: 'Finance & Tools', items: items.filter(i => i.section === 'Finance & Tools') }
         ].filter(s => s.items.length > 0);
     });
+
+    /**
+     * 30.11: single source of truth for "what should the header/breadcrumb/browser-tab
+     * title say for this URL" — centralizes the match-by-path logic that admin-layout
+     * and portal-layout each used to duplicate inline, so nav label and page title can
+     * never drift apart again (they're now the same lookup, not two copies of it).
+     */
+    labelFor(url: string, scope: 'admin' | 'portal'): string {
+        if (scope === 'admin') {
+            const match = this.adminNavItems().find(x => url.includes(x.path));
+            return match?.label ?? 'Control Panel';
+        }
+        const match = this.portalNavItems().find(x => url.includes(x.path.replace('/portal/', '')));
+        return match?.label ?? 'Dashboard';
+    }
 
     /** Whether the current user has admin access */
     isAdmin = computed(() => {

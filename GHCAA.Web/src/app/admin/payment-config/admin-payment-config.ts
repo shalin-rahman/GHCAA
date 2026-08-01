@@ -1,6 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PaymentConfigService, PaymentConfig } from '../../core/services/payment-config.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
@@ -8,7 +10,7 @@ import { PageHeaderComponent } from '../../common/page-header/page-header.compon
 @Component({
   selector: 'app-admin-payment-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, ImgFallbackDirective, LogoSpinnerComponent],
   templateUrl: './admin-payment-config.html',
   styleUrl: './admin-payment-config.scss'
 })

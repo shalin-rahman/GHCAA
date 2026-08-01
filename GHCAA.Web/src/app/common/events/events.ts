@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { EventsService } from '../../core/services/events.service';
@@ -10,11 +10,12 @@ import { GatewaysService } from '../../core/services/gateways.service';
 import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { FinancialService } from '../../core/services/financial.service';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, PaymentPortalComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PaymentPortalComponent, ImgFallbackDirective],
   templateUrl: './events.html',
   styleUrl: './events.scss'
 })
@@ -30,6 +31,21 @@ export class Events implements OnInit {
   events = signal<AlumniEvent[]>([]);
   activeTab = signal<'upcoming' | 'my-registrations'>('upcoming');
   myRegistrations = signal<EventRegistration[]>([]);
+
+  // 30.26: holds a deep-linked event (from /events/:id or ?eventId=) until the auth service has
+  // finished restoring the session (see AuthService.authChecked). Without this gate, a genuine
+  // member landing here via a fresh page load could get misidentified as a guest — and bounced
+  // to /login — because openRegisterModal()'s isGuest() check ran before the async /auth/me
+  // session-restore call had resolved (a real race between two independent HTTP calls).
+  private pendingDeepLinkEvent = signal<AlumniEvent | null>(null);
+  private deepLinkEffect = effect(() => {
+    const ev = this.pendingDeepLinkEvent();
+    if (ev && this.auth.authChecked()) {
+      this.pendingDeepLinkEvent.set(null);
+      // Slight delay ensures the UI has fully transitioned before opening the modal
+      setTimeout(() => this.openRegisterModal(ev), 150);
+    }
+  });
 
   // Modal & Form State
   showModal = signal<boolean>(false);
@@ -74,8 +90,8 @@ export class Events implements OnInit {
         if (targetEventId) {
             const ev = data.find(e => e.id.toString() === targetEventId);
             if (ev) {
-                // Slight delay ensures the UI has fully transitioned before opening the modal
-                setTimeout(() => this.openRegisterModal(ev), 150);
+                // Defer to the effect above until auth state is confirmed (see 30.26 note).
+                this.pendingDeepLinkEvent.set(ev);
             }
         }
       },

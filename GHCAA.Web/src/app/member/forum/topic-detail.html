@@ -32,7 +32,7 @@
           <div class="topic-meta-row">
             <div class="author-info">
               @if (topic()!.authorPhotoUrl) {
-                <img [src]="topic()!.authorPhotoUrl" alt="Avatar" class="avatar-img" />
+                <img [src]="topic()!.authorPhotoUrl" alt="Avatar" class="avatar-img" appImgFallback="/assets/placeholders/avatar-placeholder.svg" />
               } @else {
                 <div class="avatar-placeholder">{{ topic()!.authorName[0]?.toUpperCase() }}</div>
               }
@@ -66,7 +66,7 @@
             <div class="reply-header">
               <div class="author-info">
                 @if (post.authorPhotoUrl) {
-                  <img [src]="post.authorPhotoUrl" alt="Avatar" class="avatar-img" />
+                  <img [src]="post.authorPhotoUrl" alt="Avatar" class="avatar-img" appImgFallback="/assets/placeholders/avatar-placeholder.svg" />
                 } @else {
                   <div class="avatar-placeholder">{{ post.authorName[0]?.toUpperCase() }}</div>
                 }

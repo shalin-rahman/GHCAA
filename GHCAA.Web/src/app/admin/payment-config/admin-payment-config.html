@@ -13,8 +13,9 @@
     </div>
   </app-page-header>
 
-  <div class="glass-card mb-8 p-6" *ngIf="loading()">
-      <p class="opacity-50 text-center animate-pulse">Synchronizing financial logic networks...</p>
+  <div class="glass-card mb-8 p-6 text-center" *ngIf="loading()">
+      <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+      <p class="opacity-50 animate-pulse">Synchronizing financial logic networks...</p>
   </div>
 
   <div class="table-wrap reveal-bottom" *ngIf="!loading()">
@@ -33,7 +34,7 @@
               <tr class="animate-fade-in" [class.opacity-50]="!config.isEnabled">
                   <td>
                       <div class="flex items-center gap-3">
-                          <img *ngIf="isImageIcon(config.icon)" [src]="getIconPath(config.icon)" alt="Logo" class="w-10 h-10 object-contain rounded">
+                          <img *ngIf="isImageIcon(config.icon)" [src]="getIconPath(config.icon)" alt="Logo" class="w-10 h-10 object-contain rounded" appImgFallback>
                           <span *ngIf="!isImageIcon(config.icon)" class="text-2xl">{{ config.icon || '💸' }}</span>
                           <span class="badge badge-secondary">{{ config.method }}</span>
                       </div>

@@ -3,19 +3,21 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { OrgConfig } from '../../core/models/org-config.model';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
   selector: 'app-org-config',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent],
   templateUrl: './org-config.html',
   styleUrl: './org-config.scss'
 })
 export class AdminOrgConfig implements OnInit {
   private configService = inject(OrgConfigService);
-  
+
   configJson: string = '';
   isSaving = false;
+  isLoading = false;
   successMessage = '';
   errorMessage = '';
 
@@ -24,8 +26,12 @@ export class AdminOrgConfig implements OnInit {
     if (currentConfig) {
       this.configJson = JSON.stringify(currentConfig, null, 2);
     } else {
+      this.isLoading = true;
       this.configService.loadConfig().then(() => {
         this.configJson = JSON.stringify(this.configService.config(), null, 2);
+        this.isLoading = false;
+      }).catch(() => {
+        this.isLoading = false;
       });
     }
   }

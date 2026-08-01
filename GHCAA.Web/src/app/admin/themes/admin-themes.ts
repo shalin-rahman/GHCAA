@@ -6,7 +6,9 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ThemeService, SpecialDayTheme } from '../../core/services/theme.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
-import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
+import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
+
+export type ThemeStatus = 'SCHEDULED' | 'LIVE' | 'EXPIRED' | 'IDLE';
 
 @Component({
     selector: 'app-admin-themes',
@@ -28,6 +30,27 @@ export class AdminThemes implements OnInit {
 
     formatDateToDMY(d: any) {
         return toDisplayDate(d);
+    }
+
+    /** SCHEDULED / LIVE / EXPIRED / IDLE — 30.17: the LIVE badge previously just mirrored
+     *  `isEnabled`, ignoring the start/end date window entirely (an expired range still
+     *  showed LIVE). Disabled themes are always IDLE; enabled themes are resolved against
+     *  today's date vs. the theme's own start/end window. */
+    themeStatus(theme: SpecialDayTheme): ThemeStatus {
+        if (!theme.isEnabled) return 'IDLE';
+
+        const start = parseDisplayDate(theme.startDate);
+        const end = parseDisplayDate(theme.endDate);
+        if (!start || !end) return 'IDLE';
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+
+        if (today < start) return 'SCHEDULED';
+        if (today > end) return 'EXPIRED';
+        return 'LIVE';
     }
 
     selectedTheme: SpecialDayTheme = this.resetTheme();

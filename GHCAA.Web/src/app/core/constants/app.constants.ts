@@ -447,7 +447,8 @@ export const API_ENDPOINTS = {
     FINANCIALS: '/api/financials',
     MESSAGING: {
         RECENT: '/api/messaging/recent',
-        HISTORY: '/api/messaging/history'
+        HISTORY: '/api/messaging/history',
+        SEND: '/api/messaging/send'
     },
     HUBS: {
         CHAT: '/api/hubs/chat',
