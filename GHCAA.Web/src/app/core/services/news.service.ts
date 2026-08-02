@@ -12,9 +12,11 @@ export class NewsService {
     private http = inject(HttpClient);
     private apiUrl = API_ENDPOINTS.NEWS;
 
-    getNews(articleCategory?: string, silent: boolean = false): Observable<NewsPost[]> {
-        let url = this.apiUrl;
-        if (articleCategory) url += `?articleCategory=${articleCategory}`;
+    getNews(articleCategory?: string, silent: boolean = false, postType?: string): Observable<NewsPost[]> {
+        const params: string[] = [];
+        if (articleCategory) params.push(`articleCategory=${encodeURIComponent(articleCategory)}`);
+        if (postType) params.push(`postType=${encodeURIComponent(postType)}`);
+        const url = params.length ? `${this.apiUrl}?${params.join('&')}` : this.apiUrl;
         const headers = silent ? new HttpHeaders().set('X-Skip-Error-Notify', 'true') : undefined;
         return this.http.get<NewsPost[]>(url, { headers });
     }
@@ -44,6 +46,12 @@ export class NewsService {
         const formData = new FormData();
         formData.append('file', file);
         return this.http.post<{ url: string, relativePath: string }>(`${this.apiUrl}/upload-image`, formData);
+    }
+
+    uploadDocument(file: File): Observable<{ url: string, relativePath: string, fileName: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<{ url: string, relativePath: string, fileName: string }>(`${this.apiUrl}/upload-document`, formData);
     }
 
     // Member Submission Methods

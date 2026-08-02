@@ -1,13 +1,6 @@
 
 
-/* Actions in Table */
-.actions-cell {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-
-    /* .icon-btn moved to central styles.scss (30.2) — do NOT re-add a block here. */
-}
+/* .actions-cell and .icon-btn live in central styles.scss — do NOT re-add them here. */
 
 /* Member Cell Styling */
 .member-cell {

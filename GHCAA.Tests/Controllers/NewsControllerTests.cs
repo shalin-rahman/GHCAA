@@ -38,11 +38,67 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetActiveNews_ReturnsOk()
         {
-            _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), It.IsAny<CancellationToken>()))
+            _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), It.IsAny<Enums.PostType?>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync(new List<NewsPostDto>());
 
-            var result = await _controller.GetActiveNews(null, CancellationToken.None);
+            var result = await _controller.GetActiveNews(null, null, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task GetActiveNews_PassesPostTypeFilterToService()
+        {
+            _newsServiceMock.Setup(x => x.GetActiveNewsAsync(It.IsAny<Enums.ArticleCategory?>(), Enums.PostType.Notice, It.IsAny<CancellationToken>()))
+                            .ReturnsAsync(new List<NewsPostDto>());
+
+            var result = await _controller.GetActiveNews(null, Enums.PostType.Notice, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            _newsServiceMock.Verify(x => x.GetActiveNewsAsync(null, Enums.PostType.Notice, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        public async Task SubmitArticle_Forbids_WhenMemberSubmitsNotice()
+        {
+            SetUserContext(_controller, null, "Member", 5);
+
+            var result = await _controller.SubmitArticle(
+                new CreateNewsDto { Title = "Notice", Content = "Body", PostType = Enums.PostType.Notice },
+                CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<ForbidResult>());
+            _newsServiceMock.Verify(x => x.CreateNewsAsync(It.IsAny<CreateNewsDto>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
+        public async Task SubmitArticle_Allows_WhenAdminSubmitsNotice()
+        {
+            _newsServiceMock.Setup(x => x.CreateNewsAsync(It.IsAny<CreateNewsDto>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                            .ReturnsAsync(new NewsPostDto { Id = 9, PostType = Enums.PostType.Notice });
+
+            var result = await _controller.SubmitArticle(
+                new CreateNewsDto { Title = "Notice", Content = "Body", PostType = Enums.PostType.Notice },
+                CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<CreatedAtActionResult>());
+        }
+
+        [Test]
+        public async Task UploadDocument_ReturnsOk_WithStoredUrl()
+        {
+            _fileStorageServiceMock.Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<int>(), Enums.FileUploadType.NoticeDocument, It.IsAny<CancellationToken>()))
+                                   .ReturnsAsync("uploads/members/1/notice_1.pdf");
+
+            var file = new FormFile(new MemoryStream(new byte[] { 1, 2, 3 }), 0, 3, "file", "notice.pdf")
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "application/pdf"
+            };
+
+            var result = await _controller.UploadDocument(file, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            _fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<int>(), Enums.FileUploadType.NoticeDocument, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]

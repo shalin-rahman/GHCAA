@@ -1,12 +1,19 @@
 <div class="admin-feature">
     @if (!showForm()) {
-    <app-page-header title="News Posts" [total]="newsList().length"
-        emptySubtitle="Publish and manage news announcements">
-        <small subtitle>Showing {{ filteredNews().length }} of {{ newsList().length }} news entries</small>
+    <app-page-header title="News &amp; Notices" [total]="newsList().length"
+        emptySubtitle="Publish and manage news stories and official notices">
+        <small subtitle>Showing {{ filteredNews().length }} of {{ newsList().length }} posts</small>
         <button actions class="btn btn-accent shadow-gold" (click)="openForm()">
-            <span class="icon">✍️</span> Draft New Story
+            <span class="icon">✍️</span> Draft New Post
         </button>
     </app-page-header>
+
+    <div class="tabs tab-nav">
+        @for (tab of postTypeTabs; track tab.value) {
+        <button type="button" [class.active]="postTypeFilter() === tab.value"
+            (click)="postTypeFilter.set(tab.value)">{{ tab.label }}</button>
+        }
+    </div>
 
     <!-- Toolbar for Search and Filters -->
     <div class="filter-bar">
@@ -46,6 +53,15 @@
 
             <div class="form-grid mb-8">
                 <div class="form-group">
+                    <label>Post Type <span class="required-star">*</span></label>
+                    <select [(ngModel)]="form.postType" name="postType" required>
+                        <option value="News">News Story</option>
+                        <option value="Notice">Official Notice</option>
+                    </select>
+                    <small class="text-muted text-xs">Notices are admin-authored only and may carry a PDF
+                        document.</small>
+                </div>
+                <div class="form-group">
                     <label>Asset Category <span class="required-star">*</span></label>
                     <select [(ngModel)]="form.articleCategory" name="articleCategory" required #categoryInput="ngModel">
                         @for (c of categories; track c.value) {
@@ -77,6 +93,26 @@
                         </label>
                     </div>
                 </div>
+                @if (form.postType === 'Notice') {
+                <div class="form-group">
+                    <label>Notice Document (PDF)</label>
+                    <div class="image-upload-wrapper" style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" [ngModel]="form.attachmentFileName" name="attachmentFileName" readonly
+                            placeholder="No document attached" style="flex: 1;">
+                        <label class="btn btn-secondary btn-sm" style="margin: 0; cursor: pointer;">
+                            @if (!uploadingDocument()) { <span class="icon">📄</span> }
+                            @if (uploadingDocument()) { <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> }
+                            {{ uploadingDocument() ? 'Uploading...' : 'Upload' }}
+                            <input type="file" style="display: none;" accept="application/pdf"
+                                (change)="onDocumentSelect($event)" [disabled]="uploadingDocument()">
+                        </label>
+                        @if (form.attachmentUrl) {
+                        <button type="button" class="icon-btn delete" (click)="removeDocument()"
+                            title="Remove document">✕</button>
+                        }
+                    </div>
+                </div>
+                }
                 <div class="form-group">
                     <label>Collaborators (Comma separated names)</label>
                     <input type="text" [ngModel]="form.collaborators.join(', ')" (ngModelChange)="updateCollaborators($event)" 
@@ -138,6 +174,7 @@
             <thead>
                 <tr>
                     <th>Title</th>
+                    <th>Type</th>
                     <th>Category</th>
                     <th>Status</th>
                     <th>Date</th>
@@ -147,7 +184,11 @@
             <tbody>
                 @for (post of filteredNews(); track post.id) {
                 <tr>
-                    <td class="title-cell">{{ post.title }}</td>
+                    <td class="title-cell">
+                        {{ post.title }}
+                        @if (post.attachmentUrl) { <span class="attachment-flag" title="Has PDF attachment">📄</span> }
+                    </td>
+                    <td><span class="pill">{{ post.postType === 'Notice' ? 'Notice' : 'News' }}</span></td>
                     <td><span class="pill">{{ getCategoryLabel(post.articleCategory) }}</span></td>
                     <td>
                         <span class="status-badge" [class.active]="post.isActive" [class.inactive]="!post.isActive">
@@ -189,6 +230,11 @@
                 <div class="prose prose-invert max-w-none">
                     <p class="text-lg leading-relaxed font-light" style="white-space: pre-wrap;">{{ post.content }}</p>
                 </div>
+                @if (post.attachmentUrl) {
+                <a [href]="post.attachmentUrl" target="_blank" rel="noopener" class="btn btn-secondary mt-8">
+                    <span class="icon">📄</span> {{ post.attachmentFileName || 'Download attachment' }}
+                </a>
+                }
             </div>
             <div class="modal-footer">
                 <button (click)="editPost(post); selectedPost.set(null)" class="btn btn-secondary">Edit Original

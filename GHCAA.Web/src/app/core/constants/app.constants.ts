@@ -228,6 +228,25 @@ export function getArticleCategoryLabel(category: string | number | null | undef
     return ARTICLE_CATEGORIES.find(item => item.value === category)?.label || category || 'Article';
 }
 
+/**
+ * News / Notice filter tabs — shared by the admin console and the public+portal feed so
+ * both stay in step. '' means "no filter".
+ */
+export const POST_TYPE_TABS: { value: '' | 'News' | 'Notice'; label: string }[] = [
+    { value: '', label: 'All' },
+    { value: 'News', label: 'News' },
+    { value: 'Notice', label: 'Notices' }
+];
+
+/** Posts predating the PostType column have no value — they count as News. */
+export function matchesPostType(
+    postType: string | null | undefined,
+    filter: '' | 'News' | 'Notice'
+): boolean {
+    if (!filter) return true;
+    return (postType || 'News') === filter;
+}
+
 export function getJobCategoryLabel(category: string | null | undefined): string {
     return JOB_CATEGORIES.find(item => item.id === category || item.name === category)?.name || category || 'General';
 }
@@ -442,6 +461,7 @@ export const API_ENDPOINTS = {
     EVENTS: '/api/events',
     GALLERY: '/api/gallery',
     NEWS: '/api/news',
+    SITE_CONTENT: '/api/site-content',
     JOBS: '/api/jobs',
     PROFILE: '/api/profile',
     FINANCIALS: '/api/financials',

@@ -30,9 +30,9 @@ namespace GHCAA.API.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetActiveNews([FromQuery] Enums.ArticleCategory? articleCategory, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetActiveNews([FromQuery] Enums.ArticleCategory? articleCategory, [FromQuery] Enums.PostType? postType, CancellationToken cancellationToken)
         {
-            var news = await _newsService.GetActiveNewsAsync(articleCategory, cancellationToken);
+            var news = await _newsService.GetActiveNewsAsync(articleCategory, postType, cancellationToken);
             return Ok(news);
         }
 
@@ -125,6 +125,9 @@ namespace GHCAA.API.Controllers
             // Ensure status is Pending if submitted by member, or Draft if requested
             if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
             {
+                if (dto.PostType == Enums.PostType.Notice)
+                    return Forbid();
+
                 if (dto.Status != Enums.SubmissionStatus.Draft)
                     dto.Status = Enums.SubmissionStatus.Pending;
 
@@ -197,6 +200,36 @@ namespace GHCAA.API.Controllers
 
             var fileUrl = "/" + relativePath.TrimStart('/');
             return Ok(new { url = fileUrl, relativePath });
+        }
+
+        [HttpPost("upload-document")]
+        [Authorize(Policy = "AdminOnly")] // Notices are admin-authored only
+        public async Task<IActionResult> UploadDocument(IFormFile file, CancellationToken cancellationToken)
+        {
+            var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Document, 10 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+
+            var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(authorIdClaim, out var authorId))
+            {
+                return Unauthorized();
+            }
+
+            using var stream = file.OpenReadStream();
+            var extension = Path.GetExtension(file.FileName);
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var uniqueFileName = $"notice_{timestamp}_{Guid.NewGuid().ToString().Substring(0, 8)}{extension}";
+
+            var relativePath = await _fileStorageService.SaveFileAsync(
+                stream,
+                uniqueFileName,
+                authorId,
+                Enums.FileUploadType.NoticeDocument,
+                cancellationToken
+            );
+
+            var fileUrl = "/" + relativePath.TrimStart('/');
+            return Ok(new { url = fileUrl, relativePath, fileName = file.FileName });
         }
     }
 }

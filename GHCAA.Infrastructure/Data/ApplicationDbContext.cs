@@ -135,6 +135,7 @@ namespace GHCAA.Infrastructure.Data
 
         // Config-Driven Framework
         public DbSet<OrganizationConfig> OrganizationConfigs { get; set; } = null!;
+        public DbSet<SiteContent> SiteContents { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -317,6 +318,10 @@ namespace GHCAA.Infrastructure.Data
             // Seed Saved Payment Methods from JSON
             var savedMethods = LoadSeed<SavedPaymentMethod>("saved_payment_methods.json");
             if (savedMethods.Any()) modelBuilder.Entity<SavedPaymentMethod>().HasData(savedMethods);
+
+            // Seed CMS content blocks (About/Contact) from JSON
+            var siteContent = LoadSeed<SiteContent>("site_content.json");
+            if (siteContent.Any()) modelBuilder.Entity<SiteContent>().HasData(siteContent);
         }
     }
 }

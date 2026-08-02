@@ -124,7 +124,7 @@ class FakeEventsService implements EventsService {
 }
 
 class FakeNewsService implements NewsService {
-  @override Future<List<dynamic>> getLatestNews() async => [];
+  @override Future<List<dynamic>> getLatestNews({String? postType}) async => [];
   @override Future<List<dynamic>> getNewsByCategory(String category) async => [];
   @override Future<List<dynamic>> getMySubmissions() async => [];
   @override Future<void> deleteMySubmission(int id) async {}

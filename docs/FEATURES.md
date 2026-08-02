@@ -204,11 +204,23 @@ The assistant runs entirely on internal data with a rule-based engine — it has
 
 ## 7. Global Content Management (CMS)
 
-### 7.1 News & Press Releases
-- **Business description**: Publishing and managing association news with image support.
-- **User roles**: Public (read), Admin (CRUD).
-- **Inputs / outputs**: Screen `/news`; API `POST /api/news`.
-- **Dependencies**: News service.
+### 7.1 News & Notices
+- **Business description**: One board for both association news and official notices, discriminated by a `PostType` field on the same `NewsPost` entity. News may carry an image; notices may additionally carry a PDF document. Admins manage both from a single admin screen with a News/Notice tab filter.
+- **User roles**: Public (read), Member (may submit *news* articles for approval), Admin (CRUD on both). **Notices are admin-post-only** — the member-facing submit endpoint rejects `PostType.Notice` from non-admins.
+- **Inputs / outputs**: Screens `/news` (public + portal feed, tab-filtered; `/news?type=Notice` deep-links the Notices tab from the public nav) and `/admin/news`; APIs `GET /api/news?postType=`, `POST /api/news`, `POST /api/news/upload-image`, `POST /api/news/upload-document` (AdminOnly, PDF, 10 MB).
+- **Dependencies**: News service, file storage, file-validation service.
+
+### 7.1a Site Content CMS (About Us / Contact intro)
+- **Business description**: Admin-editable content blocks that render the public About Us page and the Contact page intro, so institutional copy changes without a redeploy. Each block is a keyed record (`about-origin`, `about-association`, `about-logo`, `about-objectives`, `contact-intro`) with a title, rich-text body, display order, and active flag. Seeded from the GHCAA Constitution; the public page falls back to its previous static markup if the API returns nothing.
+- **User roles**: Public (read active blocks), Admin (CRUD, reorder, activate/deactivate).
+- **Inputs / outputs**: Screens `/about`, `/contact`, `/admin/site-content`; APIs `GET /api/site-content?group=` (anonymous), `GET /api/site-content/admin`, `POST`/`PUT /{id}`/`DELETE /{id}` (all AdminOnly).
+- **Dependencies**: SiteContent service, `HtmlSanitizer` (body HTML is sanitized server-side on every write), shared rich-text editor component.
+
+### 7.1b Contact details configuration
+- **Business description**: The Contact page's address/phone/email/social panel is driven by `OrgConfig.Contact` rather than hardcoded markup — including an **on-campus address**, a list of phone numbers, and an optional map embed URL, all editable from the SuperAdmin org-config screen and shared by web and mobile.
+- **User roles**: Public (read), SuperAdmin (edit).
+- **Inputs / outputs**: Screens `/contact`, `/admin/org-config`; API `GET`/`PUT /api/org-config`.
+- **Dependencies**: OrgConfig service. The admin-supplied map URL is treated as untrusted: it passes an allow-list check before the iframe is trusted, and no iframe renders if it fails.
 
 ### 7.2 Media Gallery & Albums
 - **Business description**: Visual records of association history categorized by events.

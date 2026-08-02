@@ -183,15 +183,7 @@
 
 
 
-.pill {
-    background: rgba(var(--primary-rgb), 0.03);
-    padding: 0.25rem 0.75rem;
-    border-radius: 6px;
-    font-size: 0.72rem;
-    font-weight: 800;
-    border: 1px solid var(--glass-border);
-    color: var(--text-muted);
-}
+/* .pill lives in central styles.scss — do NOT re-add it here. */
 
 .loading-state,
 .empty-state {

@@ -6,11 +6,15 @@ class SocialLinks {
   final String facebook;
   final String whatsapp;
   final String youtube;
+  final String linkedin;
+  final String instagram;
 
   SocialLinks({
     required this.facebook,
     required this.whatsapp,
     required this.youtube,
+    this.linkedin = '#',
+    this.instagram = '#',
   });
 
   factory SocialLinks.fromJson(Map<String, dynamic> json) {
@@ -18,6 +22,8 @@ class SocialLinks {
       facebook: json['facebook'] ?? '#',
       whatsapp: json['whatsapp'] ?? '#',
       youtube: json['youtube'] ?? '#',
+      linkedin: json['linkedin'] ?? '#',
+      instagram: json['instagram'] ?? '#',
     );
   }
 }
@@ -67,6 +73,9 @@ class OrgContact {
   final String supportEmail;
   final String importEmailBase;
   final String registeredOffice;
+  final String campusAddress;
+  final List<String> phoneNumbers;
+  final String mapEmbedUrl;
   final String portalBaseUrl;
   final SocialLinks socialLinks;
 
@@ -76,6 +85,9 @@ class OrgContact {
     required this.registeredOffice,
     required this.portalBaseUrl,
     required this.socialLinks,
+    this.campusAddress = '',
+    this.phoneNumbers = const [],
+    this.mapEmbedUrl = '',
   });
 
   factory OrgContact.fromJson(Map<String, dynamic> json) {
@@ -83,6 +95,9 @@ class OrgContact {
       supportEmail: json['supportEmail'] ?? '',
       importEmailBase: json['importEmailBase'] ?? '',
       registeredOffice: json['registeredOffice'] ?? '',
+      campusAddress: json['campusAddress'] ?? '',
+      phoneNumbers: (json['phoneNumbers'] as List?)?.map((e) => e.toString()).toList() ?? const [],
+      mapEmbedUrl: json['mapEmbedUrl'] ?? '',
       portalBaseUrl: json['portalBaseUrl'] ?? '',
       socialLinks: SocialLinks.fromJson(json['socialLinks'] ?? {}),
     );
@@ -362,6 +377,9 @@ class OrgConfig {
           supportEmail: 'haragangian@gmail.com',
           importEmailBase: 'haragangian',
           registeredOffice: 'Govt. Haraganga College Campus, Munshiganj, Bangladesh.',
+          campusAddress: 'Govt. Haraganga College, Munshiganj-1500, Bangladesh.',
+          phoneNumbers: const ['+880 1711-234567', '+880 1812-345678'],
+          mapEmbedUrl: '',
           portalBaseUrl: 'https://haragangian.com/portal',
           socialLinks: SocialLinks(facebook: '#', whatsapp: '#', youtube: '#'),
         ),

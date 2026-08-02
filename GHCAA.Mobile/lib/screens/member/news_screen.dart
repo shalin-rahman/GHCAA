@@ -14,6 +14,9 @@ import '../../features/content/content_service.dart';
 
 final newsSearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
 
+/// '' = all, 'News', 'Notice' — matches the PostType discriminator on NewsPost.
+final newsPostTypeFilterProvider = StateProvider.autoDispose<String>((ref) => "");
+
 final newsListProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async => ref.read(newsServiceProvider).getLatestNews());
 
 class NewsScreen extends ConsumerStatefulWidget {
@@ -36,22 +39,39 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
   Widget build(BuildContext context) {
     final newsAsync = ref.watch(newsListProvider);
     final searchQuery = ref.watch(newsSearchQueryProvider);
+    final postTypeFilter = ref.watch(newsPostTypeFilterProvider);
 
     return AppScaffold(
-      title: 'News',
-      breadcrumb: 'PORTAL > NEWS',
+      title: 'News & Notices',
+      breadcrumb: 'PORTAL > NEWS & NOTICES',
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(AppTheme.spaceL, AppTheme.spaceM, AppTheme.spaceL, AppTheme.spaceS),
             child: AppSearchField(
               controller: _searchController,
-              hintText: 'Search news...',
+              hintText: 'Search news & notices...',
               onChanged: (v) => ref.read(newsSearchQueryProvider.notifier).state = v.toLowerCase(),
               onClear: () {
                 _searchController.clear();
                 ref.read(newsSearchQueryProvider.notifier).state = "";
               },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppTheme.spaceL, 0, AppTheme.spaceL, AppTheme.spaceS),
+            child: Row(
+              children: [
+                for (final option in const [('', 'ALL'), ('News', 'NEWS'), ('Notice', 'NOTICES')])
+                  Padding(
+                    padding: const EdgeInsets.only(right: AppTheme.spaceS),
+                    child: ChoiceChip(
+                      label: Text(option.$2, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                      selected: postTypeFilter == option.$1,
+                      onSelected: (_) => ref.read(newsPostTypeFilterProvider.notifier).state = option.$1,
+                    ),
+                  ),
+              ],
             ),
           ),
           Expanded(
@@ -62,7 +82,9 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
               data: (news) {
                 final filtered = news.where((article) {
                   final title = article['title']?.toString().toLowerCase() ?? '';
-                  return title.contains(searchQuery);
+                  if (!title.contains(searchQuery)) return false;
+                  if (postTypeFilter.isEmpty) return true;
+                  return _postTypeOf(article) == postTypeFilter;
                 }).toList();
 
                 return RefreshIndicator(
@@ -79,7 +101,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              'Showing ${filtered.length} of ${news.length} news stories',
+                              'Showing ${filtered.length} of ${news.length} posts',
                               style: TextStyle(fontSize: 10, color: AppTheme.royalGold.withValues(alpha: 0.7), fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -141,7 +163,7 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                                                       child: Container(
                                                         padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceS, vertical: AppTheme.spaceXS),
                                                         decoration: BoxDecoration(color: AppTheme.royalGold.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(AppTheme.radiusXS)),
-                                                        child: Text(_getCategoryLabel(article['articleCategory']), style: const TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1), overflow: TextOverflow.ellipsis),
+                                                        child: Text(_postTypeOf(article) == 'Notice' ? 'NOTICE' : _getCategoryLabel(article['articleCategory']), style: const TextStyle(color: AppTheme.royalGold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1), overflow: TextOverflow.ellipsis),
                                                       ),
                                                     ),
                                                     Text(AppUtils.formatDate(article['createdAt']), style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)),
@@ -151,7 +173,23 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
                                                 Text(article['title'] ?? 'Alumni News Highlight', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, height: 1.25)),
                                                 const SizedBox(height: AppTheme.spaceS),
                                                 Text(article['content']?.toString().substring(0, article['content'].toString().length > 150 ? 150 : article['content'].toString().length) ?? 'Read more about this story in the alumni portal.', style: const TextStyle(fontSize: 12, height: 1.5, color: AppTheme.textSecondaryDark), maxLines: 2, overflow: TextOverflow.ellipsis),
-                                              ],
+                                                if ((article['attachmentUrl'] ?? '').toString().isNotEmpty) ...[
+                                                  const SizedBox(height: AppTheme.spaceS),
+                                                  Row(
+                                                    children: [
+                                                      const Icon(Icons.picture_as_pdf_outlined, size: 14, color: AppTheme.royalGold),
+                                                      const SizedBox(width: AppTheme.spaceXS),
+                                                      Expanded(
+                                                        child: Text(
+                                                          article['attachmentFileName']?.toString() ?? 'Attached document',
+                                                          style: const TextStyle(fontSize: 10, color: AppTheme.royalGold, fontWeight: FontWeight.bold),
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+],
                                             ),
                                           ),
                                         ],
@@ -171,6 +209,12 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
         ],
       ),
     );
+  }
+
+  String _postTypeOf(dynamic article) {
+    final raw = article['postType'];
+    if (raw == null) return 'News';
+    return (raw.toString() == '1' || raw.toString() == 'Notice') ? 'Notice' : 'News';
   }
 
   String _getCategoryLabel(dynamic category) {

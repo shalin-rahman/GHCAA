@@ -2,31 +2,53 @@
     animation: fadeIn 0.4s ease-out;
 
     .header {
-        margin-bottom: 3rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
 
         h2 {
             font-weight: 900;
             letter-spacing: -1px;
         }
+
+        .header-text p {
+            color: var(--text-muted);
+        }
+
+        /* .tabs.tab-nav is the global filter-tab pattern — styling lives in styles.scss. */
+        .tabs {
+            flex-shrink: 0;
+        }
     }
 }
 
+/* Card grid instead of a single tall column: many more posts land above the fold. */
 .news-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    max-width: 900px;
-    margin-top: 3rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: var(--text-muted);
+    }
 }
 
 .news-article {
     display: flex;
+    flex-direction: column;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s, box-shadow 0.3s;
     overflow: hidden;
 
     &:hover {
-        transform: translateX(10px);
+        transform: translateY(-4px);
         border-color: var(--accent-color);
         box-shadow: var(--shadow-md);
 
@@ -35,8 +57,13 @@
         }
     }
 
+    &.notice {
+        border-left: 3px solid var(--accent-color);
+    }
+
     .article-img {
-        width: 250px;
+        width: 100%;
+        height: 160px;
         background-size: cover;
         background-position: center;
         flex-shrink: 0;
@@ -44,16 +71,19 @@
     }
 
     .article-body {
-        padding: 2rem;
+        padding: 1.25rem 1.5rem 1.5rem;
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.6rem;
+        min-width: 0;
 
         .meta {
             display: flex;
-            gap: 1.5rem;
-            font-size: 0.7rem;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.68rem;
             font-weight: 800;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -64,32 +94,72 @@
             }
         }
 
+        .type-tag {
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.62rem;
+            font-weight: 900;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+
+            &.notice {
+                background: var(--gold-gradient);
+                border-color: transparent;
+                color: #000;
+            }
+        }
+
         h3 {
-            font-size: 1.5rem;
+            font-size: 1.15rem;
             font-weight: 800;
             color: var(--text-main);
             line-height: 1.3;
+            /* Two-line clamp keeps every card the same height in the grid. */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         p {
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             color: var(--text-muted);
-            line-height: 1.6;
+            line-height: 1.55;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .footer {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
+            gap: 0.5rem;
             margin-top: auto;
-            padding-top: 1rem;
+            padding-top: 0.85rem;
             border-top: 1px solid var(--glass-border);
 
             .author {
-                font-size: 0.8rem;
+                font-size: 0.78rem;
                 font-weight: 700;
                 color: var(--text-muted);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
+
+            .footer-actions {
+                display: flex;
+                align-items: center;
+                gap: 0.6rem;
+                flex-shrink: 0;
+            }
+
+            /* .doc-link lives in central styles.scss — do NOT re-add it here. */
 
             .btn-text {
                 background: none;
@@ -203,16 +273,33 @@
     }
 }
 
-@media (max-width: 768px) {
-    .news-article {
-        flex-direction: column;
+@media (max-width: 640px) {
+    .news-page .header {
+        align-items: flex-start;
 
-        .article-img {
+        .tabs {
             width: 100%;
-            height: 220px;
+            overflow-x: auto;
         }
     }
 
+    .news-list {
+        /* Single column below 640px — 320px min would otherwise force horizontal overflow. */
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .news-article .article-img {
+        height: 140px;
+    }
+
+    .news-detail-section {
+        margin: 2rem 0;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
     .m-header {
         padding: 2rem 1.5rem 1rem;
 

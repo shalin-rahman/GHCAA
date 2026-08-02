@@ -148,25 +148,53 @@ export interface LedgerCategorySummary {
 }
 
 
+export type PostType = 'News' | 'Notice';
+
 export interface NewsPost {
     id: number;
     title: string;
     content: string;
     articleCategory: ArticleCategory;
+    postType: PostType;
     status: SubmissionStatus;
     imageUrl?: string;
+    attachmentUrl?: string;
+    attachmentFileName?: string;
     isActive: boolean;
     authorName?: string;
     createdAt: string | Date;
     collaborators: string[];
 }
 
+export interface SiteContent {
+    id: number;
+    key: string;
+    group: string;
+    title: string;
+    bodyHtml: string;
+    displayOrder: number;
+    isActive: boolean;
+    lastModified?: string | Date;
+}
+
+export interface UpsertSiteContentDto {
+    key: string;
+    group: string;
+    title: string;
+    bodyHtml: string;
+    displayOrder: number;
+    isActive: boolean;
+}
+
 export interface CreateNewsDto {
     title: string;
     content: string;
     articleCategory: ArticleCategory;
+    postType?: PostType;
     status?: SubmissionStatus;
     imageUrl?: string;
+    attachmentUrl?: string;
+    attachmentFileName?: string;
     isActive?: boolean;
     collaborators?: string[];
 }

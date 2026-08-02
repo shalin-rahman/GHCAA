@@ -234,8 +234,27 @@ graph TD
 | `AuthorId` | `int` | FK → User |
 | `LastModified` | `DateTime?` | |
 | `ExternalCollaborators` | `string?` | |
+| `PostType` | `PostType` enum | News/Notice — discriminates the merged board; defaults to News |
+| `AttachmentUrl` | `string?` | Notice PDF |
+| `AttachmentFileName` | `string?` | Original filename for the download link |
 
 **Navigation:** `User? Author`, `ICollection<NewsCollaborator>`
+
+---
+
+### `SiteContent` _(GHCAA.Domain.Models)_
+**File:** `GHCAA.Domain/Models/SiteContent.cs`
+
+| Property | Type | Notes |
+|---|---|---|
+| `Id` | `int` | |
+| `Key` | `string` | Unique index; e.g. `about-origin`, `contact-intro` |
+| `Title` | `string` | |
+| `BodyHtml` | `string` | Sanitized server-side on every write |
+| `DisplayOrder` | `int` | Public render order |
+| `IsActive` | `bool` | Anonymous reads return active blocks only |
+| `LastModified` | `DateTime?` | |
+| `UpdatedByAdminId` | `int?` | |
 
 ---
 
@@ -595,7 +614,7 @@ graph TD
 
 | Method | Returns |
 |---|---|
-| `GetActiveNewsAsync(category, ct)` | `IEnumerable<NewsPostDto>` |
+| `GetActiveNewsAsync(articleCategory, postType, ct)` | `IEnumerable<NewsPostDto>` |
 | `GetAllNewsForAdminAsync(ct)` | `IEnumerable<NewsPostDto>` |
 | `GetPendingSubmissionsAsync(ct)` | `IEnumerable<NewsPostDto>` |
 | `GetMySubmissionsAsync(userId, ct)` | `IEnumerable<NewsPostDto>` |
@@ -748,7 +767,8 @@ graph TD
 | `EventTaskDto` / `CreateEventTaskDto` | Event tasks |
 | `EventBudgetDto` / `UpdateEventBudgetDto` | Event budget |
 | `RegisterForEventDto` / `PublicParticipantDto` | Event registration |
-| `NewsPostDto` / `CreateNewsDto` / `UpdateNewsDto` | News CRUD |
+| `NewsPostDto` / `CreateNewsDto` / `UpdateNewsDto` | News + Notice CRUD (carry `PostType` + attachment fields) |
+| `SiteContentDto` / `UpsertSiteContentDto` | Site content CMS blocks |
 | `JobDto` / `CreateJobDto` | Job hub |
 | `FinancialDtos` (PaymentHistoryDto, MembershipDueDto, etc.) | Financials |
 | `MembershipFeeConfigDto` / `LedgerSummaryDto` | Fee config + ledger |
@@ -791,6 +811,7 @@ All services are registered as **Scoped** unless noted.
 | `IFinancialService` | `FinancialService` | Services/ |
 | `IFinancialLedgerService` | `FinancialLedgerService` | Services/ |
 | `INewsService` | `NewsService` | Services/ |
+| `ISiteContentService` | `SiteContentService` | Services/ |
 | `IJobHubService` | `JobHubService` | Services/ |
 | `IIDCardService` | `IDCardService` | Services/ |
 | `IActivityService` | `ActivityService` | Services/ |
@@ -860,7 +881,8 @@ All controllers at `GHCAA.API/Controllers/`. Base route: `/api/[controller]`
 | `AdminController` | `/api/admin` | Admin/SuperAdmin | `IMemberService`, `IRoleService`, `IUserService` |
 | `AdminGovernanceController` | `/api/admin/governance` | Admin | `IGovernanceService` |
 | `EventsController` | `/api/events` | Public + Auth + Admin | `IEventService`, `IFileStorageService` |
-| `NewsController` | `/api/news` | Public + Auth + Admin | `INewsService` |
+| `NewsController` | `/api/news` | Public + Auth + Admin | `INewsService`, `IFileStorageService`, `IFileValidationService` |
+| `SiteContentController` | `/api/site-content` | Public (read active) + Admin (CRUD) | `ISiteContentService` |
 | `JobHubController` | `/api/jobs` | Auth (post) / Public (read) | `IJobHubService` |
 | `FinancialsController` | `/api/financials` | Auth | `IFinancialService` |
 | `FinancialLedgerController` | `/api/ledger` | SuperAdmin | `IFinancialLedgerService` |
@@ -989,7 +1011,8 @@ Order in `Program.cs`:
 | `SavedPaymentMethod` | `id, memberId, displayName, method, accountNumber, icon?, isDefault, lastUsedAt?` | `SavedPaymentMethodDto` |
 | `AlumniEvent` | `id, title, description, startDate, endDate, location, registrationFee?, requiresPayment, isActive, imageUrl?, registrationStartDate?, registrationEndDate?, adminNote?, allowNonMembers, participantCount?` | `EventDto` |
 | `EventRegistration` | `id, eventId, eventTitle, memberId?, memberName?, isNonMember, guestName/Email/Mobile?, paymentReference, receiptPath?, paymentMethod, status, registeredAt, approvedAt?` | `EventRegistrationDto` |
-| `NewsPost` | `id, title, content, articleCategory, status, imageUrl?, isActive, authorName?, createdAt, collaborators[]` | `NewsPostDto` |
+| `NewsPost` | `id, title, content, articleCategory, postType, status, imageUrl?, attachmentUrl?, attachmentFileName?, isActive, authorName?, createdAt, collaborators[]` | `NewsPostDto` |
+| `SiteContent` | `id, key, title, bodyHtml, displayOrder, isActive, lastModified?` | `SiteContentDto` / `UpsertSiteContentDto` |
 | `CreateNewsDto` | `title, content, articleCategory, status?, imageUrl?, isActive?, collaborators?` | — |
 | `UpdateNewsDto` | `extends Partial<CreateNewsDto>` + `id` | — |
 | `Job` | `id, title, companyName, location, description, requirements, applicationEmail?, applicationLink?, postedDate, applicationDeadline?, jobCategory, isActive, postedByMemberId, postedByMemberName?` | `JobDto` |
@@ -1150,15 +1173,29 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 
 | Method | Signature | API Endpoint |
 |---|---|---|
-| `getNews()` | `(category?, silent?) => Observable<NewsPost[]>` | `GET /news` |
+| `getNews()` | `(articleCategory?, silent?, postType?) => Observable<NewsPost[]>` | `GET /news` |
 | `getNewsById()` | `(id) => Observable<NewsPost>` | `GET /news/:id` |
 | `getNewsAdmin()` | `() => Observable<NewsPost[]>` | `GET /news/admin` |
 | `createNews()` | `(dto) => Observable<NewsPost>` | `POST /news` |
 | `updateNews()` | `(id, dto) => Observable<NewsPost>` | `PUT /news/:id` |
 | `deleteNews()` | `(id) => Observable<any>` | `DELETE /news/:id` |
 | `uploadImage()` | `(file) => Observable<{url, relativePath}>` | `POST /news/upload-image` |
+| `uploadDocument()` | `(file) => Observable<{url, relativePath, fileName}>` | `POST /news/upload-document` (AdminOnly, PDF) |
 | `getMySubmissions()` | `() => Observable<NewsPost[]>` | `GET /news/my-submissions` |
 | `submitArticle()` | `(dto) => Observable<NewsPost>` | `POST /news/submit` |
+
+---
+
+### `SiteContentService`
+**File:** `site-content.service.ts` · **Deps:** `HttpClient`
+
+| Method | Signature | API Endpoint |
+|---|---|---|
+| `getByGroup()` | `(group, silent?) => Observable<SiteContent[]>` | `GET /site-content?group=` |
+| `getAll()` | `() => Observable<SiteContent[]>` | `GET /site-content/admin` |
+| `create()` | `(dto) => Observable<SiteContent>` | `POST /site-content` |
+| `update()` | `(id, dto) => Observable<SiteContent>` | `PUT /site-content/:id` |
+| `delete()` | `(id) => Observable<void>` | `DELETE /site-content/:id` |
 | `saveDraft()` | `(dto) => Observable<NewsPost>` | `POST /news/submit` (status=Draft) |
 | `getPendingSubmissions()` | `() => Observable<NewsPost[]>` | `GET /news/pending` |
 | `approveSubmission()` | `(id) => Observable<any>` | `POST /news/:id/approve` |
@@ -1252,7 +1289,7 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | Component | Folder | Key Services |
 |---|---|---|
 | `EventsComponent` | `events/` | `EventsService` |
-| `NewsComponent` | `news/` | `NewsService` |
+| `NewsComponent` | `news/` | `NewsService` (News/Notices tab filter, `?type=` deep-link, PDF download links) |
 | `JobsComponent` | `jobs/` | `JobService` |
 | `GalleryComponent` | `gallery/` | `GalleryService` |
 | `GovernanceComponent` | `governance/` | `NetworkingService` |
@@ -1283,7 +1320,8 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `AdminMembersComponent` | `AdminService`, `ProfileService` |
 | `AdminGovernanceComponent` | `AdminService`, `NetworkingService` |
 | `AdminEventsComponent` | `EventsService` |
-| `AdminNewsComponent` | `NewsService` |
+| `AdminNewsComponent` | `NewsService` (manages News **and** Notices from one screen; PDF upload for notices) |
+| `AdminSiteContentComponent` | `SiteContentService` (About/Contact CMS blocks) |
 | `AdminGalleryComponent` | `GalleryService` |
 | `AdminCommComponent` | `AdminCommService` |
 | `AdminThemesComponent` | `AdminService` |
@@ -1542,7 +1580,7 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 **`NewsService` Methods:**
 | Method | API |
 |---|---|
-| `getLatestNews()` | `GET /news` |
+| `getLatestNews({postType})` | `GET /news?postType=` |
 | `getNewsByCategory(cat)` | `GET /news?articleCategory=` |
 | `getMySubmissions()` | `GET /news/my-submissions` |
 | `deleteMySubmission(id)` | `DELETE /news/:id` |
@@ -1762,6 +1800,7 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `NetworkingControllerTests` | `NetworkingControllerTests.cs` | `NetworkingController` | `INetworkingService` |
 | `NewsControllerTests` | `NewsControllerTests.cs` | `NewsController` | `INewsService` |
 | `PaymentConfigControllerTests` | `PaymentConfigControllerTests.cs` | `PaymentConfigController` | `ApplicationDbContext` |
+| `SiteContentControllerTests` | `SiteContentControllerTests.cs` | `SiteContentController` | `ISiteContentService` |
 | `ProfileControllerTests` | `ProfileControllerTests.cs` | `ProfileController` | `IMemberService`, `INetworkingService` |
 | `RegistrationControllerTests` | `RegistrationControllerTests.cs` | `RegistrationController` | `IMemberService`, `IOtpService` |
 | `ThemeControllerTests` | `ThemeControllerTests.cs` | `ThemeController` | `IThemeService` |
@@ -1789,6 +1828,7 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `NewsServiceTests` | `NewsServiceTests.cs` | `NewsService` |
 | `NotificationServiceTests` | `NotificationServiceTests.cs` | `NotificationService` |
 | `OtpServiceTests` | `OtpServiceTests.cs` | `OtpService` |
+| `SiteContentServiceTests` | `SiteContentServiceTests.cs` | `SiteContentService` |
 | `TokenServiceTests` | `TokenServiceTests.cs` | `TokenService` |
 | `UserServiceTests` | `UserServiceTests.cs` | `UserService` |
 

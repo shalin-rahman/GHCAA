@@ -85,6 +85,8 @@ namespace GHCAA.Infrastructure.Services
                 SupportEmail = "haragangian@gmail.com",
                 ImportEmailBase = "haragangian",
                 RegisteredOffice = "Govt. Haraganga College Campus, Munshiganj, Bangladesh.",
+                CampusAddress = "Govt. Haraganga College, Munshiganj-1500, Bangladesh.",
+                PhoneNumbers = new List<string> { "+880 1711-234567", "+880 1812-345678" },
                 PortalBaseUrl = "https://haragangian.com/portal",
                 SocialLinks = new() { Facebook = "#", Whatsapp = "#", Youtube = "#" }
             },

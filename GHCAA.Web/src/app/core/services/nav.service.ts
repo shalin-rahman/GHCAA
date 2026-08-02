@@ -44,7 +44,8 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/members', label: 'All Members', icon: 'members', section: 'Membership' },
     { path: '/admin/members/ec', label: 'Executive Committee', icon: 'ec', section: 'Membership' },
 
-    { path: '/admin/news', label: 'News Posts', icon: 'news', section: 'Content' },
+    { path: '/admin/news', label: 'News & Notices', icon: 'news', section: 'Content' },
+    { path: '/admin/site-content', label: 'Site Content', icon: 'site-content', section: 'Content' },
     { path: '/admin/events', label: 'Manage Events', icon: 'events', section: 'Content' },
     { path: '/admin/gallery', label: 'Gallery Albums', icon: 'gallery', section: 'Content' },
     { path: '/admin/comm', label: 'Communications', icon: 'comm', section: 'Content' },

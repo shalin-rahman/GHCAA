@@ -99,7 +99,10 @@ Fostering professional and personal growth within the network.
 * **3.6.2 Constitution Hub**: Version-controlled governing documents with member voting capabilities.
 * **3.6.3 Communication Hub**: Mass email/SMS engine with HTML templates and targeted segmenting (e.g., by batch or type).
 * **3.6.4 Dynamic Themes**: UI transformations for special days (e.g., National Days) controlled via Admin settings.
-* **3.6.5 Member Polls & Voting**: Admin-managed polling system for sentiment analysis and formal association decisions. Supports single/multiple choice, expiry dates, and real-time result visualization for members.
+* **3.6.5 Site Content Blocks**: Admin-editable, keyed content blocks (title, rich-text body, display order, active flag) that drive the public About Us page and the Contact page intro, so institutional copy is changed from the admin panel rather than by redeploy. Block bodies are sanitized server-side on every write; the public page retains a static fallback so it can never render empty.
+* **3.6.6 News & Notice Board**: News and official notices share one entity discriminated by `PostType`, managed from a single admin screen and surfaced on one tab-filtered public/portal feed. Notices may carry a PDF attachment. **Notices may be posted by administrators only** — the member article-submission path rejects notice-typed posts from non-admin callers, while member *news* submissions continue to follow the existing approval workflow.
+* **3.6.7 Contact Details Configuration**: On-campus address, phone numbers, support email, social links, and an optional map embed URL are held in organisation configuration and edited by SuperAdmin, giving web and mobile a single source of truth. The map URL is admin-supplied and therefore allow-list validated before being embedded.
+* **3.6.8 Member Polls & Voting**: Admin-managed polling system for sentiment analysis and formal association decisions. Supports single/multiple choice, expiry dates, and real-time result visualization for members.
 
 ---
 

@@ -8,6 +8,19 @@
 </section>
 
 <div class="container main-content">
+    @if (blocks().length > 0) {
+    <!-- Admin-managed content (Admin → Site Content). Server-sanitized on write. -->
+    <div class="story-grid">
+        @for (block of blocks(); track block.id) {
+        <div class="glass-card story-card reveal-bottom">
+            <div class="card-tag">{{ block.group | uppercase }}</div>
+            <h3>{{ block.title }}</h3>
+            <div class="cms-body" [innerHTML]="block.bodyHtml"></div>
+            <div class="feature-line"></div>
+        </div>
+        }
+    </div>
+    } @else {
     <!-- Storytelling Section -->
     <div class="story-grid">
         <div class="glass-card story-card reveal-left" style="position: relative; overflow: hidden;">
@@ -39,6 +52,7 @@
             </ul>
         </div>
     </div>
+    }
 
     <!-- Governance Section -->
     <div class="heritage-banner glass-card reveal-bottom">

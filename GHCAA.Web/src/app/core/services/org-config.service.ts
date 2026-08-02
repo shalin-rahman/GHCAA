@@ -54,8 +54,11 @@ export class OrgConfigService {
           supportEmail: 'haragangian@gmail.com',
           importEmailBase: 'haragangian',
           registeredOffice: 'Govt. Haraganga College Campus, Munshiganj, Bangladesh.',
+          campusAddress: 'Govt. Haraganga College, Munshiganj-1500, Bangladesh.',
+          phoneNumbers: ['+880 1711-234567', '+880 1812-345678'],
+          mapEmbedUrl: '',
           portalBaseUrl: 'https://haragangian.com/portal',
-          socialLinks: { facebook: '#', whatsapp: '#', youtube: '#' }
+          socialLinks: { facebook: '#', whatsapp: '#', youtube: '#', linkedin: '#', instagram: '#' }
         },
         currency: { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
         features: {

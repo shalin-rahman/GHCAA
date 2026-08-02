@@ -11,7 +11,10 @@ namespace GHCAA.Application.DTOs
         public string Content { get; set; } = null!;
         public Enums.ArticleCategory ArticleCategory { get; set; }
         public Enums.SubmissionStatus Status { get; set; }
+        public Enums.PostType PostType { get; set; }
         public string? ImageUrl { get; set; }
+        public string? AttachmentUrl { get; set; }
+        public string? AttachmentFileName { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? AuthorName { get; set; }
@@ -33,8 +36,15 @@ namespace GHCAA.Application.DTOs
 
         public Enums.SubmissionStatus Status { get; set; } = Enums.SubmissionStatus.Approved;
 
+        public Enums.PostType PostType { get; set; } = Enums.PostType.News;
+
         [Url(ErrorMessage = "Image URL must be a valid URL.")]
         public string? ImageUrl { get; set; }
+
+        public string? AttachmentUrl { get; set; }
+
+        [MaxLength(260)]
+        public string? AttachmentFileName { get; set; }
 
         public List<string> Collaborators { get; set; } = new List<string>();
 

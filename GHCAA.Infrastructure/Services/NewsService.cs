@@ -24,7 +24,7 @@ namespace GHCAA.Infrastructure.Services
             _db = db;
         }
 
-        public async Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(Enums.ArticleCategory? category = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<NewsPostDto>> GetActiveNewsAsync(Enums.ArticleCategory? category = null, Enums.PostType? postType = null, CancellationToken cancellationToken = default)
         {
             var query = _db.NewsPosts
                 .Where(n => n.IsActive && n.Status == Enums.SubmissionStatus.Approved);
@@ -32,6 +32,11 @@ namespace GHCAA.Infrastructure.Services
             if (category.HasValue)
             {
                 query = query.Where(n => n.ArticleCategory == category.Value);
+            }
+
+            if (postType.HasValue)
+            {
+                query = query.Where(n => n.PostType == postType.Value);
             }
 
             var posts = await query
@@ -103,7 +108,10 @@ namespace GHCAA.Infrastructure.Services
                 Content = _sanitizer.Sanitize(dto.Content ?? ""), // 24.42: strip XSS before storage
                 ArticleCategory = dto.ArticleCategory,
                 Status = dto.Status,
+                PostType = dto.PostType,
                 ImageUrl = dto.ImageUrl,
+                AttachmentUrl = dto.AttachmentUrl,
+                AttachmentFileName = dto.AttachmentFileName,
                 IsActive = dto.IsActive,
                 AuthorId = authorId,
                 PublishDate = DateTime.UtcNow,
@@ -124,7 +132,10 @@ namespace GHCAA.Infrastructure.Services
             existing.Content = _sanitizer.Sanitize(dto.Content ?? ""); // 24.42
             existing.ArticleCategory = dto.ArticleCategory;
             existing.Status = dto.Status;
+            existing.PostType = dto.PostType;
             existing.ImageUrl = dto.ImageUrl;
+            existing.AttachmentUrl = dto.AttachmentUrl;
+            existing.AttachmentFileName = dto.AttachmentFileName;
             existing.IsActive = dto.IsActive;
             existing.LastModified = DateTime.UtcNow;
             existing.ExternalCollaborators = dto.Collaborators != null ? string.Join(", ", dto.Collaborators) : null;
@@ -204,7 +215,10 @@ namespace GHCAA.Infrastructure.Services
                 Content = post.Content,
                 ArticleCategory = post.ArticleCategory,
                 Status = post.Status,
+                PostType = post.PostType,
                 ImageUrl = post.ImageUrl,
+                AttachmentUrl = post.AttachmentUrl,
+                AttachmentFileName = post.AttachmentFileName,
                 IsActive = post.IsActive,
                 CreatedAt = post.PublishDate,
                 AuthorName = post.Author?.Member?.FullName ?? post.Author?.Username ?? "Unknown",

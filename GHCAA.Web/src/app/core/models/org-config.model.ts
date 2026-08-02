@@ -2,6 +2,8 @@ export interface SocialLinks {
   facebook?: string;
   whatsapp?: string;
   youtube?: string;
+  linkedin?: string;
+  instagram?: string;
 }
 
 export interface OrgBranding {
@@ -21,6 +23,9 @@ export interface OrgContact {
   supportEmail: string;
   importEmailBase: string;
   registeredOffice: string;
+  campusAddress: string;
+  phoneNumbers: string[];
+  mapEmbedUrl: string;
   portalBaseUrl: string;
   socialLinks: SocialLinks;
 }

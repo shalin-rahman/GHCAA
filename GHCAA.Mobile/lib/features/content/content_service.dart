@@ -10,9 +10,9 @@ class NewsService {
   final Dio _dio;
   NewsService(this._dio);
 
-  Future<List<dynamic>> getLatestNews() async {
+  Future<List<dynamic>> getLatestNews({String? postType}) async {
     try {
-      final response = await _dio.get('/news');
+      final response = await _dio.get('/news', queryParameters: postType == null ? null : {'postType': postType});
       return response.data as List<dynamic>;
     } catch (e) {
       debugPrint('NewsService.getLatestNews failed: $e');

@@ -1,7 +1,12 @@
 <section class="page-header reveal-text">
     <div class="container header-content">
         <h1 class="glow-text">Get in Touch</h1>
-        <p>Our secretariat is ready to assist you with any GHCAA related enquiries.</p>
+        @if (intro(); as block) {
+        <div [innerHTML]="block.bodyHtml"></div>
+        } @else {
+        <p>Our secretariat is ready to assist you with any
+            {{ orgConfigService.config()?.branding?.shortName || 'GHCAA' }} related enquiries.</p>
+        }
     </div>
     <div class="header-overlay"></div>
 </section>
@@ -16,34 +21,60 @@
             </div>
 
             <div class="info-list">
+                <!-- All values come from Admin → Org Config (contact section). -->
+                @if (contact()?.campusAddress) {
                 <div class="info-item">
                     <span class="icon">📍</span>
                     <div class="details">
-                        <strong>Campus Office</strong>
-                        <p>Govt. Haraganga College,<br>Munshiganj-1500, Bangladesh.</p>
+                        <strong>On Campus Address</strong>
+                        <p>{{ contact()?.campusAddress }}</p>
                     </div>
                 </div>
+                }
+                @if (contact()?.registeredOffice) {
+                <div class="info-item">
+                    <span class="icon">🏛️</span>
+                    <div class="details">
+                        <strong>Registered Office</strong>
+                        <p>{{ contact()?.registeredOffice }}</p>
+                    </div>
+                </div>
+                }
+                @if (contact()?.supportEmail) {
                 <div class="info-item">
                     <span class="icon">📧</span>
                     <div class="details">
                         <strong>Digital Desk</strong>
-                        <p>haragangian&#64;gmail.com</p>
+                        <p><a [href]="'mailto:' + contact()?.supportEmail">{{ contact()?.supportEmail }}</a></p>
                     </div>
                 </div>
+                }
+                @if ((contact()?.phoneNumbers?.length ?? 0) > 0) {
                 <div class="info-item">
                     <span class="icon">📞</span>
                     <div class="details">
                         <strong>Voice Support</strong>
-                        <p>+880 1711-234567<br>+880 1812-345678</p>
+                        @for (phone of contact()?.phoneNumbers; track phone) {
+                        <p><a [href]="'tel:' + phone">{{ phone }}</a></p>
+                        }
                     </div>
                 </div>
+                }
             </div>
 
-            <div class="social-links">
-                <a href="#" class="social-btn">FB</a>
-                <a href="#" class="social-btn">WA</a>
-                <a href="#" class="social-btn">LI</a>
+            @if (mapUrl(); as src) {
+            <div class="map-embed">
+                <iframe [src]="src" title="Campus location" loading="lazy" referrerpolicy="no-referrer"></iframe>
             </div>
+            }
+
+            @if (socialButtons().length > 0) {
+            <div class="social-links">
+                @for (social of socialButtons(); track social.label) {
+                <a [href]="social.url" target="_blank" rel="noopener" class="social-btn">{{ social.label }}</a>
+                }
+            </div>
+            }
         </div>
 
         <!-- Form Panel -->

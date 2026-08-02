@@ -31,6 +31,9 @@ namespace GHCAA.Application.DTOs
         public string SupportEmail { get; init; } = string.Empty;
         public string ImportEmailBase { get; init; } = string.Empty;
         public string RegisteredOffice { get; init; } = string.Empty;
+        public string CampusAddress { get; init; } = string.Empty;
+        public List<string> PhoneNumbers { get; init; } = new();
+        public string MapEmbedUrl { get; init; } = string.Empty;
         public string PortalBaseUrl { get; init; } = string.Empty;
         public SocialLinksDto SocialLinks { get; init; } = new();
     }
@@ -40,6 +43,8 @@ namespace GHCAA.Application.DTOs
         public string Facebook { get; init; } = "#";
         public string Whatsapp { get; init; } = "#";
         public string Youtube { get; init; } = "#";
+        public string Linkedin { get; init; } = "#";
+        public string Instagram { get; init; } = "#";
     }
 
     public record CurrencyDto

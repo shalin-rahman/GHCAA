@@ -1,7 +1,17 @@
 <div class="news-page">
     <div class="header">
-        <h2>News</h2>
-        <p>Announcements, updates, and stories from the alumni community</p>
+        <div class="header-text">
+            <h2>News &amp; Notices</h2>
+            <p>Announcements, updates, and stories from the alumni community</p>
+        </div>
+
+        <div class="tabs tab-nav">
+            @for (tab of postTypeTabs; track tab.value) {
+            <button type="button" [class.active]="postTypeFilter() === tab.value" (click)="setFilter(tab.value)">
+                {{ tab.label }}
+            </button>
+            }
+        </div>
     </div>
 
     @if (loading()) {
@@ -11,12 +21,15 @@
     </div>
     } @else {
     <div class="news-list">
-        @for (post of news(); track post.id) {
-        <article class="news-article glass-card" (click)="selectedPost.set(post)">
+        @for (post of filteredNews(); track post.id) {
+        <article class="news-article glass-card" [class.notice]="post.postType === 'Notice'" (click)="selectPost(post)">
             <div class="article-img" *ngIf="post.imageUrl" [style.background-image]="'url(' + post.imageUrl + ')'">
             </div>
             <div class="article-body">
                 <div class="meta">
+                    <span class="type-tag" [class.notice]="post.postType === 'Notice'">
+                        {{ post.postType === 'Notice' ? 'Notice' : 'News' }}
+                    </span>
                     <span class="cat">{{ getArticleCategoryLabel(post.articleCategory) }}</span>
                     <span>{{ post.createdAt | date:'dd-MM-yyyy' }}</span>
                 </div>
@@ -24,13 +37,24 @@
                 <p>{{ post.content | slice:0:180 }}...</p>
                 <div class="footer">
                     <span class="author">By {{ post.authorName }}</span>
-                    <button class="btn btn-outline btn-sm">Details ↗</button>
+                    <span class="footer-actions">
+                        @if (post.attachmentUrl) {
+                        <a [href]="post.attachmentUrl" target="_blank" rel="noopener" class="doc-link"
+                            (click)="$event.stopPropagation()"
+                            [title]="post.attachmentFileName || 'Download document'">📄 PDF</a>
+                        }
+                        <button class="btn btn-outline btn-sm">Details ↗</button>
+                    </span>
                 </div>
             </div>
         </article>
         } @empty {
         <div class="empty-state glass-card">
-            <p>No news posts available at the moment. Stay tuned!</p>
+            <p>
+                @if (postTypeFilter() === 'Notice') { No notices published at the moment. }
+                @else if (postTypeFilter() === 'News') { No news stories available at the moment. }
+                @else { No news posts available at the moment. Stay tuned! }
+            </p>
         </div>
         }
     </div>
@@ -54,6 +78,11 @@
         <div class="detail-content leading-relaxed text-lg opacity-90">
             <p>{{ post.content }}</p>
         </div>
+        @if (post.attachmentUrl) {
+        <a [href]="post.attachmentUrl" target="_blank" rel="noopener" class="btn btn-secondary mt-8 doc-download">
+            <span class="icon">📄</span> {{ post.attachmentFileName || 'Download attachment' }}
+        </a>
+        }
     </div>
     }
 </div>

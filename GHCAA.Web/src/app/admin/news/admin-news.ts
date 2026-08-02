@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { NewsService } from '../../core/services/news.service';
-import { NewsPost } from '../../core/models/business.models';
+import { NewsPost, PostType } from '../../core/models/business.models';
+import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { NotificationService } from '../../core/services/notification.service';
-import { ARTICLE_CATEGORIES, getArticleCategoryLabel } from '../../core/constants/app.constants';
+import { ARTICLE_CATEGORIES, getArticleCategoryLabel, POST_TYPE_TABS, matchesPostType } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
@@ -24,15 +25,19 @@ export class AdminNews implements OnInit {
     categories = ARTICLE_CATEGORIES;
     newsList = signal<NewsPost[]>([]);
     searchQuery = signal('');
-    
+    postTypeFilter = signal<'' | PostType>('');
+
+    readonly postTypeTabs = POST_TYPE_TABS;
+
     filteredNews = computed(() => {
         const query = this.searchQuery().toLowerCase();
-        if (!query) return this.newsList();
-        
-        return this.newsList().filter(post => 
-            post.title.toLowerCase().includes(query) || 
-            getArticleCategoryLabel(post.articleCategory).toLowerCase().includes(query)
-        );
+        const type = this.postTypeFilter();
+        return this.newsList().filter(post => {
+            if (!matchesPostType(post.postType, type)) return false;
+            if (!query) return true;
+            return post.title.toLowerCase().includes(query) ||
+                getArticleCategoryLabel(post.articleCategory).toLowerCase().includes(query);
+        });
     });
 
     loading = signal(true);
@@ -41,8 +46,9 @@ export class AdminNews implements OnInit {
     saving = signal(false);
     editingId = signal<number | null>(null);
     uploadingImage = signal(false);
+    uploadingDocument = signal(false);
 
-    form: any = { title: '', content: '', articleCategory: 'Regular', imageUrl: '', isActive: true, status: 2, collaborators: [] };
+    form: any = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, collaborators: [] };
 
     ngOnInit() { 
         this.loadNews(); 
@@ -61,7 +67,7 @@ export class AdminNews implements OnInit {
 
     openForm() {
         this.editingId.set(null);
-        this.form = { title: '', content: '', articleCategory: 'Regular', imageUrl: '', isActive: true, status: 2, collaborators: [] };
+        this.form = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, collaborators: [] };
         this.showForm.set(true);
     }
 
@@ -71,7 +77,10 @@ export class AdminNews implements OnInit {
             title: post.title,
             content: post.content,
             articleCategory: post.articleCategory,
+            postType: post.postType || 'News',
             imageUrl: post.imageUrl || '',
+            attachmentUrl: post.attachmentUrl || '',
+            attachmentFileName: post.attachmentFileName || '',
             isActive: post.isActive,
             status: post.status ?? 2,
             collaborators: post.collaborators || []
@@ -96,6 +105,38 @@ export class AdminNews implements OnInit {
                 this.uploadingImage.set(false);
             }
         });
+    }
+
+    onDocumentSelect(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+
+        const error = validateUploadFile(file, 'pdf');
+        if (error) {
+            this.notify.error(error);
+            input.value = '';
+            return;
+        }
+
+        this.uploadingDocument.set(true);
+        this.newsService.uploadDocument(file).subscribe({
+            next: (res) => {
+                this.form.attachmentUrl = res.url;
+                this.form.attachmentFileName = res.fileName;
+                this.notify.success('Document uploaded successfully');
+                this.uploadingDocument.set(false);
+            },
+            error: () => {
+                this.notify.error('Document upload failed');
+                this.uploadingDocument.set(false);
+            }
+        });
+    }
+
+    removeDocument() {
+        this.form.attachmentUrl = '';
+        this.form.attachmentFileName = '';
     }
 
     cancelForm() {

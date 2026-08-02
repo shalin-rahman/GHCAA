@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/widgets/glass_container.dart';
@@ -122,7 +123,18 @@ class NewsDetailsScreen extends ConsumerWidget {
                             child: Text(article['summary'], style: const TextStyle(color: AppTheme.royalGold, fontSize: 14, fontStyle: FontStyle.italic, height: 1.6)),
                           ),
                        Text(article['content'] ?? 'No article content found.', style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.8)),
-                       
+                       if ((article['attachmentUrl'] ?? '').toString().isNotEmpty)
+                         Padding(
+                           padding: const EdgeInsets.only(top: 24),
+                           child: OutlinedButton.icon(
+                             onPressed: () => launchUrl(
+                               Uri.parse(AppConfig.resolveImageUrl(article['attachmentUrl']) ?? article['attachmentUrl'].toString()),
+                               mode: LaunchMode.externalApplication,
+                             ),
+                             icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                             label: Text(article['attachmentFileName']?.toString() ?? 'Download attachment'),
+                           ),
+                         ),
                      ],
                    )
                 ),

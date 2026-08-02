@@ -23,8 +23,16 @@ namespace GHCAA.Domain.Models
 
         public DateTime PublishDate { get; set; } = DateTime.UtcNow;
 
+        public PostType PostType { get; set; } = PostType.News;
+
         public bool IsActive { get; set; } = true;
         public string? ImageUrl { get; set; }
+
+        public string? AttachmentUrl { get; set; }
+
+        [MaxLength(260)]
+        public string? AttachmentFileName { get; set; }
+
         public int AuthorId { get; set; }
 
         public DateTime? LastModified { get; set; }

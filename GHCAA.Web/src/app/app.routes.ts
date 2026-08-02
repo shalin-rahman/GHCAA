@@ -240,6 +240,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./admin/polls/polls.component').then(m => m.AdminPolls)
             },
             {
+                path: 'site-content',
+                loadComponent: () => import('./admin/site-content/site-content').then(m => m.AdminSiteContent)
+            },
+            {
                 path: 'org-config',
                 loadComponent: () => import('./admin/org-config/org-config').then(m => m.AdminOrgConfig),
                 canActivate: [superAdminGuard]
