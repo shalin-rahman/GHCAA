@@ -21,7 +21,7 @@
     "Id": 3,
     "Key": "about-logo",
     "Group": "about",
-    "Title": "Logo &amp; Flag",
+    "Title": "Logo & Flag",
     "BodyHtml": "<p>Every element of the Association's logo carries meaning:</p><ul><li><strong>Historic building</strong> &ndash; the college and its heritage</li><li><strong>Open book</strong> &ndash; knowledge and learning</li><li><strong>Torch</strong> &ndash; enlightenment and guidance</li><li><strong>Mortarboard</strong> &ndash; academic achievement</li><li><strong>Handshake</strong> &ndash; fellowship and mutual support among alumni</li><li><strong>Red and gold border, &ldquo;Est. 2025&rdquo;</strong> &ndash; the founding of the Association</li></ul><p>The Association's flag is white, signifying peace, harmony, non-violence and purity.</p><p>Use of the Association's name, logo, flag or other branding requires prior permission from the Executive Committee.</p>",
     "DisplayOrder": 3,
     "IsActive": true
@@ -30,7 +30,7 @@
     "Id": 4,
     "Key": "about-objectives",
     "Group": "about",
-    "Title": "Purpose &amp; Objectives",
+    "Title": "Purpose & Objectives",
     "BodyHtml": "<ul><li>To build and maintain a lasting bond among the alumni of Govt. Haraganga College.</li><li>To preserve and promote the heritage, history and traditions of the College.</li><li>To support the academic development of current students of the College.</li><li>To provide mentorship, career guidance and networking opportunities to students and alumni.</li><li>To assist alumni and students facing financial hardship through scholarships and welfare support.</li><li>To organise educational, cultural, social and sporting activities.</li><li>To encourage philanthropic and community service initiatives.</li><li>To strengthen cooperation between the Association, the College administration and its teachers.</li><li>To maintain an accurate register of alumni and facilitate communication among them.</li><li>To uphold transparency, accountability and good governance within the Association.</li><li>To undertake any other lawful activity consistent with these objectives.</li></ul>",
     "DisplayOrder": 4,
     "IsActive": true

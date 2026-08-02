@@ -58,7 +58,7 @@ export class News implements OnInit {
       this.applyFilter(type === 'Notice' || type === 'News' ? type : '');
     });
 
-    this.newsService.getNews().subscribe({
+    this.newsService.getNews(undefined, true).subscribe({
       next: (data) => {
         this.news.set(data);
         this.loading.set(false);
