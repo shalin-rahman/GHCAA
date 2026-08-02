@@ -148,13 +148,13 @@
                     @if (isEditing()) {
                     <div
                         class="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity pointer-events-none">
-                        📷</div>
+                        <app-icon name="camera" [size]="16"></app-icon></div>
                     }
                 </div>
                 <input #photoInput type="file" accept="image/jpeg,image/png,image/webp"
                     (change)="onAdminPhotoSelected($event)" class="hidden">
                 @if (isEditing() && photoPreview()) {
-                <button class="btn btn-accent btn-sm ml-3" (click)="uploadMemberPhoto()">💾 Save Photo</button>
+                <button class="btn btn-accent btn-sm ml-3" (click)="uploadMemberPhoto()"><app-icon name="save" [size]="14"></app-icon> Save Photo</button>
                 }
                 <div class="header-info">
                     @if (isEditing()) {
@@ -178,19 +178,19 @@
                     } @else if (selectedMember()?.signaturePath) {
                         <img [src]="getImageUrl(selectedMember().signaturePath)" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature" appImgFallback>
                     } @else {
-                        <div class="h-12 w-24 border border-dashed border-white/20 rounded-md flex items-center justify-center text-lg">🖋️</div>
+                        <div class="h-12 w-24 border border-dashed border-white/20 rounded-md flex items-center justify-center text-lg"><app-icon name="pen" [size]="18"></app-icon></div>
                     }
                     @if (isEditing()) {
-                        <div class="absolute inset-0 bg-black/50 rounded-md opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity pointer-events-none">🖊️</div>
+                        <div class="absolute inset-0 bg-black/50 rounded-md opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity pointer-events-none"><app-icon name="pen" [size]="14"></app-icon></div>
                     }
                     <input #signatureInput type="file" accept="image/jpeg,image/png,image/webp" (change)="onAdminSignatureSelected($event)" class="hidden">
                 </div>
                 @if (isEditing() && signaturePreview()) {
-                    <button class="btn btn-accent btn-xs" (click)="uploadMemberSignature()">💾 Save</button>
+                    <button class="btn btn-accent btn-xs" (click)="uploadMemberSignature()"><app-icon name="save" [size]="14"></app-icon> Save</button>
                 }
             </div>
 
-            <button (click)="closeDetail()" class="close-btn">✕</button>
+            <button (click)="closeDetail()" class="close-btn"><app-icon name="close" [size]="18"></app-icon></button>
         </div>
 
         <div class="modal-body">
@@ -478,7 +478,7 @@
                                 @if (isEditing()) {
                                 <button
                                     class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
-                                    (click)="removeAcademic($index)" type="button">✕ Remove</button>
+                                    (click)="removeAcademic($index)" type="button"><app-icon name="close" [size]="12"></app-icon> Remove</button>
                                 }
                             </div>
                             <div class="p-4">
@@ -543,7 +543,7 @@
                                 @if (isEditing()) {
                                 <button
                                     class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
-                                    (click)="removeProfessional($index)" type="button">✕ Remove</button>
+                                    (click)="removeProfessional($index)" type="button"><app-icon name="close" [size]="12"></app-icon> Remove</button>
                                 }
                             </div>
                             <div class="p-4">
@@ -658,7 +658,7 @@
                                     </div>
                                 </div>
                                 <button class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
-                                    (click)="selectedMember().ecHistory.splice($index, 1)">✕ Remove</button>
+                                    (click)="selectedMember().ecHistory.splice($index, 1)"><app-icon name="close" [size]="12"></app-icon> Remove</button>
                             } @else {
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2">
@@ -677,7 +677,7 @@
                                 </div>
                                 <button
                                     class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
-                                    (click)="deleteECHistory(h.id)">✕ Delete</button>
+                                    (click)="deleteECHistory(h.id)"><app-icon name="close" [size]="12"></app-icon> Delete</button>
                             }
                         </div>
                         }
@@ -715,7 +715,7 @@
                             @if (nav.isSuperAdmin()) {
                             <button
                                 class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
-                                (click)="deletePayment(p.id)">✕ Delete</button>
+                                (click)="deletePayment(p.id)"><app-icon name="close" [size]="12"></app-icon> Delete</button>
                             }
                         </div>
                         }

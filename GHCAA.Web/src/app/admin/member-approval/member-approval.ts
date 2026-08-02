@@ -55,13 +55,16 @@ export class MemberApproval implements OnInit {
     this.loading.set(true);
     this.adminService.getPendingMembers().subscribe({
       next: (data) => {
-        // Robust mapping for case-insensitive property access
+        // 32.3: generic case-insensitive key normalization, was a hardcoded field whitelist
         const items = (data.items || []).map((obj: any) => {
           const result: any = {};
-          const props = ['id', 'fullName', 'email', 'mobileNo', 'membershipNumber', 'status', 'photoPath', 'category'];
-          props.forEach(p => {
-             const pascal = p.charAt(0).toUpperCase() + p.slice(1);
-             result[p] = obj[p] !== undefined ? obj[p] : (obj[pascal] !== undefined ? obj[pascal] : undefined);
+          Object.keys(obj || {}).forEach(key => {
+            const camelKey = key === key.toUpperCase()
+              ? key.toLowerCase()
+              : key.charAt(0).toLowerCase() + key.slice(1);
+            if (result[camelKey] === undefined) {
+              result[camelKey] = obj[key];
+            }
           });
           return result;
         });

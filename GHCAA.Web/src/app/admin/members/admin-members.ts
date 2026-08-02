@@ -17,11 +17,12 @@ import { ExportUtil } from '../../core/utils/export.util';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { toWireDate } from '../../core/utils/date.util';
+import { Icon } from '../../common/icon/icon';
 
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon],
   providers: [DatePipe],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'
@@ -224,13 +225,17 @@ export class AdminMembers implements OnInit {
 
     this.adminService.getMembers(page, this.pageSize(), query, status, cat, type, incArchived).subscribe({
       next: (res: any) => {
-        // Robust case-insensitive property mapping for the list items
+        // 32.3: generic case-insensitive key normalization — see openDetail() below for why
+        // a hardcoded field whitelist was the bug, not the fix.
         const mapping = (obj: any) => {
           const result: any = {};
-          const props = ['id', 'fullName', 'email', 'mobileNo', 'membershipNumber', 'membershipType', 'status', 'ghcLastCertificatePassingYear', 'category', 'photoPath'];
-          props.forEach(p => {
-            const pascal = p.charAt(0).toUpperCase() + p.slice(1);
-            result[p] = obj[p] !== undefined ? obj[p] : (obj[pascal] !== undefined ? obj[pascal] : (p === 'nid' ? obj['NID'] : undefined));
+          Object.keys(obj || {}).forEach(key => {
+            const camelKey = key === key.toUpperCase()
+              ? key.toLowerCase()
+              : key.charAt(0).toLowerCase() + key.slice(1);
+            if (result[camelKey] === undefined) {
+              result[camelKey] = obj[key];
+            }
           });
           return result;
         };
@@ -306,37 +311,25 @@ export class AdminMembers implements OnInit {
     this.loading.set(true);
     this.adminService.getMemberById(member.id).subscribe({
       next: (fullMember: any) => {
-        // Robust case-insensitive property mapping to handle both PascalCase (C#) and camelCase (JS)
-        // This addresses reports of values not loading correctly in the web app
+        // 32.3: generic case-insensitive key normalization (handles both PascalCase C# DTOs and
+        // camelCase JS) — was a hardcoded whitelist that silently dropped any unlisted flat field
+        // (designation, professionalSector, profileCompletionPercentage, etc.)
         const mapping = (obj: any) => {
           const result: any = {};
-          // Known properties from C# DTO and our TS interfaces
-          const props = [
-            'id', 'fullName', 'mobileNo', 'email', 'fatherName', 'motherName', 'dateOfBirth', 
-            'nid', 'gender', 'bloodGroup', 'presentAddress', 'permanentAddress', 
-            'emergencyContactName', 'emergencyContactRelation', 'emergencyContactPhone',
-            'membershipNumber', 'membershipType', 'category', 'status', 'photoPath', 'signaturePath',
-            'isVerified', 'contributionPoints', 'tShirtSize', 'isMobilePublic', 'isEmailPublic',
-            'isAddressPublic', 'isNIDPublic', 'isFamilyPublic', 'notifyEventCreation',
-            'notifyParticipationApproval', 'notifyRegistrationUpdate', 'notifyRelevantUpdates',
-            'certificatePath', 'paymentProofPath', 'ghcLastCertificatePassingYear'
-          ];
-          
-          props.forEach(p => {
-            // Case-insensitive lookup
-            const pascal = p.charAt(0).toUpperCase() + p.slice(1);
-            const value = obj[p] !== undefined ? obj[p] : (obj[pascal] !== undefined ? obj[pascal] : (p === 'nid' ? obj['NID'] : undefined));
-            result[p] = value;
+          Object.keys(obj || {}).forEach(key => {
+            const camelKey = key === key.toUpperCase()
+              ? key.toLowerCase()
+              : key.charAt(0).toLowerCase() + key.slice(1);
+            if (result[camelKey] === undefined) {
+              result[camelKey] = obj[key];
+            }
           });
 
-          // Handle special cases for NID and Passing Year if they didn't match
-          if (result.nid === undefined && obj['NID'] !== undefined) result.nid = obj['NID'];
-
-          // Copy nested objects directly if they exist
+          // Copy nested collections directly if they exist
           result.academicHistory = obj.academicHistory || obj.AcademicHistory || [];
           result.professionalHistory = obj.professionalHistory || obj.ProfessionalHistory || [];
           result.ecHistory = obj.ecHistory || obj.ECHistory || [];
-          
+
           return result;
         };
 

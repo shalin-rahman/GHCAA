@@ -10,11 +10,12 @@ import { DatePipe } from '@angular/common';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { toWireDate } from '../../core/utils/date.util';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { Icon } from '../../common/icon/icon';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective, Icon],
     providers: [DatePipe],
     templateUrl: './profile.html',
     styleUrl: './profile.scss'
@@ -62,21 +63,19 @@ export class Profile implements OnInit {
     // post-save re-sync did `this.profile = {...p}` on the RAW response, so PascalCase keys
     // and ISO dates leaked through and half the form fields rendered blank after saving.
     private applyProfileResponse(p: any) {
+        // 32.3: was a hardcoded ~30-field whitelist, which silently dropped any DTO field not
+        // explicitly listed (designation, professionalSector, profileCompletionPercentage, etc.)
+        // — replaced with a generic case-insensitive key normalization so every current and
+        // future flat DTO field survives.
         const mapping = (obj: any) => {
             const result: any = {};
-            const props = [
-                'id', 'fullName', 'mobileNo', 'email', 'fatherName', 'motherName', 'dateOfBirth',
-                'nid', 'gender', 'bloodGroup', 'presentAddress', 'permanentAddress',
-                'emergencyContactName', 'emergencyContactRelation', 'emergencyContactPhone',
-                'membershipNumber', 'membershipType', 'category', 'status', 'photoPath', 'signaturePath',
-                'isVerified', 'contributionPoints', 'tShirtSize', 'isMobilePublic', 'isEmailPublic',
-                'isAddressPublic', 'isNIDPublic', 'isFamilyPublic', 'notifyEventCreation',
-                'notifyParticipationApproval', 'notifyRegistrationUpdate', 'notifyRelevantUpdates',
-                'certificatePath', 'paymentProofPath'
-            ];
-            props.forEach(prop => {
-                const pascal = prop.charAt(0).toUpperCase() + prop.slice(1);
-                result[prop] = obj[prop] !== undefined ? obj[prop] : (obj[pascal] !== undefined ? obj[pascal] : (prop === 'nid' ? obj['NID'] : undefined));
+            Object.keys(obj || {}).forEach(key => {
+                const camelKey = key === key.toUpperCase()
+                    ? key.toLowerCase()
+                    : key.charAt(0).toLowerCase() + key.slice(1);
+                if (result[camelKey] === undefined) {
+                    result[camelKey] = obj[key];
+                }
             });
             result.academicHistory = obj.academicHistory || obj.AcademicHistory || [];
             result.professionalHistory = obj.professionalHistory || obj.ProfessionalHistory || [];

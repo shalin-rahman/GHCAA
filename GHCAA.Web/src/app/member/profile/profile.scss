@@ -48,9 +48,6 @@
 }
 
 .status-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--glass-border);
 }
@@ -119,28 +116,11 @@
         color: var(--text-muted);
     }
 
-    .remove-photo-btn {
+    .icon-btn {
         position: absolute;
         bottom: -5px;
         right: -5px;
-        background: var(--danger-color);
-        color: white;
-        border: none;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 14px;
-        box-shadow: var(--shadow-sm);
         z-index: 10;
-        
-        &:hover {
-            transform: scale(1.1);
-            background: var(--danger-color);
-        }
     }
 }
 

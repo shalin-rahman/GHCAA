@@ -66,119 +66,6 @@
         </div>
     </div>
 
-    <!-- EC History Section -->
-    <div class="glass-card mb-12 p-12">
-        <div class="flex justify-between items-center mb-6">
-            <h4 class="section-label !mb-0">Association Governance History</h4>
-            <span class="badge-info">Archive Record</span>
-        </div>
-        @if (profile.ecHistory && profile.ecHistory.length > 0) {
-        <div class="history-list">
-            @for (h of profile.ecHistory; track h.startDate) {
-            <div class="history-row" [class.current]="h.isCurrent && !h.endDate">
-                <div class="row-main">
-                    <span class="row-title">{{ getECPositionName(h.position) }}</span>
-                    <div class="row-sub">
-                        <span>{{ h.periodTitle }}</span>
-                        @if (h.changeReason) {
-                            <span class="separator">|</span>
-                            <span class="italic opacity-60">"{{ h.changeReason }}"</span>
-                        }
-                    </div>
-                </div>
-                <div class="row-period">
-                    {{ h.startDate | date:'MMM yyyy' }} - {{ h.endDate ? (h.endDate | date:'MMM yyyy') : (h.isCurrent ? 'Present' : 'Ended') }}
-                </div>
-            </div>
-            }
-        </div>
-        } @else {
-        <div class="empty-placeholder">
-            <span>🏛️</span>
-            <p>You haven't held any positions in the Executive Committee yet. Participation in elections or nominations will appear here.</p>
-        </div>
-        }
-    </div>
-
-    <!-- Education History Section -->
-    <div class="glass-card mb-12 p-12">
-        <h4 class="section-label">Educational Timeline</h4>
-        @if (profile.academicHistory && profile.academicHistory.length > 0) {
-        <div class="history-list">
-            @for (h of profile.academicHistory; track $index) {
-            <div class="history-row" [class.primary]="h.isGHC">
-                <div class="row-main">
-                    <span class="row-title">{{ h.degree }} {{ getMajorDisplay(h.degree, h.subject) }}</span>
-                    <div class="row-sub">
-                        <span>{{ h.institutionName }}</span>
-                        @if (h.isGHC) { <span class="badge-info !text-[9px]">Primary Registry</span> }
-                    </div>
-                </div>
-                <div class="row-period">
-                    {{ h.admissionYear ? h.admissionYear + ' - ' : '' }}{{ h.passingYear }}
-                </div>
-                <div class="row-actions">
-                    <button type="button" (click)="removeAcademicRecord($index)" class="btn btn-secondary btn-sm text-danger-color !border-none !bg-transparent" title="Remove Record">
-                        🗑️
-                    </button>
-                </div>
-            </div>
-            }
-        </div>
-        
-        } @else {
-        <div class="empty-placeholder">
-            <span>🎓</span>
-            <p>Your educational journey is currently empty. Add your academic milestones below.</p>
-        </div>
-        }
-    </div>
-
-    <!-- Career History Section -->
-    <div class="glass-card mb-12 p-12">
-        <h4 class="section-label">Professional Experience</h4>
-        @if ((profile.professionalHistory && profile.professionalHistory.length > 0) || profile.designation) {
-        <div class="history-list">
-            <!-- Professional Snapshot (from Main Profile) -->
-                <div class="history-row primary current">
-                    <div class="row-main">
-                        <span class="row-title">{{ profile.designation }}</span>
-                        <div class="row-sub">
-                            @if (profile.professionalSector) { <span>{{ profile.professionalSector }}</span> }
-                            <span class="badge-info !text-[9px]">Primary Occupation</span>
-                        </div>
-                    </div>
-                    <div class="row-period">Verified Active</div>
-                </div>
-
-            @for (w of profile.professionalHistory; track $index) {
-            <div class="history-row" [class.current]="w.isCurrent">
-                <div class="row-main">
-                    <span class="row-title">{{ w.designation }}</span>
-                    <div class="row-sub">
-                        <span>{{ w.organizationName }}</span>
-                        @if (w.location) { <span class="separator">|</span> <span class="opacity-60">📍 {{ w.location }}</span> }
-                    </div>
-                </div>
-                <div class="row-period">
-                    {{ w.startDate | date:'MMM yyyy' }} - {{ w.isCurrent ? 'Present' : (w.endDate | date:'MMM yyyy') }}
-                </div>
-                <div class="row-actions">
-                    <button type="button" (click)="removeProfessionalRecord($index)" class="btn btn-secondary btn-sm text-danger-color !border-none !bg-transparent" title="Remove Experience">
-                        🗑️
-                    </button>
-                </div>
-            </div>
-            }
-        </div>
-        } @else {
-        <div class="empty-placeholder">
-            <span>💼</span>
-            <p>Professional history not found. Keeping your career up to date helps with networking within the alumni portal.</p>
-        </div>
-        }
-    </div>
-
     <!-- Photo Upload Card -->
     <div class="glass-card mb-12 p-12" id="section-identity-photo">
         <h4 class="section-label mb-6">Profile Photo</h4>
@@ -195,15 +82,15 @@
                 }
                 
                 @if (profile.photoPath || photoPreview()) {
-                    <button type="button" (click)="removePhoto()" class="remove-photo-btn" title="Remove Photo">
-                        🗑️
+                    <button type="button" (click)="removePhoto()" class="icon-btn delete" title="Remove Photo">
+                        <app-icon name="trash" [size]="16"></app-icon>
                     </button>
                 }
             </div>
             <div class="flex flex-col gap-4">
                 <p class="text-sm opacity-60">Upload a professional photo (JPG, PNG, WebP — max 5MB)</p>
                 <label class="btn btn-secondary cursor-pointer !mb-0">
-                    📷 Choose New Photo
+                    <app-icon name="camera" [size]="16"></app-icon> Choose New Photo
                     <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhotoSelected($event)" class="hidden">
                 </label>
             </div>
@@ -226,15 +113,15 @@
                 }
                 
                 @if (profile.signaturePath || signaturePreview()) {
-                    <button type="button" (click)="removeSignature()" class="remove-photo-btn" title="Remove Signature">
-                        🗑️
+                    <button type="button" (click)="removeSignature()" class="icon-btn delete" title="Remove Signature">
+                        <app-icon name="trash" [size]="16"></app-icon>
                     </button>
                 }
             </div>
             <div class="flex flex-col gap-4">
                 <p class="text-sm opacity-60">Upload your handwritten signature (JPG, PNG, WebP — max 2MB)</p>
                 <label class="btn btn-secondary cursor-pointer !mb-0">
-                    🖊️ Choose Signature
+                    <app-icon name="pen" [size]="16"></app-icon> Choose Signature
                     <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onSignatureSelected($event)" class="hidden">
                 </label>
             </div>
@@ -247,7 +134,7 @@
             <!-- Section 1: Personal Details -->
             <div class="section-block">
                 <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Secure Identity Details</h4>
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Personal Details</h4>
                 </div>
                 <div class="form-grid mb-12">
                     <div class="form-group">
@@ -330,7 +217,7 @@
                     @for (item of profile.academicHistory; track $index) {
                     <div class="history-item relative p-10 glass-card mb-4">
                         <button type="button" (click)="removeAcademicRecord($index)" class="absolute top-6 right-6 btn btn-secondary btn-sm text-danger-color border-danger-color">
-                             Remove 🗑️
+                             Remove <app-icon name="trash" [size]="14"></app-icon>
                         </button>
                         
                         <div class="form-grid">
@@ -424,7 +311,7 @@
                     @for (work of profile.professionalHistory; track $index) {
                     <div class="history-item relative p-10 glass-card mb-4">
                         <button type="button" (click)="removeProfessionalRecord($index)" class="absolute top-6 right-6 btn btn-secondary btn-sm text-danger-color border-danger-color">
-                             Remove 🗑️
+                             Remove <app-icon name="trash" [size]="14"></app-icon>
                         </button>
                         
                         <div class="form-grid">
@@ -484,7 +371,7 @@
             <!-- Section 7: Emergency -->
             <div class="section-block mt-12">
                 <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Emergency Protocol Contact</h4>
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Emergency Contact Details</h4>
                 </div>
                 <div class="form-grid mb-4">
                     <div class="form-group full">
@@ -493,7 +380,7 @@
                             #ecnM="ngModel" [class.border-red-500]="ecnM.invalid && ecnM.touched">
                     </div>
                     <div class="form-group">
-                        <label>Consanguinity / Relation *</label>
+                        <label>Relation *</label>
                         <input type="text" [(ngModel)]="profile.emergencyContactRelation" name="ecRel" required maxlength="100"
                             #ecrM="ngModel" [class.border-red-500]="ecrM.invalid && ecrM.touched">
                     </div>
@@ -580,11 +467,124 @@
                     @if (saving()) {
                         <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> Synchronizing Metadata...
                     } @else {
-                        <span class="icon">🚀</span> Update Registry Information
+                        <app-icon name="rocket" [size]="18" class="icon"></app-icon> Update Registry Information
                     }
                 </button>
             </div>
         </form>
+    </div>
+
+    <!-- EC History Section -->
+    <div class="glass-card mb-12 p-12">
+        <div class="flex justify-between items-center mb-6">
+            <h4 class="section-label !mb-0">Association Governance History</h4>
+            <span class="badge-info">Archive Record</span>
+        </div>
+        @if (profile.ecHistory && profile.ecHistory.length > 0) {
+        <div class="history-list">
+            @for (h of profile.ecHistory; track h.startDate) {
+            <div class="history-row" [class.current]="h.isCurrent && !h.endDate">
+                <div class="row-main">
+                    <span class="row-title">{{ getECPositionName(h.position) }}</span>
+                    <div class="row-sub">
+                        <span>{{ h.periodTitle }}</span>
+                        @if (h.changeReason) {
+                            <span class="separator">|</span>
+                            <span class="italic opacity-60">"{{ h.changeReason }}"</span>
+                        }
+                    </div>
+                </div>
+                <div class="row-period">
+                    {{ h.startDate | date:'MMM yyyy' }} - {{ h.endDate ? (h.endDate | date:'MMM yyyy') : (h.isCurrent ? 'Present' : 'Ended') }}
+                </div>
+            </div>
+            }
+        </div>
+        } @else {
+        <div class="empty-placeholder compact">
+            <span>🏛️</span>
+            <p>You haven't held any positions in the Executive Committee yet. Participation in elections or nominations will appear here.</p>
+        </div>
+        }
+    </div>
+
+    <!-- Education History Section -->
+    <div class="glass-card mb-12 p-12">
+        <h4 class="section-label">Educational Timeline</h4>
+        @if (profile.academicHistory && profile.academicHistory.length > 0) {
+        <div class="history-list">
+            @for (h of profile.academicHistory; track $index) {
+            <div class="history-row" [class.primary]="h.isGHC">
+                <div class="row-main">
+                    <span class="row-title">{{ h.degree }} {{ getMajorDisplay(h.degree, h.subject) }}</span>
+                    <div class="row-sub">
+                        <span>{{ h.institutionName }}</span>
+                        @if (h.isGHC) { <span class="badge-info !text-[9px]">Primary Registry</span> }
+                    </div>
+                </div>
+                <div class="row-period">
+                    {{ h.admissionYear ? h.admissionYear + ' - ' : '' }}{{ h.passingYear }}
+                </div>
+                <div class="row-actions">
+                    <button type="button" (click)="removeAcademicRecord($index)" class="btn btn-secondary btn-sm text-danger-color !border-none !bg-transparent" title="Remove Record">
+                        <app-icon name="trash" [size]="16"></app-icon>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+
+        } @else {
+        <div class="empty-placeholder compact">
+            <span>🎓</span>
+            <p>Your educational journey is currently empty. Add your academic milestones below.</p>
+        </div>
+        }
+    </div>
+
+    <!-- Career History Section -->
+    <div class="glass-card mb-12 p-12">
+        <h4 class="section-label">Professional Experience</h4>
+        @if ((profile.professionalHistory && profile.professionalHistory.length > 0) || profile.designation) {
+        <div class="history-list">
+            <!-- Professional Snapshot (from Main Profile) -->
+                <div class="history-row primary current">
+                    <div class="row-main">
+                        <span class="row-title">{{ profile.designation }}</span>
+                        <div class="row-sub">
+                            @if (profile.professionalSector) { <span>{{ profile.professionalSector }}</span> }
+                            <span class="badge-info !text-[9px]">Primary Occupation</span>
+                        </div>
+                    </div>
+                    <div class="row-period">Verified Active</div>
+                </div>
+
+            @for (w of profile.professionalHistory; track $index) {
+            <div class="history-row" [class.current]="w.isCurrent">
+                <div class="row-main">
+                    <span class="row-title">{{ w.designation }}</span>
+                    <div class="row-sub">
+                        <span>{{ w.organizationName }}</span>
+                        @if (w.location) { <span class="separator">|</span> <span class="opacity-60">📍 {{ w.location }}</span> }
+                    </div>
+                </div>
+                <div class="row-period">
+                    {{ w.startDate | date:'MMM yyyy' }} - {{ w.isCurrent ? 'Present' : (w.endDate | date:'MMM yyyy') }}
+                </div>
+                <div class="row-actions">
+                    <button type="button" (click)="removeProfessionalRecord($index)" class="btn btn-secondary btn-sm text-danger-color !border-none !bg-transparent" title="Remove Experience">
+                        <app-icon name="trash" [size]="16"></app-icon>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+        } @else {
+        <div class="empty-placeholder compact">
+            <span>💼</span>
+            <p>Professional history not found. Keeping your career up to date helps with networking within the alumni portal.</p>
+        </div>
+        }
     </div>
 
     <!-- Reference Datalists -->
