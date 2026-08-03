@@ -12,17 +12,8 @@
     gap: 1.5rem;
 }
 
-.theme-toggle {
-    font-size: 1.25rem;
-    border: none;
-    background: none;
-    cursor: pointer;
-    transition: 0.3s;
-
-    &:hover {
-        transform: rotate(15deg);
-    }
-}
+/* `.theme-toggle` now lives with <app-theme-toggle> (common/theme-toggle) — it had to
+   move with the markup, since encapsulated parent styles don't reach a child template. */
 
 .user-profile {
     display: flex;
@@ -93,7 +84,4 @@
         border-left: none;
     }
 
-    .theme-toggle {
-        font-size: 1rem;
-    }
 }

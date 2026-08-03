@@ -8,11 +8,12 @@ import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { ThemeToggle } from '../../common/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, AppFooter, CommonModule, ImgFallbackDirective],
+  imports: [RouterOutlet, RouterLink, AppFooter, CommonModule, ImgFallbackDirective, ThemeToggle],
   templateUrl: './public-layout.html',
   styleUrl: './public-layout.scss'
 })

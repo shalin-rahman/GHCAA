@@ -1,7 +1,4 @@
-<button class="touch-target btn-icon theme-toggle" (click)="theme.toggleTheme()"
-    [title]="'Toggle Dark/Light Mode'">
-    <app-icon [name]="theme.theme() === 'light' ? 'theme-dark' : 'theme-light'"></app-icon>
-</button>
+<app-theme-toggle></app-theme-toggle>
 <div class="user-profile">
     @if (profilePhotoUrl()) {
     <img [src]="profilePhotoUrl()" alt="Profile" class="avatar avatar-img"

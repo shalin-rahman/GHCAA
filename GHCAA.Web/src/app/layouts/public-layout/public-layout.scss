@@ -303,6 +303,27 @@
     }
 }
 
+/* Last item in .nav-links. On mobile the panel is a centred column, so the lone icon gets
+   the same vertical rhythm as a .nav-link row; on desktop it's just another flex item.
+   The nav bar is dark in both themes, hence the explicit white-ish colour. */
+.nav-theme-toggle {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 0.85rem 0 0;
+    color: #fff;
+
+    &:hover {
+        color: var(--accent-text);
+    }
+
+    @media (min-width: 768px) {
+        width: auto;
+        padding: 0;
+        color: rgba(255, 255, 255, 0.85);
+    }
+}
+
 @keyframes slideDownNav {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }

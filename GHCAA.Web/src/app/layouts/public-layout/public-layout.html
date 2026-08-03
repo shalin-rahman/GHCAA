@@ -29,7 +29,7 @@
             <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo" class="mini-logo" appImgFallback="/assets/logo.png">
             <div class="logo-text">
                 <span class="abbr">{{ orgConfigService.config()?.branding?.shortName }}</span>
-                <span class="full hide-mobile hidden xl:block">{{ orgConfigService.config()?.branding?.fullName }}</span>
+                <span class="full hide-mobile">{{ orgConfigService.config()?.branding?.fullName }}</span>
             </div>
         </div>
 
@@ -52,6 +52,9 @@
             <a *ngIf="orgConfigService.isFeatureEnabled('enableJobHub')" routerLink="/jobs" class="nav-link">Jobs</a>
             <a routerLink="/contact" class="nav-link">Contact</a>
             <a routerLink="/login" class="nav-link">Login</a>
+            <!-- The theme choice persists globally, so without a switch here a visitor who
+                 once picked light mode in the portal had no way back on the public site. -->
+            <app-theme-toggle class="nav-theme-toggle"></app-theme-toggle>
         </div>
     </div>
 </nav>

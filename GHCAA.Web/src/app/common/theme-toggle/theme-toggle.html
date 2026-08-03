@@ -1,0 +1,4 @@
+<button type="button" class="touch-target btn-icon theme-toggle" (click)="theme.toggleTheme()"
+    [attr.aria-label]="label()" [title]="label()">
+    <app-icon [name]="theme.theme() === 'light' ? 'theme-dark' : 'theme-light'"></app-icon>
+</button>

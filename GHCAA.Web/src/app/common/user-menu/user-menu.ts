@@ -1,9 +1,9 @@
 import { Component, Input, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { ThemeService } from '../../core/services/theme.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { Icon } from '../icon/icon';
+import { ThemeToggle } from '../theme-toggle/theme-toggle';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 /**
@@ -13,7 +13,10 @@ import { ImgFallbackDirective } from '../directives/img-fallback.directive';
  * (only a plain username + role-badge text pair) — this component centralizes that
  * markup so both layouts render identically and stay in sync going forward.
  *
- * Reuses the exact `.theme-toggle` / `.user-profile` / `.avatar` / `.avatar-img` /
+ * The theme switch itself now lives in the shared <app-theme-toggle> so the public nav
+ * can render it too.
+ *
+ * Reuses the exact `.user-profile` / `.avatar` / `.avatar-img` /
  * `.user-details` / `.username` / `.role` / `.logout-toggle` classes that are already
  * styled globally in styles.scss (via portal-layout's `.right-section` scope, which
  * applies wherever this component is placed) — no new CSS required.
@@ -21,14 +24,13 @@ import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 @Component({
   selector: 'app-user-menu',
   standalone: true,
-  imports: [Icon, ImgFallbackDirective, RouterLink],
+  imports: [Icon, ImgFallbackDirective, RouterLink, ThemeToggle],
   templateUrl: './user-menu.html',
   styleUrl: './user-menu.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserMenu {
   auth = inject(AuthService);
-  theme = inject(ThemeService);
   private profileService = inject(ProfileService);
 
   /** Caller-computed role/label text shown under the username (e.g. "Administrator", "Alumni Member", or the raw role). */
