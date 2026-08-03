@@ -104,13 +104,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: AppTheme.spaceHUGE),
                 // Branded Logo Integration
                 Center(
-                  child: Container(
+                  // Transparent crest, no black disc or ring behind it (matches web).
+                  child: Padding(
                     padding: const EdgeInsets.all(AppTheme.spaceS),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.1)),
-                    ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(AppTheme.radiusXL),
                       child: Image.asset(

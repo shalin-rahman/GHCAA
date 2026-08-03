@@ -29,12 +29,10 @@
 .logo {
     height: 40px;
     width: 40px;
-    border-radius: 50%;
     object-fit: contain;
     /* transparent so the crest blends with the surface (dark sidebar → dark, light → light);
        PNG asset is transparent — a white disc here would show a hard medallion in dark theme */
     background: transparent;
-    border: 1.5px solid var(--accent-color);
 }
 
 .brand-text {

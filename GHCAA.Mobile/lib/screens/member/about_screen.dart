@@ -27,7 +27,7 @@ class AboutScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppTheme.radiusXL + 16), // 24 + 16 = 40
                   border: Border.all(
                       color: AppTheme.royalGold.withValues(alpha: 0.3), width: 2),
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: Colors.transparent,
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppTheme.radiusXL + 8), // 24 + 8 = 32

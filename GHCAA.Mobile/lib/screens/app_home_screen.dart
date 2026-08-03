@@ -120,23 +120,13 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
                 Center(
                   child: Hero(
                     tag: 'app_logo',
-                    child: Container(
+                    // No disc, ring or glow: assets/logo.png is a transparent crest, so it
+                    // sits directly on the backdrop the same way it does on web.
+                    child: SizedBox(
                       width: 130,
                       height: 130,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppTheme.royalGold, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.royalGold.withValues(alpha: 0.3),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: ClipOval(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
                         child: Image.asset(
                           'assets/logo.png', 
                           fit: BoxFit.contain,

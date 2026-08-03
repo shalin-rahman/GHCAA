@@ -68,7 +68,7 @@
                 <span class="cat-tag">{{ getArticleCategoryLabel(post.articleCategory) }}</span>
                 <button class="close-btn" (click)="selectedPost.set(null)">✕ Close</button>
             </div>
-            <img [src]="post.imageUrl || '/assets/logo.jpg'" class="detail-img mb-8" *ngIf="post.imageUrl" appImgFallback="/assets/logo.jpg">
+            <img [src]="post.imageUrl || '/assets/logo.png'" class="detail-img mb-8" *ngIf="post.imageUrl" appImgFallback="/assets/logo.png">
             <div class="detail-meta mb-4">
                 <span class="date">{{ post.createdAt | date:'fullDate' }}</span>
                 <span class="author ml-4">By <strong>{{ post.authorName }}</strong></span>

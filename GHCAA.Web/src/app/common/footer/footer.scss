@@ -19,11 +19,10 @@
 .footer-logo {
     height: 64px;
     width: 64px;
-    border-radius: 50%;
     object-fit: contain;
-    background: white;
-    border: 2px solid var(--accent-color);
-    box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
+    /* The crest PNG is transparent; a white disc behind it printed a hard medallion on the
+       dark footer, and the gold ring doubled up on the crest's own border. */
+    background: transparent;
 }
 
 .motto {
@@ -121,9 +120,7 @@
     .footer-bot-logo {
         height: 28px;
         width: 28px;
-        border-radius: 50%;
-        background: white;
-        border: 1px solid var(--accent-color);
+        background: transparent;
         object-fit: contain;
     }
 }

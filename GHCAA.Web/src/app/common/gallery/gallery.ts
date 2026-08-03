@@ -103,7 +103,7 @@ export class Gallery implements OnInit {
   // Runtime 404s (file missing on server / ephemeral disk) are now handled centrally by
   // the `appImgFallback` directive (30.9) on the template's <img>.
   validImg(path?: string | null): string {
-    return path && (path.startsWith('/') || path.startsWith('http')) ? path : '/assets/logo.jpg';
+    return path && (path.startsWith('/') || path.startsWith('http')) ? path : '/assets/logo.png';
   }
 }
 

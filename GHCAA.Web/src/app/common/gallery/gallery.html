@@ -110,7 +110,7 @@
             <div class="photo-grid-immersive">
                 @for (p of gallery?.photos; track p.id) {
                 <div class="photo-reveal">
-                    <img [src]="validImg(p.photoPath)" [alt]="gallery?.title" appImgFallback="/assets/logo.jpg" (click)="viewFull(p.photoPath)">
+                    <img [src]="validImg(p.photoPath)" [alt]="gallery?.title" appImgFallback="/assets/logo.png" (click)="viewFull(p.photoPath)">
                 </div>
                 }
             </div>

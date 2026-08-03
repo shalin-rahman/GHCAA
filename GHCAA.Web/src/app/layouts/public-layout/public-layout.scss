@@ -146,14 +146,13 @@
     cursor: pointer;
     flex-shrink: 0;
 
+    /* No gold ring or glow — the crest is a transparent PNG and reads as itself against
+       the nav. Same treatment in portal-layout, admin-layout, footer and the landing hero. */
     .mini-logo {
         height: 42px;
         max-width: 42px;
         object-fit: contain;
-        border-radius: 50%;
-        border: 1.5px solid var(--accent-color);
         background: transparent;
-        box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
     }
 }
 

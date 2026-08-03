@@ -3,9 +3,18 @@
     "Id": 1,
     "Key": "about-origin",
     "Group": "about",
-    "Title": "Our Origin",
-    "BodyHtml": "<p>Govt. Haraganga College, Munshiganj, has stood as a centre of learning since 1938, founded through the initiative of Ashutosh Ganguly with the support of Sher-e-Bangla A. K. Fazlul Huq. Generations of students have passed through its halls and carried its name into public service, business, academia and the arts.</p><p>The Govt. Haraganga College Alumni Association exists to keep that lineage connected.</p>",
+    "Title": "The College and Its Origin",
+    "BodyHtml": "<p>Govt. Haraganga College opened its doors on <strong>18 December 1938</strong>, at a time when opportunities for higher education outside Dhaka were scarce. It began with a single act of generosity: <strong>Ashutosh Ganguly</strong> of Tongibari donated one lakh rupees &mdash; a considerable fortune then &mdash; so that the young people of Bikrampur would not have to leave home to continue their studies.</p><p>He was not alone in the effort. The local advocate <strong>Satish Chandra Bhattacharya</strong> rallied support among Munshiganj's educationists, and <strong>A. H. M. Wajir Ali</strong>, then sub-divisional magistrate and later a sub-divisional judge &mdash; nephew and son-in-law of Sher-e-Bangla A. K. Fazlul Huq &mdash; lent the project the official backing it needed to take root.</p><p>Nearly nine decades later the college still stands on College Road in Munshiganj Sadar, and the reason it was founded has not changed: to put a serious education within reach of the people of this region.</p>",
     "DisplayOrder": 1,
+    "IsActive": true
+  },
+  {
+    "Id": 6,
+    "Key": "about-college-today",
+    "Group": "about",
+    "Title": "The College Today",
+    "BodyHtml": "<p>Govt. Haraganga College is a public institution in Munshiganj Sadar teaching at both higher-secondary and degree level, with <strong>16 honours departments</strong> and a faculty of more than <strong>80 teachers</strong>. Beyond the classroom, students run a range of clubs covering culture, sport, debate and community service.</p><p>In its 87 years the college has educated over <strong>one hundred thousand students</strong>, who have gone on into public service, medicine, engineering, teaching, business, journalism and the arts, at home and abroad. It is that shared history &mdash; not a shared graduating year &mdash; that this Association exists to keep alive.</p><ul><li><strong>Campus</strong> &mdash; College Road, Munshiganj Sadar, Munshiganj-1500, Bangladesh</li><li><strong>EIIN</strong> &mdash; 111160 &nbsp;&middot;&nbsp; <strong>College Code</strong> &mdash; 5701</li><li><strong>Principal</strong> &mdash; Professor Md. Kamaruzzaman Khan</li><li><strong>College website</strong> &mdash; <a href=\"https://www.haragangacollege.edu.bd/en\" target=\"_blank\" rel=\"noopener noreferrer\">haragangacollege.edu.bd</a></li></ul><p><em>College facts are drawn from the institution's official website. For admissions, results, routines and academic notices, please refer to the college directly &mdash; this Association is an independent alumni body and does not administer college affairs.</em></p>",
+    "DisplayOrder": 2,
     "IsActive": true
   },
   {
@@ -13,8 +22,8 @@
     "Key": "about-association",
     "Group": "about",
     "Title": "The Association",
-    "BodyHtml": "<p>The organisation is named the <strong>Govt. Haraganga College Alumni Association (GHCAA)</strong>. Its members are known as <strong>HARAGANGIAN</strong>. The Association was founded on <strong>29 November 2025</strong>.</p><p>The Association is non-political, non-religious, inclusive and non-profit. It is a patron of education and culture and philanthropic in purpose. It does not affiliate with any political party or religious body, and welcomes all alumni without distinction.</p><p><strong>Motto:</strong> Sharing Heritage, Aligning Lives, Integrating Networks<br/><em>&#2405;&#2469;&#2495;&#2489;&#2509;&#2479;&#2503;&#2480; &#2476;&#2495;&#2472;&#2495;&#2478;&#2479;&#2492;, &#2460;&#2496;&#2476;&#2472;&#2503;&#2480; &#2488;&#2478;&#2472;&#2509;&#2476;&#2479;&#2492; &#2451; &#2488;&#2434;&#2489;&#2468;&#2495;&#2480; &#2488;&#2503;&#2468;&#2497;&#2476;&#2472;&#2509;&#2471;&#2472;</em></p>",
-    "DisplayOrder": 2,
+    "BodyHtml": "<p>The <strong>Govt. Haraganga College Alumni Association (GHCAA)</strong> was founded on <strong>29 November 2025</strong> to give the college's graduates a single place to find one another. Its members are known as <strong>HARAGANGIAN</strong>.</p><p>The Association is non-political, non-religious and not-for-profit. It takes no side in party politics and aligns with no religious body; membership is open to every former student of the college without distinction. Its work is philanthropic, and directed at education and culture.</p><p><strong>Motto:</strong> Sharing Heritage, Aligning Lives, Integrating Networks<br/><em>&#2405;&#2469;&#2495;&#2489;&#2509;&#2479;&#2503;&#2480; &#2476;&#2495;&#2472;&#2495;&#2478;&#2479;&#2492;, &#2460;&#2496;&#2476;&#2472;&#2503;&#2480; &#2488;&#2478;&#2472;&#2509;&#2476;&#2479;&#2492; &#2451; &#2488;&#2434;&#2489;&#2468;&#2495;&#2480; &#2488;&#2503;&#2468;&#2497;&#2476;&#2472;&#2509;&#2471;&#2472;</em></p>",
+    "DisplayOrder": 3,
     "IsActive": true
   },
   {
@@ -22,17 +31,17 @@
     "Key": "about-logo",
     "Group": "about",
     "Title": "Logo & Flag",
-    "BodyHtml": "<p>Every element of the Association's logo carries meaning:</p><ul><li><strong>Historic building</strong> &ndash; the college and its heritage</li><li><strong>Open book</strong> &ndash; knowledge and learning</li><li><strong>Torch</strong> &ndash; enlightenment and guidance</li><li><strong>Mortarboard</strong> &ndash; academic achievement</li><li><strong>Handshake</strong> &ndash; fellowship and mutual support among alumni</li><li><strong>Red and gold border, &ldquo;Est. 2025&rdquo;</strong> &ndash; the founding of the Association</li></ul><p>The Association's flag is white, signifying peace, harmony, non-violence and purity.</p><p>Use of the Association's name, logo, flag or other branding requires prior permission from the Executive Committee.</p>",
-    "DisplayOrder": 3,
+    "BodyHtml": "<p>Every element of the Association's crest carries meaning:</p><ul><li><strong>Historic building</strong> &ndash; the college and its heritage</li><li><strong>Open book</strong> &ndash; knowledge and learning</li><li><strong>Torch</strong> &ndash; enlightenment and guidance</li><li><strong>Mortarboard</strong> &ndash; academic achievement</li><li><strong>Handshake</strong> &ndash; fellowship and mutual support among alumni</li><li><strong>Red and gold border, &ldquo;Est. 2025&rdquo;</strong> &ndash; the founding of the Association</li></ul><p>The Association's flag is white, signifying peace, harmony, non-violence and purity.</p><p>Use of the Association's name, crest, flag or other branding requires prior permission from the Executive Committee.</p>",
+    "DisplayOrder": 4,
     "IsActive": true
   },
   {
     "Id": 4,
     "Key": "about-objectives",
     "Group": "about",
-    "Title": "Purpose & Objectives",
-    "BodyHtml": "<ul><li>To build and maintain a lasting bond among the alumni of Govt. Haraganga College.</li><li>To preserve and promote the heritage, history and traditions of the College.</li><li>To support the academic development of current students of the College.</li><li>To provide mentorship, career guidance and networking opportunities to students and alumni.</li><li>To assist alumni and students facing financial hardship through scholarships and welfare support.</li><li>To organise educational, cultural, social and sporting activities.</li><li>To encourage philanthropic and community service initiatives.</li><li>To strengthen cooperation between the Association, the College administration and its teachers.</li><li>To maintain an accurate register of alumni and facilitate communication among them.</li><li>To uphold transparency, accountability and good governance within the Association.</li><li>To undertake any other lawful activity consistent with these objectives.</li></ul>",
-    "DisplayOrder": 4,
+    "Title": "What We Do",
+    "BodyHtml": "<p>In practice, the Association's work falls into four areas &mdash; keeping alumni connected, supporting today's students, looking after members in difficulty, and safeguarding the college's history.</p><ul><li><strong>Connection</strong> &mdash; maintaining an accurate alumni register and making it easy for members to find and reach one another.</li><li><strong>Students</strong> &mdash; supporting the academic development of current students, and offering mentorship, career guidance and introductions to alumni working in their field.</li><li><strong>Welfare</strong> &mdash; scholarships and hardship assistance for students and alumni in financial difficulty.</li><li><strong>Community</strong> &mdash; educational, cultural, social and sporting events, and philanthropic initiatives that serve the wider Munshiganj community.</li><li><strong>Heritage</strong> &mdash; preserving and promoting the history and traditions of the college, and working alongside its administration and teachers.</li><li><strong>Governance</strong> &mdash; running the Association itself transparently and accountably, with published accounts and elected officers.</li></ul>",
+    "DisplayOrder": 5,
     "IsActive": true
   },
   {
