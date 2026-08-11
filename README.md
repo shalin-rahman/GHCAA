@@ -1,112 +1,91 @@
-# GHCAA - Govt. Haraganga College# GHCAA Alumni Association Platform
+# GHCAA Alumni Association Platform
 
-Welcome to the GHCAA Platform. This project is a comprehensive digital ecosystem designed to connect Haraganga College Alumni through secure membership, intelligent search, and integrated financial governance.
+A comprehensive digital ecosystem for the Govt. Haraganga College Alumni Association (GHCAA), connecting alumni through secure membership, an intelligent directory, event participation, and transparent financial governance. The platform spans a REST API, an Angular web application, and a Flutter mobile app sharing a single backend.
 
-> [!IMPORTANT]
-> This document and the associated **[Software Requirements Specification (SRS)](file:///c:/Users/HabiburRahmanShalin/.gemini/antigravity/brain/bce7f8da-1836-4cec-9dcf-8854cca6d702/srs_document.md)** serve as the definitive technical handover for the development team.
+## Documentation
 
----
-
-## 🚀 Core Technology Stack
-- **Backend**: ASP.NET Core 8.0 (Clean Architecture).
-- **Frontend**: Angular 17+ (PrimeNG, Vanilla CSS).
-- **Search & AI**: Google Gemini AI, SignalR.
-- **Database**: PostgreSQL (Entity Framework Core).
-
----
-
-## 📋 Project Development Brief
-
-This project serves as a highly structured digital ecosystem. The following outlines the Core Modules (Functional Requirements) and System Constraints (Non-Functional Requirements) that dictate its architecture.
-
-### Functional Requirements (FRs) by Module
-
-**A. Membership & Identity Management**
-- **Registration Wizard:** A 5-step form capturing Personal, Academic, and Professional data, separating college vs higher-degree admission years to verify institutional affiliation.
-- **Approval Workflow:** Users start as "Applied". Admins review documents. Upon approval, the system auto-generates a unique `MembershipNumber` (the Login ID). Includes **Member Verification "Blue Tick"** capabilities.
-- **Profile Control & Family Add-ons:** Granular privacy toggles to hide Phone/Email. System handles standard members with future support for Family/Spouse linkings.
-- **Digital ID:** Auto-generates a downloadable SVG/PDF ID card with a scannable QR code.
-
-**B. Events & Participation**
-- **Catalog & Registration:** A secure hub for event discovery. Members can pay and register.
-- **Waitlist & Caps:** Events enforce maximum capacities and handle waitlisted statuses automatically.
-- **Attendance Tracking:** Coordinators can scan a member's QR ID card at the venue to mark them as "Attended".
-
-**C. Financial & Admin Governance**
-- **Automated Payments:** Webhook-driven integration with local gateways (SSLCommerz, bKash). Successful callbacks auto-approve memberships or registrations.
-- **Ledger & Dues:** Immutable ledger of all income/expenses. Auto-generation and tracking of "Annual Membership Dues".
-- **Tax Receipts:** Auto-generation of PDF receipts for recognized donations.
-- **EC Management & Import:** SuperAdmin tools to manage Executive Committee terms and a bulk Excel importer for legacy member migration.
-
-**D. Networking, Social, & Support**
-- **Smart Directory:** Infinite-scroll member directory heavily governed by privacy toggles.
-- **Job & Mentorship Hub:** Job board with a dedicated workflow to request/offer career mentorship.
-- **Haraganga AI & Communications:** Gemini-powered chat agent for queries. Bulk email and **SMS Gateway** capabilities for administrators to message specific batches.
+| Document | Purpose |
+| --- | --- |
+| [Software Requirements Specification](docs/SRS.md) | Full functional and non-functional specification |
+| [Feature Catalog](docs/FEATURES.md) | Module-by-module features with screens, endpoints, and rules |
+| [Architecture & Data Flow](docs/architecture_data_flow.md) | System diagrams and data-flow blueprints |
+| [Payment Workflow](docs/PAYMENT_GATEWAY_WORKFLOW.md) | Manual and gateway payment handling |
+| [Config-Driven Framework](docs/CONFIG_DRIVEN_FRAMEWORK.md) | Runtime organization configuration model |
+| [Render Deployment](docs/RENDER_DEPLOYMENT.md) | Combined API + web deployment guide |
+| [Task Backlog](docs/TODO.md) | Delivered and planned work, tracked by area |
+| [Execution Plans](docs/PLAN.md) | Phased implementation plans |
 
 ---
 
-## 🛡️ System Constraints & Non-Functional Requirements (NFRs)
+## Technology Stack
 
-- **NFR 1: Zero "Ghost Data" (Soft Delete Architecture)**: The database context (EF Core) MUST use Global Query Filters to automatically hide `IsArchived` records from ALL standard queries. Never explicitly `DELETE` a user. Includes cascading archiver jobs.
-- **NFR 2: Strict Deduplication**: NID, Mobile Number, and Email must have unique database indexes. The API auto-sanitizes strings before validation.
-- **NFR 3: Security & Authorization**: Completely stateless JWT authentication. Passwords hashed with BCrypt. Granular Role-Based Access Control (Public, Member, Admin, SuperAdmin).
-- **NFR 4: Performance & Resiliency**: Server-side image optimization (< 350KB). Frontend "silent interceptors" gracefully handle partial API failures without crashing the UI.
+| Layer | Technology |
+| --- | --- |
+| Backend | ASP.NET Core 9.0 (Clean Architecture), Entity Framework Core |
+| Web frontend | Angular 21 (standalone components, signals), SCSS design system |
+| Mobile | Flutter (Riverpod state management, go_router, Dio HTTP) |
+| Database | PostgreSQL (production), SQLite (local development) |
+| Real-time | SignalR (chat, notifications) |
+| In-app assistant | Rule-based intent/keyword matching over internal data (no external LLM dependency) |
+| Security | JWT (stateless), BCrypt password hashing, role-based access control |
+| Reporting | ClosedXML (Excel), QuestPDF (PDF ID cards and receipts) |
+| DevOps | Docker (multi-stage), GitHub Actions, PowerShell automation |
 
-## 🚀 Development Roadmap & Identified Gaps
-
-The following features and integrations have been prioritized for the next phase of development:
-
-**1. Membership & Identity Lifecycle**
-- **Family/Spouse Add-ons**: Extend the `Member` model to support linking family members or associate spouse accounts.
-- **Member Verification "Blue Tick"**: Implement a visual distinction for highly verified members in the public directory.
-- **IsArchived Cascading**: Create a dedicated background worker for bulk-archiving inactive users and natively cascading the soft-delete property.
-- **Social Auth (OAuth2)**: Allow "Link with LinkedIn/Google" for streamlined login sessions after initial NID-based manual registration.
-
-**2. Events & Participation**
-- **Waitlist Management**: Explicitly handle "Waitlist" status for `AlumniEvent` registrations when capacity caps are reached.
-- **QR Attendance Tracking**: Add a scanner endpoint to mark an `EventRegistration` as "Attended" via the digital ID card's QR code.
-
-**3. Financial & Admin Governance**
-- **Automated Tax Receipts**: Auto-generate PDF receipts for recognized donations and integrate them into the `PaymentHistory`.
-
-**4. Networking & Engagement**
-- **Granular Privacy Strictness**: Tightly bind the `NetworkingController` Search endpoint to privacy toggles, ensuring DTOs never leak masked fields.
-- **Job Hub Mentorship Flow**: Introduce a structured "Mentorship Request" workflow extending the job posting capabilities.
-
-**5. Deployment & Security Integrations**
-- **SMS Gateway**: Implement an SMS provider (e.g., Twilio, SSLWireless/Banglalink) for OTP verification and time-sensitive notifications.
-- **Automatic Session Termination**: Real-time invalidation of all JWT tokens for a user if their status changes to "Terminated" or "Inactive".
+The API and Angular app are designed to run as a single combined service in production (the API serves the built SPA from `wwwroot`) or as separate origins during local development (`dotnet run` + `ng serve`).
 
 ---
 
-## 🛠️ Development Handover Checklist
-Outgoing developers should ensure the following are transferred:
-- [ ] **SSLCommerz/bKash Keys**: Sandbox and Production credentials.
-- [ ] **Gemini API Key**: For the Haraganga AI Assistant.
-- [ ] **SMTP Credentials**: Gmail app password for system notifications.
-- [ ] **CORS Configuration**: Update `appsettings.json` with new frontend URLs.
-- [ ] **NND (New Node Deployment)**: Ensure the database-on-startup migration scripts are intact.
+## Core Modules
 
-## 💻 Powered By
+### Membership & Identity
+- Multi-step registration wizard capturing personal, academic, and professional data, with logic that verifies institutional affiliation.
+- Approval workflow: applicants start as "Applied"; administrators review documents; approval auto-generates a unique membership number used as the login ID.
+- Profile control with granular privacy toggles (mask NID, phone, email, address) enforced on every directory and networking response.
+- Digital ID card generation (PDF/SVG) with a scannable QR code, unlocked once a member is Active.
 
-| **Backend**        | .NET 9 (Web API), Entity Framework Core                                          |
-| **Database**       | PostgreSQL 16+ (Dockerized in Prod)                                             |
-| **Frontend**       | Angular 18 (Signals, Standalone Components)                                    |
-| **Styling**        | Vanilla SCSS (Custom Design System), Glassmorphism                             |
-| **Security**       | JWT, BCrypt.Net-Next, ASP.NET Core Identity (Custom Implementation)             |
-| **DevOps**         | Docker, GitHub Actions, PowerShell Automation                                   |
-| **Reporting**      | ClosedXML (Excel Integration)                                                   |
-| **Payment**        | SSLCommerz, Nagad (Integration Ready)                                           |
+### Events & Participation
+- Event catalog and registration hub with capacity caps and automatic waitlist handling.
+- QR-based attendance: coordinators scan a member's digital ID at the venue to mark attendance.
 
-## 🗺️ System Workflows & User Journeys
+### Financial Management
+- Manual, admin-configurable payment model (see [Payments](#payments) below): members upload proof of payment and administrators review and approve.
+- Immutable ledger of income and expenses, with annual membership-due generation and tracking.
+- Auto-generated PDF receipts for recognized contributions.
 
-The following diagrams visualize the core operational flows of the GHCAA platform in detail.
+### Networking & Community
+- Infinite-scroll alumni directory with batch, department, and professional-domain filtering, governed strictly by privacy toggles.
+- Job and mentorship hub for sharing and discovering opportunities.
+- Peer-to-peer real-time messaging that never exposes private contact information.
+- A rule-based in-app assistant that answers directory and policy questions from internal data, plus an administrator communication hub for segmented bulk email.
 
-### 1. Membership Lifecycle (Onboarding)
+### Governance & Administration
+- Executive Committee management: terms, role assignment, and historical governance records with overlap and exclusivity rules.
+- Bulk member import/export via Excel for legacy-record migration.
+- Content management for news, media galleries, and special-day themes.
+
+For the complete, structured breakdown of every feature, role, screen, endpoint, and validation rule, see the [Feature Catalog](docs/FEATURES.md); for the formal specification, see the [Software Requirements Specification](docs/SRS.md).
+
+---
+
+## Payments
+
+The platform operates without live payment-gateway credentials. All payment methods are administrator-configurable and function manually:
+
+- Administrators configure wallet, bank, and mobile-financial-service (bKash / Nagad / bank transfer) instructions from the admin panel.
+- Members pay through the displayed channel and upload proof of payment.
+- Administrators verify the amount and approve the corresponding membership, due, or event registration.
+
+Automated gateway callback handling exists in the codebase and can be enabled later by supplying gateway keys, but no gateway integration is required for the platform to operate.
+
+---
+
+## System Workflows
+
+### Membership Lifecycle
 
 ```mermaid
 graph TD
-    A[Public Alumni] -->|Starts Registration| B(5-Step Wizard)
+    A[Public Alumni] -->|Starts Registration| B(Registration Wizard)
     B -->|Submit NID & Details| C{Email OTP Verification}
     C -->|Fails| B
     C -->|Success| D[Pending Approval Queue]
@@ -118,449 +97,251 @@ graph TD
     I --> J[Profile Management & Digital ID]
 ```
 
-### 2. Event Registration & Automated Payment
+### Event Registration & Payment
 
 ```mermaid
 graph TD
     A[Approved Member] -->|Discover Event| B[Select Event]
     B -->|Check Fee| C{Free or Paid?}
     C -->|Free| D[Instant Registration]
-    C -->|Paid| E[Payment Selection]
-    E -->|Manual Receipt| F[Upload Proof]
-    F --> G[Admin Manual Review]
-    E -->|Online Gateway| H[SSLCommerz / bKash]
-    H -->|Payment Success| I[API Callback Handler]
-    I -->|Verify Amount| J[Auto-Approve Registration]
-    J --> K[Send Participation Ticket]
-    G -->|Approved| K
+    C -->|Paid| E[Manual Payment]
+    E -->|Upload Proof| F[Admin Manual Review]
+    F -->|Approved| K[Send Participation Ticket]
     D --> K
 ```
 
-### 3. Governance & Administrative Flow
+### Governance & Content
 
 ```mermaid
 graph TD
     A[System Admin] -->|Manage Periods| B[Set EC Term]
     B -->|Search Members| C[Assign EC Roles]
     C -->|Save| D[Public Governance Page Updated]
-    
-    E[News/Gallery Editor] -->|Create Content| F[Draft Article/Album]
+
+    E[Content Editor] -->|Create Content| F[Draft Article/Album]
     F -->|Upload Images| G[Secure File Storage]
     G -->|Publish| H[Public News Feed / Gallery]
 ```
 
-### 4. AI Assistant Interaction
+### Assistant Interaction
 
 ```mermaid
 graph LR
-    A[Member] -->|Asks Question| B[Haraganga AI Agent]
-    B -->|Context Check| C{Internal Knowledge Base}
+    A[Member] -->|Asks Question| B[Assistant Service]
+    B -->|Intent Match| C{Rule Classifier}
     C -->|Alumni Lookup| D[Networking Service]
-    C -->|Policy/Help| E[Assistant Service]
-    D --> F[Gemini Generation]
+    C -->|Policy/Help| E[Knowledge Base]
+    D --> F[Compose Response]
     E --> F
     F -->|Response| A
 ```
 
 ---
 
-## 🏛️ Comprehensive Feature List (SRS/FR)
+## Architecture
 
-The following provides a full, structured breakdown of system features, user roles, and functional dependencies based on the complete SRS.
+The platform follows Clean Architecture (Onion) principles so business logic stays independent of frameworks and databases. Dependencies point inward only: `Domain` ← `Application` ← `Infrastructure` / `API`.
 
-### 1. Membership & Identity Management
-#### 1.1 Automated Member Registration
-- **Business Description**: Allows alumni to apply for association membership through a guided, multi-step process.
-- **User Roles**: Public (Alumni).
-- **Inputs/Outputs**:
-    - **Screen**: `/register` (5-step wizard).
-    - **API**: `POST /api/auth/register`, `GET /api/auth/status/:id`.
-    - **Key Fields**: Full Name, NID (Cleaned), Mobile, Batch, Degree, Email (OTP Verified).
-- **Validations & Rules**:
-    - **Duplicate Prevention**: Global check for uniqueness of NID, Email, and Mobile No.
-    - **Academic Prerequisite**: At least one academic record must be from "Govt. Haraganga College".
-    - **Digital Sanitization**: Automatic removal of spaces/formatting from NID and Mobile strings.
-- **Dependencies**: Email Service (OTP), ID Card Service (Metadata).
+### Backend (.NET 9)
 
-#### 1.2 Secure Authentication & Authorization
-- **Business Description**: Provides secure access to the portal based on identity and role.
-- **User Roles**: Public, Member, Admin, SuperAdmin.
-- **Inputs/Outputs**:
-    - **Screen**: `/login`, `/verify-email`.
-    - **API**: `POST /api/auth/login`, `POST /api/auth/verify-email`.
-    - **Key Fields**: NID/Mobile/Email as Identifier, Password (BCrypt hashed), OTP Code.
-- **Validations & Rules**:
-    - **Verification Requirement**: Email must be OTP-verified before login is permitted.
-    - **Role-Based Access**: Granular JWT claims for Member vs Admin vs SuperAdmin.
-- **Dependencies**: JWT Token Service.
+- **Domain** (`GHCAA.Domain`) — pure C# entities (`Member`, `User`, `AlumniEvent`, ~45 entities), enums, and shared constants; no external dependencies.
+- **Application** (`GHCAA.Application`) — service interfaces (`IMemberService`, `IAuthService`), DTOs, FluentValidation validators, and security primitives (JWT key resolution); defines the business contracts.
+- **Infrastructure** (`GHCAA.Infrastructure`) — ~37 service implementations, EF Core persistence with a multi-provider `ApplicationDbContext` (PostgreSQL + SQLite), per-entity `IEntityTypeConfiguration` mappings, payment gateways, and integrations (email, OTP, SMS, file storage). Services auto-register by convention.
+- **API** (`GHCAA.API`) — ~36 REST controllers, a 7-component middleware pipeline (exception handling, security headers, audit logging, login rate limiting, security-stamp invalidation, XSRF), two SignalR hubs (`ChatHub`, `NotificationHub`), and JWT authentication. Hosts the built Angular SPA from `wwwroot` in production.
 
-#### 1.3 Personal Profile & Privacy Control
-- **Business Description**: Members can manage their personal, academic, and professional information with granular privacy toggles.
-- **User Roles**: Member.
-- **Inputs/Outputs**:
-    - **Screen**: `/portal/profile`.
-    - **API**: `GET /api/profile`, `PUT /api/profile/update`.
-    - **Key Fields**: Privacy Toggles (Mask NID, Email, Mobile, Address).
-- **Validations & Rules**:
-    - **PII Masking**: Sensitive fields are automatically masked for other members unless the 'Public' toggle is active.
-- **Dependencies**: Profile Controller, Infrastructure Services.
+### Web frontend (Angular 21)
 
-#### 1.4 Digital ID Card Generation
-- **Business Description**: Automatically generates a secure, downloadable digital ID card for verified members.
-- **User Roles**: Approved Member.
-- **Inputs/Outputs**:
-    - **Screen**: `/portal/id-card`.
-    - **API**: `GET /api/idcard/generate`.
-    - **Key Fields**: QR Code, Membership ID.
-- **Validations & Rules**:
-    - **Eligibility**: Card generation is locked until the `Active` status is achieved.
-    - **Format**: Sequential 4-digit serials (e.g., GHC-2015-0001).
-- **Dependencies**: ID Card Generation Service.
+A standalone-component SPA under `GHCAA.Web/src/app`, organized by access scope: `core/` (services, guards, interceptors), `public/`, `member/`, `admin/`, `common/` (shared UI), and `layouts/`. State is signal-based; a single HTTP interceptor chain handles auth, error notification, and single-flight 401 refresh. Styling is a SCSS custom-property design system (see [Design System](#design-system)).
 
-### 2. Events & Participation
-#### 2.1 Event Listings & Catalog
-- **Business Description**: A centralized hub for discovering upcoming and past alumni events.
-- **User Roles**: Public, Member.
-- **Inputs/Outputs**:
-    - **Screen**: `/events`.
-    - **API**: `GET /api/events`.
-- **Dependencies**: Events Service.
+### Mobile (Flutter)
 
-#### 2.2 Intelligent Event Registration
-- **Business Description**: Allows members and guests to register for events with integrated payment tracking.
-- **User Roles**: Member, Guest (if allowed).
-- **Inputs/Outputs**:
-    - **Screen**: `/events/:id`.
-    - **API**: `POST /api/events/register`.
-    - **Key Fields**: Payment Reference, Receipt Upload, Contribution Amount.
-- **Validations & Rules**:
-    - **Lifecycle**: Registration permitted only for active events before the deadline.
-    - **Deduplication**: Prevents multiple registrations per user/guest for the same event.
-    - **Member Enforcement**: Guest entry restricted by the event's `AllowNonMembers` policy.
-- **Dependencies**: Financial Service, File Storage (Receipts).
+`GHCAA.Mobile` is a Flutter app using Riverpod for state, `go_router` for navigation, and Dio for HTTP against the same REST API, organized feature-first (~18 feature areas) with SignalR (`signalr_netcore`) for real-time chat and notifications.
 
-#### 2.3 Event Management (Admin)
-- **Business Description**: CRUD operations for events, including registration capping and deadline management.
-- **User Roles**: Admin, SuperAdmin.
-- **Inputs/Outputs**:
-    - **Screen**: `/admin/events`.
-    - **API**: `POST /api/events/create`, `PUT /api/events/update`.
-- **Dependencies**: Admin Controller.
+### Supporting services
 
-### 3. Financial Management & Payments
-#### 3.1 Automated Payment Gateways
-- **Business Description**: Secure online payment integration for subscriptions and event fees.
-- **User Roles**: Member, Admin.
-- **Inputs/Outputs**:
-    - **API**: `POST /api/gateways/initiate`, `POST /api/gateways/callback`.
-    - **Gateways**: SSLCommerz, bKash (Ready).
-- **Validations & Rules**:
-    - **Verification**: Callback amount must exactly match the expected fee/due.
-    - **Auto-Update**: Successful payment triggers automatic registration/due status updates.
-- **Dependencies**: SSLCommerz SDK, Financial Service.
+Cross-cutting capabilities live in Infrastructure: transactional email (SMTP), OTP generation/verification, SMS, local file storage with image compression, QuestPDF (PDF ID cards and receipts), and ClosedXML (Excel import/export) — the last two isolated in `GHCAA.Export`.
 
-#### 3.2 Financial Ledger & Audit
-- **Business Description**: Tracking all income and expenses of the association with categorized ledger entries.
-- **User Roles**: Admin (Finance), SuperAdmin.
-- **Inputs/Outputs**:
-    - **Screen**: `/admin/ledger`.
-    - **API**: `GET /api/financialledger`.
-- **Dependencies**: Financial Ledger Controller.
+Cross-cutting guarantees:
 
-#### 3.3 Payment Configuration (Admin)
-- **Business Description**: Managing gateway keys, transaction limits, and automated service charges.
-- **User Roles**: SuperAdmin.
-- **Inputs/Outputs**:
-    - **Screen**: `/admin/payments`.
-    - **API**: `GET /api/finance/configs`, `POST /api/finance/configs`.
-- **Validations & Rules**:
-    - **Temporal Logic**: Fees applied based on the most recent `EffectiveDate` relative to the billing year.
-- **Dependencies**: Payment Config Controller.
-
-### 4. Networking & Social Features
-#### 4.1 Alumni Directory (Search & Networking)
-- **Business Description**: High-performance "infinite scroll" directory for finding alumni.
-- **User Roles**: Public (Limited), Member (Full).
-- **Inputs/Outputs**:
-    - **Screen**: `/directory`.
-    - **API**: `GET /api/networking/members`.
-    - **Key Fields**: Search Query, Batch Filter, Department Filter.
-- **Dependencies**: Networking Service.
-
-#### 4.2 Professional Job Hub
-- **Business Description**: Internal portal for sharing and applying for job opportunities within the alumni network.
-- **User Roles**: Member.
-- **Inputs/Outputs**:
-    - **Screen**: `/portal/jobs`.
-    - **API**: `GET /api/jobhub`.
-- **Dependencies**: Job Hub Service.
-
-#### 4.3 Direct Peer Messaging
-- **Business Description**: Secure communication channel for members to network without exposing private contact data.
-- **User Roles**: Member.
-- **Inputs/Outputs**:
-    - **Screen**: `/portal/messages`.
-    - **API**: `POST /api/messaging/send`.
-- **Dependencies**: Real-time Messaging Hub.
-
-### 5. Governance & Operations
-#### 5.1 Executive Committee (EC) Management
-- **Business Description**: Managing committee periods, roles, and historical records of governance.
-- **User Roles**: Admin, SuperAdmin.
-- **Inputs/Outputs**:
-    - **Screen**: `/admin/members/ec`.
-    - **API**: `POST /api/admingovernance/assign-role`, `POST /api/admingovernance/periods`.
-- **Validations & Rules**:
-    - **Continuity**: Prevents temporal overlaps between EC periods.
-    - **Exclusivity**: President, GS, and Treasurer roles are unique per term.
-    - **Eligibility**: Restricted to 'Active' status members only.
-- **Dependencies**: Governance Service.
-
-#### 5.2 Bulk Member Import
-- **Business Description**: Excel-to-Database bridging for migrating legacy records.
-- **User Roles**: SuperAdmin.
-- **Inputs/Outputs**:
-    - **Screen**: `/admin/members` (Import Modal).
-    - **API**: `POST /api/memberimport/upload`.
-- **Validations & Rules**:
-    - **Deduplication**: Automatic NID/Email collision detection with graceful auto-suffixing to prevent failures.
-    - **Provisioning**: Transparent creation of User accounts with NID-based credentials during import.
-- **Dependencies**: ClosedXML Service.
-
-### 6. Intelligent Assistant (AI)
-#### 6.1 Haraganga AI Assistant
-- **Business Description**: A Gemini-powered AI helping members find information and alumni through natural language.
-- **User Roles**: Member.
-- **Inputs/Outputs**:
-    - **Screen**: `/portal/assistant`.
-    - **API**: `POST /api/assistant/ask`.
-- **Validations & Rules**:
-    - **NLP Intent**: Automatically parses natural language for years, sectors, and help topics.
-- **Dependencies**: Google Gemini API, Assistant Service.
-
-#### 6.2 Intelligent Support Chat
-- **Business Description**: Real-time support for common queries and system navigation.
-- **User Roles**: Public, Member.
-- **Inputs/Outputs**:
-    - **Screen**: Floating Chat Widget.
-    - **API**: `POST /api/chat/message`.
-- **Dependencies**: Chat Service.
-
-### 7. Global Content Management (CMS)
-#### 7.1 News & Press Releases
-- **Business Description**: Publishing and managing association news with image support.
-- **User Roles**: Public (Read), Admin (CRUD).
-- **Inputs/Outputs**:
-    - **Screen**: `/news`.
-    - **API**: `POST /api/news`.
-- **Dependencies**: News Service.
-
-#### 7.2 Media Gallery & Albums
-- **Business Description**: Visual records of association history categorized by events.
-- **User Roles**: Public (Read), Admin (CRUD).
-- **Inputs/Outputs**:
-    - **Screen**: `/gallery`.
-    - **API**: `POST /api/gallery`.
-- **Dependencies**: Gallery Service, File Storage.
-
-#### 7.3 Theme Management (Special Days)
-- **Business Description**: Dynamic UI transformation for special occasions (e.g., Independence Day).
-- **User Roles**: Admin.
-- **Inputs/Outputs**:
-    - **Screen**: `/admin/themes`.
-    - **API**: `POST /api/theme/activate`.
-- **Dependencies**: Theme Service.
+- **Soft-delete integrity** — global EF Core query filters automatically hide `IsArchived` records from every standard query, preventing orphaned "ghost data". Records are archived, never hard-deleted.
+- **Strict deduplication** — unique indexes on NID, mobile number, and email; inputs are sanitized before validation.
+- **Stateless security** — JWT authentication with BCrypt-hashed passwords and granular role-based access control (Public, Member, Admin, SuperAdmin).
+- **Resilient frontend** — HTTP interceptors handle authentication, 401 redirects, and partial API failures gracefully.
 
 ---
 
-## ⛩️ Portal Architecture & Scopes
+## Design Patterns & Techniques
 
-The platform is divided into three distinct operational scopes, each tailored for specific user interactions.
+The patterns below are the ones actually implemented, with their locations. Where a common pattern is deliberately not used, that is noted too.
 
-### 🌐 1. Public Portal (The Front Gate)
-*Open access for alumni and the general public.*
-- **🏛️ Intelligent Landing Hub**: Royal "Midnight Gold" aesthetic with Dynamic Sections (Purpose, Symbolism, and EC Highlights).
-- **📊 Real-time Stats Counter**: Live counters for total Registered Members, Batches represented, and Association Events.
-- **📝 Automated Onboarding**: High-integrity 5-step registration wizard with:
-  - **NID Sanitization**: Automatic space removal and duplicate checking.
-  - **OTP Security**: Email-based verification before submission.
-  - **Academic Validation**: Specific logic to ensure at least one GHC record exists.
-- **🔍 Public Alumni Directory**: High-performance "Infinite Scroll" member list with Batch and Professional filtering.
-- **📰 Press & Updates**: Real-time news feed and event calendar with archival support.
+### Backend (.NET)
 
-### 👤 2. Member Portal (The Alumni Hub)
-*Secured area for approved alumni using NID-based credentials.*
-- **📊 Personal Dashboard**: Visual overview of membership status and recent association activities.
-- **🤖 Haraganga AI Assistant**: Natural Language (NLP) search bot helping members find alumni by batch, sector, or professional background.
-- **🛠️ Self-Service Profile**:
-  - **Dynamic Privacy**: Granular toggles to hide/show contact info (Mobile/Email/Address).
-  - **History Management**: Self-updateable Academic and Professional records with document re-upload capabilities.
-- **💬 Networking Engine**: 
-  - **Peer Chat**: Secure messaging between members without exposing private contact data.
-  - **Career Hub**: Access to Job Opportunities shared within the network.
-- **💰 Financial Transparency**: 
-  - Real-time tracking of Membership Dues and Payment History.
-  - Manual payment proof upload for life membership upgrades.
-- **🎟️ Event Participation**: Managed registration for alumni-only events with payment integration.
+| Pattern / technique | How and where it is implemented |
+| --- | --- |
+| Clean Architecture (Onion) | Four projects with inward-only dependencies: `GHCAA.Domain` → `GHCAA.Application` → `GHCAA.Infrastructure` / `GHCAA.API`. |
+| Dependency Injection (per-layer extensions) | Each layer exposes a registration method — [`AddApplication()`](GHCAA.Application/DependencyInjection.cs), [`AddInfrastructure()`](GHCAA.Infrastructure/DependencyInjection.cs), and JWT/auth wiring in [`ServiceExtensions.cs`](GHCAA.API/Extensions/ServiceExtensions.cs). |
+| Convention-based service registration | [`AddInfrastructure()`](GHCAA.Infrastructure/DependencyInjection.cs) reflects over the `.Services` namespace and auto-binds each implementation to its `GHCAA.Application.Interfaces` interface, so new services need no manual wiring. |
+| Strategy | Payment channels implement a common [`IPaymentGatewayService`](GHCAA.Application/Interfaces/IPaymentGatewayService.cs) with swappable implementations (SSLCommerz, bKash, Nagad, DGePay) in [`GHCAA.Infrastructure/Gateways/`](GHCAA.Infrastructure/Gateways/). The database provider (SQLite / PostgreSQL) is selected by the same approach in [`AddInfrastructure()`](GHCAA.Infrastructure/DependencyInjection.cs). |
+| Factory | [`PaymentGatewayFactory`](GHCAA.Infrastructure/Gateways/PaymentGatewayFactory.cs) takes the injected set of gateway strategies and returns the one matching the requested gateway type. |
+| Middleware pipeline | Seven custom middleware components in [`GHCAA.API/Middleware/`](GHCAA.API/Middleware/) — global exception handling, security headers, audit logging, login rate limiting, security-stamp session invalidation, and XSRF protection — composed in [`Program.cs`](GHCAA.API/Program.cs). |
+| Global query filters (soft delete) | Per-entity `IEntityTypeConfiguration` classes in [`GHCAA.Infrastructure/Data/Configurations/`](GHCAA.Infrastructure/Data/Configurations/) apply `HasQueryFilter(!IsArchived)`, registered via `ApplyConfigurationsFromAssembly` in [`ApplicationDbContext`](GHCAA.Infrastructure/Data/ApplicationDbContext.cs). |
+| DTOs (manual mapping) | Request/response DTOs live in [`GHCAA.Application/DTOs/`](GHCAA.Application/DTOs/); mapping is done explicitly in services (no AutoMapper, keeping mappings visible and dependency-free). |
+| Observer (real-time) | SignalR hubs [`ChatHub`](GHCAA.API/Hubs/ChatHub.cs) and [`NotificationHub`](GHCAA.API/Hubs/NotificationHub.cs) push messages and notifications to connected clients. |
+| Validation | FluentValidation validators registered by [`AddApplication()`](GHCAA.Application/DependencyInjection.cs). |
 
-### ⚖️ 3. Admin Command Center (Governance & Management)
-*High-privilege portal for the Executive Committee and System Admins.*
-- **📈 Global Analytics**: Real-time dashboard with metrics on membership growth, financial balance, and pending workflows.
-- **👨‍💼 Membership Governance**: 
-  - **Side-by-Side Review**: Approval/Rejection interface with document verification.
-  - **Auto-Account Creation**: Approval triggers NID-based credential generation and email dispatch.
-  - **Data Retention**: Soft-delete "Archive" system with one-click restoration.
-- **📂 Management Suites**:
-  - **EC Management**: Track Governance periods, positions, and committee transitions.
-  - **📧 Communication Hub**: Mass-messaging engine with HTML templates, batch-targeting (Passing Year), and custom email campaigns.
-  - **🖼️ Media Gallery CMS**: Managed photo galleries with featured image support and event-linking.
-  - **Payment Config**: UI to manage bKash/Nagad/Bank instructions and gateway settings.
-- **⚡ Advanced Power Tools**:
-  - **Bulk Import**: Excel-to-Database bridging with complex column mapping.
-  - **Premium Export**: Automated Excel reports with formatted data labels (Blood Groups, Categories).
-  - **Admin Search**: High-speed lookup using Member IDs or NIDs.
+Deliberate non-choices: there is **no** generic repository/Unit-of-Work layer — services use the EF Core `DbContext` directly, and `SaveChanges` serves as the unit of work. (A single [`FileUploadRepository`](GHCAA.Infrastructure/Repositories/FileUploadRepository.cs) exists for file uploads only.) Settings are bound directly from `IConfiguration` rather than the `IOptions<T>` pattern, and there is no CQRS/Mediator layer. These keep the codebase lightweight and easy to trace.
+
+### Frontend (Angular)
+
+| Pattern / technique | How and where it is implemented |
+| --- | --- |
+| Signal-based reactive state | Core services and components use `signal()` / `computed()` / `effect()` — for example [`auth.service.ts`](GHCAA.Web/src/app/core/services/auth.service.ts), [`theme.service.ts`](GHCAA.Web/src/app/core/services/theme.service.ts), and [`org-config.service.ts`](GHCAA.Web/src/app/core/services/org-config.service.ts). |
+| HTTP interceptor chain | [`global-http.interceptor.ts`](GHCAA.Web/src/app/core/interceptors/global-http.interceptor.ts) injects credentials/bearer tokens, centralizes error notification, and performs single-flight 401 token refresh with queued request retries. |
+| Functional route guards | [`auth.guard.ts`](GHCAA.Web/src/app/core/guards/auth.guard.ts) (`authGuard` / `adminGuard` / `superAdminGuard`) and a feature-flag [`feature.guard.ts`](GHCAA.Web/src/app/core/guards/feature.guard.ts) driven by `OrgConfigService`. |
+| Standalone components | Components declare their own imports (no NgModules), wired through [`app.config.ts`](GHCAA.Web/src/app/app.config.ts) and [`app.routes.ts`](GHCAA.Web/src/app/app.routes.ts). |
 
 ---
 
-## 🏗️ System Architecture & Security
-**Enterprise-Grade Stability**
-- **FR 5.1: Soft-Delete Integrity**
-  - Implementation of **Global Query Filters** across the entire database. Archiving a member automatically "hides" all related history, academic records, and communications to prevent orphans.
-- **FR 5.2: Role-Based Access (RBAC)**
-  - Granular permissions for SuperAdmin, Admin, Member, and Guest roles.
-- **FR 5.3: Authentication Model**
-  - **BCrypt** password hashing with salt-per-member security.
-  - **JWT (JSON Web Tokens)** for secure, stateless session management.
+## Project Structure
 
-## 🏗️ Developer Experience & Infrastructure
-
-To ensure rapid development and system reliability, the project includes several specialized dev-features:
-
-### 1. Automated Data Seeding & Transformation
-- **Self-Healing Seeds**: JSON-based seed data (`members.json`, `users.json`) that can be automatically synchronized with the database during migration or startup.
-- **Credential Transformation Utilities**: Custom C# scripts to batch-update existing member data (e.g., transforming legacy usernames into NID-based credentials with BCrypt hashing).
-
-### 2. Technical Infrastructure
-- **Global Data Persistence**: 
-  - Centralized **soft-delete architecture** using EF Core query filters. Developers don't need to manually check `IsArchived` in every query; the system handles it at the model level.
-- **Clean Architecture Implementation**:
-  - Clear separation of concerns between **Domain Models**, **Application DTOs**, and **Infrastructure Services**.
-- **Modern Styling System**:
-  - A comprehensive **SCSS Design System** with CSS variables for colors, spacing, and glassmorphism tokens, allowing for instant global UI changes.
-
-### 3. API & Tooling
-- **Swagger/OpenAPI Integration**: Auto-generated interactive API documentation for testing and integration.
-- **Member Import Utility**: Dynamic Excel-to-Database bridging service with column mapping and auto-generation of missing data for legacy records.
-- **File Storage Abstraction**: Pluggable storage service for handling photos and certificates, currently supporting Local Storage with an interface for Cloud (S3/Azure) expansion.
-
----
-
-## 📂 Project Structure
-
-```bash
+```
 GHCAA/
-├── GHCAA.API/             # REST API Controllers & Web Host
-├── GHCAA.Application/     # Logic Contracts (Interfaces) & Data Transfer Objects (DTOs)
-├── GHCAA.Domain/          # Core Entities, Enums, and Shared Constants
-├── GHCAA.Infrastructure/  # DB Context, Migrations, Repositories, and Services
-├── GHCAA.Web/             # Angular SPA (Frontend)
-├── GHCAA.Tests/           # XUnit & Integration Test Suites
-├── GHCAA.Export/          # Excel/CSV Generation Utilities
-├── .github/workflows/    # CI/CD (GitHub Actions)
-├── Dockerfile            # Production Orchestration
-└── run-app.ps1           # Developer Bootstrapper
+├── GHCAA.API/             # REST API controllers and web host
+├── GHCAA.Application/     # Service interfaces and DTOs
+├── GHCAA.Domain/          # Core entities, enums, and constants
+├── GHCAA.Infrastructure/  # DbContext, EF configurations, and services
+├── GHCAA.Web/             # Angular single-page application
+├── GHCAA.Mobile/          # Flutter mobile application
+├── GHCAA.Tests/           # NUnit unit and integration test suites
+├── GHCAA.Export/          # Excel/CSV generation utilities
+├── GHCAA.Tools/           # Local run/stop/config PowerShell helpers
+├── docs/                  # Specification and reference documentation
+├── .github/workflows/     # CI/CD (GitHub Actions)
+└── Dockerfile             # Multi-stage production build (API + web)
 ```
 
 ---
 
-## 🏗️ Technical Architecture
+## Getting Started
 
-The platform is built using **Clean Architecture** (Onion Architecture) principles, ensuring that the business logic is independent of external frameworks and databases.
+### Prerequisites
 
-### Layered Structure
-- **Core (Domain)**: Pure C# project containing Entities (`Member`, `User`, `AlumniEvent`), Enums, and Core Constants. No external dependencies.
-- **Application**: Defines interfaces (`IMemberService`, `IAuthService`) and Data Transfer Objects (DTOs). Contains the contract for the business logic.
-- **Infrastructure**: Implementation of persistent storage (PostgreSQL via Entity Framework Core), File Storage (Local/Cloud), and external services (Email, OTP).
-- **API (Web)**: ASP.NET Core RESTful controllers, Middleware (Rate Limiting, Exception Handling), and JWT Authentication.
-- **Web (Frontend)**: Angular 18 Single Page Application (SPA) with a modular architecture and reactive state management.
-
-### Data Flow & Persistence
-- **Repository Pattern**: Centralized data access logic.
-- **Global Filters**: Every database query is automatically intercepted to filter out `IsArchived` records, providing safety against "Ghost Data".
-- **Database**: PostgreSQL with complex unique indexing on NID, Mobile, and Email to ensure zero-duplicate integrity.
-
----
-
-## 🧪 Testing & Quality Assurance
-
-The project maintains a rigorous quality standard organized into three distinct layers:
-
-### 1. Unit Testing (`GHCAA.Tests`)
-- **Business Logic**: Comprehensive tests for Member Approval, Membership Number Generation, and Financial calculations.
-- **Service Mocking**: Utilization of Moq to isolate services and ensure deterministic test results.
-
-### 2. Integration Testing
-- **Persistence Testing**: In-memory database tests to verify that complex EF Core Query Filters and Unique Constraints are working as expected.
-- **Schema Validation**: Automated migration testing to ensure seed data (`users.json`, `members.json`) remains compatible with the current schema.
-
-### 3. API & UI Validation
-- **Swagger UI**: Interactive playground for manual API verification.
-- **Frontend Interceptors**: Automated error handling and token injection validation on the Angular side.
-
----
-
-## 🚀 Deployment & Operations
-
-### Containerization & CI/CD
-- **Dockerized Environment**: Multi-stage `Dockerfile` for streamlined production builds and environment consistency.
-- **CI/CD Pipeline**: 
-  - **GitHub Actions**: Automated build, test, and linting on every push.
-  - **PowerShell Automation**: `CI-Deploy.ps1` script for automated deployment workflows.
-- **Environment Management**: `.env` and `appsettings.json` driven configuration for local, staging, and production secrecy.
-
-### System Management
-- **Process Control**: Dedicated `run-app.ps1` and `stop-app.ps1` scripts for managing local/server environments.
-- **Logging**: Integrated `ILogger` with tiered severity levels (Information, Warning, Error) for real-time monitoring.
-- **Database Maintenance**: SQL utilities included for periodic cleanup (`delete_imported_members.sql`) and password resetting (`reset_superadmin_password.sql`).
-
----
-
-## 🛠️ Getting Started
-
-### 1. Prerequisites
 - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- [Node.js v20+](https://nodejs.org/)
-- [PostgreSQL 16+](https://www.postgresql.org/)
+- [Node.js 22+](https://nodejs.org/) (required by Angular 21)
+- [PostgreSQL 16+](https://www.postgresql.org/) for production-like runs (local development defaults to SQLite)
 
-### 2. Database Setup
-1. Create a database named `GHCAA_DB`.
-2. Update the connection string in `GHCAA.API/appsettings.json`.
-3. Apply migrations:
+### Database Setup
+
+The schema is created automatically at application startup via EF Core `EnsureCreated()` — there is no manual migration step to run for a first boot. On an empty database the full schema and seed data are created in one pass; on an existing database it is a no-op.
+
+- Local development uses a SQLite file out of the box; no external database is required.
+- For PostgreSQL, provide a connection string (see [Configuration](#configuration)); the same `EnsureCreated` path builds the schema on first boot.
+
+### Running the Application
+
+Automated (Windows / PowerShell):
+
+```powershell
+./GHCAA.Tools/run-app.ps1
+```
+
+Use `-NoWeb` or `-NoMobile` to skip a frontend. Stop and free ports with `./GHCAA.Tools/stop-app.ps1`.
+
+Manual:
+
+- Backend: `cd GHCAA.API && dotnet run`
+- Web: `cd GHCAA.Web && npm install && npm start`
+
+---
+
+## Configuration
+
+Do not commit real passwords, API keys, or production connection strings. Base settings live in [`GHCAA.API/appsettings.json`](GHCAA.API/appsettings.json) with placeholders.
+
+### Required values
+
+| Key | Purpose |
+| --- | --- |
+| `Jwt__Key` | JWT signing secret, 32+ characters. Required outside Development — the API fails fast on boot if it is unset. |
+| `ConnectionStrings__PgSqlConnection` or `DATABASE_URL` | PostgreSQL connection (a `postgres://...` URL is parsed automatically). |
+| `GmailSettings__Email` / `GmailSettings__AppPassword` | SMTP credentials for OTP, approval, and notification email. |
+| `AppSettings__AllowedOrigins__0` | Browser origins permitted by CORS. |
+| `DataProtection__KeyRingPath` | Persistent path for Data Protection keys (mount a volume in containers so auth cookies survive restarts). |
+
+### Local development options
+
+1. **`.env` file** — copy [`GHCAA.API/.env.example`](GHCAA.API/.env.example) to `GHCAA.API/.env` (loaded by `DotNetEnv` at startup). Run the API with the working directory set to `GHCAA.API` so the file is found.
+2. **.NET User Secrets** — already wired via `UserSecretsId`:
    ```bash
-   dotnet ef database update --project GHCAA.Infrastructure --startup-project GHCAA.API
+   cd GHCAA.API
+   dotnet user-secrets set "Jwt:Key" "YOUR_SECRET_AT_LEAST_32_CHARACTERS_LONG"
+   dotnet user-secrets set "ConnectionStrings:PgSqlConnection" "Host=...;Database=...;Username=...;Password=...;SslMode=Prefer"
+   dotnet user-secrets set "GmailSettings:Email" "you@example.com"
+   dotnet user-secrets set "GmailSettings:AppPassword" "your-app-password"
    ```
 
-### 3. Running the Application
-**Option A: Automated (Win/PowerShell)**
-```powershell
-./run-app.ps1
-```
+### Production / hosted
 
-**Option B: Manual**
-- **Backend**: `cd GHCAA.API && dotnet run`
-- **Frontend**: `cd GHCAA.Web && npm install && npm start`
+Set the values above as environment variables in the host (Render, Docker, etc.). On each release that changes host URLs, add every browser origin (scheme + host + port) to `AppSettings:AllowedOrigins`, and confirm SignalR clients (`/hubs/chat`) use an allowed origin over HTTPS.
 
 ---
 
-## 🧪 Testing Coverage
-The repository targets **>85% code coverage** on core business services.
-- Run all tests: `dotnet test`
-- View results: `test_results.txt` (generated automatically in CI)
+## Testing & Quality
+
+Each layer has its own suite and toolchain:
+
+| Layer | Technology | Scope |
+| --- | --- | --- |
+| Backend (`GHCAA.Tests`) | NUnit 4, Moq, FluentAssertions; EF Core InMemory + SQLite | Service logic (member approval, membership-number generation, financial calculations), controllers, validators, and integration tests over query filters, unique constraints, and seed compatibility. |
+| Web (`GHCAA.Web`) | Vitest (headless), plus Playwright end-to-end specs | Component, service, guard, and interceptor unit tests. |
+| Mobile (`GHCAA.Mobile`) | `flutter_test`, `integration_test`, Mockito, `golden_toolkit` | Widget/unit tests and golden (visual regression) tests. |
+
+Run the suites with `dotnet test` (backend), `npm test` (web), and `flutter test` (mobile).
+
+**On coverage:** CI runs every suite as a pass/fail gate rather than publishing a single headline coverage number — no authoritative figure is tracked in the repo, so none is claimed here. Coverage can be measured locally on the backend via the bundled `coverlet.collector` (`dotnet test --collect:"XPlat Code Coverage"`).
+
+### Continuous Integration
+
+CI/CD runs on GitHub Actions (`.github/workflows/`). The main pipeline (`ghcaa-ci-standard.yml`, and `ghcaa-ci-preprod.yml` for the `preprod` branch) runs a strict, ordered sequence — a failure at any stage stops the run:
+
+1. **Backend analysis** — C# build and analyzers.
+2. **Frontend analysis** — Angular lint and TypeScript type-check.
+3. **Mobile analysis** — Dart analyzer.
+4. **API tests** — `dotnet test` against an SQLite mirror.
+5. **Web tests** — Vitest headless suite.
+6. **Mobile tests** — `flutter test`.
+7. **Integrated build** — packages the API and built SPA into a single deployment-ready image.
+
+Additional workflows handle release and infrastructure: `main.yml` (build/package), `mobile_deployment.yml` (Android AAB + iOS IPA artifacts), and `neon_workflow.yml` (a Neon Postgres preview branch per pull request). On a push to `preprod`, the pipeline finishes by calling a Render deploy hook, which builds the multi-stage `Dockerfile` and rolls out the combined API + web service. See [Render Deployment](docs/RENDER_DEPLOYMENT.md) for the full flow.
 
 ---
 
-## 🎨 Design Philosophy: "Midnight Gold"
-The application adheres to a premium aesthetic designed to evoke prestige and legacy:
-- **Visuals**: Dark mode base with royal gold highlights and glassmorphic panels.
-- **Micro-animations**: Subtle hover transitions and container entry animations.
-- **Performance**: Optimized for fast LCP (Largest Contentful Paint) and smooth rendering of large data lists.
+## Maintenance & Operations
+
+- **Local tooling** — `GHCAA.Tools/run-app.ps1` starts the API, web, and mobile together (`-NoWeb` / `-NoMobile` to skip a frontend); `stop-app.ps1` stops them and frees the ports.
+- **Logging** — tiered `ILogger` throughout the backend, with audit-logging middleware recording sensitive operations.
+- **Data Protection keys** — persisted to `DataProtection__KeyRingPath`; mount a volume to this path in containers so antiforgery tokens and auth cookies survive restarts and redeploys.
+- **Schema** — created and seeded at startup via EF Core `EnsureCreated()` (not migrations); safe to re-run against an existing database.
+- **Operational SQL** — maintenance scripts (e.g. resetting the super-admin password, removing bulk-imported members) live alongside the tooling for recovery tasks.
+
+---
+
+## Roadmap & Task Tracking
+
+Delivered and planned work is tracked in the repository:
+
+- **[Task Backlog](docs/TODO.md)** — the master tracker. Completed areas are marked done; open items capture the remaining full-stack review findings and enhancements.
+- **[Execution Plans](docs/PLAN.md)** — phased implementation plans mapping backlog items to concrete steps.
+
+At a glance:
+
+| Status | Area |
+| --- | --- |
+| Done | Membership lifecycle, events, manual payments, networking, governance/CMS, security hardening, config-driven branding, combined API + web deployment |
+| Planned | Remaining review-remediation items and incremental enhancements tracked in [docs/TODO.md](docs/TODO.md) |
+
+---
+
+## Design System
+
+The interface uses a dark-first "Obsidian & Gold" aesthetic built on a SCSS custom-property design system. Colors, surfaces, and text are driven by semantic CSS variables that flip between fully-styled light and dark themes, so both modes remain readable throughout the application. Layouts favor glassmorphic panels, subtle micro-animations, and fast rendering of large data lists.

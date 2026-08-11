@@ -28,21 +28,31 @@ export class AlertService {
     }
 
     loadNotifications() {
-        this.http.get<AppNotification[]>(this.apiUrl).subscribe(data => {
-            this.notifications.set(data);
-            this.unreadCount.set(data.filter(n => !n.isRead).length);
+        // 29F.2: surface HTTP failures instead of failing silently
+        this.http.get<AppNotification[]>(this.apiUrl).subscribe({
+            next: data => {
+                this.notifications.set(data);
+                this.unreadCount.set(data.filter(n => !n.isRead).length);
+            },
+            error: err => console.error('Failed to load notifications', err)
         });
     }
 
     markAsRead(id: number) {
-        this.http.post(`${this.apiUrl}/${id}/read`, {}).subscribe(() => {
-            this.loadNotifications();
+        this.http.post(`${this.apiUrl}/${id}/read`, {}).subscribe({
+            next: () => {
+                this.loadNotifications();
+            },
+            error: err => console.error('Failed to mark notification as read', err)
         });
     }
 
     markAllAsRead() {
-        this.http.post(API_ENDPOINTS.NOTIFICATIONS.READ_ALL, {}).subscribe(() => {
-            this.loadNotifications();
+        this.http.post(API_ENDPOINTS.NOTIFICATIONS.READ_ALL, {}).subscribe({
+            next: () => {
+                this.loadNotifications();
+            },
+            error: err => console.error('Failed to mark all notifications as read', err)
         });
     }
 }

@@ -1,15 +1,19 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { ARTICLE_CATEGORIES, SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-article-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
   templateUrl: './article-approval.html',
   styleUrl: './article-approval.scss'
 })
@@ -22,6 +26,17 @@ export class ArticleApproval implements OnInit {
   selectedArticle = signal<NewsPost | null>(null);
   rejectReason = signal('');
   isProcessing = signal(false);
+  searchQuery = signal('');
+
+  filteredArticles = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return this.pendingArticles();
+    return this.pendingArticles().filter(a =>
+      (a.title || '').toLowerCase().includes(q) ||
+      ((a as any).authorName || '').toLowerCase().includes(q) ||
+      ((a as any).articleCategory || '').toLowerCase().includes(q)
+    );
+  });
 
   ngOnInit() {
     this.loadPending();

@@ -15,7 +15,7 @@ namespace GHCAA.Domain.Models
         public FinancialRecordType RecordType { get; set; }
 
         [Required]
-        public FinancialCategory Category { get; set; }
+        public FinancialCategory FinancialCategory { get; set; }
 
         [Required]
         public DateTime Date { get; set; }

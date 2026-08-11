@@ -13,7 +13,7 @@
         margin-top: 0;
         margin-bottom: 2rem;
         font-size: 1.25rem;
-        color: var(--accent-color);
+        color: var(--accent-text);
         font-weight: 800;
         letter-spacing: -0.5px;
         text-transform: uppercase;
@@ -30,21 +30,22 @@
 }
 
 .album-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--card-bg);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
     border-radius: 24px;
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     display: flex;
     flex-direction: column;
+    box-shadow: var(--shadow-sm);
 
     &:hover {
         transform: translateY(-8px);
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--card-bg-hover);
         border-color: rgba(var(--accent-rgb), 0.3);
-        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+        box-shadow: var(--shadow-lg);
 
         .album-preview img {
             transform: scale(1.1);
@@ -99,7 +100,7 @@
             margin: 0 0 0.5rem 0;
             font-size: 1.25rem;
             font-weight: 800;
-            color: #fff;
+            color: var(--text-main);
             letter-spacing: -0.02em;
         }
 
@@ -134,12 +135,17 @@
 
     }
 
+    /* 30.19: was a bespoke `justify-content: space-between` flex row with an inner
+       `.flex.gap-2` sub-wrapper — the two groups sat flush against the card edges,
+       crowding the trailing delete icon-btn against "Edit Info" on narrower cards.
+       Now `.album-actions` also carries the shared `.action-group` class (padding/border
+       stay here, gap/flex-wrap come from `.action-group` in styles.scss); `.ml-auto` on
+       the delete button pushes it to the row end while keeping the same gap as its
+       siblings. */
     .album-actions {
         padding: 1.25rem 1.75rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        border-top: 1px solid var(--card-border);
+        flex-wrap: wrap;
     }
 }
 
@@ -162,7 +168,7 @@
     }
 
     &.featured {
-        color: var(--accent-color);
+        color: var(--accent-text);
         border-color: rgba(var(--accent-rgb), 0.3);
     }
 
@@ -171,37 +177,13 @@
     }
 }
 
-.icon-btn {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    transition: all 0.3s;
-    cursor: pointer;
-
-    &:hover {
-        background: #ef4444;
-        color: #fff;
-        transform: scale(1.1);
-    }
-}
+/* .icon-btn moved to central styles.scss (30.2) — do NOT re-add a block here. Delete-album
+   button here previously always rendered red (no .delete modifier) — now uses the modifier
+   explicitly so it matches every other danger icon-button app-wide. */
 
 
 
-.pill {
-    background: rgba(var(--primary-rgb), 0.03);
-    padding: 0.25rem 0.75rem;
-    border-radius: 6px;
-    font-size: 0.72rem;
-    font-weight: 800;
-    border: 1px solid var(--glass-border);
-    color: var(--text-muted);
-}
+/* .pill lives in central styles.scss — do NOT re-add it here. */
 
 .loading-state,
 .empty-state {
@@ -237,7 +219,7 @@
     overflow: hidden;
     border-radius: 8px;
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--card-bg-hover);
 
     img {
         width: 100%;

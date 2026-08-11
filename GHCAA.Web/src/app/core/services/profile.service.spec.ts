@@ -1,3 +1,4 @@
+import { createAuthServiceMock } from '../testing/testing-utils';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ProfileService } from './profile.service';
@@ -22,16 +23,7 @@ describe('ProfileService', () => {
         category: 'None',
         gender: 'Male',
         bloodGroup: 'APositive',
-        highestCertificate: 'BSc',
-        highestCertificateGroup: 'Science',
-        highestCertificateSubject: 'CSE',
-        highestCertificatePassingYear: 2020,
-        ghcLastCertificate: 'HSC',
-        ghcLastCertificateGroup: 'Science',
-        ghcLastCertificateSubject: 'Science',
-        ghcLastCertificatePassingYear: 2016,
-        professionalSector: 'IT',
-        designation: 'Engineer',
+    
         presentAddress: 'Dhaka',
         permanentAddress: 'Dhaka',
         isMobilePublic: true,

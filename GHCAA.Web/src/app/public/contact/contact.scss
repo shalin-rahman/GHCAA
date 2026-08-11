@@ -48,8 +48,9 @@
 
 .contact-grid {
     display: grid;
-    grid-template-columns: 400px 1fr;
-    gap: 3rem;
+    /* Info panel shrinks with the viewport instead of holding a fixed 400px until it collapses. */
+    grid-template-columns: minmax(280px, 380px) 1fr;
+    gap: 2.5rem;
 }
 
 .info-panel {
@@ -58,7 +59,7 @@
 
     h3 {
         font-size: 1.75rem;
-        color: var(--accent-color);
+        color: var(--accent-text);
         margin-bottom: 2rem;
     }
 }
@@ -83,7 +84,7 @@
             font-size: 0.72rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--accent-color);
+            color: var(--accent-text);
             margin-bottom: 0.4rem;
             font-weight: 900;
         }
@@ -148,28 +149,55 @@
     }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 900px) {
+    /* Stack only once the two columns genuinely stop fitting — stacking early doubles page height. */
     .contact-grid {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 1.75rem;
     }
-    
+
     .info-panel, .form-panel {
-        padding: 2.5rem;
+        padding: 2rem;
     }
 }
 
 @media (max-width: 768px) {
     .page-header {
-        height: 35vh;
+        height: auto;
+        min-height: 28vh;
+        padding: 3rem 0;
     }
 
     .header-content h1 {
-        font-size: 2.5rem;
+        font-size: 2.25rem;
         letter-spacing: -1px;
     }
 
     .main-content {
-        padding: 3rem 0;
+        padding: 2.5rem 0;
+    }
+}
+
+@media (max-width: 560px) {
+    .info-panel, .form-panel {
+        padding: 1.5rem;
+    }
+
+    .map-embed iframe {
+        height: 170px;
+    }
+}
+/* Optional Google Maps embed — only rendered when an allow-listed URL is configured. */
+.map-embed {
+    margin-top: 1.5rem;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+
+    iframe {
+        display: block;
+        width: 100%;
+        height: 220px;
+        border: 0;
     }
 }

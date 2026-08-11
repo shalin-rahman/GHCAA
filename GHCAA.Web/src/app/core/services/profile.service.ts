@@ -44,16 +44,6 @@ export class ProfileService {
                 permanentAddress: 'Backend Server',
                 gender: 'Male',
                 bloodGroup: 'APositive',
-                highestCertificate: 'Admin',
-                highestCertificateGroup: 'Admin',
-                highestCertificateSubject: 'Admin',
-                highestCertificatePassingYear: 0,
-                ghcLastCertificate: 'Admin',
-                ghcLastCertificateGroup: 'Admin',
-                ghcLastCertificateSubject: 'Admin',
-                ghcLastCertificatePassingYear: 0,
-                professionalSector: 'IT',
-                designation: 'SuperAdmin',
                 isMobilePublic: false,
                 isEmailPublic: false,
                 isAddressPublic: false
@@ -75,6 +65,12 @@ export class ProfileService {
         const formData = new FormData();
         formData.append('photo', file);
         return this.http.post<any>(`${this.apiUrl}/photo`, formData);
+    }
+
+    uploadSignature(file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('signature', file);
+        return this.http.post<any>(`${this.apiUrl}/signature`, formData);
     }
 
     getCertificate(): Observable<{ dataUri: string }> {

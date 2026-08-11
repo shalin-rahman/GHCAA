@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Register } from './register';
 import { RegistrationService } from '../../core/services/registration.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { GatewaysService } from '../../core/services/gateways.service';
+import { FinancialService } from '../../core/services/financial.service';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
@@ -11,6 +13,10 @@ describe('Register Component', () => {
     let regServiceMock: any;
     let notificationServiceMock: any;
     let routerMock: any;
+    const mockForm = { 
+        invalid: false, 
+        control: { markAllAsTouched: vi.fn() } 
+    };
 
     beforeEach(async () => {
         regServiceMock = {
@@ -29,12 +35,22 @@ describe('Register Component', () => {
             navigate: vi.fn()
         };
 
+        const gatewaysServiceMock = {
+            initiatePayment: vi.fn().mockReturnValue(of({}))
+        };
+
+        const financialServiceMock = {
+            getApplicableFee: vi.fn().mockReturnValue(of({ amount: 500 }))
+        };
+
         await TestBed.configureTestingModule({
             imports: [Register],
             providers: [
                 { provide: RegistrationService, useValue: regServiceMock },
                 { provide: NotificationService, useValue: notificationServiceMock },
-                { provide: Router, useValue: routerMock }
+                { provide: Router, useValue: routerMock },
+                { provide: GatewaysService, useValue: gatewaysServiceMock },
+                { provide: FinancialService, useValue: financialServiceMock }
             ]
         }).compileComponents();
 
@@ -47,12 +63,19 @@ describe('Register Component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should navigate between steps', () => {
+    it('should navigate between all 4 steps', () => {
         expect(component.currentStep()).toBe(1);
-        component.nextStep();
+        component.nextStep(mockForm);
         expect(component.currentStep()).toBe(2);
+        component.nextStep(mockForm);
+        expect(component.currentStep()).toBe(3);
+        
+        // Final transition to Step 4 is usually handled by onSubmit response
+        component.currentStep.set(4);
+        expect(component.currentStep()).toBe(4);
+
         component.prevStep();
-        expect(component.currentStep()).toBe(1);
+        expect(component.currentStep()).toBe(3);
     });
 
     it('should add/remove academic history', () => {
@@ -61,5 +84,34 @@ describe('Register Component', () => {
         expect(component.model.AcademicHistory.length).toBe(initialCount + 1);
         component.removeAcademic(initialCount);
         expect(component.model.AcademicHistory.length).toBe(initialCount);
+    });
+
+    it('should handle payment method change', () => {
+        const mockMethod = { id: 101, displayName: 'Test bKash' };
+        component.onPaymentMethodChange(mockMethod);
+        expect(component.model.PaymentMethodId).toBe(101);
+        expect(component.selectedPaymentMethod()).toEqual(mockMethod);
+    });
+
+    it('should handle transaction reference change', () => {
+        const mockRef = 'T-999-XYZ';
+        component.onReferenceSelected(mockRef);
+        expect(component.model.TransactionId).toBe(mockRef);
+    });
+
+    it('should handle payment receipt selection', () => {
+        const mockFile = new File([''], 'receipt.pdf', { type: 'application/pdf' });
+        component.onPaymentReceiptSelected(mockFile);
+        expect(component.files['paymentProof']).toBe(mockFile);
+    });
+
+    it('should fail submission if payment method is missing', () => {
+        component.model.PaymentMethodId = 0;
+        component.onSubmit(mockForm);
+        
+        expect(notificationServiceMock.error).toHaveBeenCalledWith(
+            expect.stringContaining('select a payment method')
+        );
+        expect(regServiceMock.register).not.toHaveBeenCalled();
     });
 });

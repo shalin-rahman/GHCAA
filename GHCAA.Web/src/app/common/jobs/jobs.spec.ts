@@ -1,3 +1,4 @@
+import { createAuthServiceMock } from '../../core/testing/testing-utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Jobs } from './jobs';
 import { JobService } from '../../core/services/job.service';
@@ -55,5 +56,6 @@ describe('Jobs Component', () => {
     it('should format category names correctly', () => {
         expect(component.getCategoryName('IT')).toBe('IT & Software Development');
         expect(component.getCategoryName('Mentorship')).toBe('Mentorship & Career Guidance');
+        expect(component.getCategoryName('PublicSector')).toBe('Govt. & Public Sector');
     });
 });

@@ -9,6 +9,13 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using QuestPDF.Previewer;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -17,12 +24,42 @@ namespace GHCAA.Infrastructure.Services
         private readonly ApplicationDbContext _db;
         private readonly ICommunicationService _communication;
         private readonly INotificationService _notification;
+        private readonly IFileStorageService _storage;
+        private readonly IRealTimeService _realTime;
+        private readonly ILogger<FinancialService> _logger;
+        private readonly IConfiguration _config;
+        private readonly IUserService _userService;
+        private readonly IActivityService _activityService;
+        private readonly IGamificationService _gamification;
+        private readonly IOrgConfigService _orgConfigService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public FinancialService(ApplicationDbContext db, ICommunicationService communication, INotificationService notification)
+        public FinancialService(
+            ApplicationDbContext db,
+            ICommunicationService communication,
+            INotificationService notification,
+            IFileStorageService storage,
+            IRealTimeService realTime,
+            ILogger<FinancialService> logger,
+            IConfiguration config,
+            IUserService userService,
+            IActivityService activityService,
+            IGamificationService gamification,
+            IOrgConfigService orgConfigService,
+            IServiceProvider serviceProvider)
         {
             _db = db;
             _communication = communication;
             _notification = notification;
+            _storage = storage;
+            _realTime = realTime;
+            _logger = logger;
+            _config = config;
+            _userService = userService;
+            _activityService = activityService;
+            _gamification = gamification;
+            _orgConfigService = orgConfigService;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<IEnumerable<PaymentHistoryDto>> GetMemberPaymentHistoryAsync(int memberId, CancellationToken cancellationToken = default)
@@ -31,13 +68,13 @@ namespace GHCAA.Infrastructure.Services
                 .Where(p => p.MemberId == memberId)
                 .OrderByDescending(p => p.PaidAt)
                 .ToListAsync(cancellationToken);
-            
+
             return history.Select(MapToPaymentDto);
         }
 
         public async Task<PaymentHistoryDto> RecordPaymentAsync(CreatePaymentHistoryDto dto, CancellationToken cancellationToken = default)
         {
-            if (!dto.MemberId.HasValue) 
+            if (!dto.MemberId.HasValue)
                 throw new ArgumentException("MemberId is required for recording payment.");
 
             var payment = new PaymentHistory
@@ -47,18 +84,44 @@ namespace GHCAA.Infrastructure.Services
                 Amount = dto.Amount,
                 PaidAt = DateTime.SpecifyKind(dto.PaidAt, DateTimeKind.Utc),
                 Status = Enums.PaymentStatus.Pending,
-                Category = dto.Category,
+                FinancialCategory = dto.FinancialCategory,
+                PaymentMethod = dto.PaymentMethod,
                 Notes = dto.Notes
             };
 
             await _db.PaymentHistories.AddAsync(payment, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
 
+            // Handle Receipt Upload if present
+            if (dto.Receipt != null)
+            {
+                using var ms = new MemoryStream();
+                await dto.Receipt.CopyToAsync(ms, cancellationToken);
+                ms.Position = 0;
+
+                var path = await _storage.SaveFileAsync(ms, dto.Receipt.FileName, payment.MemberId, Enums.FileUploadType.PaymentProof, cancellationToken);
+
+                payment.ReceiptPath = path;
+
+                // Track in FileUploads table too
+                var fu = new FileUpload
+                {
+                    MemberId = payment.MemberId,
+                    UploadType = Enums.FileUploadType.PaymentProof,
+                    FileName = dto.Receipt.FileName,
+                    FilePath = path,
+                    SizeBytes = dto.Receipt.Length
+                };
+                await _db.FileUploads.AddAsync(fu, cancellationToken);
+
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+
             // Send Notification
             // We use simple fire-and-forget or await? The interface awaits.
             // Using try-catch for notification to not block payment recording if email fails?
             // Existing code awaited it. keeping it consistent.
-            try 
+            try
             {
                 await _communication.SendIndividualEmailAsync(payment.MemberId, "PAYMENT_RECEIVED", new Dictionary<string, string>
                 {
@@ -66,7 +129,7 @@ namespace GHCAA.Infrastructure.Services
                     { "TrxID", payment.TransactionId }
                 }, cancellationToken);
             }
-            catch 
+            catch
             {
                 // Log warning? For now just continue as payment is recorded.
             }
@@ -76,7 +139,7 @@ namespace GHCAA.Infrastructure.Services
                 payment.MemberId,
                 "Payment Recorded",
                 $"Your payment of {payment.Amount:N2} (TrxID: {payment.TransactionId}) has been received and is pending verification.",
-                "Payment",
+                Enums.NotificationType.GeneralSystem,
                 "/portal/payments",
                 cancellationToken);
 
@@ -89,34 +152,109 @@ namespace GHCAA.Infrastructure.Services
             if (payment == null) return false;
 
             payment.Status = status;
-            if (notes != null) payment.Notes = notes;
+            if (!string.IsNullOrEmpty(notes))
+            {
+                payment.Notes = string.IsNullOrEmpty(payment.Notes) ? notes : $"{payment.Notes} | {notes}";
+            }
 
             await _db.SaveChangesAsync(cancellationToken);
 
-            // Send Notification
-            try
+            if (status == Enums.PaymentStatus.Completed)
             {
-                await _communication.SendIndividualEmailAsync(payment.MemberId, "PAYMENT_STATUS_UPDATED", new Dictionary<string, string>
-                {
-                    { "Status", status.ToString() },
-                    { "TrxID", payment.TransactionId }
-                }, cancellationToken);
-            }
-            catch
-            {
-                // Ignore email failure
-            }
+                await _notification.CreateNotificationAsync(payment.MemberId, "Payment Verified", $"Your payment of {payment.Amount:N2} has been successfully verified.", Enums.NotificationType.GeneralSystem, "/finance/history", cancellationToken);
 
-            // In-app Notification
-            await _notification.CreateNotificationAsync(
-                payment.MemberId,
-                "Payment Status Updated",
-                $"The status of your transaction {payment.TransactionId} has been updated to {status}.",
-                "Payment",
-                "/portal/payments",
-                cancellationToken);
+                // Trigger Live Admin Alert (Real-time Audit Trace)
+                await _realTime.SendAdminAlertAsync("NEW_PAYMENT", new
+                {
+                    MemberId = payment.MemberId,
+                    Amount = payment.Amount,
+                    TransactionId = payment.TransactionId,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
 
             return true;
+        }
+
+        public async Task<bool> ProcessGatewayPaymentAsync(string transactionId, decimal confirmedAmount = 0, string gatewayNotes = "", CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories.FirstOrDefaultAsync(p => p.TransactionId == transactionId, cancellationToken);
+            if (payment == null || payment.Status == Enums.PaymentStatus.Completed) return false;
+
+            // Security Check
+            if (confirmedAmount > 0 && Math.Abs(payment.Amount - confirmedAmount) > 0.01m)
+            {
+                await UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Failed, $"Amount mismatch detected. Paid: {confirmedAmount}, Expected: {payment.Amount}. Gateway: {gatewayNotes}", cancellationToken);
+                return false;
+            }
+
+            // 1. Mark as Completed
+            await UpdatePaymentStatusAsync(payment.Id, Enums.PaymentStatus.Completed, gatewayNotes, cancellationToken);
+
+            // 2. Handle Automated Approvals
+            await HandleAutomatedApprovalsAfterPaymentAsync(payment, cancellationToken);
+
+            return true;
+        }
+
+        private async Task HandleAutomatedApprovalsAfterPaymentAsync(PaymentHistory payment, CancellationToken cancellationToken)
+        {
+            // Case A: Event Registration
+            if (payment.Notes != null && payment.Notes.Contains("EVT-REG-"))
+            {
+                var regMatch = payment.Notes.Split("EVT-REG-")[1].Split(" ")[0];
+                var regRef = "EVT-REG-" + regMatch;
+
+                var registration = await _db.EventRegistrations.Include(r => r.Event).FirstOrDefaultAsync(r => r.PaymentReference == regRef, cancellationToken);
+                if (registration != null && registration.Status == Enums.EventRegistrationStatus.Pending)
+                {
+                    var expected = registration.Event?.RegistrationFee ?? registration.ContributionAmount ?? 0;
+                    if (payment.Amount >= expected)
+                    {
+                        var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";
+                        int.TryParse(adminIdStr, out var adminId);
+
+                        registration.Status = Enums.EventRegistrationStatus.Approved;
+                        registration.ApprovedAt = DateTime.UtcNow;
+                        registration.ApprovedByAdminId = adminId; // System Admin
+                        await _db.SaveChangesAsync(cancellationToken);
+
+                        await _notification.CreateNotificationAsync(registration.MemberId ?? 0, "Registration Approved", $"Your registration for {registration.Event?.Title} is now confirmed.", Enums.NotificationType.RegistrationUpdate, "/events", cancellationToken);
+                    }
+                }
+            }
+
+            // Case B: Member Admission Approval
+            if (payment.MemberId > 0)
+            {
+                var member = await _db.Members.FindAsync(new object[] { payment.MemberId }, cancellationToken);
+                if (member != null && member.Status == Enums.MembershipStatus.Applied)
+                {
+                    // Verify if it covers the dues
+                    var fee = await GetApplicableMembershipFeeAsync(member.MembershipType, DateTime.UtcNow.Year, cancellationToken);
+                    if (payment.Amount >= fee)
+                    {
+                        // 29C.1: Delegate to the single canonical approval path in MemberService
+                        // (Serializable transaction, Id-ordered serial generation, profile/status/
+                        // payment validation, user-account creation inside the transaction) instead
+                        // of a divergent inline copy. MemberService depends on IFinancialService, so
+                        // resolve it lazily to avoid a constructor DI cycle. If approval fails
+                        // (member ineligible / transient error), log and leave the member Applied for
+                        // manual admin review rather than half-approving.
+                        var adminIdStr = _config["GeneralSettings:SystemAdminId"] ?? "1";
+                        int.TryParse(adminIdStr, out var adminId);
+                        try
+                        {
+                            var memberService = _serviceProvider.GetRequiredService<IMemberService>();
+                            await memberService.ApproveMemberAsync(member.Id, adminId, cancellationToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Auto-approval after payment failed for member {MemberId}; left as Applied for manual review.", member.Id);
+                        }
+                    }
+                }
+            }
         }
 
         public async Task<IEnumerable<MembershipHistoryDto>> GetMemberMembershipHistoryAsync(int memberId, CancellationToken cancellationToken = default)
@@ -183,9 +321,12 @@ namespace GHCAA.Infrastructure.Services
             return configs.Select(c => new MembershipFeeConfigDto
             {
                 Id = c.Id,
+                Category = c.Category,
                 MembershipType = c.MembershipType.ToString(),
                 Amount = c.Amount,
                 EffectiveDate = c.EffectiveDate,
+                EffectiveTo = c.EffectiveTo,
+                IsActive = c.IsActive,
                 Description = c.Description
             });
         }
@@ -199,9 +340,12 @@ namespace GHCAA.Infrastructure.Services
 
             var config = new MembershipFeeConfig
             {
+                Category = dto.Category,
                 MembershipType = type,
                 Amount = dto.Amount,
                 EffectiveDate = DateTime.SpecifyKind(dto.EffectiveDate, DateTimeKind.Utc),
+                EffectiveTo = dto.EffectiveTo.HasValue ? DateTime.SpecifyKind(dto.EffectiveTo.Value, DateTimeKind.Utc) : null,
+                IsActive = dto.IsActive,
                 Description = dto.Description,
                 CreatedByAdminId = adminMemberId,
                 CreatedAt = DateTime.UtcNow
@@ -213,9 +357,12 @@ namespace GHCAA.Infrastructure.Services
             return new MembershipFeeConfigDto
             {
                 Id = config.Id,
+                Category = config.Category,
                 MembershipType = config.MembershipType.ToString(),
                 Amount = config.Amount,
                 EffectiveDate = config.EffectiveDate,
+                EffectiveTo = config.EffectiveTo,
+                IsActive = config.IsActive,
                 Description = config.Description
             };
         }
@@ -225,8 +372,11 @@ namespace GHCAA.Infrastructure.Services
             var config = await _db.MembershipFeeConfigs.FindAsync(new object[] { dto.Id }, cancellationToken);
             if (config == null) throw new KeyNotFoundException($"MembershipFeeConfig with ID {dto.Id} not found.");
 
+            if (dto.Category.HasValue) config.Category = dto.Category.Value;
             config.Amount = dto.Amount;
             config.EffectiveDate = DateTime.SpecifyKind(dto.EffectiveDate, DateTimeKind.Utc);
+            config.EffectiveTo = dto.EffectiveTo.HasValue ? DateTime.SpecifyKind(dto.EffectiveTo.Value, DateTimeKind.Utc) : null;
+            config.IsActive = dto.IsActive;
             config.Description = dto.Description;
             // distinct from "CreatedBy", we might want "UpdatedBy" later, but for now simple update.
 
@@ -235,30 +385,26 @@ namespace GHCAA.Infrastructure.Services
             return new MembershipFeeConfigDto
             {
                 Id = config.Id,
+                Category = config.Category,
                 MembershipType = config.MembershipType.ToString(),
                 Amount = config.Amount,
                 EffectiveDate = config.EffectiveDate,
+                EffectiveTo = config.EffectiveTo,
+                IsActive = config.IsActive,
                 Description = config.Description
             };
         }
 
         public async Task<decimal> GetApplicableMembershipFeeAsync(Enums.MembershipType type, int year, CancellationToken cancellationToken = default)
         {
-            // Logic: Find the latest config that is effective on or before the start of the target year (or end of it? usually start).
-            // Let's assume dues for 2024 are based on the fee set before or during 2024.
-            // A fee set on Jan 1 2024 is applicable for 2024.
-            // A fee set on Dec 31 2023 is applicable for 2024.
-            // A fee set on Feb 1 2024 might be applicable for 2025?
-            // "Applicable Date" usually means "Any dues generated for a period starting AFTER this date".
-            // Let's use: The most recent config where EffectiveDate <= Dec 31 of that year. 
-            // Actually simpler: typically fees don't change mid-year. 
-            // Let's Find the config with max EffectiveDate where EffectiveDate <= Now (or generation time).
-            // But we generate for a specific year.
-            
-            var targetDate = new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc); // End of the target year
+            return await GetApplicableFeeAsync(Enums.FinancialCategory.MembershipFee, type, new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc), cancellationToken);
+        }
 
+        public async Task<decimal> GetApplicableFeeAsync(Enums.FinancialCategory category, Enums.MembershipType type, DateTime date, CancellationToken cancellationToken = default)
+        {
+            // The most recent config where EffectiveDate <= target date AND (EffectiveTo == null OR EffectiveTo >= target date) AND IsActive == true
             var config = await _db.MembershipFeeConfigs
-                .Where(c => c.MembershipType == type && c.EffectiveDate <= targetDate)
+                .Where(c => c.IsActive && c.Category == category && c.MembershipType == type && c.EffectiveDate <= date && (c.EffectiveTo == null || c.EffectiveTo >= date))
                 .OrderByDescending(c => c.EffectiveDate)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -275,10 +421,10 @@ namespace GHCAA.Infrastructure.Services
             // Pre-fetch fees to avoid N+1 queries
             var membershipTypes = Enum.GetValues<Enums.MembershipType>();
             var feeMap = new Dictionary<Enums.MembershipType, decimal>();
-            
+
             foreach (var type in membershipTypes)
             {
-                 feeMap[type] = await GetApplicableMembershipFeeAsync(type, year, cancellationToken);
+                feeMap[type] = await GetApplicableMembershipFeeAsync(type, year, cancellationToken);
             }
 
             foreach (var member in activeMembers)
@@ -302,7 +448,7 @@ namespace GHCAA.Infrastructure.Services
                     DueDate = new DateTime(year, 3, 31, 0, 0, 0, DateTimeKind.Utc),
                     IsPaid = false
                 };
-                
+
                 _db.MembershipDues.Add(due);
             }
 
@@ -344,6 +490,165 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
+        public async Task<byte[]> GenerateTaxReceiptAsync(int paymentId, CancellationToken cancellationToken = default)
+        {
+            var payment = await _db.PaymentHistories
+                .Include(p => p.Member)
+                .FirstOrDefaultAsync(p => p.Id == paymentId, cancellationToken);
+
+            if (payment == null) throw new KeyNotFoundException("Payment record not found.");
+            if (payment.Member == null) throw new InvalidOperationException("Payment has no associated member.");
+
+            var config = await _orgConfigService.GetConfigAsync();
+
+            // Create PDF using QuestPDF
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(1, Unit.Inch);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(11));
+
+                    page.Header().Row(row =>
+                    {
+                        row.RelativeItem().Column(col =>
+                        {
+                            col.Item().Text("PAYMENT RECEIPT").FontSize(24).Bold().FontColor(Colors.Blue.Medium);
+                            col.Item().Text($"{config.Branding.ShortName}").FontSize(14).Bold();
+                        });
+
+                        row.RelativeItem().AlignRight().Column(col =>
+                        {
+                            col.Item().Text($"Receipt #: {payment.Id:D6}");
+                            col.Item().Text($"Date: {payment.PaidAt:dd MMM yyyy}");
+                        });
+                    });
+
+                    page.Content().PaddingVertical(1, Unit.Centimetre).Column(col =>
+                    {
+                        col.Item().BorderBottom(1).PaddingBottom(5).Text("Member Information").Bold();
+                        col.Item().PaddingTop(5).Row(row =>
+                        {
+                            row.RelativeItem().Text("Name:");
+                            row.RelativeItem().Text(payment.Member.FullName);
+                        });
+                        col.Item().Row(row =>
+                        {
+                            row.RelativeItem().Text("Membership ID:");
+                            row.RelativeItem().Text(payment.Member.MembershipNumber ?? "Pending");
+                        });
+
+                        col.Item().PaddingVertical(20).Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(30);
+                                columns.RelativeColumn();
+                                columns.ConstantColumn(100);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Text("#");
+                                header.Cell().Text("Description");
+                                header.Cell().AlignRight().Text("Amount (BDT)");
+                                header.Cell().Element(Block).PaddingBottom(5).BorderBottom(1);
+                            });
+
+                            table.Cell().Text("1");
+                            table.Cell().Text($"{payment.FinancialCategory} - TrxID: {payment.TransactionId}");
+                            table.Cell().AlignRight().Text($"{payment.Amount:N2}");
+                        });
+
+                        col.Item().AlignRight().PaddingRight(5).Text($"Total: {payment.Amount:N2} BDT").FontSize(14).Bold();
+
+                        col.Item().PaddingTop(50).Text("Note: This is an automatically generated receipt and does not require a signature.").FontSize(10).Italic().FontColor(Colors.Grey.Medium);
+                    });
+
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                    });
+                });
+            });
+
+            using var stream = new MemoryStream();
+            document.GeneratePdf(stream);
+            return stream.ToArray();
+        }
+
+        static IContainer Block(IContainer container)
+        {
+            return container
+                .Border(1)
+                .Background(Colors.Grey.Lighten3)
+                .ShowOnce()
+                .MinWidth(50)
+                .MinHeight(50)
+                .AlignCenter()
+                .AlignMiddle();
+        }
+
+        // Saved Payment Methods
+        public async Task<IEnumerable<SavedPaymentMethodDto>> GetSavedPaymentMethodsAsync(int memberId, CancellationToken cancellationToken = default)
+        {
+            var methods = await _db.SavedPaymentMethods
+                .Where(s => s.MemberId == memberId)
+                .OrderByDescending(s => s.LastUsedAt)
+                .ToListAsync(cancellationToken);
+
+            return methods.Select(s => new SavedPaymentMethodDto
+            {
+                Id = s.Id,
+                DisplayName = s.DisplayName,
+                Method = s.Method,
+                AccountNumber = s.AccountNumber,
+                Icon = s.Icon,
+                IsDefault = s.IsDefault
+            });
+        }
+
+        public async Task<SavedPaymentMethodDto> AddSavedPaymentMethodAsync(int memberId, CreateSavedPaymentMethodDto dto, CancellationToken cancellationToken = default)
+        {
+            var method = new SavedPaymentMethod
+            {
+                MemberId = memberId,
+                DisplayName = dto.DisplayName,
+                Method = dto.Method,
+                AccountNumber = dto.AccountNumber,
+                CreatedAt = DateTime.UtcNow,
+                LastUsedAt = DateTime.UtcNow
+            };
+
+            await _db.SavedPaymentMethods.AddAsync(method, cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return new SavedPaymentMethodDto
+            {
+                Id = method.Id,
+                DisplayName = method.DisplayName,
+                Method = method.Method,
+                AccountNumber = method.AccountNumber,
+                Icon = method.Icon,
+                IsDefault = method.IsDefault
+            };
+        }
+
+        public async Task<bool> DeleteSavedPaymentMethodAsync(int memberId, int id, CancellationToken cancellationToken = default)
+        {
+            var method = await _db.SavedPaymentMethods
+                .FirstOrDefaultAsync(s => s.Id == id && s.MemberId == memberId, cancellationToken);
+
+            if (method == null) return false;
+
+            _db.SavedPaymentMethods.Remove(method);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
         private static PaymentHistoryDto MapToPaymentDto(PaymentHistory p)
         {
             return new PaymentHistoryDto
@@ -354,7 +659,8 @@ namespace GHCAA.Infrastructure.Services
                 Amount = p.Amount,
                 PaidAt = p.PaidAt,
                 Status = p.Status,
-                Category = p.Category,
+                FinancialCategory = p.FinancialCategory,
+                PaymentMethod = p.PaymentMethod,
                 Notes = p.Notes
             };
         }

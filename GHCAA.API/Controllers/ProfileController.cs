@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -15,12 +16,14 @@ namespace GHCAA.API.Controllers
         private readonly IMemberService _memberService;
         private readonly IUserService _userService;
         private readonly IIDCardService _idCardService;
+        private readonly IFileValidationService _fileValidationService;
 
-        public ProfileController(IMemberService memberService, IUserService userService, IIDCardService idCardService)
+        public ProfileController(IMemberService memberService, IUserService userService, IIDCardService idCardService, IFileValidationService fileValidationService)
         {
             _memberService = memberService;
             _userService = userService;
             _idCardService = idCardService;
+            _fileValidationService = fileValidationService;
         }
 
         [HttpGet]
@@ -75,6 +78,16 @@ namespace GHCAA.API.Controllers
             return Ok(new { DataUri = dataUri });
         }
 
+        [HttpGet("id-card/pdf")]
+        public async Task<IActionResult> GetIDCardPdf(CancellationToken cancellationToken)
+        {
+            var memberId = GetMemberId();
+            if (memberId == 0) return Unauthorized();
+
+            var pdfBytes = await _idCardService.GenerateIDCardPdfAsync(memberId, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"ID_Card_{memberId}.pdf");
+        }
+
         [HttpGet("certificate")]
         public async Task<IActionResult> GetCertificate(CancellationToken cancellationToken)
         {
@@ -85,19 +98,23 @@ namespace GHCAA.API.Controllers
             return Ok(new { DataUri = dataUri });
         }
 
+        [HttpGet("certificate/pdf")]
+        public async Task<IActionResult> GetCertificatePdf(CancellationToken cancellationToken)
+        {
+            var memberId = GetMemberId();
+            if (memberId == 0) return Unauthorized();
+
+            var pdfBytes = await _idCardService.GenerateCertificatePdfAsync(memberId, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"Certificate_{memberId}.pdf");
+        }
+
         [HttpPost("photo")]
         public async Task<IActionResult> UploadPhoto(IFormFile photo, CancellationToken cancellationToken)
         {
             var memberId = GetMemberId();
             if (memberId == 0) return Unauthorized();
-            if (photo == null || photo.Length == 0) return BadRequest(new { Message = "No file provided." });
-
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-            if (!allowedTypes.Contains(photo.ContentType.ToLower()))
-                return BadRequest(new { Message = "Only JPG, PNG, or WebP images are allowed." });
-
-            if (photo.Length > 5 * 1024 * 1024)
-                return BadRequest(new { Message = "Photo must be under 5MB." });
+            var validation = _fileValidationService.ValidateFormFile(photo, FileCategory.Image, 5 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
 
             var dto = new UploadedFileDto
             {
@@ -108,6 +125,25 @@ namespace GHCAA.API.Controllers
 
             var photoPath = await _memberService.UpdateMemberPhotoAsync(memberId, dto, cancellationToken);
             return Ok(new { Message = "Photo updated successfully.", PhotoPath = photoPath });
+        }
+
+        [HttpPost("signature")]
+        public async Task<IActionResult> UploadSignature(IFormFile signature, CancellationToken cancellationToken)
+        {
+            var memberId = GetMemberId();
+            if (memberId == 0) return Unauthorized();
+            var validation = _fileValidationService.ValidateFormFile(signature, FileCategory.Image, 2 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+
+            var dto = new UploadedFileDto
+            {
+                FileName = signature.FileName,
+                Length = signature.Length,
+                Content = signature.OpenReadStream()
+            };
+
+            var signaturePath = await _memberService.UpdateMemberSignatureAsync(memberId, dto, cancellationToken);
+            return Ok(new { Message = "Signature updated successfully.", SignaturePath = signaturePath });
         }
 
         private int GetMemberId()

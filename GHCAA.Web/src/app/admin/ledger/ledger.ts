@@ -6,12 +6,17 @@ import { FinancialRecord, LedgerSummary } from '../../core/models/business.model
 import { NotificationService } from '../../core/services/notification.service';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
+import { getFinancialCategoryLabel } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { toWireDate, toDisplayDate, parseDisplayDate } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-ledger',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent],
   templateUrl: './ledger.html',
   styleUrl: './ledger.scss'
 })
@@ -35,22 +40,28 @@ export class Ledger implements OnInit {
   typeFilter = signal<any>(null);
 
   // PDF Export Config
-  pdfHeaders = ['Date', 'Type', 'Category', 'Description', 'Amount'];
+  pdfHeaders = ['Date', 'Type', 'Category', 'Reference', 'Description', 'Amount'];
   pdfMapper = (r: any) => [
     new Date(r.date).toLocaleDateString(),
     r.recordType === 'Income' ? 'Income' : 'Expense',
-    this.getCategoryName(r.category),
+    this.getCategoryName(r.financialCategory),
+    r.reference || '—',
     r.description,
     r.amount.toLocaleString()
   ];
 
 
+  formatDateToDMY(d: any) {
+    return toDisplayDate(d);
+  }
+
   newRecord: any = {
-    date: new Date().toISOString().split('T')[0],
+    date: this.formatDateToDMY(new Date()),
     amount: 1000,
     recordType: 'Income',
-    category: 'MembershipFee',
+    financialCategory: 'MembershipFee',
     description: '',
+    reference: '',
     year: new Date().getFullYear()
   };
 
@@ -73,7 +84,11 @@ export class Ledger implements OnInit {
   loadData() {
     const year = new Date().getFullYear();
     this.loading.set(true);
-    this.ledgerService.getSummary(year).subscribe(s => this.summary.set(s));
+    // 29F.2: surface HTTP failures instead of failing silently
+    this.ledgerService.getSummary(year).subscribe({
+      next: s => this.summary.set(s),
+      error: () => this.notify.error('Failed to load ledger summary.')
+    });
     
     const params: any = {
       page: this.currentPage(),
@@ -129,16 +144,20 @@ export class Ledger implements OnInit {
   }
 
   getCategoryName(id: any): string {
-    const c = this.categories.find(x => x.id == id);
-    return c ? c.name : 'Other';
+    return getFinancialCategoryLabel(id);
   }
 
   addRecord() {
     this.submitting.set(true);
-    // Ensure year is correct based on date
-    this.newRecord.year = new Date(this.newRecord.date).getFullYear();
+    // Ensure year is correct based on date (parse dd-MM-yyyy safely)
+    const recordDate = parseDisplayDate(this.newRecord.date);
+    const payload = {
+      ...this.newRecord,
+      date: toWireDate(this.newRecord.date),
+      year: recordDate ? recordDate.getFullYear() : this.newRecord.year
+    };
 
-    this.ledgerService.addRecord(this.newRecord).subscribe({
+    this.ledgerService.addRecord(payload).subscribe({
       next: () => {
         this.notify.success('Financial transaction recorded successfully.');
         this.submitting.set(false);
@@ -152,5 +171,3 @@ export class Ledger implements OnInit {
     });
   }
 }
-
-

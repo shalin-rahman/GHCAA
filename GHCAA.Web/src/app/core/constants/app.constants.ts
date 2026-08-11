@@ -4,18 +4,18 @@ export const EC_ROLES = [
     'Vice President',
     'General Secretary',
     'Office Secretary',
-    'Joint Secretary -1',
-    'Joint Secretary -2',
-    'Treasurer',
-    'Media Cultural & Sports Secretary',
     'Organizational Secretary',
     'Information and Technology Secretary',
+    'Law Secretary',
+    'Media Cultural & Sports Secretary',    
     'Member-1',
     'Member-2',
-    'Law Secretary',
     'Immediate Past President',
     'Institutional Representative'
 ] as const;
+
+export const DATE_FORMAT = 'dd-MM-yyyy';
+export const DATE_REGEX = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
 
 export const DEVELOPER_INFO = {
     name: 'md habibur rahman shalin',
@@ -37,12 +37,13 @@ export const MEMBERSHIP_STATUS_MAP: Record<string | number, { label: string, cla
 };
 
 export const MEMBERSHIP_TYPES = [
-    'Founding',
-    'Executive',
-    'General',
-    'Associate',
-    'Honorary',
-    'Advisory'
+    'Founding Member',
+    'Executive Member',
+    'General Member',
+    'Associate Member',
+    'Honorary Member',
+    'Advisory Member',
+    'Guest Member'
 ];
 
 // Membership options moved to grouped section below
@@ -50,10 +51,16 @@ export const MEMBERSHIP_TYPES = [
 
 export const MEMBER_CATEGORIES = [
     'None',
-    'Lifelong',
-    'Donor',
-    'Patron',
-    'Guest'
+    'Lifelong Patron',
+    'Sponsor',
+    'Advisor',
+    'Mentor',
+    'Recruiter',
+    'Active',
+    'Volunteer',
+    'Contributor',
+    'Guest',
+    'Student'
 ];
 
 export const BLOOD_GROUPS = [
@@ -61,6 +68,7 @@ export const BLOOD_GROUPS = [
 ];
 
 export const BLOOD_GROUP_OPTIONS = [
+    { value: 'Unknown', label: 'Not Specified' },
     { value: 'APositive', label: 'A+' },
     { value: 'ANegative', label: 'A-' },
     { value: 'BPositive', label: 'B+' },
@@ -76,9 +84,19 @@ export const GENDERS = [
 ];
 
 export const GENDER_OPTIONS = [
+    { value: 'None', label: 'Not Specified' },
     { value: 'Male', label: 'Male' },
     { value: 'Female', label: 'Female' },
     { value: 'Other', label: 'Other' }
+];
+
+export const TSHIRT_SIZES = [
+    { value: 'S', label: 'Small (S)' },
+    { value: 'M', label: 'Medium (M)' },
+    { value: 'L', label: 'Large (L)' },
+    { value: 'XL', label: 'Extra Large (XL)' },
+    { value: 'XXL', label: 'Double Extra Large (XXL)' },
+    { value: '3XL', label: 'Triple Extra Large (3XL)' }
 ];
 
 export const JOB_CATEGORIES = [
@@ -98,6 +116,17 @@ export const ARTICLE_CATEGORIES = [
     { value: 'Magazine', label: 'E-Magazine Article' },
     { value: 'Regular', label: 'Regular Portal Update' }
 ];
+
+export const PAYMENT_STATUS_MAP: Record<string | number, { label: string, class: string }> = {
+    Pending: { label: 'Pending Verification', class: 'pending' },
+    0: { label: 'Pending Verification', class: 'pending' },
+    Completed: { label: 'Completed', class: 'success' },
+    1: { label: 'Completed', class: 'success' },
+    Failed: { label: 'Failed', class: 'failed' },
+    2: { label: 'Failed', class: 'failed' },
+    Refunded: { label: 'Refunded', class: 'refunded' },
+    3: { label: 'Refunded', class: 'refunded' }
+};
 
 export const SUBMISSION_STATUS = {
     DRAFT: 'Draft',
@@ -141,7 +170,7 @@ export function getCurrentECPosition(ecHistory: any[] | undefined): any {
     // Try to find the active one
     const current = ecHistory.find(h => h.isCurrent && !h.endDate);
     if (current) return current.position;
-    
+
     // Fallback to the latest one if no active found
     return ecHistory[0].position;
 }
@@ -156,13 +185,13 @@ export function getCurrentECPeriod(ecHistory: any[] | undefined): string {
 export function getECPositionForPeriod(ecHistory: any[] | undefined, periodId: number | null): any {
     if (!ecHistory || !Array.isArray(ecHistory) || ecHistory.length === 0) return 'None';
     if (!periodId) return getCurrentECPosition(ecHistory);
-    
+
     // In our ECHistoryDto, we don't have periodId, we have periodTitle.
     // Wait, the ECMember interface HAS ecPeriodId.
     // Let's check what's in the DTO.
     const record = ecHistory.find(h => h.periodId === periodId);
     if (record) return record.position;
-    
+
     return 'None';
 }
 
@@ -192,6 +221,63 @@ export function getCategoryLabel(cat: string | number): string {
     return cat || 'None';
 }
 
+export function getArticleCategoryLabel(category: string | number | null | undefined): string {
+    if (typeof category === 'number') {
+        return ARTICLE_CATEGORIES[category]?.label || 'Article';
+    }
+    return ARTICLE_CATEGORIES.find(item => item.value === category)?.label || category || 'Article';
+}
+
+/**
+ * News / Notice filter tabs — shared by the admin console and the public+portal feed so
+ * both stay in step. '' means "no filter".
+ */
+export const POST_TYPE_TABS: { value: '' | 'News' | 'Notice'; label: string }[] = [
+    { value: '', label: 'All' },
+    { value: 'News', label: 'News' },
+    { value: 'Notice', label: 'Notices' }
+];
+
+/** Posts predating the PostType column have no value — they count as News. */
+export function matchesPostType(
+    postType: string | null | undefined,
+    filter: '' | 'News' | 'Notice'
+): boolean {
+    if (!filter) return true;
+    return (postType || 'News') === filter;
+}
+
+export function getJobCategoryLabel(category: string | null | undefined): string {
+    return JOB_CATEGORIES.find(item => item.id === category || item.name === category)?.name || category || 'General';
+}
+
+export function getFinancialCategoryLabel(category: string | number | null | undefined): string {
+    if (typeof category === 'number') {
+        return FINANCIAL_CATEGORY_OPTIONS[category]?.label || 'Other';
+    }
+    return FINANCIAL_CATEGORY_OPTIONS.find(item => item.value === category)?.label || category || 'Other';
+}
+
+export function getPaymentStatusLabel(status: string | number | null | undefined): string {
+    if (status === null || status === undefined) return 'Unknown';
+    const match = PAYMENT_STATUS_MAP[status];
+    if (match) return match.label;
+    if (typeof status === 'string' && /^\d+$/.test(status)) {
+        return PAYMENT_STATUS_MAP[parseInt(status, 10)]?.label || status;
+    }
+    return String(status);
+}
+
+export function getPaymentStatusClass(status: string | number | null | undefined): string {
+    if (status === null || status === undefined) return '';
+    const match = PAYMENT_STATUS_MAP[status];
+    if (match) return match.class;
+    if (typeof status === 'string' && /^\d+$/.test(status)) {
+        return PAYMENT_STATUS_MAP[parseInt(status, 10)]?.class || '';
+    }
+    return '';
+}
+
 export function getMembershipTypeLabel(type: string | number): string {
     if (typeof type === 'number') return MEMBERSHIP_TYPES[type] || 'General';
     return type || 'General';
@@ -216,19 +302,26 @@ export const MEMBERSHIP_STATUS_OPTIONS = [
 
 export const MEMBERSHIP_TYPE_OPTIONS = [
     { value: 'Founding', label: 'Founding Member' },
-    { value: 'Executive', label: 'Executive Committee' },
+    { value: 'Executive', label: 'Executive Member' },
     { value: 'General', label: 'General Member' },
     { value: 'Associate', label: 'Associate Member' },
     { value: 'Honorary', label: 'Honorary Member' },
-    { value: 'Advisory', label: 'Advisory Member' }
+    { value: 'Advisory', label: 'Advisory Member' },
+    { value: 'Guest', label: 'Guest Member' }
 ];
 
 export const MEMBER_CATEGORY_OPTIONS = [
     { value: 'None', label: 'No Special Status' },
-    { value: 'Lifelong', label: 'Lifelong Member' },
-    { value: 'Donor', label: 'Donor Member' },
-    { value: 'Patron', label: 'Patron Member' },
-    { value: 'Guest', label: 'Guest Member' }
+    { value: 'LifelongPatron', label: 'Lifelong Patron' },
+    { value: 'Sponsor', label: 'Sponsor' },
+    { value: 'Advisor', label: 'Advisor' },
+    { value: 'Mentor', label: 'Mentor' },
+    { value: 'Recruiter', label: 'Recruiter' },
+    { value: 'Active', label: 'Active Member' },
+    { value: 'Volunteer', label: 'Volunteer' },
+    { value: 'Contributor', label: 'Contributor' },
+    { value: 'Guest', label: 'Guest Member' },
+    { value: 'Student', label: 'Student Member' }
 ];
 
 export const FINANCIAL_CATEGORY_OPTIONS = [
@@ -236,6 +329,13 @@ export const FINANCIAL_CATEGORY_OPTIONS = [
     { value: 'RegistrationFee', label: 'Registration Fee' },
     { value: 'Donation', label: 'Donation' },
     { value: 'Event', label: 'Event Fee' },
+    { value: 'Maintenance', label: 'Maintenance' },
+    { value: 'Salary', label: 'Salary' },
+    { value: 'Utilities', label: 'Utilities' },
+    { value: 'ReunionFee', label: 'Reunion Fee' },
+    { value: 'Sponsorship', label: 'Sponsorship' },
+    { value: 'Grant', label: 'Grant' },
+    { value: 'Refund', label: 'Refund' },
     { value: 'Other', label: 'Other' }
 ];
 
@@ -251,14 +351,9 @@ export const ACADEMIC_CERTIFICATES = [
     'Law'
 ];
 
-export const ACADEMIC_GROUPS = [
-    'Science',
-    'Arts & Humanities',
-    'Business Studies'
-];
 
 export const ACADEMIC_SUBJECTS = [
-    'None', 'Bengali', 'English', 'History', 'Islamic History & Culture',
+    'None', 'Science', 'Arts & Humanities', 'Business Studies', 'Bengali', 'English', 'History', 'Islamic History & Culture',
     'Philosophy', 'Islamic Studies', 'Library Science', 'Economics',
     'Political Science', 'Sociology', 'Social Work', 'Anthropology',
     'Public Administration', 'Physics', 'Chemistry', 'Mathematics',
@@ -316,35 +411,24 @@ export const IS_HSC = (cert: string | undefined | null) => cert === 'HSC';
 
 export const ACADEMIC_DATA = {
     certificates: ACADEMIC_CERTIFICATES,
-    groups: ACADEMIC_GROUPS,
     subjects: ACADEMIC_SUBJECTS,
     sectors: PROFESSIONAL_SECTORS,
     getYears: getAcademicYears
 };
 
 export const ensureValidAcademicData = (member: any) => {
-    // Process flat structure (Legacy/Registration)
-    if (IS_HSC(member.highestCertificate) || IS_HSC(member.HighestCertificate)) {
-        if (member.highestCertificateSubject) member.highestCertificateSubject = 'None';
-        if (member.HighestCertificateSubject) member.HighestCertificateSubject = 'None';
-    }
-    if (IS_HSC(member.ghcLastCertificate) || IS_HSC(member.GHCLastCertificate)) {
-        if (member.ghcLastCertificateSubject) member.ghcLastCertificateSubject = 'None';
-        if (member.GHCLastCertificateSubject) member.GHCLastCertificateSubject = 'None';
-    }
-
     // Process AcademicHistory array (New LinkedIn style)
     if (member.academicHistory && Array.isArray(member.academicHistory)) {
         member.academicHistory.forEach((item: any) => {
             if (IS_HSC(item.degree)) {
-                item.subject = 'None';
+                // HSC uses science/arts/business from the combined subject list
             }
         });
     }
     if (member.AcademicHistory && Array.isArray(member.AcademicHistory)) {
         member.AcademicHistory.forEach((item: any) => {
             if (IS_HSC(item.degree)) {
-                item.subject = 'None';
+                // HSC uses science/arts/business from the combined subject list
             }
         });
     }
@@ -357,27 +441,38 @@ export const API_ENDPOINTS = {
         STATS: '/api/admin/stats',
         COMMUNICATION: '/api/admin/comm',
         GOVERNANCE: '/api/admin/governance',
-        CONTACT_MESSAGES: '/api/admin/contact-messages'
+        CONTACT_MESSAGES: '/api/admin/contact-messages',
+        SOCIAL_AUTH: '/api/admin/social-auth',
+        POLLS: '/api/admin/polls'
     },
     AUTH: {
         LOGIN: '/api/auth/login',
         REGISTER: '/api/auth/register',
         VERIFY_EMAIL: '/api/auth/verify-email',
         RESEND_OTP: '/api/auth/resend-otp',
-        STATUS: '/api/auth/status'
+        STATUS: '/api/auth/status',
+        PROVIDERS: '/api/auth/providers',
+        GOOGLE: '/api/auth/google',
+        FACEBOOK: '/api/auth/facebook',
+        REFRESH: '/api/auth/refresh',
+        ME: '/api/auth/me',
+        LOGOUT: '/api/auth/logout'
     },
     EVENTS: '/api/events',
     GALLERY: '/api/gallery',
     NEWS: '/api/news',
+    SITE_CONTENT: '/api/site-content',
     JOBS: '/api/jobs',
     PROFILE: '/api/profile',
     FINANCIALS: '/api/financials',
     MESSAGING: {
         RECENT: '/api/messaging/recent',
-        HISTORY: '/api/messaging/history'
+        HISTORY: '/api/messaging/history',
+        SEND: '/api/messaging/send'
     },
     HUBS: {
-        CHAT: '/hubs/chat'
+        CHAT: '/api/hubs/chat',
+        NOTIFICATIONS: '/api/hubs/notifications'
     },
     NOTIFICATIONS: {
         BASE: '/api/notifications',
@@ -399,5 +494,12 @@ export const API_ENDPOINTS = {
     PAYMENT_CONFIG: {
         BASE: '/api/payment-config',
         PUBLIC: '/api/payment-config/active'
-    }
+    },
+    POLLS: {
+        BASE: '/api/polls',
+        ACTIVE: '/api/polls/active'
+    },
+    ORG: '/api/org',
+    CONFIG: '/api/config',
+    FORUM: '/api/forum'
 } as const;

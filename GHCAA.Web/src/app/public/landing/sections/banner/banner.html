@@ -2,11 +2,7 @@
     <div class="hero-pattern"></div>
     <div class="container hero-content">
         <div class="hero-logo-box">
-            <div class="logo-spinner-ring">
-                <div class="spinner-arc"></div>
-                <div class="spinner-arc spinner-arc--reverse"></div>
-                <img src="/assets/logo.jpg" alt="GHCAA Official Seal" class="hero-seal">
-            </div>
+            <app-logo-spinner [size]="160" [ripple]="false"></app-logo-spinner>
         </div>
         <h2 class="reveal-text">Reconnecting <span class="highlight">HARAGANGIAN</span></h2>
         <div class="reveal-subtitle">
@@ -19,6 +15,23 @@
             <a href="/assets/GHCAA constitution 4.0.pdf" target="_blank"
                 class="btn btn-accent btn-lg px-10 rounded-full font-bold shadow-gold">Read
                 Constitution</a>
+        </div>
+
+        <div class="hero-stats" *ngIf="stats()">
+            <div class="stat-item">
+                <span class="stat-value">{{ stats().totalActiveMembers || 1200 }}+</span>
+                <span class="stat-label">Total Members</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-value">{{ stats().publishedEvents || 50 }}+</span>
+                <span class="stat-label">Events Hosted</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-value">{{ stats().alumniChapters || 12 }}+</span>
+                <span class="stat-label">Global Chapters</span>
+            </div>
         </div>
     </div>
     <div class="hero-overlay"></div>

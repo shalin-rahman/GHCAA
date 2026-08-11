@@ -1,28 +1,124 @@
 <div class="dashboard-grid">
-    <!-- Quick Stats -->
+
+    <!-- 30.11: page header added so the on-page title matches the "Dashboard" nav
+         label/breadcrumb (previously this page had no title at all, unlike admin's
+         dashboard which already showed one). -->
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Dashboard</h2>
+            <small>Welcome back{{ profile()?.fullName ? ', ' + profile()?.fullName : '' }}</small>
+        </div>
+    </div>
+
+    @if (loading()) {
+    <div class="dash-loading">
+        <div class="skeleton-row">
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+            <div class="sk-card"></div>
+        </div>
+    </div>
+    } @else {
+
+    <!-- Profile Completion Wizard Notice -->
+    @if (profileCompletion < 100) {
+    <div class="glass-card completion-wizard animate-fade-up">
+        <div class="wizard-header">
+            <div class="header-left">
+                <span class="status-badge pending">Profile Incomplete</span>
+                <h2>Complete Your Profile</h2>
+                <p>To gain full access to the GHCAA portal and receive your digital ID, please complete your profile information.</p>
+            </div>
+            <div class="completion-stat">
+                <span class="pct">{{ profileCompletion }}%</span>
+                <div class="progress-container">
+                    <div class="progress-bar" [style.width.%]="profileCompletion"></div>
+                </div>
+            </div>
+        </div>
+        <!-- 30.23: steps are now links into the relevant profile (or payments) section instead
+             of static status chips, so members can jump straight to whatever's incomplete. -->
+        <div class="wizard-steps">
+            <a class="step" routerLink="/portal/profile" fragment="section-identity-photo"
+                [class.done]="profile()?.fullName && profile()?.photoPath" title="Go to Identity & Photo">
+                <app-icon [name]="(profile()?.fullName && profile()?.photoPath) ? 'check-circle' : 'circle'" [size]="16"></app-icon>
+                <span>Identity & Photo</span>
+                <span class="step-arrow">→</span>
+            </a>
+            <a class="step" routerLink="/portal/profile" fragment="section-academic-history"
+                [class.done]="profile()?.academicHistory?.length > 0" title="Go to GHC History">
+                <app-icon [name]="profile()?.academicHistory?.length > 0 ? 'check-circle' : 'circle'" [size]="16"></app-icon>
+                <span>GHC History</span>
+                <span class="step-arrow">→</span>
+            </a>
+            <a class="step" routerLink="/portal/profile" fragment="section-professional-history"
+                [class.done]="profile()?.professionalHistory?.length > 0" title="Go to Professional Info">
+                <app-icon [name]="profile()?.professionalHistory?.length > 0 ? 'check-circle' : 'circle'" [size]="16"></app-icon>
+                <span>Professional Info</span>
+                <span class="step-arrow">→</span>
+            </a>
+            <a class="step" routerLink="/portal/payments"
+                [class.done]="profile()?.paymentStatus === 'Completed'" title="Go to Registration Payment">
+                <app-icon [name]="profile()?.paymentStatus === 'Completed' ? 'check-circle' : 'circle'" [size]="16"></app-icon>
+                <span>Registration Payment</span>
+                <span class="step-arrow">→</span>
+            </a>
+        </div>
+        <div class="wizard-footer">
+            <button class="btn btn-accent" routerLink="/portal/profile">Finish Profile Setup</button>
+            <span class="notice" *ngIf="profileCompletion === 100 && profile()?.status === 0">
+                <app-icon name="clock" [size]="14"></app-icon> Your profile is 100% complete. Waiting for admin approval.
+            </span>
+        </div>
+    </div>
+    }
+
+    <!-- Quick Stats Row -->
     <div class="stats-row">
+        <!-- Membership Card -->
         <div class="glass-card stat-card profile-summary">
             <div class="icon-box">🏆</div>
-            <div class="stat-info" *ngIf="profile(); else loadingProf">
+            @if (profile()) {
+            <div class="stat-info">
                 <div class="val">{{ profile().membershipNumber || 'Pending' }}</div>
                 <small>{{ getMembershipType(profile().membershipType) }} Member</small>
+                <span class="status-chip" [style.background]="getStatusColor(profile().status) + '22'"
+                    [style.color]="getStatusColor(profile().status)">
+                    {{ getStatusLabel(profile().status) }}
+                </span>
             </div>
-            <ng-template #loadingProf>
-                <div class="stat-info">
-                    <div class="val text-sm opacity-50">Syncing...</div>
-                    <small>Membership</small>
-                </div>
-            </ng-template>
-        </div>
-
-        <div class="glass-card stat-card">
-            <div class="icon-box">💼</div>
+            } @else {
             <div class="stat-info">
-                <div class="val">{{ jobCount() }}</div>
-                <small>Active Jobs</small>
+                <div class="val">—</div>
+                <small>Membership</small>
+            </div>
+            }
+        </div>
+
+        <!-- Profile Completion -->
+        <div class="glass-card stat-card">
+            <div class="icon-box">📊</div>
+            <div class="stat-info">
+                <div class="val">{{ profileCompletion }}%</div>
+                <small>Profile Complete</small>
+                <div class="mini-progress">
+                    <div class="mini-bar" [style.width]="profileCompletion + '%'"></div>
+                </div>
             </div>
         </div>
 
+        <!-- Contribution Points -->
+        <div class="glass-card stat-card">
+            <div class="icon-box">⭐</div>
+            <div class="stat-info">
+                <div class="val">{{ contributionPoints }}</div>
+                <small>Contribution Points</small>
+                <span class="rank-badge">Rank: {{ memberRank }}</span>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
         <div class="glass-card stat-card">
             <div class="icon-box">🎟️</div>
             <div class="stat-info">
@@ -32,44 +128,80 @@
         </div>
     </div>
 
-    <!-- Main Activity & Chat -->
+    <!-- Main Row: Activity + Notifications -->
     <div class="main-row">
-        <div class="glass-card activity-feed">
-            <h3>Recent Activity</h3>
-            <div class="feed-items">
-                @for (act of activities(); track act.id) {
-                <div class="feed-item">
-                    <div class="dot" [style.background]="act.color" [style.color]="act.color"></div>
-                    <div class="text">
-                        <strong>{{ act.title }}</strong>
-                        <p>{{ act.desc }}</p>
-                        <small>{{ act.time }}</small>
-                    </div>
+        <!-- Left: Recent News + Upcoming Events -->
+        <div class="left-col">
+            <!-- Recent News -->
+            <div class="glass-card activity-feed">
+                <div class="feed-header">
+                    <h3>📰 Latest News</h3>
+                    <a routerLink="/portal/news" class="feed-link">See All →</a>
                 </div>
-                }
+                <div class="feed-items">
+                    @for (item of recentNews(); track item.id) {
+                    <a [routerLink]="['/portal/news', item.id]" class="feed-item news-feed-item">
+                        <div class="dot" style="background: var(--accent-color)"></div>
+                        <div class="text">
+                            <strong>{{ item.title }}</strong>
+                            <p>{{ item.summary || item.excerpt || 'Read the full article for details.' }}</p>
+                            <small>{{ item.publishedAt || item.createdAt | date:'dd-MM-yyyy' }}</small>
+                        </div>
+                    </a>
+                    } @empty {
+                    <div class="empty-feed">
+                        <p>No news articles yet.</p>
+                    </div>
+                    }
+                </div>
             </div>
+
+            <!-- Upcoming Events compact list -->
+            @if (upcomingEvents().length > 0) {
+            <div class="glass-card activity-feed mt-4">
+                <div class="feed-header">
+                    <h3>📅 Upcoming Events</h3>
+                    <a routerLink="/portal/events" class="feed-link">View All →</a>
+                </div>
+                <div class="feed-items">
+                    @for (ev of upcomingEvents(); track ev.id) {
+                    <div class="feed-item event-feed-item">
+                        <div class="event-date-badge">
+                            <span class="eday">{{ ev.startDate | date:'d' }}</span>
+                            <span class="emon">{{ ev.startDate | date:'MMM' }}</span>
+                        </div>
+                        <div class="text">
+                            <strong>{{ ev.title }}</strong>
+                            <p>{{ ev.venue || ev.location || 'Venue TBD' }}</p>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
         </div>
 
+        <!-- Right: Notifications -->
         <div class="glass-card alert-widget">
             <div class="header-row flex justify-between items-center mb-6">
                 <h3 class="text-xl font-black">Notifications</h3>
-                <span class="badge bg-gold-gradient text-black" *ngIf="alertService.unreadCount() > 0">
-                    {{ alertService.unreadCount() }} New
-                </span>
+                @if (alertService.unreadCount() > 0) {
+                <span class="unread-badge">{{ alertService.unreadCount() }} New</span>
+                }
             </div>
 
             <div class="alert-list custom-scrollbar">
                 @for (n of alertService.notifications(); track n.id) {
-                <div class="alert-item" [class.unread]="!n.isRead" (click)="alertService.markAsRead(n.id)">
-                    <div class="alert-icon">{{ n.type === 'Approval' ? '✅' : '📢' }}</div>
+                <div class="alert-item feed-item" [class.unread]="!n.isRead" (click)="alertService.markAsRead(n.id)">
+                    <div class="alert-icon">{{ n.type === 'Approval' ? '✅' : n.type === 'Payment' ? '💳' : '📢' }}</div>
                     <div class="alert-body">
                         <strong>{{ n.title }}</strong>
                         <p>{{ n.message }}</p>
-                        <small>{{ n.createdAt | date:'shortTime' }} • {{ n.createdAt | date:'mediumDate' }}</small>
+                        <small>{{ n.createdAt | date:'shortTime' }} • {{ n.createdAt | date:'dd-MM-yyyy' }}</small>
                     </div>
                 </div>
                 } @empty {
-                <div class="empty-alerts py-20 text-center opacity-40 italic">
+                <div class="empty-feed">
                     <p>No new notifications.</p>
                 </div>
                 }
@@ -83,33 +215,34 @@
         </div>
     </div>
 
-    <!-- Networking / Compact Member List -->
-    <div class="glass-card networking-widget mt-6">
+    <!-- Networking / Compact Member Grid -->
+    <div class="glass-card networking-widget">
         <div class="flex justify-between items-center mb-6">
             <h3>Recently Joined Haragangians</h3>
-            <a href="/portal/directory" class="text-accent text-sm font-bold uppercase tracking-widest">View Directory
-                →</a>
+            <a routerLink="/portal/directory" class="feed-link">View Directory →</a>
         </div>
         <div class="members-compact-grid">
             @for (m of recentMembers(); track m.id) {
             <div class="compact-member-card">
                 <div class="m-photo">
                     @if (m.photoPath) {
-                    <img [src]="m.photoPath" [alt]="m.fullName">
+                    <img [src]="m.photoPath" [alt]="m.fullName" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
-                    <div class="m-avatar-ph">{{ m.fullName[0] }}</div>
+                    <div class="m-avatar-ph">{{ m.fullName?.[0] || '?' }}</div>
                     }
                 </div>
                 <div class="m-info">
                     <strong>{{ m.fullName }}</strong>
-                    <small>Batch of {{ m.ghcLastCertificatePassingYear }}</small>
+                    <small>{{ m.membershipNumber || 'Pending' }}</small>
                 </div>
             </div>
             } @empty {
-            <div class="py-10 text-center opacity-40 italic">
+            <div class="empty-feed">
                 <p>Loading member network...</p>
             </div>
             }
         </div>
     </div>
+
+    }
 </div>

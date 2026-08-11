@@ -1,8 +1,24 @@
 <div class="admin-feature">
     <div class="page-header">
         <div class="header-text">
-            <h2>Association Communications</h2>
-            <p>Broadcast announcements and manage email ecosystem.</p>
+            <h2>Communications</h2>
+            <small>
+                @if (activeTab() === 'templates') {
+                    @if (templates().length) {
+                    Showing {{ filteredTemplates().length }} of {{ templates().length }} email templates
+                    } @else {
+                    Reusable email templates
+                    }
+                } @else if (activeTab() === 'logs') {
+                    @if (logs().length) {
+                    Showing {{ filteredLogs().length }} of {{ logs().length }} communication records
+                    } @else {
+                    Sent communication history
+                    }
+                } @else {
+                    Broadcast announcements and manage email ecosystem.
+                }
+            </small>
         </div>
         <div class="header-actions"></div>
     </div>
@@ -128,7 +144,7 @@
                 </div>
                 <div class="form-group mt-4">
                     <label>Message Body (Rich Text)</label>
-                    <div id="broadcast-editor" style="height: 300px;"></div>
+                    <app-rich-text-editor [(value)]="sendOptions.customBody" height="300px"></app-rich-text-editor>
                 </div>
             </div>
             }
@@ -147,9 +163,19 @@
     <div class="glass-card reveal-top">
         <div class="panel-header mb-6">
             <h3>📄 Email Templates</h3>
-            <button class="btn btn-accent" (click)="addNewTemplate()">+ New Template</button>
+            <div class="flex gap-3">
+                <app-search-bar [value]="templateSearch()" (valueChange)="templateSearch.set($event)"
+                    placeholder="Filter templates…"></app-search-bar>
+                <button class="btn btn-accent" (click)="addNewTemplate()">+ New Template</button>
+            </div>
         </div>
 
+        @if (loading()) {
+        <div class="loading-state py-20 text-center">
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+            <p>Loading email templates...</p>
+        </div>
+        } @else {
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
@@ -161,20 +187,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (temp of templates(); track temp.id) {
+                    @for (temp of filteredTemplates(); track temp.id) {
                     <tr>
                         <td class="font-bold text-accent">{{ temp.code }}</td>
                         <td>{{ temp.description }}</td>
                         <td><small>{{ temp.subject }}</small></td>
                         <td class="actions-cell">
-                            <button class="btn btn-outline btn-sm" (click)="editTemplate(temp)">Edit ↗</button>
-                            <button class="icon-btn" (click)="deleteTemplate(temp)" title="Delete">🗑️</button>
+                            <div class="action-group">
+                                <button class="btn btn-outline btn-sm" (click)="editTemplate(temp)">Edit ↗</button>
+                                <button class="icon-btn delete" (click)="deleteTemplate(temp)" title="Delete">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state py-12">
+                                <span class="text-3xl mb-2 block">📄</span>
+                                <p class="text-muted italic">{{ templateSearch() ? 'No templates match your search.' : 'No communication templates found.' }}</p>
+                            </div>
                         </td>
                     </tr>
                     }
                 </tbody>
             </table>
         </div>
+        }
     </div>
     }
 
@@ -183,9 +221,19 @@
     <div class="glass-card reveal-top">
         <div class="panel-header mb-6">
             <h3>📜 Communication History</h3>
-            <button class="btn btn-outline btn-sm" (click)="loadLogs()">🔄 Refresh</button>
+            <div class="flex gap-3">
+                <app-search-bar [value]="logSearch()" (valueChange)="logSearch.set($event)"
+                    placeholder="Filter history logs…"></app-search-bar>
+                <button class="btn btn-outline btn-sm" (click)="loadLogs()">🔄 Refresh</button>
+            </div>
         </div>
 
+        @if (loading()) {
+        <div class="loading-state py-20 text-center">
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+            <p>Loading communication history...</p>
+        </div>
+        } @else {
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
@@ -193,15 +241,22 @@
                         <th>Timestamp</th>
                         <th>Recipient</th>
                         <th>Subject</th>
+                        <th>Target</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @for (log of logs(); track log.id) {
+                    @for (log of filteredLogs(); track log.id) {
                     <tr>
-                        <td>{{ log.sentDate | date:'short' }}</td>
+                        <td>{{ log.sentDate | date:'dd-MM-yyyy' }}</td>
                         <td><small>{{ log.recipientEmail }}</small></td>
-                        <td>{{ log.subject }}</td>
+                        <td>
+                            <div>{{ log.subject }}</div>
+                            @if (log.errorMessage) {
+                                <div class="text-[10px] text-red-400 mt-1 italic">Error: {{ log.errorMessage }}</div>
+                            }
+                        </td>
+                        <td><small class="text-accent/70 font-bold uppercase text-[9px]">{{ log.targetAudience }}</small></td>
                         <td>
                             <span class="status-badge" [class.active]="log.status === 'Sent'"
                                 [class.inactive]="log.status !== 'Sent'">
@@ -209,10 +264,20 @@
                             </span>
                         </td>
                     </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state py-12">
+                                <span class="text-3xl mb-2 block">📜</span>
+                                <p class="text-muted italic">{{ logSearch() ? 'No activity logs match your search.' : 'No communication history found.' }}</p>
+                            </div>
+                        </td>
+                    </tr>
                     }
                 </tbody>
             </table>
         </div>
+        }
     </div>
     }
 
@@ -235,18 +300,25 @@
                         <input type="text" [(ngModel)]="editingTemplate()!.subject">
                     </div>
                     <div class="form-group full">
-                        <label>Description</label>
+                        <label>Description (Internal Use)</label>
                         <input type="text" [(ngModel)]="editingTemplate()!.description">
                     </div>
                     <div class="form-group full">
+                        <label>Variable Placeholders (JSON list, e.g. ["FullName", "MemberId"])</label>
+                        <input type="text" [(ngModel)]="editingTemplate()!.variables" placeholder='["FullName", "RegistrationYear"]'>
+                        <small class="opacity-50 italic">List strings exactly as they appear in template tags like [FullName].</small>
+                    </div>
+                    <div class="form-group full">
                         <label>HTML Content</label>
-                        <div id="template-editor" style="height: 350px;"></div>
+                        <app-rich-text-editor [(value)]="editingTemplate()!.body" height="350px"></app-rich-text-editor>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
-                <button class="btn btn-accent" (click)="saveTemplate()">Save Template</button>
+                <button class="btn btn-accent" (click)="saveTemplate()" [disabled]="isSaving()">
+                    {{ isSaving() ? 'Saving...' : (editingTemplate()?.id ? 'Update' : 'Save') }}
+                </button>
             </div>
         </div>
     </div>

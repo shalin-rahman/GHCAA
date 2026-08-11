@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import { authGuard, adminGuard } from './core/guards/auth.guard';
+import { authGuard, adminGuard, superAdminGuard } from './core/guards/auth.guard';
+import { featureGuard } from './core/guards/feature.guard';
 
 export const routes: Routes = [
     {
@@ -32,7 +33,8 @@ export const routes: Routes = [
             },
             {
                 path: 'gallery',
-                loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery)
+                loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery),
+                canActivate: [featureGuard('enableGallery')]
             },
             {
                 path: 'magazine',
@@ -44,6 +46,7 @@ export const routes: Routes = [
             },
             {
                 path: 'events',
+                canActivate: [featureGuard('enableEvents')],
                 children: [
                     { path: '', loadComponent: () => import('./common/events/events').then(m => m.Events) },
                     { path: ':id', loadComponent: () => import('./common/events/events').then(m => m.Events) }
@@ -55,7 +58,8 @@ export const routes: Routes = [
             },
             {
                 path: 'jobs',
-                loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs)
+                loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs),
+                canActivate: [featureGuard('enableJobHub')]
             },
             {
                 path: 'payment',
@@ -63,6 +67,10 @@ export const routes: Routes = [
                     { path: 'success', loadComponent: () => import('./common/payment-status/payment-status').then(m => m.PaymentStatus) },
                     { path: 'failed', loadComponent: () => import('./common/payment-status/payment-status').then(m => m.PaymentStatus) }
                 ]
+            },
+            {
+                path: 'healtz',
+                loadComponent: () => import('./common/health/health').then(m => m.Health)
             }
         ]
     },
@@ -73,12 +81,19 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             {
+                // 29A.1: mustChangePassword users are redirected here by authGuard; the route must exist
+                // (previously 404'd → hard login lockout).
+                path: 'change-password',
+                loadComponent: () => import('./member/change-password/change-password').then(m => m.ChangePassword)
+            },
+            {
                 path: 'dashboard',
                 loadComponent: () => import('./member/dashboard/dashboard').then(m => m.Dashboard)
             },
             {
                 path: 'jobs',
-                loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs)
+                loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs),
+                canActivate: [featureGuard('enableJobHub')]
             },
             {
                 path: 'id-card',
@@ -110,7 +125,8 @@ export const routes: Routes = [
             },
             {
                 path: 'gallery',
-                loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery)
+                loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery),
+                canActivate: [featureGuard('enableGallery')]
             },
             {
                 path: 'news',
@@ -118,6 +134,7 @@ export const routes: Routes = [
             },
             {
                 path: 'events',
+                canActivate: [featureGuard('enableEvents')],
                 children: [
                     { path: '', loadComponent: () => import('./common/events/events').then(m => m.Events) },
                     { path: ':id', loadComponent: () => import('./common/events/events').then(m => m.Events) }
@@ -126,6 +143,20 @@ export const routes: Routes = [
             {
                 path: 'articles',
                 loadComponent: () => import('./member/articles/articles').then(m => m.MemberArticles)
+            },
+            {
+                path: 'polls',
+                loadComponent: () => import('./member/polls/polls.component').then(m => m.MemberPolls)
+            },
+            {
+                path: 'forum',
+                loadComponent: () => import('./member/forum/forum').then(m => m.Forum),
+                canActivate: [featureGuard('enableForum')]
+            },
+            {
+                path: 'forum/:id',
+                loadComponent: () => import('./member/forum/topic-detail').then(m => m.TopicDetail),
+                canActivate: [featureGuard('enableForum')]
             }
         ]
     },
@@ -165,7 +196,8 @@ export const routes: Routes = [
             },
             {
                 path: 'ledger',
-                loadComponent: () => import('./admin/ledger/ledger').then(m => m.Ledger)
+                loadComponent: () => import('./admin/ledger/ledger').then(m => m.Ledger),
+                canActivate: [superAdminGuard]
             },
             {
                 path: 'events',
@@ -176,16 +208,24 @@ export const routes: Routes = [
                 loadComponent: () => import('./admin/themes/admin-themes').then(m => m.AdminThemes)
             },
             {
+                path: 'payments/fees',
+                loadComponent: () => import('./admin/fee-config/admin-fee-config').then(m => m.AdminFeeConfig),
+                canActivate: [superAdminGuard]
+            },
+            {
                 path: 'payments',
-                loadComponent: () => import('./admin/payment-config/admin-payment-config').then(m => m.AdminPaymentConfig)
+                loadComponent: () => import('./admin/payment-config/admin-payment-config').then(m => m.AdminPaymentConfig),
+                canActivate: [superAdminGuard]
             },
             {
                 path: 'roles',
-                loadComponent: () => import('./admin/roles/admin-roles').then(m => m.AdminRoles)
+                loadComponent: () => import('./admin/roles/admin-roles').then(m => m.AdminRoles),
+                canActivate: [superAdminGuard]
             },
             {
                 path: 'audit',
-                loadComponent: () => import('./admin/audit/admin-audit').then(m => m.AdminAudit)
+                loadComponent: () => import('./admin/audit/admin-audit').then(m => m.AdminAudit),
+                canActivate: [superAdminGuard]
             },
             {
                 path: 'article-approvals',
@@ -194,6 +234,19 @@ export const routes: Routes = [
             {
                 path: 'contact-messages',
                 loadComponent: () => import('./admin/contact-messages/contact-messages').then(m => m.ContactMessages)
+            },
+            {
+                path: 'polls',
+                loadComponent: () => import('./admin/polls/polls.component').then(m => m.AdminPolls)
+            },
+            {
+                path: 'site-content',
+                loadComponent: () => import('./admin/site-content/site-content').then(m => m.AdminSiteContent)
+            },
+            {
+                path: 'org-config',
+                loadComponent: () => import('./admin/org-config/org-config').then(m => m.AdminOrgConfig),
+                canActivate: [superAdminGuard]
             }
         ]
     }

@@ -13,6 +13,11 @@ export interface SpecialDayTheme {
     backgroundColor: string;
     textColor: string;
     announcementText: string;
+    animationStyle: string; // 'Fade' | '3D' | 'Typewriter' | 'Scroll' | 'None'
+    imageUrl: string;
+    sidebarColor: string;
+    enableGradientFading: boolean;
+    isActive?: boolean;
     isEnabled: boolean;
 }
 
@@ -52,7 +57,11 @@ export class ThemeService {
         const saved = localStorage.getItem('ghcaa_theme') as Theme;
         if (saved) return saved;
 
-        // Check system preference
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        // Default to dark for a fresh visitor. Both themes are fully styled — the landing's
+        // section backgrounds and text now use the semantic --section-bg / --text-* tokens in
+        // styles.scss, which flip between :root (light) and body.dark-theme (dark). Dark is the
+        // brand's native "Obsidian & Gold" look, so it's the first impression; the toggle then
+        // switches to a properly-contrasted light palette and persists the choice.
+        return 'dark';
     }
 }

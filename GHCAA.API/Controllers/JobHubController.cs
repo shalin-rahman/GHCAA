@@ -20,9 +20,9 @@ namespace GHCAA.API.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetActiveJobs([FromQuery] Enums.JobCategory? category, [FromQuery] string? query, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetActiveJobs([FromQuery] Enums.JobCategory? jobCategory, [FromQuery] string? query, CancellationToken cancellationToken)
         {
-            var jobs = await _jobService.GetActiveJobsAsync(category, query, cancellationToken);
+            var jobs = await _jobService.GetActiveJobsAsync(jobCategory, query, cancellationToken);
             return Ok(jobs);
         }
 
@@ -50,7 +50,7 @@ namespace GHCAA.API.Controllers
 
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
             var success = await _jobService.UpdateJobAsync(id, job, memberId, isAdmin, cancellationToken);
-            
+
             if (!success) return Forbid();
             return Ok(new { Message = "Job updated successfully" });
         }
@@ -64,12 +64,13 @@ namespace GHCAA.API.Controllers
             return Ok(job);
         }
 
+        [HttpDelete("{id}")]
         [HttpPatch("deactivate/{id}")]
         public async Task<IActionResult> DeactivateJob(int id, CancellationToken cancellationToken)
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
-            
+
             var job = await _jobService.GetJobByIdAsync(id, cancellationToken);
             if (job == null) return NotFound();
 

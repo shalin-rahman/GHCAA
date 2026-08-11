@@ -1,27 +1,21 @@
 <div class="admin-feature reveal-top">
     @if (!showForm()) {
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Event Ecosystem</h2>
-            <p>Manage alumni gatherings, institutional projects, and participation approvals.</p>
-        </div>
-        <div class="header-actions flex items-center gap-3">
+    <app-page-header title="Manage Events"
+        [total]="activeTab() === 'manage' ? events().length : totalItems()"
+        emptySubtitle="Create and manage events and registrations">
+        <small subtitle>Showing {{ activeTab() === 'manage' ? filteredEvents().length : totalItems() }} {{ activeTab() === 'manage' ? 'events' : 'participations' }}</small>
+        <div actions class="flex items-center gap-3">
             @if (activeTab() === 'approvals') {
-                <app-export-buttons 
-                    [data]="registrations()" 
-                    fileName="event_registrations"
-                    [pdfHeaders]="pdfHeaders"
-                    [pdfDataMapper]="pdfMapper"
-                    [exporting]="isExporting()"
-                    (exportStart)="handleExport($event)"
-                    title="Event Registrations Export">
-                </app-export-buttons>
+            <app-export-buttons [data]="registrations()" fileName="event_registrations" [pdfHeaders]="pdfHeaders"
+                [pdfDataMapper]="pdfMapper" [exporting]="isExporting()" (exportStart)="handleExport($event)"
+                title="Event Registrations Export">
+            </app-export-buttons>
             }
-            <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
+            <button *ngIf="orgConfigService.isFeatureEnabled('enableEvents')" (click)="openCreateForm()" class="btn btn-accent shadow-gold">
                 <span class="icon">✨</span> Launch New Event
             </button>
         </div>
-    </div>
+    </app-page-header>
     } @else {
     <div class="page-header flex items-center gap-6 mb-10">
         <button (click)="showForm.set(false)" class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
@@ -29,9 +23,9 @@
         </button>
         <div>
             <h2 class="text-2xl font-black text-accent tracking-tighter">
-                {{ editingEventId() ? 'Update Event Configuration' : 'Initial Event Setup' }}
+                {{ editingEventId() ? 'Edit Event' : 'Create Event' }}
             </h2>
-            <p class="text-xs uppercase font-black tracking-widest text-muted">Configuring Event Asset</p>
+            <p class="text-xs uppercase font-black tracking-widest text-muted">Event Information</p>
         </div>
     </div>
     }
@@ -43,77 +37,112 @@
             <form [formGroup]="eventForm" (ngSubmit)="submitEvent()">
                 <!-- Image Upload Section -->
                 <div class="logo-upload-section mb-10">
-                    <label class="block text-[10px] font-black uppercase tracking-widest text-accent mb-4">Event Banner / Logo</label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-accent mb-4">Event Banner
+                        / Logo</label>
                     <div class="flex items-start gap-8">
-                        <div class="logo-preview-box w-48 h-32 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex items-center justify-center bg-surface relative group">
+                        <div
+                            class="logo-preview-box w-48 h-32 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex items-center justify-center bg-surface relative group">
                             @if (logoPreview()) {
-                                <img [src]="logoPreview()?.startsWith('data:') ? logoPreview() : '/' + logoPreview()" alt="Preview" class="w-full h-full object-cover">
-                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
-                                    <span class="text-[10px] font-black uppercase text-white">Event Banner</span>
-                                </div>
+                            <img [src]="logoPreview()?.startsWith('data:') ? logoPreview() : '/' + logoPreview()"
+                                alt="Preview" class="w-full h-full object-cover" appImgFallback>
+                            <div
+                                class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                                <span class="text-[10px] font-black uppercase text-white">Event Banner</span>
+                            </div>
                             } @else {
-                                <div class="text-center p-4">
-                                    <span class="text-2xl mb-1 block">🖼️</span>
-                                    <span class="text-[8px] uppercase font-black text-muted tracking-widest">No Banner</span>
-                                </div>
+                            <div class="text-center p-4">
+                                <span class="text-2xl mb-1 block">🖼️</span>
+                                <span class="text-[8px] uppercase font-black text-muted tracking-widest">No
+                                    Banner</span>
+                            </div>
                             }
                         </div>
                         <div class="flex-1 pt-2">
-                            <p class="text-xs text-muted mb-4 max-w-sm">Upload a high-resolution banner for this event. This image will be displayed on the public landing page and member portal.</p>
+                            <p class="text-xs text-muted mb-4 max-w-sm">Upload a high-resolution banner for this event.
+                                This image will be displayed on the public landing page and member portal.</p>
                             <button type="button" class="btn btn-secondary btn-sm" (click)="logoInput.click()">
                                 {{ logoPreview() ? 'Change Image' : 'Select Image' }}
                             </button>
-                            <input #logoInput type="file" (change)="onLogoSelected($event)" accept="image/*" class="hidden">
+                            <input #logoInput type="file" (change)="onLogoSelected($event)" accept="image/*"
+                                class="hidden">
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="input-group">
-                        <label>Engagement Title <span class="text-red-500">*</span></label>
-                        <input type="text" formControlName="title" placeholder="Annual Reunion 2024" [class.border-red-500]="eventForm.get('title')?.invalid && eventForm.get('title')?.touched">
-                        <div *ngIf="eventForm.get('title')?.invalid && eventForm.get('title')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Title is required</div>
+                <div class="form-grid mb-8">
+                    <div class="form-group">
+                        <label>Event Title <span class="text-red-500">*</span></label>
+                        <input type="text" formControlName="title" placeholder="Annual Reunion 2024"
+                            [class.border-red-500]="eventForm.get('title')?.invalid && eventForm.get('title')?.touched">
+                        <div *ngIf="eventForm.get('title')?.invalid && eventForm.get('title')?.touched"
+                            class="text-[9px] text-red-500 font-bold uppercase mt-1">Title is required</div>
                     </div>
-                    <div class="input-group">
-                        <label>Scheduled Date & Time <span class="text-red-500">*</span></label>
-                        <input type="datetime-local" formControlName="date" [class.border-red-500]="eventForm.get('date')?.invalid && eventForm.get('date')?.touched">
-                        <div *ngIf="eventForm.get('date')?.invalid && eventForm.get('date')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Event date is required</div>
+                    <div class="form-group border-r border-white/5 pr-4">
+                        <label>Start Date & Time <span class="text-red-500">*</span></label>
+                        <input type="datetime-local" formControlName="startDate"
+                            [class.border-red-500]="eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.touched">
+                        <div *ngIf="eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.touched"
+                            class="text-[9px] text-red-500 font-bold uppercase mt-1">Start date is required</div>
+                    </div>
+                    <div class="form-group pl-4">
+                        <label>End Date & Time <span class="text-red-500">*</span></label>
+                        <input type="datetime-local" formControlName="endDate"
+                            [class.border-red-500]="eventForm.get('endDate')?.invalid && eventForm.get('endDate')?.touched">
+                        <div *ngIf="eventForm.get('endDate')?.invalid && eventForm.get('endDate')?.touched"
+                            class="text-[9px] text-red-500 font-bold uppercase mt-1">End date is required</div>
                     </div>
                 </div>
 
-                <div class="input-group">
+                <div class="form-group full mb-8">
                     <label>Venue / Location <span class="text-red-500">*</span></label>
-                    <input type="text" formControlName="location" placeholder="Main Campus Auditorium" [class.border-red-500]="eventForm.get('location')?.invalid && eventForm.get('location')?.touched">
-                    <div *ngIf="eventForm.get('location')?.invalid && eventForm.get('location')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Venue is required</div>
+                    <input type="text" formControlName="location" placeholder="Main Campus Auditorium"
+                        [class.border-red-500]="eventForm.get('location')?.invalid && eventForm.get('location')?.touched">
+                    <div *ngIf="eventForm.get('location')?.invalid && eventForm.get('location')?.touched"
+                        class="text-[9px] text-red-500 font-bold uppercase mt-1">Venue is required</div>
                 </div>
 
-                <div class="input-group">
-                    <label>Project Brief / Description <span class="text-red-500">*</span></label>
+                <div class="form-group full mb-8">
+                    <label>Event Description <span class="text-red-500">*</span></label>
                     <textarea formControlName="description" rows="5"
-                        placeholder="Describe the purpose and plan for this event..." [class.border-red-500]="eventForm.get('description')?.invalid && eventForm.get('description')?.touched"></textarea>
-                    <div *ngIf="eventForm.get('description')?.invalid && eventForm.get('description')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Description is required</div>
+                        placeholder="Describe the purpose and plan for this event..."
+                        [class.border-red-500]="eventForm.get('description')?.invalid && eventForm.get('description')?.touched"></textarea>
+                    <div *ngIf="eventForm.get('description')?.invalid && eventForm.get('description')?.touched"
+                        class="text-[9px] text-red-500 font-bold uppercase mt-1">Description is required</div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="input-group">
-                        <label>Participation Deadline</label>
-                        <input type="datetime-local" formControlName="registrationDeadline">
+                <div class="form-grid mb-8">
+                    <div class="form-group">
+                        <label>Registration Opens</label>
+                        <input type="datetime-local" formControlName="registrationStartDate">
                     </div>
-                    <div class="input-group">
-                        <label>Public Secretariat Note</label>
+                    <div class="form-group">
+                        <label>Registration Closes (Deadline)</label>
+                        <input type="datetime-local" formControlName="registrationEndDate">
+                    </div>
+                    <div class="form-group full">
+                        <label>Public Note (for members)</label>
                         <input type="text" formControlName="adminNote"
                             placeholder="Public instruction or status update...">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="input-group">
-                        <label>Endowment Fee (BDT)</label>
+                <div class="form-grid mb-8">
+                    <div class="form-group">
+                        <label>Registration Fee (BDT)</label>
                         <input type="number" formControlName="registrationFee" placeholder="0.00">
                     </div>
-                    <div class="input-group">
-                        <label>Visibility & Asset Access</label>
+                    <div class="form-group">
+                        <label>Participant Limit</label>
+                        <input type="number" formControlName="participantLimit" placeholder="Leave empty for unlimited">
+                    </div>
+                    <div class="form-group">
+                        <label>Visibility & Capacity Controls</label>
                         <div class="flex flex-col gap-4 py-2">
+                            <label class="premium-checkbox-label">
+                                <input type="checkbox" formControlName="hasWaitlist">
+                                <span class="checkmark"></span>
+                                <span class="label-text">Enable Waitlist (if limit reached)</span>
+                            </label>
                             <label class="premium-checkbox-label">
                                 <input type="checkbox" formControlName="requiresPayment">
                                 <span class="checkmark"></span>
@@ -133,16 +162,40 @@
                     </div>
                 </div>
 
+                <!-- Cross-field date validation errors -->
+                @if (eventForm.errors && eventForm.touched) {
+                <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-fade-in">
+                    <div class="flex items-start gap-3">
+                        <span class="text-xl mt-0.5">⚠️</span>
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-red-400 mb-2">Date
+                                Configuration Error</p>
+                            <ul class="space-y-1">
+                                @if (eventForm.errors['endBeforeStart']) {
+                                <li class="text-xs text-red-300">• {{ eventForm.errors['endBeforeStart'] }}</li>
+                                }
+                                @if (eventForm.errors['regEndBeforeRegStart']) {
+                                <li class="text-xs text-red-300">• {{ eventForm.errors['regEndBeforeRegStart'] }}</li>
+                                }
+                                @if (eventForm.errors['regEndAfterEventStart']) {
+                                <li class="text-xs text-red-300">• {{ eventForm.errors['regEndAfterEventStart'] }}</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                }
+
                 <div class="flex gap-4 pt-4 border-t border-white/5">
                     <button type="button" (click)="showForm.set(false)"
-                        class="btn btn-secondary flex-1 py-4 h-14">Discard
-                        Changes</button>
+                        class="btn btn-secondary flex-1 py-4 h-14">Cancel</button>
                     <button type="submit" [disabled]="isSubmitting()"
                         class="btn btn-accent flex-1 py-4 h-14 shadow-gold font-black">
-                        {{ isSubmitting() ? 'Transmitting...' : (editingEventId() ? 'Save Configuration' : 'Launch Asset') }}
+                        {{ isSubmitting() ? 'Saving...' : (editingEventId() ? 'Update' : 'Save') }}
                     </button>
                 </div>
             </form>
+
         </div>
     </div>
     }
@@ -156,9 +209,9 @@
         <button (click)="activeTab.set('approvals')" [class.active]="activeTab() === 'approvals'">
             <span class="icon">📝</span> Participation Approvals
             @if (registrations().length > 0) {
-                <span class="badge bg-gold-gradient text-black">
-                    {{ registrations().length }}
-                </span>
+            <span class="badge bg-gold-gradient text-black">
+                {{ registrations().length }}
+            </span>
             }
         </button>
     </div>
@@ -166,22 +219,34 @@
     <!-- Management Hub Tab -->
     @if (activeTab() === 'manage') {
     <div class="animate-fade-in">
+        <!-- Search Bar for Management Hub -->
+        <div class="filter-bar">
+            <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+                placeholder="Search events by title or location…"></app-search-bar>
+        </div>
+        @if (loading()) {
+        <div class="loading-state py-20 text-center">
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+            <p>Loading events...</p>
+        </div>
+        } @else {
         <div class="grid gap-4">
-            @for (ev of events(); track ev.id) {
+            @for (ev of filteredEvents(); track ev.id) {
             <div class="event-management-card group">
                 <!-- Event Asset -->
                 <div class="admin-event-asset">
                     @if (ev.imageUrl) {
-                        <img [src]="'/' + ev.imageUrl" alt="Event Asset">
+                    <img [src]="'/' + ev.imageUrl" alt="Event Asset" appImgFallback="/assets/images/event-placeholder.jpg">
                     } @else {
-                        <div class="placeholder">🖼️</div>
+                    <div class="placeholder">🖼️</div>
                     }
                 </div>
 
                 <!-- Date Badge -->
-                <div class="date-box w-16 h-16 bg-surface border border-white/5 rounded-2xl flex flex-col items-center justify-center group-hover:bg-accent/10 transition-colors">
-                    <span class="text-xl font-black text-accent">{{ ev.date | date:'dd' }}</span>
-                    <span class="text-[10px] uppercase font-bold text-muted">{{ ev.date | date:'MMM' }}</span>
+                <div
+                    class="date-box w-16 h-16 bg-surface border border-white/5 rounded-2xl flex flex-col items-center justify-center group-hover:bg-accent/10 transition-colors">
+                    <span class="text-xl font-black text-accent">{{ ev.startDate | date:'dd' }}</span>
+                    <span class="text-[10px] uppercase font-bold text-muted">{{ ev.startDate | date:'MMM' }}</span>
                 </div>
 
                 <!-- Info -->
@@ -193,23 +258,27 @@
                             {{ ev.isActive ? 'Active' : 'Archived' }}
                         </span>
                     </div>
-                    <p class="meta">{{ ev.location }} • {{ ev.date | date:'shortTime' }}</p>
+                    <p class="meta">{{ ev.location }} • {{ ev.startDate | date:'shortTime' }} – {{ ev.endDate |
+                        date:'shortTime' }}</p>
                 </div>
 
                 <!-- Actions -->
                 <div class="event-actions">
-                    <button (click)="viewEvent(ev)" class="btn btn-outline btn-sm rounded-xl">Details</button>
+                    <button (click)="viewEvent(ev)" class="btn btn-outline btn-sm rounded-xl">View</button>
                     <button (click)="openEditForm(ev)" class="btn btn-secondary btn-sm rounded-xl">Edit</button>
+                    @if (nav.isSuperAdmin()) {
                     <button (click)="deleteEvent(ev.id)"
-                        class="btn btn-secondary btn-sm border-red-500/20 text-red-500 hover:bg-red-500/10">Purge</button>
+                        class="btn btn-secondary btn-sm border-red-500/20 text-red-500 hover:bg-red-500/10">Delete</button>
+                    }
                 </div>
             </div>
             } @empty {
             <div class="py-20 text-center glass-card border-dashed">
-                <p class="text-muted italic opacity-50">No events found. Start by launching your first project.</p>
+                <p class="text-muted italic opacity-50">{{ searchQuery() ? 'No events match your search.' : 'No events found. Start by launching your first project.' }}</p>
             </div>
             }
         </div>
+        }
     </div>
     }
 
@@ -218,20 +287,19 @@
     <div class="animate-fade-in">
         <!-- Filters Area -->
         <div class="filter-bar">
-            <div class="search-wrap">
-                <span class="search-icon">🔍</span>
-                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
-                    placeholder="Search participant or reference...">
-            </div>
-            
-            <select [ngModel]="selectedEventIdFilter()" (ngModelChange)="selectedEventIdFilter.set($event); onFilterChange()" class="status-select">
+            <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event); onFilterChange()"
+                placeholder="Search participant or reference…"></app-search-bar>
+
+            <select [ngModel]="selectedEventIdFilter()"
+                (ngModelChange)="selectedEventIdFilter.set($event); onFilterChange()" class="status-select">
                 <option [value]="null">All Events</option>
                 @for (ev of events(); track ev.id) {
-                    <option [value]="ev.id">{{ ev.title }}</option>
+                <option [value]="ev.id">{{ ev.title }}</option>
                 }
             </select>
 
-            <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()" class="status-select">
+            <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()"
+                class="status-select">
                 <option value="all">All Status</option>
                 <option value="Pending">Pending</option>
                 <option value="Approved">Approved</option>
@@ -239,16 +307,22 @@
             </select>
         </div>
 
+        @if (loadingRegistrations()) {
+        <div class="loading-state py-20 text-center">
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+            <p>Loading participations...</p>
+        </div>
+        } @else {
         <div class="glass-card table-container">
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th class="px-6 py-4">Participant Profile</th>
-                        <th class="px-6 py-4">Event Asset</th>
-                        <th class="px-6 py-4">Contribution / Fee</th>
-                        <th class="px-6 py-4">Financial Ref</th>
-                        <th class="px-6 py-4">Audit Status</th>
-                        <th class="px-6 py-4 text-right">Registry Decision</th>
+                        <th class="px-6 py-4">Participant</th>
+                        <th class="px-6 py-4">Event</th>
+                        <th class="px-6 py-4">Paid Fee</th>
+                        <th class="px-6 py-4">Transaction ID</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-primary/5">
@@ -256,33 +330,37 @@
                     <tr class="hover:bg-primary/[0.02] transition-colors group">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-accent/10 text-accent flex items-center justify-center font-black text-xs">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-accent/10 text-accent flex items-center justify-center font-black text-xs">
                                     {{ (reg.isNonMember ? reg.guestName : reg.memberName)?.[0]?.toUpperCase() }}
                                 </div>
                                 <div>
                                     <div class="text-sm font-bold">
                                         {{ reg.isNonMember ? reg.guestName : reg.memberName }}
-                                    @if (reg.isNonMember) {
-                                        <span class="ml-2 text-[10px] bg-accent/10 px-2 rounded-full uppercase">Guest</span>
-                                    }
+                                        @if (reg.isNonMember) {
+                                        <span
+                                            class="ml-2 text-[10px] bg-accent/10 px-2 rounded-full uppercase">Guest</span>
+                                        }
                                     </div>
                                     <div class="text-[10px] opacity-40">
                                         {{ reg.isNonMember ? reg.guestEmail : 'Member ID: ' + reg.memberId }}
                                     </div>
                                     @if (reg.isNonMember) {
-                                        <div class="text-[10px] opacity-40">{{ reg.guestMobile }}</div>
+                                    <div class="text-[10px] opacity-40">{{ reg.guestMobile }}</div>
                                     }
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm opacity-80">{{ reg.eventTitle }}</td>
                         <td class="px-6 py-4">
-                            <div class="text-xs font-black text-white/90">
-                                {{ (reg.contributionAmount || reg.eventFee || 0) > 0 ? (reg.contributionAmount || reg.eventFee | currency:'BDT ':'code') : 'Free' }}
+                            <div class="text-xs font-black">
+                                {{ (reg.contributionAmount || reg.eventFee || 0) > 0 ? (reg.contributionAmount ||
+                                reg.eventFee | currency:'BDT ':'code') : 'Free' }}
                             </div>
                             <!-- Payment Method Badge -->
                             <div class="mt-1 flex items-center gap-1 opacity-60">
-                                <span class="text-[8px] uppercase font-black border border-white/20 px-1.5 rounded bg-white/5">
+                                <span
+                                    class="text-[8px] uppercase font-black border border-white/20 px-1.5 rounded bg-white/5">
                                     {{ reg.paymentMethod }}
                                 </span>
                             </div>
@@ -291,11 +369,11 @@
                             <div class="flex items-center gap-2">
                                 <code class="text-xs text-accent font-bold">{{ reg.paymentReference }}</code>
                                 @if (reg.receiptPath) {
-                                    <button (click)="openReceipt(reg.receiptPath)" 
-                                            class="p-1 rounded bg-accent/10 hover:bg-accent/20 text-accent transition-all animate-pulse-slow" 
-                                            title="View Receipt Asset">
-                                        <span class="text-[10px]">🧾</span>
-                                    </button>
+                                <button (click)="openReceipt(reg.receiptPath)"
+                                    class="p-1 rounded bg-accent/10 hover:bg-accent/20 text-accent transition-all animate-pulse-slow"
+                                    title="View Receipt Asset">
+                                    <span class="text-[10px]">🧾</span>
+                                </button>
                                 }
                             </div>
                         </td>
@@ -311,42 +389,45 @@
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 @if (reg.status === 'Approved') {
-                                    <button (click)="fetchInvitation(reg.id)"
-                                        class="p-2 rounded-lg bg-accent/10 text-accent hover:bg-accent hover:text-white transition-all" title="View & Print Pass">📜
-                                    </button>
-                                    <button (click)="sendEmail(reg.id)"
-                                        class="p-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all" title="Email Invitation">📧
-                                    </button>
+                                <button (click)="fetchInvitation(reg.id)"
+                                    class="p-2 rounded-lg bg-accent/10 text-accent hover:bg-accent hover:text-white transition-all"
+                                    title="View & Print Pass">📜
+                                </button>
+                                <button (click)="sendEmail(reg.id)"
+                                    class="p-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"
+                                    title="Email Invitation">📧
+                                </button>
                                 }
                                 @if (reg.status === 'Pending') {
-                                    <button (click)="approveReg(reg.id, true)"
-                                        class="p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all">✅
-                                        Verify</button>
+                                <button (click)="approveReg(reg.id, true)"
+                                    class="p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all">✅
+                                    Approve</button>
                                 }
                                 @if (reg.status === 'Pending') {
-                                    <button (click)="approveReg(reg.id, false)"
-                                        class="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">❌
-                                        Decline</button>
+                                <button (click)="approveReg(reg.id, false)"
+                                    class="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">❌
+                                    Reject</button>
                                 }
                             </div>
                         </td>
                     </tr>
                     } @empty {
                     <tr>
-                        <td colspan="5" class="py-20 text-center text-muted italic opacity-40">All clear. No pending
-                            participations.</td>
+                        <td colspan="6">
+                            <div class="empty-state py-20">
+                                <span class="text-4xl mb-3 block">🎟️</span>
+                                <p class="text-muted italic opacity-50">{{ searchQuery() ? 'No participation records match your search criteria.' : 'All clear. No pending participations or registration records found.' }}</p>
+                            </div>
+                        </td>
                     </tr>
                     }
                 </tbody>
             </table>
         </div>
+        }
 
-        <app-pagination
-            [currentPage]="currentPage()"
-            [totalPages]="totalPages()"
-            [totalItems]="totalItems()"
-            [pageSize]="pageSize()"
-            (pageChange)="currentPage.set($event); loadAllRegistrations()">
+        <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [totalItems]="totalItems()"
+            [pageSize]="pageSize()" (pageChange)="currentPage.set($event); loadAllRegistrations()">
         </app-pagination>
     </div>
     }
@@ -358,29 +439,35 @@
             <div class="modal-header">
                 <div>
                     @if (ev.imageUrl) {
-                        <div class="mb-4 rounded-xl overflow-hidden border border-white/10">
-                            <img [src]="'/' + ev.imageUrl" class="w-full h-40 object-cover" alt="Event Banner">
-                        </div>
+                    <div class="mb-4 rounded-xl overflow-hidden border border-white/10">
+                        <img [src]="'/' + ev.imageUrl" class="w-full h-40 object-cover" alt="Event Banner" appImgFallback="/assets/images/event-placeholder.jpg">
+                    </div>
                     }
                     <h3 class="text-accent">{{ ev.title }}</h3>
-                    <p class="text-xs uppercase font-black tracking-widest text-muted mt-1">{{ ev.location }} • {{ ev.date | date:'longDate' }}</p>
+                    <p class="text-xs uppercase font-black tracking-widest text-muted mt-1">{{ ev.location }} • {{
+                        ev.startDate | date:'dd-MM-yyyy' }} – {{ ev.endDate | date:'dd-MM-yyyy' }}</p>
                 </div>
                 <button (click)="closeDetail()" class="close-btn">✕</button>
             </div>
             <div class="modal-body">
                 <section>
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-accent mb-4">Event Narrative</h4>
+                    <h4 class="text-[10px] font-black uppercase tracking-widest text-accent mb-4">Event Summary</h4>
                     <p class="text-lg font-light" style="white-space: pre-wrap;">{{ ev.description }}</p>
                 </section>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
                     <div class="data-field-box">
-                        <h5>Financials Asset</h5>
-                        <p>{{ ((ev?.registrationFee || 0) > 0) ? (ev?.registrationFee | currency:'BDT ':'symbol':'1.0-0') : 'Free Entry Access' }}</p>
+                        <h5>Fee Details</h5>
+                        <p>{{ ((ev?.registrationFee || 0) > 0) ? (ev?.registrationFee | currency:'BDT
+                            ':'symbol':'1.0-0') : 'Free Entry' }}</p>
                     </div>
                     <div class="data-field-box">
-                        <h5>Registry Deadline</h5>
-                        <p>{{ ev.registrationDeadline | date:'medium' }}</p>
+                        <h5>Registration Opens</h5>
+                        <p>{{ (ev.registrationStartDate | date:'dd-MM-yyyy') || 'Immediately' }}</p>
+                    </div>
+                    <div class="data-field-box">
+                        <h5>Registration Closes</h5>
+                        <p>{{ (ev.registrationEndDate | date:'dd-MM-yyyy') || 'Open until event' }}</p>
                     </div>
                 </div>
 
@@ -392,8 +479,8 @@
                 }
             </div>
             <div class="modal-footer">
-                <button (click)="openEditForm(ev); closeDetail()" class="btn btn-secondary">Edit Configuration</button>
-                <button (click)="closeDetail()" class="btn btn-accent px-8">Acknowledge</button>
+                <button (click)="openEditForm(ev); closeDetail()" class="btn btn-secondary">Edit</button>
+                <button (click)="closeDetail()" class="btn btn-accent px-8">Close</button>
             </div>
         </div>
     </div>
@@ -410,14 +497,14 @@
             <div class="modal-body">
                 <div id="invitation-card" class="invitation-card print-target">
                     <div class="card-glow"></div>
-                    
+
                     <div class="card-header">
                         <div class="card-logo">
-                            <img src="/assets/logo.jpg" alt="Logo">
+                            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo" appImgFallback="/assets/logo.png">
                         </div>
                         <div class="org-info">
-                            <h1 class="text-green-800">Govt. Haraganga College Alumni Association</h1>
-                            <p class="subtitle text-green-700">Connecting Hearts, Building Legacy</p>
+                            <h1 class="text-green-800">{{ orgConfigService.config()?.branding?.fullName }}</h1>
+                            <p class="subtitle text-green-700">{{ orgConfigService.localePack()?.tagline }}</p>
                         </div>
                     </div>
 
@@ -430,11 +517,13 @@
                         <div class="details-grid">
                             <div class="detail-group">
                                 <label>Participant Name</label>
-                                <p class="val">{{ invitationData()?.memberName || invitationData()?.guestName || 'Valued Guest' }}</p>
+                                <p class="val">{{ invitationData()?.memberName || invitationData()?.guestName || 'Valued
+                                    Guest' }}</p>
                             </div>
                             <div class="detail-group">
                                 <label>Reg Number</label>
-                                <p class="val font-mono">REG-{{ invitationData()?.id?.toString()?.padStart(6, '0') }}</p>
+                                <p class="val font-mono">REG-{{ invitationData()?.id?.toString()?.padStart(6, '0') }}
+                                </p>
                             </div>
                         </div>
 
@@ -450,7 +539,7 @@
                                 <span class="icon">📅</span>
                                 <div class="meta">
                                     <label>Date & Time</label>
-                                    <strong>{{ invitationData()?.registeredAt | date:'medium' }}</strong>
+                                    <strong>{{ invitationData()?.registeredAt | date:'dd-MM-yyyy' }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -458,15 +547,17 @@
                         <div class="security-row">
                             <div class="qr-placeholder">
                                 <div class="barcode">
-                                    <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]" class="bar" [style.width.px]="(i % 3 + 1) * 2"></div>
+                                    <div *ngFor="let char of (invitationData()?.id?.toString() || '1234567890').split('')"
+                                        class="bar" [style.width.px]="((char * 1) % 3 + 1) * 2"></div>
                                 </div>
                                 <span class="text-[8px] font-mono mt-1">E-CERTIFIED PASS</span>
                             </div>
                             <div class="approval-seal">
                                 <div class="seal">
-                                    <span class="seal-txt">GHC APPROVED</span>
+                                    <span class="seal-txt">{{ orgConfigService.config()?.branding?.approvalSeal }}</span>
                                 </div>
-                                <p class="seal-date">Validated on {{ invitationData()?.registeredAt | date:'shortDate' }}</p>
+                                <p class="seal-date">Validated on {{ invitationData()?.registeredAt | date:'dd-MM-yyyy'
+                                    }}</p>
                             </div>
                         </div>
                     </div>
@@ -486,17 +577,21 @@
         </div>
     </div>
     <!-- Receipt Preview Modal -->
-    <div *ngIf="showReceiptModal() && activeReceiptUrl()" class="modal-overlay z-[2000] backdrop-blur-md" (click)="closeReceipt()">
+    <div *ngIf="showReceiptModal() && activeReceiptUrl()" class="modal-overlay z-[2000] backdrop-blur-md"
+        (click)="closeReceipt()">
         <div class="modal-box max-w-2xl bg-black/80 p-4 border border-white/10" (click)="$event.stopPropagation()">
             <div class="flex justify-between items-center mb-4 px-2">
-                <span class="text-[10px] uppercase font-black tracking-widest text-accent">Financial Evidence Review</span>
+                <span class="text-[10px] uppercase font-black tracking-widest text-accent">Financial Evidence
+                    Review</span>
                 <button (click)="closeReceipt()" class="text-white hover:text-accent font-bold">✕ Close Preview</button>
             </div>
             <div class="receipt-preview-container rounded-xl overflow-hidden shadow-2xl bg-white/5">
-                <img [src]="activeReceiptUrl()" alt="Receipt Evidence" class="w-full h-auto max-h-[80vh] object-contain">
+                <img [src]="activeReceiptUrl()" alt="Receipt Evidence"
+                    class="w-full h-auto max-h-[80vh] object-contain" appImgFallback>
             </div>
             <div class="mt-4 flex justify-center">
-                <a [href]="activeReceiptUrl()" target="_blank" class="btn btn-secondary btn-sm">Open in Full Resolution ↗</a>
+                <a [href]="activeReceiptUrl()" target="_blank" class="btn btn-secondary btn-sm">Open in Full Resolution
+                    ↗</a>
             </div>
         </div>
     </div>

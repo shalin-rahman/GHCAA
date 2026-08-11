@@ -1,8 +1,8 @@
 <div class="admin-feature">
     <div class="page-header">
         <div class="header-text">
-            <h2>Command Center</h2>
-            <small>Performance overview and system vitals</small>
+            <h2>Dashboard</h2>
+            <small>Live system overview — {{ now | date:'dd-MM-yyyy' }}</small>
         </div>
         <div class="header-actions">
             <span class="pulse-line">Live System Status</span>
@@ -12,12 +12,28 @@
 
     @if (loading()) {
     <div class="loading-grid">
-        <div class="skeleton card h-32"></div>
-        <div class="skeleton card h-32"></div>
-        <div class="skeleton card h-32"></div>
-        <div class="skeleton card h-32"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
     </div>
     } @else {
+
+    <!-- Pending Approvals Banner -->
+    @if ((stats()?.applied || 0) > 0) {
+    <div class="alert-banner" routerLink="/admin/approvals">
+        <span class="alert-icon">🔔</span>
+        <span class="alert-msg">
+            <strong>{{ stats()?.applied }}</strong> membership application{{ (stats()?.applied || 0) > 1 ? 's' : '' }}
+            awaiting your review.
+        </span>
+        <span class="alert-cta">Review Now →</span>
+    </div>
+    }
+
+    <!-- Stats Grid -->
     <div class="stats-grid animate-fade-up">
         <div class="glass-card stat-card ripple-effect">
             <div class="stat-icon">👥</div>
@@ -25,14 +41,20 @@
                 <h3>{{ stats()?.totalMembers || 0 }}</h3>
                 <p>Total Alumni</p>
             </div>
-            <div class="stat-trend positive">+12%</div>
+            <button class="action-btn" routerLink="/admin/members">Manage</button>
         </div>
 
         <div class="glass-card stat-card ripple-effect">
             <div class="stat-icon">✅</div>
             <div class="stat-body">
                 <h3>{{ stats()?.active || 0 }}</h3>
-                <p>Verified Members</p>
+                <p>Active Members</p>
+            </div>
+            <div class="stat-rate">
+                <div class="rate-bar">
+                    <div class="rate-fill" [style.width]="membershipRate + '%'"></div>
+                </div>
+                <span class="rate-label">{{ membershipRate }}% of total</span>
             </div>
         </div>
 
@@ -45,50 +67,140 @@
             <button class="action-btn" routerLink="/admin/approvals">View All</button>
         </div>
 
+        <div class="glass-card stat-card ripple-effect">
+            <div class="stat-icon">😴</div>
+            <div class="stat-body">
+                <h3>{{ inactiveCount }}</h3>
+                <p>Inactive Members</p>
+            </div>
+            <button class="action-btn" routerLink="/admin/members">View</button>
+        </div>
+
+        @if (nav.isSuperAdmin()) {
         <div class="glass-card stat-card ripple-effect dark">
             <div class="stat-icon">💰</div>
             <div class="stat-body">
-                <h3>{{ (stats()?.balance || 0) | currency:'BDT ':'symbol':'1.0-0' }}</h3>
+                <h3>{{ formatBDT(stats()?.balance || 0) }}</h3>
                 <p>Net Fund Balance</p>
             </div>
-            <button class="action-btn gold" routerLink="/admin/ledger">Register</button>
+            <button class="action-btn gold" routerLink="/admin/ledger">Ledger</button>
+        </div>
+        }
+
+        <div class="glass-card stat-card ripple-effect">
+            <div class="stat-icon">📰</div>
+            <div class="stat-body">
+                <h3>{{ recentNews().length }}</h3>
+                <p>Published Articles</p>
+            </div>
+            <button class="action-btn" routerLink="/admin/news">Manage</button>
         </div>
     </div>
 
+    <!-- Content Section -->
     <div class="dashboard-content">
-        <div class="glass-card main-chart-card">
+        <!-- Recent News Feed -->
+        <div class="glass-card content-card">
             <div class="card-header">
-                <h3>Membership Growth</h3>
+                <h3>📰 Recent News</h3>
+                <a routerLink="/admin/news" class="card-link">Manage All →</a>
             </div>
-            <div class="chart-placeholder">
-                <!-- Custom Chart Implementation or SVG -->
-                <div class="growth-visual">
-                    <div class="bar" style="height: 40%"></div>
-                    <div class="bar" style="height: 55%"></div>
-                    <div class="bar" style="height: 45%"></div>
-                    <div class="bar" style="height: 70%"></div>
-                    <div class="bar" style="height: 85%"></div>
-                    <div class="bar featured" style="height: 100%"></div>
+            @if (recentNews().length === 0) {
+            <div class="empty-state-compact">
+                <p>No news articles published yet.</p>
+                <button class="btn btn-accent btn-sm mt-3" routerLink="/admin/news">+ Create Article</button>
+            </div>
+            } @else {
+            <div class="news-feed-list">
+                @for (item of recentNews(); track item.id) {
+                <div class="news-feed-item">
+                    @if (item.coverImageUrl || item.imageUrl) {
+                    <div class="news-thumb">
+                        <img [src]="item.coverImageUrl || item.imageUrl" [alt]="item.title" appImgFallback>
+                    </div>
+                    } @else {
+                    <div class="news-thumb-placeholder">📄</div>
+                    }
+                    <div class="news-feed-body">
+                        <span class="news-category">{{ item.articleCategory || item.category || 'General' }}</span>
+                        <strong>{{ item.title }}</strong>
+                        <small>{{ item.publishedAt || item.createdAt | date:'dd-MM-yyyy' }}</small>
+                    </div>
+                    <div class="news-status-chip" [class.published]="item.status !== 'Draft'">
+                        {{ item.status === 'Draft' ? 'Draft' : 'Live' }}
+                    </div>
                 </div>
+                }
             </div>
+            }
         </div>
 
-        <div class="glass-card news-brief">
-            <div class="card-header">
-                <h3>Recent Announcements</h3>
-            </div>
-            <div class="news-list">
-                <div class="news-item">
-                    <span class="date">May 12</span>
-                    <p>Annual General Meeting scheduled for June 15th.</p>
+        <!-- Sidebar: Upcoming Events + Quick Links -->
+        <div class="sidebar-col">
+            <!-- Upcoming Events -->
+            <div class="glass-card content-card">
+                <div class="card-header">
+                    <h3>🎟️ Upcoming Events</h3>
+                    <a routerLink="/admin/events" class="card-link">All →</a>
                 </div>
-                <div class="news-item">
-                    <span class="date">May 05</span>
-                    <p>New Executive Committee selection process started.</p>
+                @if (upcomingEvents().length === 0) {
+                <div class="empty-state-compact">
+                    <p>No upcoming events scheduled.</p>
+                </div>
+                } @else {
+                <div class="event-mini-list">
+                    @for (ev of upcomingEvents(); track ev.id) {
+                    <div class="event-mini-item">
+                        <div class="event-date-chip">
+                            <span class="eday">{{ ev.startDate | date:'d' }}</span>
+                            <span class="emon">{{ ev.startDate | date:'MMM' }}</span>
+                        </div>
+                        <div class="event-mini-info">
+                            <strong>{{ ev.title }}</strong>
+                            <small>{{ ev.venue || ev.location || 'TBD' }}</small>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="glass-card content-card quick-actions-card">
+                <div class="card-header">
+                    <h3>⚡ Quick Actions</h3>
+                </div>
+                <div class="quick-actions-grid">
+                    <a routerLink="/admin/approvals" class="qa-btn">
+                        <span class="qa-icon">📋</span>
+                        <span>Approvals</span>
+                    </a>
+                    <a routerLink="/admin/news" class="qa-btn">
+                        <span class="qa-icon">✍️</span>
+                        <span>Post News</span>
+                    </a>
+                    <a routerLink="/admin/events" class="qa-btn">
+                        <span class="qa-icon">📅</span>
+                        <span>New Event</span>
+                    </a>
+                    <a routerLink="/admin/members" class="qa-btn">
+                        <span class="qa-icon">👤</span>
+                        <span>Members</span>
+                    </a>
+                    @if (nav.isSuperAdmin()) {
+                    <a routerLink="/admin/ledger" class="qa-btn">
+                        <span class="qa-icon">📊</span>
+                        <span>Finances</span>
+                    </a>
+                    }
+                    <a routerLink="/admin/governance" class="qa-btn">
+                        <span class="qa-icon">🏛️</span>
+                        <span>EC Panel</span>
+                    </a>
                 </div>
             </div>
-            <button class="btn-link" routerLink="/admin/news">Manage News</button>
         </div>
     </div>
+
     }
 </div>

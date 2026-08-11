@@ -18,6 +18,8 @@ namespace GHCAA.Tests.Services
         private Mock<ITokenService> _mockTokenService = null!;
         private Mock<ILogger<AuthService>> _mockLogger = null!;
         private Mock<IActivityService> _mockActivityService = null!;
+        private Mock<Microsoft.Extensions.Configuration.IConfiguration> _mockConfig = null!;
+        private Mock<System.Net.Http.IHttpClientFactory> _mockHttp = null!;
         private AuthService _service = null!;
 
         [SetUp]
@@ -26,7 +28,9 @@ namespace GHCAA.Tests.Services
             _mockTokenService = new Mock<ITokenService>();
             _mockLogger = new Mock<ILogger<AuthService>>();
             _mockActivityService = new Mock<IActivityService>();
-            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object);
+            _mockConfig = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+            _mockHttp = new Mock<System.Net.Http.IHttpClientFactory>();
+            _service = new AuthService(_context, _mockTokenService.Object, _mockLogger.Object, _mockActivityService.Object, _mockConfig.Object, _mockHttp.Object);
         }
 
         [Test]
@@ -35,23 +39,8 @@ namespace GHCAA.Tests.Services
             // Arrange
             var username = "GHC-2007-0001";
             var password = "TestPassword123";
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test1@e.com", NID = "123", FatherName="F", MotherName="M", MobileNo="01", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
-            await _context.Members.AddAsync(member);
-            await _context.SaveChangesAsync();
-            var memberId = member.Id;
-
-            var user = new User
-            {
-                Username = username,
-                PasswordHash = passwordHash,
-                MemberId = memberId,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
-
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            var member = await CreateAndSaveTestMemberAsync("Active Member", "test1@e.com", "123", "123");
+            var user = await CreateAndSaveTestUserAsync(member.Id, username, password);
 
             var expectedToken = "mock_jwt_token";
             _mockTokenService.Setup(x => x.CreateToken(It.IsAny<User>()))
@@ -66,7 +55,7 @@ namespace GHCAA.Tests.Services
             result.Should().NotBeNull();
             result!.Token.Should().Be(expectedToken);
             result.Username.Should().Be(username);
-            result.MemberId.Should().Be(memberId);
+            result.MemberId.Should().Be(member.Id);
         }
 
         [Test]
@@ -81,15 +70,8 @@ namespace GHCAA.Tests.Services
         public async Task LoginAsync_WithWrongPassword_ShouldReturnNull()
         {
             var username = "testuser";
-            var password = "CorrectPassword";
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
-            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test2@e.com", NID = "124", FatherName="F", MotherName="M", MobileNo="01a", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
-            await _context.Members.AddAsync(member);
-            await _context.SaveChangesAsync();
-
-            await _context.Users.AddAsync(new User { Username = username, PasswordHash = passwordHash, MemberId = member.Id, CreatedAt = DateTime.UtcNow, IsActive = true });
-            await _context.SaveChangesAsync();
+            var member = await CreateAndSaveTestMemberAsync("Active Member", "test2@e.com", "124", "124");
+            await CreateAndSaveTestUserAsync(member.Id, username, "CorrectPassword");
 
             var result = await _service.LoginAsync(new LoginDto { Username = username, Password = "WrongPassword" });
             result.Should().BeNull();
@@ -100,13 +82,9 @@ namespace GHCAA.Tests.Services
         {
             var username = "inactiveuser";
             var password = "password";
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
-            var member = new Member { FullName = "Active Member", Status = Enums.MembershipStatus.Active, GHCLastCertificatePassingYear = 2007, Email = "test3@e.com", NID = "125", FatherName="F", MotherName="M", MobileNo="01b", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
-            await _context.Members.AddAsync(member);
-            await _context.SaveChangesAsync();
-
-            await _context.Users.AddAsync(new User { Username = username, PasswordHash = passwordHash, MemberId = member.Id, CreatedAt = DateTime.UtcNow, IsActive = false });
+            var member = await CreateAndSaveTestMemberAsync("Active Member", "test3@e.com", "125", "125");
+            var user = await CreateAndSaveTestUserAsync(member.Id, username, password);
+            user.IsActive = false;
             await _context.SaveChangesAsync();
 
             var result = await _service.LoginAsync(new LoginDto { Username = username, Password = password });
@@ -114,29 +92,43 @@ namespace GHCAA.Tests.Services
         }
 
         [Test]
+        public async Task LoginAsync_AfterFiveFailedAttempts_ShouldLockOutForFifteenMinutes()
+        {
+            var username = "lockout_user";
+            var password = "ValidPass1!";
+            var member = await CreateAndSaveTestMemberAsync("Lockout Member", "lockout@e.com", "126", "126");
+            var user = await CreateAndSaveTestUserAsync(member.Id, username, password);
+
+            for (var i = 0; i < 5; i++)
+            {
+                var fail = await _service.LoginAsync(new LoginDto { Username = username, Password = $"WrongPass{i}!" });
+                fail.Should().BeNull();
+            }
+
+            var locked = await _service.LoginAsync(new LoginDto { Username = username, Password = password });
+            locked.Should().BeNull();
+
+            var updated = await _context.Users.FindAsync(user.Id);
+            updated!.FailedLoginAttempts.Should().BeGreaterOrEqualTo(5);
+            updated.LockoutUntil.Should().NotBeNull();
+            updated.LockoutUntil!.Value.Should().BeAfter(DateTime.UtcNow);
+        }
+
+        [Test]
         public async Task ResetPasswordAsync_WithValidToken_ShouldChangePassword()
         {
             // Arrange
-            var email = "User@Example.com";
+            var email = "user@example.com";
             var token = "token123";
-            var member = new Member { FullName = "Test", Email = email, NID = "333", MobileNo = "333", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
-            await _context.Members.AddAsync(member);
+            var member = await CreateAndSaveTestMemberAsync("Test", email, "333", "333");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "testuser_reset", "old_password");
+
+            user.ResetToken = token;
+            user.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
             await _context.SaveChangesAsync();
 
-            var user = new User
-            {
-                Username = "testuser_reset",
-                MemberId = member.Id,
-                PasswordHash = "old_hash",
-                ResetToken = token,
-                ResetTokenExpiry = DateTime.UtcNow.AddHours(1),
-                IsActive = true
-            };
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-
-            // Act - Test case-insensitive email (passing lowercase instead of MixedCase)
-            var result = await _service.ResetPasswordAsync("user@example.com", token, "NewPassword123");
+            // Act
+            var result = await _service.ResetPasswordAsync(email, token, "NewPassword123");
 
             // Assert
             result.Should().BeTrue();
@@ -151,20 +143,11 @@ namespace GHCAA.Tests.Services
             // Arrange
             var email = "expired@example.com";
             var token = "expired_token";
-            var member = new Member { FullName = "Test", Email = email, NID = "444", MobileNo = "444", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="P", Designation="D" };
-            await _context.Members.AddAsync(member);
-            await _context.SaveChangesAsync();
+            var member = await CreateAndSaveTestMemberAsync("Test", email, "444", "444");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "expired_user", "old_password");
 
-            var user = new User
-            {
-                Username = "expired_user",
-                MemberId = member.Id,
-                PasswordHash = "old_hash",
-                ResetToken = token,
-                ResetTokenExpiry = DateTime.UtcNow.AddHours(-1),
-                IsActive = true
-            };
-            await _context.Users.AddAsync(user);
+            user.ResetToken = token;
+            user.ResetTokenExpiry = DateTime.UtcNow.AddHours(-1);
             await _context.SaveChangesAsync();
 
             // Act
@@ -172,6 +155,29 @@ namespace GHCAA.Tests.Services
 
             // Assert
             result.Should().BeFalse();
+        }
+
+        [Test]
+        public async Task SocialLoginAsync_WithValidGoogleId_ShouldReturnTokenResponse()
+        {
+            // Arrange
+            var email = "social@example.com";
+            var googleId = "google_12345";
+            var member = await CreateAndSaveTestMemberAsync("Social Member", email, "555", "555");
+            var user = await CreateAndSaveTestUserAsync(member.Id, "social_user", "password");
+            user.GoogleId = googleId;
+            await _context.SaveChangesAsync();
+
+            var expectedToken = "mock_social_jwt_token";
+            _mockTokenService.Setup(x => x.CreateToken(It.IsAny<User>())).Returns(expectedToken);
+
+            // Act
+            var result = await _service.SocialLoginAsync(googleId, email, "Social Member", "Google");
+
+            // Assert
+            result.Should().NotBeNull();
+            result!.Token.Should().Be(expectedToken);
+            result.MemberId.Should().Be(member.Id);
         }
     }
 }

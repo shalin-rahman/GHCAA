@@ -29,10 +29,10 @@
 .logo {
     height: 40px;
     width: 40px;
-    border-radius: 50%;
     object-fit: contain;
-    background: white;
-    border: 1.5px solid var(--accent-color);
+    /* transparent so the crest blends with the surface (dark sidebar → dark, light → light);
+       PNG asset is transparent — a white disc here would show a hard medallion in dark theme */
+    background: transparent;
 }
 
 .brand-text {
@@ -43,7 +43,7 @@
 .brand-name {
     font-weight: 900;
     font-size: 1rem;
-    color: var(--primary-color);
+    color: var(--text-main);
     line-height: 1.2;
 }
 
@@ -63,6 +63,13 @@
 
 .nav-section {
     padding: 0.75rem 0.75rem 0.25rem;
+
+    /* Clearer grouping: separate each section (except the first) with spacing + a hairline */
+    & + & {
+        margin-top: 0.35rem;
+        border-top: 1px solid var(--glass-border);
+        padding-top: 1rem;
+    }
 }
 
 .nav-section-label {
@@ -91,7 +98,7 @@
 }
 
 .nav-item:hover {
-    background: var(--bg-color);
+    background: var(--card-bg-hover);
 }
 
 .nav-item.active {
@@ -127,6 +134,22 @@
     background: var(--bg-color);
 }
 
+// 29F.4: logout button styled as a full-width nav item (button reset + danger accent)
+.logout-item {
+    width: 100%;
+    margin-top: 0.4rem;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+
+    &:hover {
+        color: #ef4444;
+        border-color: #ef4444;
+        background: color-mix(in srgb, #ef4444 8%, transparent);
+    }
+}
+
 .admin-user-info {
     display: flex;
     align-items: center;
@@ -152,7 +175,7 @@
     padding: 0.1rem 0.45rem;
     border-radius: 4px;
     background: color-mix(in srgb, var(--primary-color) 12%, transparent);
-    color: var(--primary-color);
+    color: var(--text-main);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -179,49 +202,32 @@
 }
 
 .admin-header-inner {
+    // Shares the `portal-content` class with .admin-content so the breadcrumb lines
+    // up with the page body below. But portal-content's 2.5rem (40px) all-round padding
+    // overflows this 60px-tall bar, so override to horizontal-only padding here.
+    // Span the full width (drop portal-content's 1400px cap) so the user/sign-out
+    // controls sit flush at the far top-right on wide screens.
+    max-width: none;
+    width: 100%;
+    padding: 0 2.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 }
 
-.admin-breadcrumbs {
+/* Breadcrumb markup + styling now live in the self-contained <app-breadcrumb>
+   component. Only the host element's layout role in this header row is page-specific. */
+app-breadcrumb {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-
-    .text-muted {
-        color: var(--text-muted);
-    }
-
-    .separator {
-        color: var(--glass-border);
-        font-weight: 400;
-    }
-
-    .current-page {
-        color: var(--primary-color);
-    }
+    min-width: 0;
 }
 
 .header-right {
     display: flex;
     gap: 0.75rem;
     align-items: center;
-}
-
-.header-role-badge {
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
-    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
-    color: var(--primary-color);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .header-btn {
@@ -244,10 +250,61 @@
 
 .admin-content {
     flex: 1;
+    // Match the full-width header (drop portal-content's 1400px cap) so page
+    // bodies and the header bar share the same left/right edges.
+    max-width: none;
+}
+
+// 29F.4: hamburger + backdrop are desktop-hidden; only surface on mobile
+.sidebar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--text-main);
+    padding: 0 0.5rem 0 0;
+    line-height: 1;
+}
+
+.admin-backdrop {
+    display: none;
 }
 
 @media (max-width: 768px) {
+    .sidebar-toggle {
+        display: block;
+    }
+
+    // Drawer: fixed off-canvas, slides in when .sidebar-open is set on the wrapper
     .admin-sidebar {
-        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 110;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .admin-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 105;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+    .sidebar-open {
+        .admin-sidebar {
+            transform: translateX(0);
+        }
+
+        .admin-backdrop {
+            opacity: 1;
+            pointer-events: auto;
+        }
     }
 }

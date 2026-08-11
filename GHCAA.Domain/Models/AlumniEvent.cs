@@ -15,7 +15,7 @@ namespace GHCAA.Domain.Models
         public string Description { get; set; } = null!;
 
         [Required]
-        public DateTime Date { get; set; }
+        public DateTime StartDate { get; set; }
 
         [Required]
         [MaxLength(200)]
@@ -24,16 +24,21 @@ namespace GHCAA.Domain.Models
         public decimal? RegistrationFee { get; set; }
 
         public bool RequiresPayment { get; set; } = true;
-
+        public Enums.EventStatus Status { get; set; } = Enums.EventStatus.Draft;
         public bool IsActive { get; set; } = true;
         public bool AllowNonMembers { get; set; } = false;
 
         [MaxLength(500)]
         public string? ImageUrl { get; set; }
 
-        public DateTime? RegistrationDeadline { get; set; }
-        
+        public DateTime EndDate { get; set; }
+        public DateTime? RegistrationStartDate { get; set; }
+        public DateTime? RegistrationEndDate { get; set; }
+
         public string? AdminNote { get; set; }
+
+        public int? ParticipantLimit { get; set; }
+        public bool HasWaitlist { get; set; } = false;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

@@ -1,0 +1,152 @@
+.admin-fee-config-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        
+        .title-group {
+            h2 {
+                font-size: 2rem;
+                font-weight: 900;
+                letter-spacing: -1px;
+                background: linear-gradient(to right, var(--text-main), var(--accent-color));
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 0.5rem;
+            }
+            p {
+                color: var(--text-muted);
+                font-size: 0.85rem;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+        }
+    }
+
+    .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        overflow: hidden;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        
+        thead {
+            background: rgba(var(--accent-color-rgb), 0.05);
+            th {
+                padding: 1.25rem 1.5rem;
+                text-align: left;
+                font-size: 0.7rem;
+                font-weight: 900;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--accent-text);
+                border-bottom: 1px solid rgba(var(--accent-color-rgb), 0.1);
+            }
+        }
+
+        tbody {
+            tr {
+                transition: 0.2s;
+                &:hover { background: var(--card-bg-hover); }
+                &.inactive { opacity: 0.5; filter: grayscale(0.8); }
+                
+                td {
+                    padding: 1.25rem 1.5rem;
+                    border-bottom: 1px solid var(--card-border);
+                    vertical-align: middle;
+                }
+            }
+        }
+
+        .amount {
+            font-size: 1.1rem;
+            font-weight: 900;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+    }
+}
+
+.badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    
+    &-primary { background: rgba(0, 200, 255, 0.1); color: #00c8ff; border: 1px solid rgba(0, 200, 255, 0.2); }
+    &-secondary { background: rgba(255, 170, 0, 0.1); color: #ffaa00; border: 1px solid rgba(255, 170, 0, 0.2); }
+}
+
+.status-pill {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    &.active {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+        &::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: #4caf50; display: inline-block; }
+    }
+    &.inactive {
+        background: var(--card-bg);
+        color: var(--text-muted);
+    }
+}
+
+.modal-body {
+    .form-group {
+        margin-bottom: 1.5rem;
+        label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-text);
+            margin-bottom: 0.75rem;
+            padding-left: 0.25rem;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.3s;
+            
+            &:focus {
+                border-color: var(--accent-color);
+                outline: none;
+                background: var(--card-bg-hover);
+                box-shadow: 0 0 20px rgba(var(--accent-color-rgb), 0.1);
+            }
+        }
+    }
+}

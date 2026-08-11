@@ -1,18 +1,25 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { EventsService } from '../../core/services/events.service';
 import { AlumniEvent, EventRegistration } from '../../core/models/business.models';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
+import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { NotificationService } from '../../core/services/notification.service';
+import { NavService } from '../../core/services/nav.service';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 
 @Component({
     selector: 'app-admin-events',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent, PaginationComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LogoSpinnerComponent],
     templateUrl: './admin-events.html',
     styleUrl: './admin-events.scss'
 })
@@ -20,10 +27,14 @@ export class AdminEvents implements OnInit {
     private eventsService = inject(EventsService);
     private fb = inject(FormBuilder);
     private notify = inject(NotificationService);
+    public nav = inject(NavService);
+    public orgConfigService = inject(OrgConfigService);
 
 
     events = signal<AlumniEvent[]>([]);
     registrations = signal<any[]>([]);
+    loading = signal<boolean>(true);
+    loadingRegistrations = signal<boolean>(true);
     activeTab = signal<'manage' | 'approvals'>('manage');
     isExporting = signal(false);
 
@@ -39,6 +50,16 @@ export class AdminEvents implements OnInit {
     showInvitation = signal<boolean>(false);
     invitationData = signal<any | null>(null);
     formError = signal<string | null>(null);
+
+    filteredEvents = computed(() => {
+        const query = this.searchQuery().toLowerCase();
+        const all = this.events();
+        if (!query) return all;
+        return all.filter(e => 
+            e.title?.toLowerCase()?.includes(query) || 
+            e.location?.toLowerCase()?.includes(query)
+        );
+    });
     
     // Receipt Preview
     showReceiptModal = signal<boolean>(false);
@@ -64,19 +85,45 @@ export class AdminEvents implements OnInit {
     selectedLogo = signal<File | null>(null);
     logoPreview = signal<string | null>(null);
 
+    /** Cross-field date validation: endDate > startDate; regEnd > regStart; regEnd ≤ startDate */
+    static eventDatesValidator(group: AbstractControl): ValidationErrors | null {
+        const start = group.get('startDate')?.value;
+        const end = group.get('endDate')?.value;
+        const regStart = group.get('registrationStartDate')?.value;
+        const regEnd = group.get('registrationEndDate')?.value;
+
+        const errors: ValidationErrors = {};
+
+        if (start && end && new Date(end) <= new Date(start)) {
+            errors['endBeforeStart'] = 'Event end date must be after the start date.';
+        }
+        if (regStart && regEnd && new Date(regEnd) <= new Date(regStart)) {
+            errors['regEndBeforeRegStart'] = 'Registration close date must be after the registration open date.';
+        }
+        if (regEnd && start && new Date(regEnd) > new Date(start)) {
+            errors['regEndAfterEventStart'] = 'Registration should close on or before the event start date.';
+        }
+
+        return Object.keys(errors).length ? errors : null;
+    }
+
     eventForm = this.fb.group({
         title: ['', Validators.required],
         description: ['', Validators.required],
-        date: ['', Validators.required],
+        startDate: ['', Validators.required],
+        endDate: ['', Validators.required],
         location: ['', Validators.required],
         registrationFee: [0],
         requiresPayment: [true],
-        registrationDeadline: [''],
+        registrationStartDate: [''],
+        registrationEndDate: [''],
         adminNote: [''],
         isActive: [true],
         allowNonMembers: [false],
-        imageUrl: ['']
-    });
+        imageUrl: [''],
+        participantLimit: [null],
+        hasWaitlist: [false]
+    }, { validators: AdminEvents.eventDatesValidator });
 
     ngOnInit() {
         this.loadAllEvents();
@@ -84,26 +131,29 @@ export class AdminEvents implements OnInit {
     }
 
     loadAllEvents() {
+        this.loading.set(true);
         this.eventsService.getAllEventsForAdmin().subscribe({
-            next: data => this.events.set(data),
-            error: () => this.events.set([])
+            next: data => { this.events.set(data); this.loading.set(false); },
+            error: () => { this.events.set([]); this.loading.set(false); }
         });
     }
 
     loadAllRegistrations() {
+        this.loadingRegistrations.set(true);
         this.eventsService.getAllRegistrations(
-            this.currentPage(), 
-            this.pageSize(), 
-            this.selectedEventIdFilter() || undefined, 
-            this.statusFilter(), 
+            this.currentPage(),
+            this.pageSize(),
+            this.selectedEventIdFilter() || undefined,
+            this.statusFilter(),
             this.searchQuery()
         ).subscribe({
             next: res => {
                 this.registrations.set(res.items);
                 this.totalItems.set(res.totalItems);
                 this.totalPages.set(res.totalPages);
+                this.loadingRegistrations.set(false);
             },
-            error: () => this.registrations.set([])
+            error: () => { this.registrations.set([]); this.loadingRegistrations.set(false); }
         });
     }
 
@@ -150,14 +200,18 @@ export class AdminEvents implements OnInit {
         this.eventForm.patchValue({
             title: ev.title,
             description: ev.description,
-            date: ev.date ? new Date(ev.date).toISOString().slice(0, 16) : '',
+            startDate: ev.startDate ? new Date(ev.startDate).toISOString().slice(0, 16) : '',
+            endDate: ev.endDate ? new Date(ev.endDate).toISOString().slice(0, 16) : '',
             location: ev.location,
             registrationFee: ev.registrationFee,
             requiresPayment: ev.requiresPayment,
-            registrationDeadline: ev.registrationDeadline ? new Date(ev.registrationDeadline).toISOString().slice(0, 16) : '',
+            registrationStartDate: ev.registrationStartDate ? new Date(ev.registrationStartDate).toISOString().slice(0, 16) : '',
+            registrationEndDate: ev.registrationEndDate ? new Date(ev.registrationEndDate).toISOString().slice(0, 16) : '',
             adminNote: ev.adminNote,
             isActive: ev.isActive,
-            allowNonMembers: ev.allowNonMembers
+            allowNonMembers: ev.allowNonMembers,
+            participantLimit: (ev as any).participantLimit,
+            hasWaitlist: (ev as any).hasWaitlist
         });
         this.selectedLogo.set(null);
         this.logoPreview.set(ev.imageUrl || null);
@@ -166,18 +220,30 @@ export class AdminEvents implements OnInit {
     }
 
     onLogoSelected(event: any) {
-        const file = event.target.files[0];
-        if (file) {
-            this.selectedLogo.set(file);
-            const reader = new FileReader();
-            reader.onload = () => this.logoPreview.set(reader.result as string);
-            reader.readAsDataURL(file);
-        }
+        const file: File = event.target.files[0];
+        if (!file) return;
+        const err = validateUploadFile(file, 'image');
+        if (err) { this.notify.error(err); event.target.value = ''; return; }
+        this.selectedLogo.set(file);
+        const reader = new FileReader();
+        reader.onload = () => this.logoPreview.set(reader.result as string);
+        reader.readAsDataURL(file);
     }
 
     submitEvent() {
+        this.eventForm.markAllAsTouched();
+
         if (this.eventForm.invalid) {
-            this.notify.error('Please complete all required fields.');
+            const errors = this.eventForm.errors;
+            if (errors?.['endBeforeStart']) {
+                this.notify.error(errors['endBeforeStart']);
+            } else if (errors?.['regEndBeforeRegStart']) {
+                this.notify.error(errors['regEndBeforeRegStart']);
+            } else if (errors?.['regEndAfterEventStart']) {
+                this.notify.error(errors['regEndAfterEventStart']);
+            } else {
+                this.notify.error('Please complete all required fields.');
+            }
             return;
         }
 
@@ -196,8 +262,10 @@ export class AdminEvents implements OnInit {
             title: raw.title || '',
             description: raw.description || '',
             location: raw.location || '',
-            date: toSafeISO(raw.date)!,
-            registrationDeadline: toSafeISO(raw.registrationDeadline),
+            startDate: toSafeISO(raw.startDate)!,
+            endDate: toSafeISO(raw.endDate)!,
+            registrationStartDate: toSafeISO(raw.registrationStartDate),
+            registrationEndDate: toSafeISO(raw.registrationEndDate),
             registrationFee: raw.registrationFee || 0,
             requiresPayment: raw.requiresPayment ?? true,
             adminNote: raw.adminNote || undefined,
@@ -216,8 +284,15 @@ export class AdminEvents implements OnInit {
             next: (savedEvent) => {
                 const logo = this.selectedLogo();
                 if (logo) {
-                    this.eventsService.uploadEventLogo(savedEvent.id, logo).subscribe(() => {
-                        this.finishSubmission(id ? 'Event updated!' : 'Event created!');
+                    this.eventsService.uploadEventLogo(savedEvent.id, logo).subscribe({
+                        // 29F.2: surface HTTP failures instead of failing silently
+                        next: () => {
+                            this.finishSubmission(id ? 'Event updated!' : 'Event created!');
+                        },
+                        error: () => {
+                            this.notify.error('Event saved but logo upload failed.');
+                            this.isSubmitting.set(false);
+                        }
                     });
                 } else {
                     this.finishSubmission(id ? 'Event updated!' : 'Event created!');

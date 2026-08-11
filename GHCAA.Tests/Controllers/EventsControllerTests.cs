@@ -15,42 +15,31 @@ using NUnit.Framework;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    public class EventsControllerTests
+    public class EventsControllerTests : ControllerTestBase
     {
         private Mock<IEventService> _eventServiceMock;
+        private Mock<IFileValidationService> _fileValidationServiceMock;
         private EventsController _controller;
 
         [SetUp]
         public void Setup()
         {
             _eventServiceMock = new Mock<IEventService>();
-            _controller = new EventsController(_eventServiceMock.Object);
-            
-            SetUserContext(1, 10); // Admin 1, Member 10
-        }
+            _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                       .Returns(FileValidationResult.Ok());
+            _controller = new EventsController(_eventServiceMock.Object, _fileValidationServiceMock.Object);
 
-        private void SetUserContext(int userId, int? memberId, string role = "Admin")
-        {
-            var claims = new List<Claim> {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Role, role)
-            };
-            if (memberId.HasValue) 
-                claims.Add(new Claim("MemberId", memberId.Value.ToString()));
-
-            var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuthentication"));
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
+            SetUserContext(_controller, 10, "Admin", 1); // Admin 1, Member 10
+            // Optional: if tests need MemberId 10, we can use SetMemberContext(_controller, 10);
+            // Looking at RegisterForEvent test, it uses 10.
         }
 
         [Test]
         public async Task GetActiveEvents_ReturnsOk()
         {
-             _eventServiceMock.Setup(x => x.GetActiveEventsAsync(It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(new List<EventDto>());
+            _eventServiceMock.Setup(x => x.GetActiveEventsAsync(It.IsAny<CancellationToken>()))
+                             .ReturnsAsync(new List<EventDto>());
 
             var result = await _controller.GetActiveEvents(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
@@ -59,21 +48,32 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetEventById_ReturnsOk_IfFound()
         {
-             _eventServiceMock.Setup(x => x.GetEventByIdAsync(1, It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(new EventDto { Id = 1 });
+            _eventServiceMock.Setup(x => x.GetEventByIdAsync(1, It.IsAny<CancellationToken>()))
+                             .ReturnsAsync(new EventDto { Id = 1 });
 
             var result = await _controller.GetEventById(1, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
         [Test]
-        public async Task RegisterForEvent_ReturnsOk()
+        public async Task RegisterForEventForm_ReturnsOk()
         {
             var dto = new RegisterForEventDto { EventId = 1, PaymentReference = "123" };
             _eventServiceMock.Setup(x => x.RegisterForEventAsync(dto, 10, It.IsAny<UploadedFileDto>(), It.IsAny<CancellationToken>()))
                              .ReturnsAsync(new EventRegistration { Id = 1 });
 
-            var result = await _controller.RegisterForEvent(dto, null, CancellationToken.None);
+            var result = await _controller.RegisterForEventForm(dto, null, CancellationToken.None);
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task RegisterForEventJson_ReturnsOk()
+        {
+            var dto = new RegisterForEventDto { EventId = 1, PaymentReference = "123" };
+            _eventServiceMock.Setup(x => x.RegisterForEventAsync(dto, 10, null, It.IsAny<CancellationToken>()))
+                             .ReturnsAsync(new EventRegistration { Id = 1 });
+
+            var result = await _controller.RegisterForEventJson(dto, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }
 
@@ -90,18 +90,18 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetMyRegistrations_SuperAdmin_ReturnsEmptyList()
         {
-            SetUserContext(1, null, "SuperAdmin");
+            SetUserContext(_controller, null, "SuperAdmin");
             var result = await _controller.GetMyRegistrations(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
-            Assert.That(okResult.Value, Is.Empty);
+            Assert.That(okResult!.Value, Is.Empty);
         }
-        
+
         [Test]
         public async Task GetAllEventsForAdmin_ReturnsOk()
         {
-             _eventServiceMock.Setup(x => x.GetAllEventsForAdminAsync(It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(new List<EventDto>());
+            _eventServiceMock.Setup(x => x.GetAllEventsForAdminAsync(It.IsAny<CancellationToken>()))
+                             .ReturnsAsync(new List<EventDto>());
 
             var result = await _controller.GetAllEventsForAdmin(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());

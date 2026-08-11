@@ -1,0 +1,152 @@
+<div class="admin-feature reveal-top">
+    @if (!showForm()) {
+    <app-page-header title="Fee Policy" [total]="configs().length"
+        emptySubtitle="Define membership fee schedules">
+        <small subtitle>Showing {{ configs().length }} fee configuration schedules</small>
+        <button actions class="btn btn-accent shadow-gold" (click)="openCreateForm()" [disabled]="loading()">
+            <span class="icon">➕</span> New Fee Schedule
+        </button>
+    </app-page-header>
+
+    <div class="glass-card mb-8 p-6" *ngIf="loading()">
+        <div class="loading-state">
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+            <p class="opacity-50 text-center animate-pulse">Loading fee data...</p>
+        </div>
+    </div>
+
+    <div class="table-wrap reveal-bottom" *ngIf="!loading()">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Membership Type</th>
+                    <th>Amount</th>
+                    <th>Effective From</th>
+                    <th>Effective To</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (c of configs(); track c.id) {
+                <tr class="animate-fade-in" [class.opacity-50]="!c.isActive">
+                    <td>
+                        <span class="badge" [class.badge-primary]="c.category === 'RegistrationFee'"
+                            [class.badge-secondary]="c.category === 'MembershipFee'">
+                            {{ getCategoryLabel(c.category) }}
+                        </span>
+                    </td>
+                    <td><span class="font-bold">{{ c.membershipType }}</span></td>
+                    <td class="amount font-mono text-accent">৳ {{ c.amount | number }}</td>
+                    <td><span class="text-xs">{{ c.effectiveDate | date:'dd-MM-yyyy' }}</span></td>
+                    <td><span class="text-xs opacity-60">{{ c.effectiveTo ? (c.effectiveTo | date:'dd-MM-yyyy') :
+                            'Indefinite' }}</span></td>
+                    <td>
+                        <span class="status-badge" [class.bg-green-500]="c.isActive" [class.text-black]="c.isActive"
+                            [class.bg-red-500]="!c.isActive">
+                            {{ c.isActive ? 'Active' : 'Inactive' }}
+                        </span>
+                    </td>
+                    <td class="actions-cell">
+                        <button class="action-btn edit" (click)="openEditForm(c)">
+                            <span>✏️</span> Edit
+                        </button>
+                        <button class="action-btn archive text-red-500" (click)="deleteConfig(c.id)"
+                            title="Delete Fee">
+                            <span>⏳</span> Delete
+                        </button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="7" class="empty-state py-20">
+                        <span>🧾</span>
+                        <h3>No fee schedules</h3>
+                        <p>No fee schedules have been established yet.</p>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    } @else {
+    <div class="max-w-4xl mx-auto reveal-top">
+        <div class="page-header flex items-center gap-6 mb-8">
+            <button (click)="showForm.set(false)" class="btn btn-secondary btn-sm p-3 h-12 w-12 rounded-full !min-w-0">
+                <span>←</span>
+            </button>
+            <div>
+                <h2 class="text-2xl font-black text-accent tracking-tighter">{{ editingId() ? 'Edit Fee'
+                    : 'Create Fee' }}</h2>
+                <p class="text-xs uppercase font-black tracking-widest text-muted">Fee Settings</p>
+            </div>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submitForm()" class="glass-card p-10 mt-6">
+            <div class="form-grid mb-8">
+                <div class="form-group">
+                    <label>Fee Category *</label>
+                    <select formControlName="category"
+                        [class.border-red-500]="form.get('category')?.invalid && form.get('category')?.touched">
+                        <option value="" disabled>Select Category</option>
+                        @for (cat of feeCategories; track cat.value) {
+                        <option [value]="cat.value">{{ cat.label }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Membership Eligibility *</label>
+                    <select formControlName="membershipType"
+                        [class.border-red-500]="form.get('membershipType')?.invalid && form.get('membershipType')?.touched">
+                        <option value="" disabled>Select Membership Type</option>
+                        @for (mt of membershipTypes; track mt.value) {
+                        <option [value]="mt.value">{{ mt.label }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Amount (BDT) *</label>
+                    <input type="number" formControlName="amount" placeholder="0.00" step="100"
+                        [class.border-red-500]="form.get('amount')?.invalid && form.get('amount')?.touched">
+                </div>
+
+                <div class="form-group">
+                    <label>Effective Date *</label>
+                    <input type="text" formControlName="effectiveDate"
+                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
+                        [class.border-red-500]="form.get('effectiveDate')?.invalid && form.get('effectiveDate')?.touched">
+                </div>
+
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="text" formControlName="effectiveTo" 
+                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
+                </div>
+                <div class="form-group full">
+                    <label>Description/Internal Note</label>
+                    <textarea formControlName="description" rows="3" placeholder="Reason for this fee update or schedule details..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-group mb-8">
+                <label class="premium-checkbox-label">
+                    <input type="checkbox" formControlName="isActive">
+                    <span class="checkmark"></span>
+                    <span class="label-text">Set as Active</span>
+                </label>
+            </div>
+
+            <div class="form-actions border-t pt-8 mt-4 flex gap-4">
+                <button type="button" class="btn btn-secondary flex-1" (click)="showForm.set(false)">Cancel</button>
+                <button type="submit" class="btn btn-accent flex-1 shadow-gold"
+                    [disabled]="form.invalid || submitting()">
+                    {{ submitting() ? 'Saving...' : (editingId() ? 'Update' : 'Save') }}
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+</div>

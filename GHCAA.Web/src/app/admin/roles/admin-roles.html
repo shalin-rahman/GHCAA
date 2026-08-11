@@ -1,15 +1,11 @@
 <div class="admin-feature reveal-top">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Identity & Authorization</h2>
-            <small>Manage security boundaries and administrative privilege levels for the entire ecosystem.</small>
-        </div>
-        <div class="header-actions">
-            <button (click)="showCreateForm.set(true)" class="btn btn-accent shadow-gold">
-                Create System Administrator
-            </button>
-        </div>
-    </div>
+    <app-page-header title="User Roles" [total]="users().length"
+        emptySubtitle="Administrative access and role assignment">
+        <small subtitle>Showing {{ filteredUsers().length }} of {{ users().length }} identities with administrative privilege levels</small>
+        <button actions (click)="showCreateForm.set(true)" class="btn btn-accent shadow-gold">
+            Create System Administrator
+        </button>
+    </app-page-header>
 
     <!-- Create Admin Modal -->
     <div class="modal-overlay" *ngIf="showCreateForm()" (click)="showCreateForm.set(false)">
@@ -19,30 +15,53 @@
                 <button class="close-btn" (click)="showCreateForm.set(false)">✕</button>
             </div>
             <div class="modal-body">
-                <p class="text-xs uppercase font-bold text-muted mb-6 tracking-widest">Generating non-member administrative node</p>
-                <form [formGroup]="createForm" (ngSubmit)="createAdmin()" class="space-y-6">
-                    <div class="input-group">
-                        <label>Unique System Username</label>
-                        <input type="text" formControlName="username" placeholder="e.g. system_admin_01">
+                <p class="text-xs uppercase font-bold text-muted mb-6 tracking-widest">Generating non-member
+                    administrative node</p>
+                <form [formGroup]="createForm" (ngSubmit)="createAdmin()" class="form-grid mb-8">
+                    <div class="form-group">
+                        <label>Unique System Username *</label>
+                        <input type="text" formControlName="username"
+                            [class.border-red-500]="createForm.get('username')?.touched && createForm.get('username')?.invalid"
+                            placeholder="e.g. system_admin_01">
+                        <div *ngIf="createForm.get('username')?.touched && createForm.get('username')?.invalid"
+                            class="text-[9px] text-red-500 font-bold uppercase mt-1">
+                            Username is required (min 3 chars)
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label>Secure Cipher / Password</label>
-                        <input type="password" formControlName="password" placeholder="••••••••">
+                    <div class="form-group">
+                        <label>Secure Cipher / Password *</label>
+                        <div class="password-input relative flex items-center">
+                            <input [type]="showPassword() ? 'text' : 'password'" formControlName="password"
+                                [class.border-red-500]="createForm.get('password')?.touched && createForm.get('password')?.invalid"
+                                placeholder="••••••••"
+                                style="background:rgba(var(--primary-rgb),0.05);border:1px solid var(--glass-border);color:var(--text-main)"
+                                class="w-full pr-12 rounded-lg px-4 py-2 outline-none focus:border-accent">
+                            <button type="button"
+                                class="toggle-password absolute right-3 text-white/40 hover:text-accent transition-colors"
+                                (click)="togglePassword()" tabindex="-1">
+                                <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></app-icon>
+                            </button>
+                        </div>
+                        <div *ngIf="createForm.get('password')?.touched && createForm.get('password')?.invalid"
+                            class="text-[9px] text-red-500 font-bold uppercase mt-1">
+                            Password is required (min 6 chars)
+                        </div>
                     </div>
-                    <div class="input-group">
+                    <div class="form-group full">
                         <label>Initial Privilege Level</label>
                         <select formControlName="role">
                             @for (r of roles(); track r.name) {
-                                <option [value]="r.name">{{ r.name }}</option>
+                            <option [value]="r.name">{{ r.name }}</option>
                             }
                         </select>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" (click)="showCreateForm.set(false)" class="btn btn-secondary">Abort</button>
-                <button type="submit" (click)="createAdmin()" [disabled]="submitting() || createForm.invalid" class="btn btn-accent shadow-gold">
-                    {{ submitting() ? 'Compiling...' : 'Execute Creation' }}
+            <div class="form-actions mt-6 flex gap-4">
+                <button type="button" (click)="showCreateForm.set(false)" class="btn btn-secondary">Cancel</button>
+                <button type="submit" (click)="createAdmin()" [disabled]="submitting() || createForm.invalid"
+                    class="btn btn-accent shadow-gold">
+                    {{ submitting() ? 'Saving...' : 'Save' }}
                 </button>
             </div>
         </div>
@@ -51,35 +70,50 @@
     <div class="glass-card table-wrap overflow-hidden mb-8 p-6 relative z-10">
         <h3 class="font-bold mb-4 uppercase tracking-widest text-xs text-accent">Create Custom Role</h3>
         <div class="flex gap-4 max-w-md">
-            <input type="text" [ngModel]="customRoleName()" (ngModelChange)="customRoleName.set($event)" 
-                   placeholder="e.g. Content Editor" 
-                   class="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-accent">
-            <button class="btn btn-primary" (click)="createCustomRole()" [disabled]="creatingRole() || !customRoleName()">
+            <input type="text" [ngModel]="customRoleName()" (ngModelChange)="customRoleName.set($event)"
+                placeholder="e.g. Content Editor"
+                style="background:rgba(var(--primary-rgb),0.05);border:1px solid var(--glass-border);color:var(--text-main)"
+                class="flex-1 rounded-lg px-4 py-2 outline-none focus:border-accent">
+            <button class="btn btn-primary" (click)="createCustomRole()"
+                [disabled]="creatingRole() || !customRoleName()">
                 {{ creatingRole() ? 'Creating...' : 'Create' }}
             </button>
         </div>
     </div>
 
     <div class="glass-card table-wrap overflow-hidden">
+        <div class="filter-bar">
+            <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+                placeholder="Search users by name or email…"></app-search-bar>
+            @if (users().length) {
+            <div class="record-meta">
+                Showing {{ filteredUsers().length }} of {{ users().length }} system administrators
+            </div>
+            }
+        </div>
         @if (loading()) {
-        <div class="loading-state py-20 text-center animate-pulse">
-            <p class="text-accent font-black">Syncing identity matrix...</p>
+        <div class="loading-state py-20 text-center">
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+            <p class="text-accent font-black animate-pulse">Syncing identity matrix...</p>
         </div>
         } @else {
         <table class="data-table w-full">
             <thead>
                 <tr class="text-left border-b border-white/5">
                     <th class="p-4 px-6 text-[10px] uppercase font-black tracking-widest opacity-50">Identity Node</th>
-                    <th class="p-4 px-6 text-[10px] uppercase font-black tracking-widest opacity-50">Active Privileges</th>
-                    <th class="p-4 px-6 text-[10px] uppercase font-black tracking-widest opacity-50 text-right">Matrix Overrides</th>
+                    <th class="p-4 px-6 text-[10px] uppercase font-black tracking-widest opacity-50">Active Privileges
+                    </th>
+                    <th class="p-4 px-6 text-[10px] uppercase font-black tracking-widest opacity-50 text-right">Matrix
+                        Overrides</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-white/5">
-                @for (user of users(); track user.id) {
+                @for (user of filteredUsers(); track user.id) {
                 <tr class="hover:bg-white/[0.02] transition-colors">
                     <td class="p-4 px-6">
                         <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent font-black border border-accent/20">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent font-black border border-accent/20">
                                 {{ user.fullName?.[0] || '?' }}
                             </div>
                             <div class="flex flex-col">
@@ -91,29 +125,33 @@
                     <td class="p-4 px-6">
                         <div class="flex flex-wrap gap-2">
                             @for (role of user.roles; track role) {
-                            <span class="px-2 py-0.5 rounded bg-primary/20 border border-primary/30 text-[10px] font-black uppercase tracking-tighter flex items-center gap-2">
+                            <span
+                                class="px-2 py-0.5 rounded bg-primary/20 border border-primary/30 text-[10px] font-black uppercase tracking-tighter flex items-center gap-2">
                                 {{ role }}
-                                <button (click)="removeRole(user.id, role)" class="hover:text-red-500 transition-colors">✕</button>
+                                <button (click)="removeRole(user.id, role)"
+                                    class="hover:text-red-500 transition-colors">✕</button>
                             </span>
                             }
                         </div>
                     </td>
                     <td class="p-4 px-6">
                         <div class="flex items-center justify-end gap-3">
-                            <select #roleSelect class="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-accent/50 transition-colors">
+                            <select #roleSelect [value]="user.roles[0] || roles()[0]?.name"
+                                class="role-select">
                                 @for (r of roles(); track r.name) {
                                 <option [value]="r.name">{{ r.name }}</option>
                                 }
                             </select>
-                            <button class="btn btn-accent btn-sm !py-1.5" (click)="assignRole(user.id, roleSelect.value)">
-                                Inject
+                            <button class="btn btn-accent btn-sm !py-1.5"
+                                (click)="assignRole(user.id, roleSelect.value)">
+                                Assign
                             </button>
                         </div>
                     </td>
                 </tr>
                 } @empty {
                 <tr class="empty-row">
-                    <td colspan="3" class="text-center py-20 italic opacity-50">No administrative users found in the identity cache.</td>
+                    <td colspan="3" class="text-center py-20 italic opacity-50">{{ searchQuery() ? 'No users match your search.' : 'No administrative users found in the identity cache.' }}</td>
                 </tr>
                 }
             </tbody>

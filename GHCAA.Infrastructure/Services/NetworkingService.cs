@@ -23,8 +23,15 @@ namespace GHCAA.Infrastructure.Services
         public async Task<MemberProfileDto?> GetMemberProfileAsync(int memberId, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members
+                .AsNoTracking()
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.SentFamilyLinkRequests)
+                    .ThenInclude(r => r.TargetMember)
+                .Include(m => m.ReceivedFamilyLinkRequests)
+                    .ThenInclude(r => r.Requester)
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
                 .Where(m => m.Id == memberId && m.Status == Enums.MembershipStatus.Active && !m.IsArchived)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -40,26 +47,32 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrEmpty(filter.Query))
             {
                 var q = filter.Query.ToLower();
-                query = query.Where(m => 
-                    m.FullName.ToLower().Contains(q) || 
+                query = query.Where(m =>
+                    m.FullName.ToLower().Contains(q) ||
                     (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(q)) ||
                     (m.Email != null && m.Email.ToLower().Contains(q)));
             }
 
             if (filter.PassingYear.HasValue)
-                query = query.Where(m => m.GHCLastCertificatePassingYear == filter.PassingYear.Value);
+                query = query.Where(m => m.AcademicHistory.Any(a => a.IsGHC && a.PassingYear == filter.PassingYear.Value));
 
             if (!string.IsNullOrEmpty(filter.BloodGroup))
                 query = query.Where(m => m.BloodGroup.ToString() == filter.BloodGroup);
 
             if (!string.IsNullOrEmpty(filter.ProfessionalSector))
-                query = query.Where(m => m.ProfessionalSector == filter.ProfessionalSector);
+                query = query.Where(m => m.ProfessionalHistory.Any(p => p.IsCurrent && p.Sector == filter.ProfessionalSector));
 
             if (!string.IsNullOrEmpty(filter.Designation))
-                query = query.Where(m => m.Designation.Contains(filter.Designation));
+                query = query.Where(m => m.ProfessionalHistory.Any(p => p.IsCurrent && p.Designation.Contains(filter.Designation)));
 
             if (!string.IsNullOrEmpty(filter.ECPosition) && System.Enum.TryParse<Enums.ECPosition>(filter.ECPosition, true, out var pos))
                 query = query.Where(m => m.ECMembers.Any(em => em.Position == pos && em.EndDate == null));
+
+            if (!string.IsNullOrEmpty(filter.Category) && System.Enum.TryParse<Enums.MemberCategory>(filter.Category, true, out var cat))
+                query = query.Where(m => m.Category == cat);
+
+            if (!string.IsNullOrEmpty(filter.MembershipType) && System.Enum.TryParse<Enums.MembershipType>(filter.MembershipType, true, out var type))
+                query = query.Where(m => m.MembershipType == type);
 
             var totalItems = await query.CountAsync(cancellationToken);
             var pageSize = Math.Clamp(filter.PageSize, 1, 100);
@@ -69,6 +82,8 @@ namespace GHCAA.Infrastructure.Services
             var members = await query
                 .Include(m => m.ECMembers)
                 .ThenInclude(em => em.ECPeriod)
+                .Include(m => m.AcademicHistory)
+                .Include(m => m.ProfessionalHistory)
                 .OrderBy(m => m.FullName)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -89,9 +104,10 @@ namespace GHCAA.Infrastructure.Services
             // If no period specified, get current active one
             var query = _db.ECMembers
                 .Include(em => em.Member)
+                    .ThenInclude(m => m!.AcademicHistory)
                 .Include(em => em.ECPeriod)
                 .AsQueryable();
-            
+
             if (periodId.HasValue)
             {
                 query = query.Where(em => em.ECPeriodId == periodId.Value);
@@ -139,13 +155,13 @@ namespace GHCAA.Infrastructure.Services
                 MobileNo = m.IsMobilePublic ? m.MobileNo : "Confidential",
                 MembershipNumber = m.MembershipNumber,
                 Status = m.Status,
-                
+
                 // Personal
                 FatherName = m.FatherName,
                 MotherName = m.MotherName,
-                DateOfBirth = m.DateOfBirth,
-                AppliedDate = DateTime.SpecifyKind(m.AppliedDate, DateTimeKind.Utc),
-                ApprovedDate = m.ApprovedDate.HasValue ? DateTime.SpecifyKind(m.ApprovedDate.Value, DateTimeKind.Utc) : null,
+                DateOfBirth = m.DateOfBirth.ToLocalTime(),
+                AppliedDate = m.AppliedDate.ToLocalTime(),
+                ApprovedDate = m.ApprovedDate.HasValue ? m.ApprovedDate.Value.ToLocalTime() : null,
                 Gender = m.Gender,
                 BloodGroup = m.BloodGroup,
                 NID = m.NID,
@@ -153,36 +169,102 @@ namespace GHCAA.Infrastructure.Services
                 EmergencyContactRelation = m.EmergencyContactRelation,
                 EmergencyContactPhone = m.EmergencyContactPhone,
 
-                // Academic
-                HSCAdmissionYear = m.HSCAdmissionYear,
-                HighestCertificate = m.HighestCertificate,
-                HighestCertificateGroup = m.HighestCertificateGroup,
-                HighestCertificateSubject = m.HighestCertificateSubject,
-                HighestCertificatePassingYear = m.HighestCertificatePassingYear,
-                
-                GHCAdmissionYear = m.GHCAdmissionYear,
-                GHCLastCertificate = m.GHCLastCertificate,
-                GHCLastCertificateGroup = m.GHCLastCertificateGroup,
-                GHCLastCertificateSubject = m.GHCLastCertificateSubject,
-                GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear,
-                
-                // Professional
-                ProfessionalSector = m.ProfessionalSector,
-                Designation = m.Designation,
-                
+                // History
+                AcademicHistory = m.AcademicHistory.Select(a => new AcademicRecordDto
+                {
+                    Id = a.Id,
+                    InstitutionName = a.InstitutionName,
+                    Degree = a.Degree,
+                    Subject = a.Subject,
+                    AdmissionYear = a.AdmissionYear,
+                    PassingYear = a.PassingYear,
+                    IsGHC = a.IsGHC,
+                    Result = a.Result,
+                    CertificatePath = a.CertificatePath
+                }).ToList(),
+                ProfessionalHistory = m.ProfessionalHistory.Select(p => new ProfessionalRecordDto
+                {
+                    Id = p.Id,
+                    OrganizationName = p.OrganizationName,
+                    Designation = p.Designation,
+                    Sector = p.Sector,
+                    Location = p.Location,
+                    StartDate = p.StartDate.ToLocalTime(),
+                    EndDate = p.EndDate.HasValue ? p.EndDate.Value.ToLocalTime() : null,
+                    IsCurrent = p.IsCurrent
+                }).ToList(),
+
                 // Info & Privacy
                 PhotoPath = m.PhotoPath,
-                CertificatePath = m.CertificatePath,
                 PresentAddress = m.IsAddressPublic ? m.PresentAddress : "Confidential",
                 PermanentAddress = m.IsAddressPublic ? m.PermanentAddress : "Confidential",
-                IsMobilePublic = m.IsMobilePublic,
-                IsEmailPublic = m.IsEmailPublic,
-                IsAddressPublic = m.IsAddressPublic,
-                
+                IsVerified = m.IsVerified,
                 MembershipType = m.MembershipType,
                 Category = m.Category,
-                ECHistory = new List<ECHistoryDto>()
+                IsFamilyPublic = m.IsFamilyPublic,
+                ECHistory = new List<ECHistoryDto>(),
+                FamilyMembers = new List<MemberFamilyDto>(),
+
+                // Summary Data for easier display
+                CategoryBadge = m.Category.ToString(),
+                GHCLastCertificatePassingYear = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.PassingYear,
+                GHCLastCertificate = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Degree,
+                GHCLastCertificateSubject = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC)?.Subject,
+                Designation = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Designation,
+                OrganizationName = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.OrganizationName,
+                ProfessionalSector = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Sector,
+                Location = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent)?.Location
             };
+
+            // Populate Family links from both sent and received requests
+            if (m.IsFamilyPublic)
+            {
+                // From sent requests
+                if (m.SentFamilyLinkRequests != null)
+                {
+                    foreach (var r in m.SentFamilyLinkRequests)
+                    {
+                        if (r.TargetMember != null && r.TargetMember.IsFamilyPublic)
+                        {
+                            dto.FamilyMembers.Add(new MemberFamilyDto
+                            {
+                                RequestId = r.Id,
+                                MemberId = r.TargetMemberId,
+                                FullName = r.TargetMember.FullName,
+                                MembershipNumber = r.TargetMember.MembershipNumber,
+                                PhotoPath = r.TargetMember.PhotoPath,
+                                IsVerified = r.TargetMember.IsVerified,
+                                Relationship = r.Relationship,
+                                Status = r.Status,
+                                IsRequester = true
+                            });
+                        }
+                    }
+                }
+
+                // From received requests
+                if (m.ReceivedFamilyLinkRequests != null)
+                {
+                    foreach (var r in m.ReceivedFamilyLinkRequests)
+                    {
+                        if (r.Requester != null && r.Requester.IsFamilyPublic)
+                        {
+                            dto.FamilyMembers.Add(new MemberFamilyDto
+                            {
+                                RequestId = r.Id,
+                                MemberId = r.RequesterId,
+                                FullName = r.Requester.FullName,
+                                MembershipNumber = r.Requester.MembershipNumber,
+                                PhotoPath = r.Requester.PhotoPath,
+                                IsVerified = r.Requester.IsVerified,
+                                Relationship = r.Relationship,
+                                Status = r.Status,
+                                IsRequester = false
+                            });
+                        }
+                    }
+                }
+            }
 
             if (m.ECMembers != null && m.ECMembers.Any())
             {
@@ -192,8 +274,8 @@ namespace GHCAA.Infrastructure.Services
                     PeriodId = em.ECPeriodId,
                     PeriodTitle = em.ECPeriod?.Title ?? "Unknown Period",
                     Position = em.Position,
-                    StartDate = em.ECPeriod?.StartDate ?? DateTime.MinValue,
-                    EndDate = em.ECPeriod?.EndDate,
+                    StartDate = (em.ECPeriod?.StartDate ?? em.StartDate).ToLocalTime(),
+                    EndDate = (em.ECPeriod?.EndDate ?? em.EndDate)?.ToLocalTime(),
                     ChangeReason = em.ChangeReason,
                     IsCurrent = em.ECPeriod?.IsActive ?? false
                 }).OrderByDescending(h => h.StartDate).ToList();
@@ -210,13 +292,6 @@ namespace GHCAA.Infrastructure.Services
                 FullName = m.FullName,
                 MembershipNumber = m.MembershipNumber,
                 PhotoPath = m.PhotoPath,
-                PassingYear = m.GHCLastCertificatePassingYear,
-                GhcLastCertificatePassingYear = m.GHCLastCertificatePassingYear,
-                GhcLastCertificate = m.GHCLastCertificate,
-                GhcLastCertificateGroup = m.GHCLastCertificateGroup,
-                GhcLastCertificateSubject = m.GHCLastCertificateSubject,
-                ProfessionalSector = m.ProfessionalSector,
-                Designation = m.Designation,
                 BloodGroup = m.BloodGroup,
                 Email = m.IsEmailPublic ? m.Email : "Confidential",
                 IsEmailPublic = m.IsEmailPublic,
@@ -224,6 +299,11 @@ namespace GHCAA.Infrastructure.Services
                 IsMobilePublic = m.IsMobilePublic,
                 MembershipType = m.MembershipType,
                 Category = m.Category,
+                Status = m.Status,
+                AppliedDate = m.AppliedDate.ToLocalTime(),
+                IsVerified = m.IsVerified,
+                IsFamilyPublic = m.IsFamilyPublic,
+                FamilyMembers = new List<MemberFamilyDto>(),
                 ECHistory = m.ECMembers?.Select(em => new ECHistoryDto
                 {
                     Id = em.Id,
@@ -236,6 +316,32 @@ namespace GHCAA.Infrastructure.Services
                     IsCurrent = em.ECPeriod?.IsActive ?? false
                 }).OrderByDescending(h => h.StartDate).ToList() ?? new()
             };
+
+            // Enhanced Summary Data from normalized tables
+            var ghcRecord = m.AcademicHistory?.FirstOrDefault(a => a.IsGHC);
+            if (ghcRecord != null)
+            {
+                dto.GHCLastCertificatePassingYear = ghcRecord.PassingYear;
+                dto.GHCLastCertificate = ghcRecord.Degree;
+                dto.GHCLastCertificateSubject = ghcRecord.Subject;
+
+                // 30.27: also populate the flattened Directory fields (PassingYear/Degree/Subject) -
+                // these were previously left at their default values, which is the confirmed root
+                // cause of "Executive Committee batch information is missing" on the web EC cards.
+                dto.PassingYear = ghcRecord.PassingYear;
+                dto.Degree = ghcRecord.Degree;
+                dto.Subject = ghcRecord.Subject;
+            }
+
+            var currentJob = m.ProfessionalHistory?.FirstOrDefault(p => p.IsCurrent);
+            if (currentJob != null)
+            {
+                dto.Designation = currentJob.Designation;
+                dto.OrganizationName = currentJob.OrganizationName;
+                dto.ProfessionalSector = currentJob.Sector;
+                dto.Location = currentJob.Location;
+            }
+
             return dto;
         }
     }

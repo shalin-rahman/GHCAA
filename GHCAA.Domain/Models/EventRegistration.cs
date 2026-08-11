@@ -38,6 +38,9 @@ namespace GHCAA.Domain.Models
         public EventRegistrationStatus Status { get; set; } = EventRegistrationStatus.Pending;
 
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
+        public string? TicketCode { get; set; }
+        public bool IsCheckedIn { get; set; } = false;
+        public DateTime? CheckedInAt { get; set; }
 
         public DateTime? ApprovedAt { get; set; }
 

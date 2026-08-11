@@ -1,0 +1,39 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/api/api_client.dart';
+
+final jobServiceProvider = Provider<JobService>((ref) {
+  return JobService(ref.read(dioProvider));
+});
+
+class JobService {
+  final Dio _dio;
+  JobService(this._dio);
+
+  Future<List<dynamic>> getAllJobs() async {
+    try {
+      final response = await _dio.get('/jobs');
+      return response.data as List<dynamic>;
+    } catch (e) {
+      debugPrint('JobService.getAllJobs failed: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> postJob(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post('/jobs', data: data);
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteJob(int id) async {
+    try {
+      final response = await _dio.delete('/jobs/$id');
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
+}

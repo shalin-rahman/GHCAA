@@ -1,67 +1,79 @@
 <div class="admin-feature reveal-top">
   @if (!showForm()) {
-  <div class="page-header">
-    <div class="header-text">
-      <h2>Finance Routing Profiles</h2>
-      <small>Manage payment gateways and manual receiving channels for the portal.</small>
-    </div>
-    <div class="header-actions flex gap-4">
-        <button (click)="openCreateForm()" class="btn btn-accent shadow-gold">
-            New Routing Asset
+  <app-page-header title="Payment Settings" [total]="configs().length"
+    emptySubtitle="Configure how members pay dues and fees">
+    <small subtitle>Showing {{ configs().length }} active payment gateway configurations</small>
+    <div actions class="flex gap-4">
+        <button (click)="openCreateForm()" class="btn btn-accent shadow-gold header-cta">
+            <span class="icon">✨</span> Add Payment Method
         </button>
         <button *ngIf="configs().length === 0" (click)="seedDefaults()" class="btn btn-secondary">
-            System Seed Defaults
+            Restore Defaults
         </button>
     </div>
+  </app-page-header>
+
+  <div class="glass-card mb-8 p-6 text-center" *ngIf="loading()">
+      <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+      <p class="opacity-50 animate-pulse">Synchronizing financial logic networks...</p>
   </div>
 
-  <div class="glass-card mb-8 p-6" *ngIf="loading()">
-      <p class="opacity-50 text-center animate-pulse">Synchronizing financial logic networks...</p>
-  </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="!loading()">
-      @for (config of configs(); track config.id) {
-          <div class="glass-card p-6 border-accent/10 relative transition-transform hover:-translate-y-1">
-              <div class="flex items-center gap-4 mb-4">
-                  <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-2xl border border-accent/20 text-accent font-black shadow-gold scale-150">
-                      {{ config.icon || '💸' }}
-                  </div>
-                  <div>
-                      <h3 class="font-black text-lg">{{ config.displayName }}</h3>
-                      <p class="text-[10px] uppercase font-bold text-muted tracking-widest">{{ config.method }}</p>
-                  </div>
-              </div>
-
-              <div class="space-y-3 mb-6">
-                  <p class="text-xs opacity-80 border-l border-white/10 pl-3 italic">{{ config.description }}</p>
-                  
-                  <div class="bg-primary/5 p-3 rounded-lg border border-primary/10">
-                      <div class="flex justify-between items-center text-xs">
-                          <span class="opacity-60">Status Routing</span>
-                          <span class="font-black px-2 py-0.5 rounded uppercase" 
-                                [class.bg-green-500]="config.isEnabled" 
-                                [class.text-black]="config.isEnabled"
-                                [class.bg-red-500]="!config.isEnabled">
-                              {{ config.isEnabled ? 'Active' : 'Offline' }}
-                          </span>
+  <div class="table-wrap reveal-bottom" *ngIf="!loading()">
+      <table class="data-table">
+          <thead>
+              <tr>
+                  <th>Method</th>
+                  <th>Display Name</th>
+                  <th>Gateway</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+              </tr>
+          </thead>
+          <tbody>
+              @for (config of configs(); track config.id) {
+              <tr class="animate-fade-in" [class.opacity-50]="!config.isEnabled">
+                  <td>
+                      <div class="flex items-center gap-3">
+                          <img *ngIf="isImageIcon(config.icon)" [src]="getIconPath(config.icon)" alt="Logo" class="w-10 h-10 object-contain rounded" appImgFallback>
+                          <span *ngIf="!isImageIcon(config.icon)" class="text-2xl">{{ config.icon || '💸' }}</span>
+                          <span class="badge badge-secondary">{{ config.method }}</span>
                       </div>
-                  </div>
-              </div>
-
-              <div class="flex gap-2">
-                  <button (click)="openEditForm(config)" class="btn btn-secondary flex-1">Configure Routing</button>
-                  <button (click)="toggleStatus(config.id)" class="btn flex-1" [ngClass]="config.isEnabled ? 'btn-outline border-red-500/20 text-red-500' : 'btn-accent'">
-                      {{ config.isEnabled ? 'Deactivate' : 'Enable' }}
-                  </button>
-              </div>
-          </div>
-      } @empty {
-          <div class="col-span-1 md:col-span-3 text-center py-20 px-4 glass-card">
-              <span class="text-4xl block mb-4 opacity-50">⚠️</span>
-              <p class="italic text-muted opacity-80">No financial routing profiles exist in the system core.</p>
-              <button (click)="seedDefaults()" class="btn btn-accent mt-4">Execute Initial Generation Routine</button>
-          </div>
-      }
+                  </td>
+                  <td>
+                      <div class="flex flex-col">
+                          <span class="text-white font-bold">{{ config.displayName }}</span>
+                          <span class="text-[10px] opacity-60">{{ config.description }}</span>
+                      </div>
+                  </td>
+                  <td>
+                      <span class="text-xs uppercase font-bold text-accent tracking-widest">{{ config.gateway !== 'None' ? config.gateway : 'Manual' }}</span>
+                  </td>
+                  <td>
+                      <span class="status-badge" [class.bg-green-500]="config.isEnabled" [class.text-black]="config.isEnabled" [class.bg-red-500]="!config.isEnabled">
+                          {{ config.isEnabled ? 'Active' : 'Offline' }}
+                      </span>
+                  </td>
+                  <td class="actions-cell">
+                      <button class="action-btn edit" (click)="openEditForm(config)">
+                          <span>✏️</span> Edit
+                      </button>
+                      <button class="action-btn delete" [class.text-red-500]="config.isEnabled" [class.text-green-500]="!config.isEnabled" (click)="toggleStatus(config.id)" [title]="config.isEnabled ? 'Deactivate' : 'Enable'">
+                          {{ config.isEnabled ? '⏳' : '✅' }}
+                      </button>
+                  </td>
+              </tr>
+              } @empty {
+              <tr>
+                  <td colspan="5" class="empty-state py-20">
+                      <span>⚠️</span>
+                      <h3>No Payment Methods</h3>
+                      <p>No payment methods exist in the system core.</p>
+                      <button class="btn btn-accent mt-4 shadow-gold" (click)="seedDefaults()">Restore Defaults</button>
+                  </td>
+              </tr>
+              }
+          </tbody>
+      </table>
   </div>
   } @else {
       <div class="max-w-4xl mx-auto reveal-top">
@@ -70,36 +82,45 @@
                   <span>←</span>
               </button>
               <div>
-                  <h2 class="text-2xl font-black text-accent tracking-tighter">Edit Routing Parameters</h2>
-                  <p class="text-xs uppercase font-black tracking-widest text-muted">Configuring network payload and constraints</p>
+                  <h2 class="text-2xl font-black text-accent tracking-tighter">{{ editingId() ? 'Update' : 'Add' }} Payment Method</h2>
+                  <p class="text-xs uppercase font-black tracking-widest text-muted">Configure payment gateway and account details</p>
               </div>
           </div>
 
-          <form [formGroup]="form" (ngSubmit)="submitForm()" class="glass-card p-10 space-y-8">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div class="input-group">
-                      <label>Frontend Display Name *</label>
-                      <input type="text" formControlName="displayName">
+          <form [formGroup]="form" (ngSubmit)="submitForm()" class="glass-card p-10 mt-6">
+              <div class="form-grid mb-8">
+                  <div class="form-group">
+                      <label>Payment Method Type *</label>
+                      <select formControlName="method" [attr.disabled]="editingId() ? true : null">
+                          <option *ngFor="let m of methodOptions" [value]="m">{{ m }}</option>
+                      </select>
+                      <p class="text-[9px] text-muted uppercase font-black px-2 mt-1">Underlying method class (e.g. CashOnHand). Fixed after creation.</p>
                   </div>
-                  <div class="input-group">
-                      <label>Network Emoji/Icon</label>
-                      <input type="text" formControlName="icon">
+                  <div class="form-group">
+                      <label>Frontend Display Name *</label>
+                      <input type="text" formControlName="displayName" [class.border-red-500]="form.get('displayName')?.invalid && form.get('displayName')?.touched">
+                      <div *ngIf="form.get('displayName')?.invalid && form.get('displayName')?.touched" class="text-[9px] text-red-500 font-bold uppercase mt-1">Display name is required</div>
+                  </div>
+                  <div class="form-group">
+                      <label>Network Emoji or Logo Path</label>
+                      <input type="text" formControlName="icon" placeholder="e.g. 📱 or /assets/images/payment/bkash.svg">
+                      <p class="text-[9px] text-muted uppercase font-black px-2 mt-1">Accepts Emoji or relative path to SVG/PNG asset.</p>
                   </div>
               </div>
 
-              <div class="input-group">
+              <div class="form-group full mb-8">
                   <label>Abstract / Description</label>
                   <input type="text" formControlName="description">
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div class="input-group">
+              <div class="form-grid mb-8">
+                  <div class="form-group">
                       <label>Instructional Output (Client Facing)</label>
                       <textarea formControlName="instructions" rows="3" placeholder="Exact instructions for the member..."></textarea>
                   </div>
-                  <div class="input-group">
+                  <div class="form-group">
                       <label>Automated Gateway Hub</label>
-                      <select formControlName="gateway" class="bg-primary/5 p-4 rounded-xl border border-white/10 text-white font-black text-xs uppercase tracking-widest ring-accent/10 focus:ring-4 focus:border-accent outline-none">
+                      <select formControlName="gateway">
                           <option value="None">None (Manual Channels)</option>
                           <option value="SSLCommerz">SSLCommerz (Local Cards/MFS)</option>
                           <option value="BkashGateway">bKash (Direct Tokenized)</option>
@@ -109,15 +130,15 @@
                   </div>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-primary/10 pt-8 mt-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-primary/10 pt-8 mt-4 mb-8">
                   <!-- Wallet Configuration -->
                   <div class="space-y-6">
                       <h4 class="text-xs font-black text-accent uppercase tracking-widest">Mobile Wallet Routing</h4>
-                      <div class="input-group">
+                      <div class="form-group">
                           <label>Receiving Wallet Number</label>
                           <input type="text" formControlName="walletNumber" class="font-mono text-accent">
                       </div>
-                      <div class="input-group">
+                      <div class="form-group">
                           <label>Holder Label (Wallet/Bank)</label>
                           <input type="text" formControlName="accountHolderName">
                       </div>
@@ -126,20 +147,20 @@
                   <!-- Bank Configuration -->
                   <div class="space-y-6">
                       <h4 class="text-xs font-black text-accent uppercase tracking-widest">Bank/Wire Routing</h4>
-                      <div class="input-group">
+                      <div class="form-group">
                           <label>Institution Name</label>
                           <input type="text" formControlName="bankName">
                       </div>
-                      <div class="input-group">
+                      <div class="form-group">
                           <label>Ledger/Account Number</label>
                           <input type="text" formControlName="accountNumber" class="font-mono text-accent">
                       </div>
                       <div class="grid grid-cols-2 gap-4">
-                          <div class="input-group">
+                          <div class="form-group">
                               <label>Branch Subnet</label>
                               <input type="text" formControlName="branchName">
                           </div>
-                          <div class="input-group">
+                          <div class="form-group">
                               <label>Routing Code</label>
                               <input type="text" formControlName="routingNumber">
                           </div>
@@ -148,25 +169,25 @@
               </div>
               
               <!-- Gateway Configuration (Only if a gateway is selected) -->
-              <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 space-y-6 mt-8" *ngIf="form.get('gateway')?.value !== 'None'">
+              <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 space-y-6 mt-8 mb-8" *ngIf="form.get('gateway')?.value !== 'None'">
                   <h4 class="text-xs font-black text-accent uppercase tracking-widest">Gateway API Configuration ({{ form.get('gateway')?.value }})</h4>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div class="input-group">
+                  <div class="form-grid pt-2">
+                      <div class="form-group">
                           <label>Public/Store Key</label>
                           <input type="text" formControlName="gatewayPublicKey" class="font-mono text-xs">
                       </div>
-                      <div class="input-group">
+                      <div class="form-group">
                           <label>Secret/Signature Key</label>
                           <input type="password" formControlName="gatewaySecretKey" class="font-mono text-xs">
                       </div>
                   </div>
-                  <div class="input-group">
+                  <div class="form-group full">
                       <label>IPN / Callback URL (Return Path)</label>
                       <input type="text" formControlName="gatewayCallbackUrl" placeholder="https://yourdomain.com/api/payment/callback">
                   </div>
               </div>
 
-              <div class="bg-primary/5 p-6 rounded-2xl border border-primary/10 space-y-4">
+              <div class="form-group full bg-primary/5 p-6 rounded-2xl border border-primary/10 mb-8 space-y-4">
                   <h4 class="text-xs font-black text-accent uppercase tracking-widest mb-4">Payload Constraints</h4>
                   
                   <label class="premium-checkbox-label">
@@ -188,10 +209,10 @@
                   </label>
               </div>
 
-              <div class="flex gap-4 pt-4 border-t border-white/5">
-                  <button type="button" (click)="showForm.set(false)" class="btn btn-secondary flex-1 py-4 h-14">Abort Sequence</button>
+              <div class="flex gap-4 pt-10 mt-10 border-t border-white/5">
+                  <button type="button" (click)="showForm.set(false)" class="btn btn-secondary flex-1 py-4 h-14">Cancel</button>
                   <button type="submit" [disabled]="submitting() || form.invalid" class="btn btn-accent flex-1 py-4 h-14 shadow-gold font-black">
-                      {{ submitting() ? 'Compiling...' : 'Apply Overrides' }}
+                      {{ submitting() ? 'Saving...' : (editingId() ? 'Update' : 'Save') }}
                   </button>
               </div>
           </form>

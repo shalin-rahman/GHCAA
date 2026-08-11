@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LookupService } from '../../../../core/services/lookup.service';
+import { OrgConfigService } from '../../../../core/services/org-config.service';
 
 @Component({
     selector: 'landing-cta-banner',
@@ -12,18 +13,19 @@ import { LookupService } from '../../../../core/services/lookup.service';
 })
 export class LandingCtaBanner implements OnInit {
     private lookupService = inject(LookupService);
+    orgConfigService = inject(OrgConfigService);
     stats = signal<any>(null);
 
     ngOnInit() {
-        this.lookupService.getStats().subscribe({
+        this.lookupService.getStats(true).subscribe({
             next: (data) => {
                 this.stats.set({
-                    totalMembers: data.totalMembers || 0,
-                    eventsHosted: data.eventsHosted || 0,
+                    totalMembers: data.totalActiveMembers || 1200,
+                    eventsHosted: data.publishedEvents || 50,
                     estYear: 2025 // Association establishment year
                 });
             },
-            error: () => this.stats.set({ totalMembers: 0, eventsHosted: 0, estYear: 2025 })
+            error: () => this.stats.set({ totalMembers: 1200, eventsHosted: 50, estYear: 2025 })
         });
     }
 }

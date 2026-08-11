@@ -1,3 +1,4 @@
+using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,11 +13,12 @@ using NUnit.Framework;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    public class ProfileControllerTests
+    public class ProfileControllerTests : ControllerTestBase
     {
         private Mock<IMemberService> _memberServiceMock;
         private Mock<IUserService> _userServiceMock;
         private Mock<IIDCardService> _idCardServiceMock;
+        private Mock<IFileValidationService> _fileValidationServiceMock;
         private ProfileController _controller;
 
         [SetUp]
@@ -25,23 +27,16 @@ namespace GHCAA.Tests.Controllers
             _memberServiceMock = new Mock<IMemberService>();
             _userServiceMock = new Mock<IUserService>();
             _idCardServiceMock = new Mock<IIDCardService>();
-            
-            _controller = new ProfileController(_memberServiceMock.Object, _userServiceMock.Object, _idCardServiceMock.Object);
-            
-            SetUserContext(1, 10); // MemberId 10, UserId 1
-        }
+            _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                       .Returns(FileValidationResult.Ok());
 
-        private void SetUserContext(int userId, int memberId)
-        {
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim("MemberId", memberId.ToString())
-            }, "TestAuthentication"));
+            _controller = new ProfileController(_memberServiceMock.Object, _userServiceMock.Object, _idCardServiceMock.Object, _fileValidationServiceMock.Object);
 
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
+            SetUserContext(_controller, 10, "Member", 1); // MemberId 10, UserId 1
+            // Note: In old code NameIdentifier (UserId) was 1, and MemberId was 10.
+            // If the tests strictly need UserId 1, we can adjust SetUserContext.
+            // Looking at ChangePassword (line 75), it uses UserId from NameIdentifier.
         }
 
         [Test]

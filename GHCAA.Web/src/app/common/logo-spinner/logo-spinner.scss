@@ -1,0 +1,101 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-spinner-box {
+    display: flex;
+    justify-content: center;
+    position: relative;
+
+    &.logo-spinner-box--ripple {
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid rgba(197, 160, 89, 0.5);
+            animation: logo-spinner-ripple 2.4s ease-out infinite;
+        }
+
+        &::after {
+            animation-delay: 1.2s;
+        }
+    }
+}
+
+.logo-spinner-ring {
+    position: relative;
+    width: var(--logo-spinner-size);
+    height: var(--logo-spinner-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner-arc {
+    position: absolute;
+    inset: calc(var(--logo-spinner-size) * -0.0875);
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: var(--accent-color, #c5a059);
+    border-right-color: rgba(197, 160, 89, 0.3);
+    animation: logo-spinner-spin 2.4s linear infinite;
+
+    &.spinner-arc--reverse {
+        inset: calc(var(--logo-spinner-size) * -0.1375);
+        border-top-color: transparent;
+        border-bottom-color: var(--accent-color, #c5a059);
+        border-left-color: rgba(197, 160, 89, 0.2);
+        animation-direction: reverse;
+        animation-duration: 3.6s;
+    }
+}
+
+.logo-spinner-seal {
+    width: var(--logo-spinner-size);
+    height: var(--logo-spinner-size);
+    border-radius: 50%;
+    padding: 5px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(var(--accent-color-rgb, 197, 160, 89), 0.2);
+    object-fit: contain;
+    position: relative;
+    z-index: 1;
+}
+
+.logo-spinner-label {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-on-dark, inherit);
+    opacity: 0.8;
+    text-align: center;
+}
+
+@keyframes logo-spinner-ripple {
+    0% {
+        width: calc(var(--logo-spinner-size) * 0.75625);
+        height: calc(var(--logo-spinner-size) * 0.75625);
+        opacity: 0.8;
+    }
+
+    100% {
+        width: calc(var(--logo-spinner-size) * 1.375);
+        height: calc(var(--logo-spinner-size) * 1.375);
+        opacity: 0;
+    }
+}
+
+@keyframes logo-spinner-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

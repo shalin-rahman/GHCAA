@@ -1,17 +1,20 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { NewsService } from '../../core/services/news.service';
-import { NewsPost } from '../../core/models/business.models';
+import { NewsPost, PostType } from '../../core/models/business.models';
+import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { NotificationService } from '../../core/services/notification.service';
-
-import { ARTICLE_CATEGORIES } from '../../core/constants/app.constants';
-
+import { ARTICLE_CATEGORIES, getArticleCategoryLabel, POST_TYPE_TABS, matchesPostType } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
     selector: 'app-admin-news',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
     templateUrl: './admin-news.html',
     styleUrl: './admin-news.scss'
 })
@@ -20,44 +23,67 @@ export class AdminNews implements OnInit {
     private notify = inject(NotificationService);
 
     categories = ARTICLE_CATEGORIES;
-
     newsList = signal<NewsPost[]>([]);
+    searchQuery = signal('');
+    postTypeFilter = signal<'' | PostType>('');
+
+    readonly postTypeTabs = POST_TYPE_TABS;
+
+    filteredNews = computed(() => {
+        const query = this.searchQuery().toLowerCase();
+        const type = this.postTypeFilter();
+        return this.newsList().filter(post => {
+            if (!matchesPostType(post.postType, type)) return false;
+            if (!query) return true;
+            return post.title.toLowerCase().includes(query) ||
+                getArticleCategoryLabel(post.articleCategory).toLowerCase().includes(query);
+        });
+    });
+
     loading = signal(true);
     showForm = signal(false);
     selectedPost = signal<NewsPost | null>(null);
     saving = signal(false);
     editingId = signal<number | null>(null);
+    uploadingImage = signal(false);
+    uploadingDocument = signal(false);
 
-    form: any = { title: '', content: '', category: 'Regular', imageUrl: '', isActive: true };
+    form: any = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, collaborators: [] };
 
-
-    ngOnInit() { this.loadNews(); }
+    ngOnInit() { 
+        this.loadNews(); 
+    }
 
     loadNews() {
         this.loading.set(true);
         this.newsService.getNewsAdmin().subscribe({
-            next: (data: NewsPost[]) => { this.newsList.set(data); this.loading.set(false); },
+            next: (data: NewsPost[]) => { 
+                this.newsList.set(data); 
+                this.loading.set(false); 
+            },
             error: () => this.loading.set(false)
         });
     }
 
     openForm() {
         this.editingId.set(null);
-        this.form = { title: '', content: '', category: 'Regular', imageUrl: '', isActive: true };
-
+        this.form = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, collaborators: [] };
         this.showForm.set(true);
     }
-
-    uploadingImage = signal(false);
 
     editPost(post: NewsPost) {
         this.editingId.set(post.id);
         this.form = {
             title: post.title,
             content: post.content,
-            category: post.category,
+            articleCategory: post.articleCategory,
+            postType: post.postType || 'News',
             imageUrl: post.imageUrl || '',
-            isActive: post.isActive
+            attachmentUrl: post.attachmentUrl || '',
+            attachmentFileName: post.attachmentFileName || '',
+            isActive: post.isActive,
+            status: post.status ?? 2,
+            collaborators: post.collaborators || []
         };
         this.showForm.set(true);
         window.scrollTo(0, 0);
@@ -81,21 +107,56 @@ export class AdminNews implements OnInit {
         });
     }
 
+    onDocumentSelect(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+
+        const error = validateUploadFile(file, 'pdf');
+        if (error) {
+            this.notify.error(error);
+            input.value = '';
+            return;
+        }
+
+        this.uploadingDocument.set(true);
+        this.newsService.uploadDocument(file).subscribe({
+            next: (res) => {
+                this.form.attachmentUrl = res.url;
+                this.form.attachmentFileName = res.fileName;
+                this.notify.success('Document uploaded successfully');
+                this.uploadingDocument.set(false);
+            },
+            error: () => {
+                this.notify.error('Document upload failed');
+                this.uploadingDocument.set(false);
+            }
+        });
+    }
+
+    removeDocument() {
+        this.form.attachmentUrl = '';
+        this.form.attachmentFileName = '';
+    }
+
     cancelForm() {
         this.showForm.set(false);
         this.editingId.set(null);
     }
 
-    saveNews() {
-        if (!this.form.title || !this.form.content) {
-            this.notify.error('Please complete all mandatory fields.');
+    saveNews(form: any) {
+        if (form.invalid) {
+            form.control.markAllAsTouched();
+            this.notify.error('Please complete all mandatory fields correctly.');
             return;
         }
+
         if (this.saving()) return;
 
         this.saving.set(true);
         const id = this.editingId();
         const obs = id ? this.newsService.updateNews(id, this.form) : this.newsService.createNews(this.form);
+
         obs.subscribe({
             next: () => {
                 this.notify.success(id ? 'Post updated successfully.' : 'News post published!');
@@ -103,23 +164,31 @@ export class AdminNews implements OnInit {
                 this.cancelForm();
                 this.loadNews();
             },
-            error: () => { this.saving.set(false); this.notify.error('Failed to save post.'); }
+            error: () => { 
+                this.saving.set(false); 
+                this.notify.error('Failed to save post.'); 
+            }
         });
     }
 
     deletePost(id: number) {
         if (!confirm('Delete this post permanently?')) return;
         this.newsService.deleteNews(id).subscribe({
-            next: () => { this.notify.success('Post deleted.'); this.loadNews(); },
+            next: () => { 
+                this.notify.success('Post deleted.'); 
+                this.loadNews(); 
+            },
             error: () => this.notify.error('Failed to delete post.')
         });
     }
 
     getCategoryLabel(cat: any): string {
-        const c = this.categories.find(x => x.value === cat);
-        return c ? c.label : (cat || 'Article');
+        return getArticleCategoryLabel(cat);
     }
 
+    updateCollaborators(event: string) {
+        this.form.collaborators = event.split(',')
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
+    }
 }
-
-

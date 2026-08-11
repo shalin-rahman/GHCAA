@@ -2,11 +2,12 @@ import { Component, Input, Output, EventEmitter, inject, signal, OnInit } from '
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentConfigService, PaymentConfig } from '../../core/services/payment-config.service';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
   selector: 'app-payment-method-selector',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ImgFallbackDirective],
   template: `
     <div class="payment-methods-container">
       <label class="section-label">Select Payment Method</label>
@@ -39,7 +40,7 @@ import { PaymentConfigService, PaymentConfig } from '../../core/services/payment
               
               <div class="method-icon-status">
                 <div class="method-brand-icon">
-                    <img [src]="getLogoUrl(method)" [alt]="method.displayName" class="brand-logo-img">
+                    <img [src]="getLogoUrl(method)" [alt]="method.displayName" class="brand-logo-img" appImgFallback>
                 </div>
                 <div class="check-mark-wrapper" *ngIf="selectedMethodId === method.id">
                     <div class="check-mark">✓</div>
@@ -78,7 +79,7 @@ import { PaymentConfigService, PaymentConfig } from '../../core/services/payment
                          [class.nagad]="isBrand(selectedMethod, 'nagad')"
                          [class.rocket]="isBrand(selectedMethod, 'rocket')">
                         <div class="brand-svg-lg">
-                             <img [src]="getLogoUrl(selectedMethod)" [alt]="selectedMethod.displayName" class="brand-logo-img-lg">
+                             <img [src]="getLogoUrl(selectedMethod)" [alt]="selectedMethod.displayName" class="brand-logo-img-lg" appImgFallback>
                         </div>
                     </div>
                     <div>

@@ -10,7 +10,7 @@ namespace GHCAA.Domain.Models
         public string MessageContent { get; set; } = null!;
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
         public bool IsRead { get; set; } = false;
-        
+
         // Navigation members are not strictly required for MVP but good for EF
         public Member? Sender { get; set; }
         public Member? Receiver { get; set; }

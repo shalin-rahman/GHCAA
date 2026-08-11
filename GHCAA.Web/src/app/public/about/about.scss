@@ -1,5 +1,5 @@
 .page-header {
-    height: 70vh;
+    height: clamp(280px, 48vh, 520px);
     background: #000;
     position: relative;
     display: flex;
@@ -43,17 +43,27 @@
     }
 }
 
+/* Fluid rhythm: the CMS can render several blocks here, so the fixed 10rem/8rem
+   spacing turned the page into a very long scroll on anything but a large desktop. */
 .main-content {
-    padding: 10rem 0;
+    padding: clamp(3rem, 7vw, 7rem) 0;
     background: #000;
     color: #fff;
     display: flex;
     flex-direction: column;
-    gap: 8rem;
+    gap: clamp(2rem, 5vw, 5rem);
+}
+
+/* auto-fit so a 2-card fallback and a 4-block CMS payload both tile without dead space. */
+.story-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: clamp(1.25rem, 2.5vw, 2rem);
+    align-items: stretch;
 }
 
 .story-card {
-    padding: 5rem;
+    padding: clamp(1.75rem, 4vw, 3.5rem);
     background: #050505;
     border: 1px solid rgba(197, 160, 89, 0.1);
     border-radius: 0;
@@ -64,15 +74,15 @@
     }
 
     h3 {
-        font-size: 3rem;
+        font-size: clamp(1.5rem, 2.6vw, 2.25rem);
         font-weight: 900;
-        margin-bottom: 2rem;
-        color: var(--accent-color);
+        margin-bottom: 1.25rem;
+        color: var(--accent-text);
     }
 
     p {
-        font-size: 1.2rem;
-        line-height: 2;
+        font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+        line-height: 1.8;
         font-weight: 300;
         opacity: 0.7;
     }
@@ -97,7 +107,7 @@
 }
 
 .heritage-banner {
-    padding: 6rem 4rem;
+    padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3rem);
     text-align: center;
     border-radius: 32px;
 
@@ -105,14 +115,14 @@
         h3 {
             font-size: 2.8rem;
             margin-bottom: 2rem;
-            color: var(--primary-color);
+            color: var(--text-main);
             font-weight: 800;
             letter-spacing: -1px;
         }
 
         p {
             max-width: 900px;
-            margin: 0 auto 5rem;
+            margin: 0 auto clamp(1.75rem, 4vw, 3rem);
             line-height: 1.8;
             color: var(--text-muted);
             font-size: 1.15rem;
@@ -123,8 +133,8 @@
 
 .pillars-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: clamp(1rem, 3vw, 2.5rem);
 }
 
 .pillar {
@@ -150,7 +160,7 @@
     }
 
     strong {
-        color: var(--primary-color);
+        color: var(--text-main);
         font-size: 1.25rem;
         font-weight: 800;
     }
@@ -165,40 +175,19 @@
 }
 
 @media (max-width: 992px) {
-    .story-grid {
-        gap: 2rem;
-    }
-
-    .story-card {
-        padding: 3rem;
-
-        h3 {
-            font-size: 2rem;
-        }
-    }
-
+    /* Card padding / heading sizes are fluid now — only the hero headline needs a step down. */
     .header-content h1 {
-        font-size: 3.5rem;
+        font-size: 3rem;
     }
 }
 
 @media (max-width: 768px) {
-    .page-header {
-        height: 50vh;
-    }
-
-    .main-content {
-        padding: 4rem 0;
-        gap: 3rem;
-    }
-
     .story-grid {
         grid-template-columns: 1fr;
     }
 
     .pillars-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     }
 
     .header-content {
@@ -211,15 +200,29 @@
         }
     }
 
-    .heritage-banner {
-        padding: 3rem 1.5rem;
-
-        .banner-content h3 {
-            font-size: 2rem;
-        }
+    .heritage-banner .banner-content h3 {
+        font-size: 2rem;
     }
 
     .pillar {
         padding: 1rem;
     }
+}
+/* Body of an admin-managed content block: the CMS emits raw <p>/<ul> markup,
+   so match the typography of the hardcoded story cards it replaces. */
+.cms-body {
+    color: var(--text-muted);
+    line-height: 1.8;
+    font-size: 0.98rem;
+
+    p { margin-bottom: 1rem; }
+
+    ul, ol {
+        margin: 0 0 1rem 1.2rem;
+        list-style: disc;
+    }
+
+    li { margin-bottom: 0.45rem; }
+
+    strong { color: var(--text-main); }
 }

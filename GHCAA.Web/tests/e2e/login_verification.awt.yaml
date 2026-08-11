@@ -1,0 +1,16 @@
+name: "GHCAA Authentication & Dashboard Verification"
+description: "Confirms that the fixed BCrypt hashes and seeding allow successful login."
+baseUrl: "http://localhost:4200"
+steps:
+  - navigate: "/login"
+  - wait_for: "text:Username"
+  - type: 
+      selector: "input[name='username']"
+      text: "shalin"
+  - type: 
+      selector: "input[name='password']"
+      text: "Shalin@2024!"
+  - click: "button[type='submit']"
+  - wait_for: "text:Dashboard"
+  - assert:
+      exists: "text:Welcome, Shalin Rahman"

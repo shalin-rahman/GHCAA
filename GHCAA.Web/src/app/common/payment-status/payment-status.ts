@@ -91,7 +91,7 @@ export class PaymentStatus implements OnInit {
 
   ngOnInit() {
     this.route.url.subscribe(url => {
-      this.isSuccess.set(url[1].path === 'success');
+      this.isSuccess.set(url.length > 0 && url[0].path === 'success');
     });
 
     this.route.queryParamMap.subscribe(params => {

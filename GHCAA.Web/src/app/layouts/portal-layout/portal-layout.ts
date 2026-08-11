@@ -3,21 +3,23 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } fro
 import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
-import { ThemeService } from '../../core/services/theme.service';
 import { NavService } from '../../core/services/nav.service';
 import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Icon } from '../../common/icon/icon';
+import { UserMenu } from '../../common/user-menu/user-menu';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 
 @Component({
   selector: 'app-portal-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, Icon, UserMenu, ImgFallbackDirective],
   templateUrl: './portal-layout.html',
   styleUrl: './portal-layout.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PortalLayout {
   auth = inject(AuthService);
-  theme = inject(ThemeService);
   nav = inject(NavService);
   private router = inject(Router);
   private titleService = inject(Title);
@@ -31,12 +33,13 @@ export class PortalLayout {
       this.isSidebarCollapsed.set(true);
     }
 
+    // 29D.7: tie the router subscription to component lifecycle to avoid a leak.
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+      filter(event => event instanceof NavigationEnd),
+      takeUntilDestroyed()
     ).subscribe(() => {
       const url = this.router.url;
-      const match = this.nav.portalNavItems().find(x => url.includes(x.path.replace('/portal/', '')));
-      const title = match?.label ?? 'Dashboard';
+      const title = this.nav.labelFor(url, 'portal');
       this.currentPageTitle.set(title);
       this.titleService.setTitle(`${title} | Member Portal`);
 

@@ -1,14 +1,18 @@
 <div class="admin-feature">
-    <header class="page-header">
-        <div class="header-text">
-            <h2>Article Submission Approvals</h2>
-            <small>Review and manage articles submitted by members for verification and publication.</small>
-        </div>
-    </header>
+    <app-page-header title="Submission Review" [total]="pendingArticles().length"
+        emptySubtitle="Review member-submitted articles">
+        <small subtitle>Showing {{ filteredArticles().length }} of {{ pendingArticles().length }} pending submissions</small>
+    </app-page-header>
+
+    <!-- Search Bar -->
+    <div class="filter-bar">
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search by title, author or category…"></app-search-bar>
+    </div>
 
     @if (loading()) {
     <div class="loading-state glass-card py-20 text-center">
-        <div class="spinner mx-auto mb-4"></div>
+        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
         <p>Checking for pending submissions...</p>
     </div>
     } @else {
@@ -24,20 +28,22 @@
                 </tr>
             </thead>
             <tbody>
-                @for (article of pendingArticles(); track article.id) {
+                @for (article of filteredArticles(); track article.id) {
                 <tr>
                     <td>
                         <div class="article-info">
-                            <div class="thumb" [style.background-image]="'url(' + (article.imageUrl || '/assets/placeholder.jpg') + ')'"></div>
+                            <img class="thumb" [src]="article.imageUrl || '/assets/placeholders/image-placeholder.svg'"
+                                alt="" appImgFallback>
                             <div class="txt">
                                 <strong>{{ article.title }}</strong>
                                 <p>{{ article.content | slice:0:60 }}...</p>
                             </div>
                         </div>
                     </td>
-                    <td><span class="badge">{{ article.category }}</span></td>
+                    <td><span class="badge">{{ article.articleCategory }}</span></td>
                     <td>{{ article.authorName }}</td>
-                    <td>{{ article.createdAt | date:'shortTime' }} <br> <small>{{ article.createdAt | date:'mediumDate' }}</small></td>
+                    <td>{{ article.createdAt | date:'shortTime' }} <br> <small>{{ article.createdAt | date:'dd-MM-yyyy'
+                            }}</small></td>
                     <td>
                         <button class="btn btn-secondary btn-sm" (click)="viewArticle(article)">Review Article</button>
                     </td>
@@ -45,7 +51,7 @@
                 } @empty {
                 <tr>
                     <td colspan="5" class="py-20 text-center italic opacity-50">
-                        No pending submissions found.
+                        {{ searchQuery() ? 'No submissions match your search.' : 'No pending submissions found.' }}
                     </td>
                 </tr>
                 }
@@ -66,20 +72,21 @@
         <div class="modal-body custom-scrollbar">
             <div class="article-preview">
                 @if (selectedArticle()?.imageUrl) {
-                <img [src]="selectedArticle()?.imageUrl" alt="Cover" class="preview-hero">
+                <img [src]="selectedArticle()?.imageUrl" alt="Cover" class="preview-hero" appImgFallback>
                 }
                 <div class="preview-meta mb-6 flex gap-4">
-                    <span class="badge bg-gold-gradient text-black">{{ selectedArticle()?.category }}</span>
+                    <span class="badge bg-gold-gradient text-black">{{ selectedArticle()?.articleCategory }}</span>
                     <span class="text-muted">By <strong>{{ selectedArticle()?.authorName }}</strong></span>
                 </div>
                 <h1>{{ selectedArticle()?.title }}</h1>
                 <div class="preview-body mt-8">
                     {{ selectedArticle()?.content }}
                 </div>
-                
+
                 <div class="rejection-box mt-10 p-6 glass-card bg-white/5">
                     <label class="text-xs uppercase font-black mb-4 block">Rejection Note (Only if rejecting)</label>
-                    <textarea [(ngModel)]="rejectReason" placeholder="Explain why this article is being rejected..."></textarea>
+                    <textarea [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)"
+                        placeholder="Explain why this article is being rejected..."></textarea>
                 </div>
             </div>
         </div>

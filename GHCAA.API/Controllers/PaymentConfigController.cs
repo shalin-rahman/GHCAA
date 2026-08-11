@@ -53,7 +53,7 @@ namespace GHCAA.API.Controllers
 
         // ADMIN: Get all payment configs
         [HttpGet("admin/all")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> GetAllConfigs(CancellationToken cancellationToken)
         {
             var configs = await _db.PaymentConfigurations
@@ -71,24 +71,24 @@ namespace GHCAA.API.Controllers
                         config.GatewayPublicKey = "********";
                 }
             }
-            
+
             return Ok(configs);
         }
 
         // ADMIN: Create new payment config
         [HttpPost("admin")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> CreateConfig([FromBody] PaymentConfiguration config, CancellationToken cancellationToken)
         {
             config.CreatedAt = DateTime.UtcNow;
             await _db.PaymentConfigurations.AddAsync(config, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
-            return Ok(config);
+            return Ok(MaskSecrets(config));
         }
 
         // ADMIN: Update payment config
         [HttpPut("admin/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> UpdateConfig(int id, [FromBody] PaymentConfiguration config, CancellationToken cancellationToken)
         {
             var existing = await _db.PaymentConfigurations.FindAsync(new object[] { id }, cancellationToken);
@@ -105,7 +105,7 @@ namespace GHCAA.API.Controllers
             existing.AccountNumber = config.AccountNumber;
             existing.RoutingNumber = config.RoutingNumber;
             existing.Gateway = config.Gateway;
-            
+
             // Only SuperAdmin can update gateway secrets
             if (User.IsInRole("SuperAdmin"))
             {
@@ -113,7 +113,7 @@ namespace GHCAA.API.Controllers
                     existing.GatewayPublicKey = config.GatewayPublicKey;
                 if (config.GatewaySecretKey != "********")
                     existing.GatewaySecretKey = config.GatewaySecretKey;
-                
+
                 existing.GatewayCallbackUrl = config.GatewayCallbackUrl;
                 existing.IsSandbox = config.IsSandbox;
             }
@@ -125,12 +125,12 @@ namespace GHCAA.API.Controllers
             existing.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);
-            return Ok(existing);
+            return Ok(MaskSecrets(existing));
         }
 
         // ADMIN: Toggle enable/disable
         [HttpPost("admin/{id}/toggle")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> ToggleConfig(int id, CancellationToken cancellationToken)
         {
             var config = await _db.PaymentConfigurations.FindAsync(new object[] { id }, cancellationToken);
@@ -144,7 +144,7 @@ namespace GHCAA.API.Controllers
 
         // ADMIN: Delete payment config
         [HttpDelete("admin/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> DeleteConfig(int id, CancellationToken cancellationToken)
         {
             var config = await _db.PaymentConfigurations.FindAsync(new object[] { id }, cancellationToken);
@@ -155,9 +155,36 @@ namespace GHCAA.API.Controllers
             return Ok();
         }
 
+        private static object MaskSecrets(PaymentConfiguration c) => new
+        {
+            c.Id,
+            c.Method,
+            c.DisplayName,
+            c.Description,
+            c.Icon,
+            c.IsEnabled,
+            c.IsSandbox,
+            c.SortOrder,
+            c.Gateway,
+            c.WalletNumber,
+            c.AccountHolderName,
+            c.BankName,
+            c.BranchName,
+            c.AccountNumber,
+            c.RoutingNumber,
+            c.Instructions,
+            c.RequiresReceipt,
+            c.RequiresReference,
+            c.GatewayCallbackUrl,
+            c.CreatedAt,
+            c.UpdatedAt,
+            GatewayPublicKey = string.IsNullOrEmpty(c.GatewayPublicKey) ? null : "••••••••",
+            GatewaySecretKey = string.IsNullOrEmpty(c.GatewaySecretKey) ? null : "••••••••"
+        };
+
         // ADMIN: Seed default payment methods if none exist
         [HttpPost("admin/seed-defaults")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> SeedDefaults(CancellationToken cancellationToken)
         {
             if (await _db.PaymentConfigurations.AnyAsync(cancellationToken))

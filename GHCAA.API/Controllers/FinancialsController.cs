@@ -1,5 +1,6 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.API.Extensions;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +15,21 @@ namespace GHCAA.API.Controllers
     {
         private readonly IFinancialService _financialService;
         private readonly GHCAA.Infrastructure.Data.ApplicationDbContext _db;
+        private readonly IFileValidationService _fileValidationService;
 
-        public FinancialsController(IFinancialService financialService, GHCAA.Infrastructure.Data.ApplicationDbContext db)
+        public FinancialsController(IFinancialService financialService, GHCAA.Infrastructure.Data.ApplicationDbContext db, IFileValidationService fileValidationService)
         {
             _financialService = financialService;
             _db = db;
+            _fileValidationService = fileValidationService;
+        }
+
+        [HttpGet("fees/applicable")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetApplicableFee([FromQuery] Domain.Enums.FinancialCategory category, [FromQuery] Domain.Enums.MembershipType type, [FromQuery] DateTime? date, CancellationToken cancellationToken)
+        {
+            var fee = await _financialService.GetApplicableFeeAsync(category, type, date ?? DateTime.UtcNow, cancellationToken);
+            return Ok(new { Amount = fee });
         }
 
         [HttpGet("my-history")]
@@ -38,12 +49,21 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("record-payment")]
-        public async Task<IActionResult> RecordPayment([FromBody] CreatePaymentHistoryDto dto, CancellationToken cancellationToken)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> RecordPayment([FromForm] CreatePaymentHistoryDto dto, CancellationToken cancellationToken)
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
             if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var memberId))
             {
                 dto.MemberId = memberId;
+            }
+
+            // 29B.7: Content-validate the uploaded receipt (magic-byte check) so a renamed
+            // executable/script can't be stored under a .jpg/.pdf name in the secure tree.
+            if (dto.Receipt != null)
+            {
+                var receiptValidation = _fileValidationService.ValidateFormFile(dto.Receipt, FileCategory.Document, 10 * 1024 * 1024);
+                if (!receiptValidation.IsValid) return BadRequest(new { Message = receiptValidation.ErrorMessage });
             }
 
             var result = await _financialService.RecordPaymentAsync(dto, cancellationToken);
@@ -56,6 +76,27 @@ namespace GHCAA.API.Controllers
         {
             var success = await _financialService.UpdatePaymentStatusAsync(id, status, notes, cancellationToken);
             return success ? Ok() : NotFound();
+        }
+
+        [HttpGet("receipt/{paymentId}")]
+        public async Task<IActionResult> DownloadReceipt(int paymentId, CancellationToken cancellationToken)
+        {
+            // Security check: If not admin, verify ownership
+            if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
+            {
+                var memberIdClaim = User.FindFirst("MemberId")?.Value;
+                if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
+                {
+                    return Unauthorized("Invalid session.");
+                }
+
+                var payment = await _db.PaymentHistories.FindAsync(new object[] { paymentId }, cancellationToken);
+                if (payment == null) return NotFound();
+                if (payment.MemberId != memberId) return Forbid("You can only download your own receipts.");
+            }
+
+            var pdfBytes = await _financialService.GenerateTaxReceiptAsync(paymentId, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"Receipt_{paymentId}.pdf");
         }
 
         [HttpGet("my-dues")]
@@ -86,7 +127,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("fees/config")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> GetFeeConfigs(CancellationToken cancellationToken)
         {
             var configs = await _financialService.GetMembershipFeeConfigsAsync(cancellationToken);
@@ -94,7 +135,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("fees/config")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> AddFeeConfig([FromBody] CreateMembershipFeeConfigDto dto, CancellationToken cancellationToken)
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
@@ -108,7 +149,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPut("fees/config")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> UpdateFeeConfig([FromBody] UpdateMembershipFeeConfigDto dto, CancellationToken cancellationToken)
         {
             var memberIdClaim = User.FindFirst("MemberId")?.Value;
@@ -149,6 +190,36 @@ namespace GHCAA.API.Controllers
         {
             var history = await _financialService.GetMemberPaymentHistoryAsync(memberId, cancellationToken);
             return Ok(history);
+        }
+
+        [HttpGet("saved-methods")]
+        public async Task<IActionResult> GetSavedPaymentMethods(CancellationToken cancellationToken)
+        {
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
+
+            var methods = await _financialService.GetSavedPaymentMethodsAsync(memberId, cancellationToken);
+            return Ok(methods);
+        }
+
+        [HttpPost("saved-methods")]
+        public async Task<IActionResult> AddSavedPaymentMethod([FromBody] CreateSavedPaymentMethodDto dto, CancellationToken cancellationToken)
+        {
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
+
+            var result = await _financialService.AddSavedPaymentMethodAsync(memberId, dto, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpDelete("saved-methods/{id}")]
+        public async Task<IActionResult> DeleteSavedPaymentMethod(int id, CancellationToken cancellationToken)
+        {
+            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
+
+            var result = await _financialService.DeleteSavedPaymentMethodAsync(memberId, id, cancellationToken);
+            return result ? Ok() : NotFound();
         }
     }
 }

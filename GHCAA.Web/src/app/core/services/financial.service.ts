@@ -13,7 +13,8 @@ export interface PaymentRecord {
     amount: number;
     paidAt: string;
     status: PaymentStatus;
-    category: FinancialCategory;
+    financialCategory: FinancialCategory;
+    paymentMethod: any; // Or proper enum if defined
     notes?: string;
 }
 
@@ -43,6 +44,43 @@ export class FinancialService {
     }
 
     recordPayment(dto: any): Observable<any> {
+        // Correcting the endpoint use-case: if it's FormData, let HttpClient handle headers
         return this.http.post(`${this.apiUrl}/record-payment`, dto);
+    }
+
+    // Saved Payment Methods
+    getSavedMethods(): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/saved-methods`);
+    }
+
+    addSavedMethod(dto: any): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/saved-methods`, dto);
+    }
+
+    deleteSavedMethod(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/saved-methods/${id}`);
+    }
+
+    getReceiptUrl(paymentId: number): string {
+        return `${this.apiUrl}/my-receipt/${paymentId}`;
+    }
+
+    // Admin: Membership/Registration Fee Configs
+    getFeeConfigs(): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/fees/config`);
+    }
+
+    addFeeConfig(dto: any): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/fees/config`, dto);
+    }
+
+    updateFeeConfig(dto: any): Observable<any> {
+        return this.http.put<any>(`${this.apiUrl}/fees/config`, dto);
+    }
+
+    getApplicableFee(category: string, type: string, date?: string): Observable<{ amount: number }> {
+        let url = `${this.apiUrl}/fees/applicable?category=${category}&type=${type}`;
+        if (date) url += `&date=${date}`;
+        return this.http.get<{ amount: number }>(url);
     }
 }

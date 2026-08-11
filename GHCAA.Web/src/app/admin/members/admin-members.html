@@ -1,45 +1,59 @@
 <div class="admin-feature">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Member Registry</h2>
-            <small>{{ totalItems() }} total members</small>
-        </div>
-        <div class="header-actions flex items-center gap-3">
-            <app-export-buttons 
-                [data]="allMembers()" 
-                fileName="ghcaa_members"
-                [pdfHeaders]="pdfHeaders"
-                [pdfDataMapper]="pdfMapper"
-                [exporting]="isExporting()"
-                (exportStart)="handleExport($event)"
+    <app-page-header title="All Members" [total]="totalItems()"
+        emptySubtitle="Directory of all registered members">
+        <small subtitle>Showing {{ allMembers().length }} of {{ totalItems() }} total members</small>
+        <div actions class="flex items-center gap-3">
+            <app-export-buttons [data]="allMembers()" fileName="ghcaa_members" [pdfHeaders]="pdfHeaders"
+                [pdfDataMapper]="pdfMapper" [exporting]="isExporting()" (exportStart)="handleExport($event)"
                 title="Member Registry Export">
             </app-export-buttons>
+            @if (nav.isSuperAdmin()) {
             <button class="btn btn-accent btn-md" (click)="openImport()">
                 <span class="icon">📥</span> Bulk Import
             </button>
+            }
         </div>
-    </div>
+    </app-page-header>
 
     <!-- Filters Section -->
     <div class="filter-bar">
-        <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onFilterChange()"
-                placeholder="Search by name, email, membership no…" class="search-input">
-        </div>
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event); onFilterChange()"
+            placeholder="Search by name, email, membership no…"></app-search-bar>
         <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onFilterChange()"
-            class="status-select">
+            class="status-select ml-2">
+            <option value="all">All Membership Statuses</option>
             @for (s of statusOptions; track s.value) {
             <option [value]="s.value">{{ s.label }}</option>
             }
         </select>
+        <select [ngModel]="membershipTypeFilter()" (ngModelChange)="membershipTypeFilter.set($event); onFilterChange()"
+            class="status-select ml-2">
+            <option value="all">Every Membership Tier</option>
+            @for (t of membershipTypes; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+            }
+        </select>
+        <select [ngModel]="categoryFilter()" (ngModelChange)="categoryFilter.set($event); onFilterChange()"
+            class="status-select ml-2">
+            <option value="all">Every Special Category</option>
+            @for (c of memberCategories; track c.value) {
+            <option [value]="c.value">{{ c.label }}</option>
+            }
+        </select>
+        @if (nav.isSuperAdmin()) {
+        <label class="premium-checkbox-label ml-4 scale-75 origin-left">
+            <input type="checkbox" [ngModel]="includeArchived()" (ngModelChange)="includeArchived.set($event); onFilterChange()">
+            <span class="checkmark"></span>
+            <span class="label-text">Inc. Archived</span>
+        </label>
+        }
     </div>
 
     <!-- Table Container -->
     <div class="table-wrap">
         @if (loading()) {
         <div class="loading-state">
-            <span class="spinner">⏳</span>
+            <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
             <p>Gathering member data...</p>
         </div>
         } @else if (allMembers().length === 0) {
@@ -65,7 +79,7 @@
                 <tr class="animate-fade-in">
                     <td class="member-cell" (click)="openDetail(member)">
                         @if (member.photoPath) {
-                        <img [src]="'/' + member.photoPath" class="member-avatar photo" alt="Photo">
+                        <img [src]="getImageUrl(member.photoPath)" class="member-avatar photo" alt="Photo" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                         } @else {
                         <div class="member-avatar">{{ member.fullName?.[0] }}</div>
                         }
@@ -75,7 +89,15 @@
                         </div>
                     </td>
                     <td><code class="text-accent">{{ member.membershipNumber || '—' }}</code></td>
-                    <td><span class="text-xs uppercase font-bold opacity-70">{{ getMembershipTypeLabel(member.membershipType) }}</span></td>
+                    <td>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-xs uppercase font-bold opacity-70">{{
+                                getMembershipTypeLabel(member.membershipType) }}</span>
+                            @if (member.category && member.category !== 'None') {
+                            <span class="badge" [class]="member.category.toLowerCase()">{{ member.category }}</span>
+                            }
+                        </div>
+                    </td>
                     <td>
                         <span class="status-badge" [class]="getStatusClass(member.status)">
                             {{ getStatusLabel(member.status) }}
@@ -84,11 +106,12 @@
                     <td><span class="font-bold">{{ member.ghcLastCertificatePassingYear || '—' }}</span></td>
                     <td class="actions-cell">
                         @if (member.status === 'Applied' || member.status === 0) {
-                        <button class="icon-btn approve" (click)="approveMember(member.id, 1)"
+                        <button class="icon-btn approve" (click)="approveMember(member.id)"
                             title="Approve Member">✅</button>
                         }
                         @if (nav.isSuperAdmin()) {
-                        <button class="icon-btn archive" (click)="archiveMember(member.id)" title="Archive Member">🗄️</button>
+                        <button class="icon-btn archive" (click)="archiveMember(member.id)"
+                            title="Archive Member">🗄️</button>
                         }
                         <button class="icon-btn contact" (click)="contactMember(member.email)"
                             title="Send Message">📨</button>
@@ -100,12 +123,8 @@
         </table>
 
         <!-- Pagination -->
-        <app-pagination
-            [currentPage]="currentPage()"
-            [totalPages]="totalPages()"
-            [totalItems]="totalItems()"
-            [pageSize]="pageSize()"
-            (pageChange)="currentPage.set($event); loadMembers()">
+        <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [totalItems]="totalItems()"
+            [pageSize]="pageSize()" (pageChange)="currentPage.set($event); loadMembers()">
         </app-pagination>
         }
     </div>
@@ -117,45 +136,69 @@
     <div class="modal-box" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <div class="flex items-center">
-                <div class="relative group cursor-pointer" (click)="isEditing() && photoInput.click()" [title]="isEditing() ? 'Click to change photo' : ''">
+                <div class="relative group cursor-pointer" (click)="isEditing() && photoInput.click()"
+                    [title]="isEditing() ? 'Click to change photo' : ''">
                     @if (photoPreview()) {
-                    <img [src]="photoPreview()" class="modal-avatar photo" alt="Preview">
+                    <img [src]="photoPreview()" class="modal-avatar photo" alt="Preview" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else if (selectedMember()?.photoPath) {
-                    <img [src]="'/' + selectedMember().photoPath" class="modal-avatar photo" alt="Photo">
+                    <img [src]="getImageUrl(selectedMember().photoPath)" class="modal-avatar photo" alt="Photo" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     <div class="modal-avatar">{{ selectedMember()?.fullName?.[0] }}</div>
                     }
                     @if (isEditing()) {
-                    <div class="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity pointer-events-none">📷</div>
+                    <div
+                        class="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity pointer-events-none">
+                        <app-icon name="camera" [size]="16"></app-icon></div>
                     }
                 </div>
-                <input #photoInput type="file" accept="image/jpeg,image/png,image/webp" (change)="onAdminPhotoSelected($event)" class="hidden">
+                <input #photoInput type="file" accept="image/jpeg,image/png,image/webp"
+                    (change)="onAdminPhotoSelected($event)" class="hidden">
                 @if (isEditing() && photoPreview()) {
-                <button class="btn btn-accent btn-sm ml-3" (click)="uploadMemberPhoto()">💾 Save Photo</button>
+                <button class="btn btn-accent btn-sm ml-3" (click)="uploadMemberPhoto()"><app-icon name="save" [size]="14"></app-icon> Save Photo</button>
                 }
                 <div class="header-info">
                     @if (isEditing()) {
                     <input type="text" [(ngModel)]="selectedMember().fullName" #nameInput="ngModel" required
-                        class="edit-input title-input w-full" 
-                        [class.border-red-500]="nameInput.invalid && nameInput.touched"
-                        placeholder="Full Name">
-                    <input type="text" [(ngModel)]="selectedMember().membershipNumber" class="edit-input sub-input w-full mt-2"
-                        placeholder="Membership Number">
+                        class="edit-input title-input w-full"
+                        [class.border-red-500]="nameInput.invalid && nameInput.touched" placeholder="Full Name">
+                    <input type="text" [(ngModel)]="selectedMember().membershipNumber"
+                        class="edit-input sub-input w-full mt-2" placeholder="Membership Number">
                     } @else {
                     <h3>{{ selectedMember()?.fullName }}</h3>
                     <small>{{ selectedMember()?.membershipNumber || 'Pending Membership ID' }}</small>
                     }
                 </div>
             </div>
-            <button (click)="closeDetail()" class="close-btn">✕</button>
+
+            <!-- Administrative Signature Oversight (Inline) -->
+            <div class="header-photo-controls flex items-center gap-4 ml-auto mr-12 bg-black/10 p-2 rounded-xl border border-white/5">
+                <div class="relative group cursor-pointer" (click)="isEditing() && signatureInput.click()" [title]="isEditing() ? 'Click to change signature' : ''">
+                    @if (signaturePreview()) {
+                        <img [src]="signaturePreview()" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature Preview" appImgFallback>
+                    } @else if (selectedMember()?.signaturePath) {
+                        <img [src]="getImageUrl(selectedMember().signaturePath)" class="h-12 w-24 object-contain bg-white/20 rounded-md" alt="Signature" appImgFallback>
+                    } @else {
+                        <div class="h-12 w-24 border border-dashed border-white/20 rounded-md flex items-center justify-center text-lg"><app-icon name="pen" [size]="18"></app-icon></div>
+                    }
+                    @if (isEditing()) {
+                        <div class="absolute inset-0 bg-black/50 rounded-md opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity pointer-events-none"><app-icon name="pen" [size]="14"></app-icon></div>
+                    }
+                    <input #signatureInput type="file" accept="image/jpeg,image/png,image/webp" (change)="onAdminSignatureSelected($event)" class="hidden">
+                </div>
+                @if (isEditing() && signaturePreview()) {
+                    <button class="btn btn-accent btn-xs" (click)="uploadMemberSignature()"><app-icon name="save" [size]="14"></app-icon> Save</button>
+                }
+            </div>
+
+            <button (click)="closeDetail()" class="close-btn"><app-icon name="close" [size]="18"></app-icon></button>
         </div>
-        
+
         <div class="modal-body">
             <!-- Modal Actions Bar -->
             <div class="flex justify-between items-center mb-8 border-b pb-4">
                 <div class="flex gap-4">
                     <button class="btn btn-secondary btn-sm" (click)="toggleEdit()">
-                        {{ isEditing() ? '❌ Discard Changes' : '✏️ Edit Profile' }}
+                        {{ isEditing() ? 'Cancel' : '✏️ Edit Profile' }}
                     </button>
                     @if (!isEditing()) {
                     <button class="btn btn-secondary btn-sm" (click)="sendResetLink(selectedMember().id)">
@@ -175,91 +218,245 @@
                 <!-- Personal Information -->
                 <div class="form-group">
                     <label>Mobile Number <span class="required-star">*</span></label>
-                    <input type="text" [(ngModel)]="selectedMember().mobileNo" [readonly]="!isEditing()" #mobileInput="ngModel" required
+                    <input type="text" [(ngModel)]="selectedMember().mobileNo" [readonly]="!isEditing()"
+                        #mobileInput="ngModel" required pattern="01[3-9]\d{8}" maxlength="11"
                         [class.border-red-500]="isEditing() && mobileInput.invalid && mobileInput.touched">
+                    <div *ngIf="isEditing() && mobileInput.touched && mobileInput.invalid"
+                        class="text-[10px] text-red-500 mt-1">
+                        <span *ngIf="mobileInput.errors?.['required']">Mobile is required.</span>
+                        <span *ngIf="mobileInput.errors?.['pattern']">Invalid Bangladeshi mobile (e.g.,
+                            01712345678).</span>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Email Address <span class="required-star">*</span></label>
-                    <input type="email" [(ngModel)]="selectedMember().email" [readonly]="!isEditing()" #emailInput="ngModel" required
+                    <input type="email" [(ngModel)]="selectedMember().email" [readonly]="!isEditing()"
+                        #emailInput="ngModel" required email maxlength="150"
                         [class.border-red-500]="isEditing() && emailInput.invalid && emailInput.touched">
+                    <div *ngIf="isEditing() && emailInput.touched && emailInput.invalid"
+                        class="text-[10px] text-red-500 mt-1">
+                        <span *ngIf="emailInput.errors?.['required']">Email is required.</span>
+                        <span *ngIf="emailInput.errors?.['email']">Invalid email format.</span>
+                    </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label>Father's Name</label>
-                    <input type="text" [(ngModel)]="selectedMember().fatherName" [readonly]="!isEditing()">
+                    <input type="text" [(ngModel)]="selectedMember().fatherName" [readonly]="!isEditing()"
+                        maxlength="250">
                 </div>
                 <div class="form-group">
                     <label>Mother's Name</label>
-                    <input type="text" [(ngModel)]="selectedMember().motherName" [readonly]="!isEditing()">
+                    <input type="text" [(ngModel)]="selectedMember().motherName" [readonly]="!isEditing()"
+                        maxlength="250">
                 </div>
-                
+
                 <div class="form-group">
                     <label>Date of Birth</label>
-                    <input type="date" [ngModel]="selectedMember().dateOfBirth | date:'yyyy-MM-dd'"
-                        (ngModelChange)="selectedMember().dateOfBirth = $event" [readonly]="!isEditing()">
+                    <input type="text" [(ngModel)]="selectedMember().dateOfBirth" [readonly]="!isEditing()"
+                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
                 </div>
                 <div class="form-group">
                     <label>National ID (NID)</label>
-                    <input type="text" [(ngModel)]="selectedMember().nid" [readonly]="!isEditing()">
+                    <div class="flex items-center gap-2">
+                        <input type="text" [(ngModel)]="selectedMember().nid" [readonly]="!isEditing()" minlength="6"
+                            maxlength="20" class="flex-1">
+                        @if (isEditing()) {
+                        <label class="premium-checkbox-label !mb-0" title="Visible to other members">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isNIDPublic">
+                            <span class="checkmark"></span>
+                        </label>
+                        }
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Gender</label>
-                    <select [(ngModel)]="selectedMember().gender" [disabled]="!isEditing()">
-                        @for (g of genderOptions; track g.value) { <option [value]="g.value">{{ g.label }}</option> }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Blood Group</label>
-                    <select [(ngModel)]="selectedMember().bloodGroup" [disabled]="!isEditing()">
-                        @for (b of bloodGroupOptions; track b.value) { <option [value]="b.value">{{ b.label }}</option> }
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label>Gender</label>
+                        @if (isEditing()) {
+                            <select [(ngModel)]="selectedMember().gender" #genderI="ngModel">
+                                @for (g of genderOptions; track g.value) { <option [value]="g.value">{{ g.label }}</option> }
+                            </select>
+                        } @else {
+                            <div class="view-value">{{ getLabel(genderOptions, selectedMember().gender) }}</div>
+                        }
+                    </div>
+
+                    <div class="form-group">
+                        <label>Blood Group</label>
+                        @if (isEditing()) {
+                            <select [(ngModel)]="selectedMember().bloodGroup" #bloodI="ngModel">
+                                @for (bg of bloodGroupOptions; track bg.value) { <option [value]="bg.value">{{ bg.label }}</option> }
+                            </select>
+                        } @else {
+                            <div class="view-value">{{ getLabel(bloodGroupOptions, selectedMember().bloodGroup) }}</div>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label>T-Shirt Size</label>
+                        @if (isEditing()) {
+                            <select [(ngModel)]="selectedMember().tShirtSize">
+                                <option value="">None</option>
+                                <option value="S">Small (S)</option>
+                                <option value="M">Medium (M)</option>
+                                <option value="L">Large (L)</option>
+                                <option value="XL">Extra Large (XL)</option>
+                                <option value="XXL">XXL</option>
+                                <option value="XXXL">XXXL</option>
+                            </select>
+                        } @else {
+                            <div class="view-value">{{ selectedMember().tShirtSize || 'Not Specified' }}</div>
+                        }
+                    </div>
 
                 <!-- Governance & Tier -->
-                <div class="form-group">
-                    <label>Membership Tier</label>
-                    <select [(ngModel)]="selectedMember().membershipType" [disabled]="!isEditing()">
-                        @for (t of membershipTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
-                    </select>
+                    <div class="form-group">
+                        <label>Membership Tier</label>
+                        @if (isEditing()) {
+                            <select [(ngModel)]="selectedMember().membershipType">
+                                @for (t of membershipTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                            </select>
+                        } @else {
+                            <div class="view-value">{{ getLabel(membershipTypes, selectedMember().membershipType) }}</div>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label>Special Category</label>
+                        @if (isEditing()) {
+                            <select [(ngModel)]="selectedMember().category">
+                                @for (cat of memberCategories; track cat.value) { <option [value]="cat.value">{{ cat.label }}</option> }
+                            </select>
+                        } @else {
+                            <div class="view-value">{{ getLabel(memberCategories, selectedMember().category) }}</div>
+                        }
+                    </div>
+
+                @if (isEditing()) {
+                <div class="form-group full bg-primary/5 p-4 rounded-lg border border-primary/10">
+                    <label class="text-accent font-bold">Membership Change Reason</label>
+                    <input type="text" [(ngModel)]="selectedMember().membershipChangeReason"
+                        placeholder="Why is this membership type or category being updated? (e.g., Paid via Bank, Long-term Service)"
+                        class="w-full">
+                    <small class="opacity-50 italic">Required only if changing membership tier.</small>
                 </div>
-                <div class="form-group">
-                    <label>Special Category</label>
-                    <select [(ngModel)]="selectedMember().category" [disabled]="!isEditing()">
-                        @for (c of memberCategories; track c.value) { <option [value]="c.value">{{ c.label }}</option> }
-                    </select>
-                </div>
+                }
 
 
                 <!-- Dynamic Academic History Section (Placeholder for consistency) -->
                 <div class="full border-b pb-4 mb-4 mt-8">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Academic & Professional Background</h4>
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Academic & Professional
+                        Background</h4>
                 </div>
 
                 <div class="form-group full">
                     <label>Present Address</label>
                     <textarea [(ngModel)]="selectedMember().presentAddress" [readonly]="!isEditing()"></textarea>
                 </div>
-                
+
+                <div class="form-group full">
+                    <label>Permanent Address</label>
+                    <textarea [(ngModel)]="selectedMember().permanentAddress" [readonly]="!isEditing()"></textarea>
+                </div>
+
+                <!-- Emergency Contact Section -->
+                <div class="full border-t pt-8 mt-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black mb-6">Emergency Contact Details
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="form-group">
+                            <label>Contact Name</label>
+                            <input type="text" [(ngModel)]="selectedMember().emergencyContactName"
+                                [readonly]="!isEditing()" placeholder="Full Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Relation</label>
+                            <input type="text" [(ngModel)]="selectedMember().emergencyContactRelation"
+                                [readonly]="!isEditing()" placeholder="e.g. Spouse, Father">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" [(ngModel)]="selectedMember().emergencyContactPhone"
+                                [readonly]="!isEditing()" placeholder="01xxxxxxxxx">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Privacy Checks -->
                 <div class="full privacy-grid bg-surface p-6 rounded-lg">
                     <label class="mb-4 block">Privacy Preferences</label>
                     <div class="checks grid grid-cols-1 md:grid-cols-3 gap-6">
                         <label class="premium-checkbox-label">
-                            <input type="checkbox" [(ngModel)]="selectedMember().isMobilePublic" [disabled]="!isEditing()">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isMobilePublic"
+                                [disabled]="!isEditing()">
                             <span class="checkmark"></span>
                             <span class="label-text">Show Mobile Publicly</span>
                         </label>
                         <label class="premium-checkbox-label">
-                            <input type="checkbox" [(ngModel)]="selectedMember().isEmailPublic" [disabled]="!isEditing()">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isEmailPublic"
+                                [disabled]="!isEditing()">
                             <span class="checkmark"></span>
                             <span class="label-text">Show Email Publicly</span>
                         </label>
                         <label class="premium-checkbox-label">
-                            <input type="checkbox" [(ngModel)]="selectedMember().isAddressPublic" [disabled]="!isEditing()">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isAddressPublic"
+                                [disabled]="!isEditing()">
                             <span class="checkmark"></span>
                             <span class="label-text">Show Address Publicly</span>
                         </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isNIDPublic" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Show NID Publicly</span>
+                        </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().isFamilyPublic" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Show Family Publicly</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Notification Preferences -->
+                <div class="full privacy-grid bg-surface p-6 rounded-lg mt-4">
+                    <label class="mb-4 block">Communication Protocols</label>
+                    <div class="checks grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().notifyEventCreation" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Announce New Events</span>
+                        </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().notifyParticipationApproval" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Participation Updates</span>
+                        </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().notifyRegistrationUpdate" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">Registry Change Alerts</span>
+                        </label>
+                        <label class="premium-checkbox-label">
+                            <input type="checkbox" [(ngModel)]="selectedMember().notifyRelevantUpdates" [disabled]="!isEditing()">
+                            <span class="checkmark"></span>
+                            <span class="label-text">General relevant Community News</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Verification Section -->
+                <div class="full border-t pt-8 mt-4" *ngIf="isEditing()">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black mb-6">Verification & Gamification</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="premium-checkbox-label">
+                                <input type="checkbox" [(ngModel)]="selectedMember().isVerified">
+                                <span class="checkmark"></span>
+                                <span class="label-text">Verified Alumni (Blue Tick)</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Contribution Points</label>
+                            <input type="number" [(ngModel)]="selectedMember().contributionPoints">
+                        </div>
                     </div>
                 </div>
 
@@ -271,45 +468,54 @@
                         <button class="btn btn-outline btn-sm" (click)="addAcademic()">➕ Add Record</button>
                         }
                     </div>
-                    
+
                     <div class="history-list flex flex-col gap-4">
                         @for (acad of selectedMember()?.academicHistory; track $index) {
                         <div class="history-item glass-effect rounded-lg overflow-hidden">
                             <div class="flex justify-between items-center px-4 py-2 border-b border-primary/10">
-                                <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold">Record #{{ $index + 1 }}</span>
+                                <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold">Record #{{
+                                    $index + 1 }}</span>
                                 @if (isEditing()) {
-                                <button class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors" (click)="removeAcademic($index)" type="button">✕ Remove</button>
+                                <button
+                                    class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
+                                    (click)="removeAcademic($index)" type="button"><app-icon name="close" [size]="12"></app-icon> Remove</button>
                                 }
                             </div>
                             <div class="p-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="form-group">
-                                    <label class="text-[10px]">Institution</label>
-                                    <input type="text" [(ngModel)]="acad.institutionName" [readonly]="!isEditing()" placeholder="e.g. Govt. Haraganga College">
-                                </div>
-                                <div class="form-group">
-                                    <label class="text-[10px]">Degree</label>
-                                    <input type="text" [(ngModel)]="acad.degree" [readonly]="!isEditing()" list="degree-list" placeholder="e.g. HSC, BSS">
-                                </div>
-                                <div class="form-group">
-                                    <label class="text-[10px]">Subject/Group</label>
-                                    <input type="text" [(ngModel)]="acad.subject" [readonly]="!isEditing()" list="subject-list" placeholder="e.g. Science, Philosophy">
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="form-group">
-                                        <label class="text-[10px]">Pass Year</label>
-                                        <input type="number" [(ngModel)]="acad.passingYear" [readonly]="!isEditing()" list="years-list">
+                                        <label class="text-[10px]">Institution</label>
+                                        <input type="text" [(ngModel)]="acad.institutionName" [readonly]="!isEditing()"
+                                            placeholder="e.g. Govt. Haraganga College">
                                     </div>
                                     <div class="form-group">
-                                        <label class="text-[10px]">Adm. Year</label>
-                                        <input type="number" [(ngModel)]="acad.admissionYear" [readonly]="!isEditing()" list="years-list">
+                                        <label class="text-[10px]">Degree</label>
+                                        <input type="text" [(ngModel)]="acad.degree" [readonly]="!isEditing()"
+                                            list="degree-list" placeholder="e.g. HSC, BSS">
                                     </div>
                                     <div class="form-group">
-                                        <label class="text-[10px]">Result</label>
-                                        <input type="text" [(ngModel)]="acad.result" [readonly]="!isEditing()" placeholder="e.g. 5.00">
+                                        <label class="text-[10px]">Subject/Group</label>
+                                        <input type="text" [(ngModel)]="acad.subject" [readonly]="!isEditing()"
+                                            list="subject-list" placeholder="e.g. Science, Philosophy">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="form-group">
+                                            <label class="text-[10px]">Pass Year</label>
+                                            <input type="number" [(ngModel)]="acad.passingYear"
+                                                [readonly]="!isEditing()" list="years-list">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-[10px]">Adm. Year</label>
+                                            <input type="number" [(ngModel)]="acad.admissionYear"
+                                                [readonly]="!isEditing()" list="years-list">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-[10px]">Result</label>
+                                            <input type="text" [(ngModel)]="acad.result" [readonly]="!isEditing()"
+                                                placeholder="e.g. 5.00">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                         }
@@ -332,39 +538,50 @@
                         @for (prof of selectedMember()?.professionalHistory; track $index) {
                         <div class="history-item glass-effect rounded-lg overflow-hidden">
                             <div class="flex justify-between items-center px-4 py-2 border-b border-primary/10">
-                                <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold">Job #{{ $index + 1 }}</span>
+                                <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold">Job #{{ $index
+                                    + 1 }}</span>
                                 @if (isEditing()) {
-                                <button class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors" (click)="removeProfessional($index)" type="button">✕ Remove</button>
+                                <button
+                                    class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
+                                    (click)="removeProfessional($index)" type="button"><app-icon name="close" [size]="12"></app-icon> Remove</button>
                                 }
                             </div>
                             <div class="p-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="form-group">
-                                    <label class="text-[10px]">Organization</label>
-                                    <input type="text" [(ngModel)]="prof.organizationName" [readonly]="!isEditing()" placeholder="Company Name">
-                                </div>
-                                <div class="form-group">
-                                    <label class="text-[10px]">Designation</label>
-                                    <input type="text" [(ngModel)]="prof.designation" [readonly]="!isEditing()" placeholder="e.g. Manager, Teacher">
-                                </div>
-                                <div class="form-group">
-                                    <label class="text-[10px]">Sector</label>
-                                    <input type="text" [(ngModel)]="prof.sector" [readonly]="!isEditing()" list="sector-list" placeholder="e.g. Gov, Banking">
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="form-group">
-                                        <label class="text-[10px]">Start Date</label>
-                                        <input type="date" [ngModel]="prof.startDate | date:'yyyy-MM-dd'" (ngModelChange)="prof.startDate = $event" [readonly]="!isEditing()">
+                                        <label class="text-[10px]">Organization</label>
+                                        <input type="text" [(ngModel)]="prof.organizationName" [readonly]="!isEditing()"
+                                            placeholder="Company Name">
                                     </div>
-                                    <div class="flex items-end flex-1">
-                                        <label class="premium-checkbox-label mb-2">
-                                            <input type="checkbox" [(ngModel)]="prof.isCurrent" [disabled]="!isEditing()">
-                                            <span class="checkmark"></span>
-                                            <span class="label-text">Currently Working</span>
-                                        </label>
+                                    <div class="form-group">
+                                        <label class="text-[10px]">Designation</label>
+                                        <input type="text" [(ngModel)]="prof.designation" [readonly]="!isEditing()"
+                                            placeholder="e.g. Manager, Teacher">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="text-[10px]">Sector</label>
+                                        <select [(ngModel)]="prof.sector" [disabled]="!isEditing()">
+                                            <option value="" disabled selected>Select Sector</option>
+                                            @for (s of sectorOptions; track s) { <option [value]="s">{{ s }}</option> }
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="form-group">
+                                            <label class="text-[10px]">Start Date</label>
+                                            <input type="text" [(ngModel)]="prof.startDate"
+                                                [readonly]="!isEditing()"
+                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
+                                        </div>
+                                        <div class="flex items-end flex-1">
+                                            <label class="premium-checkbox-label mb-2">
+                                                <input type="checkbox" [(ngModel)]="prof.isCurrent"
+                                                    [disabled]="!isEditing()">
+                                                <span class="checkmark"></span>
+                                                <span class="label-text">Currently Working</span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                         }
@@ -378,27 +595,90 @@
                 <div class="full border-t pt-8 mt-4">
                     <div class="flex justify-between items-center mb-6">
                         <h4 class="text-accent uppercase tracking-widest text-xs font-black">EC Position History</h4>
+                        @if (isEditing()) {
+                            <button class="btn btn-outline btn-sm" (click)="addECHistory()">➕ Add EC Role</button>
+                        }
                     </div>
 
+                    @if (isEditing()) {
+                    <div class="form-group full bg-primary/5 p-4 rounded-lg border border-primary/10 mb-4">
+                        <label class="text-accent font-bold">EC Change Reason</label>
+                        <input type="text" [(ngModel)]="selectedMember().ecChangeReason"
+                            placeholder="Why is this member's Executive Committee status changing?"
+                            class="w-full">
+                        <small class="opacity-50 italic">Required only if modifying EC roles.</small>
+                    </div>
+                    }
+
                     <div class="history-list flex flex-col gap-3">
-                        @for (h of selectedMember()?.ecHistory; track h.id) {
+                        @for (h of selectedMember()?.ecHistory; track $index) {
                         <div class="history-item glass-effect rounded-lg p-4 flex justify-between items-center">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-bold text-sm">{{ getECPositionName(h.position) }}</span>
-                                    <span class="text-[10px] bg-primary/10 px-2 py-0.5 rounded opacity-70">{{ h.periodTitle }}</span>
-                                    @if (h.isCurrent) {
-                                    <span class="text-[8px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Active</span>
-                                    }
+                            @if (isEditing()) {
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mr-4">
+                                    <div class="form-group">
+                                        <label class="text-[10px]">Position</label>
+                                        <select [(ngModel)]="h.position">
+                                            @for (role of ecPositions; track role.value) { 
+                                                <option [value]="role.value">{{ role.label }}</option> 
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="text-[10px]">Period</label>
+                                        <select [(ngModel)]="h.periodTitle">
+                                            @for (p of ecPeriods(); track p.id) { 
+                                                <option [value]="p.title">{{ p.title }}</option> 
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="form-group">
+                                            <label class="text-[10px]">Start Date</label>
+                                            <input type="text" [(ngModel)]="h.startDate"
+                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="text-[10px]">End Date</label>
+                                            <input type="text" [(ngModel)]="h.endDate"
+                                                placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="form-group">
+                                            <label class="text-[10px]">Role Specific Reason</label>
+                                            <input type="text" [(ngModel)]="h.changeReason" placeholder="Optional notes for this role">
+                                        </div>
+                                        <div class="flex items-end mb-2">
+                                            <label class="premium-checkbox-label">
+                                                <input type="checkbox" [(ngModel)]="h.isCurrent">
+                                                <span class="checkmark"></span>
+                                                <span class="label-text">Active Role</span>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="text-[10px] opacity-50 mt-1">
-                                    {{ h.startDate | date:'mediumDate' }} — {{ h.endDate ? (h.endDate | date:'mediumDate') : 'Present' }}
-                                    @if (h.changeReason) {
-                                    <span class="ml-2 italic text-gray-400">({{ h.changeReason }})</span>
-                                    }
+                                <button class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
+                                    (click)="selectedMember().ecHistory.splice($index, 1)"><app-icon name="close" [size]="12"></app-icon> Remove</button>
+                            } @else {
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-sm">{{ getECPositionName(h.position) }}</span>
+                                        <span class="text-[10px] bg-primary/10 px-2 py-0.5 rounded opacity-70">{{ h.periodTitle }}</span>
+                                        @if (h.isCurrent) {
+                                        <span class="text-[8px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Active</span>
+                                        }
+                                    </div>
+                                    <div class="text-[10px] opacity-50 mt-1">
+                                        {{ h.startDate }} — {{ h.endDate || 'Present' }}
+                                        @if (h.changeReason) {
+                                            <span class="ml-2 italic text-gray-400">({{ h.changeReason }})</span>
+                                        }
+                                    </div>
                                 </div>
-                            </div>
-                            <button class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors" (click)="deleteECHistory(h.id)">✕ Delete</button>
+                                <button
+                                    class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
+                                    (click)="deleteECHistory(h.id)"><app-icon name="close" [size]="12"></app-icon> Delete</button>
+                            }
                         </div>
                         }
                         @if (!selectedMember()?.ecHistory?.length) {
@@ -419,17 +699,24 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <span class="font-bold text-sm">{{ p.amount | currency:'BDT ' }}</span>
-                                    <span class="text-[10px] bg-primary/10 px-2 py-0.5 rounded opacity-70">{{ p.category }}</span>
-                                    <span class="status-badge text-[8px] px-1.5 py-0.5" [class]="p.status.toLowerCase()">{{ p.status }}</span>
+                                    <span class="text-[10px] bg-primary/10 px-2 py-0.5 rounded opacity-70">{{
+                                        p.financialCategory }}</span>
+                                    <span class="status-badge text-[8px] px-1.5 py-0.5"
+                                        [class]="p.status.toLowerCase()">{{ p.status }}</span>
                                 </div>
                                 <div class="text-[10px] opacity-50 mt-1">
-                                    TrxID: <code class="text-accent">{{ p.transactionId }}</code> • {{ p.paidAt | date:'mediumDate' }}
+                                    TrxID: <code class="text-accent">{{ p.transactionId }}</code> • {{ p.paidAt |
+                                    date:'dd-MM-yyyy' }}
                                     @if (p.notes) {
                                     <div class="mt-1 italic text-gray-400">Note: {{ p.notes }}</div>
                                     }
                                 </div>
                             </div>
-                            <button class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors" (click)="deletePayment(p.id)">✕ Delete</button>
+                            @if (nav.isSuperAdmin()) {
+                            <button
+                                class="text-red-400 hover:text-red-600 text-[10px] font-bold px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
+                                (click)="deletePayment(p.id)"><app-icon name="close" [size]="12"></app-icon> Delete</button>
+                            }
                         </div>
                         }
                         @if (!memberPayments().length) {
@@ -444,18 +731,21 @@
                     <div class="flex flex-col gap-6">
                         <div class="flex gap-6 items-center">
                             @if (selectedMember()?.certificatePath) {
-                            <a [href]="selectedMember().certificatePath" target="_blank" class="btn btn-secondary btn-sm">
+                            <a [href]="selectedMember().certificatePath" target="_blank"
+                                class="btn btn-secondary btn-sm">
                                 📜 View Certificate
                             </a>
                             } @else {
                             <span class="text-xs opacity-50 italic">No Certificate</span>
                             }
-                            
+
                             @if (isEditing()) {
                             <div class="flex items-center gap-3">
                                 <label class="btn btn-outline btn-sm cursor-pointer !mb-0">
-                                    {{ certToUpload ? '✅ Ready: ' + certToUpload.name : '📤 Replace/Upload Certificate' }}
-                                    <input type="file" (change)="onDocSelected($event, 'cert')" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                    {{ certToUpload ? '✅ Ready: ' + certToUpload.name : '📤 Replace/Upload Certificate'
+                                    }}
+                                    <input type="file" (change)="onDocSelected($event, 'cert')" class="hidden"
+                                        accept=".pdf,.jpg,.jpeg,.png">
                                 </label>
                             </div>
                             }
@@ -463,7 +753,8 @@
 
                         <div class="flex gap-6 items-center">
                             @if (selectedMember()?.paymentProofPath) {
-                            <a [href]="selectedMember().paymentProofPath" target="_blank" class="btn btn-secondary btn-sm">
+                            <a [href]="selectedMember().paymentProofPath" target="_blank"
+                                class="btn btn-secondary btn-sm">
                                 💳 View Payment Receipt
                             </a>
                             } @else {
@@ -474,13 +765,15 @@
                             <div class="flex items-center gap-3">
                                 <label class="btn btn-outline btn-sm cursor-pointer !mb-0">
                                     {{ payToUpload ? '✅ Ready: ' + payToUpload.name : '📤 Replace/Upload Receipt' }}
-                                    <input type="file" (change)="onDocSelected($event, 'pay')" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                    <input type="file" (change)="onDocSelected($event, 'pay')" class="hidden"
+                                        accept=".pdf,.jpg,.jpeg,.png">
                                 </label>
                             </div>
                             }
                         </div>
-                        
-                        @if (!selectedMember()?.certificatePath && !selectedMember()?.paymentProofPath && !isEditing()) {
+
+                        @if (!selectedMember()?.certificatePath && !selectedMember()?.paymentProofPath && !isEditing())
+                        {
                         <span class="text-muted italic">No verification documents on record.</span>
                         }
                     </div>
@@ -490,8 +783,8 @@
 
         @if (isEditing()) {
         <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="toggleEdit()">Discard Changes</button>
-            <button class="btn btn-accent" (click)="saveMember()">🚀 Synchronize Information</button>
+            <button class="btn btn-secondary" (click)="toggleEdit()">Cancel</button>
+            <button class="btn btn-accent" (click)="saveMember()">{{ submitting() ? 'Saving...' : 'Save Changes' }}</button>
         </div>
         }
     </div>
@@ -512,19 +805,26 @@
                 <div class="step-card">
                     <h4>Step 1: Resource Acquisition</h4>
                     <div class="grid md:grid-cols-2 gap-8">
-                        <div class="upload-zone p-8 border-2 border-dashed border-gold rounded-xl text-center cursor-pointer">
-                            <label class="block mb-4 font-black text-xs uppercase opacity-70">Excel Master Record (.xlsx)</label>
-                            <input type="file" accept=".xlsx" (change)="onFileSelected($event)" class="hidden" id="excelUpload">
-                            <button class="btn btn-secondary w-full" onclick="document.getElementById('excelUpload').click()">
-                                {{ importFile() ? '✅ ' + importFile()?.name : '📄 Select Spreadsheet' }}
+                        <div
+                            class="upload-zone p-8 border-2 border-dashed border-gold rounded-xl text-center cursor-pointer">
+                            <label class="block mb-4 font-black text-xs uppercase opacity-70">Excel Master Record
+                                (.xlsx)</label>
+                            <input type="file" accept=".xlsx" (change)="onFileSelected($event)" class="hidden"
+                                id="excelUpload">
+                            <button class="btn btn-secondary w-full"
+                                onclick="document.getElementById('excelUpload').click()">
+                                {{ importFile() ? '✅ ' + importFile()?.name : 'Select Spreadsheet' }}
                             </button>
                         </div>
-                        <div class="upload-zone p-8 border-2 border-dashed border-gold rounded-xl text-center cursor-pointer">
-                            <label class="block mb-4 font-black text-xs uppercase opacity-70">Identity Photo Cluster</label>
+                        <div
+                            class="upload-zone p-8 border-2 border-dashed border-gold rounded-xl text-center cursor-pointer">
+                            <label class="block mb-4 font-black text-xs uppercase opacity-70">Identity Photo
+                                Cluster</label>
                             <input type="file" multiple webkitdirectory directory accept="image/*"
                                 (change)="onPhotosSelected($event)" class="hidden" id="photoUpload">
-                            <button class="btn btn-secondary w-full" onclick="document.getElementById('photoUpload').click()">
-                                {{ photoFiles().length > 0 ? '✅ ' + photoFiles().length + ' Images' : '📸 Select Folder' }}
+                            <button class="btn btn-secondary w-full"
+                                onclick="document.getElementById('photoUpload').click()">
+                                {{ photoFiles().length > 0 ? '✅ ' + photoFiles().length + ' Images' : 'Select Folder' }}
                             </button>
                         </div>
                     </div>
@@ -564,9 +864,9 @@
             <button class="btn btn-accent px-10 shadow-gold" [disabled]="!importFile() || isImporting()"
                 (click)="executeImport()">
                 @if (isImporting()) {
-                    <span class="spinner">⏳</span> Optimizing Data...
+                <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> Importing...
                 } @else {
-                    <span class="icon">🚀</span> Execute Migration
+                Import
                 }
             </button>
         </div>
@@ -578,5 +878,5 @@
 <datalist id="years-list"> @for (y of yearsList; track y) { <option [value]="y"></option> } </datalist>
 <datalist id="degree-list"> @for (d of degreeOptions; track d) { <option [value]="d"></option> } </datalist>
 <datalist id="sector-list"> @for (s of sectorOptions; track s) { <option [value]="s"></option> } </datalist>
-<datalist id="group-list"> @for (g of groupOptions; track g) { <option [value]="g"></option> } </datalist>
+
 <datalist id="subject-list"> @for (s of subjectOptions; track s) { <option [value]="s"></option> } </datalist>

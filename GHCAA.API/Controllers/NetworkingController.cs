@@ -21,6 +21,7 @@ namespace GHCAA.API.Controllers
 
 
         [HttpGet("search")]
+        [HttpGet("directory")]
         [AllowAnonymous]
         public async Task<IActionResult> Search([FromQuery] MemberSearchFilterDto filter, CancellationToken cancellationToken)
         {

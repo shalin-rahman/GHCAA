@@ -23,9 +23,10 @@ public class LocalFileStorageServiceTests
         _testDirectory = Path.Combine(Path.GetTempPath(), "GHCAATests", Guid.NewGuid().ToString());
 
         var inMemorySettings = new Dictionary<string, string> {
+            {"FileStorage:BasePhysicalPath", _testDirectory},
             {"FileStorage:UploadsRelativePath", "uploads/members"},
             {"FileStorage:MaxFileSizeBytes", "1048576"},
-            {"Storage:EnableCompression", "false"} // Explicitly pass false/true so GetValue doesn't throw if section missing mocking
+            {"Storage:EnableCompression", "false"}
         };
 
         _config = new ConfigurationBuilder()
@@ -70,7 +71,7 @@ public class LocalFileStorageServiceTests
         var result = _service.GetRelativeFilePath(memberId, uploadType, fileName);
 
         // Assert
-        result.Should().Be("uploads/members/photo_m123_test.jpg");
+        result.Should().Be("uploads/members/123/photo/test.jpg");
     }
 
     [Test]
@@ -82,10 +83,10 @@ public class LocalFileStorageServiceTests
 
         // Act & Assert
         _service.GetRelativeFilePath(memberId, Enums.FileUploadType.Certificate, fileName)
-            .Should().Be("secure_uploads/members/certificate_m456_document.pdf");
+            .Should().Be("secure_uploads/members/456/certificate/document.pdf");
 
         _service.GetRelativeFilePath(memberId, Enums.FileUploadType.PaymentProof, fileName)
-            .Should().Be("secure_uploads/members/paymentproof_m456_document.pdf");
+            .Should().Be("secure_uploads/members/456/paymentproof/document.pdf");
     }
 
     [Test]
@@ -101,7 +102,8 @@ public class LocalFileStorageServiceTests
         var result = _service.GetRelativeFilePath(memberId, uploadType, fileName);
 
         // Assert
-        result.Should().Be("uploads/members/photo_m789_file.jpg");
+        // Assert
+        result.Should().Be("uploads/members/789/photo/file.jpg");
     }
 
     [Test]
@@ -119,11 +121,11 @@ public class LocalFileStorageServiceTests
 
         // Assert
         result.Should().NotBeNullOrEmpty();
-        result.Should().StartWith("uploads/members/photo_m1_");
+        result.Should().StartWith("uploads/members/1/photo/");
         result.Should().EndWith("_test.jpg");
 
         // Verify file was actually created (cross-platform path)
-        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", result.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        var fullPath = Path.Combine(_testDirectory, result.Replace("/", Path.DirectorySeparatorChar.ToString()));
         File.Exists(fullPath).Should().BeTrue();
     }
 
@@ -170,7 +172,7 @@ public class LocalFileStorageServiceTests
         var result = await _service.SaveFileAsync(stream, fileName, memberId, uploadType);
 
         // Assert
-        var directoryPath = Path.Combine("wwwroot", "uploads", "members");
+        var directoryPath = Path.Combine(_testDirectory, "uploads", "members", "999", "photo");
         Directory.Exists(directoryPath).Should().BeTrue();
     }
 
@@ -202,7 +204,7 @@ public class LocalFileStorageServiceTests
         var uploadType = Enums.FileUploadType.Photo;
 
         var relativePath = await _service.SaveFileAsync(stream, fileName, memberId, uploadType);
-        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        var fullPath = Path.Combine(_testDirectory, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
         File.Exists(fullPath).Should().BeTrue();
 
         // Act
@@ -216,7 +218,7 @@ public class LocalFileStorageServiceTests
     public async Task DeleteFileAsync_WithNonExistentFile_ShouldNotThrowException()
     {
         // Arrange
-        var relativePath = "uploads/members/photo_m999_nonexistent.jpg";
+        var relativePath = "uploads/members/999/photo/nonexistent.jpg";
 
         // Act & Assert
         var act = async () => await _service.DeleteFileAsync(relativePath);
@@ -240,7 +242,7 @@ public class LocalFileStorageServiceTests
         await _service.DeleteFileAsync(pathWithLeadingSlash);
 
         // Assert
-        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        var fullPath = Path.Combine(_testDirectory, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
         File.Exists(fullPath).Should().BeFalse();
     }
 

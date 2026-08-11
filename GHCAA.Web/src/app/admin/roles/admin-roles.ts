@@ -1,13 +1,17 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../../core/services/notification.service';
+import { Icon } from '../../common/icon/icon';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-admin-roles',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, PageHeaderComponent, SearchBarComponent, Icon, LogoSpinnerComponent],
     templateUrl: './admin-roles.html',
     styleUrl: './admin-roles.scss'
 })
@@ -21,6 +25,16 @@ export class AdminRoles implements OnInit {
     loading = signal(true);
     showCreateForm = signal(false);
     submitting = signal(false);
+    searchQuery = signal('');
+
+    filteredUsers = computed(() => {
+        const q = this.searchQuery().toLowerCase().trim();
+        if (!q) return this.users();
+        return this.users().filter(u =>
+            (u.userName || '').toLowerCase().includes(q) ||
+            (u.email || '').toLowerCase().includes(q)
+        );
+    });
 
     createForm = this.fb.group({
         username: ['', [Validators.required, Validators.minLength(3)]],
@@ -30,6 +44,11 @@ export class AdminRoles implements OnInit {
 
     customRoleName = signal('');
     creatingRole = signal(false);
+    showPassword = signal(false);
+
+    togglePassword() {
+        this.showPassword.set(!this.showPassword());
+    }
 
     ngOnInit() {
         this.loadData();
@@ -48,12 +67,18 @@ export class AdminRoles implements OnInit {
 
         // Fetch available roles
         this.http.get<any[]>('/api/roles').subscribe({
-            next: (roles) => this.roles.set(roles)
+            next: (roles) => this.roles.set(roles),
+            // 29F.2: surface failures instead of leaving the role list silently empty.
+            error: () => this.notify.error('Failed to load available roles.')
         });
     }
 
     createAdmin() {
-        if (this.createForm.invalid) return;
+        if (this.createForm.invalid) {
+            this.createForm.markAllAsTouched();
+            this.notify.error('Please provide a valid username and password (min 6 chars).');
+            return;
+        }
         this.submitting.set(true);
         this.http.post('/api/roles/users', this.createForm.value).subscribe({
             next: () => {

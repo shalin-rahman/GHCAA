@@ -1,3 +1,4 @@
+import { createAuthServiceMock } from '../../core/testing/testing-utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Login } from './login';
 import { AuthService } from '../../core/services/auth.service';
@@ -12,10 +13,15 @@ describe('Login Component', () => {
     let authServiceMock: any;
     let notificationServiceMock: any;
     let router: Router;
+    const mockForm = { 
+        invalid: false, 
+        control: { markAllAsTouched: vi.fn() } 
+    };
 
     beforeEach(async () => {
         authServiceMock = {
-            login: vi.fn()
+            login: vi.fn(),
+            getSocialProviders: vi.fn().mockReturnValue(of([]))
         };
 
         notificationServiceMock = {
@@ -46,20 +52,20 @@ describe('Login Component', () => {
     it('should navigate to admin portal for admin role', () => {
         authServiceMock.login.mockReturnValue(of({ role: 'Admin' }));
         component.credentials = { username: 'admin', password: 'password' };
-        component.onLogin();
+        component.onLogin(mockForm);
         expect(router.navigate).toHaveBeenCalledWith(['/admin/approvals']);
     });
 
     it('should navigate to portal dashboard for user role', () => {
         authServiceMock.login.mockReturnValue(of({ role: 'User' }));
         component.credentials = { username: 'user', password: 'password' };
-        component.onLogin();
+        component.onLogin(mockForm);
         expect(router.navigate).toHaveBeenCalledWith(['/portal/dashboard']);
     });
 
     it('should show error on login failure', () => {
-        authServiceMock.login.mockReturnValue(throwError(() => ({ error: { message: 'Failed' } })));
-        component.onLogin();
+        authServiceMock.login.mockReturnValue(throwError(() => ({ error: { message: 'Invalid username or password.' } })));
+        component.onLogin(mockForm);
         expect(component.errorMessage()).toBe('Invalid username or password.');
     });
 });

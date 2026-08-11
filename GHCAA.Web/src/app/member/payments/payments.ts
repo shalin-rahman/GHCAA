@@ -1,16 +1,22 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { FinancialService, PaymentRecord, MembershipDue } from '../../core/services/financial.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { PaymentMethodSelectorComponent } from '../../common/payment-method-selector/payment-method-selector.component';
-import { FINANCIAL_CATEGORY_OPTIONS } from '../../core/constants/app.constants';
-import { PaymentConfig } from '../../core/services/payment-config.service';
+import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
+import {
+    FINANCIAL_CATEGORY_OPTIONS,
+    getFinancialCategoryLabel,
+    getPaymentStatusClass,
+    getPaymentStatusLabel
+} from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 
 @Component({
     selector: 'app-payments',
     standalone: true,
-    imports: [CommonModule, FormsModule, PaymentMethodSelectorComponent],
+    imports: [CommonModule, FormsModule, PaymentPortalComponent, LogoSpinnerComponent],
     templateUrl: './payments.html',
     styleUrl: './payments.scss'
 })
@@ -20,6 +26,7 @@ export class Payments implements OnInit {
 
     history = signal<PaymentRecord[]>([]);
     dues = signal<MembershipDue[]>([]);
+    savedMethods = signal<any[]>([]);
     loading = signal(true);
     showPayModal = signal(false);
     categoryOptions = FINANCIAL_CATEGORY_OPTIONS;
@@ -29,10 +36,10 @@ export class Payments implements OnInit {
         transactionId: '',
         notes: '',
         paymentMethod: 'ManualReceipt',
-        category: 'MembershipFee'
+        financialCategory: 'MembershipFee'
     };
 
-    selectedPaymentMethod = signal<PaymentConfig | null>(null);
+    selectedPaymentMethod = signal<any>(null);
     selectedReceiptFile: File | null = null;
 
     ngOnInit() {
@@ -41,13 +48,41 @@ export class Payments implements OnInit {
 
     loadData() {
         this.loading.set(true);
-        // ForkJoin would be better, but serial is fine for now
-        this.financialService.getMyDues().subscribe(dues => {
-            this.dues.set(dues);
-            this.financialService.getMyHistory().subscribe(history => {
+        // 29D.4: Load the three sources in parallel with a single error path. The previous
+        // nested-subscribe chain had no error callback, so any failure left loading=true
+        // forever (infinite spinner). forkJoin resolves/errors once for the whole set.
+        forkJoin({
+            dues: this.financialService.getMyDues(),
+            history: this.financialService.getMyHistory(),
+            methods: this.financialService.getSavedMethods()
+        }).subscribe({
+            next: ({ dues, history, methods }) => {
+                this.dues.set(dues);
                 this.history.set(history);
+                this.savedMethods.set(methods);
                 this.loading.set(false);
-            });
+            },
+            error: () => {
+                this.notify.error('Failed to load payment information. Please try again.');
+                this.loading.set(false);
+            }
+        });
+    }
+
+    downloadReceipt(id: number) {
+        window.open(this.financialService.getReceiptUrl(id), '_blank');
+        this.notify.info('Accessing secure receipt registry...');
+    }
+
+    removeMethod(id: number) {
+        if (!confirm('Deregister this payment method from your identity wallet?')) return;
+        this.financialService.deleteSavedMethod(id).subscribe({
+            next: () => {
+                this.notify.success('Identity wallet updated.');
+                this.loadData();
+            },
+            // 29F.2: report deletion failures instead of leaving the method silently in place.
+            error: () => this.notify.error('Failed to remove the payment method.')
         });
     }
 
@@ -57,48 +92,69 @@ export class Payments implements OnInit {
             transactionId: '',
             notes: due ? `Annual Dues for ${due.year}` : '',
             paymentMethod: 'ManualReceipt',
-            category: due ? 'MembershipFee' : 'Donation'
+            financialCategory: due ? 'MembershipFee' : 'Donation'
         };
         this.showPayModal.set(true);
     }
 
-    onPaymentMethodSelected(method: PaymentConfig) {
+    onPaymentMethodSelected(method: any) {
         this.selectedPaymentMethod.set(method);
-        this.paymentForm.paymentMethod = method.method;
+        this.paymentForm.paymentMethod = method.method || method.displayName;
     }
 
-    onReceiptSelected(event: any) {
-        const file = event.target.files[0];
-        if (file) this.selectedReceiptFile = file;
+    onReferenceSelected(trxId: string) {
+        this.paymentForm.transactionId = trxId;
+    }
+
+    onReceiptSelected(file: File) {
+        this.selectedReceiptFile = file;
     }
 
     submitPayment() {
-        if (!this.paymentForm.transactionId && this.selectedPaymentMethod()?.requiresReference) return;
-        this.financialService.recordPayment(this.paymentForm).subscribe({
-            next: () => {
-                this.notify.success('Payment information submitted correctly. Status will be updated after verification.');
+        if (!this.paymentForm.transactionId) return;
+
+        this.loading.set(true);
+        
+        // Build FormData for multipart upload (sync with Backend [FromForm])
+        const formData = new FormData();
+        formData.append('transactionId', this.paymentForm.transactionId);
+        formData.append('amount', this.paymentForm.amount.toString());
+        formData.append('paidAt', new Date().toISOString());
+        formData.append('financialCategory', this.paymentForm.financialCategory.toString());
+        formData.append('paymentMethod', this.paymentForm.paymentMethod.toString());
+        if (this.paymentForm.notes) formData.append('notes', this.paymentForm.notes);
+        
+        if (this.selectedReceiptFile) {
+            formData.append('receipt', this.selectedReceiptFile, this.selectedReceiptFile.name);
+        }
+
+        this.financialService.recordPayment(formData).subscribe({
+            next: (res) => {
+                this.notify.success('Payment recorded successfully!');
                 this.showPayModal.set(false);
-                this.selectedPaymentMethod.set(null);
-                this.selectedReceiptFile = null;
                 this.loadData();
+                this.loading.set(false);
             },
-            error: () => this.notify.error('Failed to submit payment.')
+            error: () => {
+                this.notify.error('Error recording payment');
+                this.loading.set(false);
+            }
         });
     }
 
     getStatusClass(status: any): string {
-        const map: Record<string, string> = { '0': 'pending', '1': 'success', '2': 'failed' };
-        return map[String(status)] || '';
+        return getPaymentStatusClass(status);
     }
 
     getStatusLabel(status: any): string {
-        const map: Record<string, string> = { '0': 'Pending Audit', '1': 'Verified', '2': 'Rejected' };
-        return map[String(status)] || 'Unknown';
+        return getPaymentStatusLabel(status);
     }
 
     getCategoryLabel(val: any): string {
-        return this.categoryOptions.find(o => o.value === val)?.label || val;
+        return getFinancialCategoryLabel(val);
+    }
+
+    isCompleted(status: any): boolean {
+        return status === 'Completed' || status === 1 || status === '1';
     }
 }
-
-

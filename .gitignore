@@ -359,5 +359,38 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
+# Local secrets overrides (never commit)
+**/appsettings.*.local.json
+GHCAA.API/appsettings.Production.json
+GHCAA.API/appsettings.Preprod.json
+.env.local
+.env
+.env.preprod
+.env.prod
+!.env.example
+
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# GHCAA Temporary & Log Files
+test_output.txt
+test_run_output.txt
+backend_test_results.txt
+out.txt
+temp_results.txt
+file_tests.txt
+*.log
+GHCAA.Mobile/test_output.txt
+**/test_results/
+**/test-results/
+playwright-report/
+blob-report/
+test-results/
+# Build / run log artifacts (generated, not tracked)
+api_stdout.txt
+api_stderr.txt
+build_current.txt
+build_errors.txt
+build_output.txt
+test_results.txt
+graphify-out

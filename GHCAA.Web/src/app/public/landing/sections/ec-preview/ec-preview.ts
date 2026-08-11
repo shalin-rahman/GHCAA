@@ -2,11 +2,12 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NetworkingService } from '../../../../core/services/networking.service';
 import { getECPositionName, getCurrentECPosition } from '../../../../core/constants/app.constants';
+import { ImgFallbackDirective } from '../../../../common/directives/img-fallback.directive';
 
 @Component({
     selector: 'landing-ec-preview',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, ImgFallbackDirective],
     templateUrl: './ec-preview.html',
     styleUrl: './ec-preview.scss',
 })

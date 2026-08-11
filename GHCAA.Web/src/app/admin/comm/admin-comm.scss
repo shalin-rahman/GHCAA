@@ -1,13 +1,16 @@
 
 
 // ─── Tab Navigation ───────────────────────────────
+/* 30.20: was 1.5rem margin + 0.65rem/1.5rem button padding — took up disproportionate
+   vertical space above the panels for a 3-item tab strip. Tightened to the same compact
+   scale already used for `.btn-sm`/dense admin controls elsewhere. */
 .tab-nav {
     display: flex;
-    gap: 0.35rem;
-    margin-bottom: 1.5rem;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
     background: var(--surface-color);
-    padding: 0.35rem;
-    border-radius: 14px;
+    padding: 0.25rem;
+    border-radius: 12px;
     width: fit-content;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
@@ -15,20 +18,20 @@
     button {
         background: none;
         border: none;
-        padding: 0.65rem 1.5rem;
-        border-radius: 10px;
+        padding: 0.45rem 1.1rem;
+        border-radius: 8px;
         color: var(--text-muted);
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.5rem;
         font-weight: 700;
-        font-size: 0.88rem;
+        font-size: 0.82rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
         &:hover {
             color: var(--text-main);
-            background: rgba(255, 255, 255, 0.04);
+            background: var(--card-bg-hover);
         }
 
         &.active {
@@ -167,7 +170,7 @@
     &.active {
         border-color: var(--accent-color);
         background: rgba(var(--accent-color-rgb, 212, 175, 55), 0.1);
-        color: var(--accent-color);
+        color: var(--accent-text);
         box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 212, 175, 55), 0.08);
     }
 }
@@ -206,7 +209,7 @@
     padding: 0.4rem 0.5rem;
     border-radius: 6px;
     border: 1px solid transparent;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--card-bg);
     cursor: pointer;
     font-weight: 700;
     font-size: 0.78rem;
@@ -222,7 +225,7 @@
 
     &.checked {
         background: rgba(var(--accent-color-rgb, 212, 175, 55), 0.15);
-        color: var(--accent-color);
+        color: var(--accent-text);
         border-color: rgba(var(--accent-color-rgb, 212, 175, 55), 0.3);
         font-weight: 900;
         transform: scale(1.05);
@@ -231,7 +234,7 @@
 }
 
 .year-filter-input {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 0.25rem 0.6rem;
@@ -243,7 +246,7 @@
     &:focus {
         outline: none;
         border-color: var(--accent-color);
-        background: rgba(255, 255, 255, 0.06);
+        background: var(--card-bg-hover);
         width: 160px;
     }
 }
@@ -306,7 +309,7 @@
 .btn-link {
     background: none;
     border: none;
-    color: var(--accent-color);
+    color: var(--accent-text);
     font-weight: 800;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
@@ -335,7 +338,7 @@ hr.full {
 }
 
 .text-accent {
-    color: var(--accent-color);
+    color: var(--accent-text);
 }
 
 // ─── Modal ────────────────────────────────────────

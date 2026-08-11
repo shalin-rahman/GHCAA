@@ -1,6 +1,9 @@
 .footer {
     background: #111111;
     color: white;
+    /* Footer is always dark in BOTH themes → keep gold text bright (undo the light-theme
+       dark-gold swap that only makes sense on surfaces that go light). Central per-shell reset. */
+    --accent-text: var(--accent-color);
     padding-top: 5rem;
     margin-top: 0;
     border-top: 1px solid var(--glass-border);
@@ -8,24 +11,23 @@
 
 .footer-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 2fr;
-    gap: 4rem;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1.5fr;
+    gap: 2rem;
     padding-bottom: 4rem;
 }
 
 .footer-logo {
     height: 64px;
     width: 64px;
-    border-radius: 50%;
     object-fit: contain;
-    background: white;
-    border: 2px solid var(--accent-color);
-    box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
+    /* The crest PNG is transparent; a white disc behind it printed a hard medallion on the
+       dark footer, and the gold ring doubled up on the crest's own border. */
+    background: transparent;
 }
 
 .motto {
     font-style: italic;
-    color: var(--accent-color);
+    color: var(--accent-text);
     font-weight: 850;
     margin-bottom: 0.5rem;
     font-size: 0.82rem;
@@ -64,7 +66,7 @@
 }
 
 .footer-links a:hover {
-    color: var(--accent-color);
+    color: var(--accent-text);
     transform: translateX(5px);
 }
 
@@ -118,9 +120,7 @@
     .footer-bot-logo {
         height: 28px;
         width: 28px;
-        border-radius: 50%;
-        background: white;
-        border: 1px solid var(--accent-color);
+        background: transparent;
         object-fit: contain;
     }
 }
@@ -164,7 +164,7 @@
         .footer-tag {
             display: inline-block;
             white-space: nowrap;
-            color: var(--accent-color);
+            color: var(--accent-text);
             font-weight: 800;
         }
     }

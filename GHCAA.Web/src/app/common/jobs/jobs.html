@@ -2,7 +2,7 @@
     @if (!selectedJob()) {
     <div class="header">
         <div class="title-group">
-            <h2>Opportunities Hub</h2>
+            <h2>Job Hub</h2>
             <p>Careers, Mentorship, and Professional Growth</p>
         </div>
         <button class="btn btn-accent" (click)="closeForm(); showForm.set(true)" *ngIf="!showForm()">
@@ -36,7 +36,7 @@
                 </div>
                 <div class="form-group">
                     <label>Opportunity Category *</label>
-                    <select [(ngModel)]="newJob.category" name="category">
+                    <select [(ngModel)]="newJob.jobCategory" name="jobCategory">
                         @for (cat of categories; track cat.id) {
                         <option [value]="cat.id">{{ cat.name }}</option>
                         }
@@ -54,7 +54,9 @@
                 </div>
                 <div class="form-group">
                     <label>Valid Until / Deadline</label>
-                    <input type="date" [(ngModel)]="newJob.applicationDeadline" name="deadline">
+                    <input type="text" [(ngModel)]="newJob.applicationDeadline" name="deadline"
+                        placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
+                        #deadlineM="ngModel" [class.border-red-500]="deadlineM.invalid && deadlineM.touched">
                 </div>
                 <div class="form-group">
                     <label>Application / Contact Method</label>
@@ -94,16 +96,16 @@
     <div class="jobs-list">
         @if (loading()) {
         <div class="loading-state">
-            <div class="spinner"></div>
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
             <p>Scanning for opportunities...</p>
         </div>
         } @else {
         <div class="grid">
             @for (job of jobs(); track job.id) {
-            <div class="glass-card job-card reveal-card" [class.mentorship]="job.category === 'Mentorship'">
+            <div class="glass-card job-card reveal-card" [class.mentorship]="job.jobCategory === 'Mentorship'">
                 <div class="card-badges">
-                    <span class="badge cat">{{ getCategoryName(job.category) }}</span>
-                    @if (job.category === 'Mentorship') {
+                    <span class="badge cat">{{ getCategoryName(job.jobCategory) }}</span>
+                    @if (job.jobCategory === 'Mentorship') {
                     <span class="badge mentor">MENTORSHIP</span>
                     }
                 </div>
@@ -120,6 +122,7 @@
                     </div>
                     <div class="actions">
                         @if (canEdit(job)) {
+                        <button class="btn btn-outline btn-sm mr-2 !text-red-500 !border-red-500/20" (click)="deleteJob(job.id)">Delete</button>
                         <button class="btn btn-secondary btn-sm mr-2" (click)="editJob(job)">Edit</button>
                         }
                         <button class="btn btn-outline btn-sm" (click)="viewJob(job)">Details ↗</button>
@@ -177,11 +180,11 @@
                         <div class="space-y-4">
                             <div class="l-item">
                                 <span class="block text-[10px] text-muted uppercase font-bold">Category</span>
-                                <span class="font-black">{{ getCategoryName(job.category) }}</span>
+                                <span class="font-black">{{ getCategoryName(job.jobCategory) }}</span>
                             </div>
                             <div class="l-item" *ngIf="job.applicationDeadline">
                                 <span class="block text-[10px] text-muted uppercase font-bold">Closing Date</span>
-                                <span class="font-black">{{ job.applicationDeadline | date:'longDate' }}</span>
+                                <span class="font-black">{{ job.applicationDeadline | date:'dd-MM-yyyy' }}</span>
                             </div>
                         </div>
                     </div>

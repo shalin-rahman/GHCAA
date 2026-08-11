@@ -1,3 +1,4 @@
+import { createAuthServiceMock } from '../../core/testing/testing-utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Dashboard } from './dashboard';
 import { ProfileService } from '../../core/services/profile.service';
@@ -6,6 +7,7 @@ import { EventsService } from '../../core/services/events.service';
 import { NetworkingService } from '../../core/services/networking.service';
 import { AlertService } from '../../core/services/alert.service';
 import { AuthService } from '../../core/services/auth.service';
+import { NewsService } from '../../core/services/news.service';
 import { of } from 'rxjs';
 import { provideRouter } from '@angular/router';
 
@@ -18,6 +20,7 @@ describe('Dashboard Component', () => {
     let networkingServiceMock: any;
     let alertServiceMock: any;
     let authServiceMock: any;
+    let newsServiceMock: any;
 
     beforeEach(async () => {
         profileServiceMock = {
@@ -41,6 +44,9 @@ describe('Dashboard Component', () => {
         authServiceMock = {
             logout: vi.fn()
         };
+        newsServiceMock = {
+            getNews: vi.fn().mockReturnValue(of([]))
+        };
 
         await TestBed.configureTestingModule({
             imports: [Dashboard],
@@ -51,6 +57,7 @@ describe('Dashboard Component', () => {
                 { provide: NetworkingService, useValue: networkingServiceMock },
                 { provide: AlertService, useValue: alertServiceMock },
                 { provide: AuthService, useValue: authServiceMock },
+                { provide: NewsService, useValue: newsServiceMock },
                 provideRouter([])
             ]
         }).compileComponents();
@@ -70,4 +77,23 @@ describe('Dashboard Component', () => {
         expect(eventsServiceMock.getEvents).toHaveBeenCalled();
         expect(networkingServiceMock.getRecentlyJoined).toHaveBeenCalled();
     });
+
+    it('should display contribution points and rank from profile', () => {
+        const mockProfile = {
+            fullName: 'Test User',
+            contributionPoints: 450,
+            rank: '12',
+            profileCompletionPercentage: 85
+        };
+        profileServiceMock.getProfile.mockReturnValue(of(mockProfile));
+        
+        // Re-initialize to pick up mock profile
+        component.ngOnInit();
+        fixture.detectChanges();
+        
+        expect(component.contributionPoints).toBe(450);
+        expect(component.memberRank).toBe('12');
+        expect(component.profileCompletion).toBe(85);
+    });
 });
+

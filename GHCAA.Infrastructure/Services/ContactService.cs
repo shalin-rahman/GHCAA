@@ -13,13 +13,13 @@ namespace GHCAA.Infrastructure.Services
     public class ContactService : IContactService
     {
         private readonly ApplicationDbContext _db;
-        private readonly IEmailService _email;
+        private readonly ICommunicationService _communication;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _config;
 
-        public ContactService(ApplicationDbContext db, IEmailService email, Microsoft.Extensions.Configuration.IConfiguration config)
+        public ContactService(ApplicationDbContext db, ICommunicationService communication, Microsoft.Extensions.Configuration.IConfiguration config)
         {
             _db = db;
-            _email = email;
+            _communication = communication;
             _config = config;
         }
 
@@ -41,18 +41,19 @@ namespace GHCAA.Infrastructure.Services
             var recipients = _config.GetSection("ContactUsSettings:Recipients").Get<string[]>();
             if (recipients != null && recipients.Length > 0)
             {
-                var body = $"<h3>New Portal Enquiry</h3>" +
-                           $"<p><strong>From:</strong> {msg.FullName} ({msg.Email})</p>" +
-                           $"<p><strong>Subject:</strong> {msg.Subject}</p>" +
-                           $"<hr/>" +
-                           $"<p>{msg.Message}</p>" +
-                           $"<br/><p><small>Submitted via GHCAA Portal at {msg.SubmittedAt:f}</small></p>";
+                var customVars = new Dictionary<string, string>
+                {
+                    { "RequesterName", msg.FullName },
+                    { "RequesterEmail", msg.Email },
+                    { "Subject", msg.Subject },
+                    { "Message", msg.Message }
+                };
 
                 foreach (var email in recipients)
                 {
                     try
                     {
-                        await _email.SendEmailAsync(email, $"Portal Enquiry: {msg.Subject}", body);
+                        await _communication.SendEmailByCodeAsync(email, "PORTAL_ENQUIRY", customVars, null, cancellationToken);
                     }
                     catch
                     {

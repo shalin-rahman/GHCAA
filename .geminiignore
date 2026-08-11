@@ -1,0 +1,43 @@
+# GHCAA - Gemini Ignore File
+# Keeps large/noisy files out of the agent's context window
+
+# Build outputs
+build_output/
+**/bin/
+**/obj/
+**/dist/
+**/node_modules/
+**/.angular/
+
+# IDE and tool metadata
+.vs/
+.idea/
+*.user
+*.suo
+
+# Logs and diagnostics (large, noisy)
+api_error.log
+api_stdout.txt
+api_stderr.txt
+build_errors.txt
+build_output.txt
+
+# Flutter / Dart build artifacts
+GHCAA.Mobile/.dart_tool/
+GHCAA.Mobile/build/
+GHCAA.Mobile/.packages
+
+# Angular build artifacts
+GHCAA.Web/dist/
+GHCAA.Web/.angular/
+
+# Test screenshots and visual baselines (binary noise)
+**/test-results/
+**/playwright-report/
+
+# Git internals
+.git/
+
+# Environment secrets
+.env
+.env.*

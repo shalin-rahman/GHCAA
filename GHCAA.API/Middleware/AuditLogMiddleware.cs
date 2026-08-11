@@ -40,10 +40,11 @@ namespace GHCAA.API.Middleware
                     if (int.TryParse(userId, out int parsedUserId))
                     {
                         await activityService.LogActivityAsync(
-                            null, 
-                            "ApiAction", 
-                            $"User {username} performed {request.Method} {request.Path} (Status: {statusCode})", 
-                            parsedUserId
+                            null,
+                            "ApiAction",
+                            $"User {username} performed {request.Method} {request.Path} (Status: {statusCode})",
+                            parsedUserId,
+                            source: "API"
                         );
                     }
                 }

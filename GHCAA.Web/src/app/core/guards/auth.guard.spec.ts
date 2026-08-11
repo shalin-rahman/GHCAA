@@ -1,3 +1,4 @@
+import { createAuthServiceMock } from '../testing/testing-utils';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -14,7 +15,8 @@ describe('AuthGuards', () => {
             currentUser: vi.fn()
         };
         routerMock = {
-            parseUrl: vi.fn().mockImplementation((url: string) => url)
+            parseUrl: vi.fn().mockImplementation((url: string) => url),
+            createUrlTree: vi.fn().mockImplementation((commands: any[], _extras?: any) => commands[0])
         };
 
         TestBed.configureTestingModule({
@@ -25,18 +27,37 @@ describe('AuthGuards', () => {
         });
     });
 
+    // Minimal RouterStateSnapshot stub — the guard only reads `.url`.
+    const stateFor = (url: string) => ({ url } as any);
+    const anyRoute = {} as any;
+
     describe('authGuard', () => {
         it('should return true if authenticated', () => {
             authServiceMock.isAuthenticated.mockReturnValue(true);
-            const result = TestBed.runInInjectionContext(() => authGuard());
+            authServiceMock.currentUser.mockReturnValue({ role: 'Member', mustChangePassword: false });
+            const result = TestBed.runInInjectionContext(() => authGuard(anyRoute, stateFor('/portal/dashboard')));
             expect(result).toBe(true);
         });
 
         it('should redirect to login if not authenticated', () => {
             authServiceMock.isAuthenticated.mockReturnValue(false);
-            const result = TestBed.runInInjectionContext(() => authGuard());
+            const result = TestBed.runInInjectionContext(() => authGuard(anyRoute, stateFor('/portal/dashboard')));
             expect(result).toBe('/login');
-            expect(routerMock.parseUrl).toHaveBeenCalledWith('/login');
+            expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login'], { queryParams: { returnUrl: '/portal/dashboard' } });
+        });
+
+        it('should redirect mustChangePassword users to change-password', () => {
+            authServiceMock.isAuthenticated.mockReturnValue(true);
+            authServiceMock.currentUser.mockReturnValue({ role: 'Member', mustChangePassword: true });
+            const result = TestBed.runInInjectionContext(() => authGuard(anyRoute, stateFor('/portal/dashboard')));
+            expect(result).toBe('/portal/change-password');
+        });
+
+        it('should NOT loop-redirect when already on change-password', () => {
+            authServiceMock.isAuthenticated.mockReturnValue(true);
+            authServiceMock.currentUser.mockReturnValue({ role: 'Member', mustChangePassword: true });
+            const result = TestBed.runInInjectionContext(() => authGuard(anyRoute, stateFor('/portal/change-password')));
+            expect(result).toBe(true);
         });
     });
 

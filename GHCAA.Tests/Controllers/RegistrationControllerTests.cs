@@ -1,3 +1,4 @@
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.API.Controllers;
@@ -14,13 +15,17 @@ namespace GHCAA.Tests.Controllers
     public class RegistrationControllerTests
     {
         private Mock<IMemberService> _memberServiceMock;
+        private Mock<IFileValidationService> _fileValidationServiceMock;
         private RegistrationController _controller;
 
         [SetUp]
         public void Setup()
         {
             _memberServiceMock = new Mock<IMemberService>();
-            _controller = new RegistrationController(_memberServiceMock.Object);
+            _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                       .Returns(FileValidationResult.Ok());
+            _controller = new RegistrationController(_memberServiceMock.Object, _fileValidationServiceMock.Object);
         }
 
         [Test]
@@ -38,10 +43,10 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetStatus_ReturnsOk()
         {
-            _memberServiceMock.Setup(x => x.GetStatusAsync(100, It.IsAny<CancellationToken>()))
+            _memberServiceMock.Setup(x => x.GetStatusAsync(100, It.IsAny<string>(), It.IsAny<CancellationToken>()))
                               .ReturnsAsync(new MemberRegistrationResultDto { MemberId = 100, Message = "Applied" });
 
-            var result = await _controller.GetStatus(100, CancellationToken.None);
+            var result = await _controller.GetStatus(100, "test@test.com", CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
         }

@@ -13,7 +13,7 @@
 
         .m-number {
             background: rgba(var(--accent-color-rgb), 0.1);
-            color: var(--accent-color);
+            color: var(--accent-text);
             padding: 0.25rem 0.6rem;
             border-radius: 4px;
             font-size: 0.75rem;
@@ -29,12 +29,15 @@
             letter-spacing: -0.02em;
         }
 
+        /* 30.22: was uppercase + 1px letter-spacing + weight 600, while its siblings on
+           the same line (.m-number, .display-name) are mixed-case with tight/negative
+           tracking — the all-caps + wide tracking read as a visually different typeface
+           even though all three share the same font-family. Dropped the transform/tracking
+           so the whole line reads as one consistent font treatment. */
         .m-type {
             font-size: 0.85rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .separator {
@@ -45,9 +48,6 @@
 }
 
 .status-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--glass-border);
 }
@@ -83,7 +83,7 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: var(--accent-color);
+    color: var(--accent-text);
     margin-bottom: 1.5rem;
     border-left: 3px solid var(--accent-color);
     padding-left: 1rem;
@@ -116,28 +116,11 @@
         color: var(--text-muted);
     }
 
-    .remove-photo-btn {
+    .icon-btn {
         position: absolute;
         bottom: -5px;
         right: -5px;
-        background: var(--danger-color);
-        color: white;
-        border: none;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 14px;
-        box-shadow: var(--shadow-sm);
         z-index: 10;
-        
-        &:hover {
-            transform: scale(1.1);
-            background: #ff0000;
-        }
     }
 }
 
@@ -211,7 +194,7 @@
         font-weight: 900;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: var(--accent-color);
+        color: var(--accent-text);
         opacity: 0.8;
         min-width: 120px;
     }

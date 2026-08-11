@@ -23,7 +23,6 @@ namespace GHCAA.Tests.Workflows
         private FinancialService _financialService;
         private Mock<IEmailService> _emailMock;
         private Mock<IFileStorageService> _storageMock;
-        private Mock<IFileUploadRepository> _fileRepoMock;
         private Mock<IOtpService> _otpMock;
         private Mock<INotificationService> _notificationMock;
         private Mock<IActivityService> _activityMock;
@@ -35,7 +34,7 @@ namespace GHCAA.Tests.Workflows
         {
             _emailMock = new Mock<IEmailService>();
             _storageMock = new Mock<IFileStorageService>();
-            _fileRepoMock = new Mock<IFileUploadRepository>();
+
             _otpMock = new Mock<IOtpService>();
             _notificationMock = new Mock<INotificationService>();
             _activityMock = new Mock<IActivityService>();
@@ -45,22 +44,44 @@ namespace GHCAA.Tests.Workflows
             var loggerMock = new Mock<ILogger<MemberService>>();
 
             var configMock = new Mock<IConfiguration>();
+            var gamificationMock = new Mock<IGamificationService>();
+
+            var realTimeMock = new Mock<IRealTimeService>();
+            var financialLoggerMock = new Mock<ILogger<FinancialService>>();
+
+            var orgConfigMock = new Mock<IOrgConfigService>();
+
+            _financialService = new FinancialService(
+                _context,
+                _commMock.Object,
+                _notificationMock.Object,
+                _storageMock.Object,
+                realTimeMock.Object,
+                financialLoggerMock.Object,
+                configMock.Object,
+                _userServiceMock.Object,
+                _activityMock.Object,
+                gamificationMock.Object,
+                orgConfigMock.Object,
+                new Mock<IServiceProvider>().Object);
 
             _memberService = new MemberService(
-                _context, 
+                _context,
                 _storageMock.Object,
-                _fileRepoMock.Object,
                 _otpMock.Object,
                 _emailMock.Object,
-                _userServiceMock.Object, 
-                _commMock.Object, 
+                _userServiceMock.Object,
+                _commMock.Object,
                 loggerMock.Object,
                 _activityMock.Object,
                 _notificationMock.Object,
-                configMock.Object);
+                configMock.Object,
+                gamificationMock.Object,
+                _financialService,
+                realTimeMock.Object,
+                orgConfigMock.Object);
 
-            _eventService = new EventService(_context, _commMock.Object, _storageMock.Object);
-            _financialService = new FinancialService(_context, _commMock.Object, _notificationMock.Object);
+            _eventService = new EventService(_context, _commMock.Object, _storageMock.Object, gamificationMock.Object, _notificationMock.Object);
         }
 
         [Test]
@@ -73,26 +94,20 @@ namespace GHCAA.Tests.Workflows
                 Email = "workflow@example.com",
                 MobileNo = "01711111111",
                 NID = "1234567890",
-                Gender = "Male",
-                BloodGroup = "APositive",
+                Gender = GHCAA.Domain.Enums.Gender.Male,
+                BloodGroup = GHCAA.Domain.Enums.BloodGroup.APositive,
                 FatherName = "Father",
                 MotherName = "Mother",
                 DateOfBirth = DateTime.UtcNow.AddYears(-20),
                 EmergencyContactName = "Emergency",
                 EmergencyContactRelation = "Sibling",
                 EmergencyContactPhone = "01700000000",
-                HighestCertificate = "HSC",
-                HighestCertificateGroup = "Science",
-                HighestCertificateSubject = "General",
-                HighestCertificatePassingYear = 2020,
-                GHCLastCertificate = "HSC",
-                GHCLastCertificateGroup = "Science",
-                GHCLastCertificateSubject = "General",
-                GHCLastCertificatePassingYear = 2020,
-                ProfessionalSector = "IT",
-                Designation = "Developer",
                 PresentAddress = "Dhaka",
-                PermanentAddress = "Dhaka"
+                PermanentAddress = "Dhaka",
+                AcademicHistory = new List<AcademicRecordDto>
+                {
+                    new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2020, IsGHC = true }
+                }
             };
 
             var regId = await _memberService.RegisterAsync(regDto, null, null, null, CancellationToken.None);
@@ -101,10 +116,26 @@ namespace GHCAA.Tests.Workflows
             var member = _context.Members.First(m => m.Email == "workflow@example.com");
             Assert.That(member.Status, Is.EqualTo(Enums.MembershipStatus.Applied));
 
+            // Satisfy strict approval gates: Profile Complete & Payment Completed
+            member.IsProfileComplete = true;
+            member.PhotoPath = "/uploads/test.jpg";
+            member.ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "Test Org", Designation = "Developer", StartDate = new DateTime(2015, 1, 1), IsCurrent = true } };
+            _context.PaymentHistories.Add(new PaymentHistory
+            {
+                MemberId = member.Id,
+                TransactionId = "TRX-TEST-001",
+                Amount = 500,
+                PaidAt = DateTime.UtcNow,
+                Status = Enums.PaymentStatus.Completed,
+                FinancialCategory = Enums.FinancialCategory.RegistrationFee,
+                PaymentMethod = Enums.PaymentMethod.BKash
+            });
+            await _context.SaveChangesAsync();
+
             // 2. Admin Approves Member
             var approveResult = await _memberService.ApproveMemberAsync(member.Id, 1, CancellationToken.None);
             Assert.That(approveResult.MembershipNumber, Is.Not.Null);
-            
+
             _context.Entry(member).Reload();
             Assert.That(member.Status, Is.EqualTo(Enums.MembershipStatus.Active));
 
@@ -114,7 +145,8 @@ namespace GHCAA.Tests.Workflows
                 Title = "Annual Picnic",
                 Description = "A fun day out for all alumni",
                 Location = "Dhaka City Park",
-                Date = DateTime.UtcNow.AddDays(30),
+                StartDate = DateTime.UtcNow.AddDays(30),
+                EndDate = DateTime.UtcNow.AddDays(31),
                 RegistrationFee = 500,
                 IsActive = true
             };
@@ -136,7 +168,7 @@ namespace GHCAA.Tests.Workflows
             Assert.That(approveReg, Is.True);
 
             var finalReg = _context.EventRegistrations.Find(eventReg.Id);
-            Assert.That(finalReg.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
+            Assert.That(finalReg!.Status, Is.EqualTo(Enums.EventRegistrationStatus.Approved));
         }
     }
 }

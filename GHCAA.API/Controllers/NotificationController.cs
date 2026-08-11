@@ -1,12 +1,12 @@
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/notifications")]
+    [Route("api/notification")]
     [Authorize]
     public class NotificationController : ControllerBase
     {
@@ -22,31 +22,14 @@ namespace GHCAA.API.Controllers
         {
             try
             {
-                var memberIdStr = User.FindFirst("MemberId")?.Value;
-                int userId = 0;
+                if (!TryGetMemberId(out var memberId))
+                    return Unauthorized(new { message = "Member profile is required for notifications." });
 
-                if (!string.IsNullOrEmpty(memberIdStr) && int.TryParse(memberIdStr, out var mid))
-                {
-                    userId = mid;
-                }
-                else
-                {
-                    // Fallback: If no MemberId claim, this user might not have a member profile
-                    // We check NameIdentifier which is the User.Id
-                    var nameIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                    if (string.IsNullOrEmpty(nameIdStr) || !int.TryParse(nameIdStr, out var uid))
-                    {
-                        return Unauthorized();
-                    }
-                    userId = uid; 
-                }
-
-                var notifications = await _notificationService.GetUserNotificationsAsync(userId, cancellationToken);
+                var notifications = await _notificationService.GetUserNotificationsAsync(memberId, cancellationToken);
                 return Ok(notifications);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[NotificationController] Error in GetMyNotifications: {ex.Message}");
                 return StatusCode(500, new { message = "Error fetching notifications", details = ex.Message });
             }
         }
@@ -54,18 +37,30 @@ namespace GHCAA.API.Controllers
         [HttpPost("{id}/read")]
         public async Task<IActionResult> MarkAsRead(int id, CancellationToken cancellationToken)
         {
-            await _notificationService.MarkAsReadAsync(id, cancellationToken);
+            if (!TryGetMemberId(out var memberId))
+                return Unauthorized();
+
+            var updated = await _notificationService.MarkAsReadAsync(id, memberId, cancellationToken);
+            if (!updated)
+                return NotFound();
             return Ok();
         }
 
         [HttpPost("read-all")]
         public async Task<IActionResult> MarkAllAsRead(CancellationToken cancellationToken)
         {
-            var userIdStr = User.FindFirst("MemberId")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out var userId)) return Unauthorized();
+            if (!TryGetMemberId(out var memberId))
+                return Unauthorized();
 
-            await _notificationService.MarkAllAsReadAsync(userId, cancellationToken);
+            await _notificationService.MarkAllAsReadAsync(memberId, cancellationToken);
             return Ok();
+        }
+
+        private bool TryGetMemberId(out int memberId)
+        {
+            memberId = 0;
+            var memberIdStr = User.FindFirst("MemberId")?.Value;
+            return !string.IsNullOrEmpty(memberIdStr) && int.TryParse(memberIdStr, out memberId);
         }
     }
 }

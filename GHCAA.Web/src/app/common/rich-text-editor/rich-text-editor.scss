@@ -1,0 +1,16 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.rich-text-editor-quill {
+  width: 100%;
+  background: var(--bg-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.rich-text-editor-fallback {
+  width: 100%;
+  resize: vertical;
+}

@@ -107,4 +107,38 @@ export class EventsService {
     sendInvitationEmail(registrationId: number): Observable<any> {
         return this.http.post(`${this.apiUrl}/admin/registrations/${registrationId}/send-invitation`, {});
     }
+
+    // --- Operations (Tasks & Budget) ---
+
+    getEventTasks(eventId: number): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/admin/${eventId}/tasks`);
+    }
+
+    createTask(dto: any): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/admin/tasks`, dto);
+    }
+
+    toggleTask(taskId: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/tasks/${taskId}/toggle`, {});
+    }
+
+    deleteTask(taskId: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/admin/tasks/${taskId}`);
+    }
+
+    getEventBudget(eventId: number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/admin/${eventId}/budget`);
+    }
+
+    updateBudget(dto: any): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/budget`, dto);
+    }
+
+    addExpense(dto: any): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/admin/expenses`, dto);
+    }
+
+    deleteExpense(expenseId: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/admin/expenses/${expenseId}`);
+    }
 }

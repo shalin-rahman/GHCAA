@@ -4,12 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, getCurrentECPosition, getAcademicYears, PROFESSIONAL_SECTORS, getBloodGroupName } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, getAcademicYears, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBER_CATEGORY_OPTIONS } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
     selector: 'app-directory',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective],
     templateUrl: './directory.html',
     styleUrl: './directory.scss'
 })
@@ -33,11 +35,12 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
 
     years: number[] = getAcademicYears();
     sectors = PROFESSIONAL_SECTORS;
+    memberCategories = MEMBER_CATEGORY_OPTIONS;
     selectedMember = signal<any | null>(null);
 
-    getMajorDisplay(degree: string | undefined, group: string | undefined, subject: string | undefined): string {
+    getMajorDisplay(degree: string | undefined, subject: string | undefined): string {
         if (!degree) return '';
-        const major = degree === 'HSC' ? (group || 'None') : (subject || 'None');
+        const major = subject || 'None';
         return major && major !== 'None' ? `in ${major}` : '';
     }
 
@@ -56,7 +59,9 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
         query: '',
         year: null as number | null,
         sector: '',
-        bloodGroup: ''
+        bloodGroup: '',
+        category: '' as any,
+        membershipType: ''
     };
 
     ngOnInit() {
@@ -124,6 +129,8 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
                 passingYear: this.filters.year || undefined,
                 professionalSector: this.filters.sector || undefined,
                 bloodGroup: this.filters.bloodGroup || undefined,
+                category: this.filters.category || undefined,
+                membershipType: this.filters.membershipType || undefined,
                 page,
                 pageSize: this.PAGE_SIZE
             };

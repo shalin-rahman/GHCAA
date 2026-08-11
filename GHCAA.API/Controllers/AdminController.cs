@@ -1,8 +1,10 @@
+using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GHCAA.API.Controllers
 {
@@ -13,18 +15,36 @@ namespace GHCAA.API.Controllers
     {
         private readonly IMemberService _memberService;
         private readonly IIDCardService _idCardService;
+        private readonly IFileValidationService _fileValidationService;
 
-        public AdminController(IMemberService memberService, IIDCardService idCardService)
+        public AdminController(IMemberService memberService, IIDCardService idCardService, IFileValidationService fileValidationService)
         {
             _memberService = memberService;
             _idCardService = idCardService;
+            _fileValidationService = fileValidationService;
         }
 
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats(CancellationToken cancellationToken)
         {
-            var stats = await _memberService.GetDashboardStatsAsync(cancellationToken);
+            var isPrivileged = User.IsInRole("SuperAdmin");
+            var stats = await _memberService.GetDashboardStatsAsync(isPrivileged, cancellationToken);
             return Ok(stats);
+        }
+
+        [HttpGet("analytics")]
+        public async Task<IActionResult> GetAnalytics(CancellationToken cancellationToken)
+        {
+            var isPrivileged = User.IsInRole("SuperAdmin");
+            var stats = await _memberService.GetDashboardStatsAsync(isPrivileged, cancellationToken);
+            return Ok(stats);
+        }
+
+        [HttpPost("sync-members")]
+        public async Task<IActionResult> SyncMembers(CancellationToken cancellationToken)
+        {
+            var count = await _memberService.SyncAlumniAsync(cancellationToken);
+            return Ok(new { Message = $"Successfully synchronized {count} alumni.", Count = count });
         }
 
         [HttpGet("members")]
@@ -33,7 +53,9 @@ namespace GHCAA.API.Controllers
             [FromQuery] int pageSize = 10,
             [FromQuery] string searchQuery = "",
             [FromQuery] string statusFilter = "all",
-            [FromQuery] bool includeArchived = false, 
+            [FromQuery] string categoryFilter = "all",
+            [FromQuery] string membershipTypeFilter = "all",
+            [FromQuery] bool includeArchived = false,
             CancellationToken cancellationToken = default)
         {
             // Standard Admins cannot see archived records
@@ -43,7 +65,7 @@ namespace GHCAA.API.Controllers
             }
 
             var isPrivileged = User.IsInRole("SuperAdmin");
-            var result = await _memberService.GetAllMembersAsync(page, pageSize, searchQuery, statusFilter, includeArchived, isPrivileged, cancellationToken);
+            var result = await _memberService.GetAllMembersAsync(page, pageSize, searchQuery, statusFilter, categoryFilter, membershipTypeFilter, includeArchived, isPrivileged, cancellationToken);
             return Ok(result);
         }
 
@@ -67,14 +89,18 @@ namespace GHCAA.API.Controllers
         [HttpPost("members/{id}/approve")]
         public async Task<IActionResult> ApproveMember(int id, [FromBody] ApproveMemberDto dto, CancellationToken cancellationToken)
         {
+            // 24.51: Read admin identity from the JWT claim, not the request body.
+            if (!int.TryParse(User.FindFirst("MemberId")?.Value, out var adminMemberId))
+                return Unauthorized();
+
             try
             {
-                var result = await _memberService.ApproveMemberAsync(id, dto.ApprovedByAdminId, cancellationToken);
-                return Ok(new 
-                { 
-                    Message = "Member approved successfully", 
+                var result = await _memberService.ApproveMemberAsync(id, adminMemberId, cancellationToken);
+                return Ok(new
+                {
+                    Message = "Member approved successfully. Login credentials have been emailed to the member.",
                     MembershipNumber = result.MembershipNumber,
-                    DefaultPassword = result.DefaultPassword
+                    PasswordEmailed = true
                 });
             }
             catch (KeyNotFoundException ex)
@@ -90,9 +116,13 @@ namespace GHCAA.API.Controllers
         [HttpPost("members/{id}/reject")]
         public async Task<IActionResult> RejectMember(int id, [FromBody] RejectMemberDto dto, CancellationToken cancellationToken)
         {
+            // 24.51: Read admin identity from the JWT claim, not the request body.
+            if (!int.TryParse(User.FindFirst("MemberId")?.Value, out var adminMemberId))
+                return Unauthorized();
+
             try
             {
-                var success = await _memberService.RejectMemberAsync(id, dto.RejectedByAdminId, dto.Reason, cancellationToken);
+                var success = await _memberService.RejectMemberAsync(id, adminMemberId, dto.Reason, cancellationToken);
                 if (!success) return NotFound();
                 return Ok(new { Message = "Application rejected and user notified." });
             }
@@ -109,6 +139,14 @@ namespace GHCAA.API.Controllers
             var success = await _memberService.ArchiveMemberAsync(id, cancellationToken);
             if (!success) return NotFound();
             return Ok(new { Message = "Member archived successfully" });
+        }
+
+        [HttpPost("members/bulk-archive-inactive")]
+        [Authorize(Policy = "SuperAdminOnly")]
+        public async Task<IActionResult> BulkArchiveInactive(CancellationToken cancellationToken)
+        {
+            var count = await _memberService.BulkArchiveInactiveMembersAsync(cancellationToken);
+            return Ok(new { Message = $"Successfully bulk-archived {count} inactive members.", ArchivedCount = count });
         }
 
         [HttpPost("members/{id}/restore")]
@@ -131,8 +169,14 @@ namespace GHCAA.API.Controllers
         [HttpPut("members/{id}")]
         public async Task<IActionResult> UpdateMemberAdmin(int id, [FromBody] AdminMemberUpdateDto dto, CancellationToken cancellationToken)
         {
+            var adminIdClaim = User.FindFirst("MemberId")?.Value;
+            if (string.IsNullOrEmpty(adminIdClaim) || !int.TryParse(adminIdClaim, out var adminId))
+            {
+                return Unauthorized();
+            }
+
             // Admins can update all membership information
-            var success = await _memberService.AdminUpdateMemberAsync(id, dto, cancellationToken);
+            var success = await _memberService.AdminUpdateMemberAsync(id, dto, adminId, cancellationToken);
             if (!success) return NotFound();
             return Ok(new { Message = "Member updated by admin successfully" });
         }
@@ -140,10 +184,21 @@ namespace GHCAA.API.Controllers
         [HttpPost("members/{id}/photo")]
         public async Task<IActionResult> UpdateMemberPhoto(int id, IFormFile photo, CancellationToken cancellationToken)
         {
-            if (photo == null || photo.Length == 0) return BadRequest(new { Message = "No file provided." });
+            var validation = _fileValidationService.ValidateFormFile(photo, FileCategory.Image, 5 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
             var dto = new UploadedFileDto { FileName = photo.FileName, Length = photo.Length, Content = photo.OpenReadStream() };
             var path = await _memberService.UpdateMemberPhotoAsync(id, dto, cancellationToken);
             return Ok(new { Message = "Photo updated.", PhotoPath = path });
+        }
+
+        [HttpPost("members/{id}/signature")]
+        public async Task<IActionResult> UpdateMemberSignature(int id, IFormFile signature, CancellationToken cancellationToken)
+        {
+            var validation = _fileValidationService.ValidateFormFile(signature, FileCategory.Image, 2 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+            var dto = new UploadedFileDto { FileName = signature.FileName, Length = signature.Length, Content = signature.OpenReadStream() };
+            var path = await _memberService.UpdateMemberSignatureAsync(id, dto, cancellationToken);
+            return Ok(new { Message = "Signature updated.", SignaturePath = path });
         }
 
         [HttpPatch("members/{id}/documents")]
@@ -152,6 +207,9 @@ namespace GHCAA.API.Controllers
             UploadedFileDto? certFile = null;
             if (certificate != null)
             {
+                var certValidation = _fileValidationService.ValidateFormFile(certificate, FileCategory.Document, 10 * 1024 * 1024);
+                if (!certValidation.IsValid) return BadRequest(new { Message = certValidation.ErrorMessage });
+
                 certFile = new UploadedFileDto
                 {
                     FileName = certificate.FileName,
@@ -163,6 +221,9 @@ namespace GHCAA.API.Controllers
             UploadedFileDto? payFile = null;
             if (paymentProof != null)
             {
+                var payValidation = _fileValidationService.ValidateFormFile(paymentProof, FileCategory.Document, 10 * 1024 * 1024);
+                if (!payValidation.IsValid) return BadRequest(new { Message = payValidation.ErrorMessage });
+
                 payFile = new UploadedFileDto
                 {
                     FileName = paymentProof.FileName,
@@ -183,14 +244,24 @@ namespace GHCAA.API.Controllers
             return Ok(new { DataUri = dataUri });
         }
 
+        [HttpGet("members/{id}/id-card/pdf")]
+        public async Task<IActionResult> GetMemberIDCardPdf(int id, CancellationToken cancellationToken)
+        {
+            var pdfBytes = await _idCardService.GenerateIDCardPdfAsync(id, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"ID_Card_{id}.pdf");
+        }
+
         [HttpPost("members/{id}/reset-password-admin")]
         public async Task<IActionResult> ResetPasswordAdmin(int id, CancellationToken cancellationToken)
         {
             try
             {
-                var success = await _memberService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
-                if (!success) return NotFound(new { Message = "Member or user account not found. Please ensure the member is approved and active." });
-                return Ok(new { Message = "Password reset link sent to the member's registered email." });
+                var result = await _memberService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
+                if (!result.Success) return NotFound(new { Message = "Member or user account not found. Please ensure the member is approved and active." });
+                return Ok(new
+                {
+                    Message = "Password reset link has been sent to the member's registered email address."
+                });
             }
             catch (Exception ex)
             {
@@ -203,6 +274,13 @@ namespace GHCAA.API.Controllers
         {
             var dataUri = await _idCardService.GenerateCertificateDataUriAsync(id, cancellationToken);
             return Ok(new { DataUri = dataUri });
+        }
+
+        [HttpGet("members/{id}/certificate/pdf")]
+        public async Task<IActionResult> GetMemberCertificatePdf(int id, CancellationToken cancellationToken)
+        {
+            var pdfBytes = await _idCardService.GenerateCertificatePdfAsync(id, cancellationToken);
+            return File(pdfBytes, "application/pdf", $"Certificate_{id}.pdf");
         }
 
         [HttpGet("contact-messages")]

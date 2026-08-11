@@ -62,12 +62,21 @@
     justify-content: center;
     font-size: 2.5rem;
     font-weight: 800;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+    }
 }
 
 .position-badge {
     display: inline-block;
-    background: var(--surface-color);
-    color: var(--primary-color);
+    background: rgba(var(--accent-color-rgb), 0.1);
+    color: var(--accent-text);
     padding: 0.25rem 0.75rem;
     border-radius: 4px;
     font-size: 0.7rem;
@@ -85,7 +94,7 @@
 
 .batch {
     font-size: 0.85rem;
-    color: var(--accent-color);
+    color: var(--accent-text);
     font-weight: 700;
     margin: 0.25rem 0;
 }
@@ -120,7 +129,7 @@
 }
 
 .pillar-card h4 {
-    color: var(--primary-color);
+    color: var(--accent-text);
     margin-bottom: 0.75rem;
 }
 

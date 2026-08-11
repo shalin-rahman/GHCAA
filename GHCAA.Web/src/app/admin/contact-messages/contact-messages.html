@@ -1,15 +1,19 @@
 <div class="admin-feature">
-    <header class="page-header">
-        <div class="header-text">
-            <h2>Portal Enquiries</h2>
-            <small>Manage contact submissions and assistance requests from members and public.</small>
-        </div>
-        <button class="btn btn-secondary btn-sm" (click)="loadMessages()">🔄 Refresh</button>
-    </header>
+    <app-page-header title="Portal Enquiries" [total]="messages().length"
+        emptySubtitle="Member and visitor enquiries">
+        <small subtitle>Showing {{ filteredMessages().length }} of {{ messages().length }} enquiries</small>
+        <button actions class="btn btn-secondary btn-sm" (click)="loadMessages()">🔄 Refresh</button>
+    </app-page-header>
+
+    <!-- Search Bar -->
+    <div class="filter-bar">
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search by name, email or subject…"></app-search-bar>
+    </div>
 
     @if (loading()) {
     <div class="loading-state glass-card py-20 text-center">
-        <div class="spinner mx-auto mb-4"></div>
+        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
         <p>Loading enquiries...</p>
     </div>
     } @else {
@@ -24,7 +28,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (msg of messages(); track msg.id) {
+                @for (msg of filteredMessages(); track msg.id) {
                 <tr [class.unread]="!msg.isRead">
                     <td>
                         <div class="sender-info">
@@ -33,16 +37,17 @@
                         </div>
                     </td>
                     <td>
-                        <span class="badge" [class.badge-accent]="msg.subject?.includes('Help')">{{ msg.subject }}</span>
+                        <span class="badge" [class.badge-accent]="msg.subject?.includes('Help')">{{ msg.subject
+                            }}</span>
                     </td>
-                    <td>{{ msg.createdAt | date:'short' }}</td>
+                    <td>{{ msg.createdAt | date:'dd-MM-yyyy' }}</td>
                     <td>
                         <button class="btn btn-secondary btn-sm" (click)="viewMessage(msg)">View Detail</button>
                     </td>
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="4" class="py-20 text-center italic opacity-40">No enquiries found.</td>
+                    <td colspan="4" class="py-20 text-center italic opacity-40">{{ searchQuery() ? 'No enquiries match your search.' : 'No enquiries found.' }}</td>
                 </tr>
                 }
             </tbody>
@@ -70,7 +75,7 @@
                 </div>
                 <div class="row">
                     <span class="label">Date:</span>
-                    <span class="val">{{ selectedMessage().createdAt | date:'medium' }}</span>
+                    <span class="val">{{ selectedMessage().createdAt | date:'dd-MM-yyyy' }}</span>
                 </div>
             </div>
             <div class="msg-content p-6 glass-card bg-white/5 border border-white/5 whitespace-pre-wrap">

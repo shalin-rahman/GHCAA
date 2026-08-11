@@ -1,19 +1,21 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { EventsService } from '../../core/services/events.service';
-import { AlumniEvent, EventRegistration } from '../../core/models/business.models';
+import { AlumniEvent, EventRegistration, PaymentGateway } from '../../core/models/business.models';
 import { AuthService } from '../../core/services/auth.service';
-import { PaymentMethodSelectorComponent } from '../../common/payment-method-selector/payment-method-selector.component';
+import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
 import { PaymentConfig, PaymentConfigService } from '../../core/services/payment-config.service';
-import { GatewaysService, PaymentGateway } from '../../core/services/gateways.service';
+import { GatewaysService } from '../../core/services/gateways.service';
 import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
+import { FinancialService } from '../../core/services/financial.service';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, PaymentMethodSelectorComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PaymentPortalComponent, ImgFallbackDirective],
   templateUrl: './events.html',
   styleUrl: './events.scss'
 })
@@ -24,10 +26,26 @@ export class Events implements OnInit {
   private route = inject(ActivatedRoute);
   private gatewaysService = inject(GatewaysService);
   private notify = inject(NotificationService);
+  private finService = inject(FinancialService);
 
   events = signal<AlumniEvent[]>([]);
   activeTab = signal<'upcoming' | 'my-registrations'>('upcoming');
   myRegistrations = signal<EventRegistration[]>([]);
+
+  // 30.26: holds a deep-linked event (from /events/:id or ?eventId=) until the auth service has
+  // finished restoring the session (see AuthService.authChecked). Without this gate, a genuine
+  // member landing here via a fresh page load could get misidentified as a guest — and bounced
+  // to /login — because openRegisterModal()'s isGuest() check ran before the async /auth/me
+  // session-restore call had resolved (a real race between two independent HTTP calls).
+  private pendingDeepLinkEvent = signal<AlumniEvent | null>(null);
+  private deepLinkEffect = effect(() => {
+    const ev = this.pendingDeepLinkEvent();
+    if (ev && this.auth.authChecked()) {
+      this.pendingDeepLinkEvent.set(null);
+      // Slight delay ensures the UI has fully transitioned before opening the modal
+      setTimeout(() => this.openRegisterModal(ev), 150);
+    }
+  });
 
   // Modal & Form State
   showModal = signal<boolean>(false);
@@ -44,6 +62,8 @@ export class Events implements OnInit {
   activeParticipantEventId = signal<number | null>(null);
   loadingParticipants = signal<boolean>(false);
   formError = signal<string | null>(null);
+  saveMethodRequested = signal<boolean>(false);
+  saveMethodLabel = signal<string>('');
 
   regForm = this.fb.group({
     paymentReference: ['', [Validators.required, Validators.minLength(4)]],
@@ -70,8 +90,8 @@ export class Events implements OnInit {
         if (targetEventId) {
             const ev = data.find(e => e.id.toString() === targetEventId);
             if (ev) {
-                // Slight delay ensures the UI has fully transitioned before opening the modal
-                setTimeout(() => this.openRegisterModal(ev), 150);
+                // Defer to the effect above until auth state is confirmed (see 30.26 note).
+                this.pendingDeepLinkEvent.set(ev);
             }
         }
       },
@@ -143,7 +163,7 @@ export class Events implements OnInit {
     }
   }
 
-  onPaymentMethodSelected(method: PaymentConfig) {
+  onPaymentMethodSelected(method: any) {
     this.selectedPaymentMethod.set(method);
     if (method.requiresReference) {
       this.regForm.get('paymentReference')?.setValidators([Validators.required, Validators.minLength(4)]);
@@ -152,6 +172,19 @@ export class Events implements OnInit {
     }
     this.regForm.get('paymentReference')?.updateValueAndValidity();
     this.regForm.updateValueAndValidity();
+  }
+
+  onReferenceChange(ref: string) {
+    this.regForm.get('paymentReference')?.setValue(ref);
+  }
+
+  onReceiptSelected(file: File) {
+    this.selectedFile = file;
+  }
+
+  onSaveRequested(data: {save: boolean, label: string}) {
+    this.saveMethodRequested.set(data.save);
+    this.saveMethodLabel.set(data.label);
   }
 
   submitRegistration() {
@@ -205,13 +238,23 @@ export class Events implements OnInit {
         if (this.selectedPaymentMethod()?.isOnline) {
           this.initiateGateway(ev, ref);
         } else {
+          // If user requested to save this manual method for future
+          if (this.saveMethodRequested() && this.selectedPaymentMethod()) {
+              const m = this.selectedPaymentMethod()!;
+              this.finService.addSavedMethod({
+                  displayName: this.saveMethodLabel() || m.displayName,
+                  method: m.method || m.displayName,
+                  accountNumber: '' // Leave empty for manual hints or add logic
+              }).subscribe();
+          }
+
           this.notify.success('Project participation received! Wait for registry approval.');
           this.isSubmitting.set(false);
           this.closeModal();
           this.loadMyRegistrations();
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error(err);
         this.formError.set(err.error?.message || 'Registration failed. Please check your inputs.');
         this.isSubmitting.set(false);
@@ -220,7 +263,11 @@ export class Events implements OnInit {
   }
 
   public initiateGateway(ev: AlumniEvent, ref: string) {
-    const gateway = this.selectedPaymentMethod()?.method === 'SSLCommerz' ? PaymentGateway.SSLCommerz : PaymentGateway.Bkash;
+    const gatewayStr = this.selectedPaymentMethod()?.gateway;
+    const gateway = (gatewayStr && PaymentGateway[gatewayStr as keyof typeof PaymentGateway] !== undefined) 
+      ? PaymentGateway[gatewayStr as keyof typeof PaymentGateway] 
+      : PaymentGateway.None;
+      
     const amountToCharge = ev.registrationFee || this.regForm.value.contributionAmount || 0;
 
     const user = this.auth.currentUser();
@@ -254,8 +301,10 @@ export class Events implements OnInit {
 
   isRegistrationOpen(ev: AlumniEvent): boolean {
     if (!ev.isActive) return false;
-    if (!ev.registrationDeadline) return true;
-    return new Date(ev.registrationDeadline) > new Date();
+    const now = new Date();
+    if (ev.registrationStartDate && new Date(ev.registrationStartDate) > now) return false;
+    if (ev.registrationEndDate && new Date(ev.registrationEndDate) < now) return false;
+    return true;
   }
 
   askAdmin(ev: AlumniEvent) {
@@ -284,8 +333,10 @@ export class Events implements OnInit {
   }
 
   getCalendarLink(ev: AlumniEvent): string {
-    const start = new Date(ev.date).toISOString().replace(/-|:|\.\d+/g, '');
-    const end = new Date(new Date(ev.date).getTime() + 7200000).toISOString().replace(/-|:|\.\d+/g, ''); // 2h default
+    const start = new Date(ev.startDate).toISOString().replace(/-|:|\.\d+/g, '');
+    const end = ev.endDate
+      ? new Date(ev.endDate).toISOString().replace(/-|:|\.\d+/g, '')
+      : new Date(new Date(ev.startDate).getTime() + 7200000).toISOString().replace(/-|:|\.\d+/g, '');
     return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.title)}&dates=${start}/${end}&details=${encodeURIComponent(ev.description)}&location=${encodeURIComponent(ev.location)}`;
   }
 

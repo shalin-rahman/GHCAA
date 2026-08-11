@@ -3,12 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { getECPositionName, getECPositionForPeriod } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
+import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
 @Component({
     // ... (rest of metadata)
     selector: 'app-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, ImgFallbackDirective],
     templateUrl: './governance.html',
     styleUrl: './governance.scss'
 })
@@ -26,10 +28,14 @@ export class Governance implements OnInit {
     }
 
     loadPeriods() {
-        this.networkService.getPeriods().subscribe(p => {
-            this.periods.set(p);
-            const active = p.find(x => x.isActive);
-            if (active) this.selectedPeriodId.set(active.id);
+        // 29F.2: surface HTTP failures instead of failing silently
+        this.networkService.getPeriods().subscribe({
+            next: p => {
+                this.periods.set(p);
+                const active = p.find(x => x.isActive);
+                if (active) this.selectedPeriodId.set(active.id);
+            },
+            error: err => console.error('Failed to load governance periods', err)
         });
     }
 
@@ -66,10 +72,8 @@ export class Governance implements OnInit {
         });
     }
 
-    getMajorDisplay(degree: string | undefined, group: string | undefined, subject: string | undefined): string {
-        if (!degree) return '';
-        const major = degree === 'HSC' ? (group || 'None') : (subject || 'None');
-        return major && major !== 'None' ? `in ${major}` : '';
+    getMajorDisplay(degree: string | undefined, subject: string | undefined): string {
+        return subject && subject !== 'None' ? `in ${subject}` : '';
     }
 
     getPositionName(member: any): string {

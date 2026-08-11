@@ -30,4 +30,7 @@ export class JobService {
         return this.http.put(`${this.apiUrl}/${id}`, job);
     }
 
+    deleteJob(id: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/${id}`);
+    }
 }

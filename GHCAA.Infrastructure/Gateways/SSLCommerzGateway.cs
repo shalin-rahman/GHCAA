@@ -3,10 +3,13 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GHCAA.Infrastructure.Gateways
 {
@@ -32,14 +35,18 @@ namespace GHCAA.Infrastructure.Gateways
             var config = await _db.PaymentConfigurations
                 .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled, cancellationToken);
 
-            if (config == null) 
+            if (config == null)
                 return new PaymentGatewayResponseDto { Success = false, Message = "SSLCommerz configuration not found or disabled." };
 
             var storeId = config.GatewayPublicKey;
             var storePass = config.GatewaySecretKey;
-            
+
             var isSandbox = config.IsSandbox;
-            var url = isSandbox ? "https://sandbox.sslcommerz.com/gwprocess/v4/api.php" : "https://securepay.sslcommerz.com/gwprocess/v4/api.php";
+            var sandboxUrl = _config["PaymentGateways:SSLCommerz:SandboxUrl"] ?? "https://sandbox.sslcommerz.com";
+            var prodUrl = _config["PaymentGateways:SSLCommerz:ProductionUrl"] ?? "https://securepay.sslcommerz.com";
+            var url = isSandbox
+                ? $"{sandboxUrl.TrimEnd('/')}/gwprocess/v4/api.php"
+                : $"{prodUrl.TrimEnd('/')}/gwprocess/v4/api.php";
 
             var formData = new Dictionary<string, string>
             {
@@ -70,9 +77,9 @@ namespace GHCAA.Infrastructure.Gateways
 
                 if (result?.status == "SUCCESS")
                 {
-                    return new PaymentGatewayResponseDto 
-                    { 
-                        Success = true, 
+                    return new PaymentGatewayResponseDto
+                    {
+                        Success = true,
                         GatewayUrl = result.GatewayPageURL,
                         TransactionId = formData["tran_id"]
                     };
@@ -87,22 +94,53 @@ namespace GHCAA.Infrastructure.Gateways
             }
         }
 
+        // 24.11: Verify SSLCommerz verify_sign. Algorithm: sort all fields except verify_sign and
+        // verify_sign_sha2 alphabetically, concatenate values with '&', append store_passwd, MD5 the result.
+        private static bool VerifySign(IDictionary<string, string> data, string storePass)
+        {
+            if (!data.TryGetValue("verify_sign", out var expectedSign) || string.IsNullOrEmpty(expectedSign))
+                return false;
+
+            var sortedValues = data.Keys
+                .Where(k => k != "verify_sign" && k != "verify_sign_sha2")
+                .OrderBy(k => k)
+                .Select(k => data[k]);
+
+            var sb = new StringBuilder();
+            foreach (var v in sortedValues)
+                sb.Append(v).Append('&');
+            sb.Append(storePass);
+
+            var hash = MD5.HashData(Encoding.UTF8.GetBytes(sb.ToString()));
+            var computed = Convert.ToHexString(hash).ToLowerInvariant();
+            return computed == expectedSign.ToLowerInvariant();
+        }
+
         public async Task<bool> VerifyCallbackAsync(IDictionary<string, string> callbackData, CancellationToken cancellationToken = default)
         {
             if (!callbackData.ContainsKey("status") || callbackData["status"] != "VALID") return false;
-            
+
             var valId = callbackData.TryGetValue("val_id", out var v) ? v : "";
             if (string.IsNullOrEmpty(valId)) return false;
 
             var config = await _db.PaymentConfigurations
                 .FirstOrDefaultAsync(p => p.Gateway == GatewayType && p.IsEnabled, cancellationToken);
-            
+
             if (config == null) return false;
 
+            // 24.11: Verify the HMAC signature before trusting any val_id or amount in the callback.
+            if (!VerifySign(callbackData, config.GatewaySecretKey ?? string.Empty))
+            {
+                _logger.LogWarning("SSLCommerz callback rejected: verify_sign mismatch");
+                return false;
+            }
+
             var isSandbox = config.IsSandbox;
-            var validationUrl = isSandbox 
-                ? $"https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id={valId}&store_id={config.GatewayPublicKey}&store_passwd={config.GatewaySecretKey}&format=json"
-                : $"https://securepay.sslcommerz.com/validator/api/validationserverAPI.php?val_id={valId}&store_id={config.GatewayPublicKey}&store_passwd={config.GatewaySecretKey}&format=json";
+            var sandboxUrl = _config["PaymentGateways:SSLCommerz:SandboxUrl"] ?? "https://sandbox.sslcommerz.com";
+            var prodUrl = _config["PaymentGateways:SSLCommerz:ProductionUrl"] ?? "https://securepay.sslcommerz.com";
+
+            var baseValidationUrl = isSandbox ? sandboxUrl : prodUrl;
+            var validationUrl = $"{baseValidationUrl.TrimEnd('/')}/validator/api/validationserverAPI.php?val_id={valId}&store_id={config.GatewayPublicKey}&store_passwd={config.GatewaySecretKey}&format=json";
 
             try
             {
@@ -114,6 +152,25 @@ namespace GHCAA.Infrastructure.Gateways
             catch (Exception ex)
             {
                 _logger.LogError(ex, "SSLCommerz Verification Failed");
+                return false;
+            }
+        }
+
+        public async Task<bool> ProcessWebhookAsync(Stream body, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                using var reader = new StreamReader(body);
+                var content = await reader.ReadToEndAsync(cancellationToken);
+                // S4.2: Use QueryHelpers.ParseQuery so base64 values containing '=' are not truncated.
+                var parsed = QueryHelpers.ParseQuery(content);
+                var data = parsed.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString());
+
+                return await VerifyCallbackAsync(data, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SSLCommerz Webhook Processing Failed");
                 return false;
             }
         }

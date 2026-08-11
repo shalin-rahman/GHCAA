@@ -5,6 +5,8 @@ using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Linq;
 
@@ -22,7 +24,29 @@ public class FinancialServiceTests : TestBase
     {
         _communicationMock = new Mock<ICommunicationService>();
         _notificationMock = new Mock<INotificationService>();
-        _service = new FinancialService(_context, _communicationMock.Object, _notificationMock.Object);
+
+        var storageMock = new Mock<IFileStorageService>();
+        var realTimeMock = new Mock<IRealTimeService>();
+        var loggerMock = new Mock<ILogger<FinancialService>>();
+        var configMock = new Mock<IConfiguration>();
+        var userMock = new Mock<IUserService>();
+        var activityMock = new Mock<IActivityService>();
+        var gamificationMock = new Mock<IGamificationService>();
+        var orgConfigMock = new Mock<IOrgConfigService>();
+
+        _service = new FinancialService(
+            _context,
+            _communicationMock.Object,
+            _notificationMock.Object,
+            storageMock.Object,
+            realTimeMock.Object,
+            loggerMock.Object,
+            configMock.Object,
+            userMock.Object,
+            activityMock.Object,
+            gamificationMock.Object,
+            orgConfigMock.Object,
+            new Mock<IServiceProvider>().Object);
 
         if (!await _context.MembershipFeeConfigs.AnyAsync())
         {
@@ -34,7 +58,22 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task RecordPaymentAsync_ShouldAddPaymentAndReturnDto()
     {
-        var member = new Member { FullName = "Payer", Email = "fsp@e.com", NID = "FSP1", FatherName = "F", MotherName = "M", MobileNo = "FSP1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" };
+        var member = new Member
+        {
+            FullName = "Payer",
+            Email = "fsp@e.com",
+            NID = "FSP1",
+            MobileNo = "FSP1",
+            Status = Enums.MembershipStatus.Active,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
+        };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -53,7 +92,22 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task GetMemberPaymentHistoryAsync_ShouldReturnDtoList()
     {
-        var member = new Member { FullName = "History User", Email = "fsh@e.com", NID = "FSH1", FatherName = "F", MotherName = "M", MobileNo = "FSH1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" };
+        var member = new Member
+        {
+            FullName = "History User",
+            Email = "fsh@e.com",
+            NID = "FSH1",
+            MobileNo = "FSH1",
+            Status = Enums.MembershipStatus.Active,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
+        };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -70,7 +124,22 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task GenerateAnnualDuesAsync_ShouldCreateDuesForActiveMembers()
     {
-        var member = new Member { FullName = "Active User", Status = Enums.MembershipStatus.Active, MembershipType = Enums.MembershipType.General, Email = "fsg@e.com", NID = "FSG1", FatherName = "F", MotherName = "M", MobileNo = "FSG1", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector = "I", Designation = "D" };
+        var member = new Member
+        {
+            FullName = "Active User",
+            Email = "fsg@e.com",
+            NID = "FSG1",
+            MobileNo = "FSG1",
+            Status = Enums.MembershipStatus.Active,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
+        };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -85,7 +154,22 @@ public class FinancialServiceTests : TestBase
     [Test]
     public async Task MarkDueAsPaidAsync_ShouldUpdateStatus()
     {
-        var member = new Member { FullName = "M", Email = "fsm@e.com", NID = "FSM1", MobileNo = "FSM1", FatherName="F", MotherName="M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="E", EmergencyContactRelation="R", EmergencyContactPhone="0", HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None", ProfessionalSector="I", Designation="D" };
+        var member = new Member
+        {
+            FullName = "M",
+            Email = "fsm@e.com",
+            NID = "FSM1",
+            MobileNo = "FSM1",
+            Status = Enums.MembershipStatus.Active,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } }
+        };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -130,4 +214,103 @@ public class FinancialServiceTests : TestBase
         fee2024.Should().Be(1000);
         fee2025.Should().Be(2000);
     }
+
+    [Test]
+    public async Task GetSavedPaymentMethodsAsync_ShouldReturnSavedMethods()
+    {
+        var member = new Member { FullName = "U1", Email = "u1@e.com", NID = "U1", MobileNo = "U1", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        _context.SavedPaymentMethods.Add(new SavedPaymentMethod { MemberId = member.Id, Method = "BKash", AccountNumber = "01711", DisplayName = "My BKash", LastUsedAt = DateTime.UtcNow });
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetSavedPaymentMethodsAsync(member.Id);
+
+        result.Should().HaveCount(1);
+        result.First().Method.Should().Be("BKash");
+    }
+
+    [Test]
+    public async Task AddSavedPaymentMethodAsync_ShouldCreateMethod()
+    {
+        var member = new Member { FullName = "U2", Email = "u2@e.com", NID = "U2", MobileNo = "U2", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        var dto = new CreateSavedPaymentMethodDto { Method = "Nagad", AccountNumber = "01811", DisplayName = "Nagad Personal" };
+        var result = await _service.AddSavedPaymentMethodAsync(member.Id, dto);
+
+        result.Should().NotBeNull();
+        result.Method.Should().Be("Nagad");
+
+        var dbMethod = await _context.SavedPaymentMethods.FirstOrDefaultAsync(m => m.MemberId == member.Id);
+        dbMethod.Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task DeleteSavedPaymentMethodAsync_ShouldRemoveMethodIfOwner()
+    {
+        var member = new Member { FullName = "U3", Email = "u3@e.com", NID = "U3", MobileNo = "U3", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "P", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        var method = new SavedPaymentMethod { MemberId = member.Id, Method = "Rocket", AccountNumber = "01911", DisplayName = "Rocket", LastUsedAt = DateTime.UtcNow };
+        _context.SavedPaymentMethods.Add(method);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.DeleteSavedPaymentMethodAsync(member.Id, method.Id);
+
+        result.Should().BeTrue();
+        var exists = await _context.SavedPaymentMethods.AnyAsync(m => m.Id == method.Id);
+        exists.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GetMembershipFeeConfigsAsync_ShouldReturnAllConfigs()
+    {
+        // Setup ensures at least 1 config exists.
+        var configs = await _service.GetMembershipFeeConfigsAsync();
+        configs.Should().NotBeEmpty();
+    }
+
+    [Test]
+    public async Task UpdateMembershipFeeConfigAsync_ShouldModifyExistingConfig()
+    {
+        var current = await _context.MembershipFeeConfigs.FirstAsync();
+        var dto = new UpdateMembershipFeeConfigDto { Id = current.Id, Amount = 9999, EffectiveDate = current.EffectiveDate, Description = "Updated" };
+
+        var result = await _service.UpdateMembershipFeeConfigAsync(dto, 1);
+
+        result.Amount.Should().Be(9999);
+        var updated = await _context.MembershipFeeConfigs.FindAsync(current.Id);
+        updated!.Amount.Should().Be(9999);
+    }
+
+    [Test]
+    public async Task RecordMembershipChangeAsync_ShouldCreateHistoryRecord()
+    {
+        var member = await CreateAndSaveTestMemberAsync("CHG", "chg@e.com", "CHG1", "CHG1");
+        await _service.RecordMembershipChangeAsync(member.Id, "General", "Life", 1, "Upgrade");
+
+        var history = await _context.MembershipHistories.Where(h => h.MemberId == member.Id).ToListAsync();
+        history.Should().HaveCount(1);
+        history[0].ChangedFrom.Should().Be("General");
+        history[0].ChangedTo.Should().Be("Life");
+    }
+
+    [Test]
+    public async Task DeletePaymentAsync_ShouldRemovePaymentAndLogActivity()
+    {
+        var p = new PaymentHistory { MemberId = 1, TransactionId = "DEL-T1", Amount = 100, Status = Enums.PaymentStatus.Completed, PaidAt = DateTime.UtcNow };
+        _context.PaymentHistories.Add(p);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.DeletePaymentAsync(p.Id);
+
+        result.Should().BeTrue();
+        var exists = await _context.PaymentHistories.AnyAsync(ph => ph.Id == p.Id);
+        exists.Should().BeFalse();
+    }
 }
+

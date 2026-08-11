@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
@@ -27,7 +28,7 @@ namespace GHCAA.Infrastructure.Services
         {
             username = username.Replace(" ", "");
             password = password.Replace(" ", "");
-            
+
             // Check if user already exists for this member
             var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
             if (existingUser != null)
@@ -86,7 +87,7 @@ namespace GHCAA.Infrastructure.Services
             user.Roles.Add(role);
             await _db.Users.AddAsync(user, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
-            
+
             _logger.LogInformation("System {Role} account created: {Username}", roleName, username);
             return user;
         }
@@ -110,16 +111,16 @@ namespace GHCAA.Infrastructure.Services
             }
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            user.MustChangePassword = false; // Successfully changed
+            user.MustChangePassword = false;
+            user.SecurityStamp = Guid.NewGuid().ToString("N"); // S5.4: invalidate existing JWTs
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
 
         public string GenerateDefaultPassword()
         {
-            var random = new Random();
             return new string(Enumerable.Range(0, 8)
-                .Select(_ => PasswordChars[random.Next(PasswordChars.Length)])
+                .Select(_ => PasswordChars[RandomNumberGenerator.GetInt32(PasswordChars.Length)])
                 .ToArray());
         }
     }

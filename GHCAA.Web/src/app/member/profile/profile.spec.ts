@@ -48,4 +48,60 @@ describe('Profile Component', () => {
         component.addAcademicRecord();
         expect(component.profile.academicHistory.length).toBe(initial + 1);
     });
+
+    describe('32.3 regression: profile response field mapping', () => {
+        function loadWith(rawResponse: any) {
+            TestBed.resetTestingModule();
+            const mock = { getProfile: vi.fn().mockReturnValue(of(rawResponse)) };
+            TestBed.configureTestingModule({
+                imports: [Profile],
+                providers: [
+                    { provide: ProfileService, useValue: mock },
+                    { provide: NotificationService, useValue: notificationServiceMock }
+                ]
+            });
+            const f = TestBed.createComponent(Profile);
+            f.detectChanges();
+            return f.componentInstance;
+        }
+
+        it('surfaces flat DTO fields that are not part of the old hardcoded whitelist', () => {
+            const c = loadWith({
+                id: 201,
+                fullName: 'Test Member',
+                designation: 'Software Engineer',
+                organizationName: 'Acme Corp',
+                professionalSector: 'IT',
+                location: 'Dhaka',
+                passingYear: 2020,
+                degree: 'BSc',
+                subject: 'CSE',
+                profileCompletionPercentage: 75,
+                categoryBadge: 'Gold',
+                academicHistory: [],
+                professionalHistory: []
+            });
+
+            expect(c.profile.designation).toBe('Software Engineer');
+            expect(c.profile.organizationName).toBe('Acme Corp');
+            expect(c.profile.professionalSector).toBe('IT');
+            expect(c.profile.profileCompletionPercentage).toBe(75);
+            expect(c.profile.categoryBadge).toBe('Gold');
+        });
+
+        it('normalizes PascalCase keys (including the NID special case) to camelCase', () => {
+            const c = loadWith({
+                Id: 201,
+                FullName: 'Test Member',
+                NID: '1234567890',
+                Designation: 'Manager',
+                AcademicHistory: [],
+                ProfessionalHistory: []
+            });
+
+            expect(c.profile.fullName).toBe('Test Member');
+            expect(c.profile.nid).toBe('1234567890');
+            expect(c.profile.designation).toBe('Manager');
+        });
+    });
 });

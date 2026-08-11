@@ -49,11 +49,13 @@ describe('RegistrationService', () => {
     });
 
     it('should call getStatus', () => {
-        service.getStatus(100).subscribe(res => {
+        service.getStatus(100, 'test@test.com').subscribe(res => {
             expect(res.status).toBe('Applied');
         });
 
-        const req = httpMock.expectOne(`${API_ENDPOINTS.AUTH.STATUS}/100`);
+        // Angular's HttpParams leaves '@' unencoded (it's an allowed query char), so the
+        // request URL carries a raw '@', not '%40'.
+        const req = httpMock.expectOne(`${API_ENDPOINTS.AUTH.STATUS}/100?email=test@test.com`);
         expect(req.request.method).toBe('GET');
         req.flush({ status: 'Applied' });
     });

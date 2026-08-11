@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using static GHCAA.Domain.Enums;
 
@@ -16,19 +17,29 @@ namespace GHCAA.Domain.Models
         public string Content { get; set; } = null!; // HTML support
 
         [Required]
-        public ArticleCategory Category { get; set; }
+        public ArticleCategory ArticleCategory { get; set; }
 
         public SubmissionStatus Status { get; set; } = SubmissionStatus.Approved; // Default for existing/admin news
 
         public DateTime PublishDate { get; set; } = DateTime.UtcNow;
 
+        public PostType PostType { get; set; } = PostType.News;
+
         public bool IsActive { get; set; } = true;
         public string? ImageUrl { get; set; }
+
+        public string? AttachmentUrl { get; set; }
+
+        [MaxLength(260)]
+        public string? AttachmentFileName { get; set; }
+
         public int AuthorId { get; set; }
-        
+
         public DateTime? LastModified { get; set; }
+        public string? ExternalCollaborators { get; set; }
 
         // Navigation
         public User? Author { get; set; }
+        public ICollection<NewsCollaborator> Collaborators { get; set; } = new List<NewsCollaborator>();
     }
 }

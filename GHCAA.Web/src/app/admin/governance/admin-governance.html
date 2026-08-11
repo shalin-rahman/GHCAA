@@ -1,15 +1,11 @@
 <div class="admin-feature">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Governance Management</h2>
-            <small>Manage Executive Committee Periods and Role Assignments</small>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-accent btn-md" (click)="openNewPeriod()">
-                <span class="icon">📅</span> New EC Period
-            </button>
-        </div>
-    </div>
+    <app-page-header title="Executive Committee" [total]="committeeMembers().length"
+        emptySubtitle="Executive Committee assignments for {{ selectedPeriod()?.title || 'selected term' }}">
+        <small subtitle>Showing {{ filteredMembers().length }} of {{ committeeMembers().length }} assignments for {{ selectedPeriod()?.title || 'selected term' }}</small>
+        <button actions class="btn btn-accent btn-md" (click)="openNewPeriod()">
+            <span class="icon">📅</span> New EC Period
+        </button>
+    </app-page-header>
 
     <div class="governance-grid">
         <!-- Sidebar: Periods List -->
@@ -22,14 +18,14 @@
                 <div class="period-item" [class.active]="selectedPeriod()?.id === p.id" (click)="selectPeriod(p)">
                     <div class="p-info">
                         <span class="p-title">{{ p.title }}</span>
-                        <small class="p-dates">{{ p.startDate | date:'mediumDate' }} — {{ p.endDate ? (p.endDate |
-                            date:'mediumDate') : 'Present' }}</small>
+                        <small class="p-dates">{{ p.startDate | date:'dd-MM-yyyy' }} — {{ p.endDate ? (p.endDate |
+                            date:'dd-MM-yyyy') : 'Present' }}</small>
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
                         @if (p.isActive) {
                         <span class="status-badge active-badge">Active</span>
                         }
-                        <button class="icon-btn edit-btn" (click)="$event.stopPropagation(); editPeriod(p)" title="Edit Period" style="background:none; border:none; color: var(--text-muted); cursor: pointer;">✏️</button>
+                        <button class="icon-btn" (click)="$event.stopPropagation(); editPeriod(p)" title="Edit Period">✏️</button>
                     </div>
                 </div>
                 }
@@ -42,7 +38,16 @@
             <div class="committee-header">
                 <div class="title-wrap">
                     <h3>{{ selectedPeriod().title }}</h3>
-                    <div class="actions">
+                    <div class="filter-bar">
+                        <app-search-bar [value]="committeeSearch()" (valueChange)="committeeSearch.set($event)"
+                            placeholder="Search users by name or email…"></app-search-bar>
+                        @if (committeeMembers().length) {
+                        <div class="record-meta">
+                            Showing {{ filteredMembers().length }} of {{ committeeMembers().length }} assignments
+                        </div>
+                        }
+                    </div>
+                    <div class="actions flex items-center gap-3">
                         @if (!selectedPeriod().isActive) {
                         <button class="btn btn-accent btn-sm" (click)="activatePeriod(selectedPeriod().id)">
                             Activate Period
@@ -54,9 +59,9 @@
                     </div>
                 </div>
                 <div class="period-meta">
-                    <span><strong>Term:</strong> {{ selectedPeriod().startDate | date }} to {{ selectedPeriod().endDate
+                    <span><strong>Term:</strong> {{ selectedPeriod().startDate | date:'dd-MM-yyyy' }} to {{ selectedPeriod().endDate
                         ?
-                        (selectedPeriod().endDate | date) : 'Ongoing' }}</span>
+                        (selectedPeriod().endDate | date:'dd-MM-yyyy') : 'Ongoing' }}</span>
                 </div>
             </div>
 
@@ -64,35 +69,54 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Member</th>
+                            <th>Member Profile</th>
+                            <th>Membership No.</th>
                             <th>Position</th>
-                            <th>Assigned</th>
+                            <th>Type/Category</th>
+                            <th>Term Start</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @for (em of committeeMembers(); track em.id) {
+                        @for (em of filteredMembers(); track em.id) {
                         <tr>
-                            <td class="member-cell">
-                                <div class="avatar">{{ em.member?.fullName?.[0] }}</div>
-                                <div class="info">
-                                    <span class="name">{{ em.member?.fullName }}</span>
-                                    <small>{{ em.member?.membershipNumber }}</small>
+                            <td class="member-cell" style="display: flex; gap: 1rem; align-items: center;">
+                                @if (em.member?.photoPath) {
+                                <img [src]="getImageUrl(em.member.photoPath)" class="member-avatar photo" alt="Photo" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid var(--glass-border)" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                                } @else {
+                                <div class="avatar" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(212,175,55,0.1);color:#d4af37;font-weight:bold;">{{ em.member?.fullName?.[0] }}</div>
+                                }
+                                <div class="info" style="display:flex;flex-direction:column;">
+                                    <span class="name font-bold">{{ em.member?.fullName }}</span>
+                                    <small style="opacity: 0.6; font-size: 10px;">{{ em.member?.email }}</small>
                                 </div>
                             </td>
+                            <td><code class="text-accent">{{ em.member?.membershipNumber || '—' }}</code></td>
                             <td>
                                 <span class="role-badge">{{ getRoleName(em.position) }}</span>
                             </td>
-                            <td>{{ em.startDate | date }}</td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-size: 10px; text-transform: uppercase; font-weight: bold; opacity: 0.7;">{{ getMembershipTypeLabel(em.member?.membershipType) }}</span>
+                                    @if (em.member?.category && em.member?.category !== 'None') {
+                                    <span class="badge" [class]="em.member.category.toLowerCase()" style="font-size: 9px; padding: 2px 6px;">{{ getCategoryLabel(em.member.category) }}</span>
+                                    }
+                                </div>
+                            </td>
+                            <td>{{ em.startDate | date:'dd-MM-yyyy' }}</td>
                             <td>
                                 <button class="icon-btn delete" (click)="removeMember(em.id)"
                                     title="Remove">🗑️</button>
                             </td>
                         </tr>
                         } @empty {
-                        <tr class="empty-row">
-                            <td colspan="4" style="text-align: center; padding: 4rem; color: var(--text-muted);">No
-                                roles assigned to this period yet.</td>
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state py-12">
+                                    <span class="text-3xl mb-2 block">🎗️</span>
+                                    <p class="text-muted italic">{{ committeeSearch() ? 'No assignments match your search.' : 'No roles assigned to this period yet.' }}</p>
+                                </div>
+                            </td>
                         </tr>
                         }
                     </tbody>
@@ -119,26 +143,34 @@
         <div class="modal-body">
             <div class="form-group">
                 <label>Period Title <span class="required-star">*</span></label>
-                <input type="text" class="form-control" [(ngModel)]="editPeriodData().title" #periodTitle="ngModel" required
+                <input type="text" class="form-control" [(ngModel)]="editPeriodData().title" #periodTitle="ngModel" required maxlength="150"
                     [class.border-red-500]="periodTitle.invalid && periodTitle.touched"
                     placeholder="e.g. 2023-2025 Committee">
+                <div *ngIf="periodTitle.touched && periodTitle.invalid" class="text-[10px] text-red-500 mt-1">
+                    <span *ngIf="periodTitle.errors?.['required']">Period title is required.</span>
+                </div>
             </div>
             
             <div class="form-group">
                 <label>Start Date <span class="required-star">*</span></label>
-                <input type="date" class="form-control" [(ngModel)]="editPeriodData().startDate" #periodStart="ngModel" required
+                <input type="text" class="form-control" [(ngModel)]="editPeriodData().startDate" #periodStart="ngModel" required
+                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
                     [class.border-red-500]="periodStart.invalid && periodStart.touched">
+                <div *ngIf="periodStart.touched && periodStart.invalid" class="text-[10px] text-red-500 mt-1">
+                    <span *ngIf="periodStart.errors?.['required']">Start date is required.</span>
+                </div>
             </div>
 
             <div class="form-group">
                 <label>End Date</label>
-                <input type="date" class="form-control" [(ngModel)]="editPeriodData().endDate" placeholder="Leave blank if current">
+                <input type="text" class="form-control" [(ngModel)]="editPeriodData().endDate" 
+                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}">
             </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-outline" (click)="showPeriodModal.set(false)">Cancel</button>
             <button class="btn btn-accent shadow-gold" (click)="savePeriod()" [disabled]="isSavingPeriod()">
-                {{ isSavingPeriod() ? 'Saving...' : (editPeriodData().id ? 'Update Period' : 'Save Period') }}
+                {{ isSavingPeriod() ? 'Saving...' : (editPeriodData().id ? 'Update' : 'Save') }}
             </button>
         </div>
     </div>
@@ -156,7 +188,7 @@
         <div class="modal-body">
             <!-- Search field for member -->
             <div class="form-group search-group">
-                <label>Search Member</label>
+                <label>Search Member <span class="required-star">*</span></label>
                 <div class="search-box">
                     <input type="text" 
                            class="form-control" 
@@ -164,8 +196,12 @@
                            [ngModel]="searchQuery()"
                            (ngModelChange)="searchQuery.set($event); searchMembers($event)">
                     @if (isSearching()) {
-                        <span class="loading-icon animate-spin">⏳</span>
+                        <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
                     }
+                </div>
+                <!-- Selection feedback -->
+                <div *ngIf="assignData().memberId" class="mt-2 text-[10px] text-accent font-bold uppercase tracking-widest">
+                    ✅ Selected: {{ assignData().memberName }}
                 </div>
                 
                 @if (memberSearchResults().length > 0) {
@@ -180,8 +216,8 @@
             </div>
 
             <div class="form-group">
-                <label>Position</label>
-                <select class="form-control" [(ngModel)]="assignData().position">
+                <label>Position <span class="required-star">*</span></label>
+                <select class="form-control" [(ngModel)]="assignData().position" #posInput="ngModel" required>
                     @for (pos of ecPositions; track pos.value) {
                         <option [value]="pos.value">{{ pos.label }}</option>
                     }
@@ -190,7 +226,9 @@
         </div>
         <div class="modal-footer">
             <button class="btn btn-outline" (click)="showAssignModal.set(false)">Cancel</button>
-            <button class="btn btn-accent shadow-gold" (click)="assignRole()">Assign Role</button>
+            <button class="btn btn-accent shadow-gold" (click)="assignRole()" [disabled]="!assignData().memberId || posInput.invalid">
+                Assign Role
+            </button>
         </div>
     </div>
 </div>

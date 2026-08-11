@@ -1,6 +1,6 @@
 export type MembershipStatus = 'Applied' | 'Active' | 'InactivePayment' | 'InactiveResigned' | 'Terminated';
 export type MembershipType = 'Founding' | 'Executive' | 'General' | 'Associate' | 'Honorary' | 'Advisory';
-export type MemberCategory = 'None' | 'Lifelong' | 'Donor' | 'Patron' | 'Guest';
+export type MemberCategory = 'None' | 'LifelongPatron' | 'Sponsor' | 'Advisor' | 'Mentor' | 'Recruiter' | 'Active' | 'Volunteer' | 'Contributor' | 'Guest' | 'Student';
 export type ECPosition = 'None' | 'President' | 'VicePresident' | 'GeneralSecretary' | 'OfficeSecretary' | 'JointSecretary1' | 'JointSecretary2' | 'Treasurer' | 'MediaCulturalAndSportsSecretary' | 'OrganizationalSecretary' | 'InformationAndTechnologySecretary' | 'Member1' | 'Member2' | 'LawSecretary' | 'ImmediatePastPresident' | 'InstitutionalRepresentative';
 export type Gender = 'Male' | 'Female' | 'Other';
 export type BloodGroup = 'APositive' | 'ANegative' | 'BPositive' | 'BNegative' | 'OPositive' | 'ONegative' | 'ABPositive' | 'ABNegative';
@@ -13,7 +13,18 @@ export type JobCategory = 'IT' | 'Finance' | 'Engineering' | 'Marketing' | 'Educ
 export type SubmissionStatus = 'Draft' | 'Pending' | 'Approved' | 'Rejected';
 export type ArticleCategory = 'Event' | 'Magazine' | 'Regular';
 
-
+export enum PaymentGateway {
+    None = 0,
+    Stripe = 1,
+    PayPal = 2,
+    SSLCommerz = 3,
+    BkashGateway = 4,
+    NagadGateway = 5,
+    RocketGateway = 6,
+    BankTransferGateway = 7,
+    Manual = 8,
+    DGePay = 9
+}
 export interface Member {
     id: number;
     fullName: string;
@@ -31,29 +42,52 @@ export interface Member {
     emergencyContactName: string;
     emergencyContactRelation: string;
     emergencyContactPhone: string;
-    hscAdmissionYear?: number;
-    highestCertificate: string;
-    highestCertificateGroup: string;
-    highestCertificateSubject: string;
-    highestCertificatePassingYear: number;
+    tShirtSize?: string;
+    isNIDPublic?: boolean;
 
-    ghcAdmissionYear?: number;
-    ghcLastCertificate: string;
-    ghcLastCertificateGroup: string;
-    ghcLastCertificateSubject: string;
-    ghcLastCertificatePassingYear: number;
-    professionalSector: string;
-    designation: string;
     photoPath?: string;
-    certificatePath?: string;
-    paymentProofPath?: string;
+    signaturePath?: string;
     status: MembershipStatus;
     appliedDate: string | Date;
     approvedDate?: string | Date;
     membershipNumber?: string;
     membershipType: MembershipType;
     category: MemberCategory;
+    
+    academicHistory?: AcademicRecord[];
+    professionalHistory?: ProfessionalRecord[];
     ecHistory?: ECMember[];
+    paymentHistories?: PaymentHistory[];
+    
+    // Gamification & Health
+    contributionPoints?: number;
+    rank?: number;
+    categoryBadge?: string;
+    profileCompletionPercentage?: number;
+}
+
+export interface PaymentHistory {
+    id: number;
+    memberId: number;
+    transactionId: string;
+    amount: number;
+    paidAt: string | Date;
+    status: PaymentStatus;
+    financialCategory: FinancialCategory;
+    notes?: string;
+    paymentMethod: PaymentMethod;
+    receiptPath?: string;
+}
+
+export interface SavedPaymentMethod {
+    id: number;
+    memberId: number;
+    displayName: string;
+    method: string;
+    accountNumber: string;
+    icon?: string;
+    isDefault: boolean;
+    lastUsedAt?: string | Date;
 }
 
 export interface ECPeriod {
@@ -91,7 +125,7 @@ export interface FinancialRecord {
     id: number;
     year: number;
     recordType: RecordType;
-    category: FinancialCategory;
+    financialCategory: FinancialCategory;
     date: string | Date;
     amount: number;
     description: string;
@@ -109,30 +143,60 @@ export interface LedgerSummary {
 
 export interface LedgerCategorySummary {
     type: RecordType;
-    category: FinancialCategory;
+    financialCategory: FinancialCategory;
     total: number;
 }
 
+
+export type PostType = 'News' | 'Notice';
 
 export interface NewsPost {
     id: number;
     title: string;
     content: string;
-    category: ArticleCategory;
+    articleCategory: ArticleCategory;
+    postType: PostType;
     status: SubmissionStatus;
     imageUrl?: string;
+    attachmentUrl?: string;
+    attachmentFileName?: string;
     isActive: boolean;
     authorName?: string;
     createdAt: string | Date;
+    collaborators: string[];
+}
+
+export interface SiteContent {
+    id: number;
+    key: string;
+    group: string;
+    title: string;
+    bodyHtml: string;
+    displayOrder: number;
+    isActive: boolean;
+    lastModified?: string | Date;
+}
+
+export interface UpsertSiteContentDto {
+    key: string;
+    group: string;
+    title: string;
+    bodyHtml: string;
+    displayOrder: number;
+    isActive: boolean;
 }
 
 export interface CreateNewsDto {
     title: string;
     content: string;
-    category: ArticleCategory;
+    articleCategory: ArticleCategory;
+    postType?: PostType;
     status?: SubmissionStatus;
     imageUrl?: string;
+    attachmentUrl?: string;
+    attachmentFileName?: string;
     isActive?: boolean;
+    collaborators?: string[];
 }
 
 export interface UpdateNewsDto extends Partial<CreateNewsDto> {
@@ -151,7 +215,7 @@ export interface Job {
     applicationLink?: string;
     postedDate: string | Date;
     applicationDeadline?: string | Date;
-    category: JobCategory;
+    jobCategory: JobCategory;
     isActive: boolean;
     postedByMemberId: number;
     postedByMemberName?: string;
@@ -166,7 +230,7 @@ export interface CreateJobDto {
     applicationEmail?: string;
     applicationLink?: string;
     applicationDeadline?: string | Date;
-    category: JobCategory;
+    jobCategory: JobCategory;
 }
 
 export interface UpdateJobDto extends Partial<CreateJobDto> {
@@ -177,12 +241,18 @@ export interface UpdateJobDto extends Partial<CreateJobDto> {
 export interface SpecialDayTheme {
     id: number;
     title: string;
-    date: string; // MM-DD
-    primaryColor: string;
-    accentColor: string;
-    logoSecondary?: string;
-    greetingMessage: string;
+    startDate: string | Date;
+    endDate: string | Date;
+    backgroundColor: string;
+    textColor: string;
+    announcementText: string;
+    animatedTexts: string[];
+    animationStyle: string; // Fade, 3D, Typewriter, None
+    imageUrl: string;
+    sidebarColor: string;
+    enableGradientFading: boolean;
     isActive: boolean;
+    isEnabled: boolean; // mapped from backend
 }
 
 export interface ActivityLog {
@@ -199,13 +269,15 @@ export interface AlumniEvent {
     id: number;
     title: string;
     description: string;
-    date: string | Date;
+    startDate: string | Date;
+    endDate: string | Date;
     location: string;
     registrationFee?: number | null;
     requiresPayment: boolean;
     isActive: boolean;
     imageUrl?: string;
-    registrationDeadline?: string | Date;
+    registrationStartDate?: string | Date;
+    registrationEndDate?: string | Date;
     adminNote?: string;
     allowNonMembers: boolean;
     participantCount?: number;
@@ -288,7 +360,7 @@ export interface EventRegistration {
 
 export interface LookupItem {
     id: number;
-    category: string;
+    lookupGroup: string;
     code: string;
     value: string;
     order: number;
@@ -330,6 +402,7 @@ export interface AcademicRecord {
     passingYear: number;
     isGHC: boolean;
     result?: string;
+    certificatePath?: string;
 }
 
 export interface ProfessionalRecord {
@@ -372,27 +445,12 @@ export interface MemberProfile {
     emergencyContactName?: string;
     emergencyContactRelation?: string;
     emergencyContactPhone?: string;
-
-    // Academic
-    hscAdmissionYear?: number;
-    highestCertificate: string;
-    highestCertificateGroup: string;
-    highestCertificateSubject: string;
-    highestCertificatePassingYear: number;
-    ghcAdmissionYear?: number;
-    ghcLastCertificate: string;
-    ghcLastCertificateGroup: string;
-    ghcLastCertificateSubject: string;
-    ghcLastCertificatePassingYear: number;
-
-    // Professional
-    professionalSector: string;
-    designation: string;
+    tShirtSize?: string;
+    isNIDPublic?: boolean;
 
     // Info
     photoPath?: string;
-    certificatePath?: string;
-    paymentProofPath?: string;
+    signaturePath?: string;
     presentAddress: string;
     permanentAddress: string;
 
@@ -405,6 +463,12 @@ export interface MemberProfile {
     academicHistory: AcademicRecord[];
     professionalHistory: ProfessionalRecord[];
     ecHistory?: ECHistoryRecord[];
+    paymentHistories?: PaymentHistory[];
+
+    // Gamification & Health
+    contributionPoints?: number;
+    rank?: number;
+    profileCompletionPercentage?: number;
 }
 
 export interface MemberSearchFilter {
@@ -413,6 +477,91 @@ export interface MemberSearchFilter {
     bloodGroup?: BloodGroup;
     professionalSector?: string;
     designation?: string;
+    category?: MemberCategory;
 }
 
+export interface MembershipHistory {
+    id: number;
+    memberId: number;
+    oldType: string;
+    newType: string;
+    changeDate: string | Date;
+    reason?: string;
+    changedByAdminId?: number;
+}
 
+export interface MembershipFeeConfig {
+    id: number;
+    category: FinancialCategory;
+    membershipType: string;
+    amount: number;
+    effectiveDate: string | Date;
+    effectiveTo?: string | Date;
+    isActive: boolean;
+    description: string;
+}
+
+export interface CreateMembershipFeeConfig {
+    category: FinancialCategory;
+    membershipType: string;
+    amount: number;
+    effectiveDate: string | Date;
+    effectiveTo?: string | Date;
+    isActive: boolean;
+    description: string;
+}
+
+export interface UpdateMembershipFeeConfig extends Partial<CreateMembershipFeeConfig> {
+    id: number;
+}
+
+// ── Forum / Community Groups (3.7) ──────────────────────────────────────────
+
+export interface ForumCategory {
+    id: number;
+    name: string;
+    description?: string;
+    sortOrder: number;
+    topicCount: number;
+    postCount: number;
+}
+
+export interface ForumTopic {
+    id: number;
+    categoryId: number;
+    title: string;
+    content: string;
+    authorId: number;
+    authorName: string;
+    authorPhotoUrl?: string;
+    createdAt: string | Date;
+    lastUpdatedAt?: string | Date;
+    viewCount: number;
+    isPinned: boolean;
+    isLocked: boolean;
+    replyCount: number;
+}
+
+export interface ForumPost {
+    id: number;
+    topicId: number;
+    content: string;
+    authorId: number;
+    authorName: string;
+    authorPhotoUrl?: string;
+    createdAt: string | Date;
+    updatedAt?: string | Date;
+    parentPostId?: number;
+}
+
+export interface CreateForumTopicDto {
+    categoryId: number;
+    title: string;
+    content: string;
+}
+
+export interface CreateForumPostDto {
+    topicId: number;
+    content: string;
+    parentPostId?: number;
+}

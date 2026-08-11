@@ -1,15 +1,24 @@
 <div class="admin-feature">
     @if (!showForm()) {
-    <div class="page-header">
-        <div class="header-text">
-            <h2>News Management</h2>
-            <small>Create, edit, and publish institutional news articles</small>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-accent shadow-gold" (click)="openForm()">
-                <span class="icon">✍️</span> Draft New Story
-            </button>
-        </div>
+    <app-page-header title="News &amp; Notices" [total]="newsList().length"
+        emptySubtitle="Publish and manage news stories and official notices">
+        <small subtitle>Showing {{ filteredNews().length }} of {{ newsList().length }} posts</small>
+        <button actions class="btn btn-accent shadow-gold" (click)="openForm()">
+            <span class="icon">✍️</span> Draft New Post
+        </button>
+    </app-page-header>
+
+    <div class="tabs tab-nav">
+        @for (tab of postTypeTabs; track tab.value) {
+        <button type="button" [class.active]="postTypeFilter() === tab.value"
+            (click)="postTypeFilter.set(tab.value)">{{ tab.label }}</button>
+        }
+    </div>
+
+    <!-- Toolbar for Search and Filters -->
+    <div class="filter-bar">
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search headlines or categories…"></app-search-bar>
     </div>
     } @else {
     <div class="page-header flex items-center gap-6 mb-8">
@@ -28,42 +37,100 @@
     <!-- Create / Edit Form Section -->
     @if (showForm()) {
     <div class="glass-card p-10 reveal-top max-w-5xl mx-auto">
-        <form (ngSubmit)="saveNews()" class="news-form space-y-8">
+        <form #newsForm="ngForm" (ngSubmit)="saveNews(newsForm)" class="news-form space-y-8">
             <div class="form-group">
                 <label>Article Headline <span class="required-star">*</span></label>
-                <input type="text" [(ngModel)]="form.title" name="title" required #titleInput="ngModel"
-                    [class.border-red-500]="titleInput.invalid && titleInput.touched"
+                <input type="text" [(ngModel)]="form.title" name="title" required minlength="5" maxlength="300"
+                    #titleInput="ngModel" [class.border-red-500]="titleInput.invalid && titleInput.touched"
                     placeholder="Enter a compelling title..." class="text-xl font-black">
+                <div class="field-error mt-1" *ngIf="titleInput.touched && titleInput.invalid">
+                    <span class="text-xs text-red-500" *ngIf="titleInput.errors?.['required']">Headline is
+                        required.</span>
+                    <span class="text-xs text-red-500" *ngIf="titleInput.errors?.['minlength']">Headline must be at
+                        least 5 characters.</span>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="form-grid mb-8">
+                <div class="form-group">
+                    <label>Post Type <span class="required-star">*</span></label>
+                    <select [(ngModel)]="form.postType" name="postType" required>
+                        <option value="News">News Story</option>
+                        <option value="Notice">Official Notice</option>
+                    </select>
+                    <small class="text-muted text-xs">Notices are admin-authored only and may carry a PDF
+                        document.</small>
+                </div>
                 <div class="form-group">
                     <label>Asset Category <span class="required-star">*</span></label>
-                    <select [(ngModel)]="form.category" name="category" required #categoryInput="ngModel">
+                    <select [(ngModel)]="form.articleCategory" name="articleCategory" required #categoryInput="ngModel">
                         @for (c of categories; track c.value) {
                         <option [value]="c.value">{{ c.label }}</option>
                         }
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Submission Status <span class="required-star">*</span></label>
+                    <select [(ngModel)]="form.status" name="status" required #statusInput="ngModel">
+                        <option [ngValue]="0">Draft</option>
+                        <option [ngValue]="1">Pending Review</option>
+                        <option [ngValue]="2">Approved</option>
+                        <option [ngValue]="3">Rejected</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Cover Image</label>
                     <div class="image-upload-wrapper" style="display: flex; gap: 10px; align-items: center;">
-                        <input type="text" [(ngModel)]="form.imageUrl" name="imageUrl" placeholder="Image URL or upload..." style="flex: 1;" [disabled]="uploadingImage()">
+                        <input type="url" [(ngModel)]="form.imageUrl" name="imageUrl" #imageUrlInput="ngModel"
+                            placeholder="Image URL or upload..." style="flex: 1;" [disabled]="uploadingImage()"
+                            [class.border-red-500]="imageUrlInput.invalid && imageUrlInput.touched">
                         <label class="btn btn-secondary btn-sm" style="margin: 0; cursor: pointer;">
                             @if (!uploadingImage()) { <span class="icon">📁</span> }
-                            @if (uploadingImage()) { <span class="icon animate-spin">⏳</span> }
+                            @if (uploadingImage()) { <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> }
                             {{ uploadingImage() ? 'Uploading...' : 'Upload' }}
-                            <input type="file" style="display: none;" accept="image/*" (change)="onImageSelect($event)" [disabled]="uploadingImage()">
+                            <input type="file" style="display: none;" accept="image/*" (change)="onImageSelect($event)"
+                                [disabled]="uploadingImage()">
                         </label>
                     </div>
+                </div>
+                @if (form.postType === 'Notice') {
+                <div class="form-group">
+                    <label>Notice Document (PDF)</label>
+                    <div class="image-upload-wrapper" style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" [ngModel]="form.attachmentFileName" name="attachmentFileName" readonly
+                            placeholder="No document attached" style="flex: 1;">
+                        <label class="btn btn-secondary btn-sm" style="margin: 0; cursor: pointer;">
+                            @if (!uploadingDocument()) { <span class="icon">📄</span> }
+                            @if (uploadingDocument()) { <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> }
+                            {{ uploadingDocument() ? 'Uploading...' : 'Upload' }}
+                            <input type="file" style="display: none;" accept="application/pdf"
+                                (change)="onDocumentSelect($event)" [disabled]="uploadingDocument()">
+                        </label>
+                        @if (form.attachmentUrl) {
+                        <button type="button" class="icon-btn delete" (click)="removeDocument()"
+                            title="Remove document">✕</button>
+                        }
+                    </div>
+                </div>
+                }
+                <div class="form-group">
+                    <label>Collaborators (Comma separated names)</label>
+                    <input type="text" [ngModel]="form.collaborators.join(', ')" (ngModelChange)="updateCollaborators($event)" 
+                        name="collaborators" placeholder="e.g. John Doe, Jane Smith">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Article Content <span class="required-star">*</span></label>
-                <textarea [(ngModel)]="form.content" name="content" rows="12" required #contentInput="ngModel"
-                    [class.border-red-500]="contentInput.invalid && contentInput.touched"
+                <textarea [(ngModel)]="form.content" name="content" rows="12" required minlength="20"
+                    #contentInput="ngModel" [class.border-red-500]="contentInput.invalid && contentInput.touched"
                     placeholder="Compose your article here..."></textarea>
+                <div class="field-error mt-1" *ngIf="contentInput.touched && contentInput.invalid">
+                    <span class="text-xs text-red-500" *ngIf="contentInput.errors?.['required']">Content is
+                        required.</span>
+                    <span class="text-xs text-red-500" *ngIf="contentInput.errors?.['minlength']">Content must be at
+                        least 20 characters.</span>
+                </div>
             </div>
 
             <div class="flex items-center justify-between pt-6 border-t border-primary/5">
@@ -79,9 +146,9 @@
                 </div>
 
                 <div class="form-actions flex gap-4">
-                    <button type="button" class="btn btn-secondary px-8 h-12" (click)="cancelForm()">Discard Draft</button>
-                    <button type="submit" class="btn btn-accent shadow-gold px-12 h-12 font-black">
-                        {{ saving() ? 'Transmitting...' : (editingId() ? 'Update Article' : 'Publish Article') }}
+                    <button type="button" class="btn btn-secondary px-8 h-12" (click)="cancelForm()">Cancel</button>
+                    <button type="submit" class="btn btn-accent shadow-gold px-12 h-14 font-black">
+                        {{ saving() ? 'Saving...' : (editingId() ? 'Update' : 'Save') }}
                     </button>
                 </div>
             </div>
@@ -97,16 +164,17 @@
             <span>⌛</span>
             <p>Loading news posts...</p>
         </div>
-        } @else if (newsList().length === 0) {
+        } @else if (filteredNews().length === 0) {
         <div class="empty-state">
             <span>📰</span>
-            <p>No news articles yet.</p>
+            <p>{{ searchQuery() ? 'No news articles match your search.' : 'No news articles yet.' }}</p>
         </div>
         } @else {
         <table class="data-table">
             <thead>
                 <tr>
                     <th>Title</th>
+                    <th>Type</th>
                     <th>Category</th>
                     <th>Status</th>
                     <th>Date</th>
@@ -114,20 +182,24 @@
                 </tr>
             </thead>
             <tbody>
-                @for (post of newsList(); track post.id) {
+                @for (post of filteredNews(); track post.id) {
                 <tr>
-                    <td class="title-cell">{{ post.title }}</td>
-                    <td><span class="pill">{{ getCategoryLabel(post.category) }}</span></td>
+                    <td class="title-cell">
+                        {{ post.title }}
+                        @if (post.attachmentUrl) { <span class="attachment-flag" title="Has PDF attachment">📄</span> }
+                    </td>
+                    <td><span class="pill">{{ post.postType === 'Notice' ? 'Notice' : 'News' }}</span></td>
+                    <td><span class="pill">{{ getCategoryLabel(post.articleCategory) }}</span></td>
                     <td>
                         <span class="status-badge" [class.active]="post.isActive" [class.inactive]="!post.isActive">
                             {{ post.isActive ? 'Published' : 'Draft' }}
                         </span>
                     </td>
-                    <td>{{ post.createdAt | date:'mediumDate' }}</td>
+                    <td>{{ post.createdAt | date:'dd-MM-yyyy' }}</td>
                     <td class="actions-cell">
                         <button class="btn btn-outline btn-sm" (click)="selectedPost.set(post)">Details ↗</button>
                         <button class="icon-btn" (click)="editPost(post)" title="Edit">✏️</button>
-                        <button class="icon-btn" (click)="deletePost(post.id)" title="Delete">🗑️</button>
+                        <button class="icon-btn delete" (click)="deletePost(post.id)" title="Delete">🗑️</button>
                     </td>
                 </tr>
                 }
@@ -142,22 +214,31 @@
         <div class="modal-box" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <div>
-                    <span class="px-3 py-1 bg-accent/10 text-accent rounded-full text-[10px] uppercase font-black tracking-widest">{{ getCategoryLabel(post.category) }}</span>
+                    <span
+                        class="px-3 py-1 bg-accent/10 text-accent rounded-full text-[10px] uppercase font-black tracking-widest">{{
+                        getCategoryLabel(post.articleCategory) }}</span>
                     <h3 class="mt-2">{{ post.title }}</h3>
-                    <p class="text-xs opacity-50 font-bold mt-1">Published on {{ post.createdAt | date:'longDate' }}</p>
+                    <p class="text-xs opacity-50 font-bold mt-1">Published on {{ post.createdAt | date:'dd-MM-yyyy' }}</p>
                 </div>
                 <button (click)="selectedPost.set(null)" class="close-btn">✕</button>
             </div>
             <div class="modal-body">
                 @if (post.imageUrl) {
-                    <img [src]="post.imageUrl" class="w-full h-80 object-cover rounded-2xl mb-10 border border-primary/5 shadow-2xl">
+                <img [src]="post.imageUrl"
+                    class="w-full h-80 object-cover rounded-2xl mb-10 border border-primary/5 shadow-2xl" appImgFallback>
                 }
                 <div class="prose prose-invert max-w-none">
                     <p class="text-lg leading-relaxed font-light" style="white-space: pre-wrap;">{{ post.content }}</p>
                 </div>
+                @if (post.attachmentUrl) {
+                <a [href]="post.attachmentUrl" target="_blank" rel="noopener" class="btn btn-secondary mt-8">
+                    <span class="icon">📄</span> {{ post.attachmentFileName || 'Download attachment' }}
+                </a>
+                }
             </div>
             <div class="modal-footer">
-                <button (click)="editPost(post); selectedPost.set(null)" class="btn btn-secondary">Edit Original Assets</button>
+                <button (click)="editPost(post); selectedPost.set(null)" class="btn btn-secondary">Edit Original
+                    Assets</button>
                 <button (click)="selectedPost.set(null)" class="btn btn-accent px-8">Dismiss</button>
             </div>
         </div>

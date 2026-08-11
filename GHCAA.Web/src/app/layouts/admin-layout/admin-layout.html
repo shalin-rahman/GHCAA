@@ -1,10 +1,14 @@
-<div class="admin-wrapper">
+<div class="admin-wrapper" [class.sidebar-open]="isSidebarOpen()">
+    <!-- 29F.4: backdrop closes the mobile drawer when tapped -->
+    <div class="admin-backdrop" (click)="isSidebarOpen.set(false)"></div>
     <nav class="admin-sidebar">
         <div class="admin-brand">
-            <img src="/assets/logo.jpg" alt="GHC" class="logo">
+            <img [src]="orgConfig.config()?.branding?.logoUrl || '/assets/logo.png'"
+                [alt]="orgConfig.config()?.branding?.shortName || 'Logo'" class="logo"
+                appImgFallback="/assets/logo.png">
             <div class="brand-text">
-                <span class="brand-name">GHCAA Admin Portal</span>
-                <span class="brand-sub">Admin Control</span>
+                <span class="brand-name">{{ orgConfig.config()?.branding?.shortName || 'Admin' }} Admin</span>
+                <span class="brand-sub">Control Panel</span>
             </div>
         </div>
 
@@ -13,9 +17,10 @@
             <div class="nav-section">
                 <span class="nav-section-label">{{ section.name }}</span>
                 @for (item of section.items; track item.path) {
-                <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.path === '/admin/dashboard' || item.path === '/admin/members'}"
+                <a [routerLink]="item.path" routerLinkActive="active"
+                    [routerLinkActiveOptions]="{exact: item.path === '/admin/dashboard' || item.path === '/admin/members' || item.path === '/admin/payments'}"
                     class="nav-item">
-                    <span class="nav-icon">{{ item.icon }}</span>
+                    <span class="nav-icon"><app-icon [name]="item.icon"></app-icon></span>
                     <span class="nav-label">{{ item.label }}</span>
                 </a>
                 }
@@ -24,29 +29,24 @@
         </div>
 
         <div class="nav-footer">
+            <!-- Sign Out + user identity live in the top-right header only (no duplication). -->
             <a routerLink="/portal/dashboard" class="nav-item exit-item">
-                <span class="nav-icon">🔙</span>
+                <span class="nav-icon"><app-icon name="back"></app-icon></span>
                 <span class="nav-label">Member Portal</span>
             </a>
-            <div class="admin-user-info">
-                <span class="user-dot"></span>
-                {{ auth.currentUser()?.username }}
-                <span class="role-badge">{{ auth.currentUser()?.role }}</span>
-            </div>
         </div>
     </nav>
 
     <main class="admin-main">
         <header class="admin-header">
             <div class="admin-header-inner portal-content">
-                <div class="admin-breadcrumbs">
-                    <span class="text-muted">GHCAA Admin Portal</span>
-                    <span class="separator">/</span>
-                    <span class="current-page">{{ currentPageTitle() }}</span>
-                </div>
+                <!-- 29F.4: hamburger toggles the sidebar drawer on mobile -->
+                <button type="button" class="sidebar-toggle" (click)="toggleSidebar()" aria-label="Toggle menu"><app-icon name="menu"></app-icon></button>
+                <app-breadcrumb [root]="(orgConfig.config()?.branding?.shortName || 'Admin') + ' Admin'"
+                    [current]="currentPageTitle()"></app-breadcrumb>
                 <div class="header-right">
-                    <span class="header-role-badge">{{ auth.currentUser()?.role }}</span>
                     <a routerLink="/portal/dashboard" class="header-btn">Exit Admin</a>
+                    <app-user-menu [roleLabel]="auth.currentUser()?.role ?? ''"></app-user-menu>
                 </div>
             </div>
         </header>

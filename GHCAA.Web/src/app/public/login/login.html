@@ -1,22 +1,39 @@
 <div class="login-page">
     <div class="glass-card login-card">
         <div class="login-header">
-            <img src="/assets/logo.jpg" alt="Logo" class="logo">
+            <img src="/assets/logo.png" alt="Logo" class="logo" appImgFallback>
             <h2>Member Portal</h2>
             <p>Login to your account</p>
         </div>
 
-        <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+        <form (ngSubmit)="onLogin(loginForm)" #loginForm="ngForm">
             <div class="form-group">
                 <label>Username</label>
-                <input type="text" name="username" [(ngModel)]="credentials.username" required
-                    placeholder="Enter your username" class="form-control">
+                <input type="text" name="username" [(ngModel)]="credentials.username" 
+                    required minlength="3" #usernameModel="ngModel"
+                    placeholder="Enter your username" class="form-control"
+                    [class.is-invalid]="usernameModel.touched && usernameModel.invalid">
+                <div class="field-error" *ngIf="usernameModel.touched && usernameModel.invalid">
+                    <span *ngIf="usernameModel.errors?.['required']">Username is required.</span>
+                    <span *ngIf="usernameModel.errors?.['minlength']">Username must be at least 3 characters.</span>
+                </div>
             </div>
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" [(ngModel)]="credentials.password" required
-                    placeholder="••••••••" class="form-control">
+                <div class="password-input">
+                    <input [type]="showPassword() ? 'text' : 'password'" name="password" [(ngModel)]="credentials.password" 
+                        required minlength="6" #passwordModel="ngModel"
+                        placeholder="••••••••" class="form-control"
+                        [class.is-invalid]="passwordModel.touched && passwordModel.invalid">
+                    <button type="button" class="toggle-password" (click)="togglePassword()" tabindex="-1">
+                        <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></app-icon>
+                    </button>
+                </div>
+                <div class="field-error" *ngIf="passwordModel.touched && passwordModel.invalid">
+                    <span *ngIf="passwordModel.errors?.['required']">Password is required.</span>
+                    <span *ngIf="passwordModel.errors?.['minlength']">Password must be at least 6 characters.</span>
+                </div>
             </div>
 
             <div class="error-msg" *ngIf="errorMessage()">
@@ -26,6 +43,19 @@
             <button type="submit" class="btn btn-accent w-full" [disabled]="loginForm.invalid || loading()">
                 {{ loading() ? 'Authenticating...' : 'Login' }}
             </button>
+
+            <div class="social-login-separator" *ngIf="socialProviders().length > 0">
+                <span>OR</span>
+            </div>
+
+            <div class="social-login-buttons" *ngIf="socialProviders().length > 0">
+                <button *ngIf="isProviderEnabled('Google')" type="button" class="btn btn-social btn-google" (click)="loginWithGoogle()">
+                    <app-icon name="google" [size]="16"></app-icon> Continue with Google
+                </button>
+                <button *ngIf="isProviderEnabled('Facebook')" type="button" class="btn btn-social btn-facebook" (click)="loginWithFacebook()">
+                    <app-icon name="facebook" [size]="16"></app-icon> Continue with Facebook
+                </button>
+            </div>
 
             <div class="form-footer">
                 <a href="javascript:void(0)" (click)="forgotPassword()">Forgot Password?</a>

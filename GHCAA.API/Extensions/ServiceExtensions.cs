@@ -1,15 +1,18 @@
 using System.Text;
+using GHCAA.Application.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace GHCAA.API.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
         {
             var jwt = configuration.GetSection("Jwt");
-            var secret = jwt["Key"] ?? "super_secret_key_that_is_at_least_32_characters_long_for_hs256";
+            var secret = JwtSigningKeyResolver.Resolve(configuration, environment);
 
             services.AddAuthentication(options =>
             {
@@ -35,12 +38,25 @@ namespace GHCAA.API.Extensions
                 {
                     OnMessageReceived = context =>
                     {
-                        var accessToken = context.Request.Query["access_token"];
                         var path = context.HttpContext.Request.Path;
-                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+
+                        // SignalR hubs pass token via query string.
+                        var qsToken = context.Request.Query["access_token"];
+                        if (!string.IsNullOrEmpty(qsToken) && (path.StartsWithSegments("/hubs") || path.StartsWithSegments("/api/hubs")))
                         {
-                            context.Token = accessToken;
+                            context.Token = qsToken;
+                            return Task.CompletedTask;
                         }
+
+                        // 24.39: Browser clients use httpOnly cookie; Bearer header takes priority
+                        // so API clients / mobile remain unaffected.
+                        if (!context.Request.Headers.ContainsKey("Authorization")
+                            && context.Request.Cookies.TryGetValue("access_token", out var cookieToken)
+                            && !string.IsNullOrEmpty(cookieToken))
+                        {
+                            context.Token = cookieToken;
+                        }
+
                         return Task.CompletedTask;
                     }
                 };
@@ -56,6 +72,12 @@ namespace GHCAA.API.Extensions
                 options.AddPolicy("SuperAdminOnly", policy => policy.RequireRole("SuperAdmin"));
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("SuperAdmin", "Admin"));
                 options.AddPolicy("MemberOnly", policy => policy.RequireRole("SuperAdmin", "Admin", "Member"));
+
+                // 3d: Secure-by-default — any action without an explicit [Authorize]/[AllowAnonymous]
+                // now requires authentication instead of being implicitly public.
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
             });
 
             return services;

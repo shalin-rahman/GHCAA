@@ -24,29 +24,12 @@ namespace GHCAA.Domain.Models
         public string EmergencyContactRelation { get; set; } = null!;
         public string EmergencyContactPhone { get; set; } = null!;
 
-        // B. Academic (2.1 B)
-        // Highest Certificate
-        public int? HSCAdmissionYear { get; set; } // 1950 - Current
-        public string HighestCertificate { get; set; } = null!;
-        public string HighestCertificateGroup { get; set; } = null!;
-        public string HighestCertificateSubject { get; set; } = null!;
-        public int HighestCertificatePassingYear { get; set; }
-
-        // GHC Certificate
-        public int? GHCAdmissionYear { get; set; } // 1950 - Current
-        public string GHCLastCertificate { get; set; } = null!;
-        public string GHCLastCertificateGroup { get; set; } = null!;
-        public string GHCLastCertificateSubject { get; set; } = null!;
-        public int GHCLastCertificatePassingYear { get; set; }
-
-        // C. Professional (2.1 C)
-        public string ProfessionalSector { get; set; } = null!;
-        public string Designation { get; set; } = null!; // Role, Organization, Location
-
         // D. Attachments & System Logic (2.1 D & Section 4)
         public string? PhotoPath { get; set; }
-        public string? CertificatePath { get; set; }
-        public string? PaymentProofPath { get; set; }
+        public string? SignaturePath { get; set; }
+        public string? TShirtSize { get; set; }
+        public string? CertificatePath { get; set; } // Summary or current qualification
+        public string? PaymentProofPath { get; set; } // Summary or latest receipt
 
         // Workflow & Status
         public MembershipStatus Status { get; set; }
@@ -60,7 +43,16 @@ namespace GHCAA.Domain.Models
         public bool IsEmailPublic { get; set; } = false;
         public bool IsAddressPublic { get; set; } = false;
         public bool IsNIDPublic { get; set; } = false;
+        public bool IsFamilyPublic { get; set; } = false;
         public bool HasAcceptedTerms { get; set; } = false;
+        public bool HasAcceptedGdpr { get; set; } = false;
+        public DateTime? GdprAcceptedAt { get; set; }
+
+        // Notification Preferences
+        public bool NotifyEventCreation { get; set; } = true;
+        public bool NotifyParticipationApproval { get; set; } = true;
+        public bool NotifyRegistrationUpdate { get; set; } = true;
+        public bool NotifyRelevantUpdates { get; set; } = true;
 
         public bool IsArchived { get; set; } = false;
         public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow;
@@ -68,11 +60,21 @@ namespace GHCAA.Domain.Models
         // Membership details
         public MembershipType MembershipType { get; set; } = MembershipType.General;
         public MemberCategory Category { get; set; } = MemberCategory.None;
+        public string? MembershipChangeReason { get; set; }
+        public string? ECChangeReason { get; set; }
+        public bool IsVerified { get; set; } = false; // Blue Tick / Verification Status
+        public bool IsProfileComplete { get; set; } = false;
+        public int ContributionPoints { get; set; } = 0;
 
         // Navigation
         public User? User { get; set; }
         public ICollection<ECMember> ECMembers { get; set; } = new List<ECMember>();
         public ICollection<AcademicRecord> AcademicHistory { get; set; } = new List<AcademicRecord>();
         public ICollection<ProfessionalRecord> ProfessionalHistory { get; set; } = new List<ProfessionalRecord>();
+        public ICollection<PaymentHistory> PaymentHistories { get; set; } = new List<PaymentHistory>();
+
+        // Family link requests
+        public ICollection<FamilyLinkRequest> SentFamilyLinkRequests { get; set; } = new List<FamilyLinkRequest>();
+        public ICollection<FamilyLinkRequest> ReceivedFamilyLinkRequests { get; set; } = new List<FamilyLinkRequest>();
     }
 }

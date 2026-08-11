@@ -46,7 +46,7 @@ namespace GHCAA.Tests.Services
             var p1 = await _service.CreatePeriodAsync("P1", DateTime.UtcNow.AddYears(-3), DateTime.UtcNow.AddYears(-1));
             // Current period
             var p2 = await _service.CreatePeriodAsync("P2", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddYears(2));
-            
+
             p1.IsActive = true;
             await _context.SaveChangesAsync();
 
@@ -67,7 +67,7 @@ namespace GHCAA.Tests.Services
             // Arrange
             var member = CreateMinimalMember("Test User");
             _context.Members.Add(member);
-            
+
             // Period must cover current date to be activated
             var period = await _service.CreatePeriodAsync("Active Period", DateTime.UtcNow.AddDays(-1), null);
             await _service.ActivatePeriodAsync(period.Id);
@@ -89,10 +89,10 @@ namespace GHCAA.Tests.Services
             // Arrange
             var member = CreateMinimalMember("Test User 2");
             _context.Members.Add(member);
-            
+
             var period = await _service.CreatePeriodAsync("Active Period", DateTime.UtcNow.AddDays(-1), null);
             await _service.ActivatePeriodAsync(period.Id);
-            
+
             var ecMember = new ECMember { MemberId = member.Id, ECPeriodId = period.Id, Position = Enums.ECPosition.President, StartDate = DateTime.UtcNow };
             _context.ECMembers.Add(ecMember);
             await _context.SaveChangesAsync();
@@ -103,6 +103,25 @@ namespace GHCAA.Tests.Services
             // Assert
             var updatedECMember = await _context.ECMembers.FindAsync(ecMember.Id);
             updatedECMember!.EndDate.Should().NotBeNull();
+        }
+
+        [Test]
+        public async Task UpdatePeriodAsync_ShouldModifyFieldsAndForceUtc()
+        {
+            // Arrange
+            var period = await _service.CreatePeriodAsync("Old", DateTime.UtcNow.AddDays(-1), null);
+            var newStart = new DateTime(2024, 1, 1, 10, 0, 0, DateTimeKind.Unspecified);
+            var newEnd = new DateTime(2025, 12, 31, 23, 59, 59, DateTimeKind.Local);
+
+            // Act
+            await _service.UpdatePeriodAsync(period.Id, "Updated", newStart, newEnd, false);
+
+            // Assert
+            var updated = await _context.ECPeriods.FindAsync(period.Id);
+            updated!.Title.Should().Be("Updated");
+            updated.StartDate.Kind.Should().Be(DateTimeKind.Utc);
+            updated.EndDate.Should().NotBeNull();
+            updated.EndDate!.Value.Kind.Should().Be(DateTimeKind.Utc);
         }
 
         private Member CreateMinimalMember(string name)
@@ -120,10 +139,7 @@ namespace GHCAA.Tests.Services
                 EmergencyContactName = "EC",
                 EmergencyContactRelation = "Brother",
                 EmergencyContactPhone = "01800000000",
-                HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="None", GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="None",
-                ProfessionalSector = "P",
-                Designation = "D",
-                GHCLastCertificatePassingYear = 2005,
+                AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "GHC", Degree = "HSC", Subject = "Science", PassingYear = 2005, IsGHC = true } },
                 DateOfBirth = new DateTime(1990, 1, 1),
                 Gender = Enums.Gender.Male,
                 BloodGroup = Enums.BloodGroup.APositive,
@@ -132,3 +148,4 @@ namespace GHCAA.Tests.Services
         }
     }
 }
+

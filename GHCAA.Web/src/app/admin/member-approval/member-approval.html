@@ -1,19 +1,22 @@
 <div class="admin-feature">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Registry Audit Desk</h2>
-            <small>Review and adjudicate incoming membership applications.</small>
-        </div>
-        <div class="header-actions">
-            <div class="stat-badge">Pending Verification: {{ pendingRequests().length }}</div>
-        </div>
+    <app-page-header title="Approvals" [total]="pendingRequests().length"
+        emptySubtitle="Membership admission queue">
+        <small subtitle>Showing {{ filteredRequests().length }} of {{ pendingRequests().length }} pending
+            applications</small>
+        <div stat class="stat-badge">Pending: {{ pendingRequests().length }}</div>
+    </app-page-header>
+
+    <!-- Search Bar -->
+    <div class="filter-bar">
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search by name, email or membership no…"></app-search-bar>
     </div>
 
     <div class="glass-card table-wrap">
         @if (loading()) {
-        <div class="loading-state">
-            <span>⌛</span>
-            <p>Fetching Registry data...</p>
+        <div class="loading-state py-20">
+            <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
+            <p>Gathering pending applications...</p>
         </div>
         } @else {
         <table class="data-table">
@@ -26,13 +29,13 @@
                 </tr>
             </thead>
             <tbody>
-                @for (reg of pendingRequests(); track reg.id) {
+                @for (reg of filteredRequests(); track reg.id) {
                 <tr [class.viewing]="selectedMember()?.id === reg.id">
                     <td>
                         <div class="member-cell">
                             <div class="avatar-box">
                                 @if (reg.photoPath) {
-                                <img [src]="reg.photoPath" alt="Profile">
+                                <img [src]="reg.photoPath" alt="Profile" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                                 } @else {
                                 <div class="avatar">{{ reg.fullName?.[0] || '?' }}</div>
                                 }
@@ -65,9 +68,13 @@
                     </td>
                 </tr>
                 } @empty {
-                <tr class="empty-row">
-                    <td colspan="4" style="text-align: center; padding: 4rem; color: var(--text-muted);">No pending
-                        applications currently.</td>
+                <tr>
+                    <td colspan="4">
+                        <div class="empty-state py-20">
+                            <span class="text-4xl mb-3 block">👥</span>
+                            <p class="text-muted italic opacity-50">{{ searchQuery() ? 'No applicants match your search criteria.' : 'No pending applications currently in the queue.' }}</p>
+                        </div>
+                    </td>
                 </tr>
                 }
             </tbody>
@@ -80,18 +87,179 @@
     <div class="glass-card p-10 reveal-top mt-10">
         <div class="flex items-start justify-between mb-10 border-b border-accent/20 pb-6">
             <div>
-                <h3 class="text-2xl font-black text-accent tracking-tighter">Registry Audit: {{
+                <h3 class="text-2xl font-black text-accent tracking-tighter">Review Applicant: {{
                     selectedMember()?.fullName }}</h3>
-                <p class="text-muted text-xs uppercase tracking-widest font-bold mt-1">Institutional Membership
-                    Verification</p>
+                <p class="text-muted text-xs uppercase tracking-widest font-bold mt-1">Verification details for membership admission</p>
             </div>
             <div class="flex items-center gap-4">
                 <span class="status-badge bg-gold-gradient text-black">In-Review</span>
                 <button (click)="closeAudit()" class="btn btn-secondary !p-2">✕</button>
             </div>
         </div>
-        <!-- Audit grid content remains mostly same but structural classes wrap it -->
-        ...
+        <div class="audit-grid grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Column 1: Personal & Documents -->
+            <div class="space-y-10">
+                <div class="audit-section">
+                    <h4
+                        class="text-xs uppercase font-black text-accent tracking-widest mb-6 border-b border-accent/10 pb-2">
+                        Identity Proofs</h4>
+                    <div class="flex gap-8 items-start">
+                        <div class="doc-preview">
+                            <span class="text-[10px] uppercase font-bold opacity-40 mb-2 block">Applicant Photo</span>
+                            <div class="img-box glass-card w-40 h-40 overflow-hidden">
+                                <img [src]="selectedMember()?.photoPath || '/assets/placeholders/avatar-placeholder.svg'" alt="Profile" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                            </div>
+                        </div>
+                        <div class="doc-preview flex-1">
+                            <span class="text-[10px] uppercase font-bold opacity-40 mb-2 block">Application Document</span>
+                            <div
+                                class="doc-box glass-card h-40 flex flex-col items-center justify-center p-6 text-center">
+                                @if (selectedMember()?.certificatePath) {
+                                <span class="text-3xl mb-2">📜</span>
+                                <a [href]="selectedMember()?.certificatePath" target="_blank"
+                                    class="text-[10px] text-accent font-black hover:underline uppercase">View
+                                    Certificate ↗</a>
+                                } @else {
+                                <span class="text-2xl mb-2 opacity-20">📂</span>
+                                <p class="text-[9px] opacity-40 uppercase">No document provided for verification.</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="audit-section">
+                    <h4
+                        class="text-xs uppercase font-black text-accent tracking-widest mb-6 border-b border-accent/10 pb-2">
+                        Personal Particulars</h4>
+                    <div class="details-list grid grid-cols-2 gap-y-4 text-xs">
+                        <div class="field">
+                            <span class="label opacity-40 block uppercase text-[10px]">Father's Name</span>
+                            <strong class="text-main">{{ selectedMember()?.fatherName }}</strong>
+                        </div>
+                        <div class="field">
+                            <span class="label opacity-40 block uppercase text-[10px]">Mother's Name</span>
+                            <strong class="text-main">{{ selectedMember()?.motherName }}</strong>
+                        </div>
+                        <div class="field">
+                            <span class="label opacity-40 block uppercase text-[10px]">Date of Birth</span>
+                            <strong class="text-main">{{ selectedMember()?.dateOfBirth | date:'dd-MM-yyyy' }}</strong>
+                        </div>
+                        <div class="field">
+                            <span class="label opacity-40 block uppercase text-[10px]">Blood Group</span>
+                            <strong class="text-main">{{ selectedMember()?.bloodGroup }}</strong>
+                        </div>
+                        <div class="field">
+                            <span class="label opacity-40 block uppercase text-[10px]">National ID (NID)</span>
+                            <strong class="text-main">{{ selectedMember()?.nid }}</strong>
+                        </div>
+                        <div class="field">
+                            <span class="label opacity-40 block uppercase text-[10px]">Verified Phone</span>
+                            <strong class="text-main">{{ selectedMember()?.mobileNo }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="audit-section">
+                    <h4
+                        class="text-xs uppercase font-black text-accent tracking-widest mb-6 border-b border-accent/10 pb-2">
+                        Residency (Present/Permanent)</h4>
+                    <div class="details-list space-y-4 text-xs">
+                        <div class="field">
+                            <span class="label opacity-40 block uppercase text-[10px]">Present Residence</span>
+                            <p class="text-main leading-relaxed font-bold italic">{{ selectedMember()?.presentAddress }}
+                            </p>
+                        </div>
+                        <div class="field">
+                            <span class="label opacity-40 block uppercase text-[10px]">Permanent Roots</span>
+                            <p class="text-main leading-relaxed font-bold italic">{{ selectedMember()?.permanentAddress
+                                }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 2: History & Adjudication -->
+            <div class="space-y-10">
+                <div class="audit-section">
+                    <h4
+                        class="text-xs uppercase font-black text-accent tracking-widest mb-6 border-b border-accent/10 pb-2">
+                        Academic Timeline</h4>
+                    <div class="timeline space-y-4">
+                        @for (edu of selectedMember()?.academicHistory; track $index) {
+                        <div class="timeline-item glass-card p-4 relative pl-8">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-accent/20"></div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h5 class="text-[11px] font-black leading-tight">{{ edu.institutionName }}</h5>
+                                    <p class="text-[10px] text-accent font-bold">{{ edu.degree }} in {{ edu.subject }}
+                                    </p>
+                                </div>
+                                <span class="text-[10px] font-black opacity-40">{{ edu.admissionYear }} — {{
+                                    edu.passingYear }}</span>
+                            </div>
+                            @if (edu.isGHC) {
+                            <span
+                                class="absolute -left-2 top-4 bg-accent text-black text-[8px] font-black px-1 rounded">GHC</span>
+                            }
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="audit-section">
+                    <h4
+                        class="text-xs uppercase font-black text-accent tracking-widest mb-6 border-b border-accent/10 pb-2">
+                        Professional Career Milestones</h4>
+                    <div class="timeline space-y-4">
+                        @for (job of selectedMember()?.professionalHistory; track $index) {
+                        <div class="timeline-item glass-card p-4 relative pl-8">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary/20"></div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h5 class="text-[11px] font-black leading-tight">{{ job.organizationName }}</h5>
+                                    <p class="text-[10px] text-primary/70 font-bold uppercase">{{ job.designation }}</p>
+                                    <small class="text-[9px] opacity-40">{{ job.location }} · {{ job.sector }}</small>
+                                </div>
+                                <span class="text-[10px] font-black opacity-40">
+                                    {{ job.startDate | date:'yyyy' }} — {{ job.isCurrent ? 'ACTIVE' : (job.endDate |
+                                    date:'yyyy') }}
+                                </span>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="audit-section">
+                    <h4
+                        class="text-xs uppercase font-black text-accent tracking-widest mb-6 border-b border-accent/10 pb-2">
+                        Approval Decision</h4>
+                    <div class="audit-actions space-y-4">
+                        @if (rejecting()) {
+                        <div class="rejection-form animate-fade">
+                            <label class="text-[10px] font-black uppercase mb-2 block">Grounds for Decline *</label>
+                            <textarea [(ngModel)]="rejectionReason"
+                                class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-xs italic outline-none focus:border-red-500/50"
+                                placeholder="Explain why this application is being rejected..."></textarea>
+                            <div class="flex gap-4 mt-4">
+                                <button (click)="rejecting.set(false)" class="btn btn-secondary flex-1">Cancel</button>
+                                <button (click)="confirmReject()" class="btn btn-accent flex-1 bg-red-600 text-white"
+                                    [disabled]="!rejectionReason">Reject Application</button>
+                            </div>
+                        </div>
+                        } @else {
+                        <div class="flex gap-4">
+                            <button (click)="rejecting.set(true)" class="btn btn-outline flex-1">Decline
+                                Application</button>
+                            <button (click)="approve(selectedMember().id)"
+                                class="btn btn-accent flex-1 shadow-gold">Approve Member</button>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     }
 </div>

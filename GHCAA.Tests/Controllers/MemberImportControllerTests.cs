@@ -28,7 +28,7 @@ namespace GHCAA.Tests.Controllers
         {
             var request = new MemberImportRequestDto();
             var resultDto = new MemberImportResultDto { SuccessCount = 10, FailureCount = 0 };
-            
+
             _importServiceMock.Setup(x => x.ImportMembersAsync(request, It.IsAny<CancellationToken>()))
                               .ReturnsAsync(resultDto);
 
@@ -36,7 +36,7 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
-            Assert.That(okResult.Value, Is.EqualTo(resultDto));
+            Assert.That(okResult!.Value, Is.EqualTo(resultDto));
         }
     }
 }

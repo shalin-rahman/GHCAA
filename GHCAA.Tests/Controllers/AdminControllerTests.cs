@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,10 +14,11 @@ using NUnit.Framework;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    public class AdminControllerTests
+    public class AdminControllerTests : ControllerTestBase
     {
         private Mock<IMemberService> _memberServiceMock;
         private Mock<IIDCardService> _idCardServiceMock;
+        private Mock<IFileValidationService> _fileValidationServiceMock;
         private AdminController _controller;
 
         [SetUp]
@@ -24,37 +26,34 @@ namespace GHCAA.Tests.Controllers
         {
             _memberServiceMock = new Mock<IMemberService>();
             _idCardServiceMock = new Mock<IIDCardService>();
+            _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                       .Returns(FileValidationResult.Ok());
 
-            _controller = new AdminController(_memberServiceMock.Object, _idCardServiceMock.Object);
+            _controller = new AdminController(_memberServiceMock.Object, _idCardServiceMock.Object, _fileValidationServiceMock.Object);
 
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                new Claim(ClaimTypes.Role, "SuperAdmin")
-            }, "TestAuthentication"));
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
+            SetSuperAdminContext(_controller, 1);
         }
 
         [Test]
         public async Task GetAllMembers_ReturnsOk_WithData()
         {
             var fakeResult = new { TotalItems = 1, Items = new object[] { } };
-            _memberServiceMock.Setup(x => x.GetAllMembersAsync(1, 10, "", "Applied", false, true, It.IsAny<CancellationToken>()))
+            _memberServiceMock.Setup(x => x.GetAllMembersAsync(1, 10, "", "Applied", "all", "all", false, true, It.IsAny<CancellationToken>()))
                               .ReturnsAsync(fakeResult);
 
-            var result = await _controller.GetAllMembers(1, 10, "", "Applied", false, CancellationToken.None);
+            var result = await _controller.GetAllMembers(1, 10, "", "Applied", "all", "all", false, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
-            Assert.That(okResult.Value, Is.EqualTo(fakeResult));
+            Assert.That(okResult!.Value, Is.EqualTo(fakeResult));
         }
 
         [Test]
         public async Task ApproveMember_ReturnsOk_OnSuccess()
         {
-            var dto = new ApproveMemberDto { ApprovedByAdminId = 1 };
+            // Admin identity (1) comes from the JWT MemberId claim set by SetSuperAdminContext, not the DTO.
+            var dto = new ApproveMemberDto();
             _memberServiceMock.Setup(x => x.ApproveMemberAsync(100, 1, It.IsAny<CancellationToken>()))
                               .ReturnsAsync(new ApproveMemberResultDto { MembershipNumber = "GHC-2023-0001", DefaultPassword = "GHC" });
 
@@ -66,7 +65,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task RejectMember_ReturnsOk_OnSuccess()
         {
-            var dto = new RejectMemberDto { RejectedByAdminId = 1, Reason = "Invalid Data" };
+            var dto = new RejectMemberDto { Reason = "Invalid Data" };
             _memberServiceMock.Setup(x => x.RejectMemberAsync(100, 1, "Invalid Data", It.IsAny<CancellationToken>()))
                               .ReturnsAsync(true);
 
@@ -101,7 +100,7 @@ namespace GHCAA.Tests.Controllers
         public async Task ResetPasswordAdmin_ReturnsOk_OnSuccess()
         {
             _memberServiceMock.Setup(x => x.SendAdminPasswordResetLinkAsync(100, It.IsAny<CancellationToken>()))
-                              .ReturnsAsync(true);
+                              .ReturnsAsync((true, "http://reset"));
 
             var result = await _controller.ResetPasswordAdmin(100, CancellationToken.None);
 
@@ -112,7 +111,7 @@ namespace GHCAA.Tests.Controllers
         public async Task UpdateMemberAdmin_ReturnsOk_OnSuccess()
         {
             var dto = new AdminMemberUpdateDto { FullName = "Updated Name" };
-            _memberServiceMock.Setup(x => x.AdminUpdateMemberAsync(100, dto, It.IsAny<CancellationToken>()))
+            _memberServiceMock.Setup(x => x.AdminUpdateMemberAsync(100, dto, 1, It.IsAny<CancellationToken>()))
                               .ReturnsAsync(true);
 
             var result = await _controller.UpdateMemberAdmin(100, dto, CancellationToken.None);

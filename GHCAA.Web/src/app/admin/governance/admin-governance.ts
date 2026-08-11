@@ -1,15 +1,20 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { HttpClient } from '@angular/common/http';
-import { API_ENDPOINTS, EC_ROLES, getECPositionName } from '../../core/constants/app.constants';
+import { API_ENDPOINTS, EC_ROLES, getECPositionName, getMembershipTypeLabel, getCategoryLabel } from '../../core/constants/app.constants';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
+import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
     selector: 'app-admin-governance',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
     templateUrl: './admin-governance.html',
     styleUrl: './admin-governance.scss'
 })
@@ -35,7 +40,27 @@ export class AdminGovernance implements OnInit {
     memberSearchResults = signal<any[]>([]);
     isSearching = signal(false);
 
+    committeeSearch = signal('');
+    filteredMembers = computed(() => {
+        const q = this.committeeSearch().toLowerCase();
+        return this.committeeMembers().filter(m =>
+            m.member?.fullName?.toLowerCase().includes(q) ||
+            m.member?.membershipNumber?.toLowerCase().includes(q) ||
+            this.getRoleName(m.position).toLowerCase().includes(q)
+        );
+    });
+
     ecPositions = EC_ROLES.map((label, index) => ({ value: index, label }));
+
+    getImageUrl(path: string | null | undefined): string {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path : '/' + path;
+        return cleanPath.replace(/^\/\//, '/');
+    }
+
+    getMembershipTypeLabel = getMembershipTypeLabel;
+    getCategoryLabel = getCategoryLabel;
 
     ngOnInit() {
         this.loadPeriods();
@@ -64,7 +89,10 @@ export class AdminGovernance implements OnInit {
 
     loadCommittee(periodId: number) {
         this.http.get<any[]>(`${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${periodId}/members`).subscribe({
-            next: (data) => this.committeeMembers.set(data)
+            next: (data) => this.committeeMembers.set(data),
+            // 29D.8: without this the committee list silently stayed empty on failure,
+            // indistinguishable from a genuinely empty committee.
+            error: () => this.notify.error('Failed to load committee members.')
         });
     }
 
@@ -73,12 +101,16 @@ export class AdminGovernance implements OnInit {
         this.showPeriodModal.set(true);
     }
 
+    formatDateToDMY(d: any) {
+        return toDisplayDate(d);
+    }
+
     editPeriod(period: any) {
         this.editPeriodData.set({
             id: period.id,
             title: period.title,
-            startDate: period.startDate ? period.startDate.split('T')[0] : '', // format for input type="date"
-            endDate: period.endDate ? period.endDate.split('T')[0] : '',
+            startDate: this.formatDateToDMY(period.startDate),
+            endDate: this.formatDateToDMY(period.endDate),
             isActive: period.isActive
         });
         this.showPeriodModal.set(true);
@@ -95,8 +127,8 @@ export class AdminGovernance implements OnInit {
         const isEdit = !!data.id;
         const api = isEdit ? `${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods/${data.id}` : `${API_ENDPOINTS.ADMIN.GOVERNANCE}/periods`;
 
-        // Format payload to ensure empty dates are sent as null, avoiding ASP.NET 400 JSON conversion errors
-        const payload = { ...data, endDate: data.endDate ? data.endDate : null };
+        // Format payload to ISO wire dates; empty dates are sent as null, avoiding ASP.NET 400 JSON conversion errors
+        const payload = { ...data, startDate: toWireDate(data.startDate), endDate: toWireDate(data.endDate) };
         const request = isEdit ? this.http.put(api, payload) : this.http.post(api, payload);
         
         request.subscribe({
@@ -119,7 +151,8 @@ export class AdminGovernance implements OnInit {
             next: () => {
                 this.notify.success('Period activated');
                 this.loadPeriods();
-            }
+            },
+            error: () => this.notify.error('Failed to activate period.')
         });
     }
 
@@ -186,7 +219,8 @@ export class AdminGovernance implements OnInit {
             next: () => {
                 this.notify.success('Member removed');
                 this.loadCommittee(this.selectedPeriod().id);
-            }
+            },
+            error: () => this.notify.error('Failed to remove member.')
         });
     }
 

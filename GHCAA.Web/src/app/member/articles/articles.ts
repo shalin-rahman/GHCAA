@@ -4,12 +4,21 @@ import { FormsModule } from '@angular/forms';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost, SubmissionStatus } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
-import { ARTICLE_CATEGORIES, SUBMISSION_STATUS_MAP, SUBMISSION_STATUS } from '../../core/constants/app.constants';
+import {
+  ARTICLE_CATEGORIES,
+  SUBMISSION_STATUS_MAP,
+  SUBMISSION_STATUS,
+  getArticleCategoryLabel
+} from '../../core/constants/app.constants';
+import { validateUploadFile } from '../../core/utils/file-validation.util';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 
 @Component({
   selector: 'app-member-articles',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, ImgFallbackDirective],
   templateUrl: './articles.html',
   styleUrl: './articles.scss'
 })
@@ -27,14 +36,14 @@ export class MemberArticles implements OnInit {
     id: number;
     title: string;
     content: string;
-    category: any;
+    articleCategory: any;
     imageUrl: string;
     status: SubmissionStatus;
   } = {
     id: 0,
     title: '',
     content: '',
-    category: 'Regular',
+    articleCategory: 'Regular',
     imageUrl: '',
     status: SUBMISSION_STATUS.DRAFT
   };
@@ -66,7 +75,7 @@ export class MemberArticles implements OnInit {
       id: 0,
       title: '',
       content: '',
-      category: 'Regular',
+      articleCategory: 'Regular',
       imageUrl: '',
       status: SUBMISSION_STATUS.DRAFT
     };
@@ -84,7 +93,7 @@ export class MemberArticles implements OnInit {
       id: article.id,
       title: article.title,
       content: article.content,
-      category: article.category,
+      articleCategory: article.articleCategory,
       imageUrl: article.imageUrl || '',
       status: article.status
     };
@@ -97,7 +106,8 @@ export class MemberArticles implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-
+    const err = validateUploadFile(file, 'image');
+    if (err) { this.notify.error(err); input.value = ''; return; }
     this.selectedFile = file;
     const reader = new FileReader();
     reader.onload = (e) => this.photoPreview.set(e.target?.result as string);
@@ -147,7 +157,28 @@ export class MemberArticles implements OnInit {
   }
 
 
+  deleteArticle(id: number) {
+    const article = this.mySubmissions().find(a => a.id === id);
+    if (!article) return;
+    
+    // Only allow deleting drafts or pending submissions. Approved ones are permanent.
+    if (article.status === SUBMISSION_STATUS.APPROVED) {
+        this.notify.warning('Published articles cannot be deleted directly. Contact admin.');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to delete this submission?')) return;
+
+    this.newsService.deleteMySubmission(id).subscribe({
+      next: () => {
+        this.notify.success('Article deleted');
+        this.loadMySubmissions();
+      },
+      error: () => this.notify.error('Failed to delete article')
+    });
+  }
+
   getCategoryLabel(val: string) {
-    return this.categories.find(c => c.value === val)?.label || val;
+    return getArticleCategoryLabel(val);
   }
 }

@@ -1,0 +1,218 @@
+<div class="admin-feature">
+  <app-page-header title="Organization Config"
+    emptySubtitle="Branding, contact details, currency, feature toggles and workflow rules">
+    <small subtitle>Applies to the web portal and the mobile app</small>
+  </app-page-header>
+
+  @if (isLoading) {
+  <div class="loading-state py-20 text-center">
+    <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+    <p>Loading configuration…</p>
+  </div>
+  } @else if (config) {
+  <div class="tabs tab-nav">
+    @for (tab of tabs; track tab.key) {
+    <button type="button" [class.active]="activeTab() === tab.key" (click)="activeTab.set(tab.key)">
+      {{ tab.label }}
+    </button>
+    }
+  </div>
+
+  <form class="glass-card p-8 space-y-8" (ngSubmit)="saveConfig()">
+    @switch (activeTab()) {
+
+    @case ('branding') {
+    <div class="config-grid">
+      <div class="form-group">
+        <label>Short Name</label>
+        <input type="text" [(ngModel)]="config.branding.shortName" name="shortName" maxlength="50">
+      </div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" [(ngModel)]="config.branding.fullName" name="fullName" maxlength="200">
+      </div>
+      <div class="form-group">
+        <label>Member Nickname</label>
+        <input type="text" [(ngModel)]="config.branding.memberNickname" name="memberNickname" maxlength="50">
+      </div>
+      <div class="form-group">
+        <label>Institution Name</label>
+        <input type="text" [(ngModel)]="config.branding.institutionName" name="institutionName" maxlength="200">
+      </div>
+      <div class="form-group">
+        <label>Institution Acronym</label>
+        <input type="text" [(ngModel)]="config.branding.institutionAcronym" name="institutionAcronym" maxlength="20">
+      </div>
+      <div class="form-group">
+        <label>Membership Number Prefix</label>
+        <input type="text" [(ngModel)]="config.branding.membershipNumberPrefix" name="membershipNumberPrefix" maxlength="20">
+      </div>
+      <div class="form-group">
+        <label>Approval Seal Text</label>
+        <input type="text" [(ngModel)]="config.branding.approvalSeal" name="approvalSeal" maxlength="50">
+      </div>
+      <div class="form-group">
+        <label>Logo URL</label>
+        <input type="text" [(ngModel)]="config.branding.logoUrl" name="logoUrl">
+      </div>
+      <div class="form-group">
+        <label>Primary Color</label>
+        <input type="text" [(ngModel)]="config.branding.primaryColor" name="primaryColor" placeholder="#121212">
+      </div>
+      <div class="form-group">
+        <label>Accent Color</label>
+        <input type="text" [(ngModel)]="config.branding.accentColor" name="accentColor" placeholder="#c5a059">
+      </div>
+    </div>
+    }
+
+    @case ('contact') {
+    <div class="config-grid">
+      <div class="form-group">
+        <label>Support Email</label>
+        <input type="email" [(ngModel)]="config.contact.supportEmail" name="supportEmail">
+      </div>
+      <div class="form-group">
+        <label>Import Email Base</label>
+        <input type="text" [(ngModel)]="config.contact.importEmailBase" name="importEmailBase">
+      </div>
+      <div class="form-group full-span">
+        <label>Registered Office</label>
+        <input type="text" [(ngModel)]="config.contact.registeredOffice" name="registeredOffice" maxlength="300">
+      </div>
+      <div class="form-group full-span">
+        <label>On-Campus Address</label>
+        <input type="text" [(ngModel)]="config.contact.campusAddress" name="campusAddress" maxlength="300"
+          placeholder="Govt. Haraganga College, Munshiganj-1500, Bangladesh.">
+      </div>
+      <div class="form-group full-span">
+        <label>Map Embed URL</label>
+        <input type="text" [(ngModel)]="config.contact.mapEmbedUrl" name="mapEmbedUrl"
+          placeholder="Google Maps embed src (leave blank to hide the map)">
+      </div>
+      <div class="form-group">
+        <label>Portal Base URL</label>
+        <input type="text" [(ngModel)]="config.contact.portalBaseUrl" name="portalBaseUrl">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Phone Numbers</label>
+      @for (phone of config.contact.phoneNumbers; track $index) {
+      <div class="repeat-row">
+        <input type="text" [(ngModel)]="config.contact.phoneNumbers[$index]" [name]="'phone' + $index"
+          placeholder="+880 1711-234567">
+        <button type="button" class="icon-btn delete" (click)="removePhone($index)" aria-label="Remove phone">✕</button>
+      </div>
+      }
+      <button type="button" class="btn btn-secondary btn-sm mt-2" (click)="addPhone()">+ Add Phone</button>
+    </div>
+
+    <div class="config-grid">
+      <div class="form-group">
+        <label>Facebook</label>
+        <input type="text" [(ngModel)]="config.contact.socialLinks.facebook" name="facebook">
+      </div>
+      <div class="form-group">
+        <label>WhatsApp</label>
+        <input type="text" [(ngModel)]="config.contact.socialLinks.whatsapp" name="whatsapp">
+      </div>
+      <div class="form-group">
+        <label>YouTube</label>
+        <input type="text" [(ngModel)]="config.contact.socialLinks.youtube" name="youtube">
+      </div>
+      <div class="form-group">
+        <label>LinkedIn</label>
+        <input type="text" [(ngModel)]="config.contact.socialLinks.linkedin" name="linkedin">
+      </div>
+      <div class="form-group">
+        <label>Instagram</label>
+        <input type="text" [(ngModel)]="config.contact.socialLinks.instagram" name="instagram">
+      </div>
+    </div>
+    }
+
+    @case ('currency') {
+    <div class="config-grid">
+      <div class="form-group">
+        <label>Currency Code</label>
+        <input type="text" [(ngModel)]="config.currency.code" name="currencyCode" maxlength="3" placeholder="BDT">
+      </div>
+      <div class="form-group">
+        <label>Symbol</label>
+        <input type="text" [(ngModel)]="config.currency.symbol" name="currencySymbol" maxlength="5">
+      </div>
+      <div class="form-group">
+        <label>Display Name</label>
+        <input type="text" [(ngModel)]="config.currency.name" name="currencyName">
+      </div>
+    </div>
+    }
+
+    @case ('features') {
+    <div class="toggle-grid">
+      @for (key of featureKeys; track key) {
+      <label class="toggle-row">
+        <input type="checkbox" [(ngModel)]="config.features[key]" [name]="key">
+        <span>{{ humanize(key) }}</span>
+      </label>
+      }
+    </div>
+    }
+
+    @case ('workflow') {
+    <div class="config-grid">
+      <div class="form-group">
+        <label>Member Approval Mode</label>
+        <select [(ngModel)]="config.workflow.memberApprovalMode" name="memberApprovalMode">
+          @for (mode of approvalModes; track mode) {
+          <option [value]="mode">{{ humanize(mode) }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Default Membership Type</label>
+        <input type="text" [(ngModel)]="config.workflow.defaultMembershipType" name="defaultMembershipType">
+      </div>
+      <div class="form-group full-span">
+        <label>Membership Types <small class="text-muted">(comma separated)</small></label>
+        <input type="text" [(ngModel)]="membershipTypesCsv" name="membershipTypesCsv">
+      </div>
+    </div>
+    <div class="toggle-grid">
+      <label class="toggle-row">
+        <input type="checkbox" [(ngModel)]="config.workflow.otpVerificationRequired" name="otpVerificationRequired">
+        <span>OTP Verification Required</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" [(ngModel)]="config.workflow.adminEmailOnNewRegistration" name="adminEmailOnNewRegistration">
+        <span>Email Admin On New Registration</span>
+      </label>
+    </div>
+    }
+
+    @case ('advanced') {
+    <div class="form-group">
+      <label>Localization JSON</label>
+      <p class="text-xs text-muted mb-2">Locale packs and label overrides. Must remain valid JSON.</p>
+      <textarea [(ngModel)]="localizationJson" name="localizationJson" rows="20" class="font-mono text-sm"
+        spellcheck="false"></textarea>
+    </div>
+    }
+    }
+
+    @if (successMessage) {
+    <div class="alert alert-success">{{ successMessage }}</div>
+    }
+    @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    <div class="flex justify-end">
+      <button type="submit" class="btn btn-accent shadow-gold" [disabled]="isSaving">
+        {{ isSaving ? 'Saving…' : 'Save Configuration' }}
+      </button>
+    </div>
+  </form>
+  }
+</div>

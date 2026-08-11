@@ -7,7 +7,7 @@ namespace GHCAA.Application.DTOs
     {
         public IFormFile ExcelFile { get; set; } = null!;
         public List<IFormFile> Photos { get; set; } = new();
-        
+
         // JSON string mapping: { "ExcelColumnName": "SystemPropertyName" }
         public string ColumnMappingJson { get; set; } = "{}";
 

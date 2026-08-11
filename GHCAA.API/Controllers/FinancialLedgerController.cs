@@ -10,7 +10,8 @@ namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/ledger")]
-    [Authorize(Policy = "AdminOnly")]
+    [Route("api/financial/ledger")]
+    [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
     public class FinancialLedgerController : ControllerBase
     {
         private readonly IFinancialLedgerService _ledgerService;

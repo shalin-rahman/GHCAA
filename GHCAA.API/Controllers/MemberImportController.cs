@@ -26,5 +26,12 @@ namespace GHCAA.API.Controllers
             var result = await _importService.ImportMembersAsync(request, cancellationToken);
             return Ok(result);
         }
+
+        [HttpGet("export")]
+        public async Task<IActionResult> Export(CancellationToken cancellationToken)
+        {
+            var bytes = await _importService.ExportMembersToExcelAsync(cancellationToken);
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"Members_Registry_{DateTime.Now:yyyyMMdd}.xlsx");
+        }
     }
 }

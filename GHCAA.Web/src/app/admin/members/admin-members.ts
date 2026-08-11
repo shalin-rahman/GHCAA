@@ -1,20 +1,29 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { EC_ROLES, getECPositionName, getCurrentECPosition, getCurrentECPeriod, ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, getStatusLabel, getStatusClass, getCategoryLabel, getMembershipTypeLabel, MEMBERSHIP_STATUS_MAP, MEMBERSHIP_STATUS_OPTIONS, MEMBERSHIP_TYPE_OPTIONS, MEMBER_CATEGORY_OPTIONS, EC_ROLES_OPTIONS, GENDER_OPTIONS, BLOOD_GROUP_OPTIONS, getBloodGroupName } from '../../core/constants/app.constants';
+import { DatePipe } from '@angular/common';
 import * as XLSX from 'xlsx';
 import { ExportButtonsComponent } from '../../common/export-buttons/export-buttons.component';
 import { PaginationComponent } from '../../common/pagination/pagination.component';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { ExportUtil } from '../../core/utils/export.util';
+import { validateUploadFile } from '../../core/utils/file-validation.util';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { toWireDate } from '../../core/utils/date.util';
+import { Icon } from '../../common/icon/icon';
 
 @Component({
   selector: 'app-admin-members',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent, PaginationComponent, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, Icon],
+  providers: [DatePipe],
   templateUrl: './admin-members.html',
   styleUrl: './admin-members.scss'
 })
@@ -22,6 +31,7 @@ export class AdminMembers implements OnInit {
   private adminService = inject(AdminService);
   private notify = inject(NotificationService);
   private router = inject(Router);
+  private datePipe = inject(DatePipe);
   nav = inject(NavService);
 
   allMembers = signal<any[]>([]);
@@ -29,12 +39,18 @@ export class AdminMembers implements OnInit {
   isExporting = signal(false);
   searchQuery = signal('');
   statusFilter = signal('all');
+  categoryFilter = signal('all');
+  membershipTypeFilter = signal('all');
+  includeArchived = signal(false);
   selectedMember = signal<any>(null);
   isEditing = signal(false);
+  submitting = signal(false);
   certToUpload: File | null = null;
   payToUpload: File | null = null;
   photoToUpload: File | null = null;
+  signatureToUpload: File | null = null;
   photoPreview = signal<string | null>(null);
+  signaturePreview = signal<string | null>(null);
   memberPayments = signal<any[]>([]);
 
   // Pagination state
@@ -99,7 +115,18 @@ export class AdminMembers implements OnInit {
     { value: 'MembershipType', label: 'Membership Type' },
     { value: 'Category', label: 'Member Category' },
     // System
-    { value: 'ID', label: 'System/External ID (For Photos)' }
+    { value: 'ID', label: 'System/External ID (For Photos)' },
+    // Privacy & Notifications
+    { value: 'IsMobilePublic', label: 'Expose Mobile' },
+    { value: 'IsEmailPublic', label: 'Expose Email' },
+    { value: 'IsAddressPublic', label: 'Expose Address' },
+    { value: 'IsNIDPublic', label: 'Expose NID' },
+    { value: 'IsFamilyPublic', label: 'Expose Family' },
+    { value: 'NotifyEventCreation', label: 'Notify Events' },
+    { value: 'NotifyRelevantUpdates', label: 'Notify Relevant News' },
+    // Status
+    { value: 'IsVerified', label: 'Verified Alumni (True/False)' },
+    { value: 'ContributionPoints', label: 'Merit Points' }
   ];
 
   // Constants for dropdowns
@@ -114,7 +141,6 @@ export class AdminMembers implements OnInit {
   yearsList = this.ACADEMIC.getYears();
   IS_HSC = IS_HSC;
   degreeOptions = this.ACADEMIC.certificates;
-  groupOptions = this.ACADEMIC.groups;
   subjectOptions = this.ACADEMIC.subjects;
   sectorOptions = this.ACADEMIC.sectors;
 
@@ -129,6 +155,13 @@ export class AdminMembers implements OnInit {
     m.status
   ];
 
+  getImageUrl(path: string | null | undefined): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const cleanPath = path.startsWith('/') ? path : '/' + path;
+    return cleanPath.replace(/^\/\//, '/');
+  }
+
   ngOnInit() {
     this.loadMembers();
     this.loadECPeriods();
@@ -141,7 +174,6 @@ export class AdminMembers implements OnInit {
     });
   }
 
-
   onFilterChange() {
     this.currentPage.set(1);
     this.loadMembers();
@@ -149,7 +181,7 @@ export class AdminMembers implements OnInit {
 
   handleExport(format: string) {
     this.isExporting.set(true);
-    this.adminService.getAllForExport(this.searchQuery(), this.statusFilter()).subscribe({
+    this.adminService.getAllForExport(this.searchQuery(), this.statusFilter(), this.categoryFilter(), this.membershipTypeFilter()).subscribe({
       next: async (res: any) => {
         const rawData = res.items || res;
         
@@ -184,9 +216,32 @@ export class AdminMembers implements OnInit {
 
   loadMembers() {
     this.loading.set(true);
-    this.adminService.getMembers(this.currentPage(), this.pageSize(), this.searchQuery(), this.statusFilter(), false).subscribe({
+    const page = this.currentPage();
+    const query = this.searchQuery();
+    const status = this.statusFilter();
+    const type = this.membershipTypeFilter();
+    const cat = this.categoryFilter();
+    const incArchived = this.includeArchived();
+
+    this.adminService.getMembers(page, this.pageSize(), query, status, cat, type, incArchived).subscribe({
       next: (res: any) => {
-        this.allMembers.set(res.items);
+        // 32.3: generic case-insensitive key normalization — see openDetail() below for why
+        // a hardcoded field whitelist was the bug, not the fix.
+        const mapping = (obj: any) => {
+          const result: any = {};
+          Object.keys(obj || {}).forEach(key => {
+            const camelKey = key === key.toUpperCase()
+              ? key.toLowerCase()
+              : key.charAt(0).toLowerCase() + key.slice(1);
+            if (result[camelKey] === undefined) {
+              result[camelKey] = obj[key];
+            }
+          });
+          return result;
+        };
+
+        const mappedItems = (res.items || []).map(mapping);
+        this.allMembers.set(mappedItems);
         this.totalPages.set(res.totalPages || 1);
         this.totalItems.set(res.totalItems || 0);
         this.loading.set(false);
@@ -212,8 +267,8 @@ export class AdminMembers implements OnInit {
     this.loadMembers();
   }
 
-  approveMember(id: number, adminId: number) {
-    this.adminService.approveMember(id, adminId).subscribe({
+  approveMember(id: number) {
+    this.adminService.approveMember(id).subscribe({
       next: (res: any) => {
         this.notify.success(`Approved! Membership: ${res.membershipNumber}`);
         this.loadMembers();
@@ -233,17 +288,79 @@ export class AdminMembers implements OnInit {
   sendResetLink(id: number) {
     if (!confirm('Send a password reset link to this member?')) return;
     this.adminService.sendPasswordResetLink(id).subscribe({
-      next: () => this.notify.success('Password reset link sent.'),
-      error: () => this.notify.error('Failed to send reset link.')
+      next: (res: any) => {
+        if (res.resetUrl) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(res.resetUrl).then(() => {
+                    this.notify.success('Link copied to dashboard clipboard automatically.');
+                }).catch(() => {
+                    prompt('Password Reset Link:', res.resetUrl);
+                });
+            } else {
+                prompt('Password Reset Link:', res.resetUrl);
+            }
+        } else {
+            this.notify.success(res.message || 'Password reset link sent.');
+        }
+      },
+      error: (err: any) => this.notify.error(err.error?.message || 'Failed to send reset link.')
     });
   }
 
   openDetail(member: any) { 
-    this.selectedMember.set({ ...member }); 
-    this.isEditing.set(false); 
-    this.photoToUpload = null; 
-    this.photoPreview.set(null); 
-    this.loadPayments(member.id);
+    this.loading.set(true);
+    this.adminService.getMemberById(member.id).subscribe({
+      next: (fullMember: any) => {
+        // 32.3: generic case-insensitive key normalization (handles both PascalCase C# DTOs and
+        // camelCase JS) — was a hardcoded whitelist that silently dropped any unlisted flat field
+        // (designation, professionalSector, profileCompletionPercentage, etc.)
+        const mapping = (obj: any) => {
+          const result: any = {};
+          Object.keys(obj || {}).forEach(key => {
+            const camelKey = key === key.toUpperCase()
+              ? key.toLowerCase()
+              : key.charAt(0).toLowerCase() + key.slice(1);
+            if (result[camelKey] === undefined) {
+              result[camelKey] = obj[key];
+            }
+          });
+
+          // Copy nested collections directly if they exist
+          result.academicHistory = obj.academicHistory || obj.AcademicHistory || [];
+          result.professionalHistory = obj.professionalHistory || obj.ProfessionalHistory || [];
+          result.ecHistory = obj.ecHistory || obj.ECHistory || [];
+
+          return result;
+        };
+
+        const mappedMember = mapping(fullMember);
+
+        // Date normalization for Registry standards (dd-MM-yyyy)
+        if (mappedMember.dateOfBirth) {
+            mappedMember.dateOfBirth = this.datePipe.transform(mappedMember.dateOfBirth, 'dd-MM-yyyy') || '';
+        } else if (fullMember.DateOfBirth) {
+            mappedMember.dateOfBirth = this.datePipe.transform(fullMember.DateOfBirth, 'dd-MM-yyyy') || '';
+        }
+
+        if (mappedMember.professionalHistory) {
+            mappedMember.professionalHistory = mappedMember.professionalHistory.map((ph: any) => ({
+                ...ph,
+                startDate: this.datePipe.transform(ph.startDate || ph.StartDate, 'dd-MM-yyyy') || ''
+            }));
+        }
+
+        this.selectedMember.set(mappedMember);
+        this.isEditing.set(false); 
+        this.photoToUpload = null; 
+        this.photoPreview.set(null); 
+        this.loadPayments(member.id);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.notify.error('Failed to load member profile.');
+        this.loading.set(false);
+      }
+    });
   }
 
   loadPayments(memberId: number) {
@@ -282,6 +399,31 @@ export class AdminMembers implements OnInit {
     });
   }
 
+  onAdminSignatureSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.signatureToUpload = file;
+    const reader = new FileReader();
+    reader.onload = (e) => this.signaturePreview.set(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  uploadMemberSignature() {
+    const member = this.selectedMember();
+    if (!member || !this.signatureToUpload) return;
+    this.adminService.updateMemberSignature(member.id, this.signatureToUpload).subscribe({
+      next: (res) => {
+        this.selectedMember.update(m => ({ ...m, signaturePath: res.signaturePath }));
+        this.signatureToUpload = null;
+        this.signaturePreview.set(null);
+        this.notify.success('Signature updated successfully!');
+        this.loadMembers();
+      },
+      error: (err) => this.notify.error(err?.error?.message || 'Signature upload failed.')
+    });
+  }
+
   saveMember() {
     const member = this.selectedMember();
     if (!member) return;
@@ -291,13 +433,21 @@ export class AdminMembers implements OnInit {
       return;
     }
 
+    const mobilePattern = /^01[3-9]\d{8}$/;
+    if (!mobilePattern.test(member.mobileNo)) {
+      this.notify.error('Please enter a valid 11-digit Bangladeshi mobile number.');
+      return;
+    }
+
     ensureValidAcademicData(member);
 
+    this.submitting.set(true);
     this.adminService.updateMember(member.id, {
       fullName: member.fullName,
+      status: member.status,
       fatherName: member.fatherName,
       motherName: member.motherName,
-      dateOfBirth: member.dateOfBirth,
+      dateOfBirth: toWireDate(member.dateOfBirth),
       nid: member.nid,
       mobileNo: member.mobileNo,
       email: member.email,
@@ -320,11 +470,34 @@ export class AdminMembers implements OnInit {
       membershipType: member.membershipType,
       category: member.category,
       membershipNumber: member.membershipNumber,
+      membershipChangeReason: member.membershipChangeReason,
       isMobilePublic: member.isMobilePublic,
       isEmailPublic: member.isEmailPublic,
       isAddressPublic: member.isAddressPublic,
+      isNIDPublic: member.isNIDPublic,
+      isFamilyPublic: member.isFamilyPublic,
+      isVerified: member.isVerified,
+      contributionPoints: member.contributionPoints,
+      notifyEventCreation: member.notifyEventCreation,
+      notifyParticipationApproval: member.notifyParticipationApproval,
+      notifyRegistrationUpdate: member.notifyRegistrationUpdate,
+      notifyRelevantUpdates: member.notifyRelevantUpdates,
+      tShirtSize: member.tShirtSize,
+      emergencyContactName: member.emergencyContactName,
+      emergencyContactRelation: member.emergencyContactRelation,
+      emergencyContactPhone: member.emergencyContactPhone,
       academicHistory: member.academicHistory,
-      professionalHistory: member.professionalHistory
+      professionalHistory: (member.professionalHistory || []).map((ph: any) => ({
+        ...ph,
+        startDate: toWireDate(ph.startDate),
+        endDate: toWireDate(ph.endDate)
+      })),
+      ecHistory: (member.ecHistory || []).map((h: any) => ({
+        ...h,
+        startDate: toWireDate(h.startDate),
+        endDate: toWireDate(h.endDate)
+      })),
+      ecChangeReason: member.ecChangeReason
     }).subscribe({
       next: () => {
         // After data update, if there are files, upload them
@@ -341,11 +514,15 @@ export class AdminMembers implements OnInit {
           this.finalizeSave();
         }
       },
-      error: () => this.notify.error('Update failed.')
+      error: () => {
+        this.notify.error('Update failed.');
+        this.submitting.set(false);
+      }
     });
   }
 
   private finalizeSave() {
+    this.submitting.set(false);
     const memberId = this.selectedMember()?.id;
     this.isEditing.set(false);
     this.certToUpload = null;
@@ -365,11 +542,12 @@ export class AdminMembers implements OnInit {
   }
 
   onDocSelected(event: any, type: 'cert' | 'pay') {
-    const file = event.target.files[0];
-    if (file) {
-      if (type === 'cert') this.certToUpload = file;
-      else this.payToUpload = file;
-    }
+    const file: File = event.target.files[0];
+    if (!file) return;
+    const err = validateUploadFile(file, 'pdf');
+    if (err) { this.notify.error(err); event.target.value = ''; return; }
+    if (type === 'cert') this.certToUpload = file;
+    else this.payToUpload = file;
   }
 
   contactMember(email: string) {
@@ -381,6 +559,7 @@ export class AdminMembers implements OnInit {
   getCategoryLabel = getCategoryLabel;
   getMembershipTypeLabel = getMembershipTypeLabel;
   getECPositionName = getECPositionName;
+  
   getCurrentPosition(member: any) {
     const pos = getCurrentECPosition(member.ecHistory);
     return getECPositionName(pos);
@@ -389,6 +568,7 @@ export class AdminMembers implements OnInit {
   getCurrentPeriod(member: any) {
     return getCurrentECPeriod(member.ecHistory);
   }
+  
   getBloodGroupName = getBloodGroupName;
 
   // --- Import Actions ---
@@ -514,36 +694,48 @@ export class AdminMembers implements OnInit {
   }
 
   addAcademic() {
-    if (!this.selectedMember().academicHistory) this.selectedMember().academicHistory = [];
-    this.selectedMember().academicHistory.unshift({
-      institutionName: '',
-      degree: '',
-      subject: '',
-      admissionYear: new Date().getFullYear() - 4,
-      passingYear: new Date().getFullYear(),
-      isGHC: false,
-      result: ''
+    this.selectedMember.update(m => {
+      if (!m.academicHistory) m.academicHistory = [];
+      m.academicHistory.unshift({
+        institutionName: '',
+        degree: '',
+        subject: '',
+        admissionYear: new Date().getFullYear() - 4,
+        passingYear: new Date().getFullYear(),
+        isGHC: false,
+        result: ''
+      });
+      return { ...m };
     });
   }
 
   removeAcademic(index: number) {
-    this.selectedMember().academicHistory.splice(index, 1);
+    this.selectedMember.update(m => {
+      m.academicHistory.splice(index, 1);
+      return { ...m };
+    });
   }
 
   addProfessional() {
-    if (!this.selectedMember().professionalHistory) this.selectedMember().professionalHistory = [];
-    this.selectedMember().professionalHistory.unshift({
-      organizationName: '',
-      designation: '',
-      sector: '',
-      location: '',
-      startDate: new Date().toISOString().split('T')[0],
-      isCurrent: true
+    this.selectedMember.update(m => {
+      if (!m.professionalHistory) m.professionalHistory = [];
+      m.professionalHistory.unshift({
+        organizationName: '',
+        designation: '',
+        sector: '',
+        location: '',
+        startDate: this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '',
+        isCurrent: true
+      });
+      return { ...m };
     });
   }
 
   removeProfessional(index: number) {
-    this.selectedMember().professionalHistory.splice(index, 1);
+    this.selectedMember.update(m => {
+      m.professionalHistory.splice(index, 1);
+      return { ...m };
+    });
   }
 
   addECHistory() {
@@ -552,7 +744,7 @@ export class AdminMembers implements OnInit {
     this.selectedMember().ecHistory.unshift({
       periodTitle: activePeriod ? activePeriod.title : '',
       position: 0, // None
-      startDate: new Date().toISOString().split('T')[0],
+      startDate: this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '',
       isCurrent: true,
       changeReason: ''
     });
@@ -579,6 +771,12 @@ export class AdminMembers implements OnInit {
       error: () => this.notify.error('Failed to delete history.')
     });
   }
+
+  getLabel(options: any[], value: any): string {
+    if (value === null || value === undefined) return 'Not Specified';
+    // Stringify comparison to handle string vs number (e.g. "Male" vs "Male", or enum 0 vs "0")
+    // Special case for enums: if value is a number, we might need to match its string representation if options use that
+    const option = options.find(o => String(o.value).toLowerCase() === String(value).toLowerCase());
+    return option ? option.label : String(value);
+  }
 }
-
-

@@ -1,6 +1,6 @@
 <div class="directory-page" [class.compact]="isCompact">
     <div class="header">
-        <h2 *ngIf="!isCompact">Member Directory</h2>
+        <h2 *ngIf="!isCompact">Alumni Directory</h2>
         <p *ngIf="!isCompact">Find and connect with fellow Haragangians</p>
     </div>
 
@@ -46,6 +46,27 @@
                     }
                 </select>
             </div>
+            <div class="filter-group">
+                <label>Category</label>
+                <select [(ngModel)]="filters.category" (change)="search()">
+                    <option value="">All Categories</option>
+                    @for (cat of memberCategories; track cat.value) {
+                    <option [value]="cat.value">{{ cat.label }}</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Membership Type</label>
+                <select [(ngModel)]="filters.membershipType" (change)="search()">
+                    <option value="">All Types</option>
+                    <option value="Founding">Founding Member</option>
+                    <option value="Executive">Executive Member</option>
+                    <option value="General">General Member</option>
+                    <option value="Associate">Associate Member</option>
+                    <option value="Honorary">Honorary Member</option>
+                    <option value="Advisory">Advisory Member</option>
+                </select>
+            </div>
         </div>
         <div class="results-summary" *ngIf="!loading() && totalItems() > 0">
             <span>Showing <strong>{{ members().length }}</strong> of <strong>{{ totalItems() }}</strong> members</span>
@@ -56,7 +77,7 @@
     <div class="member-list">
         @if (loading()) {
         <div class="loading-state">
-            <div class="spinner"></div>
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
             <p>Searching directory...</p>
         </div>
         } @else {
@@ -66,7 +87,8 @@
                 <div class="member-header">
                     <div class="avatar-container">
                         @if (m.photoPath) {
-                        <img [src]="m.photoPath" alt="Profile" class="avatar-img">
+                        <img [src]="m.photoPath" alt="Profile" class="avatar-img"
+                            appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                         } @else {
                         <div class="avatar">{{ m.fullName[0] }}</div>
                         }
@@ -75,11 +97,14 @@
                         <h4>{{ m.fullName }}</h4>
                         <div class="membership-meta">
                             <span class="m-no">{{ m.membershipNumber || 'REG-PENDING' }}</span>
+                            @if (m.rank) {
+                                <span class="badge badge-rank !bg-amber-500/20 !text-amber-500 !border-amber-500/30">#{{ m.rank }}</span>
+                            }
+                            @if (m.categoryBadge) {
+                                <span class="badge badge-category !bg-blue-500/20 !text-blue-500 !border-blue-500/30">{{ m.categoryBadge }}</span>
+                            }
                             @if (m.membershipType) {
                                 <span class="m-type-label">{{ m.membershipType }}</span>
-                            }
-                            @if (m.category && m.category !== 'None') {
-                                <span class="m-cat-label">{{ m.category }}</span>
                             }
                         </div>
                         @if (getCurrentECPosition(m.ecHistory) !== 'None') {
@@ -93,7 +118,7 @@
                 <div class="member-body">
                     <div class="info-item academic-batch">
                         <span class="icon">🎓</span>
-                        <span class="batch-text">Batch: <strong>{{ m.ghcLastCertificatePassingYear }}</strong> ({{ m.ghcLastCertificate }} {{ getMajorDisplay(m.ghcLastCertificate, m.ghcLastCertificateGroup, m.ghcLastCertificateSubject) }})</span>
+                        <span class="batch-text">Batch: <strong>{{ m.passingYear || 'N/A' }}</strong> ({{ m.degree || 'N/A' }} {{ getMajorDisplay(m.degree, m.subject) }})</span>
                     </div>
                     <div class="info-item" *ngIf="m.professionalSector">
                         <span class="icon">💼</span>
@@ -124,7 +149,7 @@
         <div #sentinel class="scroll-sentinel">
             @if (loadingMore()) {
             <div class="load-more-spinner">
-                <div class="spinner-sm"></div>
+                <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
                 <span>Syncing Haragangian records...</span>
             </div>
             } @else if (hasMore()) {
@@ -153,11 +178,14 @@
                 <h3>Member Profile</h3>
                 <div class="membership-meta ml-4">
                     <span class="m-no">{{ selectedMember()?.membershipNumber || 'REG-PENDING' }}</span>
-                    @if (selectedMember()?.membershipType) {
-                        <span class="m-type-label">{{ selectedMember()?.membershipType }}</span>
+                    @if (selectedMember()?.rank) {
+                        <span class="badge badge-rank !bg-amber-500/20 !text-amber-500 ml-2">#{{ selectedMember()?.rank }}</span>
                     }
-                    @if (selectedMember()?.category && selectedMember()?.category !== 'None') {
-                        <span class="m-cat-label">{{ selectedMember()?.category }}</span>
+                    @if (selectedMember()?.categoryBadge) {
+                        <span class="badge badge-category !bg-blue-500/20 !text-blue-500 ml-2">{{ selectedMember()?.categoryBadge }}</span>
+                    }
+                    @if (selectedMember()?.membershipType) {
+                        <span class="m-type-label ml-2">{{ selectedMember()?.membershipType }}</span>
                     }
                 </div>
             </div>
@@ -168,7 +196,8 @@
             <div class="viewer-header">
                 <div class="viewer-avatar">
                     @if (selectedMember()?.photoPath) {
-                    <img [src]="selectedMember()?.photoPath" alt="Profile">
+                    <img [src]="selectedMember()?.photoPath" alt="Profile"
+                        appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     <div class="avatar-ph">{{ selectedMember()?.fullName[0] }}</div>
                     }
@@ -178,7 +207,7 @@
                     <p class="role">{{ selectedMember()?.designation }} at {{ selectedMember()?.professionalSector }}
                     </p>
                     <div class="social-tags">
-                        <span class="tag">🎓 Batch: <strong>{{ selectedMember()?.ghcLastCertificatePassingYear }}</strong> ({{ selectedMember()?.ghcLastCertificate }} {{ getMajorDisplay(selectedMember()?.ghcLastCertificate, selectedMember()?.ghcLastCertificateGroup, selectedMember()?.ghcLastCertificateSubject) }})</span>
+                        <span class="tag">🎓 Batch: <strong>{{ selectedMember()?.passingYear || 'N/A' }}</strong> ({{ selectedMember()?.degree || 'N/A' }} {{ getMajorDisplay(selectedMember()?.degree, selectedMember()?.subject) }})</span>
                         <span class="tag">🩸 {{ getBloodGroupName(selectedMember()?.bloodGroup) }}</span>
                     </div>
                 </div>
@@ -197,7 +226,7 @@
                     </div>
                     <div class="v-item">
                         <span class="v-label">Date of Birth</span>
-                        <span class="v-value">{{ selectedMember()?.dateOfBirth | date:'dd MMM yyyy' }}</span>
+                        <span class="v-value">{{ selectedMember()?.dateOfBirth | date:'dd-MM-yyyy' }}</span>
                     </div>
                     <div class="v-item">
                         <span class="v-label">Gender</span>
@@ -216,27 +245,14 @@
                 </div>
 
                 <div class="v-section">
-                    <h4>Academic History</h4>
+                    <h4>Academic Summary</h4>
                     <div class="v-item">
-                        <span class="v-label">HSC Batch</span>
-                        <span class="v-value">{{ selectedMember()?.hscAdmissionYear || 'N/A' }}</span>
+                        <span class="v-label">Batch</span>
+                        <span class="v-value"><strong>{{ selectedMember()?.passingYear || 'N/A' }}</strong></span>
                     </div>
                     <div class="v-item">
-                        <span class="v-label">Academic Status</span>
-                        <span class="v-value">{{ selectedMember()?.highestCertificate }} {{ getMajorDisplay(selectedMember()?.highestCertificate, selectedMember()?.highestCertificateGroup, selectedMember()?.highestCertificateSubject) }}</span>
-                    </div>
-                    <div class="v-item">
-                        <span class="v-label">Passing Year</span>
-                        <span class="v-value">{{ selectedMember()?.highestCertificatePassingYear }}</span>
-                    </div>
-                    <div class="v-divider"></div>
-                    <div class="v-item">
-                        <span class="v-label">GHC Registry</span>
-                        <span class="v-value">{{ selectedMember()?.ghcLastCertificate }} {{ getMajorDisplay(selectedMember()?.ghcLastCertificate, selectedMember()?.ghcLastCertificateGroup, selectedMember()?.ghcLastCertificateSubject) }}</span>
-                    </div>
-                    <div class="v-item">
-                        <span class="v-label">GHC Batch</span>
-                        <span class="v-value"><strong>{{ selectedMember()?.ghcLastCertificatePassingYear }}</strong> (HSC Adm: {{ selectedMember()?.hscAdmissionYear || 'N/A' }})</span>
+                        <span class="v-label">Degree</span>
+                        <span class="v-value">{{ selectedMember()?.degree || 'N/A' }} {{ getMajorDisplay(selectedMember()?.degree, selectedMember()?.subject) }}</span>
                     </div>
                 </div>
 

@@ -17,7 +17,7 @@
     h2 {
         margin: 0;
         font-size: 2rem;
-        color: var(--primary-color);
+        color: var(--text-main);
     }
 
     p {
@@ -27,16 +27,27 @@
     }
 }
 
+/* 30.24: was 2rem padding / 3rem margin — disproportionately tall for a filter panel,
+   and it scrolled away with the results on long member lists. Compacted to the same
+   scale as the `.compact` variant below, and made sticky on larger screens using the
+   same `position: sticky` / `top: var(--header-height)` pattern as `.filter-bar`/
+   `.action-bar` (styles.scss) so the search stays reachable while scrolling. */
 .filters {
-    padding: 2rem;
-    margin-bottom: 3rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
     border: 1px solid var(--glass-border);
+
+    @media (min-width: 1024px) {
+        position: sticky;
+        top: var(--header-height);
+        z-index: 90;
+    }
 }
 
 .filter-grid {
     display: grid;
     grid-template-columns: 1.5fr 1fr 1fr 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .filter-group {
@@ -44,7 +55,7 @@
         display: block;
         font-size: 0.75rem;
         font-weight: 800;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.4rem;
         color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 1px;
@@ -53,18 +64,18 @@
     input,
     select {
         width: 100%;
-        padding: 0.8rem 1rem;
+        padding: 0.55rem 0.85rem;
         border: 1px solid var(--glass-border);
         border-radius: 10px;
         background: var(--bg-color);
         color: var(--text-main);
         font-family: inherit;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         transition: 0.3s;
 
         &:focus {
             outline: none;
-            border-color: var(--primary-color);
+            border-color: var(--text-main);
             box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
         }
     }
@@ -105,7 +116,7 @@
 
     &:hover {
         transform: translateY(-8px);
-        border-color: var(--primary-color);
+        border-color: var(--text-main);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     }
 }
@@ -160,7 +171,7 @@
         .m-no {
             font-size: 0.7rem;
             font-weight: 800;
-            color: var(--primary-color);
+            color: var(--text-main);
             background: rgba(var(--primary-rgb), 0.05);
             padding: 0.15rem 0.5rem;
             border-radius: 4px;
@@ -183,7 +194,7 @@
                 opacity: 0.4;
             }
         }
-        .m-type-label { color: var(--primary-color); }
+        .m-type-label { color: var(--text-main); }
         .m-cat-label { color: var(--text-muted); }
     }
 
@@ -194,7 +205,7 @@
         gap: 0.4rem;
         font-size: 0.75rem;
         font-weight: 800;
-        color: var(--accent-color);
+        color: var(--accent-text);
         background: rgba(var(--accent-rgb), 0.1);
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
@@ -223,7 +234,7 @@
         strong { color: var(--text-main); }
         
         a {
-            color: var(--primary-color);
+            color: var(--text-main);
             text-decoration: none;
             font-weight: 700;
             &:hover { text-decoration: underline; }
@@ -233,7 +244,7 @@
             .batch-text {
                 color: var(--text-main);
                 strong {
-                    color: var(--primary-color);
+                    color: var(--text-main);
                     font-weight: 900;
                     text-decoration: underline;
                     text-decoration-color: rgba(var(--primary-rgb), 0.2);
@@ -258,7 +269,7 @@
     color: var(--text-muted);
 
     strong {
-        color: var(--primary-color);
+        color: var(--text-main);
     }
 }
 
@@ -280,7 +291,7 @@
         width: 20px;
         height: 20px;
         border: 2px solid var(--glass-border);
-        border-top-color: var(--primary-color);
+        border-top-color: var(--text-main);
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
     }
@@ -410,7 +421,7 @@
     .role {
         margin: 0 0 1rem;
         font-size: 1.1rem;
-        color: var(--primary-color);
+        color: var(--text-main);
         font-weight: 600;
     }
 }
@@ -450,7 +461,7 @@
         font-size: 0.9rem;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: var(--primary-color);
+        color: var(--text-main);
         border-bottom: 1px solid var(--glass-border);
         padding-bottom: 0.75rem;
         display: flex;
@@ -496,7 +507,7 @@
         word-break: break-word;
 
         a {
-            color: var(--primary-color);
+            color: var(--text-main);
             text-decoration: none;
 
             &:hover {
@@ -514,7 +525,7 @@
 
 .badge-ec {
     background: rgba(var(--accent-rgb), 0.1) !important;
-    color: var(--accent-color) !important;
+    color: var(--accent-text) !important;
     border-color: rgba(var(--accent-rgb), 0.2) !important;
 }
 
@@ -580,7 +591,7 @@
 
         .h-period {
             font-size: 0.75rem;
-            color: var(--primary-color);
+            color: var(--text-main);
             font-weight: 800;
             letter-spacing: 0.5px;
         }

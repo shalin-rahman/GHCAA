@@ -12,7 +12,7 @@ namespace GHCAA.Tests.Services;
 [TestFixture]
 public class OtpServiceTests : TestBase
 {
-    private Mock<IEmailService> _mockEmail = null!;
+    private Mock<ICommunicationService> _mockCommunication = null!;
     private Mock<IConfiguration> _mockConfig = null!;
     private Mock<ILogger<OtpService>> _mockLogger = null!;
     private OtpService _service = null!;
@@ -20,11 +20,11 @@ public class OtpServiceTests : TestBase
     [SetUp]
     public void Setup()
     {
-        _mockEmail = new Mock<IEmailService>();
+        _mockCommunication = new Mock<ICommunicationService>();
         _mockConfig = new Mock<IConfiguration>();
         _mockLogger = new Mock<ILogger<OtpService>>();
         _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("10");
-        _service = new OtpService(_context, _mockEmail.Object, _mockConfig.Object, _mockLogger.Object);
+        _service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
     }
 
     [Test]
@@ -39,7 +39,8 @@ public class OtpServiceTests : TestBase
 
         var otp = await _context.Otps.FirstOrDefaultAsync(o => o.Email == email);
         otp.Should().NotBeNull();
-        otp!.Code.Should().Be(code);
+        // 24.20: Code is stored as HMAC-SHA256 hex (64 chars), not the returned plaintext code.
+        otp!.Code.Should().HaveLength(64).And.MatchRegex(@"^[0-9a-f]{64}$");
         otp.IsVerified.Should().BeFalse();
     }
 
@@ -62,17 +63,15 @@ public class OtpServiceTests : TestBase
         var email = "otp3@example.com";
         await _service.GenerateAndSendOtpAsync(email);
 
-        _mockEmail.Verify(x => x.SendEmailAsync(
-            email, "Your GHC Alumni OTP",
-            It.Is<string>(body => body.Contains("verification code")),
-            It.IsAny<CancellationToken>()), Times.Once);
+        _mockCommunication.Verify(x => x.SendEmailByCodeAsync(
+            email, "OTP_EMAIL", It.IsAny<Dictionary<string, string>>(), null, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
     public async Task GenerateAndSendOtpAsync_WithCustomExpiryMinutes_ShouldUseCustomValue()
     {
         _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("5");
-        var service = new OtpService(_context, _mockEmail.Object, _mockConfig.Object, _mockLogger.Object);
+        var service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
         var email = "otp4@example.com";
         var before = DateTime.UtcNow;
         await service.GenerateAndSendOtpAsync(email);
@@ -87,7 +86,7 @@ public class OtpServiceTests : TestBase
     public async Task GenerateAndSendOtpAsync_WithInvalidConfigValue_ShouldUseDefaultExpiry()
     {
         _mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("invalid");
-        var service = new OtpService(_context, _mockEmail.Object, _mockConfig.Object, _mockLogger.Object);
+        var service = new OtpService(_context, _mockCommunication.Object, _mockConfig.Object, _mockLogger.Object);
         var email = "otp5@example.com";
         var before = DateTime.UtcNow;
         await service.GenerateAndSendOtpAsync(email);
@@ -106,7 +105,9 @@ public class OtpServiceTests : TestBase
         var result = await _service.VerifyOtpAsync(email, code);
 
         result.Should().BeTrue();
-        var otp = await _context.Otps.FirstOrDefaultAsync(o => o.Email == email && o.Code == code);
+        // 24.20: Code stored as HMAC hash; query by email + IsVerified flag instead.
+        var otp = await _context.Otps.FirstOrDefaultAsync(o => o.Email == email && o.IsVerified == true);
+        otp.Should().NotBeNull();
         otp!.IsVerified.Should().BeTrue();
     }
 
@@ -158,7 +159,9 @@ public class OtpServiceTests : TestBase
         var result = await _service.VerifyOtpAsync(email, newCode);
         result.Should().BeTrue();
 
-        var verifiedOtp = await _context.Otps.Where(o => o.Email == email && o.Code == newCode).FirstOrDefaultAsync();
+        // 24.20: Code stored as HMAC hash; find by email + IsVerified flag.
+        var verifiedOtp = await _context.Otps.Where(o => o.Email == email && o.IsVerified == true).FirstOrDefaultAsync();
+        verifiedOtp.Should().NotBeNull();
         verifiedOtp!.IsVerified.Should().BeTrue();
     }
 }

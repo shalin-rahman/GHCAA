@@ -1,6 +1,6 @@
 <section class="page-header reveal-text" style="background-image: url('/assets/images/concept/artistic_campus_watercolor_1773859737909.png'); background-size: cover; background-position: center;">
     <div class="container header-content">
-        <h1 class="glow-text">The Haragangian Legacy</h1>
+        <h1 class="glow-text">The {{ orgConfigService.config()?.branding?.memberNickname }} Legacy</h1>
         <p>From 1938 to eternity: Preserving history while engineering a future of unity and progress.</p>
         <div class="header-badge">ESTABLISHED 18 DECEMBER 1938</div>
     </div>
@@ -8,14 +8,27 @@
 </section>
 
 <div class="container main-content">
+    @if (blocks().length > 0) {
+    <!-- Admin-managed content (Admin → Site Content). Server-sanitized on write. -->
+    <div class="story-grid">
+        @for (block of blocks(); track block.id) {
+        <div class="glass-card story-card reveal-bottom">
+            <div class="card-tag">{{ block.group | uppercase }}</div>
+            <h3>{{ block.title }}</h3>
+            <div class="cms-body" [innerHTML]="block.bodyHtml"></div>
+            <div class="feature-line"></div>
+        </div>
+        }
+    </div>
+    } @else {
     <!-- Storytelling Section -->
     <div class="story-grid">
         <div class="glass-card story-card reveal-left" style="position: relative; overflow: hidden;">
-            <img src="/assets/images/concept/founder_artistic_lineart_1773859752969.png" alt="Ashutosh Ganguly" style="position: absolute; right: -50px; bottom: -50px; opacity: 0.15; max-height: 400px; pointer-events: none;">
+            <img src="/assets/images/concept/founder_artistic_lineart_1773859752969.png" alt="Ashutosh Ganguly" style="position: absolute; right: -50px; bottom: -50px; opacity: 0.15; max-height: 400px; pointer-events: none;" appImgFallback>
             <div class="card-tag">OUR ORIGIN</div>
             <h3>Historic Foundation</h3>
             <p>
-                Government Haraganga College, Munshiganj, established on <strong>18 December 1938</strong>, 
+                <strong>{{ orgConfigService.config()?.branding?.institutionName }}</strong>, Munshiganj, established on <strong>18 December 1938</strong>,
                 stands as the premier cradle of knowledge with a visionary donation of ₹1,00,000 from the legendary philanthropist <strong>Mr. Ashutosh Ganguly</strong>.
                 Named after his parents, Haranath Ganguly and Gangaswari Devi, the institution was built to serve generations
                 and was inaugurated by Sher-e-Bangla A.K. Fazlul Huq. Over eight decades, it has produced visionaries who have shaped the destiny of our nation.
@@ -25,11 +38,11 @@
 
         <div class="glass-card story-card accent reveal-right">
             <div class="card-tag">OUR PURPOSE</div>
-            <h3>The GHCAA Vision</h3>
+            <h3>The {{ orgConfigService.config()?.branding?.shortName }} Vision</h3>
             <p>
-                The Haraganga College Alumni Association (GHCAA) isn't just a registry; it's a brotherhood.
-                We bridge generations of alumni to support our mother institution and empower every Haragangian
-                worldwide. 
+                The {{ orgConfigService.config()?.branding?.fullName }} ({{ orgConfigService.config()?.branding?.shortName }}) isn't just a registry; it's a brotherhood.
+                We bridge generations of alumni to support our mother institution and empower every {{ orgConfigService.config()?.branding?.memberNickname }}
+                worldwide.
             </p>
             <ul class="mission-pills">
                 <li>Networking</li>
@@ -39,13 +52,14 @@
             </ul>
         </div>
     </div>
+    }
 
     <!-- Governance Section -->
     <div class="heritage-banner glass-card reveal-bottom">
         <div class="banner-content">
             <h3>Constitutional Pillars</h3>
             <p>
-                Operating under a strict code of ethics and political neutrality, GHCAA is governed by
+                Operating under a strict code of ethics and political neutrality, {{ orgConfigService.config()?.branding?.shortName }} is governed by
                 transparency and democratic values. We ensure every member's contribution fuels institutional
                 advancement and collective growth.
             </p>

@@ -23,10 +23,10 @@ public class FinancialLedgerServiceTests : TestBase
     {
         _context.FinancialRecords.AddRange(new List<FinancialRecord>
         {
-            new FinancialRecord { Year = 2024, RecordType = Enums.FinancialRecordType.Income, Amount = 1000, Category = Enums.FinancialCategory.Donation, Date = DateTime.UtcNow, Description = "D1" },
-            new FinancialRecord { Year = 2024, RecordType = Enums.FinancialRecordType.Income, Amount = 500, Category = Enums.FinancialCategory.MembershipFee, Date = DateTime.UtcNow, Description = "D2" },
-            new FinancialRecord { Year = 2024, RecordType = Enums.FinancialRecordType.Expense, Amount = 300, Category = Enums.FinancialCategory.Utilities, Date = DateTime.UtcNow, Description = "E1" },
-            new FinancialRecord { Year = 2023, RecordType = Enums.FinancialRecordType.Income, Amount = 2000, Category = Enums.FinancialCategory.Donation, Date = DateTime.UtcNow, Description = "Old" }
+            new FinancialRecord { Year = 2024, RecordType = Enums.FinancialRecordType.Income, Amount = 1000, FinancialCategory = Enums.FinancialCategory.Donation, Date = DateTime.UtcNow, Description = "D1" },
+            new FinancialRecord { Year = 2024, RecordType = Enums.FinancialRecordType.Income, Amount = 500, FinancialCategory = Enums.FinancialCategory.MembershipFee, Date = DateTime.UtcNow, Description = "D2" },
+            new FinancialRecord { Year = 2024, RecordType = Enums.FinancialRecordType.Expense, Amount = 300, FinancialCategory = Enums.FinancialCategory.Utilities, Date = DateTime.UtcNow, Description = "E1" },
+            new FinancialRecord { Year = 2023, RecordType = Enums.FinancialRecordType.Income, Amount = 2000, FinancialCategory = Enums.FinancialCategory.Donation, Date = DateTime.UtcNow, Description = "Old" }
         });
         await _context.SaveChangesAsync();
 

@@ -1,0 +1,7 @@
+@if (quillAvailable) {
+<div #editorContainer class="rich-text-editor-quill" [style.height]="height"></div>
+} @else {
+<textarea class="rich-text-editor-fallback" [style.height]="height" [ngModel]="value"
+    (ngModelChange)="onTextareaInput($event)"
+    placeholder="Rich text editor unavailable — plain text mode."></textarea>
+}

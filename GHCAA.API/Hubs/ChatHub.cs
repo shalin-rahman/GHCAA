@@ -1,14 +1,20 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
 using System.Security.Claims;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 
 namespace GHCAA.API.Hubs
 {
+    [Authorize]
     public class ChatHub : Hub
     {
         private readonly IChatService _chatService;
-        private static readonly Dictionary<string, string> _connections = new();
+        // Tracks userId → connectionId for presence; ConcurrentDictionary is safe under concurrent
+        // OnConnectedAsync / OnDisconnectedAsync calls. Note: last-write-wins for multi-device sessions —
+        // see TODO 24.6 in Area 24 for full multi-device tracking if needed.
+        private static readonly ConcurrentDictionary<string, string> _connections = new();
 
         public ChatHub(IChatService chatService)
         {
@@ -31,7 +37,7 @@ namespace GHCAA.API.Hubs
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId != null)
             {
-                _connections.Remove(userId);
+                _connections.TryRemove(userId, out _);
             }
             await base.OnDisconnectedAsync(exception);
         }

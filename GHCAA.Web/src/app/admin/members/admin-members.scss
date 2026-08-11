@@ -1,34 +1,6 @@
 
 
-/* Actions in Table */
-.actions-cell {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-
-    .icon-btn {
-        background: rgba(var(--primary-rgb), 0.03);
-        border: 1px solid var(--glass-border);
-        cursor: pointer;
-        font-size: 1rem;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        transition: 0.2s;
-
-        &:hover {
-            background: var(--surface-color);
-            transform: scale(1.1);
-        }
-
-        &.approve { border-color: var(--success-color); color: var(--success-color); }
-        &.archive { border-color: var(--danger-color); color: var(--danger-color); }
-        &.contact { border-color: var(--accent-color); color: var(--accent-color); }
-    }
-}
+/* .actions-cell and .icon-btn live in central styles.scss — do NOT re-add them here. */
 
 /* Member Cell Styling */
 .member-cell {
@@ -70,7 +42,7 @@
     }
 
     &:hover .member-name {
-        color: var(--accent-color);
+        color: var(--accent-text);
     }
 }
 
@@ -118,9 +90,9 @@
     letter-spacing: 0.5px;
 
     &.lifelong { background: rgba(var(--success-color), 0.1); color: var(--success-color); border: 1px solid rgba(var(--success-color), 0.2); }
-    &.donor { background: rgba(var(--accent-color-rgb), 0.1); color: var(--accent-color); border: 1px solid rgba(var(--accent-color-rgb), 0.2); }
+    &.donor { background: rgba(var(--accent-color-rgb), 0.1); color: var(--accent-text); border: 1px solid rgba(var(--accent-color-rgb), 0.2); }
     &.patron { background: #6366f11a; color: #6366f1; border: 1px solid #6366f133; }
-    &.guest { background: rgba(var(--primary-color), 0.1); color: var(--primary-color); border: 1px solid rgba(var(--primary-color), 0.2); }
+    &.guest { background: rgba(var(--primary-color), 0.1); color: var(--text-main); border: 1px solid rgba(var(--primary-color), 0.2); }
 }
 
 /* Modal Specific Overrides */
@@ -204,7 +176,7 @@
         margin-bottom: 0.5rem;
 
         .h-pos { font-weight: 800; color: var(--text-main); }
-        .h-period { font-size: 0.7rem; font-weight: 900; color: var(--accent-color); text-transform: uppercase; }
+        .h-period { font-size: 0.7rem; font-weight: 900; color: var(--accent-text); text-transform: uppercase; }
     }
 
     .h-meta {
@@ -235,7 +207,7 @@
 
     h4 {
         margin-bottom: 1.5rem;
-        color: var(--accent-color);
+        color: var(--accent-text);
         text-transform: uppercase;
         letter-spacing: 1px;
         font-size: 0.9rem;
@@ -263,5 +235,37 @@
         }
 
         .sys-prop { font-weight: 700; font-size: 0.85rem; }
+
+        /* These controls live in a grid row (not a .form-group), so they'd render
+           browser-native without this. Mirror the global .form-group control tokens. */
+        select,
+        input {
+            width: 100%;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 0.9rem;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+
+            &:focus {
+                border-color: var(--accent-color);
+                box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
+            }
+
+            &::placeholder { color: var(--text-muted); opacity: 0.5; }
+        }
     }
+}
+
+/* Search width cap preserved after migrating the search markup into <app-search-bar>.
+   The inner icon/input/clear styling now comes from the GLOBAL .filter-bar/.search-wrap
+   rules in styles.scss; only the members-list 400px width cap is page-specific, so we
+   target the child's host tag (which still lives in this template) rather than its
+   now-encapsulated internals. */
+app-search-bar {
+    flex: 0 1 400px;
+    max-width: 400px;
 }

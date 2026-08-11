@@ -24,7 +24,7 @@ namespace GHCAA.Infrastructure.Services
         {
             query = query.ToLower();
             var response = new AssistantResponseDto();
-            
+
             // Basic Intent Identification (Simulated NLP)
             bool isSearchAlumni = query.Contains("find") || query.Contains("search") || query.Contains("who") || query.Contains("alumni") || query.Contains("member");
 
@@ -36,15 +36,15 @@ namespace GHCAA.Infrastructure.Services
                 var matchYear = Regex.Match(query, @"\b(19|20)\d{2}\b");
                 if (matchYear.Success && int.TryParse(matchYear.Value, out var year))
                 {
-                    queryable = queryable.Where(m => m.GHCLastCertificatePassingYear == year);
+                    //                     queryable = queryable.Where(m => m.GHCLastCertificatePassingYear == year);
                 }
 
                 // Extract Potential Sector
-                if (query.Contains("corporate")) queryable = queryable.Where(m => m.ProfessionalSector == "Corporate");
-                else if (query.Contains("govt") || query.Contains("government")) queryable = queryable.Where(m => m.ProfessionalSector == "Govt. Service");
-                else if (query.Contains("business")) queryable = queryable.Where(m => m.ProfessionalSector == "Business");
-                else if (query.Contains("education") || query.Contains("teacher")) queryable = queryable.Where(m => m.ProfessionalSector == "Education");
-                else if (query.Contains("medical") || query.Contains("doctor")) queryable = queryable.Where(m => m.ProfessionalSector == "Medical");
+                //                 if (query.Contains("corporate")) queryable = queryable.Where(m => m.ProfessionalSector == "Corporate");
+                //                 else if (query.Contains("govt") || query.Contains("government")) queryable = queryable.Where(m => m.ProfessionalSector == "Govt. Service");
+                //                 else if (query.Contains("business")) queryable = queryable.Where(m => m.ProfessionalSector == "Business");
+                //                 else if (query.Contains("education") || query.Contains("teacher")) queryable = queryable.Where(m => m.ProfessionalSector == "Education");
+                //                 else if (query.Contains("medical") || query.Contains("doctor")) queryable = queryable.Where(m => m.ProfessionalSector == "Medical");
 
                 var results = await queryable.Take(10).ToListAsync(cancellationToken);
 
@@ -55,9 +55,9 @@ namespace GHCAA.Infrastructure.Services
                     {
                         Id = m.Id,
                         FullName = m.FullName,
-                        GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear,
-                        ProfessionalSector = m.ProfessionalSector,
-                        Designation = m.Designation,
+                        //                         GHCLastCertificatePassingYear = m.GHCLastCertificatePassingYear,
+                        //                         ProfessionalSector = m.ProfessionalSector,
+                        //                         Designation = m.Designation,
                         PhotoPath = m.PhotoPath
                     });
                 }

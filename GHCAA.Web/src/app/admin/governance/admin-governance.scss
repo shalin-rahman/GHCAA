@@ -61,7 +61,7 @@
         border-right: 4px solid var(--accent-color);
 
         .p-title {
-            color: var(--accent-color);
+            color: var(--accent-text);
         }
     }
 }
@@ -112,7 +112,7 @@
         margin: 0;
         font-size: 1.4rem;
         font-weight: 800;
-        color: var(--primary-color);
+        color: var(--text-main);
     }
 
     .actions {
@@ -193,7 +193,7 @@
     display: inline-block;
     padding: 0.25rem 0.65rem;
     background: rgba(var(--accent-color-rgb), 0.12);
-    color: var(--accent-color);
+    color: var(--accent-text);
     border-radius: 4px;
     font-size: 0.75rem;
     font-weight: 900;
@@ -221,25 +221,7 @@
     }
 }
 
-.icon-btn.delete {
-    width: 34px;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    background: transparent;
-    color: #ef4444;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.2, 0, 0.2, 1);
-
-    &:hover {
-        background: #ef4444;
-        color: #fff;
-        transform: translateY(-2px);
-    }
-}
+/* .icon-btn.delete moved to central styles.scss (30.2) — do NOT re-add a block here. */
 
 .search-box {
     position: relative;
@@ -276,7 +258,7 @@
 
         &:hover {
             background: rgba(var(--accent-color-rgb), 0.1);
-            color: var(--accent-color);
+            color: var(--accent-text);
         }
 
         strong {

@@ -1,22 +1,26 @@
 import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { AdminService } from '../../core/services/admin.service';
-import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
-import { ACADEMIC_CERTIFICATES, ACADEMIC_GROUPS, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getAcademicYears, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
+import { NotificationService } from '../../core/services/notification.service';
+import { ACADEMIC_CERTIFICATES, ACADEMIC_SUBJECTS, PROFESSIONAL_SECTORS, getAcademicYears, getStatusLabel, getStatusClass } from '../../core/constants/app.constants';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-member-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoSpinnerComponent, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective],
   templateUrl: './member-approval.html',
   styleUrl: './member-approval.scss'
 })
 export class MemberApproval implements OnInit {
   private adminService = inject(AdminService);
-  private auth = inject(AuthService);
   private router = inject(Router);
+  private notify = inject(NotificationService);
 
   requests = signal<any[]>([]);
   pendingRequests = computed(() => {
@@ -24,9 +28,19 @@ export class MemberApproval implements OnInit {
   });
   loading = signal(true);
   selectedMember = signal<any | null>(null);
+  searchQuery = signal('');
+
+  filteredRequests = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return this.pendingRequests();
+    return this.pendingRequests().filter(r =>
+      (r.fullName || '').toLowerCase().includes(q) ||
+      (r.email || '').toLowerCase().includes(q) ||
+      (r.membershipNumber || '').toLowerCase().includes(q)
+    );
+  });
   years = getAcademicYears();
   certificateOptions = ACADEMIC_CERTIFICATES;
-  groupOptions = ACADEMIC_GROUPS;
   subjectOptions = ACADEMIC_SUBJECTS;
   sectorOptions = PROFESSIONAL_SECTORS;
 
@@ -41,19 +55,51 @@ export class MemberApproval implements OnInit {
     this.loading.set(true);
     this.adminService.getPendingMembers().subscribe({
       next: (data) => {
-        // Only show applied status (0) in logic if preferred, 
-        // though backend might already filter for pending
-        this.requests.set(data.items || []);
+        // 32.3: generic case-insensitive key normalization, was a hardcoded field whitelist
+        const items = (data.items || []).map((obj: any) => {
+          const result: any = {};
+          Object.keys(obj || {}).forEach(key => {
+            const camelKey = key === key.toUpperCase()
+              ? key.toLowerCase()
+              : key.charAt(0).toLowerCase() + key.slice(1);
+            if (result[camelKey] === undefined) {
+              result[camelKey] = obj[key];
+            }
+          });
+          return result;
+        });
+        
+        this.requests.set(items);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
     });
   }
 
+  detailLoading = signal(false);
+
   viewDetails(member: any) {
+    // 29D.2: The list row only carries 8 summary fields, but the audit panel binds
+    // ~15 (father/mother name, DOB, NID, addresses, academic/professional history,
+    // certificatePath). Show the summary immediately, then fetch the full record so
+    // those sections populate instead of rendering blank.
     this.selectedMember.set(member);
     this.rejecting.set(false);
     this.rejectionReason = '';
+    this.detailLoading.set(true);
+    this.adminService.getMemberById(member.id).subscribe({
+      next: (full) => {
+        // Guard against a stale response if the admin closed/switched panels meanwhile.
+        if (this.selectedMember()?.id === member.id) {
+          this.selectedMember.set({ ...member, ...full });
+        }
+        this.detailLoading.set(false);
+      },
+      error: () => {
+        this.detailLoading.set(false);
+        this.notify.error('Failed to load full applicant details.');
+      }
+    });
   }
 
   closeAudit() {
@@ -63,13 +109,13 @@ export class MemberApproval implements OnInit {
 
   approve(id: number) {
     if (confirm('Verify this registry entry? This will officially induct the member and dispatch credentials.')) {
-      const adminId = this.auth.currentUser()?.memberId || 1;
-      this.adminService.approveMember(id, adminId).subscribe({
+      this.adminService.approveMember(id).subscribe({
         next: () => {
-          alert('Registry verified. Member successfully inducted.');
+          this.notify.success('Registry verified. Member successfully inducted.');
           this.selectedMember.set(null);
           this.loadMembers();
-        }
+        },
+        error: () => this.notify.error('Failed to verify registry.')
       });
     }
   }
@@ -77,13 +123,13 @@ export class MemberApproval implements OnInit {
   confirmReject() {
     if (!this.rejectionReason) return;
     if (confirm('Permanently decline this registry filing? The applicant will be notified with your reason.')) {
-      const adminId = this.auth.currentUser()?.memberId || 1;
-      this.adminService.rejectMember(this.selectedMember().id, adminId, this.rejectionReason).subscribe({
+      this.adminService.rejectMember(this.selectedMember().id, this.rejectionReason).subscribe({
         next: () => {
-          alert('Application declined. Record removed from active queue.');
+          this.notify.success('Application declined. Record removed from active queue.');
           this.selectedMember.set(null);
           this.loadMembers();
-        }
+        },
+        error: () => this.notify.error('Failed to decline application.')
       });
     }
   }

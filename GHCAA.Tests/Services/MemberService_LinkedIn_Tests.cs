@@ -17,7 +17,6 @@ namespace GHCAA.Tests.Services;
 public class MemberService_LinkedIn_Tests : TestBase
 {
     private Mock<IFileStorageService> _mockStorage = null!;
-    private Mock<IFileUploadRepository> _mockFileRepo = null!;
     private Mock<IOtpService> _mockOtp = null!;
     private Mock<IEmailService> _mockEmail = null!;
     private Mock<IUserService> _mockUserService = null!;
@@ -26,13 +25,14 @@ public class MemberService_LinkedIn_Tests : TestBase
     private Mock<INotificationService> _mockNotificationService = null!;
     private Mock<ICommunicationService> _mockCommunication = null!;
     private Mock<IConfiguration> _mockConfig = null!;
+    private Mock<IGamificationService> _mockGamification = null!;
+    private Mock<IFinancialService> _mockFinancialService = null!;
     private MemberService _service = null!;
 
     [SetUp]
     public void Setup()
     {
         _mockStorage = new Mock<IFileStorageService>();
-        _mockFileRepo = new Mock<IFileUploadRepository>();
         _mockOtp = new Mock<IOtpService>();
         _mockEmail = new Mock<IEmailService>();
         _mockUserService = new Mock<IUserService>();
@@ -41,11 +41,13 @@ public class MemberService_LinkedIn_Tests : TestBase
         _mockCommunication = new Mock<ICommunicationService>();
         _mockNotificationService = new Mock<INotificationService>();
         _mockConfig = new Mock<IConfiguration>();
+        _mockGamification = new Mock<IGamificationService>();
+        _mockFinancialService = new Mock<IFinancialService>();
+        var mockOrgConfigService = new Mock<IOrgConfigService>();
 
         _service = new MemberService(
             _context,
             _mockStorage.Object,
-            _mockFileRepo.Object,
             _mockOtp.Object,
             _mockEmail.Object,
             _mockUserService.Object,
@@ -53,21 +55,34 @@ public class MemberService_LinkedIn_Tests : TestBase
             _mockLogger.Object,
             _mockActivityService.Object,
             _mockNotificationService.Object,
-            _mockConfig.Object
+            _mockConfig.Object,
+            _mockGamification.Object,
+            _mockFinancialService.Object,
+            new Mock<IRealTimeService>().Object,
+            mockOrgConfigService.Object
         );
     }
 
     private Member CreateTestMember(string email, string nid)
     {
-        return new Member 
-        { 
-            FullName = "Test", Email = email, NID = nid, MobileNo = nid, 
-            FatherName = "F", MotherName = "M", PresentAddress="A", PermanentAddress="A", 
-            EmergencyContactName="C", EmergencyContactRelation="R", EmergencyContactPhone="P",
-            HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
-            GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
-            ProfessionalSector="IT", Designation="Dev",
-            Gender = Enums.Gender.Male, BloodGroup = Enums.BloodGroup.APositive
+        return new Member
+        {
+            FullName = "Test",
+            Email = email,
+            NID = nid,
+            MobileNo = nid,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "C",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "P",
+            //             HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
+            //             GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
+            //             ProfessionalSector="IT", Designation="Dev",
+            Gender = Enums.Gender.Male,
+            BloodGroup = Enums.BloodGroup.APositive
         };
     }
 
@@ -140,12 +155,18 @@ public class MemberService_LinkedIn_Tests : TestBase
             Email = "new@ex.com",
             NID = "333",
             MobileNo = "333",
-            Gender = "Male",
-            BloodGroup = "APositive",
-            FatherName = "F", MotherName = "M", PresentAddress="A", PermanentAddress="A", EmergencyContactName="C", EmergencyContactRelation="R", EmergencyContactPhone="P",
-            HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
-            GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
-            ProfessionalSector="IT", Designation="Dev",
+            Gender = GHCAA.Domain.Enums.Gender.Male,
+            BloodGroup = GHCAA.Domain.Enums.BloodGroup.APositive,
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "C",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "P",
+            //             HighestCertificate="HSC", HighestCertificateGroup="S", HighestCertificateSubject="N", HighestCertificatePassingYear=2010,
+            //             GHCLastCertificate="HSC", GHCLastCertificateGroup="S", GHCLastCertificateSubject="N", GHCLastCertificatePassingYear=2010,
+            //             ProfessionalSector="IT", Designation="Dev",
             AcademicHistory = new List<AcademicRecordDto>
             {
                 new AcademicRecordDto { InstitutionName = "Govt. Haraganga College", Degree = "HSC", Subject="S", PassingYear = 2010, IsGHC = true }

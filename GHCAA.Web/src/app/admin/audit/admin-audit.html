@@ -1,25 +1,27 @@
 <div class="admin-feature">
-    <div class="page-header">
-        <div class="header-text">
-            <h2>System Audit Logs</h2>
-            <small>Monitor administrative actions and system-wide modifications</small>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-secondary btn-sm" (click)="loadLogs()">
-                <span class="icon">🔄</span> Refresh Activity
-            </button>
-        </div>
+    <app-page-header title="Audit Logs" [total]="logs().length"
+        emptySubtitle="System activity and audit trail">
+        <small subtitle>Showing {{ filteredLogs().length }} of {{ logs().length }} activity records</small>
+        <button actions class="btn btn-secondary btn-sm" (click)="loadLogs()">
+            <span class="icon">🔄</span> Refresh Activity
+        </button>
+    </app-page-header>
+
+    <!-- Search Bar -->
+    <div class="filter-bar">
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search by action, user, IP address…"></app-search-bar>
     </div>
 
     <div class="glass-card audit-container">
         @if (loading()) {
         <div class="loading-state">
-            <span>⏳</span>
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
             <p>Fetching activity stream...</p>
         </div>
         } @else {
         <div class="audit-timeline">
-            @for (log of logs(); track log.id) {
+            @for (log of filteredLogs(); track log.id) {
             <div class="audit-item">
                 <div class="audit-marker">
                     <span class="icon">{{ getActionIcon(log.action) }}</span>
@@ -27,7 +29,7 @@
                 <div class="audit-content">
                     <div class="audit-header">
                         <span class="action-type">{{ log.action }}</span>
-                        <span class="timestamp">{{ log.createdAt | date:'medium' }}</span>
+                        <span class="timestamp">{{ log.createdAt | date:'dd-MM-yyyy' }}</span>
                     </div>
                     <p class="description">{{ log.details }}</p>
                     <div class="audit-meta">
@@ -41,10 +43,11 @@
             } @empty {
             <div class="empty-state">
                 <span>📜</span>
-                <p>No audit logs found for the current period.</p>
+                <p>{{ searchQuery() ? 'No logs match your search.' : 'No audit logs found for the current period.' }}</p>
             </div>
             }
         </div>
         }
     </div>
+
 </div>

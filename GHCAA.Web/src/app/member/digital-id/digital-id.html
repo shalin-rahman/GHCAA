@@ -1,7 +1,7 @@
 <div class="credentials-page">
     <div class="header">
         <div class="header-main">
-            <h2>Member Credentials</h2>
+            <h2>Digital ID</h2>
             <p>Your official digital identity as a Haragangian</p>
         </div>
         <div class="header-btns">
@@ -18,7 +18,7 @@
         <!-- Front View -->
         <div class="id-card glass-card reveal-card">
             <div class="card-header">
-                <img src="/assets/logo.jpg" alt="Logo" class="logo">
+                <img src="/assets/logo.png" alt="Logo" class="logo" appImgFallback>
                 <div class="header-text">
                     <h3>GHCAA</h3>
                     <small>ALUMNI ASSOCIATION</small>
@@ -28,7 +28,7 @@
             <div class="card-body">
                 <div class="photo-placeholder">
                     @if (profile()?.photoPath) {
-                    <img [src]="profile()?.photoPath" alt="Profile" class="profile-img">
+                    <img [src]="profile()?.photoPath" alt="Profile" class="profile-img" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                     } @else {
                     <span>👤</span>
                     }
@@ -43,7 +43,7 @@
                         </div>
                         <div class="meta-item">
                             <span class="label">Grad. Year</span>
-                            <span class="value">{{ profile()?.ghcLastCertificatePassingYear || 'N/A' }}</span>
+                            <span class="value">{{ profile()?.academicHistory?.[0]?.passingYear || 'N/A' }}</span>
                         </div>
                     </div>
                 </div>
@@ -79,7 +79,7 @@
                     <span>December 2030</span>
                 </div>
                 <div class="official-seal">
-                    <img src="/assets/logo.jpg" alt="Seal">
+                    <img src="/assets/logo.png" alt="Seal" appImgFallback>
                     <p>OFFICIAL SEAL</p>
                 </div>
             </div>
@@ -88,7 +88,7 @@
 
     <ng-template #loading>
         <div class="loading-state">
-            <div class="spinner"></div>
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
             <p>Fetching your secure credentials...</p>
         </div>
     </ng-template>

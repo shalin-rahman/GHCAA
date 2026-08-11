@@ -1,3 +1,27 @@
+/* ─── Shell layout (co-located, not only in global styles.scss) ───
+   The portal shell previously relied ENTIRELY on the global `.app-shell` /
+   `.main-content` rules in styles.scss. If that global sheet is even slightly
+   out of sync with the component bundle (stale CDN cache, partial load), the
+   flex row is lost and the whole portal collapses to a vertical stack (sidebar
+   on top, content below). admin-layout never has this problem because it owns
+   its `.admin-wrapper` layout in-component — so mirror that here. These are
+   scoped to portal-layout only; the public about/contact pages keep the global
+   `.main-content`. */
+.app-shell {
+    display: flex;
+    height: 100vh;
+    background: var(--bg-color);
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+    min-width: 0;
+}
+
 .sidebar {
     width: 280px;
     background: var(--surface-color);
@@ -25,11 +49,8 @@
 .mini-logo {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
-    border: 1.5px solid var(--accent-color);
-    background: white;
+    background: transparent;
     object-fit: contain;
-    box-shadow: 0 0 15px rgba(197, 160, 89, 0.1);
 }
 
 .brand-name {
@@ -47,6 +68,37 @@
     flex-direction: column;
     padding: 1.5rem 0;
     overflow-y: auto;
+}
+
+// TODO 30.14: this had zero CSS rule anywhere, so it did not actually push the
+// Admin Panel link to the bottom of the sidebar despite `.nav-list` being a flex
+// column with `flex: 1` above it — the spacer itself never grew to fill the gap.
+.nav-spacer {
+    flex: 1 1 auto;
+}
+
+// TODO 30.13: grouped-section wrapper for the portal sidebar, mirroring the
+// admin sidebar's `.nav-section`/`.nav-section-label` pattern (admin-layout.scss)
+// adapted to this sidebar's uppercase/letter-spaced nav-item styling.
+.nav-section {
+    padding: 0 0 0.25rem;
+
+    & + & {
+        margin-top: 0.35rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--glass-border);
+    }
+}
+
+.nav-section-label {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    padding: 0 1.25rem;
+    margin-bottom: 0.4rem;
 }
 
 .nav-item {
@@ -101,7 +153,7 @@
         margin-top: 2rem;
         background: rgba(var(--accent-color-rgb), 0.05);
         border: 1px solid var(--glass-border);
-        color: var(--accent-color);
+        color: var(--accent-text);
 
         &:hover {
             background: var(--accent-color);
@@ -182,9 +234,14 @@
 }
 
 .top-bar-inner {
+    // Shares `portal-content` with .page-content so the bar aligns with the page
+    // body below, but portal-content's 2.5rem all-round padding overflows this
+    // fixed-height bar — restrict to horizontal padding here.
+    padding: 0 2.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
 }
 
 .left-section,
@@ -219,7 +276,7 @@
     letter-spacing: 1px;
 
     .separator {
-        color: var(--accent-color);
+        color: var(--accent-text);
         opacity: 0.3;
     }
 
@@ -228,58 +285,9 @@
     }
 }
 
-.right-section {
-    .theme-toggle {
-        font-size: 1.25rem;
-        border: none;
-        background: none;
-        cursor: pointer;
-        transition: 0.3s;
-
-        &:hover {
-            transform: rotate(15deg);
-        }
-    }
-
-    .user-profile {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding-left: 1.5rem;
-        border-left: 1px solid var(--glass-border);
-
-        .avatar {
-            width: 32px;
-            height: 32px;
-            background: var(--gold-gradient);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-weight: 900;
-            font-size: 0.8rem;
-        }
-
-        .user-details {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.2;
-        }
-
-        .username {
-            font-weight: 800;
-            font-size: 0.85rem;
-        }
-
-        .role {
-            font-size: 0.65rem;
-            color: var(--accent-color);
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-    }
-}
+/* .right-section's theme-toggle/user-profile/avatar/logout-toggle markup + styles
+   moved into the shared <app-user-menu> component (TODO 30.8/30.15) — see
+   src/app/common/user-menu/user-menu.scss. */
 
 /* Page Transitions */
 .page-content {
@@ -330,7 +338,7 @@
     }
 
     &.active {
-        color: var(--accent-color);
+        color: var(--accent-text);
 
         .icon {
             transform: translateY(-2px);
@@ -353,3 +361,81 @@
         padding: 0 1rem;
     }
 }
+
+/* ─── MOBILE BOTTOM NAV: only show on small screens ─── */
+.mobile-nav {
+    display: none; /* hidden by default (desktop) */
+}
+
+@media (max-width: 767px) {
+
+    /* Completely hide the sidebar - bottom nav handles navigation */
+    .sidebar {
+        display: none !important;
+    }
+
+    /* Remove sidebar overlay on mobile (no sidebar = no overlay needed) */
+    .sidebar-overlay {
+        display: none !important;
+    }
+
+    /* Main content fills full width with no sidebar */
+    .main-content {
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+        padding-bottom: 80px; /* space for bottom nav */
+    }
+
+    /* Compact top bar */
+    .top-bar {
+        padding: 0 0.75rem;
+        height: 60px;
+    }
+
+    .toggle-btn {
+        gap: 0.4rem;
+        max-width: calc(100vw - 120px);
+        overflow: hidden;
+    }
+
+    /* Prevent brand name from overflowing on very small screens */
+    .brand-name {
+        font-size: 0.78rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 160px;
+    }
+
+    /* Tighten breadcrumbs */
+    .breadcrumbs {
+        display: none; /* hide on very small; title alone is enough */
+    }
+
+    /* Make the right-section more compact (user-profile/theme-toggle mobile sizing
+       now lives in the shared user-menu.scss since that markup moved out). */
+    .right-section {
+        gap: 0.5rem;
+    }
+
+    /* Page content full bleed, no overflow */
+    .page-content {
+        padding: 0;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Show mobile bottom nav */
+    .mobile-nav {
+        display: flex !important;
+    }
+
+    /* Keep b-nav-item labels visible */
+    .b-nav-item {
+        .label {
+            font-size: 0.6rem;
+        }
+    }
+}

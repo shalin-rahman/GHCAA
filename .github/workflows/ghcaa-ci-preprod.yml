@@ -1,0 +1,193 @@
+name: GHCAA Preprod CI/CD
+
+on:
+  push:
+    branches: [ preprod ]
+  pull_request:
+    branches: [ preprod ]
+  workflow_dispatch:
+
+jobs:
+  lint-backend:
+    name: Backend Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+      - name: Verify Formatting
+        run: dotnet format --verify-no-changes
+
+  lint-frontend:
+    name: Frontend Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - name: Install
+        working-directory: GHCAA.Web
+        run: npm ci
+      - name: Type Check
+        working-directory: GHCAA.Web
+        run: npm run type-check
+
+  lint-mobile:
+    name: Mobile Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+      - name: Analyze Code
+        working-directory: GHCAA.Mobile
+        run: flutter analyze
+
+  api-tests:
+    name: API/Backend Tests
+    needs: [lint-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build and Run Tests
+        run: dotnet test GHCAA.Tests/GHCAA.Tests.csproj --configuration Release --no-restore
+
+  ui-tests:
+    name: Web UI/Frontend Tests
+    needs: [api-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        working-directory: GHCAA.Web
+        run: npm ci
+
+      - name: Run Unit Tests
+        working-directory: GHCAA.Web
+        run: npm run test:unit -- --run
+
+      - name: Build Check
+        working-directory: GHCAA.Web
+        run: npm run build
+
+  mobile-tests:
+    name: Mobile/Flutter Tests
+    needs: [ui-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        working-directory: GHCAA.Mobile
+        run: flutter pub get
+
+      - name: Run Tests
+        working-directory: GHCAA.Mobile
+        run: flutter test --reporter expanded
+
+  integrated-build:
+    name: Preprod Integrated Build
+    needs: [mobile-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      
+      - name: Restore & Build API
+        run: |
+          dotnet restore
+          dotnet build -c Release
+          
+      - name: Build Web Frontend
+        working-directory: GHCAA.Web
+        run: |
+          npm ci
+          npm run build
+          
+      - name: Integrated Packaging
+        run: |
+          dotnet publish GHCAA.API/GHCAA.API.csproj -c Release -o ./publish/api
+          mkdir -p ./publish/api/wwwroot
+          cp -r GHCAA.Web/dist/GHCAA.Web/browser/* ./publish/api/wwwroot/
+
+      - name: Archive Integrated Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghcaa-preprod-deployment
+          path: ./publish/api
+
+  deploy-preprod:
+    name: Deploy to Preprod (Render)
+    needs: [integrated-build]
+    # Only deploy on a real push to preprod — never on PRs.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/preprod'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preflight — verify preprod DB is reachable
+        continue-on-error: true
+        env:
+          DATABASE_URL: ${{ secrets.PREPROD_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::PREPROD_DATABASE_URL secret not set — skipping DB reachability check."
+            exit 0
+          fi
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client >/dev/null
+          if pg_isready -d "$DATABASE_URL" -t 15; then
+            echo "Preprod DB is accepting connections."
+          else
+            echo "::warning::Preprod DB not reachable — check Render Access Control (IP allowlist) / that the DB is not suspended. Deploy will still proceed; the app connects from inside Render via the internal URL."
+          fi
+
+      - name: Trigger Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "::error::RENDER_DEPLOY_HOOK_URL secret is not set. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          echo "Triggering Render deploy for preprod..."
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+          echo "Render deploy triggered. Render will build the Dockerfile and roll out the new revision."

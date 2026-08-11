@@ -22,8 +22,11 @@ namespace GHCAA.Application.Interfaces
         public string? ProfessionalSector { get; set; }
         public string? Designation { get; set; }
         public string? ECPosition { get; set; }
+        public string? Category { get; set; }
+        public string? MembershipType { get; set; }
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 20;
+        public string? Cursor { get; set; }
     }
 
     public class PagedResult<T>
@@ -33,6 +36,7 @@ namespace GHCAA.Application.Interfaces
         public int TotalPages { get; set; }
         public int Page { get; set; }
         public int PageSize { get; set; }
-        public bool HasNextPage => Page < TotalPages;
+        public bool HasNextPage => Page < TotalPages || NextCursor != null;
+        public string? NextCursor { get; set; }
     }
 }

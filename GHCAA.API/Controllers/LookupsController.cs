@@ -22,6 +22,7 @@ namespace GHCAA.API.Controllers
             _memberService = memberService;
         }
 
+        [AllowAnonymous]
         [HttpGet("stats")]
         public async Task<IActionResult> GetPublicStats(CancellationToken cancellationToken)
         {
@@ -29,6 +30,7 @@ namespace GHCAA.API.Controllers
             return Ok(stats);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAllLookups(CancellationToken cancellationToken)
         {
@@ -36,10 +38,11 @@ namespace GHCAA.API.Controllers
             return Ok(lookups);
         }
 
-        [HttpGet("{category}")]
-        public async Task<IActionResult> GetByCategory(string category, CancellationToken cancellationToken)
+        [AllowAnonymous]
+        [HttpGet("{group}")]
+        public async Task<IActionResult> GetByGroup(string group, CancellationToken cancellationToken)
         {
-            var lookups = await _lookupService.GetByCategoryAsync(category, cancellationToken);
+            var lookups = await _lookupService.GetByGroupAsync(group, cancellationToken);
             return Ok(lookups);
         }
 
@@ -49,7 +52,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> CreateLookup([FromBody] LookupItem item, CancellationToken cancellationToken)
         {
             var result = await _lookupService.AddLookupItemAsync(item, cancellationToken);
-            return CreatedAtAction(nameof(GetByCategory), new { category = result.Category }, result);
+            return CreatedAtAction(nameof(GetByGroup), new { group = result.LookupGroup }, result);
         }
 
         [Authorize(Policy = "AdminOnly")]

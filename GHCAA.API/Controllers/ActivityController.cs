@@ -39,7 +39,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("admin/global")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> GetGlobalActivity(CancellationToken cancellationToken)
         {
             var logs = await _activityService.GetRecentGlobalActivityAsync(50, cancellationToken);

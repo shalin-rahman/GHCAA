@@ -1,15 +1,20 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { PageHeaderComponent } from '../../common/page-header/page-header.component';
+import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { firstValueFrom } from 'rxjs';
 import { GalleryService } from '../../core/services/gallery.service';
 import { EventGallery, EventPhoto } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
+import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
 @Component({
     selector: 'app-admin-gallery',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, PageHeaderComponent, SearchBarComponent, ImgFallbackDirective, LogoSpinnerComponent],
     templateUrl: './admin-gallery.html',
     styleUrl: './admin-gallery.scss'
 })
@@ -23,14 +28,39 @@ export class AdminGallery implements OnInit {
     isSubmitting = signal(false);
     isUploading = signal(false);
     uploadedFiles = signal<File[]>([]);
+    searchQuery = signal('');
+
+    getImageUrl(path: string | null | undefined): string {
+        if (!path) return '';
+        // If it already has a leading slash, don't add another one
+        // If it starts with http, return as is
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path : '/' + path;
+        // Ensure we don't have double slashes at the start which browser treats as protocol-relative
+        return cleanPath.replace(/^\/\//, '/');
+    }
+
+    filteredGalleries = computed(() => {
+        const q = this.searchQuery().toLowerCase().trim();
+        if (!q) return this.galleries();
+        return this.galleries().filter(g =>
+            (g.title || '').toLowerCase().includes(q) ||
+            (g.location || '').toLowerCase().includes(q) ||
+            (g.description || '').toLowerCase().includes(q)
+        );
+    });
 
     // Form State
     showForm = signal(false);
     editingId = signal<number | null>(null);
+    formatDateToDMY(d: any) {
+        return toDisplayDate(d);
+    }
+
     newGallery = {
         title: '',
         description: '',
-        eventDate: new Date().toISOString().split('T')[0],
+        eventDate: this.formatDateToDMY(new Date()),
         location: ''
     };
 
@@ -41,8 +71,20 @@ export class AdminGallery implements OnInit {
     loadGalleries() {
         this.loading.set(true);
         this.galleryService.getAllGalleries().subscribe({
-            next: (data) => {
-                this.galleries.set(data);
+            next: (data: any[]) => {
+                // Robust mapping for case-insensitive property access
+                const mapped = (data || []).map((g: any) => {
+                    const result: any = { ...g };
+                    // Handle photos casing
+                    const photos = g.photos || g.Photos || [];
+                    result.photos = photos.map((p: any) => ({
+                        id: p.id || p.Id,
+                        photoPath: p.photoPath || p.PhotoPath,
+                        uploadedAt: p.uploadedAt || p.UploadedAt
+                    }));
+                    return result;
+                });
+                this.galleries.set(mapped);
                 this.loading.set(false);
             },
             error: () => {
@@ -64,7 +106,7 @@ export class AdminGallery implements OnInit {
         this.newGallery = {
             title: gallery.title,
             description: gallery.description || '',
-            eventDate: gallery.eventDate ? new Date(gallery.eventDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            eventDate: this.formatDateToDMY(gallery.eventDate),
             location: gallery.location || ''
         };
         this.showForm.set(true);
@@ -76,13 +118,14 @@ export class AdminGallery implements OnInit {
         this.newGallery = {
             title: '',
             description: '',
-            eventDate: new Date().toISOString().split('T')[0],
+            eventDate: this.formatDateToDMY(new Date()),
             location: ''
         };
     }
 
-    onSubmit() {
-        if (!this.newGallery.title || !this.newGallery.eventDate) {
+    onSubmit(form: any) {
+        if (form.invalid) {
+            Object.values(form.controls).forEach((control: any) => control.markAsTouched());
             this.notify.error('Title and Date are required assets.');
             return;
         }
@@ -90,9 +133,10 @@ export class AdminGallery implements OnInit {
         const editId = this.editingId();
         this.isSubmitting.set(true);
 
-        const request = editId 
-            ? this.galleryService.updateGallery(editId, this.newGallery)
-            : this.galleryService.createGallery(this.newGallery);
+        const payload = { ...this.newGallery, eventDate: toWireDate(this.newGallery.eventDate) };
+        const request = editId
+            ? this.galleryService.updateGallery(editId, payload)
+            : this.galleryService.createGallery(payload);
 
         request.subscribe({
             next: () => {
@@ -112,20 +156,20 @@ export class AdminGallery implements OnInit {
     toggleActive(id: number) {
         this.galleryService.toggleActive(id).subscribe({
             next: (res) => {
-                alert(`Gallery is now ${res.isActive ? 'Active' : 'Hidden'}`);
+                this.notify.success(`Gallery is now ${res.isActive ? 'Active' : 'Hidden'}`);
                 this.loadGalleries();
             },
-            error: () => alert('Failed to toggle status')
+            error: () => this.notify.error('Failed to toggle status')
         });
     }
 
     toggleFeatured(id: number) {
         this.galleryService.toggleFeatured(id).subscribe({
             next: (res) => {
-                alert(`Gallery is now ${res.isFeatured ? 'Featured' : 'Regular'}`);
+                this.notify.success(`Gallery is now ${res.isFeatured ? 'Featured' : 'Regular'}`);
                 this.loadGalleries();
             },
-            error: () => alert('Failed to toggle featured status')
+            error: () => this.notify.error('Failed to toggle featured status')
         });
     }
 
@@ -134,10 +178,10 @@ export class AdminGallery implements OnInit {
 
         this.galleryService.deleteGallery(id).subscribe({
             next: () => {
-                alert('Gallery deleted');
+                this.notify.success('Gallery deleted');
                 this.loadGalleries();
             },
-            error: () => alert('Failed to delete gallery')
+            error: () => this.notify.error('Failed to delete gallery')
         });
     }
 
@@ -169,17 +213,21 @@ export class AdminGallery implements OnInit {
 
             if (paths.length > 0) {
                 await firstValueFrom(this.galleryService.addPhotos(gallery.id, paths));
-                alert(`🚀 ${paths.length} Photo(s) uploaded successfully!`);
+                this.notify.success(`🚀 ${paths.length} Photo(s) uploaded successfully!`);
                 
                 // Refresh data from server
-                this.galleryService.getAllGalleries().subscribe(all => {
-                    this.galleries.set(all);
-                    const fresh = all.find(g => g.id === gallery.id);
-                    if (fresh) this.selectedGallery.set(fresh);
+                this.galleryService.getAllGalleries().subscribe({
+                    // 29F.2: surface HTTP failures instead of failing silently
+                    next: all => {
+                        this.galleries.set(all);
+                        const fresh = all.find(g => g.id === gallery.id);
+                        if (fresh) this.selectedGallery.set(fresh);
+                    },
+                    error: () => this.notify.error('Failed to refresh gallery.')
                 });
             }
         } catch (error) {
-            alert('Error uploading photos');
+            this.notify.error('Error uploading photos');
         } finally {
             this.isUploading.set(false);
             this.uploadedFiles.set([]);
@@ -201,7 +249,7 @@ export class AdminGallery implements OnInit {
                 // Also refresh the background galleries list
                 this.loadGalleries();
             },
-            error: () => alert('Failed to remove photo')
+            error: () => this.notify.error('Failed to remove photo')
         });
     }
 

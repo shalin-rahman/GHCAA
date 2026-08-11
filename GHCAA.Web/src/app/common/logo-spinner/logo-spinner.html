@@ -1,0 +1,10 @@
+<div class="logo-spinner-box" [class.logo-spinner-box--ripple]="ripple" [style.--logo-spinner-size.px]="size">
+    <div class="logo-spinner-ring">
+        <div class="spinner-arc"></div>
+        <div class="spinner-arc spinner-arc--reverse"></div>
+        <img src="/assets/logo.png" alt="GHCAA Official Seal" class="logo-spinner-seal" appImgFallback>
+    </div>
+</div>
+@if (label) {
+<p class="logo-spinner-label">{{ label }}</p>
+}

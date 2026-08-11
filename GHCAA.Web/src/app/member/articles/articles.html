@@ -1,27 +1,24 @@
 <div class="articles-container admin-feature">
-    <header class="page-header">
-        <div class="header-text">
-            <h2>Articles & Submissions</h2>
-            <small>Share your stories, event highlights, and magazine entries with the community.</small>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-accent" (click)="openCreate()">
-                <span class="icon">✍️</span> Write New Article
-            </button>
-        </div>
-    </header>
+    <app-page-header title="My Articles"
+        emptySubtitle="Share your stories, event highlights, and magazine entries with the community.">
+        <button actions class="btn btn-accent" (click)="openCreate()">
+            <span class="icon">✍️</span> Write New Article
+        </button>
+    </app-page-header>
 
     @if (!showForm()) {
     <div class="submissions-list animate-fade-in">
+        @if (mySubmissions().length) {
         <div class="filter-bar glass-card mb-6">
             <div class="stat-group">
                 <span class="text-muted">You have submitted {{ mySubmissions().length }} articles</span>
             </div>
         </div>
+        }
 
         @if (loading()) {
         <div class="loading-state glass-card py-20 text-center">
-            <div class="spinner mx-auto mb-4"></div>
+            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
             <p>Fetching your submissions...</p>
         </div>
         } @else {
@@ -32,19 +29,24 @@
                     <span class="status-badge" [class]="getStatusInfo(article.status).class">
                         {{ getStatusInfo(article.status).label }}
                     </span>
-                    <span class="category-tag">{{ getCategoryLabel(article.category) }}</span>
+                    <span class="category-tag">{{ getCategoryLabel(article.articleCategory) }}</span>
                 </div>
                 <div class="card-content">
                     <h3>{{ article.title }}</h3>
                     <p class="excerpt">{{ article.content | slice:0:120 }}...</p>
                     <div class="meta text-xs mt-4">
-                        <span>Created on {{ article.createdAt | date:'mediumDate' }}</span>
+                        <span>Created on {{ article.createdAt | date:'dd-MM-yyyy' }}</span>
                     </div>
                 </div>
                 <div class="card-footer px-6 py-4 border-t border-white/5 flex gap-2">
                     <button class="btn btn-secondary btn-sm flex-1" (click)="editArticle(article)" [disabled]="article.status === 'Approved'">
                         {{ article.status === 'Approved' ? 'Published' : 'Edit / Update' }}
                     </button>
+                    @if (article.status !== 'Approved') {
+                        <button class="btn btn-danger btn-sm px-4" (click)="deleteArticle(article.id)" title="Delete Submission">
+                            🗑️
+                        </button>
+                    }
                 </div>
             </div>
             } @empty {
@@ -74,7 +76,7 @@
 
                 <div class="form-group">
                     <label>Category</label>
-                    <select [(ngModel)]="articleForm.category" [disabled]="isSubmitting()">
+                    <select [(ngModel)]="articleForm.articleCategory" [disabled]="isSubmitting()">
                         @for (cat of categories; track cat.value) {
                         <option [value]="cat.value">{{ cat.label }}</option>
                         }
@@ -85,7 +87,7 @@
                     <label>Cover Photo</label>
                     <div class="photo-upload-zone" (click)="fileInput.click()">
                         @if (photoPreview()) {
-                        <img [src]="photoPreview()" alt="Preview" class="preview-img">
+                        <img [src]="photoPreview()" alt="Preview" class="preview-img" appImgFallback>
                         <div class="overlay">Change Photo</div>
                         } @else {
                         <div class="upload-placeholder">

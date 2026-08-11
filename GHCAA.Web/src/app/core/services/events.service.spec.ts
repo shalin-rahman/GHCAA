@@ -12,7 +12,8 @@ describe('EventsService', () => {
         id: 1,
         title: 'Reunion',
         description: 'Test Reunion',
-        date: '2026-03-08T00:00:00Z',
+        startDate: '08-03-2026',
+        endDate: '08-03-2026',
         location: 'Dhaka',
         isActive: true,
         requiresPayment: true,
@@ -27,7 +28,7 @@ describe('EventsService', () => {
         paymentReference: 'TRX123',
         paymentMethod: 'BKash',
         status: 'Pending',
-        registeredAt: '2026-03-08T00:00:00Z',
+        registeredAt: '08-03-2026',
         isNonMember: false
     };
 

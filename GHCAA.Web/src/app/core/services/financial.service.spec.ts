@@ -30,4 +30,38 @@ describe('FinancialService', () => {
         expect(req.request.method).toBe('GET');
         req.flush([]);
     });
+    it('should fetch applicable fee dynamically', () => {
+        service.getApplicableFee('MembershipFee', 'General', '22-03-2024').subscribe(f => {
+            expect(f.amount).toBe(1000);
+        });
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/applicable?category=MembershipFee&type=General&date=22-03-2024`);
+        expect(req.request.method).toBe('GET');
+        req.flush({ amount: 1000 });
+    });
+
+    it('should fetch all fee configs', () => {
+        service.getFeeConfigs().subscribe(c => expect(c).toBeTruthy());
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/config`);
+        expect(req.request.method).toBe('GET');
+        req.flush([]);
+    });
+
+    it('should post new fee config', () => {
+        const dto = { category: 'Registration', amount: 500 };
+        service.addFeeConfig(dto).subscribe(c => expect(c).toBeTruthy());
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/config`);
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toEqual(dto);
+        req.flush({ id: 1 });
+    });
+
+    it('should put updated fee config', () => {
+        const dto = { id: 5, amount: 600 };
+        service.updateFeeConfig(dto).subscribe(c => expect(c).toBeTruthy());
+        const req = httpMock.expectOne(`${API_ENDPOINTS.FINANCIALS}/fees/config`);
+        expect(req.request.method).toBe('PUT');
+        expect(req.request.body).toEqual(dto);
+        req.flush({ id: 5 });
+    });
 });
+

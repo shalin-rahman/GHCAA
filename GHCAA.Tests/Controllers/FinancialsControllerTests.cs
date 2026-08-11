@@ -16,53 +16,26 @@ using NUnit.Framework;
 namespace GHCAA.Tests.Controllers
 {
     [TestFixture]
-    public class FinancialsControllerTests
+    public class FinancialsControllerTests : ControllerTestBase
     {
         private Mock<IFinancialService> _financialServiceMock;
-        private ApplicationDbContext _dbContext;
+        private Mock<IFileValidationService> _fileValidationServiceMock;
         private FinancialsController _controller;
 
         [SetUp]
         public void Setup()
         {
             _financialServiceMock = new Mock<IFinancialService>();
-            
-            // Use InMemory database for DbContext dependency
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: "FinancialsTestDb")
-                .Options;
-            _dbContext = new ApplicationDbContext(options);
-
-            _controller = new FinancialsController(_financialServiceMock.Object, _dbContext);
-        }
-
-        private void SetUserContext(string? memberId = "10", string role = "Admin")
-        {
-            var claims = new List<Claim> {
-                new Claim(ClaimTypes.Role, role)
-            };
-            if (memberId != null) 
-                claims.Add(new Claim("MemberId", memberId));
-
-            var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuthentication"));
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _dbContext.Database.EnsureDeleted();
-            _dbContext.Dispose();
+            _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<System.IO.Stream>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                      .Returns(new FileValidationResult { IsValid = true });
+            _controller = new FinancialsController(_financialServiceMock.Object, _context, _fileValidationServiceMock.Object);
         }
 
         [Test]
         public async Task GetMyPaymentHistory_ReturnsOk()
         {
-            SetUserContext();
+            SetUserContext(_controller, 10, "Admin");
             _financialServiceMock.Setup(x => x.GetMemberPaymentHistoryAsync(10, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(new List<PaymentHistoryDto>());
 
@@ -74,17 +47,17 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetMyPaymentHistory_SuperAdmin_ReturnsEmptyList()
         {
-            SetUserContext(null, "SuperAdmin");
+            SetUserContext(_controller, null, "SuperAdmin");
             var result = await _controller.GetMyPaymentHistory(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
-            Assert.That(okResult.Value, Is.Empty);
+            Assert.That(okResult!.Value, Is.Empty);
         }
 
         [Test]
         public async Task RecordPayment_ReturnsOk()
         {
-            SetUserContext();
+            SetUserContext(_controller, 10, "Admin");
             var dto = new CreatePaymentHistoryDto { Amount = 100 };
             _financialServiceMock.Setup(x => x.RecordPaymentAsync(dto, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(new PaymentHistoryDto { Id = 1 });
@@ -97,7 +70,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetMyDues_ReturnsOk()
         {
-            SetUserContext();
+            SetUserContext(_controller, 10, "Admin");
             _financialServiceMock.Setup(x => x.GetMemberDuesAsync(10, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(new List<MembershipDueDto>());
 
@@ -109,11 +82,11 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task GetMyDues_SuperAdmin_ReturnsEmptyList()
         {
-            SetUserContext(null, "SuperAdmin");
+            SetUserContext(_controller, null, "SuperAdmin");
             var result = await _controller.GetMyDues(CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
-            Assert.That(okResult.Value, Is.Empty);
+            Assert.That(okResult!.Value, Is.Empty);
         }
 
         [Test]

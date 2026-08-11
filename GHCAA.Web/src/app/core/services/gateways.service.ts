@@ -2,11 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
-
-export enum PaymentGateway {
-    SSLCommerz = 0,
-    Bkash = 1
-}
+import { PaymentGateway } from '../models/business.models';
 
 export interface InitiatePaymentRequest {
     amount: number;

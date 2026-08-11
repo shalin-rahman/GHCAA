@@ -11,7 +11,7 @@ namespace GHCAA.Application.Interfaces
         Task<FinancialRecord> AddRecordAsync(FinancialRecord record, CancellationToken cancellationToken = default);
         Task<FinancialRecord> UpdateRecordAsync(FinancialRecord record, CancellationToken cancellationToken = default);
         Task<bool> DeleteRecordAsync(int id, CancellationToken cancellationToken = default);
-        
+
         Task<LedgerSummaryDto> GetSummaryAsync(int year, CancellationToken cancellationToken = default);
         Task<byte[]> ExportRecordsAsync(int? year = null, CancellationToken cancellationToken = default);
     }

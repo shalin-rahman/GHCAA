@@ -2,11 +2,12 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GalleryService } from '../../../../core/services/gallery.service';
 import { EventGallery, EventPhoto } from '../../../../core/models/business.models';
+import { ImgFallbackDirective } from '../../../../common/directives/img-fallback.directive';
 
 @Component({
     selector: 'landing-gallery-preview',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, ImgFallbackDirective],
     templateUrl: './gallery-preview.html',
     styleUrl: './gallery-preview.scss'
 })

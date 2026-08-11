@@ -26,12 +26,12 @@
                     </div>
                     <div class="meta-item">
                         <span class="icon">🕒</span>
-                        <span class="val">Ends: {{ job.applicationDeadline | date:'MMM d' }}</span>
+                        <span class="val">Ends: {{ job.applicationDeadline | date:'dd-MM-yyyy' }}</span>
                     </div>
                 </div>
 
                 <div class="job-action-col">
-                    <a routerLink="/login" class="btn-view">Login to View →</a>
+                    <a routerLink="/login" class="btn btn-sm btn-outline">Login to View →</a>
                 </div>
             </div>
             } @empty {
@@ -42,10 +42,8 @@
             }
         </div>
 
-        <div class="text-center mt-12">
-            <a routerLink="/portal/jobs" class="btn btn-accent px-10 py-3 rounded-full font-bold shadow-gold">Explore
-                Job
-                Hub →</a>
+        <div class="section-footer">
+            <a routerLink="/portal/jobs" class="btn btn-accent">Explore Job Hub →</a>
         </div>
     </div>
 </section>

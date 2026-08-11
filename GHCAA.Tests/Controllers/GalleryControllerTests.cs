@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace GHCAA.Tests.Controllers
     {
         private Mock<IGalleryService> _galleryServiceMock;
         private Mock<IFileStorageService> _fileStorageMock;
+        private Mock<IFileValidationService> _fileValidationServiceMock;
         private GalleryController _controller;
 
         [SetUp]
@@ -24,7 +26,10 @@ namespace GHCAA.Tests.Controllers
         {
             _galleryServiceMock = new Mock<IGalleryService>();
             _fileStorageMock = new Mock<IFileStorageService>();
-            _controller = new GalleryController(_galleryServiceMock.Object, _fileStorageMock.Object);
+            _fileValidationServiceMock = new Mock<IFileValidationService>();
+            _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
+                                       .Returns(FileValidationResult.Ok());
+            _controller = new GalleryController(_galleryServiceMock.Object, _fileStorageMock.Object, _fileValidationServiceMock.Object);
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
                 new Claim("MemberId", "10")

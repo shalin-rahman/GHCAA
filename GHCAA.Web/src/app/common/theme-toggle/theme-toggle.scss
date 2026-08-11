@@ -1,0 +1,26 @@
+/* Relocated verbatim from user-menu.scss so the button looks identical wherever it is
+   placed. Angular's emulated view encapsulation means the host layout's scoped CSS never
+   reaches this template, so the rules have to travel with the component. */
+:host {
+    display: inline-flex;
+    align-items: center;
+}
+
+.theme-toggle {
+    font-size: 1.25rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: inherit;
+    transition: 0.3s;
+
+    &:hover {
+        transform: rotate(15deg);
+    }
+}
+
+@media (max-width: 767px) {
+    .theme-toggle {
+        font-size: 1rem;
+    }
+}

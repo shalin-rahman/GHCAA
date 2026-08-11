@@ -1,7 +1,7 @@
 <div class="payments-page">
     <div class="header">
         <div class="title-group">
-            <h2>Fees & Dues</h2>
+            <h2>Payments</h2>
             <p>Manage your membership contributions and annual fees.</p>
         </div>
         <button class="btn btn-accent" (click)="openPayModal()">
@@ -11,7 +11,7 @@
 
     @if (loading()) {
     <div class="loading-state">
-        <div class="spinner"></div>
+        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
         <p>Gathering financial history...</p>
     </div>
     } @else {
@@ -44,41 +44,88 @@
     <!-- Payment History -->
     <div class="section">
         <h3>Recent Transactions</h3>
-        <div class="glass-card table-wrap reveal-bottom">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Purpose</th>
-                        <th>Transaction ID</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (p of history(); track p.id) {
-                    <tr>
-                        <td>{{ p.paidAt | date:'mediumDate' }}</td>
-                        <td><span class="badge">{{ getCategoryLabel(p.category) }}</span></td>
-                        <td><code>{{ p.transactionId }}</code></td>
-                        <td class="amount">৳ {{ p.amount | number }}</td>
-                        <td>
-                            <span class="status-pill" [class]="getStatusClass(p.status)">
-                                {{ getStatusLabel(p.status) }}
-                            </span>
-                        </td>
-                        <td class="notes">{{ p.notes || '—' }}</td>
-                    </tr>
-                    } @empty {
-                    <tr>
-                        <td colspan="5" class="empty-row">No payment history found.</td>
-                    </tr>
-                    }
-                </tbody>
-            </table>
+            <div class="glass-card history-card reveal-card">
+                <div class="card-header pb-6 border-b border-white/5 flex justify-between items-center">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-muted">Archived Transactions</h3>
+                    <div class="badges flex gap-2">
+                         <span class="badge badge-outline text-[10px]">Tax Deductible</span>
+                    </div>
+                </div>
+                <div class="table-container pt-6">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Transaction</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th class="text-right">Proof</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of history(); track item.transactionId) {
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td>
+                                    <span class="text-[11px] font-bold">{{ getCategoryLabel(item.financialCategory) }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-[10px] font-mono text-muted">{{ item.transactionId }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-[10px] payment-date">{{ item.paidAt | date:'dd-MM-yyyy' }}</span>
+                                </td>
+                                <td>
+                                    <span class="font-black">৳{{ item.amount }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge" [ngClass]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
+                                </td>
+                                <td class="text-right">
+                                    @if (isCompleted(item.status)) {
+                                        <button class="btn btn-outline btn-sm !py-1 !px-3 !text-[10px]" (click)="downloadReceipt(item.id)">
+                                            📜 Receipt
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center py-12 text-muted italic">No community contributions found.</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <div class="sidebar lg:col-span-1 space-y-8 reveal-right">
+            <!-- Saved Identity Wallet -->
+            <div class="glass-card wallet-card !bg-accent/5 !border-accent/10">
+                <div class="card-header mb-6">
+                    <h4 class="text-[10px] font-black uppercase tracking-widest text-accent">Identity Wallet</h4>
+                    <p class="text-[9px] text-muted uppercase font-bold mt-1">Faster Checkout for Haragangians</p>
+                </div>
+
+                <div class="wallet-items space-y-4">
+                    @for (m of savedMethods(); track m.id) {
+                        <div class="wallet-item bg-white/5 p-4 rounded-xl border border-white/5 flex justify-between items-center">
+                            <div class="method-info">
+                                <span class="block text-[10px] font-black">{{ m.methodName }}</span>
+                                <span class="block text-[9px] text-muted">{{ m.accountIdentifier }}</span>
+                            </div>
+                            <button class="text-red-500/50 hover:text-red-500 text-xs" (click)="removeMethod(m.id)">Deregister</button>
+                        </div>
+                    } @empty {
+                        <div class="empty-wallet text-center p-6 border border-dashed border-white/10 rounded-2xl">
+                             <span class="text-2xl opacity-20 block mb-2">💳</span>
+                             <p class="text-[10px] text-muted italic">Secure your first payment method to see it here.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
     }
 </div>
 
@@ -93,7 +140,7 @@
         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
             <div class="form-group">
                 <label>Payment Purpose / Category</label>
-                <select [(ngModel)]="paymentForm.category" class="form-control">
+                <select [(ngModel)]="paymentForm.financialCategory" class="form-control">
                     @for (opt of categoryOptions; track opt.value) {
                         <option [value]="opt.value">{{ opt.label }}</option>
                     }
@@ -105,41 +152,17 @@
                 <input type="number" [(ngModel)]="paymentForm.amount" placeholder="0.00">
             </div>
 
-            <!-- Payment Method Selector -->
-            <app-payment-method-selector
-                (methodSelected)="onPaymentMethodSelected($event)">
-            </app-payment-method-selector>
+            <!-- Common Payment Hub Integration -->
+            <app-payment-portal
+                [amount]="paymentForm.amount"
+                (methodSelected)="onPaymentMethodSelected($event)"
+                (referenceChange)="onReferenceSelected($event)"
+                (receiptSelected)="onReceiptSelected($event)">
+            </app-payment-portal>
 
-            <!-- Transaction ID (conditionally shown) -->
-            @if (selectedPaymentMethod()?.requiresReference) {
-            <div class="form-group">
-                <label>Transaction ID *</label>
-                <input type="text" [(ngModel)]="paymentForm.transactionId"
-                    placeholder="e.g. 8K029SXL">
-            </div>
-            }
-
-            <!-- Receipt Upload (conditionally shown) -->
-            @if (selectedPaymentMethod()?.requiresReceipt) {
-            <div class="form-group">
-                <label>Upload Receipt / Screenshot</label>
-                <div class="file-drop-zone" style="height: 6rem; border: 2px dashed rgba(255,255,255,0.1); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: all 0.3s;">
-                    <input type="file" (change)="onReceiptSelected($event)"
-                        style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
-                    <div *ngIf="!selectedReceiptFile" style="text-align: center;">
-                        <span style="font-size: 1.5rem; display: block; margin-bottom: 0.25rem;">📸</span>
-                        <p style="font-size: 0.65rem; font-weight: 800; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.1em;">Upload Receipt</p>
-                    </div>
-                    <div *ngIf="selectedReceiptFile" class="text-accent font-black flex items-center gap-3">
-                        <span>✅</span> {{ selectedReceiptFile.name }}
-                    </div>
-                </div>
-            </div>
-            }
-
-            <div class="form-group">
-                <label>Notes / Purpose</label>
-                <textarea [(ngModel)]="paymentForm.notes" rows="3" placeholder="e.g. Annual Dues 2024"></textarea>
+            <div class="form-group mb-0">
+                <label>Additional Notes / Purpose</label>
+                <textarea [(ngModel)]="paymentForm.notes" rows="2" placeholder="e.g. Annual Dues 2024"></textarea>
             </div>
         </div>
         <div class="modal-footer">

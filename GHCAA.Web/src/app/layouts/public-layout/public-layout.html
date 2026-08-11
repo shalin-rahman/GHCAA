@@ -1,11 +1,24 @@
-<div class="dark-theme public-wrapper">
+
 @let activeTheme = themeService.activeSpecialTheme();
 
 @if (activeTheme) {
-<div class="top-announcement-banner" [style.background-color]="activeTheme.backgroundColor"
+<div class="top-announcement-banner"
+    [style.background]="activeTheme.enableGradientFading
+        ? 'linear-gradient(135deg, ' + activeTheme.backgroundColor + ', ' + (activeTheme.sidebarColor || activeTheme.backgroundColor) + ')'
+        : activeTheme.backgroundColor"
     [style.color]="activeTheme.textColor">
     <div class="container banner-content">
-        <span class="banner-text">{{ activeTheme.announcementText }}</span>
+        @if (activeTheme.imageUrl) {
+            <img [src]="activeTheme.imageUrl" alt="Special Day Banner" class="banner-image" appImgFallback>
+        } @else {
+            <span class="banner-text"
+                [class.anim-fade]="activeTheme.animationStyle === 'Fade'"
+                [class.anim-typewriter]="activeTheme.animationStyle === 'Typewriter'"
+                [class.anim-flip3d]="activeTheme.animationStyle === '3D'"
+                [class.anim-scroll]="activeTheme.animationStyle === 'Scroll'">
+                {{ displayedText || activeTheme.announcementText }}
+            </span>
+        }
     </div>
 </div>
 }
@@ -13,10 +26,10 @@
 <nav class="glass-nav" [class.with-banner]="activeTheme">
     <div class="container nav-content">
         <div class="logo">
-            <img src="/assets/logo.jpg" alt="GHC" class="mini-logo">
+            <img [src]="orgConfigService.config()?.branding?.logoUrl" alt="Logo" class="mini-logo" appImgFallback="/assets/logo.png">
             <div class="logo-text">
-                <span class="abbr">GHCAA</span>
-                <span class="full hide-mobile hidden md:block">Govt. Haraganga College Alumni Association</span>
+                <span class="abbr">{{ orgConfigService.config()?.branding?.shortName }}</span>
+                <span class="full hide-mobile">{{ orgConfigService.config()?.branding?.fullName }}</span>
             </div>
         </div>
 
@@ -30,12 +43,18 @@
              [class.active]="isMobileMenuOpen">
             <a routerLink="/" class="nav-link">Home</a>
             <a routerLink="/about" class="nav-link">About</a>
-            <a routerLink="/events" class="nav-link">Events</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableEvents')" routerLink="/events" class="nav-link">Events</a>
             <a routerLink="/news" class="nav-link" title="Latest News">News</a>
-            <a routerLink="/register" class="nav-link">Join</a>
-            <a routerLink="/gallery" class="nav-link">Gallery</a>
+            <!-- Same feed, deep-linked to its Notices tab — no second page to maintain. -->
+            <a routerLink="/news" [queryParams]="{ type: 'Notice' }" class="nav-link"
+                title="Official Notices">Notices</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableGallery')" routerLink="/gallery" class="nav-link">Gallery</a>
+            <a *ngIf="orgConfigService.isFeatureEnabled('enableJobHub')" routerLink="/jobs" class="nav-link">Jobs</a>
             <a routerLink="/contact" class="nav-link">Contact</a>
             <a routerLink="/login" class="nav-link">Login</a>
+            <!-- The theme choice persists globally, so without a switch here a visitor who
+                 once picked light mode in the portal had no way back on the public site. -->
+            <app-theme-toggle class="nav-theme-toggle"></app-theme-toggle>
         </div>
     </div>
 </nav>
@@ -45,4 +64,3 @@
 </main>
 
 <app-footer></app-footer>
-</div>

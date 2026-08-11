@@ -18,6 +18,7 @@ namespace GHCAA.API.Controllers
             _themeService = themeService;
         }
 
+        [AllowAnonymous]
         [HttpGet("active")]
         public async Task<ActionResult<SpecialDayTheme>> GetActiveTheme()
         {

@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.API.Extensions;
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
@@ -18,20 +19,24 @@ namespace GHCAA.API.Controllers
     {
         private readonly INewsService _newsService;
         private readonly IFileStorageService _fileStorageService;
+        private readonly IFileValidationService _fileValidationService;
 
-        public NewsController(INewsService newsService, IFileStorageService fileStorageService)
+        public NewsController(INewsService newsService, IFileStorageService fileStorageService, IFileValidationService fileValidationService)
         {
             _newsService = newsService;
             _fileStorageService = fileStorageService;
+            _fileValidationService = fileValidationService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetActiveNews([FromQuery] Enums.ArticleCategory? category, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetActiveNews([FromQuery] Enums.ArticleCategory? articleCategory, [FromQuery] Enums.PostType? postType, CancellationToken cancellationToken)
         {
-            var news = await _newsService.GetActiveNewsAsync(category, cancellationToken);
+            var news = await _newsService.GetActiveNewsAsync(articleCategory, postType, cancellationToken);
             return Ok(news);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetNewsById(int id, CancellationToken cancellationToken)
         {
@@ -48,6 +53,8 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("pending")]
+        [HttpGet("admin/pending")]
+        [HttpGet("News/Pending")] // Mobile Alias
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> GetPendingSubmissions(CancellationToken cancellationToken)
         {
@@ -98,12 +105,12 @@ namespace GHCAA.API.Controllers
             // The service already uses user.MemberId if needed, but here it wants memberId.
             // Actually, I'll update the service to take userId directly or handle it there.
             // For now, I'll just pass the userId if it's the authorId.
-            
+
             // Re-evaluating GetMySubmissionsAsync logic in NewsService:
             // It searches for user by memberId. 
             // Let's just bypass and use the authorId directly in a new service method or update it.
             // I'll update the service method to take userId.
-            
+
             var news = await _newsService.GetMySubmissionsAsync(userId, cancellationToken); // I'll fix service next
             return Ok(news);
         }
@@ -118,9 +125,12 @@ namespace GHCAA.API.Controllers
             // Ensure status is Pending if submitted by member, or Draft if requested
             if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
             {
+                if (dto.PostType == Enums.PostType.Notice)
+                    return Forbid();
+
                 if (dto.Status != Enums.SubmissionStatus.Draft)
                     dto.Status = Enums.SubmissionStatus.Pending;
-                
+
                 dto.IsActive = false; // Members cannot set active directly
             }
 
@@ -129,6 +139,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("{id:int}/approve")]
+        [HttpPost("admin/{id:int}/approve")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> ApproveArticle(int id, CancellationToken cancellationToken)
         {
@@ -137,6 +148,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("{id:int}/reject")]
+        [HttpPost("admin/{id:int}/reject")]
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> RejectArticle(int id, CancellationToken cancellationToken)
         {
@@ -144,12 +156,28 @@ namespace GHCAA.API.Controllers
             return success ? Ok(new { Message = "Article rejected." }) : NotFound();
         }
 
+        [HttpPost("{id:int}/collaborators/{userId:int}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> AddCollaborator(int id, int userId, CancellationToken cancellationToken)
+        {
+            var success = await _newsService.AddCollaboratorAsync(id, userId, cancellationToken);
+            return success ? Ok(new { Message = "Collaborator added." }) : BadRequest("Could not add collaborator.");
+        }
+
+        [HttpDelete("{id:int}/collaborators/{userId:int}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> RemoveCollaborator(int id, int userId, CancellationToken cancellationToken)
+        {
+            var success = await _newsService.RemoveCollaboratorAsync(id, userId, cancellationToken);
+            return success ? Ok(new { Message = "Collaborator removed." }) : NotFound();
+        }
+
         [HttpPost("upload-image")]
         [Authorize] // Allow members to upload images for their articles too
         public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded.");
+            var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Image, 10 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
 
             var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(authorIdClaim, out var authorId))
@@ -161,17 +189,47 @@ namespace GHCAA.API.Controllers
             var extension = Path.GetExtension(file.FileName);
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var uniqueFileName = $"news_{timestamp}_{Guid.NewGuid().ToString().Substring(0, 8)}{extension}";
-            
+
             var relativePath = await _fileStorageService.SaveFileAsync(
-                stream, 
-                uniqueFileName, 
-                authorId, 
-                Enums.FileUploadType.NewsImage, 
+                stream,
+                uniqueFileName,
+                authorId,
+                Enums.FileUploadType.NewsImage,
                 cancellationToken
             );
 
             var fileUrl = "/" + relativePath.TrimStart('/');
             return Ok(new { url = fileUrl, relativePath });
+        }
+
+        [HttpPost("upload-document")]
+        [Authorize(Policy = "AdminOnly")] // Notices are admin-authored only
+        public async Task<IActionResult> UploadDocument(IFormFile file, CancellationToken cancellationToken)
+        {
+            var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Document, 10 * 1024 * 1024);
+            if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
+
+            var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(authorIdClaim, out var authorId))
+            {
+                return Unauthorized();
+            }
+
+            using var stream = file.OpenReadStream();
+            var extension = Path.GetExtension(file.FileName);
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var uniqueFileName = $"notice_{timestamp}_{Guid.NewGuid().ToString().Substring(0, 8)}{extension}";
+
+            var relativePath = await _fileStorageService.SaveFileAsync(
+                stream,
+                uniqueFileName,
+                authorId,
+                Enums.FileUploadType.NoticeDocument,
+                cancellationToken
+            );
+
+            var fileUrl = "/" + relativePath.TrimStart('/');
+            return Ok(new { url = fileUrl, relativePath, fileName = file.FileName });
         }
     }
 }

@@ -14,6 +14,7 @@ describe('Payments Component', () => {
         financialServiceMock = {
             getMyDues: vi.fn().mockReturnValue(of([])),
             getMyHistory: vi.fn().mockReturnValue(of([])),
+            getSavedMethods: vi.fn().mockReturnValue(of([])),
             recordPayment: vi.fn().mockReturnValue(of({ success: true }))
         };
 
@@ -42,5 +43,17 @@ describe('Payments Component', () => {
     it('should load dues and history on init', () => {
         expect(financialServiceMock.getMyDues).toHaveBeenCalled();
         expect(financialServiceMock.getMyHistory).toHaveBeenCalled();
+    });
+
+    it('should map enum payment statuses from the backend', () => {
+        expect(component.getStatusLabel('Pending')).toBe('Pending Verification');
+        expect(component.getStatusClass('Completed')).toBe('success');
+        expect(component.getStatusLabel('Failed')).toBe('Failed');
+        expect(component.getStatusLabel('Refunded')).toBe('Refunded');
+    });
+
+    it('should format financial category labels', () => {
+        expect(component.getCategoryLabel('MembershipFee')).toBe('Yearly Membership Fee');
+        expect(component.getCategoryLabel('Utilities')).toBe('Utilities');
     });
 });

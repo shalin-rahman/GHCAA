@@ -25,8 +25,7 @@
         width: 60px;
         height: 45px;
         border-radius: 8px;
-        background-size: cover;
-        background-position: center;
+        object-fit: cover;
         flex-shrink: 0;
         border: 1px solid var(--glass-border);
     }
@@ -81,8 +80,26 @@
 }
 
 .rejection-box {
+    /* Bare textarea (no .form-group) — give it the standard themed control look
+       instead of the user-agent border + off-theme black fill. */
     textarea {
-        height: 100px !important;
-        background: rgba(0,0,0,0.2) !important;
+        width: 100%;
+        min-height: 100px;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        color: var(--text-main);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none;
+        resize: vertical;
+
+        &:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
+        }
+
+        &::placeholder { color: var(--text-muted); opacity: 0.5; }
     }
 }

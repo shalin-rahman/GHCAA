@@ -1,12 +1,12 @@
 <div class="profile-page">
     <div class="header">
-        <h2>Member Dashboard</h2>
+        <h2>My Profile</h2>
         <p>Manage your association identity and professional details</p>
     </div>
 
     @if (loading()) {
     <div class="glass-card loading-box">
-        <span class="spinner">⏳</span>
+        <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
         <p>Syncing profile with registry...</p>
     </div>
     } @else {
@@ -26,29 +26,37 @@
                     }
                 </div>
                 <div class="special-labels flex gap-2 mt-2">
-                    <span *ngIf="profile.category && profile.category !== 'None' && profile.category !== 0"
-                        class="badge" [class]="getCategoryLabel(profile.category).toLowerCase()">
-                        {{ getCategoryLabel(profile.category) }}
-                    </span>
+                    @if (profile.category && profile.category !== 'None') {
+                        <span class="badge" [class]="profile.category.toLowerCase()">
+                            {{ profile.category }}
+                        </span>
+                    }
                     <span class="ec-pos text-accent font-black text-xs uppercase tracking-widest" *ngIf="getCurrentECPosition(profile.ecHistory) !== 'None'">{{
                         getECPositionName(getCurrentECPosition(profile.ecHistory)) }}</span>
                 </div>
             </div>
-            <div class="badge-icon flex flex-col items-end gap-1" [ngClass]="profile.status === 1 ? 'active' : 'pending'">
-                <span class="text-sm font-bold">{{ profile.status === 1 ? 'Verified ✅' : 'Audit Pending ⏳' }}</span>
-                <span class="text-[9px] opacity-60 uppercase tracking-tighter">{{ profile.status === 1 ? 'Legacy Active' : 'Waiting for Admin Signature' }}</span>
+            <div class="badge-icon flex flex-col items-end gap-1" [ngClass]="profile.status === 'Active' || profile.status === 1 ? 'active' : 'pending'">
+                <span class="text-sm font-bold">{{ profile.status === 'Active' || profile.status === 1 ? 'Verified ✅' : 'Audit Pending ⏳' }}</span>
+                <span class="text-[9px] opacity-60 uppercase tracking-tighter">{{ profile.status === 'Active' || profile.status === 1 ? 'Legacy Active' : 'Waiting for Admin Signature' }}</span>
             </div>
         </div>
-        <div class="status-grid">
+        <div class="status-grid mt-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="grid-item">
+                <small>Profile Health</small>
+                <div class="h-1 bg-white/5 rounded-full mt-1 mb-1 overflow-hidden">
+                    <div class="h-full bg-accent transition-all duration-1000" [style.width.%]="profile.profileCompletionPercentage"></div>
+                </div>
+                <span class="text-[10px] opacity-60 uppercase">{{ profile.profileCompletionPercentage }}% Complete</span>
+            </div>
             <div class="grid-item">
                 <small>Associated Batch</small>
-                <p><strong>{{ profile.ghcLastCertificatePassingYear }}</strong></p>
-                <span class="text-[10px] opacity-60 uppercase">{{ profile.ghcLastCertificate }} {{ getMajorDisplay(profile.ghcLastCertificate, profile.ghcLastCertificateGroup, profile.ghcLastCertificateSubject) }}</span>
+                <p><strong>{{ getGHCHistory()?.passingYear || 'N/A' }}</strong></p>
+                <span class="text-[10px] opacity-60 uppercase">{{ getGHCHistory()?.degree || 'N/A' }}</span>
             </div>
             <div class="grid-item">
                 <small>Highest Degree</small>
-                <p><strong>{{ profile.highestCertificate }}</strong></p>
-                <span class="text-[10px] opacity-60 uppercase truncate block max-w-[150px]">{{ getMajorDisplay(profile.highestCertificate, profile.highestCertificateGroup, profile.highestCertificateSubject).replace('in ', '') || 'General' }}</span>
+                <p><strong>{{ getHighestHistory()?.degree || 'N/A' }}</strong></p>
+                <span class="text-[10px] opacity-60 uppercase truncate block max-w-[150px]">{{ getMajorDisplay(getHighestHistory()?.degree, getHighestHistory()?.subject).replace('in ', '') || 'General' }}</span>
             </div>
             <div class="grid-item">
                 <small>Member Since</small>
@@ -56,6 +64,414 @@
                 <span class="text-[10px] opacity-60 uppercase">Registry Active</span>
             </div>
         </div>
+    </div>
+
+    <!-- Photo Upload Card -->
+    <div class="glass-card mb-12 p-12" id="section-identity-photo">
+        <h4 class="section-label mb-6">Profile Photo</h4>
+        <div class="flex items-center gap-8">
+            <div class="photo-preview-wrap relative">
+                @if (photoPreview()) {
+                <img [src]="photoPreview()" class="photo-preview rounded-2xl" alt="Preview" appImgFallback>
+                } @else if (profile.photoPath) {
+                <img [src]="getImageUrl(profile.photoPath)" class="photo-preview rounded-2xl" alt="Current Photo" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                } @else {
+                <div class="photo-placeholder rounded-2xl flex items-center justify-center text-4xl">
+                    {{ profile.fullName?.[0] || '?' }}
+                </div>
+                }
+                
+                @if (profile.photoPath || photoPreview()) {
+                    <button type="button" (click)="removePhoto()" class="icon-btn delete" title="Remove Photo">
+                        <app-icon name="trash" [size]="16"></app-icon>
+                    </button>
+                }
+            </div>
+            <div class="flex flex-col gap-4">
+                <p class="text-sm opacity-60">Upload a professional photo (JPG, PNG, WebP — max 5MB)</p>
+                <label class="btn btn-secondary cursor-pointer !mb-0">
+                    <app-icon name="camera" [size]="16"></app-icon> Choose New Photo
+                    <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhotoSelected($event)" class="hidden">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signature Upload Card -->
+    <div class="glass-card mb-12 p-12">
+        <h4 class="section-label mb-6">Digital Signature (Optional)</h4>
+        <div class="flex items-center gap-8">
+            <div class="photo-preview-wrap relative signature-wrap">
+                @if (signaturePreview()) {
+                <img [src]="signaturePreview()" class="photo-preview rounded-2xl object-contain !bg-white/10" alt="Signature Preview" appImgFallback>
+                } @else if (profile.signaturePath) {
+                <img [src]="getImageUrl(profile.signaturePath)" class="photo-preview rounded-2xl object-contain !bg-white/10" alt="Current Signature" appImgFallback>
+                } @else {
+                <div class="photo-placeholder rounded-2xl flex items-center justify-center text-2xl border-dashed border-2 border-white/20">
+                    🖋️
+                </div>
+                }
+                
+                @if (profile.signaturePath || signaturePreview()) {
+                    <button type="button" (click)="removeSignature()" class="icon-btn delete" title="Remove Signature">
+                        <app-icon name="trash" [size]="16"></app-icon>
+                    </button>
+                }
+            </div>
+            <div class="flex flex-col gap-4">
+                <p class="text-sm opacity-60">Upload your handwritten signature (JPG, PNG, WebP — max 2MB)</p>
+                <label class="btn btn-secondary cursor-pointer !mb-0">
+                    <app-icon name="pen" [size]="16"></app-icon> Choose Signature
+                    <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onSignatureSelected($event)" class="hidden">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Profile Edit Form -->
+    <div class="glass-card profile-card p-12">
+        <form #profileForm="ngForm" (submit)="updateProfile(profileForm)">
+            <!-- Section 1: Personal Details -->
+            <div class="section-block">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Personal Details</h4>
+                </div>
+                <div class="form-grid mb-12">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" [(ngModel)]="profile.fullName" name="fullName" required maxlength="200" #nameM="ngModel"
+                            [class.border-red-500]="nameM.invalid && nameM.touched">
+                        <div *ngIf="nameM.touched && nameM.invalid" class="text-[10px] text-red-500 mt-1">
+                            <span *ngIf="nameM.errors?.['required']">Full name is required.</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>National ID (NID)</label>
+                        <input type="text" [value]="profile.nid" name="nid" readonly class="opacity-50"
+                            title="Contact admin to change verified NID">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth *</label>
+                        <input type="text" [(ngModel)]="profile.dateOfBirth" name="dateOfBirth" required 
+                            placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
+                            #dobM="ngModel" [class.border-red-500]="dobM.invalid && dobM.touched">
+                        <div *ngIf="dobM.touched && dobM.invalid" class="text-[10px] text-red-500 mt-1">
+                            <span *ngIf="dobM.errors?.['required']">Date of birth is required.</span>
+                            <span *ngIf="dobM.errors?.['pattern']">Use format: dd-mm-yyyy</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" [value]="profile.email" name="email" readonly class="opacity-50"
+                            title="Contact admin to change verified Email Address">
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        <input type="text" [value]="profile.mobileNo" name="mobileNo" readonly class="opacity-50"
+                            title="Contact admin to change verified Mobile Number">
+                    </div>
+                    <div class="form-group">
+                        <label>Father's Name *</label>
+                        <input type="text" [(ngModel)]="profile.fatherName" name="fatherName" required maxlength="200" #fatherM="ngModel"
+                            [class.border-red-500]="fatherM.invalid && fatherM.touched">
+                    </div>
+                    <div class="form-group">
+                        <label>Mother's Name *</label>
+                        <input type="text" [(ngModel)]="profile.motherName" name="motherName" required maxlength="200" #motherM="ngModel"
+                            [class.border-red-500]="motherM.invalid && motherM.touched">
+                    </div>
+                    <div class="form-group">
+                        <label>Gender *</label>
+                        <select [(ngModel)]="profile.gender" name="gender" required #genderM="ngModel"
+                            [class.border-red-500]="genderM.invalid && genderM.touched">
+                            <option *ngFor="let g of genderOptions" [value]="g.value">{{ g.label }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Blood Group *</label>
+                        <select [(ngModel)]="profile.bloodGroup" name="bloodGroup" required #bgM="ngModel"
+                            [class.border-red-500]="bgM.invalid && bgM.touched">
+                            <option *ngFor="let b of bloodGroupOptions" [value]="b.value">{{ b.label }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>T-Shirt Size *</label>
+                        <select [(ngModel)]="profile.tShirtSize" name="tShirtSize" required #tsM="ngModel"
+                            [class.border-red-500]="tsM.invalid && tsM.touched">
+                            <option *ngFor="let s of tShirtOptions" [value]="s.value">{{ s.label }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Academic History -->
+            <div class="section-block mt-12" id="section-academic-history">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Detailed Academic Milestones</h4>
+                    <button type="button" (click)="addAcademicRecord()" class="btn btn-secondary btn-sm">
+                        + Add Education
+                    </button>
+                </div>
+                
+                <div class="history-container">
+                    @for (item of profile.academicHistory; track $index) {
+                    <div class="history-item relative p-10 glass-card mb-4">
+                        <button type="button" (click)="removeAcademicRecord($index)" class="absolute top-6 right-6 btn btn-secondary btn-sm text-danger-color border-danger-color">
+                             Remove <app-icon name="trash" [size]="14"></app-icon>
+                        </button>
+                        
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label>Institution / University Name *</label>
+                                <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" required maxlength="250"
+                                    #instMi="ngModel" [class.border-red-500]="instMi.invalid && instMi.touched" placeholder="e.g. Govt. Haraganga College">
+                            </div>
+                            <div class="input-group full py-2">
+                                <label class="premium-checkbox-label">
+                                    <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'isGHC_' + $index">
+                                    <span class="checkmark"></span>
+                                    <span class="label-text">Is this from Govt. Haraganga College?</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Degree Type *</label>
+                                <select [(ngModel)]="item.degree" [name]="'deg_' + $index" required maxlength="100"
+                                    #degMi="ngModel" [class.border-red-500]="degMi.invalid && degMi.touched">
+                                    <option value="">Select...</option>
+                                    @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Major / Subject *</label>
+                                <select [(ngModel)]="item.subject" [name]="'sub_' + $index" required maxlength="100"
+                                    #subMi="ngModel" [class.border-red-500]="subMi.invalid && subMi.touched">
+                                    <option value="None">None</option>
+                                    @for (sub of subjectOptions; track sub) { <option [value]="sub">{{ sub }}</option> }
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Admission Year *</label>
+                                <select [(ngModel)]="item.admissionYear" [name]="'admY_' + $index" required
+                                    #admMi="ngModel" [class.border-red-500]="admMi.invalid && admMi.touched">
+                                    <option [value]="null">Select...</option>
+                                    @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Passing Year (Graduation) *</label>
+                                <select [(ngModel)]="item.passingYear" [name]="'passY_' + $index" required
+                                    #passMi="ngModel" [class.border-red-500]="passMi.invalid && passMi.touched">
+                                    <option [value]="null">Select...</option>
+                                    @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    } @empty {
+                    <div class="empty-placeholder dark compact">
+                        <p>No educational history provided. At least one record from GHC is required for verification.</p>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Section 5: Professional Legacy -->
+            <div class="section-block mt-12" id="section-professional-history">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Professional Legacy & Snapshot</h4>
+                </div>
+                
+                <div class="form-grid mb-12">
+                    <div class="form-group full">
+                        <label>Primary Designation & Organization</label>
+                        <input type="text" [(ngModel)]="profile.designation" name="profileDesignation" maxlength="300" placeholder="e.g. Lead Architect at BuildRight">
+                    </div>
+                    <div class="form-group">
+                        <label>Industry Sector</label>
+                        <select [(ngModel)]="profile.professionalSector" name="profileSector">
+                            <option value="" disabled selected>Select Sector</option>
+                            <option *ngFor="let s of sectorOptions" [value]="s">{{ s }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 6: Career Timeline -->
+            <div class="section-block mt-12">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Detailed Career Timeline</h4>
+                    <button type="button" (click)="addProfessionalRecord()" class="btn btn-secondary btn-sm">
+                        + Add Experience
+                    </button>
+                </div>
+
+                <div class="history-container">
+                    @for (work of profile.professionalHistory; track $index) {
+                    <div class="history-item relative p-10 glass-card mb-4">
+                        <button type="button" (click)="removeProfessionalRecord($index)" class="absolute top-6 right-6 btn btn-secondary btn-sm text-danger-color border-danger-color">
+                             Remove <app-icon name="trash" [size]="14"></app-icon>
+                        </button>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Organisation / Company *</label>
+                                <input type="text" [(ngModel)]="work.organizationName" [name]="'org_' + $index" required maxlength="250"
+                                    #pOrgM="ngModel" [class.border-red-500]="pOrgM.invalid && pOrgM.touched" placeholder="Company Name">
+                            </div>
+                            <div class="form-group">
+                                <label>Official Designation *</label>
+                                <input type="text" [(ngModel)]="work.designation" [name]="'des_' + $index" required maxlength="150"
+                                    #pDesM="ngModel" [class.border-red-500]="pDesM.invalid && pDesM.touched" placeholder="Chief Executive / Manager">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Career Sector</label>
+                                <select [(ngModel)]="work.sector" [name]="'sec_' + $index">
+                                    <option value="" disabled selected>Select Sector</option>
+                                    <option *ngFor="let s of sectorOptions" [value]="s">{{ s }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Work Location</label>
+                                <input type="text" [(ngModel)]="work.location" [name]="'loc_' + $index" maxlength="200" placeholder="City, Country">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Date of Induction *</label>
+                                <input type="text" [(ngModel)]="work.startDate" [name]="'sD_' + $index" required
+                                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
+                                    #pSdM="ngModel" [class.border-red-500]="pSdM.invalid && pSdM.touched">
+                            </div>
+                            <div class="form-group" *ngIf="!work.isCurrent">
+                                <label>Retirement / Resignation Date *</label>
+                                <input type="text" [(ngModel)]="work.endDate" [name]="'eD_' + $index" required
+                                    placeholder="dd-mm-yyyy" pattern="(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}"
+                                    #pEdM="ngModel" [class.border-red-500]="pEdM.invalid && pEdM.touched">
+                            </div>
+
+                            <div class="input-group full py-2">
+                                <label class="premium-checkbox-label">
+                                    <input type="checkbox" [(ngModel)]="work.isCurrent" [name]="'isCurr_' + $index">
+                                    <span class="checkmark"></span>
+                                    <span class="label-text">Active Occupation (Currently serving here)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    } @empty {
+                    <div class="empty-placeholder dark compact">
+                        <p>No professional history records yet. Update your career status for networking.</p>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Section 7: Emergency -->
+            <div class="section-block mt-12">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Emergency Contact Details</h4>
+                </div>
+                <div class="form-grid mb-4">
+                    <div class="form-group full">
+                        <label>Contact Person Legal Name *</label>
+                        <input type="text" [(ngModel)]="profile.emergencyContactName" name="ecName" required maxlength="200"
+                            #ecnM="ngModel" [class.border-red-500]="ecnM.invalid && ecnM.touched">
+                    </div>
+                    <div class="form-group">
+                        <label>Relation *</label>
+                        <input type="text" [(ngModel)]="profile.emergencyContactRelation" name="ecRel" required maxlength="100"
+                            #ecrM="ngModel" [class.border-red-500]="ecrM.invalid && ecrM.touched">
+                    </div>
+                    <div class="form-group">
+                        <label>Primary Phone Number *</label>
+                        <input type="text" [(ngModel)]="profile.emergencyContactPhone" name="ecPhone" required pattern="01[3-9]\d{8}"
+                            #ecpM="ngModel" [class.border-red-500]="ecpM.invalid && ecpM.touched">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 8: Address -->
+            <div class="section-block mt-12">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Correspondence Identity</h4>
+                </div>
+                <div class="form-grid mb-4">
+                    <div class="form-group full">
+                        <label>Present Primary Address *</label>
+                        <textarea [(ngModel)]="profile.presentAddress" name="presentAddress" rows="2" required maxlength="500"
+                            #presAM="ngModel" [class.border-red-500]="presAM.invalid && presAM.touched"></textarea>
+                    </div>
+                    <div class="form-group full">
+                        <label>Permanent Residential Address *</label>
+                        <textarea [(ngModel)]="profile.permanentAddress" name="permanentAddress" rows="2" required maxlength="500"
+                            #permAM="ngModel" [class.border-red-500]="permAM.invalid && permAM.touched"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 9: Privacy -->
+            <div class="section-block mt-12">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Directory Privacy Controls</h4>
+                </div>
+                <p class="text-muted text-xs mb-12">Manage which attributes are visible to other verified Haragangians in the member directory.</p>
+                
+                <div class="space-y-6">
+                    <label class="premium-checkbox-label">
+                        <input type="checkbox" [(ngModel)]="profile.isEmailPublic" name="isEmailPublic">
+                        <span class="checkmark"></span>
+                        <span class="label-text">Expose Email to Alumni Community</span>
+                    </label>
+                    <label class="premium-checkbox-label">
+                        <input type="checkbox" [(ngModel)]="profile.isMobilePublic" name="isMobilePublic">
+                        <span class="checkmark"></span>
+                        <span class="label-text">Expose Mobile Identity to Alumni Community</span>
+                    </label>
+                    <label class="premium-checkbox-label">
+                        <input type="checkbox" [(ngModel)]="profile.isAddressPublic" name="isAddressPublic">
+                        <span class="checkmark"></span>
+                        <span class="label-text">Expose Residential Data to Alumni Community</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Section 10: Notifications -->
+            <div class="section-block mt-12">
+                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
+                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Communication Preferences</h4>
+                </div>
+                
+                <div class="space-y-6">
+                    <label class="premium-checkbox-label">
+                        <input type="checkbox" [(ngModel)]="profile.notifyEventCreation" name="notifyEventCreation">
+                        <span class="checkmark"></span>
+                        <span class="label-text">Receive New Event Announcements</span>
+                    </label>
+                    <label class="premium-checkbox-label">
+                        <input type="checkbox" [(ngModel)]="profile.notifyParticipationApproval" name="notifyParticipationApproval">
+                        <span class="checkmark"></span>
+                        <span class="label-text">Event Participation Approvals</span>
+                    </label>
+                    <label class="premium-checkbox-label">
+                        <input type="checkbox" [(ngModel)]="profile.notifyRegistrationUpdate" name="notifyRegistrationUpdate">
+                        <span class="checkmark"></span>
+                        <span class="label-text">Registry Metadata Updates Alerts</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-actions mt-14 border-t pt-10">
+                <button type="submit" class="btn btn-accent btn-lg px-12 h-14 shadow-gold" [disabled]="saving()">
+                    @if (saving()) {
+                        <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> Synchronizing Metadata...
+                    } @else {
+                        <app-icon name="rocket" [size]="18" class="icon"></app-icon> Update Registry Information
+                    }
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- EC History Section -->
@@ -85,7 +501,7 @@
             }
         </div>
         } @else {
-        <div class="empty-placeholder">
+        <div class="empty-placeholder compact">
             <span>🏛️</span>
             <p>You haven't held any positions in the Executive Committee yet. Participation in elections or nominations will appear here.</p>
         </div>
@@ -95,33 +511,15 @@
     <!-- Education History Section -->
     <div class="glass-card mb-12 p-12">
         <h4 class="section-label">Educational Timeline</h4>
-        @if ((profile.academicHistory && profile.academicHistory.length > 0) || profile.ghcLastCertificate) {
+        @if (profile.academicHistory && profile.academicHistory.length > 0) {
         <div class="history-list">
-            <!-- Primary Overview (from Main Profile) -->
-            @if (profile.ghcLastCertificate) {
-            <div class="history-row primary">
-                <div class="row-main">
-                    <span class="row-title">
-                        {{ profile.ghcLastCertificate }} {{ getMajorDisplay(profile.ghcLastCertificate, profile.ghcLastCertificateGroup, profile.ghcLastCertificateSubject) }}
-                    </span>
-                    <div class="row-sub">
-                        <span>Govt. Haraganga College</span>
-                        <span class="badge-info !text-[9px]">Primary Registry</span>
-                    </div>
-                </div>
-                <div class="row-period">
-                    {{ profile.ghcAdmissionYear ? profile.ghcAdmissionYear + ' - ' : '' }}{{ profile.ghcLastCertificatePassingYear }}
-                </div>
-            </div>
-            }
-
             @for (h of profile.academicHistory; track $index) {
-            <div class="history-row">
+            <div class="history-row" [class.primary]="h.isGHC">
                 <div class="row-main">
-                    <span class="row-title">{{ h.degree }} {{ getMajorDisplay(h.degree, 'None', h.subject) }}</span>
+                    <span class="row-title">{{ h.degree }} {{ getMajorDisplay(h.degree, h.subject) }}</span>
                     <div class="row-sub">
                         <span>{{ h.institutionName }}</span>
-                        @if (h.isGHC) { <span class="badge-info !text-[9px]">Haragangian Record</span> }
+                        @if (h.isGHC) { <span class="badge-info !text-[9px]">Primary Registry</span> }
                     </div>
                 </div>
                 <div class="row-period">
@@ -129,14 +527,15 @@
                 </div>
                 <div class="row-actions">
                     <button type="button" (click)="removeAcademicRecord($index)" class="btn btn-secondary btn-sm text-danger-color !border-none !bg-transparent" title="Remove Record">
-                        🗑️
+                        <app-icon name="trash" [size]="16"></app-icon>
                     </button>
                 </div>
             </div>
             }
         </div>
+
         } @else {
-        <div class="empty-placeholder">
+        <div class="empty-placeholder compact">
             <span>🎓</span>
             <p>Your educational journey is currently empty. Add your academic milestones below.</p>
         </div>
@@ -174,412 +573,23 @@
                 </div>
                 <div class="row-actions">
                     <button type="button" (click)="removeProfessionalRecord($index)" class="btn btn-secondary btn-sm text-danger-color !border-none !bg-transparent" title="Remove Experience">
-                        🗑️
+                        <app-icon name="trash" [size]="16"></app-icon>
                     </button>
                 </div>
             </div>
             }
         </div>
         } @else {
-        <div class="empty-placeholder">
+        <div class="empty-placeholder compact">
             <span>💼</span>
             <p>Professional history not found. Keeping your career up to date helps with networking within the alumni portal.</p>
         </div>
         }
     </div>
 
-    <!-- Photo Upload Card -->
-    <div class="glass-card mb-12 p-12">
-        <h4 class="section-label mb-6">Profile Photo</h4>
-        <div class="flex items-center gap-8">
-            <div class="photo-preview-wrap relative">
-                @if (photoPreview()) {
-                <img [src]="photoPreview()" class="photo-preview rounded-2xl" alt="Preview">
-                } @else if (profile.photoPath) {
-                <img [src]="'/' + profile.photoPath" class="photo-preview rounded-2xl" alt="Current Photo">
-                } @else {
-                <div class="photo-placeholder rounded-2xl flex items-center justify-center text-4xl">
-                    {{ profile.fullName?.[0] || '?' }}
-                </div>
-                }
-                
-                @if (profile.photoPath || photoPreview()) {
-                    <button type="button" (click)="removePhoto()" class="remove-photo-btn" title="Remove Photo">
-                        🗑️
-                    </button>
-                }
-            </div>
-            <div class="flex flex-col gap-4">
-                <p class="text-sm opacity-60">Upload a professional photo (JPG, PNG, WebP — max 5MB)</p>
-                <label class="btn btn-secondary cursor-pointer !mb-0">
-                    📷 Choose New Photo
-                    <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onPhotoSelected($event)" class="hidden">
-                </label>
-                @if (photoPreview()) {
-                <button class="btn btn-accent" (click)="uploadPhoto()" [disabled]="uploadingPhoto()">
-                    @if (uploadingPhoto()) { ⏳ Uploading... } @else { 🚀 Save Photo }
-                </button>
-                }
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Profile Edit Form -->
-    <div class="glass-card profile-card p-12">
-        <form (submit)="updateProfile()">
-            <!-- Section 1: Personal Details -->
-            <div class="section-block">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Secure Identity Details</h4>
-                </div>
-                <div class="form-grid mb-12">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" [(ngModel)]="profile.fullName" name="fullName">
-                    </div>
-                    <div class="form-group">
-                        <label>National ID (NID)</label>
-                        <input type="text" [value]="profile.nid" name="nid" readonly class="opacity-50"
-                            title="Contact admin to change verified NID">
-                    </div>
-                    <div class="form-group">
-                        <label>Father's Name</label>
-                        <input type="text" [(ngModel)]="profile.fatherName" name="fatherName">
-                    </div>
-                    <div class="form-group">
-                        <label>Mother's Name</label>
-                        <input type="text" [(ngModel)]="profile.motherName" name="motherName">
-                    </div>
-                    <div class="form-group">
-                        <label>Gender</label>
-                        <select [(ngModel)]="profile.gender" name="gender">
-                            <option *ngFor="let g of genderOptions" [value]="g.value">{{ g.label }}</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Blood Group</label>
-                        <select [(ngModel)]="profile.bloodGroup" name="bloodGroup">
-                            <option *ngFor="let b of bloodGroupOptions" [value]="b.value">{{ b.label }}</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 2: Academic Achievements -->
-            <div class="section-block mt-12">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Overall Highest Academic Achievement</h4>
-                </div>
-                <div class="form-grid mb-12">
-                    <div class="form-group">
-                        <label>Highest Degree Title</label>
-                        <select [(ngModel)]="profile.highestCertificate" name="highDeg">
-                            <option value="">Choose Degree...</option>
-                            @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Major / Group / Subject</label>
-                        @if (profile.highestCertificate === 'HSC') {
-                            <select [(ngModel)]="profile.highestCertificateGroup" name="highGrp">
-                                <option value="None">None / General</option>
-                                @for (g of groupOptions; track g) { <option [value]="g">{{ g }}</option> }
-                            </select>
-                        } @else {
-                            <select [(ngModel)]="profile.highestCertificateSubject" name="highSub">
-                                <option value="None">None / General</option>
-                                @for (s of subjectOptions; track s) { <option [value]="s">{{ s }}</option> }
-                            </select>
-                        }
-                    </div>
-                    <div class="form-group">
-                        <label>Passing Year</label>
-                        <select [(ngModel)]="profile.highestCertificatePassingYear" name="highPass">
-                            <option [value]="null">Select Year...</option>
-                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>HSC Admission Year (Reference)</label>
-                        <select [(ngModel)]="profile.hscAdmissionYear" name="hscAdm">
-                            <option [value]="null">Select Year...</option>
-                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 3: Registration Summary -->
-            <div class="section-block mt-12">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Member Registration Summary (GHC)</h4>
-                </div>
-                <div class="form-grid mb-12">
-                    <div class="form-group">
-                        <label>Last GHC Degree</label>
-                        <select [(ngModel)]="profile.ghcLastCertificate" name="ghcDeg">
-                            <option value="">Select Certificate...</option>
-                            @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>GHC Subject / Group</label>
-                        @if (profile.ghcLastCertificate === 'HSC') {
-                            <select [(ngModel)]="profile.ghcLastCertificateGroup" name="ghcGrp">
-                                <option value="None">None / General</option>
-                                @for (g of groupOptions; track g) { <option [value]="g">{{ g }}</option> }
-                            </select>
-                        } @else {
-                            <select [(ngModel)]="profile.ghcLastCertificateSubject" name="ghcSub">
-                                <option value="None">None / General</option>
-                                @for (s of subjectOptions; track s) { <option [value]="s">{{ s }}</option> }
-                            </select>
-                        }
-                    </div>
-                    <div class="form-group">
-                        <label>GHC Admission Year</label>
-                        <select [(ngModel)]="profile.ghcAdmissionYear" name="ghcAdm">
-                            <option [value]="null">Select Year...</option>
-                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>GHC Passing Year</label>
-                        <select [(ngModel)]="profile.ghcLastCertificatePassingYear" name="ghcPass">
-                            <option [value]="null">Select Year...</option>
-                            @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 4: Academic History -->
-            <div class="section-block mt-12">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Detailed Academic Milestones</h4>
-                    <button type="button" (click)="addAcademicRecord()" class="btn btn-secondary btn-sm">
-                        + Add Education
-                    </button>
-                </div>
-                
-                <div class="history-container">
-                    @for (item of profile.academicHistory; track $index) {
-                    <div class="history-item relative p-10 glass-card mb-4">
-                        <button type="button" (click)="removeAcademicRecord($index)" class="absolute top-6 right-6 btn btn-secondary btn-sm text-danger-color border-danger-color">
-                             Remove 🗑️
-                        </button>
-                        
-                        <div class="form-grid">
-                            <div class="form-group full">
-                                <label>Institution / University Name</label>
-                                <input type="text" [(ngModel)]="item.institutionName" [name]="'inst_' + $index" placeholder="e.g. Govt. Haraganga College">
-                            </div>
-                            <div class="input-group full py-2">
-                                <label class="premium-checkbox-label">
-                                    <input type="checkbox" [(ngModel)]="item.isGHC" [name]="'isGHC_' + $index">
-                                    <span class="checkmark"></span>
-                                    <span class="label-text">Is this from Govt. Haraganga College?</span>
-                                </label>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Degree Type</label>
-                                <select [(ngModel)]="item.degree" [name]="'deg_' + $index">
-                                    <option value="">Select...</option>
-                                    @for (deg of degreeOptions; track deg) { <option [value]="deg">{{ deg }}</option> }
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Major / Group / Subject</label>
-                                <select [(ngModel)]="item.subject" [name]="'sub_' + $index">
-                                    <option value="None">None</option>
-                                    @for (sub of getAvailableSubjects(item.degree); track sub) { <option [value]="sub">{{ sub }}</option> }
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Admission Year</label>
-                                <select [(ngModel)]="item.admissionYear" [name]="'admY_' + $index">
-                                    <option [value]="null">Select...</option>
-                                    @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Passing Year (Graduation)</label>
-                                <select [(ngModel)]="item.passingYear" [name]="'passY_' + $index">
-                                    <option [value]="null">Select...</option>
-                                    @for (y of yearsList; track y) { <option [value]="y">{{ y }}</option> }
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    } @empty {
-                    <div class="empty-placeholder dark">
-                        <p>No educational history provided. At least one record from GHC is required for verification.</p>
-                    </div>
-                    }
-                </div>
-            </div>
-
-            <!-- Section 5: Professional Legacy -->
-            <div class="section-block mt-12">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Professional Legacy & Snapshot</h4>
-                </div>
-                
-                <div class="form-grid mb-12">
-                    <div class="form-group full">
-                        <label>Primary Designation & Organization</label>
-                        <input type="text" [(ngModel)]="profile.designation" name="profileDesignation" placeholder="e.g. Lead Architect at BuildRight">
-                    </div>
-                    <div class="form-group">
-                        <label>Industry Sector</label>
-                        <input type="text" list="sector-list" [(ngModel)]="profile.professionalSector" name="profileSector">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 6: Career Timeline -->
-            <div class="section-block mt-12">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Detailed Career Timeline</h4>
-                    <button type="button" (click)="addProfessionalRecord()" class="btn btn-secondary btn-sm">
-                        + Add Experience
-                    </button>
-                </div>
-
-                <div class="history-container">
-                    @for (work of profile.professionalHistory; track $index) {
-                    <div class="history-item relative p-10 glass-card mb-4">
-                        <button type="button" (click)="removeProfessionalRecord($index)" class="absolute top-6 right-6 btn btn-secondary btn-sm text-danger-color border-danger-color">
-                             Remove 🗑️
-                        </button>
-                        
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Organisation / Company</label>
-                                <input type="text" [(ngModel)]="work.organizationName" [name]="'org_' + $index" placeholder="Company Name">
-                            </div>
-                            <div class="form-group">
-                                <label>Official Designation</label>
-                                <input type="text" [(ngModel)]="work.designation" [name]="'des_' + $index" placeholder="Chief Executive / Manager">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Career Sector</label>
-                                <input type="text" list="sector-list" [(ngModel)]="work.sector" [name]="'sec_' + $index">
-                            </div>
-                            <div class="form-group">
-                                <label>Work Location</label>
-                                <input type="text" [(ngModel)]="work.location" [name]="'loc_' + $index" placeholder="City, Country">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Date of Induction</label>
-                                <input type="date" [(ngModel)]="work.startDate" [name]="'sD_' + $index">
-                            </div>
-                            <div class="form-group" *ngIf="!work.isCurrent">
-                                <label>Retirement / Resignation Date</label>
-                                <input type="date" [(ngModel)]="work.endDate" [name]="'eD_' + $index">
-                            </div>
-
-                            <div class="input-group full py-2">
-                                <label class="premium-checkbox-label">
-                                    <input type="checkbox" [(ngModel)]="work.isCurrent" [name]="'isCurr_' + $index">
-                                    <span class="checkmark"></span>
-                                    <span class="label-text">Active Occupation (Currently serving here)</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    } @empty {
-                    <div class="empty-placeholder dark">
-                        <p>No professional history records yet. Update your career status for networking.</p>
-                    </div>
-                    }
-                </div>
-            </div>
-
-            <!-- Section 7: Emergency -->
-            <div class="section-block mt-12">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Emergency Protocol Contact</h4>
-                </div>
-                <div class="form-grid mb-4">
-                    <div class="form-group full">
-                        <label>Contact Person Legal Name</label>
-                        <input type="text" [(ngModel)]="profile.emergencyContactName" name="ecName">
-                    </div>
-                    <div class="form-group">
-                        <label>Consanguinity / Relation</label>
-                        <input type="text" [(ngModel)]="profile.emergencyContactRelation" name="ecRel">
-                    </div>
-                    <div class="form-group">
-                        <label>Primary Phone Number</label>
-                        <input type="text" [(ngModel)]="profile.emergencyContactPhone" name="ecPhone">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 8: Address -->
-            <div class="section-block mt-12">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Correspondence Identity</h4>
-                </div>
-                <div class="form-grid mb-4">
-                    <div class="form-group full">
-                        <label>Present Primary Address</label>
-                        <textarea [(ngModel)]="profile.presentAddress" name="presentAddress" rows="2"></textarea>
-                    </div>
-                    <div class="form-group full">
-                        <label>Permanent Residential Address</label>
-                        <textarea [(ngModel)]="profile.permanentAddress" name="permanentAddress" rows="2"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 9: Privacy -->
-            <div class="section-block mt-12">
-                <div class="flex justify-between items-center mb-8 border-b border-accent pb-4">
-                    <h4 class="text-accent uppercase tracking-widest text-xs font-black">Directory Privacy Controls</h4>
-                </div>
-                <p class="text-muted text-xs mb-12">Manage which attributes are visible to other verified Haragangians in the member directory.</p>
-                
-                <div class="space-y-6">
-                    <label class="premium-checkbox-label">
-                        <input type="checkbox" [(ngModel)]="profile.isEmailPublic" name="isEmailPublic">
-                        <span class="checkmark"></span>
-                        <span class="label-text">Expose Email to Alumni Community</span>
-                    </label>
-                    <label class="premium-checkbox-label">
-                        <input type="checkbox" [(ngModel)]="profile.isMobilePublic" name="isMobilePublic">
-                        <span class="checkmark"></span>
-                        <span class="label-text">Expose Mobile Identity to Alumni Community</span>
-                    </label>
-                    <label class="premium-checkbox-label">
-                        <input type="checkbox" [(ngModel)]="profile.isAddressPublic" name="isAddressPublic">
-                        <span class="checkmark"></span>
-                        <span class="label-text">Expose Residential Data to Alumni Community</span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-actions mt-14 border-t pt-10">
-                <button type="submit" class="btn btn-accent btn-lg px-12 h-14 shadow-gold" [disabled]="saving()">
-                    @if (saving()) {
-                        <span class="spinner">⏳</span> Synchronizing Metadata...
-                    } @else {
-                        <span class="icon">🚀</span> Update Registry Information
-                    }
-                </button>
-            </div>
-        </form>
-    </div>
-
     <!-- Reference Datalists -->
     <datalist id="years-list"> <option *ngFor="let y of yearsList" [value]="y"></option> </datalist>
     <datalist id="sector-list"> <option *ngFor="let s of sectorOptions" [value]="s"></option> </datalist>
-    <datalist id="group-list"> <option *ngFor="let g of groupOptions" [value]="g"></option> </datalist>
     <datalist id="subject-list"> <option *ngFor="let s of subjectOptions" [value]="s"></option> </datalist>
     <datalist id="degree-list"> <option *ngFor="let d of degreeOptions" [value]="d"></option> </datalist>
     }
