@@ -1,8 +1,13 @@
 # Configuration-Driven Framework — Implementation Guide
 
-**Status:** Phase 1 (Backend + DB) COMPLETE | Phase 2 (Angular Consumer) TODO | Phase 3 (Flutter Consumer) TODO  
-**Last Updated:** 2026-05-30  
+**Status:** Phase 1 (Backend + DB) COMPLETE | Phase 2 (Angular Consumer) COMPLETE | Phase 3 (Flutter Consumer) COMPLETE | Phase 4 (Tests) TODO | Phase 5 (Admin UI) COMPLETE | Phase 6 (Cleanup) COMPLETE  
+**Last Updated:** 2026-08-11 (status reconciled against the code; the guide itself is unchanged from 2026-05-30)  
 **Branch:** `preprod`
+
+> The 2026-08-11 audit found this page a full quarter behind the code: Phases 2, 3, 5 and 6 had
+> all shipped while still being described here as pending. Sections 4 and 8–12 have been
+> corrected. What remains open in Area 28 is the test suite (28.22–28.26) plus a handful of
+> small decisions — see [TODO.md](TODO.md) Part 1 for the current list.
 
 ---
 
@@ -58,7 +63,11 @@ Transforms every hardcoded brand string, label, and feature toggle in the system
 
 ---
 
-## 4. Mandatory Migration (MUST DO BEFORE RUNNING)
+## 4. Mandatory Migration (DONE — kept for reference)
+
+> Applied. The migration exists as `Data/Migrations/PgSql/20260530092800_AddOrganizationConfig`
+> and 31.3 recorded that no migrations are outstanding. This was the blocking gate (28.0) for
+> everything else in Area 28; the steps below are only useful when standing up a fresh database.
 
 ```powershell
 # Step 1: Apply the two pending migrations that were queued before this feature
@@ -186,9 +195,10 @@ A new `Guest` value was added to `MembershipType` enum. All three platforms must
 | Angular | `app.constants.ts:39` | `'Guest Member'` in `MEMBERSHIP_TYPES` | ✅ Done |
 | Angular | `app.constants.ts:283` | `{ value: 'Guest', label: 'Guest Member' }` in `MEMBERSHIP_TYPE_OPTIONS` | ✅ Done |
 | Config | `OrgConfigService.cs` | `["Guest"] = "Guest Member"` / `"অতিথি সদস্য"` in both locales | ✅ Done |
-| Flutter | `GHCAA.Mobile/lib/core/...` | Add `'Guest'` to any hardcoded type list | ⏳ TODO (Area 28.12) |
+| Flutter | `dropdown_service.dart` | `Guest` present in the `defaultMembershipTypes` fallback | ✅ Done |
+| Flutter | `directory_screen.dart:199`, `registration_constants.dart` | Two hardcoded lists still omit `Guest` | ⏳ TODO (28.21) |
 | DB | `MembershipFeeConfigs` table | Admin should add fee config row for Guest type via Admin portal | Manual step |
-| Tests | `GHCAA.Tests/` | Update any test asserting exact membership type count | ⏳ TODO (Area 28.11) |
+| Tests | `GHCAA.Tests/` | Update any test asserting exact membership type count | ⏳ TODO (28.22) |
 
 > **Note:** `MembershipType` is stored as an int in the DB (EF default). `Guest = 6` appended at the end — no migration needed for the enum itself; no existing rows are affected.
 
@@ -196,41 +206,49 @@ A new `Guest` value was added to `MembershipType` enum. All three platforms must
 
 ## 9. Known Tech Debt (from Opus Review — 2026-05-30)
 
-| ID | Issue | Severity | Area |
-|----|-------|----------|------|
-| TD-1 | `Constants.cs` branding/email sections are now duplicate sources of truth | Medium | 28.16 |
-| TD-2 | No optimistic concurrency token on `OrganizationConfig` entity | Low | 28.17 |
-| TD-3 | `MembershipTypeLabels` in locale packs still require manual sync when enum changes | Medium | 28.18 |
-| TD-4 | `Constants.Branding.*` and `Constants.EmailSubjects.*` not yet deleted/deprecated | Medium | 28.16 |
+| ID | Issue | Severity | Task | Outcome |
+|----|-------|----------|------|---------|
+| TD-1 | `Constants.cs` branding/email sections are now duplicate sources of truth | Medium | 28.30 | ✅ Call sites read `config.Branding.*` / `locale.EmailSubjects.*` |
+| TD-2 | No optimistic concurrency token on `OrganizationConfig` entity | Low | 28.31 | ✅ `RowVersion` added, migration `20260703123040` |
+| TD-3 | `MembershipTypeLabels` in locale packs still require manual sync when enum changes | Medium | 28.22 | ⏳ Open — the seed test that would catch a drift is not written |
+| TD-4 | `Constants.Branding.*` and `Constants.EmailSubjects.*` not yet deleted/deprecated | Medium | 28.29 | ✅ Deleted outright rather than deprecated |
 
 ---
 
-## 10. Phase 2 — Angular Consumer (TODO)
+## 10. Phase 2 — Angular Consumer (DONE)
 
-Create `OrgConfigService` Angular service that:
-1. Loads `GET /api/config` via `APP_INITIALIZER` before any component renders
+`OrgConfigService` at `core/services/org-config.service.ts`:
+1. Loads `GET /api/config` via `APP_INITIALIZER` in `app.config.ts` before any component renders
 2. Exposes `config()` as an Angular Signal
 3. Exposes `t(path, locale?)` for locale string lookup
-4. Falls back to `GHCAA_DEFAULT_CONFIG` if API call fails
-5. Exposes `isEnabled(feature)` for feature-gate guards
+4. Falls back to an inline GHCAA default if the API call fails
+5. Exposes `isEnabled(feature)`, consumed by `core/guards/feature.guard.ts` on the gallery,
+   events, job-hub and forum routes
 
-See `Area 28` tasks 28.1–28.9 in TODO.md.
-
----
-
-## 11. Phase 3 — Flutter Consumer (TODO)
-
-Create `OrgConfigService` Dart service that:
-1. Loads `GET /api/config` on app init via `OrgConfigService.instance.load(apiClient)`
-2. Caches in `SharedPreferences` for offline resilience
-3. Exposes `pack` accessor returning locale-appropriate `LocalePack`
-4. Updates `app_drawer.dart` hardcoded strings to read from `pack.nav.*`
-
-See `Area 28` tasks 28.10–28.14 in TODO.md.
+Delivered by `Area 28` tasks 28.11–28.16. The load method is `loadConfig()`, not `load()`.
+Zero `APP_CONFIG` references remain under `GHCAA.Web/src`.
 
 ---
 
-## 12. How to Add a New Organization (Once All 3 Phases Complete)
+## 11. Phase 3 — Flutter Consumer (DONE, with two open decisions)
+
+`OrgConfigService` at `lib/core/services/org_config_service.dart`, with the models in
+`lib/core/config/org_config.dart` (not `core/models/`, as originally sketched):
+1. `load()` hits `/config` on the `/api` base
+2. Caches in `SharedPreferences` under `org_config_cache` for offline resilience
+3. `localePackProvider` exposes the locale-appropriate `LocalePack`
+4. `app_drawer.dart` reads its section headers, role labels and batch prefix from the pack
+
+Delivered by `Area 28` tasks 28.17–28.18. Two things were not delivered as specified and are
+still open: config loads lazily through Riverpod rather than before `runApp` (28.19), and the
+individual drawer menu item titles are still string literals (28.20).
+
+---
+
+## 12. How to Add a New Organization
+
+The admin editor shipped under 28.27 (`GHCAA.Web/src/app/admin/org-config/`, Branding / Contact
+/ Currency / Features / Workflow / Advanced tabs), so this flow works today:
 
 1. Login as SuperAdmin
 2. Navigate to `/admin/org-config`

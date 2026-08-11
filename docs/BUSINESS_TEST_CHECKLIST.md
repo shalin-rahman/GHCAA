@@ -75,6 +75,9 @@ Use during Phases 2–4. Mark `[x]` when verified on the relevant layer(s). Note
 
 - [x] **A11.1** `AuthServiceTests.SocialLoginAsync_WithValidGoogleId` (API)
 - [ ] **A11.2** Incomplete profile onboarding wizard (Web/Mobile)
+- [ ] **A11.3** Mobile social login — nothing to test yet. `29E.1` removed the stub UI and the
+  `google_sign_in` / `flutter_facebook_auth` packages have no imports in `lib/`. Tracked as
+  `15.5`; do not read A11.1 as covering the mobile client.
 
 ---
 

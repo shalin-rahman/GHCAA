@@ -51,7 +51,7 @@ The core of the system is a high-integrity registration and verification workflo
   * System auto-provisions a **User Account** where the Membership Number becomes the Login ID.
 * **3.1.3 Digital ID & Certificates**: Automatic generation of secure, QR-coded SVG/PDF ID cards and membership certificates for "Active" members.
 * **3.1.4 Profile Management**: Granular control over personal data with member-defined **Privacy Toggles** (Masking NID, Email, Mobile, Address).
-* **3.1.5 Social Authentication**: Integration with **Google** and **Facebook** for simplified login. The system automatically links social IDs to existing accounts via email or prompts for profile completion for new users.
+* **3.1.5 Social Authentication**: Integration with **Google** and **Facebook** for simplified login. The system automatically links social IDs to existing accounts via email or prompts for profile completion for new users. *Delivered on the API and the web client only; the mobile client has no social login today (TODO `15.5`), and LinkedIn is not implemented anywhere (TODO `7.15`).*
 * **3.1.6 Onboarding Workflow**: "Applied" members who login via social auth are restricted to a Profile Wizard. Full system access is gated until:
   1. **Profile Completion**: 100% of mandatory fields provided. The 13 required fields are:
      * Personal: `FullName`, `Email`, `MobileNo`, `DateOfBirth`, `Gender`, `NID`, `FatherName`, `MotherName`, `PermanentAddress`, `BloodGroup`.

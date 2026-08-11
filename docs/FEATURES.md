@@ -219,7 +219,7 @@ The assistant runs entirely on internal data with a rule-based engine — it has
 ### 7.1b Contact details configuration
 - **Business description**: The Contact page's address/phone/email/social panel is driven by `OrgConfig.Contact` rather than hardcoded markup — including an **on-campus address**, a list of phone numbers, and an optional map embed URL, all editable from the SuperAdmin org-config screen and shared by web and mobile.
 - **User roles**: Public (read), SuperAdmin (edit).
-- **Inputs / outputs**: Screens `/contact`, `/admin/org-config`; API `GET`/`PUT /api/org-config`.
+- **Inputs / outputs**: Screens `/contact`, `/admin/org-config`; API `GET`/`PUT /api/config`.
 - **Dependencies**: OrgConfig service. The admin-supplied map URL is treated as untrusted: it passes an allow-list check before the iframe is trusted, and no iframe renders if it fails.
 
 ### 7.2 Media Gallery & Albums

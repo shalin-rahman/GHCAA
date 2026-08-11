@@ -1853,6 +1853,25 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `member-journey.spec.ts` | `GHCAA.Web/tests/e2e/member-journey.spec.ts` | E2E Member login/dashboard journey |
 | `admin-workflow.spec.ts` | `GHCAA.Web/tests/e2e/admin-workflow.spec.ts` | E2E Admin approval workflow |
 
+### Mobile (Flutter) — Test Files
+
+Run with `flutter test` (unit, widget and golden) from `GHCAA.Mobile/`. Golden baselines live in `test/goldens/`; `test/flutter_test_config.dart` skips pixel comparison on CI.
+
+| Test File | Path | Covers |
+|---|---|---|
+| `unit_test.dart` | `test/unit_test.dart` | `AppUtils` — date parse/format contract, currency, initials |
+| `model_test.dart` | `test/model_test.dart` | `ForumCategory`/`ForumTopic`/`ForumPost` and `OrgConfig` `fromJson` |
+| `router_test.dart` | `test/router_test.dart` | Registered `GoRouter` paths and names |
+| `major_functionalities_test.dart` | `test/major_functionalities_test.dart` | `AuthService`, `EventsService`, `GatewayService` |
+| `forum_service_test.dart` | `test/forum_service_test.dart` | `ForumService` endpoints, payloads and error paths |
+| `registration_wizard_test.dart` | `test/registration_wizard_test.dart` | `RegisterWizardNotifier` steps and payload |
+| `widget_test.dart` | `test/widget_test.dart` | `AppHomeScreen` branding and theme |
+| `comprehensive_visual_freeze_test.dart` | `test/comprehensive_visual_freeze_test.dart` | Golden — 48 member + admin screens |
+| `full_app_visual_freeze_test.dart` | `test/full_app_visual_freeze_test.dart` | Golden — 11 key screens |
+| `visual_freeze_test.dart` | `test/visual_freeze_test.dart` | Golden — Digital ID card |
+| `dashboard_visual_test.dart` | `test/dashboard_visual_test.dart` | Golden — member dashboard |
+| `app_test.dart`, `member_journey_test.dart`, `article_test.dart`, `financial_test.dart`, `dgepay_payment_test.dart` | `integration_test/` | E2E journeys — need a device and a live API, so not run by `flutter test` or CI |
+
 ---
 
 ## Web (Angular) — Test Specs
@@ -2036,4 +2055,4 @@ To maintain architectural integrity and prevent "documentation drift," the follo
 
 ---
 
-*Last updated: 2026-04-23 v2.4 — Integrated Visual Testing Suite & Production Quality Freeze.*
+*Last updated: 2026-08-11 v2.5 — Mobile test-file inventory rebuilt against the source (Area 35 sweep). Previous: 2026-04-23 v2.4 — Integrated Visual Testing Suite & Production Quality Freeze.*

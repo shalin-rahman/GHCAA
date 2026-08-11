@@ -307,16 +307,19 @@ Tests: `AuthControllerTests`, `AuthServiceTests`, `TokenServiceTests`.
 
 From `TODO.md` — not blockers unless user prioritizes:
 
-| Item | Area | Type |
-|---|---|---|
-| Alumni referral system | 6.2 | New feature |
-| 2FA for admin | 7.13 | Security enhancement |
-| Biometric auth | 7.14 | Mobile enhancement |
-| SSL pinning | 7.16 | Hardening |
-| Cursor pagination (directory) | 8.3 | Performance |
-| i18n EN + Bengali | 8.8 | Localization |
-| OrgConfig Angular consumer | 28.11+ | Config-driven white-label |
-| DB migrations (Area 28.0) | 28.0 | Blocking for org-config feature |
+Refreshed 2026-08-11 — three rows below had shipped since this list was written.
+
+| Item | Area | Type | Status |
+|---|---|---|---|
+| Alumni referral system | 6.2 | New feature | Open |
+| 2FA for admin | 7.13 | Security enhancement | Open |
+| Biometric auth | 7.14 | Mobile enhancement | **Shipped** — `biometric_service.dart` + opt-in on the login screen |
+| SSL pinning | 7.16 | Hardening | Open |
+| Cursor pagination (directory) | 8.3 | Performance | Open |
+| i18n EN + Bengali | 8.8 | Localization | Open — depends on 28.32 (web) and 28.33 (mobile) |
+| OrgConfig Angular consumer | 28.11–28.16 | Config-driven white-label | **Shipped** — `APP_INITIALIZER` + `feature.guard.ts`; no `APP_CONFIG` left |
+| DB migrations (Area 28.0) | 28.0 | Blocking for org-config feature | **Applied** — `20260530092800_AddOrganizationConfig` |
+| Mobile social login | 15.5, 7.15 | Auth | Open — was marked done, but 29E.1 removed the stub UI and the SDKs are unused |
 
 ---
 
