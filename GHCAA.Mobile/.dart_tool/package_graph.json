@@ -19,6 +19,7 @@
         "flutter_dotenv",
         "flutter_facebook_auth",
         "flutter_launcher_icons",
+        "flutter_localizations",
         "flutter_native_splash",
         "flutter_riverpod",
         "flutter_secure_storage",
@@ -35,6 +36,7 @@
         "pdf",
         "printing",
         "qr_flutter",
+        "screen_protector",
         "sentry_flutter",
         "share_plus",
         "shared_preferences",
@@ -151,6 +153,13 @@
       ]
     },
     {
+      "name": "screen_protector",
+      "version": "1.5.3",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
       "name": "connectivity_plus",
       "version": "6.1.5",
       "dependencies": [
@@ -186,7 +195,7 @@
     },
     {
       "name": "intl",
-      "version": "0.19.0",
+      "version": "0.20.2",
       "dependencies": [
         "clock",
         "meta",
@@ -550,6 +559,15 @@
         "meta",
         "riverpod",
         "state_notifier"
+      ]
+    },
+    {
+      "name": "flutter_localizations",
+      "version": "0.0.0",
+      "dependencies": [
+        "flutter",
+        "intl",
+        "path"
       ]
     },
     {

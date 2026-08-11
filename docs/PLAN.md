@@ -6,8 +6,10 @@ status banner saying what actually happened.
 
 ## Current critical path (reconciled 2026-08-11)
 
-54 items are open across 9 areas. Almost none of them block each other, so the ordering below
-is about unblocking verification rather than untangling dependencies.
+73 items are open across 10 areas. 54 of those are remediation and mostly independent of each
+other, so the ordering below is about unblocking verification rather than untangling
+dependencies; the other 19 are Area 36, a new feature that is planned separately at the bottom
+of this section.
 
 **Start here, because it is blocking two other items and takes an hour.** `34.D17` — the local
 database has drifted from the seed files, so `shalin` and `superadmin` log in as ordinary
@@ -18,9 +20,14 @@ finish the live-browser verification in `34.D8` or the admin half of `33.13`.
 
 | Chain | Order | Note |
 |---|---|---|
-| Mobile gaps → goldens | `35.A1`–`35.A9` → `35.B1` | Regenerating goldens before the UI fixes land means regenerating them twice |
 | Auth correctness → its tests | `35.A2` → `35.A3` → `35.B3` | `35.B3` is meant to cover the code `35.A3` changes |
 | Social auth | `7.15` → `15.5` → `35.A8` | Decide the feature first; `35.A8` is "drop the SDKs" only if the answer is no |
+
+**The mobile suite is green as of 2026-08-11** — 121 passed, 0 failed, analyze clean. `35.B1`
+regenerated the 21 stale goldens and is closed, so the "fix the UI before touching the goldens"
+chain no longer applies. The flip side is that the Area 35 UI items (`35.A1`–`35.A9`) now each
+carry the cost of regenerating whatever goldens they move, and anyone landing one of them
+should expect to re-run `--update-goldens` as part of the change rather than after it.
 
 **Everything else is independent** and can be picked up by anyone in any order: the Area 28
 test suite (`28.22`–`28.26`), the Area 27 coverage work (`27.1` gates `27.8`), the Area 12
@@ -31,6 +38,91 @@ not the large backlog it appears to be — 12 of its items were already delivere
 closed, and what is left is mostly the test suite plus small naming decisions. Conversely,
 `15.5` and `7.15` were marked `[DONE]` but never delivered: `29E.1` removed the mobile social
 login because it was a stub, and LinkedIn OAuth exists nowhere in the repo.
+
+---
+
+# PLAN: Facebook Page → News/Notice ingest (TODO Area 36)
+
+> **Status: planned, not started.** Raised 2026-08-11. Nineteen items, `36.A1`–`36.D5`.
+
+## The question that was asked
+
+Can posts from a pre-configured Facebook Page be collected, offered to an admin who picks
+which ones become News or Notice items, and then rendered through the existing News/Notice
+structures — text, image, date and all?
+
+## The answer
+
+Yes, and the reason it is cheap is that almost none of it is new. GHCAA already has one table
+for both News and Notices (`NewsPost`, discriminated by a `PostType` enum), an admin editor for
+them, file upload with magic-byte validation, HTML sanitization on save, and mobile and web
+readers that render whatever `GET /api/news` returns. A Facebook import is a **new front door
+onto that existing pipeline**, not a parallel one. What is genuinely new is a Graph API client,
+a staging table, and one admin screen.
+
+There is one external dependency the whole thing rests on, and it is not a technical one.
+Reading a Page's posts requires `pages_read_engagement` on a Page Access Token, which normally
+means Facebook App Review — except when the token belongs to someone who holds a role on that
+Page, which an association admin does. **`36.A1` proves that by hand before any code is
+written.** If the Page turns out to be agency-managed or the permission needs review, the whole
+plan changes shape, and finding that out in an afternoon is much better than finding it out in
+sprint three.
+
+## Two design choices worth stating up front
+
+**Fetch is admin-triggered, not scheduled.** The repo has no background-job infrastructure at
+all — no Hangfire, no `IHostedService`, no cron — so a periodic poll would mean building that
+first, plus retries, failure alerting and a schedule nobody owns. Since the requirement already
+puts a human in the loop choosing posts, a "Fetch from Facebook" button gets the same outcome
+and skips all of it. A scheduled poll can be added later without reworking anything.
+
+**Fetched posts land in a staging table, never straight into `NewsPosts`.** This is what makes
+re-fetching safe (unique index on the Facebook post id), gives an audit trail of what was seen
+and ignored, and keeps the public feed clean of anything an admin has not explicitly approved.
+
+## Phases
+
+| Phase | Items | Gate before moving on |
+|---|---|---|
+| 0 — Decide | `36.A1`–`36.A4` | The token route is proven and the editorial policy is settled. **Do not start Phase 1 until `36.A1` is answered.** |
+| 1 — Connect and fetch | `36.B1`–`36.B4`, `36.B7` | A real fetch populates the staging table, re-running it creates no duplicates, and an expired token produces a clear error rather than an empty list |
+| 2 — Import | `36.B5`, `36.B6` | An imported post appears on `/news` with its image re-hosted on our own storage and its original publish date intact |
+| 3 — Admin UI | `36.C1`–`36.C3` | An admin can do the whole journey without a developer, including recovering from an expired token |
+| 4 — Prove and roll out | `36.D1`–`36.D5` | Tests green on API, web and mobile; feature enabled for one admin before anyone else |
+
+## The failure modes this plan is built around
+
+Three things will break this feature in production if they are not handled deliberately, and
+each has an item of its own rather than being left as a note.
+
+**The token expires and nobody notices.** Long-lived Page tokens last about 60 days. If expiry
+surfaces as an empty result set, the feature simply appears to stop finding new posts, and that
+can go unnoticed for a long time. `36.B2` makes the client distinguish expired-token from
+no-new-posts, and `36.C3` gives an admin a way to fix it without a deployment. This is also why
+`36.A3` leans towards storing the token somewhere a non-developer can rotate it.
+
+**Facebook's image CDN URLs rotate.** Storing a `scontent.*` URL on a `NewsPost` produces an
+item that looks perfect on the day it is imported and shows a broken image a few weeks later.
+`36.B5` downloads and re-hosts the media at import time, through the existing validation and
+storage services. `36.D5` deliberately leaves the pilot posts sitting for a fortnight, because
+that is the only cheap way to prove it worked.
+
+**A re-fetch duplicates everything.** Handled by a unique index on `FacebookPostId` in `36.B3`
+and an upsert in `36.B4`, and asserted in `36.D1`.
+
+## Things that will surprise whoever picks this up
+
+- Facebook posts **have no title**; `CreateNewsDto.Title` requires 5–300 characters. A title
+  has to be derived and then made editable — an import cannot be fully unattended.
+- `CreateNewsDto.Content` has a 20-character minimum, so a very short Facebook post cannot be
+  imported as-is and needs an explicit, comprehensible refusal.
+- `NewsPost.AuthorId` is a non-null FK **and** `NewsPostConfiguration` carries a global query
+  filter on `Author != null && !Author.IsArchived`. A synthetic "Facebook" author is therefore
+  a trap: archive that user and every imported post silently disappears from the public feed.
+  Use the importing admin's user id.
+- The admin review UI is **web-only**, and that is deliberate — mobile has no admin news
+  management screen at all today. `36.A4` records it so a later parity audit does not reopen
+  the area. The member-facing side needs no mobile work whatsoever.
 
 ---
 

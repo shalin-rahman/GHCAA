@@ -386,6 +386,12 @@
       "languageVersion": "3.1"
     },
     {
+      "name": "flutter_localizations",
+      "rootUri": "file:///C:/Users/u1074139/flutter/flutter_windows_3.44.2-stable/flutter/packages/flutter_localizations",
+      "packageUri": "lib/",
+      "languageVersion": "3.10"
+    },
+    {
       "name": "flutter_native_splash",
       "rootUri": "file:///C:/Users/u1074139/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_native_splash-2.4.7",
       "packageUri": "lib/",
@@ -627,9 +633,9 @@
     },
     {
       "name": "intl",
-      "rootUri": "file:///C:/Users/u1074139/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.19.0",
+      "rootUri": "file:///C:/Users/u1074139/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.20.2",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.3"
     },
     {
       "name": "io",
@@ -928,6 +934,12 @@
     {
       "name": "rxdart",
       "rootUri": "file:///C:/Users/u1074139/AppData/Local/Pub/Cache/hosted/pub.dev/rxdart-0.28.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "screen_protector",
+      "rootUri": "file:///C:/Users/u1074139/AppData/Local/Pub/Cache/hosted/pub.dev/screen_protector-1.5.3",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },

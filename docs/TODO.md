@@ -1,6 +1,6 @@
 # GHCAA PLATFORM TASK TRACKER
 
-**Open: 54  ·  Completed: 391  ·  Total: 445**  
+**Open: 73  ·  Completed: 392  ·  Total: 465**  
 Last reconciled against the codebase: 2026-08-11.
 
 This file is the authoritative status of the platform. [PLAN.md](PLAN.md) holds the
@@ -70,7 +70,7 @@ delivered and appear only in Part 2.
 
 > Scope: a documentation-vs-source sweep of `GHCAA.Mobile` only — every item below was confirmed against the actual code, not inherited from an earlier area. Items an earlier area already settled deliberately are **not** repeated here (e.g. 29G.2 records walletNumber/bankName/accountNumber as display-only *by design*, so that is not a gap). Each task names the file, the line, and how to verify it, so it can be picked up cold. Standing constraints carry over: web + mobile parity, `flutter analyze` stays clean, and per the standing policy nothing is `[DONE]` until its test passes.
 >
-> **Measured on this machine (Flutter 3.44.2 / Dart 3.12.2, 2026-08-11):** `flutter analyze` — *No issues found*. `flutter test` — **66 passed / 26 failed** when the sweep started, **95 passed / 26 failed** after 35.B7 and 35.B8. Every one of the 26 failures, before and after, is a golden pixel mismatch against the 80 committed baselines in `test/goldens/` — the failing set is identical, and there are zero logic failures, zero RenderFlex overflows and zero timer leaks. So the bar for anything in this area is: 26 failures, all goldens, analyze clean.
+> **Measured on this machine (Flutter 3.44.2 / Dart 3.12.2, 2026-08-11):** `flutter analyze` — *No issues found*. `flutter test` — **121 passed / 0 failed**. The sweep started at 66 passed / 26 failed and reached 95 / 26 after 35.B7 and 35.B8. 35.B1 then found that part of that failing count was not a golden problem at all: the package config had drifted, so two visual-freeze files failed to compile rather than mismatch. After `flutter pub get` the real set was 21 stale goldens, and regenerating them took the suite green. **The bar for anything in this area is now zero failures** — any red is yours.
 
 #### 35.A — Source gaps found in the sweep
 
@@ -85,12 +85,12 @@ delivered and appear only in Part 2.
 | **35.A7** | `TODO` | Mobile | Hardcoded production baseUrl in the gateway payload | Mobile: `lib/features/financials/gateway_service.dart:37` posts a hardcoded `'baseUrl': 'https://api.ghcaa.org'` in the gateway-initiate payload — its own trailing comment admits it is a placeholder. A preprod or local build therefore hands the payment gateway a production return URL. Source it from `AppConfig` like the rest of the app does. | S | — | 2026-08-11 |
 | **35.A8** | `TODO` | Mobile | Drop or wire the unused social-auth SDKs | Mobile: `google_sign_in` and `flutter_facebook_auth` are still declared in `pubspec.yaml` but have zero imports anywhere in `lib/` — 29E.1 removed the dead social-login UI and kept the SDKs, so both still ship in the binary and keep their native/Gradle/Info.plist config alive and unmaintained. Either finish the wiring under 7.15 or drop both packages together with the uncalled `AuthService.googleLogin`/`facebookLogin` (`lib/features/auth/auth_service.dart:82,86`). | S | 7.15 | 2026-08-11 |
 | **35.A9** | `TODO` | Mobile | formatDate silently rolls over invalid dates | Mobile: `AppUtils.formatDate` turns an out-of-range date into a plausible wrong one instead of rejecting it — `lib/core/utils/app_utils.dart:15` calls `DateFormat('dd-MM-yyyy').parse()`, whose default lenient mode rolls overflow forward, so `'2026-13-45'` renders as `14-02-2027` rather than falling through to the `catch` that returns the raw value. Found while writing the 35.B7 tests; a bad date from the API therefore displays as a confident, wrong date on every screen that formats one. Use `parse(input, true)` (strict) so the existing fallback actually runs, and update the expectation in `test/unit_test.dart` that currently pins the rollover. | S | — | 2026-08-11 |
+| **35.A10** | `TODO` | Mobile | Verify screenshot protection actually works on a device | The committed `GeneratedPluginRegistrant.java` and `GeneratedPluginRegistrant.m` did **not** register `screen_protector` — the plugin was in `pubspec.yaml` and called from three screens (`digital_id_screen.dart`, `financial_portal_screen.dart`, `payment_web_page.dart`), but the native registrants were stale, so `ScreenProtector.preventScreenshotOn()` would have had no plugin behind it. Found by 35.B1, when a `flutter pub get` regenerated both files and added the missing registration. A local build regenerates these, so this may never have reached a real release — but nobody appears to have checked. **Verify on a physical Android device and a physical iOS device that a screenshot is actually blocked on the Digital ID screen**, since that is the whole point of the feature and it cannot be proven by a unit test. While there, decide whether these generated registrants should be tracked in git at all; they are build output and they drift silently. | S | — | 2026-08-11 |
 
 #### 35.B — Test suite
 
 | # | Status | Component | Title | Description | Est. | Depends on | Raised |
 |---|---|---|---|---|---|---|---|
-| **35.B1** | `TODO` | Tests | Regenerate the 26 stale mobile goldens | Mobile: **supersedes the count in 34.D7** — 26 goldens are stale now, not 21. The spread matters and should not be regenerated blind: `auth_register` is 28.16 % different, `registration_wizard` 32.61 %, `login_portal` 21.57 %, `auth_login` 12.11 %, but `member_dashboard` is 0.26 % and `member_dashboard_standard` 0.38 %. A sub-1 % diff and a 30 % diff are not the same event. Run `flutter test --update-goldens`, then review each regenerated image against its predecessor before committing, so a genuine regression is not laundered into the baseline. | M | 35.A1-35.A9 | 2026-08-11 |
 | **35.B2** | `TODO` | Tests | Extract a shared mobile test harness | Mobile: there is no shared test harness. Five golden files (`comprehensive_visual_freeze_test.dart`, `full_app_visual_freeze_test.dart`, `visual_freeze_test.dart`, `dashboard_visual_test.dart`, `registration_visual_test.dart`) each define their own `wrapInApp`/`_wrapInApp` plus their own copy of 15–20 fake services. 34.D6 already paid the price for this: one `NewsService` signature change forced the same edit in two files. Extract one `test/helpers/` harness (`pumpApp` + the fake set + the `dotenv.testLoad`/`local_auth` channel boilerplate) and have every visual test call it. | M | — | 2026-08-11 |
 | **35.B3** | `TODO` | Tests | Cover api_client, session_manager and the widgets | Mobile: significant surface with no test of any kind. Whole features: the forum screens (`forum_categories_screen.dart`, `forum_topics_screen.dart`, `forum_topic_detail_screen.dart`). Core infrastructure: `core/api/api_client.dart` (including the 31.5 JWT-refresh interceptor, which is untested), `core/session/session_manager.dart`, `core/storage/storage_service.dart`, `core/services/org_config_service.dart`, `core/real_time/notification_hub_service.dart`, `core/services/connectivity_service.dart`, `core/services/device_info_service.dart`. All 15 widgets under `core/widgets/` — including `app_search_field.dart`, whose 350 ms debounce (29E.4) has no regression test. Prioritise `api_client` and `session_manager`: both govern auth state, and 35.A3 is about to change one of them. | L | 35.A3 | 2026-08-11 |
 | **35.B4** | `TODO` | Tests | Run or formally shelve the integration suite | Mobile: `integration_test/` never runs anywhere. CI (`.github/workflows/ghcaa-ci-standard.yml`, `ghcaa-ci-preprod.yml`) runs `flutter analyze` and `flutter test`, which only picks up `test/`; the five integration files need a device and a live API and are blocked locally by MOB-BLOCK-001/003. Either add a CI job with an emulator + seeded API, or mark the suite explicitly manual in the mobile README so its green-looking presence stops implying coverage it does not provide. | M | — | 2026-08-11 |
@@ -207,6 +207,73 @@ delivered and appear only in Part 2.
 | # | Status | Component | Title | Description | Est. | Depends on | Raised |
 |---|---|---|---|---|---|---|---|
 | **6.2** | `TODO` | Cross-platform | Alumni referral system for jobs and internships | Alumni referral system for jobs and internships | XL | — | — |
+
+### 36. Facebook Page → News/Notice Ingest  (19 open)
+
+> Raised by user 2026-08-11: "would it be possible a pre-configured FB page links posts to be
+> collected, admin able to choose which posts to display as notice/news, then post contents
+> (image and texts, dates etc) are formatted as current news/notice structures?"
+>
+> **Feasibility: yes, and without Facebook App Review** — but only because GHCAA owns the Page.
+> Reading a Page's own posts needs `pages_read_engagement` on a Page Access Token. Facebook
+> waives App Review when the token belongs to a user who holds a role on that Page, which an
+> association admin does. If that assumption ever breaks (agency-managed Page, role removed),
+> the feature needs App Review and the estimates below are wrong. **36.A1 exists to prove this
+> before any code is written.**
+>
+> **Design in one paragraph.** Fetch is *admin-triggered*, not scheduled — the repo has no
+> background-job infrastructure (no Hangfire, no `IHostedService`, no cron), and the
+> requirement is a human choosing posts anyway, so a "Fetch from Facebook" button avoids that
+> entire surface. Fetched posts land in a **staging table**, not straight into `NewsPosts`;
+> the admin then picks, edits and imports. Import reuses what already exists: media through
+> `FileValidationService` + `LocalFileStorageService` (`FileUploadType.NewsImage`), the row
+> through `NewsService.CreateNewsAsync`, which already sanitizes HTML. So the ingest is a new
+> front door onto the existing News/Notice pipeline rather than a parallel one.
+>
+> **The three things most likely to make this fail in production**, each with a task below:
+> Page tokens expire and the failure is silent (36.B2); Facebook's image CDN URLs rotate, so
+> anything not downloaded at import time turns into a broken image later (36.B5); and a
+> re-fetch must not create duplicates, which needs the Facebook post id as a unique key
+> (36.B3).
+
+#### 36.A — Decisions to close before writing code
+
+| # | Status | Component | Title | Description | Est. | Depends on | Raised |
+|---|---|---|---|---|---|---|---|
+| **36.A1** | `TODO` | Process | Prove the Page-token route works without App Review | Before anything is built, confirm by hand: an association admin who holds a role on the GHCAA Page can mint a long-lived Page Access Token with `pages_read_engagement` and read `/{page-id}/published_posts`. Do it once in Graph Explorer and record the exact permission set, the token lifetime observed, and the Graph API version used. **This is the single assumption the whole area rests on** — if the Page turns out to be agency-managed, or the token needs App Review, stop and re-plan rather than proceeding. Record the answer in this item. | S | — | 2026-08-11 |
+| **36.A2** | `TODO` | Process | Settle the editorial policy | Four questions, all of which change the code: (1) does an imported post need visible attribution to the Facebook source, and does the association have the right to re-publish comment/reaction data (recommend: no comment data at all)? (2) if the post is edited or deleted on Facebook after import, does the site follow — recommend **no**, an imported item becomes an independent editorial artefact, and say so in the admin UI so nobody is surprised; (3) which post types are in scope — plain text and photo posts certainly, but decide now about videos, shared links and reels; (4) is an imported item allowed to become a `Notice`, given notices are admin-post-only and carry legal weight, or only ever `News`? | S | — | 2026-08-11 |
+| **36.A3** | `TODO` | Security | Decide where the Page token lives | A long-lived Page Access Token grants read access to the Page and is a real credential. There is a precedent for DB storage — `SocialAuthConfigs` holds `ClientId`/`ClientSecret` — but that table is plaintext. Choose between an environment variable (simplest, but re-authorising means a redeploy, which will not survive contact with a 60-day expiry) and a DB row with encryption at rest and SuperAdmin-only write (recommended, because the token *will* need rotating by a non-developer). Whichever is chosen, the token must never be returned by any GET endpoint, not even masked to admins. | S | 36.A1 | 2026-08-11 |
+| **36.A4** | `TODO` | Process | Record the mobile parity exception explicitly | The standing policy says a feature is not done until API, web and mobile all reflect it. This feature only partly can: mobile has **no admin news/notice management screen at all** (`admin_modules.dart`'s CMS entry is gallery-only), so the review-and-import UI is web-only by necessity, not by oversight. The member-facing half needs no work — mobile's `news_screen.dart` already renders whatever `GET /news` returns, so imported posts appear automatically. Write that exception down here so a later audit does not reopen this area as "mobile never delivered". | S | 36.A2 | 2026-08-11 |
+
+#### 36.B — Backend: connection, fetch and import
+
+| # | Status | Component | Title | Description | Est. | Depends on | Raised |
+|---|---|---|---|---|---|---|---|
+| **36.B1** | `TODO` | API | Page connection config + SuperAdmin endpoints | Store the Page id, the token (per 36.A3), the pinned Graph API version, and the timestamp of the last successful fetch. Expose `GET`/`PUT /api/facebook-ingest/config` under SuperAdmin only. The GET must return connection *status* — connected / token expiring / token expired / never configured — and must not return the token itself. | M | 36.A3 | 2026-08-11 |
+| **36.B2** | `TODO` | API | Graph client with a pinned version and a loud token health check | A thin typed client over `HttpClient` (register it with `AddHttpClient` the way the payment gateways already do). **Pin the Graph API version explicitly** — Facebook retires versions on roughly a two-year cycle, and an unpinned client breaks without warning. Add an explicit `CheckConnectionAsync` that distinguishes "token expired", "token lacks the permission", "page not found" and "Facebook is down", because those need four different admin messages. Per the rule 29E.2 established, none of these may be swallowed: a failed fetch must surface a real message, never an empty list that looks like "no new posts". | M | 36.B1 | 2026-08-11 |
+| **36.B3** | `TODO` | DB | `FacebookPostImport` staging entity + migration | New entity: `FacebookPostId` (string, **unique index** — this is what makes a re-fetch idempotent), `Message`, `CreatedTime`, `PermalinkUrl`, `RawPayloadJson`, `MediaSourceUrl`, `Status` (`Fetched`/`Ignored`/`Imported`), `ImportedNewsPostId` (nullable FK), `FetchedAt`, `ImportedByUserId`. Nothing is written to `NewsPosts` at fetch time. Add the migration under `Data/Migrations/PgSql` and remember local dev is SQLite via `EnsureCreated` with no SQLite migration tree (see 34.D4/34.D10). | M | 36.A2 | 2026-08-11 |
+| **36.B4** | `TODO` | API | Admin-triggered fetch with paging and idempotency | `POST /api/facebook-ingest/fetch` (AdminOnly) reads `/{page-id}/published_posts` newest-first, follows paging cursors up to a bounded page count, and upserts on `FacebookPostId` so re-running it is safe and cheap. Respect Graph rate limits — fail with a clear "try again later" rather than hammering. Return a summary the UI can show: fetched, new, already-seen. Deliberately **not** a scheduled job; see the area note. | M | 36.B2, 36.B3 | 2026-08-11 |
+| **36.B5** | `TODO` | Security | Download and re-host media, with an SSRF allow-list | Facebook's CDN URLs expire and rotate, so an imported post that merely links to `scontent.*` will show a broken image within weeks — the media must be downloaded and re-hosted at import time. That means the server fetches a URL supplied by a third party, so: restrict the download to Facebook CDN hostnames, cap the response size, enforce a timeout, and run the bytes through the existing `FileValidationService` magic-byte check before storing via `LocalFileStorageService` as `FileUploadType.NewsImage`. Do not trust the content-type header. | M | 36.B3 | 2026-08-11 |
+| **36.B6** | `TODO` | API | Import a staged post into a NewsPost | `POST /api/facebook-ingest/{id}/import` (AdminOnly) maps the staged row onto `CreateNewsDto` and calls the existing `NewsService.CreateNewsAsync`, so HTML sanitization and every existing rule apply unchanged. Four mapping details that will bite otherwise: Facebook posts **have no title** while `CreateNewsDto.Title` requires 5–300 characters, so derive a candidate from the first line and let the admin edit it (36.C2); `Content` has a 20-character minimum, so a two-word Facebook post cannot be imported as-is and needs a clear rejection message; `PublishDate` comes from the post's `created_time`, not the import time; and `AuthorId` must be the **importing admin's user id**, because it is a non-null FK and `NewsPostConfiguration` has a global query filter on `Author != null && !Author.IsArchived` — a synthetic "Facebook" user would make every imported post vanish from the public feed the moment it was archived. Also add `POST /{id}/ignore` so the queue can be cleared without importing. | L | 36.B5 | 2026-08-11 |
+| **36.B7** | `TODO` | API | Feature toggle `enableFacebookNewsIngest` | Add to `FeatureToggleDto` (`OrgConfigDto.cs`), mirror in `org-config.model.ts` and `org_config.dart`, and **default it off**. Gate the API endpoints on it as well as the UI — a toggle that only hides the button is not a toggle. The admin org-config screen picks new keys up automatically from `Object.keys(config.features)`. | S | 36.B1 | 2026-08-11 |
+
+#### 36.C — Web admin review queue
+
+| # | Status | Component | Title | Description | Est. | Depends on | Raised |
+|---|---|---|---|---|---|---|---|
+| **36.C1** | `TODO` | Web | Review queue screen | New admin screen listing staged posts newest-first with the Facebook text, the image thumbnail, the original post date and a permalink to the source, plus filters for Fetched / Ignored / Imported. Follows the existing `admin/news` component conventions and sits behind the same `AdminOnly` route guard plus the 36.B7 feature guard. | L | 36.B4, 36.B7 | 2026-08-11 |
+| **36.C2** | `TODO` | Web | Edit before import | The admin must be able to set the title (mandatory, since Facebook supplies none), choose News or Notice per 36.A2, adjust the body, and drop the image, all before committing the import. Reuse the existing `admin-news` form controls rather than building a second editor — one `NewsPost` form is enough. | M | 36.C1, 36.B6 | 2026-08-11 |
+| **36.C3** | `TODO` | Web | Connection status and re-authorise flow | Surface the 36.B2 health check where an admin will actually see it, and make the expiry path recoverable without a developer: a clear "the Facebook connection has expired, paste a new token" state on the org-config or ingest screen. A 60-day token that silently stops working is the most likely way this feature dies quietly. | M | 36.B2, 36.C1 | 2026-08-11 |
+
+#### 36.D — Tests and rollout
+
+| # | Status | Component | Title | Description | Est. | Depends on | Raised |
+|---|---|---|---|---|---|---|---|
+| **36.D1** | `TODO` | Tests | API unit tests | Cover the mapping and the guards: staged row → `CreateNewsDto`; the title-derivation rule; rejection when the body is under 20 characters; `PublishDate` taken from `created_time`; `AuthorId` set to the importing admin; re-fetch of a known `FacebookPostId` updates rather than duplicates; import of an already-imported row is refused; and every endpoint refuses a non-admin. Follow the existing `NewsServiceTests` / `NewsControllerTests` shape. | M | 36.B6 | 2026-08-11 |
+| **36.D2** | `TODO` | Tests | Contract test against recorded Graph payloads | Save real (redacted) Graph responses as fixtures and test the client against them — a text-only post, a photo post, a multi-photo post, a shared link, a Bengali-language post, and an error envelope for an expired token. This is what catches a Graph version bump breaking the parse, and it runs without network access or a live token. | M | 36.B2 | 2026-08-11 |
+| **36.D3** | `TODO` | Tests | Playwright E2E for the admin journey | Fetch (with the Graph call intercepted) → queue shows posts → edit title → import as Notice → the item appears on `/news?type=Notice`. Also assert the feature-off path: with `enableFacebookNewsIngest` false, the route is not reachable. | M | 36.C2, 36.B7 | 2026-08-11 |
+| **36.D4** | `TODO` | Tests | Confirm imported posts render on mobile | No mobile code should be needed — `news_screen.dart` and `news_details_screen.dart` already render whatever `GET /news` returns. Prove it rather than assume it: an imported post with a re-hosted image and a Bengali body must render correctly in the list and the detail view. Regenerate the affected goldens if the fixtures change. | S | 36.B6 | 2026-08-11 |
+| **36.D5** | `TODO` | Process | Staged rollout | Ship with the toggle off. Enable for one admin, import a handful of real posts, and let them sit for a fortnight — long enough for the CDN URLs of any non-re-hosted media to rotate, which is the cheapest way to prove 36.B5 actually works. Only then enable generally. | S | 36.D1, 36.D3 | 2026-08-11 |
 
 ---
 
@@ -1416,12 +1483,13 @@ verification notes — is preserved verbatim in the collapsible block under each
 
 > Scope: a documentation-vs-source sweep of `GHCAA.Mobile` only — every item below was confirmed against the actual code, not inherited from an earlier area. Items an earlier area already settled deliberately are **not** repeated here (e.g. 29G.2 records walletNumber/bankName/accountNumber as display-only *by design*, so that is not a gap). Each task names the file, the line, and how to verify it, so it can be picked up cold. Standing constraints carry over: web + mobile parity, `flutter analyze` stays clean, and per the standing policy nothing is `[DONE]` until its test passes.
 >
-> **Measured on this machine (Flutter 3.44.2 / Dart 3.12.2, 2026-08-11):** `flutter analyze` — *No issues found*. `flutter test` — **66 passed / 26 failed** when the sweep started, **95 passed / 26 failed** after 35.B7 and 35.B8. Every one of the 26 failures, before and after, is a golden pixel mismatch against the 80 committed baselines in `test/goldens/` — the failing set is identical, and there are zero logic failures, zero RenderFlex overflows and zero timer leaks. So the bar for anything in this area is: 26 failures, all goldens, analyze clean.
+> **Measured on this machine (Flutter 3.44.2 / Dart 3.12.2, 2026-08-11):** `flutter analyze` — *No issues found*. `flutter test` — **121 passed / 0 failed**. The sweep started at 66 passed / 26 failed and reached 95 / 26 after 35.B7 and 35.B8. 35.B1 then found that part of that failing count was not a golden problem at all: the package config had drifted, so two visual-freeze files failed to compile rather than mismatch. After `flutter pub get` the real set was 21 stale goldens, and regenerating them took the suite green. **The bar for anything in this area is now zero failures** — any red is yours.
 
 #### 35.B — Test suite
 
 | # | Status | Component | Summary | Completed |
 |---|---|---|---|---|
+| 35.B1 | `DONE` | Tests | Mobile: regenerated the stale goldens — 21 baselines, not the 26 first counted. See the note below for why the count moved and what was reviewed. | 2026-08-11 |
 | 35.B7 | `DONE` | Mobile | Mobile: replaced three placeholder tests that were reporting green while asserting nothing. `test/unit_test.dart` was an empty `AuthService` test (whole body commented out, awaiting a… | 2026-08-11 |
 | 35.B8 | `DONE` | Mobile | Mobile: added `test/forum_service_test.dart` — the forum feature (3.7) shipped with no test at all. Covers `getCategories`/`getTopics`/`getPosts` mapping, query-parameter paging, the… | 2026-08-11 |
 
@@ -1435,6 +1503,21 @@ verification notes — is preserved verbatim in the collapsible block under each
 <summary>AREA 35 — original entries and completion notes (3 items)</summary>
 
 ```text
+35.B1 [DONE 2026-08-11] Mobile: regenerated the stale goldens. Two things were wrong with the
+      original framing of this task. First, the failing count was inflated: `flutter analyze`
+      and the two big visual-freeze files were failing to COMPILE, because the package config
+      had drifted and `screen_protector` and `flutter_localizations` were unresolved. A
+      `flutter pub get` restored them, analyze went back to *No issues found*, and the real
+      failing set turned out to be 21 goldens, not 26 — the extra 5 were tests that never ran.
+      Second, `member_dashboard` (0.26 %) and `member_dashboard_standard` (0.38 %) were NOT in
+      the failing set once the suite compiled, so the "sub-1 % diff" worry did not apply.
+      Regenerated with `flutter test --update-goldens`. Result: 121 passed / 0 failed, and
+      exactly 21 baseline files changed — no collateral churn. Reviewed the two largest diffs
+      against their predecessors before accepting: `registration_step_1` (32.61 %) and
+      `login_portal` (21.45 %) both show the Area 30/33 form redesign, field labels moved from
+      inside the input to above it. Legitimate, not a regression. One thing to keep an eye on:
+      the login crest lost its dark circular backdrop in the same change — consistent with the
+      Area 30 shared-layer icon work, but nothing explicitly recorded it.
 35.B7 [DONE 2026-08-11] Mobile: replaced three placeholder tests that were reporting green while asserting nothing. `test/unit_test.dart` was an empty `AuthService` test (whole body commented out, awaiting a `build_runner` mockito generation that was never run — the `@GenerateMocks` annotation had no generated `.mocks.dart` anywhere in the repo) plus a literal `expect(true, true)`; it is now real `AppUtils` coverage — the ISO/`dd-MM-yyyy` dual-parse contract settled in 29F.3/23.4, `toWire`, currency, and initials. `test/model_test.dart` imported nothing from `lib/` and asserted values it had just written into a local map; it now covers the `fromJson` factories actually shipped in `forum_service.dart` and `org_config.dart`, including the `OrgConfig` contact fields added by 34.B4. `test/router_test.dart` asserted only `routes.isNotEmpty`, which cannot fail while a single route exists; it now pins the registered paths, so deleting or renaming one is caught.
 35.B8 [DONE 2026-08-11] Mobile: added `test/forum_service_test.dart` — the forum feature (3.7) shipped with no test at all. Covers `getCategories`/`getTopics`/`getPosts` mapping, query-parameter paging, the `getTopic` 404-to-null path, `createTopic`/`createPost` including the `parentPostId` threading that drives the reply-to-post UI, and `deleteTopic`/`deletePost` status handling. Follows the `FakeDio` pattern already in `major_functionalities_test.dart` — a local stub, since that one implements only `get`/`post` and the forum service also deletes; folding both into one shared fake belongs with 35.B2. No network, no golden. This is a first slice of 35.B3, not a discharge of it.
 35.C1 [DONE 2026-08-11] `docs/PLAN.md` described work that had already shipped, which is a trap for anyone opening the plan file first: its "3.7 Discussion Forums" plan showed all six steps unchecked although 3.7 is `[DONE]` and the service, three screens, three routes, and the drawer entry are all present; and its "Full-Stack Review Remediation" phases showed 1.2/1.3/4.6/5.1/5.2/6.1/6.2 unchecked although the matching 29A/29E/29G/29F items are all `[DONE 2026-07-25]`. Added a status banner to each of the two sections pointing at the authoritative area in this file, rather than back-ticking checkboxes whose completion notes live here.
