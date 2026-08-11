@@ -1,0 +1,213 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: e2e\article-editorial.spec.ts >> Article Editorial E2E (Web) >> Member submits article, Admin approves, it appears in News
+- Location: tests\e2e\article-editorial.spec.ts:5:7
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: page.waitForResponse: Test timeout of 30000ms exceeded.
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic [ref=e6]:
+        - img "GHC" [ref=e7]
+        - generic [ref=e8]: HARAGANGIAN
+      - navigation [ref=e9]:
+        - link "📊 Dashboard" [ref=e10] [cursor=pointer]:
+          - /url: /portal/dashboard
+          - generic [ref=e11]: 📊
+          - generic [ref=e12]: Dashboard
+        - link "📰 News" [ref=e13] [cursor=pointer]:
+          - /url: /portal/news
+          - generic [ref=e14]: 📰
+          - generic [ref=e15]: News
+        - link "🎟️ Events" [ref=e16] [cursor=pointer]:
+          - /url: /portal/events
+          - generic [ref=e17]: 🎟️
+          - generic [ref=e18]: Events
+        - link "✨ Assistance" [ref=e19] [cursor=pointer]:
+          - /url: /portal/assistant
+          - generic [ref=e20]: ✨
+          - generic [ref=e21]: Assistance
+        - link "💬 Messaging" [ref=e22] [cursor=pointer]:
+          - /url: /portal/messages
+          - generic [ref=e23]: 💬
+          - generic [ref=e24]: Messaging
+        - link "🗣️ Discussions" [ref=e25] [cursor=pointer]:
+          - /url: /portal/forum
+          - generic [ref=e26]: 🗣️
+          - generic [ref=e27]: Discussions
+        - link "💼 Job Hub" [ref=e28] [cursor=pointer]:
+          - /url: /portal/jobs
+          - generic [ref=e29]: 💼
+          - generic [ref=e30]: Job Hub
+        - link "🔍 Alumni Directory" [ref=e31] [cursor=pointer]:
+          - /url: /portal/directory
+          - generic [ref=e32]: 🔍
+          - generic [ref=e33]: Alumni Directory
+        - link "🖼️ Event Gallery" [ref=e34] [cursor=pointer]:
+          - /url: /portal/gallery
+          - generic [ref=e35]: 🖼️
+          - generic [ref=e36]: Event Gallery
+        - link "⚖️ Governance" [ref=e37] [cursor=pointer]:
+          - /url: /portal/governance
+          - generic [ref=e38]: ⚖️
+          - generic [ref=e39]: Governance
+        - link "🆔 Digital ID" [ref=e40] [cursor=pointer]:
+          - /url: /portal/id-card
+          - generic [ref=e41]: 🆔
+          - generic [ref=e42]: Digital ID
+        - link "💰 Payments" [ref=e43] [cursor=pointer]:
+          - /url: /portal/payments
+          - generic [ref=e44]: 💰
+          - generic [ref=e45]: Payments
+        - link "✍️ My Articles" [ref=e46] [cursor=pointer]:
+          - /url: /portal/articles
+          - generic [ref=e47]: ✍️
+          - generic [ref=e48]: My Articles
+        - link "👤 My Profile" [ref=e49] [cursor=pointer]:
+          - /url: /portal/profile
+          - generic [ref=e50]: 👤
+          - generic [ref=e51]: My Profile
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - generic [ref=e54]: "2"
+          - generic [ref=e55]:
+            - generic [ref=e56]: Subrata das
+            - generic [ref=e57]: Alumni Member
+        - button "🚪 Logout" [ref=e58] [cursor=pointer]:
+          - generic [ref=e59]: 🚪
+          - generic [ref=e60]: Logout
+    - main [ref=e61]:
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - button "GHC GHCAA Member Portal" [ref=e65] [cursor=pointer]:
+            - img "GHC" [ref=e66]
+            - generic [ref=e67]: GHCAA Member Portal
+          - generic [ref=e68]:
+            - generic [ref=e69]: /
+            - generic [ref=e70]: My Articles
+        - generic [ref=e71]:
+          - button "🌙" [ref=e72] [cursor=pointer]
+          - generic [ref=e73]:
+            - generic [ref=e74]: "2"
+            - generic [ref=e75]:
+              - generic [ref=e76]: Subrata das
+              - generic [ref=e77]: Alumni Member
+      - generic [ref=e80]:
+        - generic [ref=e81]:
+          - generic [ref=e82]:
+            - heading "Articles & Submissions" [level=2] [ref=e83]
+            - generic [ref=e84]: Share your stories, event highlights, and magazine entries with the community.
+          - button "✍️ Write New Article" [ref=e86] [cursor=pointer]:
+            - generic [ref=e87]: ✍️
+            - text: Write New Article
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - heading "Compose New Article" [level=3] [ref=e91]
+            - button "×" [ref=e92] [cursor=pointer]
+          - generic [ref=e93]:
+            - generic [ref=e94]:
+              - generic [ref=e95]: Article Title *
+              - textbox "Enter a catchy title..." [ref=e96]: E2E Automated Article - 1783088940511
+            - generic [ref=e97]:
+              - generic [ref=e98]: Category
+              - combobox [ref=e99]:
+                - option "Event Highlights"
+                - option "E-Magazine Article"
+                - option "Regular Portal Update" [selected]
+            - generic [ref=e100]:
+              - generic [ref=e101]: Cover Photo
+              - generic [ref=e103] [cursor=pointer]:
+                - generic [ref=e104]: 📸
+                - generic [ref=e105]: Click to upload article photo
+            - generic [ref=e106]:
+              - generic [ref=e107]: Content *
+              - textbox "Write your story here..." [ref=e108]: This is an automated test article submitted via Playwright E2E test suite.
+          - generic [ref=e109]:
+            - button "Cancel" [ref=e110] [cursor=pointer]
+            - generic [ref=e111]:
+              - button "Save Draft" [ref=e112] [cursor=pointer]
+              - button "🚀 Submit for Approval" [ref=e113] [cursor=pointer]:
+                - generic [ref=e114]: 🚀
+                - text: Submit for Approval
+  - generic:
+    - generic:
+      - generic [ref=e115] [cursor=pointer]:
+        - generic [ref=e116]: ❌
+        - generic [ref=e117]: An unexpected error occurred
+      - generic [ref=e118] [cursor=pointer]:
+        - generic [ref=e119]: ❌
+        - generic [ref=e120]: Failed to save article
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect } from '@playwright/test';
+  2  | import { AuthHelper } from './utils/auth-helper';
+  3  | 
+  4  | test.describe('Article Editorial E2E (Web)', () => {
+  5  |   test('Member submits article, Admin approves, it appears in News', async ({ page }) => {
+  6  |     const auth = new AuthHelper(page);
+  7  |     const testArticleTitle = `E2E Automated Article - ${Date.now()}`;
+  8  | 
+  9  |     // ==== STEP 1: Member submits article ====
+  10 |     // Using a regular member for feature testing as per latest instructions
+  11 |     await auth.login('2512006', '2512006');
+  12 |     
+  13 |     await page.goto('/portal/articles');
+  14 |     await expect(page).toHaveURL(/.*portal\/articles/);
+  15 | 
+  16 |     await page.click('button:has-text("Write New Article")');
+  17 |     await page.fill('input[placeholder*="Enter a catchy title"]', testArticleTitle);
+  18 |     await page.fill('textarea[placeholder*="Write your story"]',
+  19 |       'This is an automated test article submitted via Playwright E2E test suite.');
+  20 | 
+  21 |     await Promise.all([
+> 22 |       page.waitForResponse(
+     |            ^ Error: page.waitForResponse: Test timeout of 30000ms exceeded.
+  23 |         (r) => r.url().includes('/api/news/submit') && r.status() < 400,
+  24 |         { timeout: 15000 }
+  25 |       ),
+  26 |       page.getByRole('button', { name: /Submit for Approval/i }).click(),
+  27 |     ]);
+  28 |     await expect(page.getByRole('heading', { name: 'Articles & Submissions' })).toBeVisible({ timeout: 10000 });
+  29 | 
+  30 |     await auth.logout();
+  31 | 
+  32 |     // ==== STEP 2: Admin approves article ====
+  33 |     await auth.login('superadmin', 'SuperAdminPassword123!');
+  34 |     await page.goto('/admin/article-approvals');
+  35 |     await expect(page).toHaveURL(/.*admin\/article-approvals/);
+  36 | 
+  37 |     const articleRow = page.locator('tbody tr', { hasText: testArticleTitle });
+  38 |     await expect(articleRow).toBeVisible({ timeout: 10000 });
+  39 |     await articleRow.locator('button:has-text("Review Article")').click();
+  40 |     await page.locator('button:has-text("Approve & Publish")').click();
+  41 |     await expect(articleRow).not.toBeVisible({ timeout: 10000 });
+  42 | 
+  43 |     // ==== STEP 3: Verify article is published in News ====
+  44 |     await page.goto('/news');
+  45 |     await page.waitForLoadState('networkidle');
+  46 |     await expect(page.locator('body')).toContainText(testArticleTitle);
+  47 |   });
+  48 | });
+  49 | 
+```
