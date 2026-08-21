@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { getECPositionName, getCurrentECPosition, getAcademicYears, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBER_CATEGORY_OPTIONS } from '../../core/constants/app.constants';
+import { getECPositionName, getCurrentECPosition, getAcademicYears, PROFESSIONAL_SECTORS, getBloodGroupName, MEMBER_CATEGORY_OPTIONS, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
@@ -36,6 +36,8 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     years: number[] = getAcademicYears();
     sectors = PROFESSIONAL_SECTORS;
     memberCategories = MEMBER_CATEGORY_OPTIONS;
+    membershipTypes = MEMBERSHIP_TYPE_OPTIONS; // 35.3: template drove this off a hardcoded list
+
     selectedMember = signal<any | null>(null);
 
     getMajorDisplay(degree: string | undefined, subject: string | undefined): string {

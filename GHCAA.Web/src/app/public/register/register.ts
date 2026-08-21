@@ -6,7 +6,8 @@ import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
 import { FinancialService } from '../../core/services/financial.service';
-import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
+import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES } from '../../core/constants/app.constants';
+import { OrgConfigService } from '../../core/services/org-config.service';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { parseDisplayDate } from '../../core/utils/date.util';
 import { GatewaysService } from '../../core/services/gateways.service';
@@ -28,6 +29,7 @@ export class Register implements OnDestroy {
   private notify = inject(NotificationService);
   private gatewaysService = inject(GatewaysService);
   private finService = inject(FinancialService);
+  private orgConfig = inject(OrgConfigService);
 
   loading = signal(false);
   registrationFee = signal<number>(500); // Default placeholder
@@ -50,7 +52,6 @@ export class Register implements OnDestroy {
   bloodGroupOptions = BLOOD_GROUP_OPTIONS;
   genderOptions = GENDER_OPTIONS;
   tShirtOptions = TSHIRT_SIZES;
-  membershipTypeOptions = MEMBERSHIP_TYPE_OPTIONS;
 
 
   model: any = {
@@ -66,7 +67,8 @@ export class Register implements OnDestroy {
     PresentAddress: '',
     PermanentAddress: '',
     TShirtSize: 'L',
-    MembershipType: 'General',
+    // 35.5: no MembershipType — the tier is assigned by an admin after approval, so the
+    // applicant neither picks it nor sends it. The API ignores any tier in the payload.
     EmergencyContactName: '',
     EmergencyContactRelation: '',
     EmergencyContactPhone: '',
@@ -116,7 +118,9 @@ export class Register implements OnDestroy {
   }
 
   loadRegistrationFee() {
-    const type = this.model.MembershipType || 'General';
+    // 35.5: every applicant joins on the org's default tier, so the filing fee is that tier's fee.
+    // The server recomputes it from the same default when the application is saved.
+    const type = this.orgConfig.config()?.workflow?.defaultMembershipType || 'General';
     this.finService.getApplicableFee('RegistrationFee', type).subscribe({
       next: (res) => this.registrationFee.set(res.amount),
       error: () => this.registrationFee.set(500) // fallback

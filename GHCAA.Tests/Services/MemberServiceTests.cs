@@ -139,6 +139,25 @@ public class MemberServiceTests : TestBase
     }
 
     [Test]
+    public async Task RegisterAsync_ShouldAssignDefaultMembershipType_NotAClientSuppliedOne()
+    {
+        // 35.5: membership tiers are admin-assigned only. The registration DTO carries no
+        // MembershipType at all, and the server stamps the org config's default tier so an
+        // applicant can never land on Founding/Executive by crafting a payload.
+        var dto = CreateValidDto();
+        var payConfig = await _context.PaymentConfigurations.FirstAsync(x => x.Method == Enums.PaymentMethod.BKash);
+        dto.PaymentMethodId = payConfig.Id;
+
+        typeof(MemberRegistrationDto).GetProperty("MembershipType").Should().BeNull(
+            "the registration payload must not be able to carry a membership tier");
+
+        var memberId = await _service.RegisterAsync(dto, null, null, null);
+
+        var member = await _context.Members.FindAsync(memberId);
+        member!.MembershipType.Should().Be(Enums.MembershipType.General);
+    }
+
+    [Test]
     public async Task RegisterAsync_WithDuplicateEmail_ShouldThrowException()
     {
         // Arrange

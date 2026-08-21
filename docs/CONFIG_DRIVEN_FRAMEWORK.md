@@ -45,16 +45,16 @@ Transforms every hardcoded brand string, label, and feature toggle in the system
 
 | File | Layer | Status |
 |------|-------|--------|
-| `GHCAA.Domain/Models/OrganizationConfig.cs` | Domain | ✅ Created |
-| `GHCAA.Application/DTOs/OrgConfigDto.cs` | Application | ✅ Created |
-| `GHCAA.Application/Interfaces/IOrgConfigService.cs` | Application | ✅ Created |
-| `GHCAA.Infrastructure/Services/OrgConfigService.cs` | Infrastructure | ✅ Created |
-| `GHCAA.Infrastructure/Data/Configurations/OrganizationConfigConfiguration.cs` | Infrastructure | ✅ Created |
-| `GHCAA.Infrastructure/Data/ApplicationDbContext.cs` | Infrastructure | ✅ Modified (DbSet added) |
-| `GHCAA.API/Controllers/OrgConfigController.cs` | API | ✅ Created |
-| `GHCAA.API/Program.cs` | API | ✅ Modified (seed + DI) |
-| `GHCAA.Domain/Enums.cs` | Domain | ✅ Modified (Guest added) |
-| `GHCAA.Web/src/app/core/constants/app.constants.ts` | Angular | ✅ Modified (Guest added) |
+| `GHCAA.Domain/Models/OrganizationConfig.cs` | Domain | Created |
+| `GHCAA.Application/DTOs/OrgConfigDto.cs` | Application | Created |
+| `GHCAA.Application/Interfaces/IOrgConfigService.cs` | Application | Created |
+| `GHCAA.Infrastructure/Services/OrgConfigService.cs` | Infrastructure | Created |
+| `GHCAA.Infrastructure/Data/Configurations/OrganizationConfigConfiguration.cs` | Infrastructure | Created |
+| `GHCAA.Infrastructure/Data/ApplicationDbContext.cs` | Infrastructure | Modified (DbSet added) |
+| `GHCAA.API/Controllers/OrgConfigController.cs` | API | Created |
+| `GHCAA.API/Program.cs` | API | Modified (seed + DI) |
+| `GHCAA.Domain/Enums.cs` | Domain | Modified (Guest added) |
+| `GHCAA.Web/src/app/core/constants/app.constants.ts` | Angular | Modified (Guest added) |
 
 ---
 
@@ -182,13 +182,66 @@ A new `Guest` value was added to `MembershipType` enum. All three platforms must
 
 | Platform | File | Change | Status |
 |----------|------|--------|--------|
-| Backend | `GHCAA.Domain/Enums.cs:6` | `Guest` appended to end of enum | ✅ Done |
-| Angular | `app.constants.ts:39` | `'Guest Member'` in `MEMBERSHIP_TYPES` | ✅ Done |
-| Angular | `app.constants.ts:283` | `{ value: 'Guest', label: 'Guest Member' }` in `MEMBERSHIP_TYPE_OPTIONS` | ✅ Done |
-| Config | `OrgConfigService.cs` | `["Guest"] = "Guest Member"` / `"অতিথি সদস্য"` in both locales | ✅ Done |
-| Flutter | `GHCAA.Mobile/lib/core/...` | Add `'Guest'` to any hardcoded type list | ⏳ TODO (Area 28.12) |
+| Backend | `GHCAA.Domain/Enums.cs:6` | `Guest` appended to end of enum | Done |
+| Angular | `app.constants.ts:39` | `'Guest Member'` in `MEMBERSHIP_TYPES` | Done |
+| Angular | `app.constants.ts:283` | `{ value: 'Guest', label: 'Guest Member' }` in `MEMBERSHIP_TYPE_OPTIONS` | Done |
+| Config | `OrgConfigService.cs` | `["Guest"] = "Guest Member"` / `"অতিথি সদস্য"` in both locales | Done |
+| Flutter | `lib/core/config/org_config.dart` | `'Guest'` in `membershipTypes` + `en`/`bn` label maps | Done |
+| Flutter | `lib/features/lookups/dropdown_service.dart` | `'Guest'` in the type list + option map | Done |
+| Flutter | `lib/screens/admin/fee_config_screen.dart` | `'Guest'` in the fee-tier `names` list | Done |
+| Flutter | `lib/core/constants/registration_constants.dart` | `MembershipConstants.typeOptions` **deleted** — tiers are admin-assigned only, so no registration screen offers them | Done 2026-08-22 (TODO 35.5, closes 28.21) |
+| Backend | `GHCAA.Application/DTOs/MemberRegistrationDto.cs` | `MembershipType` property **deleted** — the registration payload must not carry a tier | Done 2026-08-22 (TODO 35.5) |
+| Backend | `MemberService.RegisterAsync` | Assigns `OrgConfig.Workflow.DefaultMembershipType` (fallback `General`) to both the member and the registration-fee lookup; ignores anything a client sends | Done 2026-08-22 (TODO 35.5) |
+| Angular | `public/register/register.html` + `register.ts` | Tier `<select>` replaced by a read-only note; fee tier read from `orgConfig.config()?.workflow?.defaultMembershipType` | Done 2026-08-22 (TODO 35.5) |
+| Flutter | `lib/screens/auth/register_screen.dart` | Step-3 tier dropdown replaced by explanatory text | Done 2026-08-22 (TODO 35.5) |
+| Flutter | `lib/features/auth/register_wizard_provider.dart` | `membershipType` removed from model, ctor, `copyWith`, `data` map, `updateData` and submit payload | Done 2026-08-22 (TODO 35.5) |
+| Flutter | `lib/screens/member/profile_edit_screen.dart` (~L435) | Non-admins now get a **read-only** `Member Tier & Category` block (previously they saw nothing; the dropdown was admin-gated) | Done 2026-08-22 (TODO 35.5) |
+| Flutter | `lib/screens/member/directory_screen.dart` (~L199) | `'Guest'` in the `_buildFilterDropdown('TYPE', [...])` list | Done 2026-08-22 (TODO 28.21) |
+| Angular | `common/directory/directory.html` (~L61) | Membership-type filter now loops `MEMBERSHIP_TYPE_OPTIONS` (was a hardcoded list ending at Advisory, hiding Guest members) | Done 2026-08-22 (TODO 35.3) |
+| Angular | `member/digital-id/digital-id.ts:31` | Local label array deleted; delegates to `getMembershipTypeLabel` (index 6 read `'Life'`, so Guest printed "Life" on the ID card) | Done 2026-08-22 (TODO 35.1) |
+| Angular | `member/dashboard/dashboard.ts:83` | Same local map deleted; delegates to `getMembershipTypeLabel` | Done 2026-08-22 (TODO 35.2) |
+| Angular | `core/models/business.models.ts:2` | `'Guest'` added to the `MembershipType` TS union | Done 2026-08-22 (TODO 35.4) |
 | DB | `MembershipFeeConfigs` table | Admin should add fee config row for Guest type via Admin portal | Manual step |
-| Tests | `GHCAA.Tests/` | Update any test asserting exact membership type count | ⏳ TODO (Area 28.11) |
+| Tests | `GHCAA.Tests/OrgConfig/OrgConfigSeedTests.cs` | Asserts `MembershipTypeLabels` has 7 keys incl. Guest | Done (TODO 28.22) |
+| Tests | `core/constants/app.constants.spec.ts` (new) | Pins `MEMBERSHIP_TYPES` / `MEMBERSHIP_TYPE_OPTIONS` / `getMembershipTypeLabel` against the domain enum; asserts no ordinal is ever labelled `Life` | Done 2026-08-22 (TODO 35.6) |
+| Tests | `digital-id.spec.ts`, `dashboard.spec.ts`, `directory.spec.ts` | Per-component guards: ordinal 6 → `Guest Member`; the directory filter offers and forwards `Guest` | Done 2026-08-22 (TODO 35.6) |
+
+> **Status corrected 2026-08-22.** The single "Flutter: add Guest to any hardcoded type list" row
+> above was expanded into five, because it was both **stale** (three of the five sites were already
+> done) and **mis-referenced** — it pointed at "Area 28.12" and the Tests row at "Area 28.11", but
+> those are the Angular model/service items. The Guest sync item is **28.21** and the test item is
+> **28.22**.
+>
+> The two remaining sites were *not* the same kind of gap, and were deliberately not fixed in one
+> sweep:
+>
+> - `directory_screen.dart` was a **plain defect** — a member-directory filter that cannot select
+> Guest silently hides every Guest member from search results. **Fixed 2026-08-22.**
+> - `registration_constants.dart` is a **product decision**, not a typo, and is still open. That list drives the
+> self-service registration form, so adding `Guest` there lets an applicant *self-select* Guest
+> membership. If Guest is meant to be admin-assign-only (the likely intent, since Guest sits
+> outside the fee tiers), the correct action is to **leave it out and document that**, not to add
+> it for symmetry. **Superseded 2026-08-22 (later) — now tracked as TODO 35.5**, and the
+> "admin-assign-only" reading is *disproved*: the **web** registration form has been offering
+> Guest all along (`public/register/register.html:137` loops `MEMBERSHIP_TYPE_OPTIONS`). So this is
+> a client-to-client inconsistency, and one of the two forms is wrong whichever way the product
+> decision lands. **Resolved 2026-08-22 by TODO 35.5.** The product decision (user, verbatim):
+> *"Guest - membership will be updated by admin, infact any membershiptypes only can be updated by
+> admin."* So the answer went further than Guest — **no** tier is applicant-selectable. Both
+> registration forms lost their tier control and the DTO property was deleted, which also closed a
+> real privilege-escalation hole (a self-registration could previously request `Founding`). The
+> Dart list was therefore **deleted rather than completed with `Guest`**. Admin, directory, label
+> and fee-config paths keep every tier, and members still see their own tier read-only.
+>
+> **Table extended 2026-08-22 (Area 35).** The checklist tracked Backend / Angular-constants /
+> Config / Flutter / DB / Tests and had **no rows at all** for the Angular *consumers* — the
+> directory template, the two component-local label maps, or the TS union. That blind spot is
+> exactly why all four drifted unnoticed while the constants file was correct: the web app kept
+> three copies of the type list, two of which labelled index 6 `'Life'`, a value the enum has never
+> had. The consumer rows are now listed above and pinned by tests. **Rule going forward: a component
+> must never inline a MembershipType list — call `getMembershipTypeLabel()` or bind
+> `MEMBERSHIP_TYPE_OPTIONS`.** Mobile is already correct by construction here: `dashboard_screen.dart`
+> renders the API's string straight through, so a new enum value needs no mobile change.
 
 > **Note:** `MembershipType` is stored as an int in the DB (EF default). `Guest = 6` appended at the end — no migration needed for the enum itself; no existing rows are affected.
 

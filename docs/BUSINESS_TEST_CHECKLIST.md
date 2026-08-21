@@ -134,10 +134,10 @@ Use during Phases 2–4. Mark `[x]` when verified on the relevant layer(s). Note
 | 2026-07-03 | A1–A6 membership tests | 92 | 0 | 0 | Unchanged | Phase 1 filter |
 | 2026-07-03 | A7–F Phase 2 suites | 150 | 0 | 0 | Unchanged | Profile+Family+Networking+Events+Financial+Governance+Auth |
 | 2026-07-03 | Full regression (Phase 2) | 305 | 0 | 1 | Superseded | `dotnet test GHCAA.Tests` |
-| 2026-07-03 | **Full regression (Phase 4)** | **308** | **0** | **1** | **✅ No regressions** | `dotnet test GHCAA.sln --no-build` |
+| 2026-07-03 | **Full regression (Phase 4)** | **308** | **0** | **1** | **No regressions** | `dotnet test GHCAA.sln --no-build` |
 | 2026-07-03 | Flutter core (Phase 3 Mobile) | 28 | 0 | 0 | Not re-run P4 | `flutter test` (6 files, visual freeze excluded) |
 | 2026-07-03 | ForumServiceTests | 2 | 0 | 0 | Included in 308 | Phase 3 API gaps |
 | 2026-07-03 | AuthServiceTests lockout (F5) | 1 | 0 | 0 | Included in 308 | Phase 3 API gaps |
 | 2026-07-03 | Vitest unit (Phase 3 Web) | 230 | 0 | 0 | Not re-run P4 | `npm run test:unit` GHCAA.Web |
 | 2026-07-03 | Playwright full `npm run test:e2e` (Phase 3 Web) | 48 | 44 | 0 | Not re-run P4 | `npm run test:e2e` 92 tests, 15.1m |
-| 2026-07-03 | HTTP smoke (Phase 4) | 5 | 0 | 0 | **✅ Pass** | `/healthz`, `/api/config`, forum, SignalR |
+| 2026-07-03 | HTTP smoke (Phase 4) | 5 | 0 | 0 | **Pass** | `/healthz`, `/api/config`, forum, SignalR |

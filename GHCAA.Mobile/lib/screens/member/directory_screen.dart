@@ -196,7 +196,9 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildFilterDropdown('TYPE', ['General', 'Founding', 'Executive', 'Associate', 'Honorary', 'Advisory']),
+                      // 28.21: keep in sync with MembershipType in GHCAA.Domain/Enums.cs —
+                      // omitting a value here silently hides those members from the directory.
+                      child: _buildFilterDropdown('TYPE', ['General', 'Founding', 'Executive', 'Associate', 'Honorary', 'Advisory', 'Guest']),
                     ),
                     const SizedBox(width: AppTheme.spaceS),
                     Expanded(

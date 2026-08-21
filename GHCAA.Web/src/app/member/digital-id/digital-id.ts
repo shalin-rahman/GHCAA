@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { getMembershipTypeLabel } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-digital-id',
@@ -28,10 +29,10 @@ export class DigitalId implements OnInit {
     });
   }
 
-  getMembershipName(type: any): string {
-    const types = ['Founding', 'Executive', 'General', 'Associate', 'Honorary', 'Advisory', 'Life'];
-    return types[type] || 'General';
-  }
+  // 35.1: was a local array whose index 6 read 'Life' — a value that does not exist in
+  // GHCAA.Domain/Enums.cs, where 6 is Guest — so Guest members printed "Life" on their ID card.
+  // Delegates to the shared helper; the returned label already includes " Member".
+  getMembershipName = getMembershipTypeLabel;
 
   download() {
     // 29D.5: Call the real server-rendered ID card (was a fake setTimeout that claimed

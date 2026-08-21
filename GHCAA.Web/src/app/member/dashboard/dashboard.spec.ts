@@ -10,6 +10,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { NewsService } from '../../core/services/news.service';
 import { of } from 'rxjs';
 import { provideRouter } from '@angular/router';
+import { MEMBERSHIP_TYPES } from '../../core/constants/app.constants';
 
 describe('Dashboard Component', () => {
     let component: Dashboard;
@@ -94,6 +95,17 @@ describe('Dashboard Component', () => {
         expect(component.contributionPoints).toBe(450);
         expect(component.memberRank).toBe('12');
         expect(component.profileCompletion).toBe(85);
+    });
+
+    // 35.2 regression guard — same defect as 35.1, in the dashboard's own copy of the map.
+    it('should label the last MembershipType as Guest, never Life', () => {
+        expect(component.getMembershipType(6)).toBe('Guest Member');
+        expect(component.getMembershipType(6)).not.toContain('Life');
+        expect(component.getMembershipType('Guest')).toBe('Guest Member');
+    });
+
+    it('should label every MembershipType ordinal from the shared constant', () => {
+        expect(MEMBERSHIP_TYPES.map((_, i) => component.getMembershipType(i))).toEqual(MEMBERSHIP_TYPES);
     });
 });
 

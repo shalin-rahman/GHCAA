@@ -11,6 +11,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
 import { Icon } from '../../common/icon/icon';
+import { getMembershipTypeLabel } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-dashboard',
@@ -80,13 +81,9 @@ export class Dashboard implements OnInit {
     });
   }
 
-  getMembershipType(type: any): string {
-    const types: Record<number, string> = {
-      0: 'Founding', 1: 'Executive', 2: 'General',
-      3: 'Associate', 4: 'Honorary', 5: 'Advisory', 6: 'Life'
-    };
-    return types[type as number] || 'General';
-  }
+  // 35.2: same defect as 35.1 — the local map labelled index 6 'Life' when the domain enum's
+  // member 6 is Guest. Delegates to the shared helper; the label already includes " Member".
+  getMembershipType = getMembershipTypeLabel;
 
   getStatusColor(status: any): string {
     const colors: Record<number, string> = {

@@ -82,7 +82,8 @@
             @if (profile()) {
             <div class="stat-info">
                 <div class="val">{{ profile().membershipNumber || 'Pending' }}</div>
-                <small>{{ getMembershipType(profile().membershipType) }} Member</small>
+                <!-- 35.2: helper already returns the full label ("Guest Member") — do not append " Member". -->
+                <small>{{ getMembershipType(profile().membershipType) }}</small>
                 <span class="status-chip" [style.background]="getStatusColor(profile().status) + '22'"
                     [style.color]="getStatusColor(profile().status)">
                     {{ getStatusLabel(profile().status) }}

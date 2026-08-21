@@ -306,11 +306,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _sectionTitle('Membership & Subscription'),
-        _buildAsyncDropdown(
-          label: 'Membership Category *',
-          group: 'MembershipType',
-          value: state.data['MembershipType'] ?? 'General',
-          onChanged: (v) => ref.read(registerWizardProvider.notifier).updateData('MembershipType', v),
+        // 35.5: the membership tier is admin-assigned only — an applicant must not be able to
+        // pick (and therefore grant themselves) a tier. The API ignores any tier in the payload.
+        const Text(
+          'Your membership tier is assigned by the association office once your application is reviewed.',
+          style: TextStyle(fontSize: 11, color: Colors.white54),
         ),
         _gap(),
         _sectionTitle('Registry Filing Fee'),

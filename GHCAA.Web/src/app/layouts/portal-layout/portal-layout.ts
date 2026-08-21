@@ -9,6 +9,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Icon } from '../../common/icon/icon';
 import { UserMenu } from '../../common/user-menu/user-menu';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { OrgConfigService } from '../../core/services/org-config.service';
 
 @Component({
   selector: 'app-portal-layout',
@@ -21,6 +22,7 @@ import { ImgFallbackDirective } from '../../common/directives/img-fallback.direc
 export class PortalLayout {
   auth = inject(AuthService);
   nav = inject(NavService);
+  orgConfig = inject(OrgConfigService);
   private router = inject(Router);
   private titleService = inject(Title);
 
@@ -41,7 +43,7 @@ export class PortalLayout {
       const url = this.router.url;
       const title = this.nav.labelFor(url, 'portal');
       this.currentPageTitle.set(title);
-      this.titleService.setTitle(`${title} | Member Portal`);
+      this.titleService.setTitle(`${title} | ${this.orgConfig.config()?.branding?.shortName ?? 'GHCAA'} Member Portal`);
 
       // Auto-collapse on mobile after navigation
       if (typeof window !== 'undefined' && window.innerWidth <= 768) {

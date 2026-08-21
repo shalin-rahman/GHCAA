@@ -108,7 +108,7 @@ close glyph, with hover/focus-visible states. One change fixes every popup in bo
 ### 0.8 `[C]` Shared user menu (`app-user-menu`)
 New shared component: member photo avatar (initial fallback), full name, role, theme toggle,
 sign-out as a proper icon button. Wire into **both** `portal-layout.html` (replaces the ad-hoc
-avatar + `🚪` button) and `admin-layout.html` (replaces the plain `header-username` +
+avatar + door-glyph sign-out button) and `admin-layout.html` (replaces the plain `header-username` +
 `header-role-badge` + text "Sign Out"). Admin reuses `ProfileService.getProfile()` so an admin
 who is also a member gets their photo.
 

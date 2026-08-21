@@ -278,9 +278,16 @@ export function getPaymentStatusClass(status: string | number | null | undefined
     return '';
 }
 
-export function getMembershipTypeLabel(type: string | number): string {
+// Area 35: the single source for rendering a MembershipType. Accepts either the numeric
+// enum ordinal or the enum name, because the API sends both shapes depending on endpoint.
+// Never inline a copy of this list in a component — that is exactly how index 6 came to be
+// labelled 'Life' in two places while the enum's real member 6 is Guest (see TODO 35.1/35.2).
+// Returns the full display label ('Guest Member'), so templates must NOT append ' Member'.
+export function getMembershipTypeLabel(type: string | number | null | undefined): string {
+    if (type === null || type === undefined || type === '') return 'General';
     if (typeof type === 'number') return MEMBERSHIP_TYPES[type] || 'General';
-    return type || 'General';
+    if (/^\d+$/.test(type)) return MEMBERSHIP_TYPES[parseInt(type, 10)] || 'General';
+    return MEMBERSHIP_TYPE_OPTIONS.find(o => o.value === type)?.label || type;
 }
 
 export function getBloodGroupName(bg: string | undefined | null): string {

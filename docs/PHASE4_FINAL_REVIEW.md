@@ -9,7 +9,7 @@
 
 Phase 4 re-ran the dependency loop (restore → build → test → HTTP smoke) and confirmed **no backend test regressions**. The API test suite grew from **305 → 308** passing tests (3 new tests from Phase 3: `ForumServiceTests` ×2, auth lockout ×1). Live smoke checks on `:5087` confirm `/healthz`, `/api/config`, forum CRUD (authenticated), and SignalR hubs (Chat + Notification) all work after BUG-001 and BUG-002 fixes.
 
-**Regression status:** ✅ **PASS** — 308 passed, 0 failed, 1 intentionally skipped (`SyncMembersForReal`).
+**Regression status:** **PASS** — 308 passed, 0 failed, 1 intentionally skipped (`SyncMembersForReal`).
 
 **Build note:** `dotnet build GHCAA.sln` fails while `GHCAA.API` is running (DLL file lock, MSB3027). Stop the API process before rebuilding, or build with the API already stopped.
 

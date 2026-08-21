@@ -75,6 +75,15 @@ namespace GHCAA.Infrastructure.Services
                 if (await _db.Members.AnyAsync(m => m.Email == dto.Email || m.NID == dto.NID || m.MobileNo == dto.MobileNo, cancellationToken))
                     throw new InvalidOperationException("Member with same Email, NID, or Mobile already exists.");
 
+                // 35.5: MembershipType is admin-assigned only. Whatever tier the client submits is
+                // ignored — otherwise a self-registering applicant could grant themselves Founding or
+                // Executive. Every application starts on the org config's default tier; an admin moves
+                // it afterwards through UpdateMemberByAdminAsync, which audits the change.
+                var orgConfig = await _orgConfigService.GetConfigAsync();
+                var assignedType = Enum.TryParse<Enums.MembershipType>(orgConfig?.Workflow?.DefaultMembershipType, true, out var defaultType)
+                    ? defaultType
+                    : Enums.MembershipType.General;
+
                 var member = new Member
                 {
                     FullName = dto.FullName,
@@ -106,7 +115,7 @@ namespace GHCAA.Infrastructure.Services
                     HasAcceptedTerms = dto.HasAcceptedTerms,
                     HasAcceptedGdpr = dto.HasAcceptedGdpr,
                     GdprAcceptedAt = dto.HasAcceptedGdpr ? DateTime.UtcNow : null,
-                    MembershipType = dto.MembershipType,
+                    MembershipType = assignedType, // 35.5: never dto.MembershipType — admin-assigned only
                     Category = dto.Category,
                     IsVerified = false
                 };
@@ -196,7 +205,7 @@ namespace GHCAA.Infrastructure.Services
                         // Fetch dynamic fee config
                         var applicableFee = await _financialService.GetApplicableFeeAsync(
                             Enums.FinancialCategory.RegistrationFee,
-                            dto.MembershipType,
+                            assignedType, // 35.5: fee must match the tier actually assigned, not the requested one
                             DateTime.UtcNow,
                             cancellationToken);
 

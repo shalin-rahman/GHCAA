@@ -1,5 +1,6 @@
 export type MembershipStatus = 'Applied' | 'Active' | 'InactivePayment' | 'InactiveResigned' | 'Terminated';
-export type MembershipType = 'Founding' | 'Executive' | 'General' | 'Associate' | 'Honorary' | 'Advisory';
+// 35.4: keep in sync with MembershipType in GHCAA.Domain/Enums.cs (Guest is index 6).
+export type MembershipType = 'Founding' | 'Executive' | 'General' | 'Associate' | 'Honorary' | 'Advisory' | 'Guest';
 export type MemberCategory = 'None' | 'LifelongPatron' | 'Sponsor' | 'Advisor' | 'Mentor' | 'Recruiter' | 'Active' | 'Volunteer' | 'Contributor' | 'Guest' | 'Student';
 export type ECPosition = 'None' | 'President' | 'VicePresident' | 'GeneralSecretary' | 'OfficeSecretary' | 'JointSecretary1' | 'JointSecretary2' | 'Treasurer' | 'MediaCulturalAndSportsSecretary' | 'OrganizationalSecretary' | 'InformationAndTechnologySecretary' | 'Member1' | 'Member2' | 'LawSecretary' | 'ImmediatePastPresident' | 'InstitutionalRepresentative';
 export type Gender = 'Male' | 'Female' | 'Other';

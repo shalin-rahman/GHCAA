@@ -104,7 +104,6 @@ void main() {
         degree: 'HSC',
         subject: 'Science',
         designation: 'Software Engineer',
-        membershipType: 'General',
       );
 
       expect(wizard.state.model.academicHistory.length, 1);
@@ -112,7 +111,6 @@ void main() {
       expect(wizard.state.model.passingYear, '2015');
       expect(wizard.state.model.degree, 'HSC');
       expect(wizard.state.model.subject, 'Science');
-      expect(wizard.state.model.membershipType, 'General');
     });
 
     test('Step 2: media paths default to null and update via updateData', () {
@@ -195,7 +193,6 @@ void main() {
         presentAddress: '123 Main St',
         permanentAddress: '123 Main St',
         degree: 'HSC',
-        membershipType: 'General',
         bloodGroup: 'BPositive',
         hasAcceptedTerms: true,
         notifyEventCreation: true,
@@ -209,6 +206,9 @@ void main() {
       expect(json['hasAcceptedTerms'], isTrue);
       expect(json['notifyEventCreation'], isTrue);
       expect(json['notifyParticipationApproval'], isFalse);
+      // 35.5: tiers are admin-assigned only — the payload must never carry one.
+      expect(json.containsKey('MembershipType'), isFalse);
+      expect(json.containsKey('membershipType'), isFalse);
     });
 
     // ── Reset ─────────────────────────────────────────────────────────────────

@@ -38,14 +38,9 @@ class AcademicConstants {
 }
 
 class MembershipConstants {
-  static const List<Map<String, String>> typeOptions = [
-    {'value': 'Founding', 'label': 'Founding Member'},
-    {'value': 'Executive', 'label': 'Executive Member'},
-    {'value': 'General', 'label': 'General Member'},
-    {'value': 'Associate', 'label': 'Associate Member'},
-    {'value': 'Honorary', 'label': 'Honorary Member'},
-    {'value': 'Advisory', 'label': 'Advisory Member'},
-  ];
+  // 35.5 (closes 28.21): the registration tier list was deleted rather than completed with Guest.
+  // Membership tiers are admin-assigned only, so no registration screen offers them; admin screens
+  // read the tiers from the API via DropdownService.getOptions('MembershipType').
 
   static const List<Map<String, String>> bloodGroupOptions = [
     {'value': 'APositive', 'label': 'A+'},

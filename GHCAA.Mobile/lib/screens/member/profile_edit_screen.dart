@@ -444,6 +444,27 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
+              ] else ...[
+                // 35.5: tiers are admin-assigned only, so a member sees their own tier
+                // read-only here instead of an editable dropdown.
+                _buildSectionHeader('Member Tier & Category'),
+                GlassContainer(
+                  child: Column(
+                    children: [
+                      _buildReadOnlyRow('MEMBERSHIP TYPE', _data['membershipType']),
+                      const Divider(color: Colors.white10),
+                      _buildReadOnlyRow('SPECIAL CATEGORY', _data['category']),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        child: Text(
+                          'Your tier is set by the association office and cannot be changed here.',
+                          style: TextStyle(color: Colors.white38, fontSize: 10),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
               ],
 
               _buildSectionHeader('Communication Preferences'),
@@ -524,6 +545,22 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 12),
       child: Text(title.toUpperCase(), style: const TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+    );
+  }
+
+  // 35.5: read-only field for values a member may see but not edit (e.g. membership tier).
+  Widget _buildReadOnlyRow(String label, dynamic value) {
+    final text = (value == null || value.toString().isEmpty) ? 'Not assigned' : value.toString();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(color: AppTheme.textSecondaryDark, fontSize: 10, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          Text(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
+        ],
+      ),
     );
   }
 

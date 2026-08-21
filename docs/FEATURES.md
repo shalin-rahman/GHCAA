@@ -66,7 +66,10 @@ A granular, module-by-module breakdown of the platform's features — including 
 
 ### 2.2 Intelligent Event Registration
 - **Business description**: Members and guests register for events with integrated payment tracking.
-- **User roles**: Member, Guest (if allowed).
+- **User roles**: Member, Guest (if allowed) — here "Guest" means an *unregistered event
+  attendee* (see the `GuestName` / `GuestEmail` / `GuestMobile` fields on the registration
+  record). This is **not** the `Guest` value of the `MembershipType` enum, which is a membership
+  tier assigned to an actual member. The two are unrelated; do not wire one to the other.
 - **Inputs / outputs**:
   - Screen: `/events/:id`.
   - API: `POST /api/events/register`.

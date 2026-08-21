@@ -20,7 +20,8 @@ class RegisterModel {
   final String? profileImagePath;
   final String? nidPhotoPath;
   final String? paymentProofPath;
-  final String membershipType;
+  // 35.5: no membershipType — the tier is admin-assigned only and is never part of the
+  // registration payload. The API ignores any tier a client sends.
   final String bloodGroup;
   final String? dateOfBirth;
   final String? degree;
@@ -54,7 +55,6 @@ class RegisterModel {
     this.profileImagePath,
     this.nidPhotoPath,
     this.paymentProofPath,
-    this.membershipType = 'General',
     this.bloodGroup = 'APositive',
     this.dateOfBirth,
     this.degree = 'HSC',
@@ -89,7 +89,6 @@ class RegisterModel {
     String? profileImagePath,
     String? nidPhotoPath,
     String? paymentProofPath,
-    String? membershipType,
     String? bloodGroup,
     String? dateOfBirth,
     String? degree,
@@ -123,7 +122,6 @@ class RegisterModel {
       profileImagePath: profileImagePath ?? this.profileImagePath,
       nidPhotoPath: nidPhotoPath ?? this.nidPhotoPath,
       paymentProofPath: paymentProofPath ?? this.paymentProofPath,
-      membershipType: membershipType ?? this.membershipType,
       bloodGroup: bloodGroup ?? this.bloodGroup,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       degree: degree ?? this.degree,
@@ -166,7 +164,6 @@ class RegisterModel {
                   'IsGHC': true,
                 }
               ],
-        'membershipType': membershipType,
         'bloodGroup': bloodGroup,
         'dateOfBirth': AppUtils.toWire(dateOfBirth),
         'degree': degree,
@@ -216,7 +213,6 @@ class RegisterState {
         'Subject': model.subject,
         'Designation': model.designation,
         'BloodGroup': model.bloodGroup,
-        'MembershipType': model.membershipType,
         'HasAcceptedTerms': model.hasAcceptedTerms,
         'HasAcceptedGdpr': model.hasAcceptedGdpr,
         'DateOfBirth': model.dateOfBirth,
@@ -296,7 +292,6 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
     String? profileImagePath,
     String? nidPhotoPath,
     String? paymentProofPath,
-    String? membershipType,
     String? bloodGroup,
     String? dateOfBirth,
     String? degree,
@@ -331,7 +326,6 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
         profileImagePath: profileImagePath,
         nidPhotoPath: nidPhotoPath,
         paymentProofPath: paymentProofPath,
-        membershipType: membershipType,
         bloodGroup: bloodGroup,
         dateOfBirth: dateOfBirth,
         degree: degree,
@@ -402,9 +396,6 @@ class RegisterWizardNotifier extends StateNotifier<RegisterState> {
         break;
       case 'BloodGroup':
         updateModel(bloodGroup: value as String);
-        break;
-      case 'MembershipType':
-        updateModel(membershipType: value as String);
         break;
       case 'HasAcceptedTerms':
         updateModel(hasAcceptedTerms: value as bool);

@@ -35,7 +35,8 @@
                 </div>
                 <div class="details">
                     <div class="name">{{ profile()?.fullName || 'Member Name' }}</div>
-                    <div class="role-badge">{{ getMembershipName(profile()?.membershipType) }} Member</div>
+                    <!-- 35.1: helper already returns the full label ("Guest Member") — do not append " Member". -->
+                    <div class="role-badge">{{ getMembershipName(profile()?.membershipType) }}</div>
                     <div class="meta-grid">
                         <div class="meta-item">
                             <span class="label">Member ID</span>

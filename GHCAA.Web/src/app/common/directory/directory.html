@@ -59,12 +59,12 @@
                 <label>Membership Type</label>
                 <select [(ngModel)]="filters.membershipType" (change)="search()">
                     <option value="">All Types</option>
-                    <option value="Founding">Founding Member</option>
-                    <option value="Executive">Executive Member</option>
-                    <option value="General">General Member</option>
-                    <option value="Associate">Associate Member</option>
-                    <option value="Honorary">Honorary Member</option>
-                    <option value="Advisory">Advisory Member</option>
+                    <!-- 35.3: was a hardcoded list ending at Advisory, which silently hid Guest
+                         members from the directory. Driven by MEMBERSHIP_TYPE_OPTIONS so it cannot
+                         drift from GHCAA.Domain/Enums.cs again. -->
+                    @for (t of membershipTypes; track t.value) {
+                    <option [value]="t.value">{{ t.label }}</option>
+                    }
                 </select>
             </div>
         </div>

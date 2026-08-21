@@ -404,7 +404,7 @@ graph TD
 | Enum | Values |
 |---|---|
 | `MembershipStatus` | Applied, Active, InactivePayment, InactiveResigned, Terminated |
-| `MembershipType` | Founding, Executive, General, Associate, Honorary, Advisory |
+| `MembershipType` | Founding, Executive, General, Associate, Honorary, Advisory, Guest |
 | `MemberCategory` | None, LifelongPatron, Sponsor, Advisor, Mentor, Recruiter, Active, Volunteer, Contributor, Guest, Student |
 | `ECPosition` | None, President, VicePresident, GeneralSecretary, OfficeSecretary, JointSecretary1/2, Treasurer, MediaCulturalAndSportsSecretary, OrganizationalSecretary, InformationAndTechnologySecretary, Member1/2, LawSecretary, ImmediatePastPresident, InstitutionalRepresentative |
 | `BloodGroup` | Unknown, APositive, ANegative, BPositive, BNegative, OPositive, ONegative, ABPositive, ABNegative |
@@ -983,7 +983,7 @@ Order in `Program.cs`:
 | Type | Values |
 |---|---|
 | `MembershipStatus` | `'Applied' \| 'Active' \| 'InactivePayment' \| 'InactiveResigned' \| 'Terminated'` |
-| `MembershipType` | `'Founding' \| 'Executive' \| 'General' \| 'Associate' \| 'Honorary' \| 'Advisory'` |
+| `MembershipType` | `'Founding' \| 'Executive' \| 'General' \| 'Associate' \| 'Honorary' \| 'Advisory' \| 'Guest'` |
 | `MemberCategory` | `'None' \| 'LifelongPatron' \| 'Sponsor' \| ... \| 'Student'` (11 values) |
 | `ECPosition` | 16 values — mirrors `Enums.ECPosition` |
 | `Gender` | `'Male' \| 'Female' \| 'Other'` |
@@ -1919,12 +1919,12 @@ All test files use Jasmine + Karma. File pattern: `*.spec.ts`
 | | Domain | Application | Infrastructure | API | Tests |
 |---|---|---|---|---|---|
 | **Domain** | — | — | — | — | — |
-| **Application** | ✅ Models + Enums | — | — | — | — |
-| **Infrastructure** | ✅ Models + Enums | ✅ Interfaces + DTOs | — | — | — |
-| **API** | ✅ Enums/Constants | ✅ Interfaces + DTOs | ✅ DI registration | — | — |
-| **Web (Angular)** | — (TS types) | — | — | ✅ REST/SignalR | — |
-| **Mobile (Flutter)** | — (Dart types) | — | — | ✅ REST/SignalR | — |
-| **Tests** | ✅ Models + Enums | ✅ Interfaces | ✅ Services + DbContext | ✅ Controllers | — |
+| **Application** | Models + Enums | — | — | — | — |
+| **Infrastructure** | Models + Enums | Interfaces + DTOs | — | — | — |
+| **API** | Enums/Constants | Interfaces + DTOs | DI registration | — | — |
+| **Web (Angular)** | — (TS types) | — | — | REST/SignalR | — |
+| **Mobile (Flutter)** | — (Dart types) | — | — | REST/SignalR | — |
+| **Tests** | Models + Enums | Interfaces | Services + DbContext | Controllers | — |
 
 ---
 
