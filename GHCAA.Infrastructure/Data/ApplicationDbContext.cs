@@ -11,7 +11,12 @@ namespace GHCAA.Infrastructure.Data
         private static string GetSeedPath(string fileName)
             => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "Seed", fileName);
 
-        private List<T> LoadSeed<T>(string fileName)
+        /// <summary>
+        /// Resolves and deserializes a Seed JSON file. Static and internal so runtime data
+        /// syncers (e.g. <see cref="ConstitutionSeeder"/>) reuse the exact same profile gate and
+        /// path-resolution order instead of duplicating it.
+        /// </summary>
+        internal static List<T> LoadSeed<T>(string fileName)
         {
             var profile = Environment.GetEnvironmentVariable("ASP_SEED_PROFILE");
 

@@ -1,0 +1,112 @@
+<section class="doc-hero">
+    <div class="container hero-content">
+        <div class="doc-badge">GOVERNING DOCUMENT</div>
+        <h1>The Constitution</h1>
+        <p>The founding charter of {{ orgConfigService.config()?.branding?.fullName || 'the association' }} &mdash; every article, every version, open to all.</p>
+    </div>
+</section>
+
+<div class="container main-content">
+
+    @if (loading()) {
+    <div class="loading-state">
+        <app-logo-spinner />
+        <p>Loading the constitution…</p>
+    </div>
+    }
+
+    @else if (pdfOnly()) {
+    <!--
+        No active version in the repository. The PDF is the authoritative document, so the page
+        still delivers what the visitor came for instead of rendering an error.
+    -->
+    <div class="glass-card pdf-only-card">
+        <h2>Full Constitution</h2>
+        <p>
+            The complete constitution is published as a signed PDF. Open it below to read every
+            article in full.
+        </p>
+        <a class="btn btn-accent" [href]="pdfUrl()" target="_blank" rel="noopener">
+            Open Full Constitution (PDF)
+        </a>
+        <a class="btn btn-outline" [href]="pdfUrl()" download>Download PDF</a>
+    </div>
+    }
+
+    @else {
+    <div class="doc-layout">
+
+        <!-- In-page navigation, built from the `Article N:` headings in the stored text. -->
+        <aside class="doc-toc">
+            <div class="glass-card toc-card">
+                <h3>Contents</h3>
+                <nav>
+                    @for (article of articles(); track article.id) {
+                    <button type="button" class="toc-link" (click)="scrollTo(article.id)">
+                        {{ article.heading }}
+                    </button>
+                    }
+                </nav>
+                <div class="toc-actions">
+                    <a class="btn btn-accent btn-sm w-full" [href]="pdfUrl()" target="_blank" rel="noopener">Open PDF</a>
+                    <a class="btn btn-outline btn-sm w-full" [href]="pdfUrl()" download>Download PDF</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="doc-body">
+            <div class="glass-card version-banner">
+                <div class="version-meta">
+                    <span class="version-pill">Version {{ current()!.version }}</span>
+                    <span class="version-date">Effective {{ current()!.effectiveDate | date: 'longDate' }}</span>
+                </div>
+                @if (current()!.changeSummary) {
+                <p class="change-summary"><strong>What changed:</strong> {{ current()!.changeSummary }}</p>
+                }
+            </div>
+
+            @for (article of articles(); track article.id) {
+            <article class="glass-card doc-article" [id]="article.id">
+                <h2>{{ article.heading }}</h2>
+                <div class="doc-prose" [innerHTML]="article.bodyHtml"></div>
+            </article>
+            }
+
+            <!-- 36.2: version history. Every superseded version stays readable in full. -->
+            @if (pastVersions().length > 0) {
+            <section class="history-section">
+                <h2 class="section-title">Version History</h2>
+                <p class="section-sub">Superseded versions are retained in full so any amendment can be traced.</p>
+
+                @for (version of pastVersions(); track version.id) {
+                <div class="glass-card history-item">
+                    <button type="button" class="history-head" (click)="toggleVersion(version.id)"
+                        [attr.aria-expanded]="expandedVersionId() === version.id">
+                        <span class="version-pill muted">v{{ version.version }}</span>
+                        <span class="history-dates">
+                            {{ version.effectiveDate | date: 'mediumDate' }}
+                            @if (version.supersededDate) { <span>&ndash; {{ version.supersededDate | date: 'mediumDate' }}</span> }
+                        </span>
+                        <span class="history-summary">{{ version.changeSummary }}</span>
+                        <span class="chevron" [class.open]="expandedVersionId() === version.id">&#9662;</span>
+                    </button>
+
+                    @if (expandedVersionId() === version.id) {
+                    <div class="history-body">
+                        @for (article of versionArticles(version); track article.id) {
+                        <h4>{{ article.heading }}</h4>
+                        <div class="doc-prose" [innerHTML]="article.bodyHtml"></div>
+                        }
+                        @if (version.pdfUrl) {
+                        <a class="btn btn-outline btn-sm" [href]="version.pdfUrl" target="_blank" rel="noopener">Open this version (PDF)</a>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+            </section>
+            }
+        </main>
+    </div>
+    }
+</div>

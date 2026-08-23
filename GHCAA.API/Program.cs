@@ -1,4 +1,4 @@
-using GHCAA.Application;
+﻿using GHCAA.Application;
 using GHCAA.Infrastructure;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
@@ -275,6 +275,24 @@ try
 catch (Exception ex)
 {
     app.Logger.LogWarning(ex, "OrgConfig seed skipped — table may not exist yet. Run migrations first.");
+}
+
+// Publish the ratified constitution from Data/Seed/constitution.json (TODO 36.3).
+// EnsureCreated above is a no-op on an existing database, so the model's HasData seed never
+// re-runs there; without this, a newly ratified version could never reach preprod. The syncer is
+// idempotent and only supersedes prior versions, so member amendment votes are preserved.
+try
+{
+    using var constitutionScope = app.Services.CreateScope();
+    var constitutionCtx = constitutionScope.ServiceProvider.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
+    if (await constitutionCtx.Database.CanConnectAsync())
+    {
+        await GHCAA.Infrastructure.Data.ConstitutionSeeder.SyncAsync(constitutionCtx, app.Logger);
+    }
+}
+catch (Exception ex)
+{
+    app.Logger.LogWarning(ex, "Constitution sync skipped — table may not exist yet.");
 }
 
 // Automatic Database Initialization for Visual Testing Profile

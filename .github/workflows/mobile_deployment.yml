@@ -40,6 +40,9 @@ jobs:
         with:
           name: android-release
           path: GHCAA.Mobile/build/app/outputs/bundle/release/app-release.aab
+          # Consumed by `create-release` in this same run; the GitHub Release is the
+          # durable copy and release assets do not count against the artifact quota.
+          retention-days: 1
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
@@ -76,6 +79,9 @@ jobs:
         with:
           name: ios-release
           path: GHCAA.Mobile/build/ios/ipa/*.ipa
+          # Consumed by `create-release` in this same run; the GitHub Release is the
+          # durable copy and release assets do not count against the artifact quota.
+          retention-days: 1
       - name: Upload to TestFlight
         uses: apple-actions/upload-testflight-build@v1
         with:

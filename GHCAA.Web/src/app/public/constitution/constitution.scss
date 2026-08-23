@@ -1,0 +1,284 @@
+/*
+ * Layout only. Every visual primitive this page uses — the hero, the badge, the rendered
+ * article prose — is defined centrally in styles.scss as `.doc-hero` / `.doc-badge` /
+ * `.doc-prose` so the /elections hub can reuse the same shell. Nothing here re-declares a
+ * color; all values come from tokens.
+ */
+
+.main-content {
+    padding: 3rem 0 5rem;
+}
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 5rem 0;
+    color: var(--text-muted);
+}
+
+/* --- No stored version: the PDF is the whole page ------------------------- */
+
+.pdf-only-card {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2.5rem;
+    text-align: center;
+
+    h2 {
+        margin: 0 0 0.75rem;
+        color: var(--text-strong);
+    }
+
+    p {
+        margin: 0 auto 1.75rem;
+        max-width: 46ch;
+        color: var(--text-muted);
+        line-height: 1.7;
+    }
+
+    .btn {
+        margin: 0 0.35rem;
+    }
+}
+
+/* --- Two-column reading layout ------------------------------------------- */
+
+.doc-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+    gap: 2.5rem;
+    align-items: start;
+}
+
+.toc-card {
+    position: sticky;
+    top: 5.5rem;
+    padding: 1.5rem;
+
+    h3 {
+        margin: 0 0 1rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+    }
+
+    nav {
+        display: flex;
+        flex-direction: column;
+        max-height: 50vh;
+        overflow-y: auto;
+    }
+}
+
+.toc-link {
+    background: none;
+    border: 0;
+    border-left: 2px solid var(--hairline);
+    padding: 0.5rem 0 0.5rem 0.85rem;
+    text-align: left;
+    font: inherit;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+
+    &:hover,
+    &:focus-visible {
+        color: var(--accent-color);
+        border-left-color: var(--accent-color);
+    }
+}
+
+.toc-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--hairline);
+}
+
+/* --- Active version ------------------------------------------------------- */
+
+.doc-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;
+}
+
+.version-banner {
+    padding: 1.25rem 1.5rem;
+}
+
+.version-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.version-pill {
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-sm);
+    background: var(--gold-gradient);
+    color: var(--text-on-dark);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+
+    /* Superseded versions in the history list read as archival, not current. */
+    &.muted {
+        background: var(--surface-subtle);
+        color: var(--text-muted);
+        border: 1px solid var(--hairline);
+    }
+}
+
+.version-date {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.change-summary {
+    margin: 0.9rem 0 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.doc-article {
+    padding: 2rem 2.25rem;
+
+    h2 {
+        margin: 0 0 1.25rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid var(--hairline);
+        font-size: 1.3rem;
+        color: var(--text-strong);
+        /* Clears the fixed header when the ToC scrolls to this article. */
+        scroll-margin-top: 6rem;
+    }
+}
+
+/* --- Version history ------------------------------------------------------ */
+
+.history-section {
+    margin-top: 2.5rem;
+}
+
+.section-title {
+    margin: 0 0 0.4rem;
+    font-size: 1.35rem;
+    color: var(--text-strong);
+}
+
+.section-sub {
+    margin: 0 0 1.25rem;
+    font-size: 0.92rem;
+    color: var(--text-muted);
+}
+
+.history-item {
+    padding: 0;
+    overflow: hidden;
+
+    + .history-item {
+        margin-top: 0.75rem;
+    }
+}
+
+.history-head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: none;
+    border: 0;
+    font: inherit;
+    text-align: left;
+    color: var(--text-main);
+    cursor: pointer;
+
+    &:hover {
+        background: var(--card-bg-hover);
+    }
+}
+
+.history-dates {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.history-summary {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chevron {
+    color: var(--text-dim);
+    transition: transform 0.2s;
+
+    &.open {
+        transform: rotate(180deg);
+    }
+}
+
+.history-body {
+    padding: 0 1.5rem 1.5rem;
+    border-top: 1px solid var(--hairline);
+
+    h4 {
+        margin: 1.35rem 0 0.5rem;
+        font-size: 1rem;
+        color: var(--text-strong);
+    }
+}
+
+/* --- Responsive ----------------------------------------------------------- */
+
+@media (max-width: 900px) {
+    .doc-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .toc-card {
+        position: static;
+
+        nav {
+            max-height: none;
+        }
+    }
+
+    .doc-article {
+        padding: 1.5rem 1.25rem;
+    }
+
+    /* The summary is the first thing to go when there is no room for one line. */
+    .history-summary {
+        display: none;
+    }
+}
+
+@media print {
+    .doc-toc,
+    .history-section {
+        display: none;
+    }
+
+    .doc-layout {
+        grid-template-columns: 1fr;
+    }
+}

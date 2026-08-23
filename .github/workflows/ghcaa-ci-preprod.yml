@@ -151,18 +151,11 @@ jobs:
           mkdir -p ./publish/api/wwwroot
           cp -r GHCAA.Web/dist/GHCAA.Web/browser/* ./publish/api/wwwroot/
 
-      # Single tarball, not 5500 loose files, and a short retention window.
-      # Render deploys via deploy hook — nothing downloads this artifact.
-      - name: Compress Integrated Build
-        run: tar -czf ghcaa-preprod-deployment.tar.gz -C ./publish/api .
-
-      - name: Archive Integrated Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: ghcaa-preprod-deployment
-          path: ghcaa-preprod-deployment.tar.gz
-          retention-days: 5
-          compression-level: 0
+      # No artifact upload here on purpose. Render builds from the Dockerfile when the
+      # deploy hook fires below — nothing ever downloaded this tarball, and uploading it
+      # made `integrated-build` fail on the account artifact-storage quota, which in turn
+      # skipped `deploy-preprod` (needs: [integrated-build]) and silently stopped preprod
+      # from deploying at all. Do not re-add an upload here without a consumer.
 
   deploy-preprod:
     name: Deploy to Preprod (Render)

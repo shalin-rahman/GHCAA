@@ -151,15 +151,6 @@ jobs:
           mkdir -p ./publish/api/wwwroot
           cp -r GHCAA.Web/dist/GHCAA.Web/browser/* ./publish/api/wwwroot/
 
-      # Single tarball, not 5500 loose files, and a short retention window.
-      # Nothing downloads this artifact — it exists only for manual inspection.
-      - name: Compress Integrated Build
-        run: tar -czf ghcaa-full-stack-build.tar.gz -C ./publish/api .
-
-      - name: Archive Integrated Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: ghcaa-full-stack-build
-          path: ghcaa-full-stack-build.tar.gz
-          retention-days: 5
-          compression-level: 0
+      # No artifact upload here on purpose — nothing downloaded it, and it competed for
+      # the account artifact-storage quota with the release artifacts that ARE consumed.
+      # The job still proves the integrated package builds; that is its whole value.

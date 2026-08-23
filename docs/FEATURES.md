@@ -173,6 +173,25 @@ The platform operates without live payment-gateway credentials. All payment meth
   - Eligibility: restricted to members with 'Active' status.
 - **Dependencies**: Governance service.
 
+### 5.1a Constitution Hub & Election Document Library
+- **Business description**: Publishes the ratified constitution and the election procedure documents to
+  everyone, and lets Voting Members record a position on the active version.
+- **User roles**: Public (read), Member (vote), Admin/SuperAdmin (publish new versions).
+- **Inputs / outputs**:
+  - Screens: `/constitution` (full text, in-page article ToC, PDF download, collapsible version history),
+    `/elections` (the seven `docs/Elections/*.md` documents, viewable and downloadable, with the forms
+    handbook split into 18 individually printable forms), `/governance` (member ratification card).
+  - API: `GET /api/governance/constitution`, `GET /api/governance/constitution/history`,
+    `POST /api/governance/constitution/{id}/vote`.
+- **Validations & rules**:
+  - One vote per member per version, enforced by a unique `(ConstitutionId, MemberId)` index.
+  - Voting rights are limited to Founding, Executive and General members (Article III Section K);
+    Associate, Honorary and Advisory members may read but not ratify.
+  - The published text is the ratified v4.0 document, kept in sync at boot by `ConstitutionSeeder`
+    because `EnsureCreated()` never re-seeds an existing database.
+- **Dependencies**: Governance service, `ConstitutionSeeder`, in-repo markdown renderer
+  (`core/utils/markdown.util.ts`) — no markdown npm dependency.
+
 ### 5.2 Bulk Member Import & Export
 - **Business description**: Excel-to-database bridging for migrating legacy records and exporting registry data.
 - **User roles**: SuperAdmin.

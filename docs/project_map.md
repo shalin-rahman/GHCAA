@@ -861,7 +861,15 @@ All registered as **HttpClient** + **Scoped IPaymentGatewayService**.
 
 **DbSets (all 40 domain models mapped):** Member, User, Role, AlumniEvent, EventRegistration, EventTask, EventBudget, EventGallery, NewsPost, NewsCollaborator, JobOpportunity, FinancialRecord, PaymentHistory, MembershipDue, MembershipFeeConfig, MembershipHistory, AcademicRecord, ProfessionalRecord, ECPeriod, ECMember, Constitution, FamilyLinkRequest, MentorshipRequest, Poll, PollOption, PollVote, SocialAuthConfig, ActivityLog, Notification, ChatMessage, EmailTemplate, EmailLog, Otp, LookupItem, FileUpload, ContactMessage, PaymentConfiguration, SavedPaymentMethod, SpecialDayTheme, GamificationConfig
 
-**Seed:** `GHCAA.Infrastructure/Data/Seed/` — test/dev data seeder.
+**Seed:** `GHCAA.Infrastructure/Data/Seed/` — test/dev data seeder. Loaded via
+`ApplicationDbContext.LoadSeed<T>(fileName)` (`internal static`, so runtime syncers reuse the same
+profile gate and path resolution).
+
+**Runtime data sync:** `GHCAA.Infrastructure/Data/ConstitutionSeeder.SyncAsync(context, logger, ct)` —
+called from `Program.cs` at boot. `EnsureCreated()` is a no-op on a non-empty database, so `HasData`
+seed edits never reach preprod; this syncer publishes `Seed/constitution.json` idempotently, inserts
+unknown versions, refreshes changed text in place, supersedes (never deletes) prior versions so
+`AmendmentVote` rows survive, and removes only vote-free placeholder versions.
 
 ---
 

@@ -492,6 +492,13 @@ export const API_ENDPOINTS = {
         SEARCH: '/api/networking/search',
         UPDATES: '/api/networking/updates'
     },
+    // Public governance surface. Distinct from ADMIN.GOVERNANCE ('/api/admin/governance') —
+    // these three are [AllowAnonymous] on GovernanceController; VOTE is member-authenticated.
+    GOVERNANCE: {
+        CONSTITUTION: '/api/governance/constitution',
+        CONSTITUTION_HISTORY: '/api/governance/constitution/history',
+        CONSTITUTION_VOTE: (id: number) => `/api/governance/constitution/${id}/vote`
+    },
     LOOKUPS: '/api/lookups',
     LEDGER: '/api/ledger',
     CONTACT: '/api/contact',

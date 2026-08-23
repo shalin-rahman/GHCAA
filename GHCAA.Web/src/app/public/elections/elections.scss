@@ -1,0 +1,292 @@
+/*
+ * Layout only — `.doc-hero`, `.doc-badge` and `.doc-prose` are shared with /constitution
+ * and defined centrally in styles.scss. Colors come from tokens exclusively.
+ */
+
+.main-content {
+    padding: 3rem 0 5rem;
+}
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 5rem 0;
+    color: var(--text-muted);
+}
+
+/* --- Index --------------------------------------------------------------- */
+
+.doc-group + .doc-group {
+    margin-top: 3rem;
+}
+
+.group-title {
+    margin: 0 0 1.25rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.doc-grid,
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+.doc-card,
+.form-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+
+    h3 {
+        margin: 0 0 0.6rem;
+        font-size: 1.05rem;
+        line-height: 1.4;
+        color: var(--text-strong);
+    }
+
+    p {
+        flex: 1;
+        margin: 0 0 1.25rem;
+        font-size: 0.92rem;
+        line-height: 1.65;
+        color: var(--text-muted);
+    }
+}
+
+.form-code {
+    display: inline-block;
+    align-self: flex-start;
+    margin-bottom: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-subtle);
+    border: 1px solid var(--hairline);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent-color);
+}
+
+.form-card h3 {
+    flex: 1;
+}
+
+.card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: auto;
+}
+
+.index-note {
+    margin-top: 2.5rem;
+    font-size: 0.92rem;
+    color: var(--text-muted);
+
+    a {
+        color: var(--accent-color);
+    }
+}
+
+/* --- Reader -------------------------------------------------------------- */
+
+.reader-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.link-btn {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    color: var(--accent-color);
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.crumb-sep {
+    color: var(--text-dim);
+}
+
+.crumb-current {
+    color: var(--text-muted);
+}
+
+.reader-head {
+    margin-bottom: 2rem;
+
+    h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.8rem;
+        color: var(--text-strong);
+    }
+
+    p {
+        max-width: 70ch;
+        margin: 0 0 1.25rem;
+        line-height: 1.7;
+        color: var(--text-muted);
+    }
+}
+
+.error-card {
+    max-width: 620px;
+    padding: 2.5rem;
+    text-align: center;
+
+    h2 {
+        margin: 0 0 0.75rem;
+        color: var(--text-strong);
+    }
+
+    p {
+        margin: 0 0 1.5rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+    }
+}
+
+.doc-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+    gap: 2.5rem;
+    align-items: start;
+
+    &.no-toc {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.toc-card {
+    position: sticky;
+    top: 5.5rem;
+    padding: 1.5rem;
+
+    h3 {
+        margin: 0 0 1rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+    }
+
+    nav {
+        display: flex;
+        flex-direction: column;
+        max-height: 55vh;
+        overflow-y: auto;
+    }
+}
+
+.toc-link {
+    background: none;
+    border: 0;
+    border-left: 2px solid var(--hairline);
+    padding: 0.45rem 0 0.45rem 0.85rem;
+    text-align: left;
+    font: inherit;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+
+    /* Sub-headings indent so the document's shape is visible in the list. */
+    &.level-2 {
+        padding-left: 1.6rem;
+        font-size: 0.83rem;
+    }
+
+    &:hover,
+    &:focus-visible {
+        color: var(--accent-color);
+        border-left-color: var(--accent-color);
+    }
+}
+
+.toc-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--hairline);
+}
+
+.doc-body {
+    min-width: 0;
+}
+
+.form-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.doc-sheet {
+    padding: 2.5rem 2.75rem;
+}
+
+/* --- Responsive ---------------------------------------------------------- */
+
+@media (max-width: 900px) {
+    .doc-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .toc-card {
+        position: static;
+
+        nav {
+            max-height: none;
+        }
+    }
+
+    .doc-sheet {
+        padding: 1.5rem 1.25rem;
+    }
+}
+
+/*
+ * Printing matters here: a returning officer prints these forms and fills them in by hand.
+ * Everything that is navigation rather than document is dropped.
+ */
+@media print {
+    .no-print,
+    .doc-toc {
+        display: none !important;
+    }
+
+    .main-content {
+        padding: 0;
+    }
+
+    .doc-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .doc-sheet {
+        padding: 0;
+        border: 0;
+        background: none;
+        box-shadow: none;
+    }
+}

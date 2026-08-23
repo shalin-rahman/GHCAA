@@ -1,0 +1,134 @@
+<section class="doc-hero">
+    <div class="container hero-content">
+        <div class="doc-badge">ELECTION PROCESS</div>
+        <h1>Elections &amp; Forms</h1>
+        <p>
+            Every rule, procedure and form that governs an election of
+            {{ orgConfigService.config()?.branding?.fullName || 'the association' }} &mdash;
+            published in full, readable here and downloadable by anyone.
+        </p>
+    </div>
+</section>
+
+<div class="container main-content">
+
+    @if (!selected()) {
+    <!-- Index: the whole document set, grouped so the purpose of each is obvious. -->
+    @for (group of groups; track group) {
+    <section class="doc-group">
+        <h2 class="group-title">{{ group }}</h2>
+        <div class="doc-grid">
+            @for (doc of docsIn(group); track doc.id) {
+            <article class="glass-card doc-card">
+                <h3>{{ doc.title }}</h3>
+                <p>{{ doc.blurb }}</p>
+                <div class="card-actions">
+                    <button type="button" class="btn btn-accent btn-sm" (click)="open(doc)">View</button>
+                    <a class="btn btn-outline btn-sm" [href]="downloadUrl(doc)" [attr.download]="doc.file">Download</a>
+                </div>
+            </article>
+            }
+        </div>
+    </section>
+    }
+
+    <p class="index-note">
+        These documents are the published source of truth. The association&rsquo;s constitution is
+        available on the <a routerLink="/constitution">Constitution</a> page.
+    </p>
+    }
+
+    @else {
+    <div class="reader">
+
+        <nav class="reader-crumbs no-print">
+            <button type="button" class="link-btn" (click)="backToIndex()">&larr; All documents</button>
+            @if (openForm()) {
+            <span class="crumb-sep">/</span>
+            <button type="button" class="link-btn" (click)="backToForms()">{{ selected()!.title }}</button>
+            <span class="crumb-sep">/</span>
+            <span class="crumb-current">Form {{ openForm()!.code }}</span>
+            }
+        </nav>
+
+        @if (loading()) {
+        <div class="loading-state">
+            <app-logo-spinner />
+            <p>Loading document…</p>
+        </div>
+        }
+
+        @else if (loadError()) {
+        <!-- The asset failed to load; the file itself is still the deliverable. -->
+        <div class="glass-card error-card">
+            <h2>{{ selected()!.title }}</h2>
+            <p>This document could not be displayed in the browser. You can still download the full file.</p>
+            <a class="btn btn-accent" [href]="downloadUrl(selected()!)" [attr.download]="selected()!.file">Download document</a>
+        </div>
+        }
+
+        @else if (selected()!.isFormsHandbook && !openForm()) {
+        <!-- 36.6: the handbook is an index of individually usable forms, not one long page. -->
+        <header class="reader-head">
+            <h1>{{ selected()!.title }}</h1>
+            <p>{{ selected()!.blurb }}</p>
+            <a class="btn btn-outline btn-sm no-print" [href]="downloadUrl(selected()!)"
+                [attr.download]="selected()!.file">Download whole handbook</a>
+        </header>
+
+        <div class="form-grid">
+            @for (form of forms(); track form.id) {
+            <article class="glass-card form-card">
+                <span class="form-code">{{ form.code }}</span>
+                <h3>{{ form.title }}</h3>
+                <div class="card-actions">
+                    <button type="button" class="btn btn-accent btn-sm" (click)="showForm(form)">View</button>
+                    <button type="button" class="btn btn-outline btn-sm" (click)="downloadForm(form)">Download</button>
+                </div>
+            </article>
+            }
+        </div>
+
+        @if (forms().length === 0) {
+        <p class="index-note">No individual forms were found in this handbook. Use the download above.</p>
+        }
+        }
+
+        @else {
+        <div class="doc-layout" [class.no-toc]="headings().length === 0">
+
+            @if (headings().length > 0) {
+            <aside class="doc-toc no-print">
+                <div class="glass-card toc-card">
+                    <h3>Contents</h3>
+                    <nav>
+                        @for (heading of headings(); track heading.id) {
+                        <button type="button" class="toc-link" [class.level-2]="heading.level > 1"
+                            (click)="scrollTo(heading.id)">{{ heading.text }}</button>
+                        }
+                    </nav>
+                    <div class="toc-actions">
+                        <a class="btn btn-accent btn-sm w-full" [href]="downloadUrl(selected()!)"
+                            [attr.download]="selected()!.file">Download</a>
+                        <button type="button" class="btn btn-outline btn-sm w-full" (click)="print()">Print</button>
+                    </div>
+                </div>
+            </aside>
+            }
+
+            <main class="doc-body">
+                @if (openForm()) {
+                <div class="form-toolbar no-print">
+                    <button type="button" class="btn btn-accent btn-sm" (click)="print()">Print this form</button>
+                    <button type="button" class="btn btn-outline btn-sm" (click)="downloadForm(openForm()!)">Download</button>
+                </div>
+                }
+                <article class="glass-card doc-sheet">
+                    <div class="doc-prose" [innerHTML]="bodyHtml()"></div>
+                </article>
+            </main>
+        </div>
+        }
+    </div>
+    }
+</div>

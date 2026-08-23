@@ -57,11 +57,70 @@
         }
     </div>
 
-    <!-- Constitution Quick Reference -->
+    <!--
+        36.9: amendment ratification. Renders only when a version is published; eligibility and the
+        one-vote-per-member rule are enforced by the API, so the outcome is reported from its reply.
+    -->
+    @if (constitution(); as doc) {
+    <div class="amendment-section section container">
+        <div class="glass-card amendment-card">
+            <div class="amendment-head">
+                <div>
+                    <h3>Ratify the Constitution</h3>
+                    <p class="amendment-sub">
+                        Version {{ doc.version }} &mdash; effective {{ doc.effectiveDate | date: 'longDate' }}.
+                        Voting Members may record a position on this version.
+                        <a routerLink="/constitution">Read the full text</a> before you vote.
+                    </p>
+                </div>
+                <span class="version-pill">v{{ doc.version }}</span>
+            </div>
+
+            @if (doc.changeSummary) {
+            <p class="amendment-summary"><strong>What changed:</strong> {{ doc.changeSummary }}</p>
+            }
+
+            @if (voteOutcome() === 'recorded') {
+            <p class="vote-result ok">{{ voteMessage() }}</p>
+            } @else {
+            <div class="form-group">
+                <label for="voteComments">Remarks <span class="optional">(optional)</span></label>
+                <textarea id="voteComments" rows="3" maxlength="1000" [ngModel]="voteComments()"
+                    (ngModelChange)="voteComments.set($event)"
+                    placeholder="Any observation you would like recorded with your vote"></textarea>
+            </div>
+
+            <div class="vote-actions">
+                <button type="button" class="btn btn-accent" (click)="castVote(true)"
+                    [disabled]="pendingChoice() !== null">
+                    {{ pendingChoice() === true ? 'Recording…' : 'Vote in favour' }}
+                </button>
+                <button type="button" class="btn btn-outline" (click)="castVote(false)"
+                    [disabled]="pendingChoice() !== null">
+                    {{ pendingChoice() === false ? 'Recording…' : 'Vote against' }}
+                </button>
+            </div>
+
+            @if (voteOutcome() === 'rejected') {
+            <p class="vote-result error">{{ voteMessage() }}</p>
+            }
+            }
+        </div>
+    </div>
+    }
+
+    <!--
+        Governance pillars. This is a summary of the principles, NOT the constitution — the
+        full text lives on the public /constitution page, linked below.
+    -->
     <div class="constitution-reference section container">
         <div class="section-header">
             <h2>Governance Pillars</h2>
             <div class="underline"></div>
+            <p class="section-links">
+                Read the <a routerLink="/constitution">full constitution</a> or the
+                <a routerLink="/elections">election rules and forms</a>.
+            </p>
         </div>
         <div class="pillars-grid">
             <div class="glass-card pillar-card">

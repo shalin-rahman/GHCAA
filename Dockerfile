@@ -8,6 +8,11 @@ WORKDIR /web
 COPY ["GHCAA.Web/package.json", "GHCAA.Web/package-lock.json", "./"]
 RUN npm ci
 COPY GHCAA.Web/ ./
+# Governance documents live in docs/ (the source of truth) and are copied into
+# public/assets/elections/ for the public /elections page. They are committed too, but
+# regenerating here means a docs/ edit can never ship stale — see TODO 36.4.
+COPY docs/Elections/ ../docs/Elections/
+RUN npm run sync:docs
 RUN npx ng build --configuration preprod
 # @angular/build:application emits the browser bundle under dist/GHCAA.Web/browser
 

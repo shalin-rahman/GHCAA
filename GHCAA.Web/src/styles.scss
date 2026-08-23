@@ -2670,3 +2670,123 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     display: none !important;
   }
 }
+/* ==========================================================================
+   PUBLIC DOCUMENT PAGES — shared shell for /constitution and /elections
+   --------------------------------------------------------------------------
+   Added centrally rather than per-component. `about.scss` and `contact.scss`
+   each already carry a private copy of a public hero that shadows the ADMIN
+   `.page-header` defined above (which is a flex row, not a hero) — a third and
+   fourth copy would have cemented that duplication. New public document pages
+   use `.doc-hero` instead; it never collides with the admin header.
+   ========================================================================== */
+
+.doc-hero {
+  position: relative;
+  padding: clamp(3rem, 9vh, 6rem) 0;
+  text-align: center;
+  color: var(--text-on-dark);
+  background: var(--dark-gradient);
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(var(--accent-color-rgb), 0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  h1 {
+    font-size: clamp(2.25rem, 6vw, 4rem);
+    font-weight: 900;
+    letter-spacing: -2px;
+    margin: 0 0 1rem;
+    color: var(--text-on-dark);
+  }
+
+  p {
+    max-width: 62ch;
+    margin: 0 auto;
+    color: var(--text-on-dark);
+    opacity: 0.82;
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+}
+
+.doc-badge {
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  padding: 0.4rem 1.1rem;
+  border: 1px solid rgba(var(--accent-color-rgb), 0.5);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--accent-gold-bright);
+}
+
+/* Rendered document body — the output of markdown.util.ts and of the constitution
+   article parser both land here, so typography is defined once for both. */
+.doc-prose {
+  color: var(--text-main);
+  line-height: 1.85;
+
+  h1, h2, h3, h4 {
+    color: var(--text-strong);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin: 2rem 0 0.85rem;
+    scroll-margin-top: 6rem;
+  }
+
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.4rem; }
+  h3 { font-size: 1.15rem; }
+  h4 { font-size: 1rem; }
+
+  p { margin: 0 0 1rem; }
+
+  ul, ol {
+    margin: 0 0 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  li { margin-bottom: 0.5rem; }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--hairline);
+    margin: 2rem 0;
+  }
+
+  blockquote {
+    margin: 1.25rem 0;
+    padding: 0.85rem 1.25rem;
+    border-left: 3px solid var(--accent-color);
+    background: var(--surface-subtle);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: var(--text-muted);
+  }
+
+  code {
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-subtle);
+    font-size: 0.9em;
+  }
+
+  /* Fill-in-the-blank rule from the forms handbook (`_____` in the source). */
+  .md-blank {
+    display: inline-block;
+    min-width: 12rem;
+    border-bottom: 1px solid var(--text-dim);
+    vertical-align: baseline;
+  }
+}

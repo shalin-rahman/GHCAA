@@ -32,6 +32,16 @@ export const routes: Routes = [
                 loadComponent: () => import('./public/contact/contact').then(m => m.Contact)
             },
             {
+                // Public governance surface. Both pages are anonymous by design — the
+                // constitution and the election rules must be readable without a login.
+                path: 'constitution',
+                loadComponent: () => import('./public/constitution/constitution').then(m => m.ConstitutionPage)
+            },
+            {
+                path: 'elections',
+                loadComponent: () => import('./public/elections/elections').then(m => m.ElectionsPage)
+            },
+            {
                 path: 'gallery',
                 loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery),
                 canActivate: [featureGuard('enableGallery')]

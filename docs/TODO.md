@@ -835,3 +835,61 @@
 > Verified: `npx vitest run` **61 files / 258 tests passed** (baseline was 60/244 — +1 file, +14
 > tests) and `npx ng build` succeeded with only the pre-existing `canvg`/`jspdf` CommonJS warnings.
 > `docs/project_map.md:986` is now accurate — the union it documents really does carry `'Guest'`.
+
+## AREA 36: PUBLIC CONSTITUTION & ELECTION DOCUMENT HUB (raised by "did we show full constitution in public portal and Election processes, forms view and download", 2026-08-23)
+
+> Origin: a direct check of whether the public site surfaces (a) the full constitution and (b) the
+> election processes/forms with view + download. **It surfaces neither.** Both are
+> backend/content-complete and frontend-missing, which is why nothing in Areas 1-35 flagged them —
+> `9.1 Digital Constitution: Versioned legal repository` and `18.4 Backend: Seed Constitution data`
+> are both marked `[DONE]`, and they genuinely are, on the server. The UI step was never scoped.
+>
+> **Evidence, constitution.** The only public surface is a raw static PDF link:
+> `public/landing/sections/banner/banner.html:15` → `href="/assets/GHCAA constitution 4.0.pdf"`
+> (`target="_blank"`; asset present, 2,947,720 bytes). No in-app page, no article navigation,
+> no version history, no dedicated route — `app.routes.ts` public children are landing, login,
+> register, reset-password, about, contact, gallery, magazine, directory, events, news, jobs,
+> payment, healtz. Meanwhile `GovernanceController` exposes
+> `GET /api/governance/constitution` (L46) and `GET /api/governance/constitution/history` (L54),
+> **both already `[AllowAnonymous]`**, and `POST /api/governance/constitution/{id}/vote` (L62).
+> A grep for `governance/constitution` across `GHCAA.Web/src` returns **zero callers** — the
+> versioned repository, the `Constitution` entity (`Version`/`Content`/`PdfUrl`/`EffectiveDate`/
+> `SupersededDate`/`IsActive`/`ChangeSummary`) and the `AmendmentVote` table are all dead to the UI.
+> `docs/SRS.md:99` specifies "**3.6.2 Constitution Hub**: Version-controlled governing documents
+> with member voting capabilities", so this is an untracked gap against a stated requirement.
+>
+> **Evidence, elections.** Nothing in either app. `grep -i election` across `GHCAA.Web/src`
+> returns only false positives (`toggleSelection`, `no-selection`, `selection-indicator`) plus one
+> prose mention at `member/profile/profile.html:506`. The seven documents committed in `9dc4fb2`
+> (~53 KB) live only as repo markdown under `docs/Elections/` — not copied to `public/assets/`,
+> not seeded, not routed, not referenced by any template, and **not mentioned anywhere in this
+> file** (`grep -i election docs/TODO.md` → nothing before this Area).
+>
+> **Delivery decision (2026-08-23):** render the election docs from markdown **without adding a
+> markdown dependency**, per `feedback_keep_lightweight`. A feature survey of all seven files shows
+> the syntax in use is a small fixed subset — `#`/`##` headings, ordered and unordered lists, GFM
+> tables, `---` rules, `**bold**`, and blank-line paragraphs. These are repo-authored static assets,
+> not user input, so a ~120-line in-repo renderer covering exactly that subset is the right trade
+> against pulling in `marked`/`ngx-markdown`. Seeding them into `SiteContent` was rejected:
+> `EnsureCreated()` means seed changes never reach preprod (see `gotcha_ensurecreated_no_op_existing_db`
+> and 34.D10), so admin-editable storage would silently not deploy.
+
+36.1 [DONE] Public **`/constitution`** route + standalone component consuming the two already-anonymous endpoints. Render `version`, `effectiveDate`, `changeSummary` and the full `content` body with article-level navigation (a sticky in-page ToC built from the `Article N:` headings), plus a **Download PDF** action resolving `pdfUrl` first and falling back to `/assets/GHCAA constitution 4.0.pdf`. Must handle the `404` that `GetCurrentConstitution` returns when no active row exists — fall back to the PDF-only view rather than rendering an error page, because the PDF is the authoritative document today. **(Shipped as `public/constitution/` (component + template + scss), route registered under `PublicLayout`, service `core/services/constitution.service.ts`, endpoints added to `API_ENDPOINTS.GOVERNANCE`. 404 suppressed via `X-Skip-Error-Notify` and handled by the `pdfOnly()` computed, which renders the PDF-only card.)**
+
+36.2 [DONE] Version-history panel on the same page, from `GET /api/governance/constitution/history` — one collapsible row per version showing `version`, `effectiveDate`, `supersededDate`, `changeSummary`, and an inline diff-free full-text view. This is the "version-controlled" half of SRS §3.6.2 and is the reason the history endpoint exists. **(Shipped — collapsible `.history-item` rows on the same page, active version filtered out of `pastVersions()`.)**
+
+36.3 [DONE] **The seeded constitution is a placeholder, not the constitution.** `GHCAA.Infrastructure/Data/Seed/constitution.json` holds a single row (Id 1, Version `1.2.0`) whose `Content` is **828 characters** — five stub articles (Name and Office, Objectives, Membership, Executive Committee, Meetings) — and whose `PdfUrl` is **absent/null**. The real document is the 2.9 MB `GHCAA constitution 4.0.pdf`. Two consequences: the page from 36.1 will show a five-paragraph summary while the banner PDF shows the real thing (a visible contradiction), and the seeded `Version` (`1.2.0`) disagrees with the PDF's own `4.0`. Extract the PDF text into `Content`, set `PdfUrl`, and correct `Version` to `4.0`. **Blocked on the same `EnsureCreated()` problem as 34.D10** — re-seeding does not reach an existing preprod DB, so this needs a data-migration path, not just a JSON edit. **(Shipped — `Seed/constitution.json` rewritten with the full ratified v4.0 text (26,175 chars, preamble + Articles I–XIII), `Version` `4.0`, `PdfUrl` `/assets/GHCAA constitution 4.0.pdf`, and a real `ChangeSummary`. Content is authored as plain `Article <Roman>: <Title>` headings with blank-line paragraphs because `parseArticles` escapes text and does not run markdown. Data-migration path: new `GHCAA.Infrastructure/Data/ConstitutionSeeder.SyncAsync`, called from `Program.cs` on every boot behind the same fault-tolerant `CanConnect`/`LogWarning` guard as the OrgConfig boot-seed. It is idempotent, reuses `ApplicationDbContext.LoadSeed<T>` (widened to `internal static`), inserts versions it cannot find, refreshes a stored version in place when the seed text changes, supersedes (never deletes) real prior versions so `AmendmentVote` rows survive, and deletes only the vote-free `1.2.0` placeholder so the public version history never publishes an unratified document.)**
+
+36.4 [DONE] Publish the seven `docs/Elections/*.md` files as public assets and add a public **`/elections`** page listing them with, per document, a **View** action (in-app render) and a **Download** action (the raw `.md`). Copy rather than move — `docs/` stays the source of truth, and the copy step should be a build/CI step or an explicitly documented manual step so the two never silently drift. **(Shipped — `GHCAA.Web/scripts/sync-election-docs.mjs` copies `docs/Elections/*.md` into `public/assets/elections/` (wiping the target first so a renamed doc cannot linger). Wired into `npm start` and `npm run build` via `sync:docs`, and into the `Dockerfile` web stage (which bypasses `npm run build`, so it needed its own `COPY docs/Elections/` + `RUN npm run sync:docs`). Public `/elections` page lists all seven with View + Download.)**
+
+36.5 [DONE] In-repo markdown renderer (`core/utils/markdown.util.ts`) covering only the surveyed subset: `#`–`####`, `-` and `1.` lists, GFM pipe tables, `---`, `**bold**`, paragraphs. Escape HTML on the way in and never pass raw HTML through, so the renderer cannot become an injection surface if a document is ever sourced from anywhere but the repo. No new npm dependency. **(Shipped — `core/utils/markdown.util.ts`, no new dependency. Escapes every source character before emitting markup. Tables reuse the central `.table-wrap`/`.data-table` classes.)**
+
+36.6 [DONE] Forms view for `05-Election-Forms-and-Templates.md` — the file defines discrete forms (`FORM ER-01 Election Notice`, etc.) separated by `# FORM …` headings. Split on those headings and present each as an individually viewable/printable/downloadable form rather than one 5.9 KB wall, since a blank form is the unit a user actually wants. **(Shipped — `splitForms()` in `public/elections/election-docs.ts` splits the handbook on `# FORM ER-nn` into 18 individually viewable / printable / downloadable forms (download is a Blob built from the section text, since a single form has no file of its own).)**
+
+36.7 [DONE] Rename `docs/Elections/06-Election-Ballot-Seal-and-Poll-Integrety-Certicate.md` → `06-Election-Ballot-Seal-and-Poll-Integrity-Certificate.md`. Two typos ("Integrety", "Certicate") that become a public URL the moment 36.4 lands. Do this **before** 36.4 ships, not after. **(Done — renamed via `git mv`; the only remaining "Integrety/Certicate" match in the repo is this line.)**
+
+36.8 [DONE] Navigation: link `/constitution` and `/elections` from the public layout nav/footer, and cross-link both from the member `/governance` page. Also fix the mislabelled block at `common/governance/governance.html:60` — its comment says "Constitution Quick Reference" but it renders `<h2>Governance Pillars</h2>` with three hardcoded prose cards (Political Neutrality, Life-Long Connection, Transparency). It is not constitution content and the comment has been misdescribing it. **(Shipped — nav link (`Constitution`) in `public-layout.html`, both links in the footer Governance block, cross-links from `common/governance/governance.html`, and the mislabelled comment corrected.)**
+
+36.9 [DONE] Amendment-voting UI for `POST /api/governance/constitution/{id}/vote` — the endpoint reads the `MemberId` claim, enforces one vote per member via the unique `(ConstitutionId, MemberId)` index, and has **no caller**. Member-portal only (it is the one governance endpoint that is *not* `[AllowAnonymous]`). Completes SRS §3.6.2's "with member voting capabilities". **(Shipped — ratification card on the member `/governance` page: `constitution()` / `voteComments()` / `pendingChoice()` / `voteOutcome()` signals in `common/governance/governance.ts`, `castVote(isFor)` calling the existing `ConstitutionService.vote()`, per-button busy state, and a one-shot guard so a recorded vote cannot be resubmitted. Styling appended to `governance.scss` using tokens only. Server-side gap also closed: `GovernanceService.VoteOnConstitutionAsync` had **no membership-tier check**, so Associate/Honorary/Advisory members — explicitly non-voting under Article III Section K — could ratify amendments; it now returns false unless the member is Founding, Executive or General. 3 new specs in `governance.spec.ts`.)**
+
+36.10 [DONE] Per 12.6, nothing in Area 36 is `[DONE]` until `npx vitest run` and `npx ng build` pass. Add unit tests for the markdown renderer (table + nested-list + escaping cases) and for the 36.1 fallback path (404 from the endpoint must still render the PDF action). **(Done for what shipped — `npx vitest run` 64 files / 286 tests green, `npx ng build` green, emitted `styles-*.css` contains `.doc-hero`/`.doc-prose`/`.md-blank` and the seven assets land in `dist/.../assets/elections/`. New specs: `markdown.util.spec.ts`, `constitution.spec.ts`, `election-docs.spec.ts` (25 tests).)**

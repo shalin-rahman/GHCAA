@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -252,6 +252,14 @@ namespace GHCAA.Infrastructure.Services
         {
             var constitution = await _db.Constitutions.FindAsync(new object[] { constitutionId }, cancellationToken);
             if (constitution == null || !constitution.IsActive) return false;
+
+            // Article III Section K: only Founding, Executive and General members are Voting Members.
+            // Associate, Honorary and Advisory members may read and comment but not ratify amendments.
+            var isVotingMember = await _db.Members.AnyAsync(m => m.Id == memberId &&
+                (m.MembershipType == MembershipType.Founding ||
+                 m.MembershipType == MembershipType.Executive ||
+                 m.MembershipType == MembershipType.General), cancellationToken);
+            if (!isVotingMember) return false;
 
             var alreadyVoted = await _db.AmendmentVotes.AnyAsync(v => v.ConstitutionId == constitutionId && v.MemberId == memberId, cancellationToken);
             if (alreadyVoted) return false;
