@@ -46,3 +46,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Gradle project build output (reports/, intermediates/, tmp/). NOT covered by the
+# `/build/` rule above, which is anchored to the Flutter project root — this dir got
+# committed once because of that gap.
+/android/build/
+/android/*/build/
