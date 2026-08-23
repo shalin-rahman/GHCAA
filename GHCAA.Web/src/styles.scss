@@ -1476,50 +1476,58 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   border-radius: var(--radius-md);
   background: var(--surface-color);
   border: 1px solid var(--glass-border);
+}
 
-  table,
-  .data-table,
-  .admin-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+/* Table styling is keyed to the TABLE'S OWN CLASS, never to a wrapper. This
+   block used to be nested inside `.table-wrap, .table-container`, so any table
+   sitting in a `.glass-card`, a bare `.overflow-x-auto`, or a bespoke wrapper
+   rendered completely unstyled (browser-native, no padding, no full width) —
+   admin/site-content and admin/contact-messages both hit exactly that.
+   Do NOT re-nest this block under a container selector. */
+.data-table,
+.admin-table,
+.history-table,
+.table-wrap > table,
+.table-container > table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 
-    thead th {
-      background: rgba(var(--primary-rgb), 0.03);
-      padding: 1.25rem 1.5rem;
-      text-align: left;
-      font-size: 11px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 2.5px;
-      color: var(--text-muted);
-      border-bottom: 2px solid rgba(var(--primary-rgb), 0.05);
-      white-space: nowrap;
-    }
+  thead th {
+    background: rgba(var(--primary-rgb), 0.03);
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: var(--text-muted);
+    border-bottom: 2px solid rgba(var(--primary-rgb), 0.05);
+    white-space: nowrap;
+  }
 
-    tbody td {
-      padding: 1.25rem 1.5rem;
-      vertical-align: middle;
-      border-bottom: 1px solid var(--glass-border);
-      color: var(--text-main);
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
+  tbody td {
+    padding: 1.25rem 1.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
 
-    tr {
-      transition: all 0.3s ease;
+  tr {
+    transition: all 0.3s ease;
 
-      &:hover:not(:first-child) {
-        background: rgba(var(--accent-color-rgb), 0.04);
-        transform: scale(1.002);
-      }
+    &:hover:not(:first-child) {
+      background: rgba(var(--accent-color-rgb), 0.04);
+      transform: scale(1.002);
     }
   }
 
   // When a table has no rows, its @empty branch renders a single full-width
-  // cell (<td colspan=…>) holding the empty-state. Hide the column headers in
+  // cell (<td colspan=...>) holding the empty-state. Hide the column headers in
   // that case so the empty columns don't render a broken-looking header strip.
-  // Central: applies to every admin table (member-approval, articles, etc.).
+  // Keyed to the table (not the wrapper) for the same reason as above.
   &:has(tbody td[colspan]) thead {
     display: none;
   }
@@ -2269,7 +2277,9 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   }
 
   /* Compact data tables */
-  .data-table {
+  .data-table,
+  .admin-table,
+  .history-table {
     font-size: 0.75rem;
 
     th,
