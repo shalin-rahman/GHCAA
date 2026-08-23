@@ -1,6 +1,21 @@
+/*
+ * The banner photograph of the original Govt. Haraganga College building.
+ *
+ * Two layers on purpose: the real photograph first, the older watercolour concept art second.
+ * The browser paints the first layer that actually loads, so if the photograph is ever missing
+ * from the deployed assets the banner degrades to the previous artwork instead of a black box.
+ * To change the banner, replace the file at this path — nothing else needs editing.
+ */
+$campus-photo: url('/assets/images/campus/ghc-old-building.jpg');
+$campus-fallback: url('/assets/images/concept/artistic_campus_watercolor_1773859737909.png');
+
 .page-header {
     height: clamp(280px, 48vh, 520px);
-    background: #000;
+    background-color: #000;
+    background-image: $campus-photo, $campus-fallback;
+    background-size: cover, cover;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
     position: relative;
     display: flex;
     align-items: center;
@@ -16,6 +31,14 @@
         background: radial-gradient(circle at center, rgba(197, 160, 89, 0.08) 0%, transparent 70%);
         z-index: 1;
     }
+}
+
+/* Legibility scrim over the photograph; the gold headline needs a dark ground to read against. */
+.header-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.7);
 }
 
 .header-content {
