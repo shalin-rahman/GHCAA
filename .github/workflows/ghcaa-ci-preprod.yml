@@ -151,11 +151,18 @@ jobs:
           mkdir -p ./publish/api/wwwroot
           cp -r GHCAA.Web/dist/GHCAA.Web/browser/* ./publish/api/wwwroot/
 
+      # Single tarball, not 5500 loose files, and a short retention window.
+      # Render deploys via deploy hook — nothing downloads this artifact.
+      - name: Compress Integrated Build
+        run: tar -czf ghcaa-preprod-deployment.tar.gz -C ./publish/api .
+
       - name: Archive Integrated Build
         uses: actions/upload-artifact@v4
         with:
           name: ghcaa-preprod-deployment
-          path: ./publish/api
+          path: ghcaa-preprod-deployment.tar.gz
+          retention-days: 5
+          compression-level: 0
 
   deploy-preprod:
     name: Deploy to Preprod (Render)

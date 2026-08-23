@@ -45,8 +45,15 @@ jobs:
         mkdir -p ./publish/api/wwwroot
         cp -r GHCAA.Web/dist/GHCAA.Web/browser/* ./publish/api/wwwroot/
 
+    # Single tarball, not 5500 loose files, and a short retention window.
+    # Nothing downloads this artifact — it exists only for manual inspection.
+    - name: Compress Deployment Package
+      run: tar -czf ghcaa-deployment-package.tar.gz -C ./publish/api .
+
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ghcaa-deployment-package
-        path: ./publish/api
+        path: ghcaa-deployment-package.tar.gz
+        retention-days: 5
+        compression-level: 0
