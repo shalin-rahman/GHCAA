@@ -893,3 +893,187 @@
 36.9 [DONE] Amendment-voting UI for `POST /api/governance/constitution/{id}/vote` — the endpoint reads the `MemberId` claim, enforces one vote per member via the unique `(ConstitutionId, MemberId)` index, and has **no caller**. Member-portal only (it is the one governance endpoint that is *not* `[AllowAnonymous]`). Completes SRS §3.6.2's "with member voting capabilities". **(Shipped — ratification card on the member `/governance` page: `constitution()` / `voteComments()` / `pendingChoice()` / `voteOutcome()` signals in `common/governance/governance.ts`, `castVote(isFor)` calling the existing `ConstitutionService.vote()`, per-button busy state, and a one-shot guard so a recorded vote cannot be resubmitted. Styling appended to `governance.scss` using tokens only. Server-side gap also closed: `GovernanceService.VoteOnConstitutionAsync` had **no membership-tier check**, so Associate/Honorary/Advisory members — explicitly non-voting under Article III Section K — could ratify amendments; it now returns false unless the member is Founding, Executive or General. 3 new specs in `governance.spec.ts`.)**
 
 36.10 [DONE] Per 12.6, nothing in Area 36 is `[DONE]` until `npx vitest run` and `npx ng build` pass. Add unit tests for the markdown renderer (table + nested-list + escaping cases) and for the 36.1 fallback path (404 from the endpoint must still render the PDF action). **(Done for what shipped — `npx vitest run` 64 files / 286 tests green, `npx ng build` green, emitted `styles-*.css` contains `.doc-hero`/`.doc-prose`/`.md-blank` and the seven assets land in `dist/.../assets/elections/`. New specs: `markdown.util.spec.ts`, `constitution.spec.ts`, `election-docs.spec.ts` (25 tests).)**
+
+## AREA 37: ALUMNI-ASSOCIATION DEPTH — ELECTION ENGINE, SCHOLARSHIPS, PHILANTHROPY, MEMORY (raised by "what outstanding/extra ordinary matters can be incorporated on this project", 2026-08-23)
+
+> Origin: a deliberate look at what a mature college alumni association does that this codebase
+> does not yet model. Area 36 published the *documents* of governance and the *categories* of
+> money; Area 37 builds the *machinery* behind them. Every item below is scoped against what the
+> repository actually contains today, and — per `feedback_keep_lightweight` — **none of the ten
+> requires a new npm or NuGet dependency.**
+>
+> **Evidence, money.** `GHCAA.Domain/Enums.cs` declares
+> `FinancialCategory { MembershipFee, RegistrationFee, Donation, Event, Maintenance, Salary,
+> Utilities, ReunionFee, Sponsorship, Grant, Refund, Other }`. Four of those values —
+> `Donation`, `ReunionFee`, `Sponsorship`, `Grant` — **exist only as ledger labels an admin can
+> pick when hand-entering a `FinancialRecord`.** There is no campaign, no donor, no pledge, no
+> scholarship, no reunion and no grant application anywhere in the 45 files under
+> `GHCAA.Domain/Models/`. The ledger can *record* philanthropy; the product cannot *conduct* it.
+>
+> **Evidence, elections.** Area 36 shipped seven election documents as read-only markdown and 18
+> blank ER-forms split out of the handbook. The only election-adjacent tables are `ECPeriod`
+> (`Title`/`StartDate`/`EndDate`/`IsActive`) and `ECMember` (`MemberId`/`ECPeriodId`/`Position`/
+> `StartDate`/`EndDate`/`ChangeReason`) — i.e. **the result of an election, recorded by hand after
+> the fact.** There is no `Nomination`, `Candidate`, `Ballot`, `VoterRoll` or `ScrutinyDecision`
+> model. `Poll`/`PollOption`/`PollVote` are a general opinion-poll feature with no eligibility
+> roll, no secrecy separation, no nomination phase and no returning-officer role; they are not a
+> ballot and must not be overloaded into one.
+>
+> **Evidence, people.** `Member` has no batch/session/graduation field at all — cohort identity
+> lives on `AcademicRecord` (`AdmissionYear`, `PassingYear`, `IsGHC`, `Degree`, `Subject`), which
+> is where every batch query in this Area must read from. There is no obituary, chapter, or
+> oral-history model, and no i18n: `GHCAA.Web/package.json` carries neither `@angular/localize`
+> nor `ngx-translate`, and every string in the app is hardcoded English in a template.
+>
+> **Capabilities already paid for (use these; do not add libraries).**
+> `GHCAA.Infrastructure` already references **QuestPDF 2026.2.3** and **QRCoder 1.8.0**, both used
+> by `IDCardService` (`QuestPDF.Settings.License = LicenseType.Community` is set in its ctor, and
+> `GetQrDataUri` is the working QR pattern). Server-side PDF generation and QR encoding are
+> therefore free for 37.1 and 37.8. `ClosedXML` is present for spreadsheet export.
+> `GHCAA.Web` already has `jspdf` + `jspdf-autotable` for client-side documents and `xlsx` for
+> sheets. `INotificationService.CreateNotificationAsync` / `BroadcastNotificationAsync` is the
+> in-app messaging channel; `ICommunicationService` is the email channel.
+>
+> **DI:** `GHCAA.Infrastructure/DependencyInjection.cs` reflects over every class whose namespace
+> contains `"Services"` and registers it scoped against each `GHCAA.Application.Interfaces`
+> interface it implements. **A new `GHCAA.Infrastructure/Services/XService.cs` implementing
+> `IXService` needs no registration line.** Do not add one.
+>
+> **Conventions every item must follow.** Domain models: `int Id`, `= null!` on required strings,
+> nullable navigation properties (`public Member? Member { get; set; }`),
+> `ICollection<T> X { get; set; } = new List<T>();`, `DateTime CreatedAt { get; set; } = DateTime.UtcNow;`.
+> Enums go **inside** `public class Enums` in `namespace GHCAA.Domain` (consumers write
+> `using static GHCAA.Domain.Enums;`). Service methods end `CancellationToken cancellationToken = default`,
+> return `Task<bool>` for mutations and `Task<XDto?>` / `Task<IEnumerable<XDto>>` for reads.
+> Controllers are `[ApiController]` + `[Route("api/<area>")]` + `[Authorize]` at class level with
+> `[AllowAnonymous]` applied **per action**. Angular routes are lazy
+> (`loadComponent: () => import('./public/x/x').then(m => m.XPage)`) and feature-gated with
+> `canActivate: [featureGuard('<flag>')]`; each new flag is declared in
+> `core/models/org-config.model.ts` (`FeatureToggles`), defaulted in `core/services/org-config.service.ts`,
+> and referenced by any nav entry in `core/services/nav.service.ts` (`feature: '<flag>'`).
+> Endpoints go in the matching block of `core/constants/app.constants.ts` (`API_ENDPOINTS`),
+> function-valued when they take a route parameter. Styling: tokens only, every control inside
+> `.form-group`, no inline `style=""` — see the `ghcaa-design` skill.
+>
+> **Seed/deploy constraint — applies to all ten.** Runtime uses `Database.EnsureCreated()`, which
+> is a **no-op on a non-empty database**, and migrations are not run at startup
+> (`gotcha_ensurecreated_no_op_existing_db`). A new table therefore does **not** appear on preprod
+> just because the model compiles, and `HasData` seed edits never reach it. Area 36 solved this
+> once with `GHCAA.Infrastructure/Data/ConstitutionSeeder.SyncAsync(context, logger, ct)` — an
+> idempotent boot-time syncer called from `Program.cs` behind a `CanConnectAsync()`/`LogWarning`
+> guard. **Copying that pattern per feature is the fallback, not the plan.** 37.0 makes the real
+> migration path a prerequisite, because four more bespoke syncers is a smell.
+>
+> **Recommended sequence: 37.0 → 37.3 → 37.2 → 37.1**, with 37.5 taken opportunistically (it is
+> the smallest item in the Area and needs no new UI shell). 37.7–37.10 are independent and may be
+> scheduled at any point after 37.0.
+
+37.0 [TODO] **Prerequisite: a real migration path.** Every remaining item in this Area adds tables, and none of them can reach preprod under `EnsureCreated()`. Replace the startup call with `await context.Database.MigrateAsync()` guarded by a config flag (`Database:ApplyMigrationsOnStartup`, default `true` for Development/Preprod), and add the baseline migration that reconciles the existing preprod schema so the first `MigrateAsync` on a populated database is a no-op rather than a failed `CREATE TABLE`. Keep `ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))` — the pending-model warning here is non-deterministic seed churn, not schema drift (`gotcha_pending_model_changes_seed`). `ConstitutionSeeder` stays as-is: it syncs *content*, which is a different job from schema. Document the new boot sequence in `docs/architecture_data_flow.md` and `docs/project_map.md`. **Acceptance: a schema change committed on `preprod` is visible on the Render deployment without a manual database step.**
+
+37.1 [TODO] **Election engine** — turn the Area 36 documents into a running process. This is the largest item; implement it in the five phases below, each independently shippable behind the flag. New enums in `GHCAA.Domain/Enums.cs`: `ElectionPhase { Announced, Nomination, Scrutiny, Withdrawal, CandidateList, Campaign, Polling, Counting, Declared, Archived }`, `NominationStatus { Submitted, UnderScrutiny, Accepted, Rejected, Withdrawn }`, `ElectionRole { ReturningOfficer, AssistantReturningOfficer, PollingOfficer, Scrutineer }`.
+  - **37.1a Election + roll.** `Election` (`Id`, `Title`, `ECPeriodId`, `Phase`, `AnnouncedOn`, `NominationOpensOn`, `NominationClosesOn`, `ScrutinyOn`, `WithdrawalClosesOn`, `PollingOpensOn`, `PollingClosesOn`, `DeclaredOn?`, `IsActive`, `CreatedBy`), `ElectionSeat` (`Id`, `ElectionId`, `ECPosition Position`, `SeatCount`), `ElectionOfficer` (`Id`, `ElectionId`, `MemberId`, `ElectionRole Role`), and `VoterRoll` (`Id`, `ElectionId`, `MemberId`, `IsEligible`, `IneligibilityReason?`, `FrozenAt`, `VotedAt?`). The roll is **frozen by snapshot**, not computed at poll time: eligibility is the same Article III Section K rule already enforced in `GovernanceService.VoteOnConstitutionAsync` (`MembershipType` of `Founding`, `Executive` or `General`), plus dues-current per `MembershipDue`. Freezing is what makes a disputed result auditable.
+  - **37.1b Nomination.** `Nomination` (`Id`, `ElectionId`, `ElectionSeatId`, `CandidateMemberId`, `ProposerMemberId`, `SeconderMemberId`, `Statement`, `PhotoPath?`, `Status`, `SubmittedAt`, `WithdrawnAt?`), `ScrutinyDecision` (`Id`, `NominationId`, `OfficerMemberId`, `Accepted`, `Reason`, `DecidedAt`). Proposer and seconder must both be on the frozen roll and must not be the candidate; enforce in the service, not only the UI.
+  - **37.1c Ballot and poll.** `Ballot` (`Id`, `ElectionId`, `ElectionSeatId`, `SerialNumber`, `IssuedAt`, `IsSpoiled`) and `BallotVote` (`Id`, `BallotId`, `NominationId`, `CastAt`) kept in **separate tables with no member foreign key on the vote side** — the roll records *that* a member voted (`VoterRoll.VotedAt`), the ballot records *what* was voted, and nothing joins the two. That separation is the secret ballot, and it is the one design decision here that cannot be retrofitted. A unique index on `(ElectionId, MemberId)` in the roll prevents double voting.
+  - **37.1d Counting and declaration.** `ElectionResult` (`Id`, `ElectionId`, `ElectionSeatId`, `NominationId`, `VoteCount`, `IsElected`, `IsTie`). On declaration, write the winners straight into `ECMember` rows against the election's `ECPeriodId` — this is the payoff: the committee roster stops being hand-typed.
+  - **37.1e ER-forms as generated PDFs.** The 18 blank forms from 36.6 become filled documents. Server-side with **QuestPDF**, following `IDCardService.GenerateIDCardPdfAsync` for structure and its `GetQrDataUri` helper for the verification QR. Minimum set: ER-01 Election Notice, ER-03 Nomination Paper, ER-05 Final Candidate List, ER-08 Ballot Paper, ER-12 Result Sheet. Each carries the election title, the returning officer's name, the generation timestamp and a QR pointing at the 37.8 verification URL.
+  - **Service/API.** `IElectionService` in `GHCAA.Application/Interfaces` + `GHCAA.Infrastructure/Services/ElectionService.cs` (no DI registration needed). `ElectionsController` at `api/elections`, `[Authorize]` at class level; `GET api/elections/public` and `GET api/elections/{id}/candidates` are `[AllowAnonymous]` (the candidate list is a published document); nomination, scrutiny and casting are member- or officer-scoped. Casting must reject any phase other than `Polling` server-side.
+  - **UI.** Flag `enableElections`. The existing public `/elections` page gains a live banner when an election is not `Archived`. Member `portal/elections` — nominate, withdraw, view candidates, cast. Admin `admin/elections` — create, appoint officers, freeze roll, scrutinise, advance phase, count, declare, download ER PDFs. New `API_ENDPOINTS.ELECTIONS` block.
+  - **Tests.** NUnit: roll freeze excludes Associate/Honorary/Advisory; proposer ≠ candidate; double vote rejected; cast outside `Polling` rejected; declaration writes `ECMember`; **a ballot row cannot be joined back to a member**. Vitest: phase-driven UI state, closed-nomination guard.
+
+37.2 [TODO] **Scholarship & student-aid programme** — fund → open call → application → blind review → award → disbursement. New enums: `ScholarshipApplicationStatus { Draft, Submitted, UnderReview, Shortlisted, Awarded, Rejected, Withdrawn }`, `DisbursementStatus { Pending, Approved, Paid, Cancelled }`.
+  - **Models.** `ScholarshipFund` (`Id`, `Name`, `Description`, `NamedAfter?` — the endowment-in-memory case that links to 37.5, `TargetAmount`, `IsActive`, `CreatedAt`); `ScholarshipCall` (`Id`, `ScholarshipFundId`, `AcademicYear`, `OpensOn`, `ClosesOn`, `SlotCount`, `AwardAmount`, `EligibilityCriteria`, `IsActive`); `ScholarshipApplication` (`Id`, `ScholarshipCallId`, `ApplicantName`, `ApplicantEmail`, `ApplicantPhone`, `InstitutionName`, `Class`, `GuardianName`, `HouseholdIncome`, `NeedStatement`, `MeritStatement`, `Status`, `SubmittedAt`, `ReferenceCode`); `ScholarshipDocument` (`Id`, `ScholarshipApplicationId`, `FileUploadId`, `DocumentType`) reusing the existing `FileUpload` + `IFileValidationService` path — **no new upload plumbing**; `ScholarshipReview` (`Id`, `ScholarshipApplicationId`, `ReviewerMemberId`, `NeedScore`, `MeritScore`, `Comments`, `ReviewedAt`); `ScholarshipAward` (`Id`, `ScholarshipApplicationId`, `Amount`, `AwardedOn`, `DisbursementStatus`, `FinancialRecordId?`).
+  - **Blind review is a query rule, not a UI rule.** `GetApplicationForReviewAsync` must project a DTO that omits `ApplicantName`, `ApplicantEmail`, `ApplicantPhone` and `GuardianName`, exposing only `ReferenceCode`. Reviewers must not be able to obtain identity from the API at all; hiding it in the template is not acceptance.
+  - **Applicants are not members.** The public application form is `[AllowAnonymous]` and identified by `ReferenceCode` + email; **do not create `Member`/`User` rows for schoolchildren.** Status lookup is `GET api/scholarships/status/{referenceCode}`, also anonymous, rate-limited by the existing `LoginRateLimitMiddleware` pattern.
+  - **Ledger tie-in.** Marking an award `Paid` writes a `FinancialRecord` with `RecordType = Expense`, `FinancialCategory = Grant`, `Reference = ReferenceCode`, and stores the new record's `Id` back on `ScholarshipAward.FinancialRecordId`. This is what makes the impact report in 37.10 derivable rather than typed.
+  - **Service/API/UI.** `IScholarshipService` + `ScholarshipService`; `ScholarshipsController` at `api/scholarships`. Flag `enableScholarships`. Public `/scholarships` (call listing + apply + status check), member `portal/scholarships` (reviewer queue for panel members), admin `admin/scholarships` (funds, calls, shortlist, award, disburse). New `API_ENDPOINTS.SCHOLARSHIPS` block.
+  - **Tests.** NUnit: review DTO carries no identifying field; application rejected outside the `OpensOn`–`ClosesOn` window; award → paid writes exactly one `Grant` `FinancialRecord` and is idempotent on repeat. Vitest: apply-form validation, status lookup with an unknown code.
+
+37.3 [TODO] **Fundraising campaigns + donor honour roll** — the shortest path from "the ledger has a `Donation` category" to "the association can actually raise money". New enum: `PledgeStatus { Pledged, PartiallyPaid, Paid, Lapsed, Cancelled }`.
+  - **Models.** `Campaign` (`Id`, `Title`, `Slug`, `Story`, `CoverImagePath?`, `TargetAmount`, `StartsOn`, `EndsOn?`, `IsActive`, `IsArchived`, `CreatedBy`); `CampaignPledge` (`Id`, `CampaignId`, `MemberId?` — nullable so non-alumni can give, `DonorName`, `DonorEmail?`, `DonorPhone?`, `Amount`, `AmountReceived`, `Status`, `IsAnonymous`, `Message?`, `PledgedAt`, `FinancialRecordId?`); `DonorRecognitionTier` (`Id`, `Name`, `MinimumAmount`, `Description`) — admin-configurable so tier names are not compiled in.
+  - **No payment gateway.** The repo operates under a **no-gateway-keys rule** (`session_area29_shipblockers_payments`): a pledge is recorded, the existing display-only wallet/bank instructions are shown, and an admin confirms receipt. Confirming receipt writes a `FinancialRecord` (`RecordType = Income`, `FinancialCategory = Donation`) and back-links `FinancialRecordId`, mirroring 37.2 exactly. **Do not introduce a gateway integration here.**
+  - **Honour roll.** Public, derived, never hand-maintained: group confirmed pledges by `DonorRecognitionTier`, render `IsAnonymous` rows as "Anonymous", and show a live progress bar of `SUM(AmountReceived) / TargetAmount`. Anonymity must be enforced in the projection, not the template.
+  - **Service/API/UI.** `ICampaignService` + `CampaignService`; `CampaignsController` at `api/campaigns` with `GET api/campaigns/public`, `GET api/campaigns/{slug}` and `GET api/campaigns/{slug}/honour-roll` as `[AllowAnonymous]`; pledging allowed anonymously. Flag `enableFundraising`. Public `/campaigns` + `/campaigns/:slug`, member `portal/giving` (my pledges, my giving history), admin `admin/campaigns` (create, confirm receipts, tiers). New `API_ENDPOINTS.CAMPAIGNS` block.
+  - **Tests.** NUnit: an anonymous pledge never leaks `DonorName` through the honour-roll projection; confirming receipt is idempotent and writes one `Donation` record; progress excludes unconfirmed pledges. Vitest: progress-bar arithmetic, anonymous-checkbox behaviour.
+
+37.4 [TODO] **Batch cohorts and reunions as first-class objects.** Today a batch exists only as `AcademicRecord.PassingYear` — there is no cohort page, no cohort representative and no reunion.
+  - **Models.** `BatchCohort` (`Id`, `PassingYear`, `Title`, `Story?`, `CoverImagePath?`, `RepresentativeMemberId?`, `IsActive`); `Reunion` (`Id`, `BatchCohortId?` — null means an all-alumni reunion, `AlumniEventId`, `Theme`, `SouvenirUrl?`) built **on top of** the existing `AlumniEvent` + `EventRegistration` + `EventBudget` stack rather than beside it — a reunion is an event with cohort identity, and duplicating registration logic would be the mistake here.
+  - **Membership is derived, not stored.** Cohort membership = `AcademicRecord` rows with `IsGHC == true` and the matching `PassingYear`. Do not add a `BatchYear` column to `Member`; it would immediately disagree with `AcademicRecord` for anyone holding two GHC records.
+  - **Ledger tie-in.** Reunion fees collected through `EventRegistration` post as `FinancialCategory.ReunionFee`, finally giving that enum value a producer.
+  - **Service/API/UI.** `IBatchService` + `BatchService`; `BatchesController` at `api/batches` with `GET api/batches/public` and `GET api/batches/{year}` `[AllowAnonymous]`. Flag `enableReunions`. Public `/batches` (year grid) + `/batches/:year`, member `portal/my-batch`, admin `admin/batches`. New `API_ENDPOINTS.BATCHES` block.
+  - **Tests.** NUnit: a member with two GHC `AcademicRecord` rows appears in both cohorts; non-GHC records excluded. Vitest: year-grid grouping, empty-cohort `EmptyStateWidget` path.
+
+37.5 [TODO] **In Memoriam register.** A new `MembershipType` value is **not** the mechanism — membership tier is admin-assigned and orthogonal (`feedback_membership_type_admin_only`). Instead: `MemorialEntry` (`Id`, `MemberId?` — nullable so a pre-digital alumnus can be honoured, `FullName`, `PassingYear?`, `DateOfBirth?`, `DateOfDeath`, `PhotoPath?`, `Tribute`, `IsPublished`, `SubmittedByMemberId?`, `SubmissionStatus Status`, `CreatedAt`) reusing the existing `SubmissionStatus { Draft, Pending, Approved, Rejected }` enum, and `Condolence` (`Id`, `MemorialEntryId`, `MemberId`, `Message`, `PostedAt`, `IsApproved`).
+  - **Moderation is mandatory.** Nothing publishes without admin approval, and every condolence goes through the existing `HtmlSanitizer` path before storage. This is the single highest-sensitivity surface in the Area; an unmoderated tribute wall on a memorial page is a reputational incident.
+  - **Setting `MemorialEntry.MemberId` must deactivate the linked `Member`** — and suppress them from the public directory and from any 37.1 voter roll — in the same transaction. A deceased member appearing on an election roll is the failure mode this clause exists to prevent.
+  - **Service/API/UI.** Extend `IMemberService` **only if** the memorial logic stays under ~5 methods; otherwise `IMemorialService` + `MemorialService`. `MemorialController` at `api/memorial`, `GET api/memorial/public` `[AllowAnonymous]`. Flag `enableMemorial`. Public `/in-memoriam`, member submission form under `portal/`, admin moderation queue. New `API_ENDPOINTS.MEMORIAL` block.
+  - **Tests.** NUnit: an unapproved entry is absent from the public projection; linking a `Member` deactivates them and removes them from directory results; condolence HTML is sanitised. Vitest: moderation-queue actions, published/unpublished rendering.
+
+37.6 [TODO] **Oral-history / legacy archive** — recorded memories from senior alumni, which is the one asset an alumni association can create that nobody else can. `ArchiveCollection` (`Id`, `Title`, `Description`, `IsPublished`, `SortOrder`) and `ArchiveItem` (`Id`, `ArchiveCollectionId`, `Title`, `NarratorName`, `NarratorMemberId?`, `RecordedOn?`, `Summary`, `Transcript?`, `MediaFileUploadId?`, `ExternalMediaUrl?`, `PhotoPath?`, `DecadeTag`, `IsPublished`, `SubmissionStatus Status`).
+  - **Storage decision, settled before building:** `MediaFileUploadId` reuses `FileUpload` + `IFileStorageService`; `ExternalMediaUrl` covers a link to already-hosted audio/video. **Both fields exist deliberately** — audio is heavy and the Render deployment has no object store configured, so the external-link path is the default and the upload path is opt-in behind the existing size limits in `IFileValidationService`.
+  - **The transcript is the product**, not the audio: it is searchable, printable, quotable in 37.10, and readable on a bad connection. Treat a missing transcript as an incomplete item in the admin queue, not merely an empty field.
+  - **Service/API/UI.** `IArchiveService` + `ArchiveService`; `ArchiveController` at `api/archive`, `GET api/archive/public` and `GET api/archive/items/{id}` `[AllowAnonymous]`. Flag `enableLegacyArchive`. Public `/legacy` (collections → item with transcript) reusing the Area 36 `.doc-hero` / `.doc-prose` shell rather than new page chrome; member submission; admin curation. New `API_ENDPOINTS.ARCHIVE` block.
+  - **Tests.** NUnit: unpublished items excluded from public reads; an item with none of `MediaFileUploadId`, `ExternalMediaUrl` or `Transcript` is rejected. Vitest: decade filter, transcript rendering and print styles.
+
+37.7 [TODO] **Bengali/English bilingual UI.** The association's constituency is Bengali-speaking and every string in the app is currently a hardcoded English literal in a template. **Do not install `@angular/localize` or `ngx-translate`** — `feedback_keep_lightweight` applies, and the requirement here is a single flat key → string lookup with a live runtime toggle, which `@angular/localize` (build-time, one bundle per locale) does not even satisfy.
+  - **Mechanism.** `core/services/i18n.service.ts` holding a `signal<'en' | 'bn'>` persisted to `localStorage`; two dictionaries under `core/i18n/en.ts` and `core/i18n/bn.ts` typed as `Record<string, string>` with `en` as the key source of truth; and a pure `TranslatePipe` (`{{ 'nav.constitution' | t }}`) falling back to the English string, then to the key itself, when a Bengali value is missing. Update `<html lang>` on toggle. Ship the toggle next to the existing `<app-theme-toggle>` so it inherits placement and styling.
+  - **Scope explicitly, and state it in the item when it lands:** public site + member portal nav, buttons, labels and validation messages. **Admin stays English-only** — it is staff-facing, and translating it doubles the surface for no constituency benefit. Server-stored content (constitution text, election documents, news) is not translated by this mechanism; it is authored content and belongs to whichever language it was written in.
+  - **Font.** Bengali glyphs need a webfont with Bengali coverage. Production `ng build` inlines Google Fonts over the network and this environment cannot reach it — self-host the face under `public/assets/fonts/` and reference it from `styles.scss`, so the build stays offline-safe.
+  - **Tests.** Vitest: the pipe returns the Bengali value, falls back to English on a missing key, and falls back to the key when both are missing; the toggle persists across a service re-instantiation; **every key present in `en.ts` resolves through the pipe** (guards against key drift).
+
+37.8 [TODO] **Public credential verification.** `IIDCardService` already issues ID cards and certificates as PDFs, but nothing on the outside can confirm one is genuine — an employer holding a printed membership certificate has no check available.
+  - **Models.** `IssuedCredential` (`Id`, `MemberId`, `CredentialType` — new enum `CredentialType { MembershipCertificate, IdCard, ElectionDocument }`, `ShortCode` — a 10-character unambiguous-alphabet code with a unique index, `IssuedOn`, `ExpiresOn?`, `IsRevoked`, `RevokedReason?`, `RevokedOn?`).
+  - **Mechanism.** Extend `IIDCardService` (do not create a parallel service) so every generated document records an `IssuedCredential` and embeds a QR — via the existing `QRCoder` `GetQrDataUri` helper — pointing at `/verify/{shortCode}`. `GET api/verify/{shortCode}` is `[AllowAnonymous]` and returns **only** `{ valid, memberName, membershipType, issuedOn, status }`. It must never return an email, phone, address or member id: this endpoint is publicly enumerable by design, so the short code must be high-entropy and the response minimal. Rate-limit it with the existing `LoginRateLimitMiddleware` pattern.
+  - **UI.** Flag `enableCredentialVerification`. Public `/verify/:code` plus a code-entry form at `/verify`, rendering a single valid / revoked / unknown verdict card; admin revocation action on the member detail page. New `API_ENDPOINTS.VERIFY` block.
+  - **Tests.** NUnit: a revoked code returns `valid: false`; the response DTO exposes no contact field; short codes are unique across 10k generations. Vitest: the three verdict states, unknown-code path.
+
+37.9 [TODO] **Geographic chapters.** `Chapter` (`Id`, `Name`, `Region`, `Country`, `City`, `Description`, `CoordinatorMemberId?`, `ContactEmail?`, `IsActive`, `CreatedAt`) and `ChapterMembership` (`Id`, `ChapterId`, `MemberId`, `JoinedAt`, `IsCoordinator`) with a unique index on `(ChapterId, MemberId)`.
+  - **Reuse, do not rebuild.** A chapter event is an `AlumniEvent` with a `ChapterId` — add the nullable column to `AlumniEvent` rather than creating a `ChapterEvent` table. Chapter announcements reuse `INotificationService.CreateNotificationAsync` fanned over the chapter's members; there is no new messaging surface in this item.
+  - **Service/API/UI.** `IChapterService` + `ChapterService`; `ChaptersController` at `api/chapters`, `GET api/chapters/public` `[AllowAnonymous]`. Flag `enableChapters`. Public `/chapters` (list + detail with coordinator contact), member `portal/chapters` (join/leave, my chapter feed), admin `admin/chapters`. New `API_ENDPOINTS.CHAPTERS` block.
+  - **Tests.** NUnit: joining twice does not duplicate; a chapter event appears only in that chapter's feed; coordinator contact is hidden from the anonymous projection unless `ContactEmail` is set. Vitest: join/leave state, empty-chapter state.
+
+37.10 [TODO] **Annual impact report generated from the ledger** — the accountability artifact that closes the loop on 37.2, 37.3 and 37.4, and the reason those three back-link `FinancialRecordId`.
+  - **Nothing in this item is hand-typed.** For a given year it aggregates: total income and expense by `FinancialCategory` from `FinancialRecord`; scholarships awarded and disbursed from `ScholarshipAward`; campaign totals and donor counts from `CampaignPledge`; events and attendance from `AlumniEvent` + `EventRegistration`; new members from `Member.CreatedAt` / `MembershipHistory`; reunions from 37.4. The only authored fields are a president's foreword and a cover image, stored in the existing `SiteContent` CMS from Area 34 — **do not add a table for two strings.**
+  - **Output.** Server-side PDF via **QuestPDF**, following the `IDCardService.GenerateIDCardPdfAsync` pattern, plus an on-site HTML view reusing the Area 36 `.doc-hero` / `.doc-prose` shell. Extend `IFinancialLedgerService` with `Task<ImpactReportDto?> GetImpactReportAsync(int year, CancellationToken cancellationToken = default)`, and put the PDF method on the existing document-generation surface rather than inventing a third document service.
+  - **Guard.** The report must degrade rather than throw when a source feature is not yet built or its flag is off — a year with no campaigns renders without that section. This item is therefore safe to build *before* 37.2/37.3/37.4 land, and must read every source through a null-tolerant projection.
+  - **API/UI.** `GET api/financials/impact/{year}` and `GET api/financials/impact/{year}/pdf`, both `[AllowAnonymous]` (publishing it is the point). Flag `enableImpactReport`. Public `/impact/:year` with a year selector; admin action to set the foreword and publish. Additions to the existing `API_ENDPOINTS.FINANCIALS` block.
+  - **Tests.** NUnit: a year with zero records returns a report with zeroed sections rather than null; category totals match a hand-summed fixture; the disbursed-scholarship total equals the sum of the linked `Grant` `FinancialRecord` rows. Vitest: year selector, empty-section rendering.
+
+37.11 [TODO] Per 12.6, nothing in Area 37 is `[DONE]` until `dotnet test`, `npx vitest run`, `npm run type-check` and `npx ng build` all pass. Baselines to beat at the start of this Area: **351 NUnit tests** and **64 vitest files / 286 tests**. Additionally, every item that adds a table must be verified against the 37.0 migration path on a **non-empty** database — a passing suite against a fresh SQLite file proves nothing about preprod (`gotcha_ensurecreated_no_op_existing_db`). Update `docs/FEATURES.md`, `docs/project_map.md`, `docs/SRS.md` and `docs/architecture_data_flow.md` as each item lands, per `feedback_docs_update_scope`.
+
+---
+
+# Area 38 — Constitution v4.2 & the "always latest" rule
+
+**Standing rule (2026-08-25): whenever a newer constitution is ratified, every surface must follow
+it automatically.** No page, component, document or link may pin a version. Publication is one
+command; the surfaces are already version-agnostic. Reference: `docs/CONSTITUTION_PUBLISHING.md`.
+
+38.1 [DONE] Publish `GHCAA Constitution V4.2.pdf` as the active constitution. `Seed/constitution.json`
+rewritten as a single active record — `Version` `4.2`, `EffectiveDate` `2026-07-01`, `PdfUrl`
+`/assets/GHCAA Constitution V4.2.pdf`, `Content` 36,999 chars (preamble + Articles I–XII + Future
+Vision), real `ChangeSummary`. Reaches preprod through `ConstitutionSeeder.SyncAsync`, not through
+`EnsureCreated()`. **`GHCAA constitution 4.0.pdf` stays on disk** — the seeder supersedes rather
+than deletes, so the v4.0 history row's `PdfUrl` must still resolve.
+
+38.2 [DONE] Remove the last hardcoded version reference from a page. `landing/sections/banner/banner.html`
+linked `href="/assets/GHCAA constitution 4.0.pdf"`; it now `routerLink`s to `/constitution`, which
+renders whatever row is active. The only version-bearing string left in application code is
+`CONSTITUTION_PDF_FALLBACK` in `public/constitution/constitution.ts`, and the publishing tool owns it.
+
+38.3 [DONE] Committed the extraction pipeline as `tools/constitution/publish_constitution.py`
+(PyMuPDF; build-time documentation tool, **not** an application dependency). It extracts the PDF
+into the plain-text shape `parseArticles` expects, writes the seed, and repoints
+`CONSTITUTION_PDF_FALLBACK`. Version and effective date are read from the document's closing
+colophon because **the v4.2 cover page still says "V 4.0"**. Verified: a `--dry-run` re-extraction
+reproduces the shipped `Content` byte-for-byte. Handles the Google-Docs U+200B fencing rule
+(doubled = swallowed space, single = intra-word), bold-run structure detection and page-break
+paragraph rejoining — all documented in `docs/CONSTITUTION_PUBLISHING.md`.
+
+38.4 [TODO] **Source-document defect, still present in the user's PDF.** Article V, Section C,
+item 6 reads *"6. TReplace the 21-day election notice rule with: …"* — a leftover editing
+instruction carried verbatim into the published text. Fix the source document and re-run 38.3;
+no code change is involved.
+
+38.5 [DONE] Docs updated per `feedback_docs_update_scope`: new `docs/CONSTITUTION_PUBLISHING.md`;
+`FEATURES.md` §5.1a, `SRS.md` §3.6.2, `architecture_data_flow.md` §2.D and `project_map.md`
+(build-time tool entry) all carry the always-latest rule.

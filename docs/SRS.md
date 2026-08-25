@@ -96,7 +96,7 @@ Fostering professional and personal growth within the network.
 ### 3.6 Governance & CMS
 
 * **3.6.1 EC Management**: Management of Executive Committee terms, roles (President, GS, etc.), and historical governance records.
-* **3.6.2 Constitution Hub**: Version-controlled governing documents with member voting capabilities.
+* **3.6.2 Constitution Hub**: Version-controlled governing documents with member voting capabilities. **The public reader always serves the latest ratified version**: it renders whichever version row is active, rebuilds its article navigation from that text, and lists superseded versions in a history panel with their own PDF links. No page, link or component may pin a version number, so ratifying a new document changes what every surface shows without a code change to those surfaces. The currently published text is v4.2, effective 01 Jul 2026.
 * **3.6.3 Communication Hub**: Mass email/SMS engine with HTML templates and targeted segmenting (e.g., by batch or type).
 * **3.6.4 Dynamic Themes**: UI transformations for special days (e.g., National Days) controlled via Admin settings.
 * **3.6.5 Site Content Blocks**: Admin-editable, keyed content blocks (title, rich-text body, display order, active flag) that drive the public About Us page and the Contact page intro, so institutional copy is changed from the admin panel rather than by redeploy. Block bodies are sanitized server-side on every write; the public page retains a static fallback so it can never render empty.

@@ -187,10 +187,16 @@ The platform operates without live payment-gateway credentials. All payment meth
   - One vote per member per version, enforced by a unique `(ConstitutionId, MemberId)` index.
   - Voting rights are limited to Founding, Executive and General members (Article III Section K);
     Associate, Honorary and Advisory members may read but not ratify.
-  - The published text is the ratified v4.0 document, kept in sync at boot by `ConstitutionSeeder`
-    because `EnsureCreated()` never re-seeds an existing database.
+  - The published text is the ratified v4.2 document (effective 01 Jul 2026), kept in sync at boot
+    by `ConstitutionSeeder` because `EnsureCreated()` never re-seeds an existing database.
+  - **Every surface follows the latest ratified version automatically.** No page pins a version:
+    the reader renders whichever row is `IsActive`, the landing hero routes to `/constitution`
+    rather than to a PDF, and superseded versions stay readable in the history panel with their
+    own `PdfUrl`. Republishing is one command — see `docs/CONSTITUTION_PUBLISHING.md`.
 - **Dependencies**: Governance service, `ConstitutionSeeder`, in-repo markdown renderer
   (`core/utils/markdown.util.ts`) — no markdown npm dependency.
+  `tools/constitution/publish_constitution.py` (PyMuPDF) is a build-time documentation tool, not
+  an application dependency.
 
 ### 5.2 Bulk Member Import & Export
 - **Business description**: Excel-to-database bridging for migrating legacy records and exporting registry data.

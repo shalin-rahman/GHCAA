@@ -18,7 +18,7 @@ export interface ConstitutionArticle {
  * whenever the active row carries no `pdfUrl`, and as the entire page content when the API
  * has no active constitution at all.
  */
-export const CONSTITUTION_PDF_FALLBACK = '/assets/GHCAA constitution 4.0.pdf';
+export const CONSTITUTION_PDF_FALLBACK = '/assets/GHCAA Constitution V4.2.pdf';
 
 /**
  * Splits the stored plain-text constitution into articles. The seeded format is

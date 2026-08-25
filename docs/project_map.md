@@ -871,6 +871,12 @@ seed edits never reach preprod; this syncer publishes `Seed/constitution.json` i
 unknown versions, refreshes changed text in place, supersedes (never deletes) prior versions so
 `AmendmentVote` rows survive, and removes only vote-free placeholder versions.
 
+**Build-time tool:** `tools/constitution/publish_constitution.py` (PyMuPDF; documentation tool, not
+an application dependency). Extracts a ratified constitution PDF into the plain-text shape the
+Angular reader parses, rewrites `Seed/constitution.json` as the single active record, and repoints
+`CONSTITUTION_PDF_FALLBACK` in `GHCAA.Web/src/app/public/constitution/constitution.ts`. It is the
+only thing allowed to hold a version-bearing PDF path — see `docs/CONSTITUTION_PUBLISHING.md`.
+
 ---
 
 ## API Layer — Controllers
