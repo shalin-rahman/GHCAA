@@ -220,6 +220,8 @@ export interface Job {
     isActive: boolean;
     postedByMemberId: number;
     postedByMemberName?: string;
+    status?: SubmissionStatus | string;
+    rejectionReason?: string;
 }
 
 export interface CreateJobDto {
@@ -282,6 +284,7 @@ export interface AlumniEvent {
     adminNote?: string;
     allowNonMembers: boolean;
     participantCount?: number;
+    requiresRegistration: boolean;
 }
 
 
@@ -323,6 +326,9 @@ export interface EventPhoto {
     photoPath: string;
     caption?: string;
     uploadedAt: string | Date;
+    uploadedByMemberId?: number;
+    status?: SubmissionStatus | string;
+    rejectionReason?: string;
 }
 
 export interface EventGallery {
@@ -336,6 +342,9 @@ export interface EventGallery {
     isActive: boolean;
     isFeatured: boolean;
     photos: EventPhoto[];
+    ownerMemberId?: number;
+    status?: SubmissionStatus | string;
+    rejectionReason?: string;
 }
 
 

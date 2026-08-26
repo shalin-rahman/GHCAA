@@ -146,6 +146,10 @@
                                 (click)="assignRole(user.id, roleSelect.value)">
                                 Assign
                             </button>
+                            @if (!user.memberId) {
+                            <button class="icon-btn delete" (click)="deleteUser(user)"
+                                title="Delete System Administrator Account">🗑️</button>
+                            }
                         </div>
                     </td>
                 </tr>

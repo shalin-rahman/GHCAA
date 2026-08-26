@@ -17,19 +17,21 @@ namespace GHCAA.Infrastructure.Services
         private readonly ApplicationDbContext _db;
         private readonly INotificationService _notification;
         private readonly IUserService _userService;
+        private readonly IAdminNotificationService _adminNotification;
 
-        public JobHubService(ApplicationDbContext db, INotificationService notification, IUserService userService)
+        public JobHubService(ApplicationDbContext db, INotificationService notification, IUserService userService, IAdminNotificationService adminNotification)
         {
             _db = db;
             _notification = notification;
             _userService = userService;
+            _adminNotification = adminNotification;
         }
 
         public async Task<IEnumerable<JobDto>> GetActiveJobsAsync(Enums.JobCategory? category = null, string? query = null, CancellationToken cancellationToken = default)
         {
             var qry = _db.JobOpportunities
                 .Include(j => j.PostedBy)
-                .Where(j => j.IsActive && (j.ExpiryDate == null || j.ExpiryDate > DateTime.UtcNow));
+                .Where(j => j.IsActive && j.Status == Enums.SubmissionStatus.Approved && (j.ExpiryDate == null || j.ExpiryDate > DateTime.UtcNow));
 
             if (category.HasValue)
                 qry = qry.Where(j => j.JobCategory == category.Value);
@@ -76,8 +78,10 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
-        public async Task<JobDto> PostJobAsync(CreateJobDto dto, int memberId, CancellationToken cancellationToken = default)
+        public async Task<JobDto> PostJobAsync(CreateJobDto dto, int memberId, bool isAdmin, CancellationToken cancellationToken = default)
         {
+            var status = isAdmin ? Enums.SubmissionStatus.Approved : Enums.SubmissionStatus.Pending;
+
             var job = new JobOpportunity
             {
                 Title = dto.Title,
@@ -93,25 +97,36 @@ namespace GHCAA.Infrastructure.Services
                 ExpiryDate = dto.ApplicationDeadline.HasValue
                     ? DateTime.SpecifyKind(dto.ApplicationDeadline.Value, DateTimeKind.Utc)
                     : null,
-                IsActive = true
+                IsActive = true,
+                Status = status
             };
 
             await _db.JobOpportunities.AddAsync(job, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
 
-            // Notify the poster
-            await _notification.CreateNotificationAsync(
-                memberId,
-                "Job Posted",
-                $"Your job posting '{job.Title}' at {job.Company} has been published successfully.",
-                Enums.NotificationType.GeneralSystem,
-                "/portal/jobs",
-                cancellationToken);
-
-            // Reload to get member info if needed, or just map locally
-            // Ideally we want the member name, which we might not have yet unless we include it
             var postedBy = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId, cancellationToken);
             job.PostedBy = postedBy;
+
+            if (status == Enums.SubmissionStatus.Approved)
+            {
+                // Notify the poster immediately since no approval step is needed.
+                await _notification.CreateNotificationAsync(
+                    memberId,
+                    "Job Posted",
+                    $"Your job posting '{job.Title}' at {job.Company} has been published successfully.",
+                    Enums.NotificationType.GeneralSystem,
+                    "/portal/jobs",
+                    cancellationToken);
+            }
+            else
+            {
+                await _adminNotification.NotifyPendingApprovalAsync(
+                    "Job",
+                    job.Title,
+                    postedBy?.FullName ?? "A member",
+                    $"/admin/jobs/{job.Id}",
+                    cancellationToken);
+            }
 
             return MapToDto(job);
         }
@@ -146,6 +161,58 @@ namespace GHCAA.Infrastructure.Services
             return jobs.Select(MapToDto);
         }
 
+        public async Task<IEnumerable<JobDto>> GetPendingJobsAsync(CancellationToken cancellationToken = default)
+        {
+            var jobs = await _db.JobOpportunities
+                .Include(j => j.PostedBy)
+                .Where(j => j.Status == Enums.SubmissionStatus.Pending)
+                .OrderByDescending(j => j.PostedDate)
+                .ToListAsync(cancellationToken);
+
+            return jobs.Select(MapToDto);
+        }
+
+        public async Task<bool> ApproveJobAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var job = await _db.JobOpportunities.FindAsync(new object[] { id }, cancellationToken);
+            if (job == null) return false;
+
+            job.Status = Enums.SubmissionStatus.Approved;
+            job.RejectionReason = null;
+            await _db.SaveChangesAsync(cancellationToken);
+
+            await _notification.CreateNotificationAsync(
+                job.PostedByMemberId,
+                "Job Approved",
+                $"Your job posting '{job.Title}' has been approved and is now live.",
+                Enums.NotificationType.GeneralSystem,
+                "/portal/jobs",
+                cancellationToken);
+
+            return true;
+        }
+
+        public async Task<bool> RejectJobAsync(int id, string reason, CancellationToken cancellationToken = default)
+        {
+            var job = await _db.JobOpportunities.FindAsync(new object[] { id }, cancellationToken);
+            if (job == null) return false;
+
+            job.Status = Enums.SubmissionStatus.Rejected;
+            job.RejectionReason = reason;
+            job.IsActive = false;
+            await _db.SaveChangesAsync(cancellationToken);
+
+            await _notification.CreateNotificationAsync(
+                job.PostedByMemberId,
+                "Job Rejected",
+                $"Your job posting '{job.Title}' was rejected. Reason: {reason}",
+                Enums.NotificationType.GeneralSystem,
+                "/portal/jobs",
+                cancellationToken);
+
+            return true;
+        }
+
         private static JobDto MapToDto(JobOpportunity job)
         {
             return new JobDto
@@ -163,7 +230,9 @@ namespace GHCAA.Infrastructure.Services
                 JobCategory = job.JobCategory,
                 IsActive = job.IsActive,
                 PostedByMemberId = job.PostedByMemberId,
-                PostedByMemberName = job.PostedBy?.FullName
+                PostedByMemberName = job.PostedBy?.FullName,
+                Status = job.Status,
+                RejectionReason = job.RejectionReason
             };
         }
     }

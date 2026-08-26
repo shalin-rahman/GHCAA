@@ -44,6 +44,58 @@ public class EventServiceTests : TestBase
     }
 
     [Test]
+    public async Task GetAllEventsForAdminAsync_ShouldIncludeInactiveEvents()
+    {
+        var active = new AlumniEvent { Title = "Active Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = true };
+        var inactive = new AlumniEvent { Title = "Unpublished Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = false };
+        _context.AlumniEvents.AddRange(active, inactive);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetAllEventsForAdminAsync();
+
+        result.Should().HaveCount(2);
+        result.Select(e => e.Title).Should().Contain("Unpublished Event");
+    }
+
+    [Test]
+    public async Task GetActiveEventsAsync_ShouldExcludeInactiveEvents()
+    {
+        var active = new AlumniEvent { Title = "Active Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = true };
+        var inactive = new AlumniEvent { Title = "Unpublished Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = false };
+        _context.AlumniEvents.AddRange(active, inactive);
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetActiveEventsAsync();
+
+        result.Should().ContainSingle();
+        result.Single().Title.Should().Be("Active Event");
+    }
+
+    [Test]
+    public async Task UpdateEventAsync_ShouldAllowReactivatingAnUnpublishedEvent()
+    {
+        var ev = new AlumniEvent { Title = "Unpublished Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L", IsActive = false };
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        var dto = new UpdateEventDto
+        {
+            Id = ev.Id,
+            Title = ev.Title,
+            Description = ev.Description,
+            StartDate = ev.StartDate,
+            EndDate = ev.EndDate,
+            Location = ev.Location,
+            IsActive = true
+        };
+
+        var result = await _service.UpdateEventAsync(dto);
+
+        result.Should().NotBeNull();
+        result!.IsActive.Should().BeTrue();
+    }
+
+    [Test]
     public async Task RegisterForEventAsync_ShouldCreateRegistration()
     {
         var member = new Member { FullName = "EVT", Email = "e@t.com", NID = "12", MobileNo = "12", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };

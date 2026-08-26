@@ -119,6 +119,13 @@ describe('Events Component', () => {
         expect(notificationServiceMock.success).toHaveBeenCalled();
     });
 
+    it('should not open the registration modal for informational-only events', () => {
+        const mockEvent = { id: 1, title: 'Test', requiresRegistration: false, allowNonMembers: true };
+        component.openRegisterModal(mockEvent as any);
+        expect(component.showModal()).toBe(false);
+        expect(component.selectedEvent()).toBeNull();
+    });
+
     it('should update validators when manual method is selected', () => {
        const mockMethod = { id: 1, requiresReference: true };
        component.onPaymentMethodSelected(mockMethod as any);

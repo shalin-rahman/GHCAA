@@ -57,6 +57,7 @@ class EventDetailsScreen extends ConsumerWidget {
       floatingActionButton: detailsAsync.maybeWhen(
         data: (event) {
           if (event == null) return null;
+          if (event['requiresRegistration'] == false) return null;
           final isOpen = _isRegistrationOpen(event);
           if (!isOpen && !isAdmin) return null; // Admins might still see something else, but generally hide if close
           return FloatingActionButton.extended(

@@ -18,6 +18,9 @@ namespace GHCAA.Domain.Models
         public bool IsActive { get; set; } = true;
         public Enums.JobCategory JobCategory { get; set; }
 
+        public Enums.SubmissionStatus Status { get; set; } = Enums.SubmissionStatus.Approved; // Default for existing/admin jobs
+        public string? RejectionReason { get; set; }
+
         // Navigation
         public Member? PostedBy { get; set; }
     }

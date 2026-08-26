@@ -108,6 +108,11 @@
                     @if (job.jobCategory === 'Mentorship') {
                     <span class="badge mentor">MENTORSHIP</span>
                     }
+                    @if (isOwnPending(job)) {
+                    <span class="status-badge" [class]="getStatusInfo(job.status).class">
+                        {{ getStatusInfo(job.status).label }}
+                    </span>
+                    }
                 </div>
                 <div class="card-content">
                     <h3>{{ job.title }}</h3>

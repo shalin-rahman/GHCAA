@@ -12,11 +12,16 @@ import '../../core/widgets/admin_action_circle.dart';
 import '../../core/widgets/app_search_field.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/widgets/glass_tile.dart';
 
 final galleryItemsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   final role = await ref.read(authServiceProvider).getRole();
   final isAdmin = role.isStaffAdminRole;
   return ref.read(galleryServiceProvider).getGalleries(onlyActive: !isAdmin);
+});
+
+final myAlbumsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
+  return ref.read(galleryServiceProvider).getMyAlbums();
 });
 
 final gallerySearchQueryProvider = StateProvider.autoDispose<String>((ref) => "");
@@ -188,6 +193,148 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     }
   }
  
+  Future<void> _createAlbum() async {
+    final titleCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.deepCharcoal,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppTheme.glassBorder)),
+        title: Center(child: Text('CREATE MY ALBUM', style: Theme.of(context).textTheme.labelLarge?.copyWith(letterSpacing: 2))),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: AppTheme.spaceM),
+              TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Album Title', prefixIcon: Icon(Icons.collections_bookmark_rounded))),
+              const SizedBox(height: AppTheme.spaceM),
+              TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Description', prefixIcon: Icon(Icons.notes_rounded)), maxLines: 2),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL', style: TextStyle(color: Colors.white38))),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('CREATE ALBUM'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && titleCtrl.text.isNotEmpty) {
+      final success = await ref.read(galleryServiceProvider).createAlbum(titleCtrl.text, descCtrl.text.isEmpty ? null : descCtrl.text);
+      if (success) {
+        ref.invalidate(myAlbumsProvider);
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Album submitted for review.')));
+      }
+    }
+  }
+
+  Future<void> _addPhotoToAlbum(int albumId) async {
+    final picker = ImagePicker();
+    final images = await picker.pickMultiImage();
+    if (images.isEmpty) return;
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Uploading ${images.length} photos...')));
+
+    var successCount = 0;
+    for (final img in images) {
+      final success = await ref.read(galleryServiceProvider).addPhotoToAlbum(albumId, img.path);
+      if (success) successCount++;
+    }
+
+    if (successCount > 0) {
+      ref.invalidate(myAlbumsProvider);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$successCount photo(s) submitted for review.')));
+    }
+  }
+
+  Widget _albumStatusChip(String status) {
+    Color color;
+    switch (status) {
+      case 'Approved':
+        color = Colors.greenAccent;
+        break;
+      case 'Rejected':
+        color = Colors.redAccent;
+        break;
+      default:
+        color = AppTheme.royalGold;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20), border: Border.all(color: color.withValues(alpha: 0.4))),
+      child: Text(status.toUpperCase(), style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 0.8)),
+    );
+  }
+
+  Widget _buildMyAlbumsSection(BuildContext context) {
+    final myAlbumsAsync = ref.watch(myAlbumsProvider);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppTheme.spaceL, 0, AppTheme.spaceL, AppTheme.spaceL),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('MY ALBUMS', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.royalGold, letterSpacing: 1.5, fontSize: 10)),
+              TextButton.icon(
+                onPressed: _createAlbum,
+                icon: const Icon(Icons.add_circle_outline_rounded, size: 16, color: AppTheme.royalGold),
+                label: const Text('CREATE ALBUM', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900)),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spaceS),
+          myAlbumsAsync.when(
+            data: (albums) {
+              if (albums.isEmpty) {
+                return const EmptyStateWidget('You have no albums yet.', icon: Icons.collections_bookmark_outlined, compact: true);
+              }
+              return Column(
+                children: albums.map((album) {
+                  final status = (album['status'] ?? 'Pending').toString();
+                  final rejectionReason = album['rejectionReason'] as String?;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppTheme.spaceS),
+                    child: GlassTile(
+                      icon: Icons.photo_album_rounded,
+                      title: album['title'] ?? 'Untitled Album',
+                      subtitle: status == 'Rejected' && rejectionReason != null ? 'Rejected: $rejectionReason' : '${(album['photos'] as List? ?? []).length} photo(s)',
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _albumStatusChip(status),
+                          const SizedBox(width: AppTheme.spaceS),
+                          IconButton(
+                            icon: const Icon(Icons.add_a_photo_outlined, size: 18, color: AppTheme.royalGold),
+                            tooltip: 'Add Photos',
+                            onPressed: () => _addPhotoToAlbum(album['id']),
+                          ),
+                        ],
+                      ),
+                      onTap: () {},
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+            loading: () => const Center(child: LogoSpinner(size: 60)),
+            error: (e, s) => Text('Error loading albums: $e', style: const TextStyle(color: Colors.redAccent, fontSize: 11)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _confirmDeleteGallery(int id) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -256,14 +403,21 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 final filtered = galleries.where((g) => g['title'].toString().toLowerCase().contains(searchQuery)).toList();
                 
                 if (filtered.isEmpty) {
-                  return const EmptyStateWidget('No galleries found.', icon: Icons.photo_library_outlined);
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 104),
+                    children: [
+                      _buildMyAlbumsSection(context),
+                      const EmptyStateWidget('No galleries found.', icon: Icons.photo_library_outlined),
+                    ],
+                  );
                 }
- 
+
                 return ListView.builder(
                   padding: const EdgeInsets.fromLTRB(AppTheme.spaceL, 0, AppTheme.spaceL, 104),
-                  itemCount: filtered.length,
+                  itemCount: filtered.length + 1,
                   itemBuilder: (context, index) {
-                    final gallery = filtered[index];
+                    if (index == 0) return _buildMyAlbumsSection(context);
+                    final gallery = filtered[index - 1];
                     final photos = gallery['photos'] as List? ?? [];
                     final fullThumb = AppConfig.resolveImageUrl(photos.isNotEmpty ? photos[0]['photoPath'] : null);
  

@@ -47,6 +47,8 @@ export class AdminNews implements OnInit {
     editingId = signal<number | null>(null);
     uploadingImage = signal(false);
     uploadingDocument = signal(false);
+    stagedImageFile: File | null = null;
+    stagedImageName = signal<string | null>(null);
 
     form: any = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, collaborators: [] };
 
@@ -68,11 +70,15 @@ export class AdminNews implements OnInit {
     openForm() {
         this.editingId.set(null);
         this.form = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, collaborators: [] };
+        this.stagedImageFile = null;
+        this.stagedImageName.set(null);
         this.showForm.set(true);
     }
 
     editPost(post: NewsPost) {
         this.editingId.set(post.id);
+        this.stagedImageFile = null;
+        this.stagedImageName.set(null);
         this.form = {
             title: post.title,
             content: post.content,
@@ -90,21 +96,15 @@ export class AdminNews implements OnInit {
     }
 
     onImageSelect(event: Event) {
-        const file = (event.target as HTMLInputElement).files?.[0];
+        // Stage the file locally only; the actual upload happens on Save/Update
+        // (saveNews) so an abandoned/cancelled form never leaves an orphaned
+        // image on the server.
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
         if (!file) return;
 
-        this.uploadingImage.set(true);
-        this.newsService.uploadImage(file).subscribe({
-            next: (res) => {
-                this.form.imageUrl = res.url;
-                this.notify.success('Image uploaded successfully');
-                this.uploadingImage.set(false);
-            },
-            error: () => {
-                this.notify.error('Image upload failed');
-                this.uploadingImage.set(false);
-            }
-        });
+        this.stagedImageFile = file;
+        this.stagedImageName.set(file.name);
     }
 
     onDocumentSelect(event: Event) {
@@ -142,6 +142,8 @@ export class AdminNews implements OnInit {
     cancelForm() {
         this.showForm.set(false);
         this.editingId.set(null);
+        this.stagedImageFile = null;
+        this.stagedImageName.set(null);
     }
 
     saveNews(form: any) {
@@ -154,6 +156,31 @@ export class AdminNews implements OnInit {
         if (this.saving()) return;
 
         this.saving.set(true);
+
+        const stagedFile = this.stagedImageFile;
+        if (stagedFile) {
+            this.uploadingImage.set(true);
+            this.newsService.uploadImage(stagedFile).subscribe({
+                next: (res) => {
+                    this.form.imageUrl = res.url;
+                    this.uploadingImage.set(false);
+                    this.stagedImageFile = null;
+                    this.stagedImageName.set(null);
+                    this.submitNews();
+                },
+                error: () => {
+                    this.uploadingImage.set(false);
+                    this.saving.set(false);
+                    this.notify.error('Image upload failed.');
+                }
+            });
+            return;
+        }
+
+        this.submitNews();
+    }
+
+    private submitNews() {
         const id = this.editingId();
         const obs = id ? this.newsService.updateNews(id, this.form) : this.newsService.createNews(this.form);
 
@@ -164,9 +191,9 @@ export class AdminNews implements OnInit {
                 this.cancelForm();
                 this.loadNews();
             },
-            error: () => { 
-                this.saving.set(false); 
-                this.notify.error('Failed to save post.'); 
+            error: () => {
+                this.saving.set(false);
+                this.notify.error('Failed to save post.');
             }
         });
     }

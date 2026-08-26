@@ -110,6 +110,10 @@ export class Events implements OnInit {
 
 
   openRegisterModal(ev: AlumniEvent) {
+    if (ev.requiresRegistration === false) {
+      // Informational-only event — no registration flow should ever be offered.
+      return;
+    }
     if (this.isGuest() && !ev.allowNonMembers) {
       this.notify.warning('This event is for members only. Please log in to register.');
       window.location.href = '/login';

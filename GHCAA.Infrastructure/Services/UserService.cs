@@ -117,6 +117,20 @@ namespace GHCAA.Infrastructure.Services
             return true;
         }
 
+        public async Task<bool> DeleteSystemAdminAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            // Only non-member (system-created) admin accounts may be hard-deleted here.
+            // Member-linked accounts are the member's portal login and must be managed
+            // via member archive/restore instead, to avoid silently locking a member out.
+            var user = await _db.Users.FindAsync(new object[] { userId }, cancellationToken);
+            if (user == null || user.MemberId != null) return false;
+
+            _db.Users.Remove(user);
+            await _db.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("System admin account deleted: {UserId}", userId);
+            return true;
+        }
+
         public string GenerateDefaultPassword()
         {
             return new string(Enumerable.Range(0, 8)

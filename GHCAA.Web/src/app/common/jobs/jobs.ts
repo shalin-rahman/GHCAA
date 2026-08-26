@@ -5,7 +5,7 @@ import { JobService } from '../../core/services/job.service';
 import { Job } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
-import { JOB_CATEGORIES, getJobCategoryLabel } from '../../core/constants/app.constants';
+import { JOB_CATEGORIES, getJobCategoryLabel, SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { toWireDate, toDisplayDate } from '../../core/utils/date.util';
 
@@ -138,6 +138,17 @@ export class Jobs implements OnInit {
     const user = this.auth.currentUser();
     if (!user) return false;
     return user.role === 'Admin' || user.role === 'SuperAdmin' || job.postedByMemberId === user.memberId;
+  }
+
+  // Shows a Pending badge only to the poster on their own not-yet-approved jobs.
+  isOwnPending(job: Job): boolean {
+    const user = this.auth.currentUser();
+    if (!user) return false;
+    return job.postedByMemberId === user.memberId && job.status === 'Pending';
+  }
+
+  getStatusInfo(status: any) {
+    return SUBMISSION_STATUS_MAP[status] || { label: 'Unknown', class: 'pending' };
   }
 
   deleteJob(id: number) {

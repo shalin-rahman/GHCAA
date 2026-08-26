@@ -27,4 +27,8 @@ export class ContactService {
     markAsRead(id: number): Observable<any> {
         return this.http.post(`${API_ENDPOINTS.ADMIN.CONTACT_MESSAGES}/${id}/read`, {});
     }
+
+    deleteMessage(id: number): Observable<any> {
+        return this.http.delete(`${API_ENDPOINTS.ADMIN.CONTACT_MESSAGES}/${id}`);
+    }
 }

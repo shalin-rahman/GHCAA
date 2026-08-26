@@ -9,5 +9,6 @@ namespace GHCAA.Application.Interfaces
         Task SubmitMessageAsync(ContactMessageDto dto, CancellationToken cancellationToken = default);
         Task<IEnumerable<object>> GetMessagesAsync(CancellationToken cancellationToken = default);
         Task<bool> MarkAsReadAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> DeleteMessageAsync(int id, CancellationToken cancellationToken = default);
     }
 }

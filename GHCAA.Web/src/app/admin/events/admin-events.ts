@@ -120,6 +120,7 @@ export class AdminEvents implements OnInit {
         adminNote: [''],
         isActive: [true],
         allowNonMembers: [false],
+        requiresRegistration: [true],
         imageUrl: [''],
         participantLimit: [null],
         hasWaitlist: [false]
@@ -188,7 +189,7 @@ export class AdminEvents implements OnInit {
 
     openCreateForm() {
         this.editingEventId.set(null);
-        this.eventForm.reset({ isActive: true, requiresPayment: true, registrationFee: 0 });
+        this.eventForm.reset({ isActive: true, requiresPayment: true, requiresRegistration: true, registrationFee: 0 });
         this.selectedLogo.set(null);
         this.logoPreview.set(null);
         this.formError.set(null);
@@ -210,6 +211,7 @@ export class AdminEvents implements OnInit {
             adminNote: ev.adminNote,
             isActive: ev.isActive,
             allowNonMembers: ev.allowNonMembers,
+            requiresRegistration: ev.requiresRegistration ?? true,
             participantLimit: (ev as any).participantLimit,
             hasWaitlist: (ev as any).hasWaitlist
         });
@@ -271,6 +273,7 @@ export class AdminEvents implements OnInit {
             adminNote: raw.adminNote || undefined,
             isActive: raw.isActive ?? true,
             allowNonMembers: raw.allowNonMembers ?? false,
+            requiresRegistration: raw.requiresRegistration ?? true,
             imageUrl: raw.imageUrl || undefined
         };
 

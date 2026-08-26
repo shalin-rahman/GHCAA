@@ -1139,3 +1139,122 @@ constitution subheading rules). Visual QA done in both themes for `/elections`,
 and A4 PDFs. **Known environmental gap:** `npm run build` currently fails in Angular's
 font-inlining plugin (`connect ETIMEDOUT` to `fonts.googleapis.com` at `styles.scss:6`) — not a
 code defect; re-run when the network allows and re-grep the emitted `styles-*.css`.
+
+---
+
+# Area 40 — Member albums with admin approval, job-posting approval, events without registration (raised by user 2026-08-26)
+
+Plan: `C:\Users\HabiburRahmanShalin\.claude\plans\piped-sniffing-lollipop.md`. `EventGallery`/`EventPhoto`
+extended in place for member ownership (no new `Album` table); admin = `Admin`/`SuperAdmin` role;
+legacy dead `POST api/gallery` "submit a memory" endpoint fixed separately from the new album flow.
+
+40.1 [TODO] Domain + migration: `EventGallery`/`EventPhoto` gain `OwnerMemberId`/`UploadedByMemberId`,
+`Status` (`SubmissionStatus`, default `Approved`), `RejectionReason`; `JobOpportunity` gains
+`Status`/`RejectionReason`; `Enums.NotificationType.ApprovalRequest` added; `AlumniEvent` gains
+`RequiresRegistration` (bool, default `true`). One EF migration for all of the above (`AddApprovalWorkflowToGalleryAndJobs`), verified against a non-empty DB per 37.0's `EnsureCreated()` gotcha.
+
+40.2 [TODO] `IAdminNotificationService`/`AdminNotificationService` (new) — resolves Admin/SuperAdmin
+members via `User.Roles`, fans out `INotificationService.CreateNotificationAsync` +
+`IEmailService.SendEmailAsync` on any pending approval.
+
+40.3 [TODO] Gallery/album backend: member album create/add-photo/list-mine endpoints, admin
+pending/approve/reject endpoints (gallery + per-photo), public/member-facing reads filtered to
+`Status == Approved`, fixed `POST api/gallery` "submit a memory" handler.
+
+40.4 [TODO] Jobs backend: `Status` gate on `PostJobAsync`/`GetActiveJobsAsync`, admin
+pending/approve/reject endpoints, poster notified on resolution.
+
+40.5 [TODO] Events-without-registration: `RequiresRegistration` threaded through Create/UpdateEventDto
++ `EventService`, `RegisterForEventAsync` rejects when false.
+
+40.6 [TODO] Web member portal: "My Albums" UI in `common/gallery/`, pending-job badge in
+`common/jobs/`, admin-events form checkbox for `requiresRegistration`, public events Register
+button gated on `requiresRegistration`.
+
+40.7 [TODO] Web admin: new `admin/gallery-approval/` and `admin/job-approval/` screens cloned from
+`admin/article-approval/` pattern, wired into nav + `app.routes.ts`.
+
+40.8 [TODO] Mobile: `GalleryService`/job-service pending/approve/reject calls, member "My Albums"
+section on `gallery_screen.dart`, generalized/sibling approval screens off
+`approval_queue_screen.dart` (with reject-reason capture), `event_details_screen.dart` FAB gated on
+`requiresRegistration`.
+
+40.9 [TODO] Tests: backend `GalleryControllerTests`/job-approval/`AdminNotificationService` unit
+tests; frontend `gallery-approval.spec.ts`/`job-approval.spec.ts` cloned from
+`article-approval.spec.ts`; e2e `gallery.spec.ts` extended; mobile widget tests if the project
+convention has them.
+
+40.10 [TODO] Per 12.6: `dotnet test`, `npx vitest run`, `npm run type-check`, `npx ng build` (or note
+the known font-inlining network gap from 39.7) all pass before closing this Area. Update
+`docs/FEATURES.md` per `feedback_docs_update_scope`.
+
+40.11 [DONE] Backend for 40.1-40.5, 40.9 shipped: Domain/migration `AddApprovalWorkflowToGalleryAndJobs`
+applied, `AdminNotificationService`, Gallery member-album + approve/reject endpoints, Jobs approve/reject
+endpoints, `AlumniEvent.RequiresRegistration` + `RegisterForEventAsync` guard, backend tests
+(368 total / 367 passed / 1 pre-existing skip). `docs/FEATURES.md` §7.2 updated.
+
+40.12 [DONE] Web (40.6-40.7) shipped: `admin/gallery-approval/` + `admin/job-approval/` screens
+(cloned from `article-approval`), member "My Albums" UI, job pending badge, `admin-events`
+`requiresRegistration` checkbox, public events Register/participation UI fully hidden (not just
+disabled) when `requiresRegistration===false` — closes 41.5. `npx vitest run` 315/315 (66 files),
+type-check clean. Job endpoints are actually under `api/jobs`, not `api/jobhub`.
+
+40.13 [DONE] Mobile (40.8) shipped: `gallery_approval_screen.dart` + `job_approval_screen.dart` as
+sibling screens off the dashboard (not tabs, matching the `article_approval_screen` precedent), member
+"My Albums" section on `gallery_screen.dart`, reject-reason capture added to all three approval flows
+(including the previously-missing member-approval one), event registration FAB/badge fully hidden when
+`requiresRegistration===false`. `flutter analyze` clean, `flutter test` 28/28 passed (goldens skipped
+per existing CI convention). No admin events-registration screen exists on mobile (confirmed, N/A).
+
+40.14 [DONE] Area 40 fully complete end-to-end (backend + web + mobile).
+
+---
+
+# Area 41 — Live-site bug fixes (raised by user 2026-08-26, fix before continuing Area 40 web/mobile)
+
+41.1 [DONE] `POST /api/news` 400 fixed — root cause was `[Url]` validation on `CreateNewsDto.ImageUrl`
+rejecting the relative paths the app's own image-upload endpoint returns; replaced with a
+`RelativeOrAbsoluteUrlAttribute`. `NewsControllerTests` extended (7-case parameterized test).
+
+41.2 [DONE] Notice image-before-save fixed — `admin-news.ts` was the only admin image-upload form
+uploading on file-select instead of staging-then-uploading on Save (gallery/members/events all already
+staged-then-submit); brought into line, `admin-news.spec.ts` extended.
+
+41.3 [DONE] Admin delete-any-entity audited across all 18 admin screens; added to Contact Messages
+and Roles (system-admin accounts only, member-linked login accounts excluded to avoid locking out
+portal access); Ledger/Audit/approval-queues intentionally left non-deletable (audit-trail integrity).
+
+41.4 [DONE] Admin event visibility on unpublish fixed — root cause was an EF Core global
+`HasQueryFilter(e => e.IsActive)` on `AlumniEvent` (`AlumniEventConfiguration.cs`) silently applying to
+admin's list/update/delete/logo-update queries too, not just public reads; admin paths in
+`EventService.cs` now use `.IgnoreQueryFilters()`, matching the existing `MemberService`/`NewsService`/
+`AuthService` convention. Also fixed as a side effect: admin previously couldn't re-publish, delete, or
+change the logo of an already-unpublished event. `EventServiceTests` extended (3 new tests).
+
+41.5 [DONE] Public portal shows zero registration/participation UI (button, count, "spots left", etc.)
+for events where `RequiresRegistration == false` — web (`common/events/`) fully removes the
+Register/Closed button + participant-count pill, mobile (`event_details_screen.dart`,
+`events_screen.dart`) fully hides the FAB/badge, in both cases rather than merely disabling them.
+Shipped as part of Area 40 (40.12/40.13).
+
+41.6 [DONE] `dotnet test` 378/378 passed, `npx vitest run` 306/306 passed (64 files) after all four
+bug fixes; final combined state after Area 40 frontend work: `npx vitest run` 315/315 (66 files),
+`flutter test` 28/28 passed.
+
+---
+
+# Area 42 — Elections forms/docs manageable from admin portal (raised by user 2026-08-26, plan only, not yet built)
+
+Today election forms/docs shown at the public `/elections` route are static/seeded ([[session_election_form_pad]], [[session_area36_constitution_seeder_voting]]). User wants admin to manage (create/edit/replace) the election forms, documents, and other information currently shown in the public/portal elections pages, from the admin portal — analogous to the existing SiteContent CMS pattern ([[session_area34_sitecontent_notices]]).
+
+42.1 [TODO] Explore/plan (Plan Mode required — multi-file, touches Domain/Application/Infra/API/Web
+admin+public/Mobile): inventory exactly what's static today under the elections feature (entities,
+seeders, controllers, public/portal components) before designing the admin-editable model — do not
+assume it mirrors SiteContent without checking field/document shape differences (forms likely need
+file/PDF attachments, not just rich text).
+42.2 [TODO] Design admin CRUD screens + API for whatever the inventory in 42.1 finds (forms list,
+per-form fields/attachment, publish state) following `ghcaa-design` conventions.
+42.3 [TODO] Web public/portal elections pages read from the new admin-managed source instead of the
+seeder/static content.
+42.4 [TODO] Mobile: sync if elections content is surfaced there.
+42.5 [TODO] Tests + docs update per usual closing convention.

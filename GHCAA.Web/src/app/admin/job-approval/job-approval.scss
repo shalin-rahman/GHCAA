@@ -1,0 +1,82 @@
+.submissions-table {
+    th {
+        text-align: left;
+        padding: 1.25rem 1.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--glass-border);
+        font-size: 0.9rem;
+    }
+}
+
+.job-info {
+    strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--text-main);
+    }
+    p {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+}
+
+.job-preview {
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        letter-spacing: -1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .preview-body {
+        line-height: 1.8;
+        font-size: 1.1rem;
+        color: var(--text-main);
+        white-space: pre-wrap;
+    }
+}
+
+.modal-box.large {
+    max-width: 1000px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+
+    .modal-body {
+        flex: 1;
+        overflow-y: auto;
+    }
+}
+
+.rejection-box {
+    /* Bare textarea (no .form-group) — give it the standard themed control look
+       instead of the user-agent border + off-theme black fill. */
+    textarea {
+        width: 100%;
+        min-height: 100px;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        color: var(--text-main);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none;
+        resize: vertical;
+
+        &:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
+        }
+
+        &::placeholder { color: var(--text-muted); opacity: 0.5; }
+    }
+}

@@ -19,6 +19,8 @@ namespace GHCAA.Application.DTOs
         public bool IsActive { get; set; }
         public int PostedByMemberId { get; set; }
         public string? PostedByMemberName { get; set; }
+        public Enums.SubmissionStatus Status { get; set; }
+        public string? RejectionReason { get; set; }
     }
 
     public class CreateJobDto

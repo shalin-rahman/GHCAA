@@ -157,6 +157,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                               itemBuilder: (context, index) {
                                 final ev = filtered[index];
                                 final isOpen = _isRegistrationOpen(ev);
+                                final requiresReg = ev['requiresRegistration'] != false;
                                 final fullImgUrl = AppConfig.resolveImageUrl(ev['coverImageUrl'] ?? ev['imageUrl']);
  
                                 return Padding(
@@ -190,19 +191,20 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                   height: 192,
                                                   child: Center(child: Icon(Icons.celebration_outlined, size: 64, color: AppTheme.royalGold.withValues(alpha: 0.1))),
                                                 ),
-                                              Positioned(
-                                                top: 16,
-                                                right: 16,
-                                                child: Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceS, vertical: AppTheme.spaceXS),
-                                                  decoration: BoxDecoration(
-                                                    color: isOpen ? Colors.green.withValues(alpha: 0.9) : Colors.redAccent.withValues(alpha: 0.9), 
-                                                    borderRadius: BorderRadius.circular(AppTheme.radiusXS),
-                                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: AppTheme.spaceS)]
+                                              if (requiresReg)
+                                                Positioned(
+                                                  top: 16,
+                                                  right: 16,
+                                                  child: Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceS, vertical: AppTheme.spaceXS),
+                                                    decoration: BoxDecoration(
+                                                      color: isOpen ? Colors.green.withValues(alpha: 0.9) : Colors.redAccent.withValues(alpha: 0.9),
+                                                      borderRadius: BorderRadius.circular(AppTheme.radiusXS),
+                                                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: AppTheme.spaceS)]
+                                                    ),
+                                                    child: Text(isOpen ? 'REGISTRATION OPEN' : 'CLOSED', style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
                                                   ),
-                                                  child: Text(isOpen ? 'REGISTRATION OPEN' : 'CLOSED', style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
                                                 ),
-                                              ),
                                               Positioned(
                                                 bottom: 0,
                                                 left: 0,
@@ -253,18 +255,20 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                 Text(ev['title'] ?? 'Alumni Reunion Event', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
                                                 const SizedBox(height: AppTheme.spaceS),
                                                 Text(ev['description'] ?? 'No description provided.', style: Theme.of(context).textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
-                                                const SizedBox(height: AppTheme.spaceL),
-                                                SizedBox(
-                                                  width: double.infinity,
-                                                  child: ElevatedButton.icon(
-                                                    onPressed: isOpen ? () {
-                                                      HapticFeedback.lightImpact();
-                                                      handleEventPayment((ev['registrationFee'] ?? 0).toDouble(), ev['title'] ?? 'Event');
-                                                    } : null,
-                                                    icon: Icon(isOpen ? Icons.how_to_reg_rounded : Icons.lock_clock_outlined, size: 18),
-                                                    label: Text(isOpen ? 'CONFIRM REGISTRATION' : 'REGISTRATION CLOSED'),
+                                                if (requiresReg) ...[
+                                                  const SizedBox(height: AppTheme.spaceL),
+                                                  SizedBox(
+                                                    width: double.infinity,
+                                                    child: ElevatedButton.icon(
+                                                      onPressed: isOpen ? () {
+                                                        HapticFeedback.lightImpact();
+                                                        handleEventPayment((ev['registrationFee'] ?? 0).toDouble(), ev['title'] ?? 'Event');
+                                                      } : null,
+                                                      icon: Icon(isOpen ? Icons.how_to_reg_rounded : Icons.lock_clock_outlined, size: 18),
+                                                      label: Text(isOpen ? 'CONFIRM REGISTRATION' : 'REGISTRATION CLOSED'),
+                                                    ),
                                                   ),
-                                                ),
+                                                ],
                                               ],
                                             ),
                                           ),

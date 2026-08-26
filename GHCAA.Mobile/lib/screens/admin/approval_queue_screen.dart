@@ -9,6 +9,7 @@ import '../../core/widgets/glass_container.dart';
 import '../../features/auth/auth_service.dart';
 import '../../core/widgets/empty_state_widget.dart';
 import '../../core/widgets/logo_spinner.dart';
+import '../../core/widgets/reject_reason_dialog.dart';
 
 final pendingApprovalsProvider = FutureProvider<List<dynamic>>((ref) async => ref.read(adminServiceProvider).getPendingApprovals());
 
@@ -120,8 +121,8 @@ class ApprovalQueueScreen extends ConsumerWidget {
                                                 ),
                                                 const SizedBox(width: 20),
                                                 IconButton(
-                                                  icon: const Icon(Icons.remove_circle_outline_rounded, color: Colors.redAccent, size: 24), 
-                                                  onPressed: () => _handleApproval(ref, member['id'], false),
+                                                  icon: const Icon(Icons.remove_circle_outline_rounded, color: Colors.redAccent, size: 24),
+                                                  onPressed: () => _handleReject(context, ref, member['id']),
                                                   padding: EdgeInsets.zero,
                                                   constraints: const BoxConstraints(),
                                                 ),
@@ -169,8 +170,21 @@ class ApprovalQueueScreen extends ConsumerWidget {
   Future<void> _handleApproval(WidgetRef ref, int id, bool approve) async {
     final adminProfile = ref.read(userProfileProvider).value;
     final adminId = adminProfile?['id'] ?? 1; // Fallback to 1 if not yet loaded (SuperAdmin expected)
-    
+
     final success = await ref.read(adminServiceProvider).resolveApproval(id, approve, adminId: adminId);
+    if (success) {
+      ref.invalidate(pendingApprovalsProvider);
+    }
+  }
+
+  Future<void> _handleReject(BuildContext context, WidgetRef ref, int id) async {
+    final reason = await showRejectReasonDialog(context, title: 'REJECT APPLICATION');
+    if (reason == null) return;
+
+    final adminProfile = ref.read(userProfileProvider).value;
+    final adminId = adminProfile?['id'] ?? 1;
+
+    final success = await ref.read(adminServiceProvider).resolveApproval(id, false, adminId: adminId, reason: reason);
     if (success) {
       ref.invalidate(pendingApprovalsProvider);
     }

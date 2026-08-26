@@ -85,5 +85,13 @@ namespace GHCAA.API.Controllers
             if (!success) return BadRequest(new { Message = "User not found" });
             return Ok(new { Message = "Role removed successfully" });
         }
+
+        [HttpDelete("users/{id}")]
+        public async Task<IActionResult> DeleteUser(int id, CancellationToken cancellationToken)
+        {
+            var success = await _userService.DeleteSystemAdminAsync(id, cancellationToken);
+            if (!success) return BadRequest(new { Message = "Only non-member system administrator accounts can be deleted here." });
+            return Ok(new { Message = "System administrator account deleted." });
+        }
     }
 }

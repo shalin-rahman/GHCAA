@@ -40,6 +40,8 @@ namespace GHCAA.Domain.Models
         public int? ParticipantLimit { get; set; }
         public bool HasWaitlist { get; set; } = false;
 
+        public bool RequiresRegistration { get; set; } = true;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

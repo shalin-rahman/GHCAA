@@ -1,0 +1,155 @@
+<div class="admin-feature">
+    <app-page-header title="Gallery Review" [total]="totalPending()"
+        emptySubtitle="Review member-submitted albums and photos">
+        <small subtitle>Showing {{ filteredAlbums().length + filteredPhotos().length }} of {{ totalPending() }} pending items</small>
+    </app-page-header>
+
+    <!-- Search Bar -->
+    <div class="filter-bar">
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search by album title or photo caption…"></app-search-bar>
+    </div>
+
+    @if (loading()) {
+    <div class="loading-state glass-card py-20 text-center">
+        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+        <p>Checking for pending submissions...</p>
+    </div>
+    } @else {
+    <h4 class="section-label">Pending Albums</h4>
+    <div class="submissions-table glass-card table-wrap mb-10">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Album Info</th>
+                    <th>Owner</th>
+                    <th>Photos</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (album of filteredAlbums(); track album.id) {
+                <tr>
+                    <td>
+                        <div class="article-info">
+                            <img class="thumb" [src]="validImg(album.photos[0]?.photoPath)" alt="" appImgFallback>
+                            <div class="txt">
+                                <strong>{{ album.title }}</strong>
+                                <p>{{ album.description }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ album.ownerMemberId }}</td>
+                    <td>{{ album.photos.length }}</td>
+                    <td>{{ album.createdAt | date:'dd-MM-yyyy' }}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" (click)="viewAlbum(album)">Review Album</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="5" class="py-20 text-center italic opacity-50">
+                        {{ searchQuery() ? 'No albums match your search.' : 'No pending albums found.' }}
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <h4 class="section-label">Pending Photos</h4>
+    <div class="submissions-table glass-card table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Caption</th>
+                    <th>Owner</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (photo of filteredPhotos(); track photo.id) {
+                <tr>
+                    <td>
+                        <img class="thumb" [src]="validImg(photo.photoPath)" alt="" appImgFallback>
+                    </td>
+                    <td>{{ photo.caption }}</td>
+                    <td>{{ photo.uploadedByMemberId }}</td>
+                    <td>{{ photo.uploadedAt | date:'dd-MM-yyyy' }}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" (click)="viewPhoto(photo)">Review Photo</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="5" class="py-20 text-center italic opacity-50">
+                        {{ searchQuery() ? 'No photos match your search.' : 'No pending photos found.' }}
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>
+
+<!-- Review Modal -->
+@if (selectedItem(); as item) {
+<div class="modal-overlay" (click)="selectedItem.set(null)">
+    <div class="modal-box large reveal-top" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ item.kind === 'album' ? 'Review Album' : 'Review Photo' }}</h3>
+            <button class="close-btn" (click)="selectedItem.set(null)">×</button>
+        </div>
+        <div class="modal-body custom-scrollbar">
+            @if (item.kind === 'album') {
+            <div class="article-preview">
+                @if (item.album.photos[0]?.photoPath) {
+                <img [src]="validImg(item.album.photos[0]?.photoPath)" alt="Cover" class="preview-hero" appImgFallback>
+                }
+                <div class="preview-meta mb-6 flex gap-4">
+                    <span class="text-muted">Owner Member #<strong>{{ item.album.ownerMemberId }}</strong></span>
+                </div>
+                <h1>{{ item.album.title }}</h1>
+                <div class="preview-body mt-8">
+                    {{ item.album.description }}
+                </div>
+                <div class="photo-grid-preview mt-8">
+                    @for (p of item.album.photos; track p.id) {
+                    <img [src]="validImg(p.photoPath)" alt="" appImgFallback>
+                    }
+                </div>
+            </div>
+            } @else {
+            <div class="article-preview">
+                <img [src]="validImg(item.photo.photoPath)" alt="Photo" class="preview-hero" appImgFallback>
+                <div class="preview-meta mb-6 flex gap-4">
+                    <span class="text-muted">Uploaded by Member #<strong>{{ item.photo.uploadedByMemberId }}</strong></span>
+                </div>
+                <p class="preview-body mt-4">{{ item.photo.caption }}</p>
+            </div>
+            }
+
+            <div class="rejection-box mt-10 p-6 glass-card bg-white/5">
+                <label class="text-xs uppercase font-black mb-4 block">Rejection Note (Only if rejecting)</label>
+                <textarea [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)"
+                    placeholder="Explain why this submission is being rejected..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer flex justify-between">
+            <button class="btn btn-secondary" (click)="selectedItem.set(null)">Close Review</button>
+            <div class="actions flex gap-4">
+                <button class="btn btn-outline" (click)="reject()" [disabled]="isProcessing()">
+                    {{ isProcessing() ? 'Processing...' : 'Reject Submission' }}
+                </button>
+                <button class="btn btn-accent" (click)="approve()" [disabled]="isProcessing()">
+                    {{ isProcessing() ? 'Approving...' : 'Approve' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}

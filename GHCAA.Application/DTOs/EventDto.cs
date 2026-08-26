@@ -21,6 +21,7 @@ namespace GHCAA.Application.DTOs
         public DateTime? RegistrationEndDate { get; set; }
         public string? AdminNote { get; set; }
         public int ParticipantCount { get; set; }
+        public bool RequiresRegistration { get; set; }
     }
 
     public class CreateEventDto : IValidatableObject
@@ -51,6 +52,8 @@ namespace GHCAA.Application.DTOs
 
         public int? ParticipantLimit { get; set; }
         public bool HasWaitlist { get; set; } = false;
+
+        public bool RequiresRegistration { get; set; } = true;
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

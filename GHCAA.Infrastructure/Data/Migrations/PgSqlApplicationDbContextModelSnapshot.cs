@@ -7166,6 +7166,9 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<bool>("RequiresPayment")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("RequiresRegistration")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -7196,6 +7199,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             RegistrationFee = 3000.0m,
                             RegistrationStartDate = new DateTime(2025, 12, 18, 23, 59, 59, 0, DateTimeKind.Utc),
                             RequiresPayment = true,
+                            RequiresRegistration = true,
                             StartDate = new DateTime(2026, 1, 24, 9, 0, 0, 0, DateTimeKind.Utc),
                             Status = 0,
                             Title = "GHC 1st Grand Reunion"
@@ -7214,6 +7218,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             RegistrationFee = 500.0m,
                             RegistrationStartDate = new DateTime(2026, 2, 6, 7, 21, 0, 0, DateTimeKind.Utc),
                             RequiresPayment = true,
+                            RequiresRegistration = true,
                             StartDate = new DateTime(2026, 3, 14, 7, 21, 0, 0, DateTimeKind.Utc),
                             Status = 0,
                             Title = "Iftar 2026"
@@ -7232,6 +7237,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             RegistrationFee = 2000.0m,
                             RegistrationStartDate = new DateTime(2026, 10, 31, 8, 38, 0, 0, DateTimeKind.Utc),
                             RequiresPayment = true,
+                            RequiresRegistration = true,
                             StartDate = new DateTime(2026, 12, 30, 1, 38, 0, 0, DateTimeKind.Utc),
                             Status = 0,
                             Title = "Annual Tour"
@@ -7250,6 +7256,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             RegistrationFee = 0.0m,
                             RegistrationStartDate = new DateTime(2026, 5, 31, 9, 40, 0, 0, DateTimeKind.Utc),
                             RequiresPayment = false,
+                            RequiresRegistration = true,
                             StartDate = new DateTime(2026, 6, 28, 9, 40, 0, 0, DateTimeKind.Utc),
                             Status = 0,
                             Title = "Tree Plantation  2026"
@@ -7362,11 +7369,12 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 1,
-                            ChangeSummary = "Updated membership eligibility criteria and added provisions for digital governance voting.",
-                            Content = "CONSTITUTION OF THE GOVERNMENT HARAGANGA COLLEGE ALUMNI ASSOCIATION (GHCAA)\n\nArticle I: Name and Office\nThe name of the association shall be Government Haraganga College Alumni Association, abbreviated as GHCAA.\n\nArticle II: Objectives\nTo foster a spirit of loyalty and to promote the general welfare of Haraganga College. To support the college's goals and to strengthen the ties between alumni, the community, and the college.\n\nArticle III: Membership\nAll former students who have completed at least one academic session at Haraganga College are eligible for membership.\n\nArticle IV: Executive Committee\nThe management of the association shall be vested in an Executive Committee elected every two years.\n\nArticle V: Meetings\nThe Annual General Meeting (AGM) shall be held once a year at a time and place determined by the EC.",
-                            EffectiveDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ChangeSummary = "Ratified version 4.2 of the Association's constitution, superseding version 4.0. Article I (Name, Nature & Motto) grows to thirteen sections, adding the Flag, Theme Song, Registration No., Registered Office, Banner and Signboard, Digital Data Platform and Social media platforms -- items to be finalised by the Executive Committee through formal bylaws within six months of registration. Article II now carries eleven objectives, adding digital literacy, modern career training and entrepreneurship; a long-term archival project documenting alumni achievements and the Institution's history; and financial assistance and scholarships for meritorious and financially disadvantaged students. The election articles are restated around the Election Commission, Election Appeals Tribunal, electronic voting and the first election of the Association, and the document closes at Article XII (Dissolution of the Association) followed by the Future Vision statement.",
+                            Content = "Govt. Haraganga College (established on 18 Dec 1938) is one of the most esteemed educational institutions in Bangladesh. Over the decades, the college has produced thousands of graduates who are now contributing to society at national and international levels. The Govt. Haraganga College Alumni Association (hereinafter referred to as \"HARAGANGIAN\") unites former students of the institution under a shared commitment to lifelong connection, service, ethical conduct, and collective progress. This Constitution defines the governance, membership, responsibilities, and enduring vision of the Association. The Association shall operate in accordance with the principles set forth in this Constitution, including strict political neutrality.\n\nArticle I: Name, Nature & Motto\n\nSection 1: Name The official name of the organization shall be Govt. Haraganga College Alumni Association. Also referred to as “HARAGANGIAN” for social platforms, cultural and informal representation only.\n\nSection 2: Founding Date The official founding date of the organization shall be 29 Nov 2025\n\nSection 3: Nature of the Association The Association shall remain:\n\n1. Non-political\n2. Non-religious\n3. Inclusive to all eligible alumni\n4. Non-profit\n5. Patron of Education and Culture\n6. Philanthropic\n\nSection 4: Motto The official motto of the organization shall be Sharing Heritage, Aligning Lives, Integrating Networks (ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন)\n\nSection 5: Branding & Identity The Association shall have the right to use the name \"Govt. Haraganga College,\" its logo, and related branding only with formal written permission from the Institution. Unauthorized personal or commercial use is strictly prohibited. Such permission shall not imply ownership or institutional control unless expressly stated in writing.\n\nSection 6: Logo The official logo of the Govt. Haraganga College Alumni Association is a symbolic representation of the institution’s heritage and the shared values of its graduates. The design elements are defined as follows:\n\n- Historic Heritage: The apex of the logo features a detailed rendering of the Govt. Haraganga College historic building, representing the foundation of the institution's academic legacy.\n- The Open Book: Located within the shield, it symbolizes lifelong learning, knowledge, and the primary mission of education.\n- The Torch: This quadrant represents enlightenment, leadership, and the guiding light that education provides to society.\n- The Graduation Cap (Mortarboard): This symbol marks the successful completion of academic journeys and the transition from student to alumnus.\n- The Handshake: Situated at the base of the shield, it signifies the unity, networking, and mutual support of the \"Haragangian\" community.\n- The Identity & Legacy: The surrounding red and gold border displays the official association name and its establishment year, Est. 2025.\n\nSection 7: Flag The Official Flag of the Alumni Association as illustrated below Design: The official flag features a solid white background with the association's logo positioned prominently in the center.\n\nSymbolism of Color: The white color of the flag serves as a symbol of peace, harmony, non-violence, and purity.\n\nSection 8: Theme Song ____________.\n\nSection 9: Registration No ____________.\n\nSection 10: The Registered Office of the Association shall be at: ____________. This address shall be used for all legal correspondence until changed by the Executive Committee and notified to the Registrar of Societies.\n\nSection 11: Banner and Signboard of the Association shall be: ____________.\n\nSection 12: Digital Data Platform of the Association shall be: ____________.\n\nSection 13: Social media platforms of the Association shall be Facebook ______, WhatsApp _______\n\nAll undefined items under this Article shall be finalized by the Executive Committee through formal bylaws within 6 months of registration. Until such definitions are finalized, no interim use shall create legal or financial obligations for the Association.\n\nArticle II: Purpose & Objectives\n\n1. To connect alumni through networking, reunions, and professional exchange.\n2. To foster mutual support with ethical conduct.\n3. To celebrate the Institution's legacy via cultural and academic events.\n4. To promote social responsibility, philanthropy, and collective welfare including but not limited to blood donation programs, tree plantation initiatives, counseling services, and humanitarian aid.\n5. To ensure fair participation opportunities for all alumni.\n6. To support official college programs (sports day, prize ceremonies etc).\n7. To develop a Social & Recreational Centre.\n8. To collaborate on student-focused educational and cultural programs.\n9. To promote digital literacy, modern career training, and entrepreneurship among alumni and students.\n10. To maintain a long-term archival project documenting alumni achievements and the Institution's history.\n11. To provide financial assistance and scholarships to meritorious and financially disadvantaged students, subject to policies approved by the Executive Committee.\n\nArticle III: Membership\n\nSection A: Eligibility & Verification\n\n1. All ex-students (including previously enrolled or registered students) of the Government Haraganga College are eligible.\n2. Required proof: testimonial, certificate, transcript, or any verifiable official document.\n3. Membership subject to approval by the Executive Committee. Approval shall not be unreasonably withheld and must be based on documented eligibility criteria.\n4. The Association may deny or revoke membership for misconduct.\n5. Members must comply with this Constitution.\n6. \"Years since obtaining HSC Certification\" shall be calculated from the date of HSC passing year.\n7. Former students who did not complete HSC but studied at least one academic year may apply for Associate Membership.\n\nSection B: Membership Types\n\n- Voting Members (Paid): Founding, Executive, and General.\n- Non-Voting Members: Associate, Honorary, Advisory.\n\nSection C: Founding Membership\n\n- Eligibility:\n1. Must be certified alumni of the Institution.\n2. Must have completed at least 20 years since obtaining HSC Certification.\n3. Must be a Graduate (Bachelor Certified) from a recognized Institution.\n4. Outstanding contributions — clarified as: a. Minimum defined donation slabs set by bylaws. The Executive Committee (EC) shall publish clear thresholds for donation slabs annually. OR b. Major Intellectual/Developmental/Technical Contribution: A documented, legacy-defining intellectual or developmental or technical contribution to the Institution, demonstrating the strategic leadership necessary to uphold constitutional duties and decisively guide the Association's foundational vision. Requires formal documentation and ratification by a two-thirds majority vote of the Executive Council (EC).\n5. Demonstrated leadership.\n6. Clean disciplinary record.\n7. Must not hold active partisan political positions at local, national, or international levels..\n8. Should act as advisor/mentor.\n9. Founding Members shall also be known and recognized as Lifetime Members of the Association.\n- Founding Members must submit an \"Declaration of Non-Political Engagement\" to maintain active status. Failure to submit will result in automatic suspension until compliance.\n\nSection D: Executive Membership\n\n- Eligibility:\n\n1. Must be certified alumni of the Institution.\n2. Must have completed at least 10 years since obtaining HSC Certification.\n3. Must be a Graduate (Bachelor Certified) from a recognized Institution.\n4. Active role in events and decision-making.\n5. Relevant skills preferred.\n6. Good moral standing.\n7. Must be a General Member in good standing.\n- Executive Members must attend at least 60% of committee meetings per term.\n\nSection E: General Membership\n\n- Eligibility:\n\n1. Must be certified alumni of the Institution.\n2. Must have completed at least 5 years since obtaining HSC Certification.\n3. Interest in alumni activities.\n4. Payment of membership fee. Must be duly registered, with all applicable registration and annual fees paid and no outstanding dues.\n5. Voting member.\n\nSection F: Associate Membership\n\n- Eligibility:\n\n1. Open to any verified ex-student.\n2. No years requirement.\n3. Registration fee only\n4. Non-voting.\n5. Access limited to open programs.\n6. May join non-policy subcommittees (e.g., event volunteer teams).\n7. Upgrade to General Membership anytime by satisfying conditions.\n\nSection G: Honorary Membership\n\n- Eligibility:\n\n1. For distinguished contributors.\n2. Requires two-thirds EC approval.\n3. Non-voting unless specifically granted.\n- Honorary Members must not use their title for personal promotion.\n\nSection H: Advisory Membership\n\n1. Eligibility: a. Advisory Membership is for individuals who provide high-level guidance, institutional linkage, and community insight. Members include:\n\n. Principal of Govt. Haraganga College i. Vice Principal of the College ii. Former Principals of Colleges. iii. Former Teachers of the College iv. Current Teachers of the College (selected rotationally or by recommendation) v. Alumni with exceptional contributions to society or community (must meet at least two of the following criteria):\n\n1. Minimum 10 years of demonstrable service in social, educational, charitable, or developmental initiatives.\n2. Documented leadership roles in local, national, or international community organizations.\n3. Significant contributions to youth development, public welfare, education, or health campaigns.\n4. Recognized work (awards, citations, published achievements) that aligns with the Institution's values.\n5. Proven record of non-political, ethical community service positively impacting society. vi. Advisory Members shall not be counted toward quorum requirements of the General Body or Executive Committee.\n2. Conditions:\n\n1. Advisory Members are non-voting.\n2. Cannot contest Executive Committee elections.\n3. May attend meetings by invitation, provide recommendations, and advise EC.\n4. No membership fee required.\n5. Term: 3 years, renewable by EC approval.\n6. Must maintain neutrality and ethical conduct at all times.\n7. Advisory members representing government or institutional posts shall not be counted as organizational members for quorum.\n1. Roles & Responsibilities:\n\n1. Advise on long-term policy, institutional strategy, and major initiatives.\n2. Review annual reports, budgets, and proposals.\n3. Ensure Association remains apolitical, inclusive, and ethical.\n4. Mediate in escalated disputes if requested by EC.\n5. Act as a bridge between alumni, College, and community stakeholders.\n\nSection I: Membership Application & Approval\n\n1. Submit form + documents.\n2. Verification within 30 days.\n3. EC approves or rejects.\n4. False information = immediate termination.\n5. Appeals may be filed within 15 working days for rejected applicants.\n\nSection J: Membership Terms\n\n1. Founding: Permanent/Lifetime (unless revoked).\n2. Executive: 3 years (renewable). May be upgraded to Lifetime status per Section C.\n3. General & Associate: Continuous.\n4. Honorary: Lifetime or term as approved.\n5. Advisory: 3-year term, renewable upon EC approval.\n\nSection K: Member Rights & Responsibilities\n\n1. Common Rights: a. Attend meetings and events. b. Respectfully engage with members. c. Uphold reputation and ethics. d. Maintain confidentiality.\n2. Tier(Membership)-Specific Rights: a. Founding & Executive: Full voting rights, Eligible for EC elections, Full facility access, Must pay dues. b. General: Voting rights, Full facility access, Must pay dues. c. Associate: Non-voting, Limited access, d. Honorary: As defined by EC. e. Advisory: Non-voting, May attend strategic/AGM meetings upon invitation, Provide recommendations to EC, Cannot hold office in EC, Serve as institutional and community guidance.\n3. Future Lifetime Members: The Executive Committee (EC) reserves the right to grant \"Lifetime Membership\" status to Executive Members in the future, based on significant donations, outstanding service, or other criteria as defined in the Bylaws.\n\nSection L: Resignation & Register Any member may resign by written notice to the General Secretary. The Association shall maintain a Membership Register containing name, address, membership type, date of joining, and termination.\n\nArticle IV: Executive Committee\n\nSection A: Composition & Term the Executive Committee (EC) shall consist of 15 positions, comprising 13 elected positions and 2 ex-officio, non-voting positions, for a term of three (3) years.\n\nSection B: Founding Member Legacy Provision To preserve institutional memory, three (3) of the thirteen (13) elected Executive Committee positions shall be filled by Founding Members for the first fifteen (15) years, after which this provision may be reviewed. This reservation shall not create hereditary or permanent entitlement beyond the period specified.\n\nSection C: Transition Flexibility If fewer than three (3) eligible Founding Members contest the election in any election cycle, the remaining positions shall be opened to eligible Executive Members for that cycle. If the quota cannot be met despite notifications, elections shall proceed without the quota for that cycle.\n\nSection D: Positions & Duties\n\n1. President: Leads organization represents association.\n2. Vice President: Assists President assumes duties when absent.\n3. General Secretary: Manages correspondence, records minutes.\n4. Office Secretary: Manages office, documents and center operations.\n5. Joint Secretary -1: Supports General Secretary\n6. Joint Secretary -2: Supports General Secretary\n7. Treasurer: Manages finances, prepares reports.\n8. Media Cultural & Sports Secretary: Plans cultural events. Handles print and media.\n9. Organizational Secretary: Handles member engagement.\n10. Information and Technology Secretary: Manages digital platform, database.\n11. Member-1: Support EC operations.\n12. Member-2: Support EC operations.\n13. Law Secretary: Constitutional and legislative activities.\n14. Immediate Past President: Non-voting advisor.\n15. Institutional Representative: Non-voting advisor. Current GHC Principal/VP\n\nSection E: Eligibility Clauses for Technical Positions & Duties\n\n1. Law Secretary: Eligibility & Qualification: The Law Secretary shall either:\n\n1. Have demonstrable contribution to the drafting, review, or interpretation of this Association’s Constitution or Bylaws; or\n2. Be a qualified legal professional or legal advisor with documented experience in constitutional, corporate, or organizational governance matters, including service as a legal or constitutional advisor to companies, institutions, or registered organizations.\n1. Information and Technology Secretary: Eligibility & Qualification:\n\nThe Information and Technology Secretary must possess substantial hands-on professional experience in one or more of the following areas:\n\n1. Software programming or application development\n2. Cyber security or information security management\n3. Database design, administration, or data governance\n4. Digital systems administration, platforms, or technology infrastructure Relevant academic qualifications, professional certifications, or verifiable project experience shall be considered acceptable evidence.\n\nSection F: Founding Member Representation within Elected Positions\n\n1. Of the thirteen (13) elected Executive Committee positions, three (3) positions shall be reserved for Founding Member representation.\n2. These three (3) positions shall be the following named offices:\n\n1. President\n2. General Secretary\n3. Treasurer\n1. Where multiple eligible Founding Members contest for a reserved position, the position shall be filled by election through votes of the Voting Members.\n2. Where only one eligible Founding Member contests a reserved position, that candidate shall be declared elected unopposed.\n3. Where no eligible Founding Member contests a reserved position, the position shall be opened to other eligible Executive Members and filled through election.\n\nSection G: Appointed / Ex-Officio Positions (Non-Voting)\n\n1. Immediate Past President – Non-voting advisor\n2. Institutional Representative – Non-voting advisor (Current GHC Principal / Vice Principal)\n\nSection H: Meetings The EC must meet at least half-yearly with minutes archived. Quorum shall be 50% of elected members.\n\nSection I: Succession If any elected EC member resigns, passes away, or is incapacitated during their term, the EC may appoint a replacement from eligible members to serve until the next AGM.\n\nArticle V: Governance & Elections\n\nSection A: Annual General Meeting (AGM) The AGM is held once yearly for all members to discuss performance, activities, and budget.\n\nSection B: Special Meetings Can be called by the President or EC when required.\n\nSection C: Elections\n\n1. Elections for the EC are held during the AGM every three years.\n2. The process must ensure compliance with the Founding Member quota requirements under Article IV..\n3. Voting shall be conducted by secret ballot using a method authorized under this Constitution and applicable Election Regulations, ensuring eligibility, one-person-one-vote, secrecy, integrity, auditability and accessibility..\n4. All Voting Members in good standing shall be entitled to vote.\n5. Election results shall be formally certified and published by the Election Commission at the AGM.\n6. TReplace the 21-day election notice rule with: Election notice and timetable shall follow constitutional minimums and Election Regulations.\n\n7. Election Regulations must comply with the Constitution and cannot override constitutional rights or requirements.\n\n8. Election Regulations must be finalized before nominations and generally cannot be materially changed during an election.\n\nSection D: Candidacy for the Executive Committee\n\n1. Automatic Eligibility: Founding Members and Executive Members in good standing are automatically eligible to contest elections.\n2. Special Nomination for General Members: A General Member may be nominated as a candidate through a Special Nomination, which requires:\n\n1. a. A written proposal by at least two Executive Committee members. 2. b. Demonstration of exceptional, documented service to the Association over a minimum of one year. 3. c. Approval by a two-thirds majority vote of the sitting Executive Committee.\n3. All candidates must formally accept the nomination and confirm their willingness to serve if elected.\n4. If an Executive Committee position becomes vacant, the EC may fill it temporarily until the next AGM.\n\n1. An independent Election Commission Selection Committee (ECSC) shall be constituted for each election cycle.\n2. The ECSC shall consist of: a. Immediate Past President. b. Institutional Representative. c. One Senior Founding Member not contesting election. d. One Advisory Member. e. One Former Executive Committee member not contesting election.\n3. The ECSC shall elect a Chairperson from among its members.\n4. No member of the ECSC may: a. Contest the election. b. Campaign for a candidate. c. Be a spouse, parent, child, sibling, or dependent family member of a candidate. d. Hold active partisan political office. e. Be under disciplinary proceedings.\n5. The ECSC shall: a. Invite nominations for Election Commissioners. b. Verify qualifications. c. Hear objections. d. Appoint Election Commissioners. e. Fill vacancies. f. Safeguard independence of the election process.\n6. Decisions shall be made by majority vote.\n\n7. In case of vacancy, unavailability, or disqualification, the ECSC may appoint a replacement by majority vote.\n\nSection F: Election Commission\n\n1. The Election Commission shall be appointed by the ECSC not less than ninety (90) days before election day.\n2. The Election Commission shall consist of: a. Chief Election Commissioner. b. Election Commissioner. c. Election Commissioner.\n3. Election Commissioners shall: a. Be Voting Members. b. Be in good standing. c. Have maintained active membership for not less than five (5) years except the first two elections. d. Possess integrity, neutrality, and ethical reputation. e. Submit a Declaration of Neutrality.\n4. The following persons shall be ineligible: a. Current Executive Committee members. b. Election candidates. c. Campaign managers. d. Persons publicly campaigning for candidates. e. Immediate family members of candidates. f. Persons holding active partisan political office.\n5. Election Commissioners shall not contest the election they supervise.\n6. The Election Commission shall remain in office until: a. Results are certified. b. All appeals are disposed of. c. The newly elected Executive Committee assumes office.\n7. The Commission shall have a quorum of two members and decide matters by majority vote.\n8. A Commissioner with a conflict of interest shall disclose it and abstain from the relevant decision.\n9. A vacancy, disqualification, or permanent incapacity shall be filled by the ECSC.\n\nSection G: Powers and Responsibilities of Election Commission The Election Commission shall:\n\n1. Announce election schedules.\n2. Publish Election Regulations.\n3. Prepare and verify voter rolls.\n4. Receive nominations.\n5. Scrutinize nominations.\n6. Publish candidate lists.\n7. Conduct voting.\n\n8. Appoint polling officials where required.\n9. Manage electronic voting systems.\n10. Investigate election complaints.\n11. Enforce election rules.\n12. Count votes.\n13. Declare results.\n14. Publish election reports.\n15. Preserve election records.\n16. The Commission shall exercise its powers only under this Constitution and applicable Election Regulations.\n17. The Commission may delegate administrative duties but remains responsible for election integrity and certification.\n\nNo committee, member, office bearer, or candidate shall interfere with the lawful duties of the Election Commission.\n\nSection H: Voter List\n\n1. The Election Commission shall prepare a Preliminary Voter List.\n2. The Preliminary Voter List shall be published not less than sixty (60) days before election day.\n3. Voting Members may file corrections or objections within seven (7) days.\n4. The Election Commission shall review all objections.\n5. The Final Voter List shall be published not less than forty-five (45) days before election day.\n6. Only members included in the Final Voter List shall be entitled to vote.\n7. After publication of the Final Voter List, changes shall require a documented Commission decision under this Constitution and Election Regulations.\n\nSection I: Nominations\n\n1. Nomination forms shall be issued by the Election Commission.\n2. Nomination forms may be distributed physically, electronically, or through approved digital platforms.\n3. The Election Commission may prescribe nomination fees through Election Regulations.\n4. All nomination fees shall be non-refundable unless otherwise determined by the Election Commission.\n5. Every nomination shall: a. Be submitted on the prescribed form. b. Include written consent of the candidate. c. Include required declarations. d. Be submitted before the published deadline.\n6. The Election Commission shall scrutinize all nominations.\n7. Candidates may withdraw their nominations within the period specified by the Election Commission.\n8. The Final Candidate List shall be published following scrutiny and withdrawal.\n9. The same eligibility and scrutiny standards shall apply to all candidates for the same position.\n10. A nomination rejection shall state its constitutional or regulatory ground.\n\n11. If only one eligible candidate remains after withdrawal, that candidate may be declared elected unopposed under Election Regulations.\n\nSection J: Campaign and Code of Conduct\n\n1. Candidates may campaign during the period determined by the Election Commission.\n2. Campaign activities shall remain respectful and consistent with the Association's non-political and non-religious character.\n3. No candidate shall Engage in bribery, Offer gifts or financial incentives, Intimidate voters, Spread false information, Misuse Association resources.\n4. The Election Commission may issue warnings or authorized sanctions. Disqualification shall require constitutional or regulatory authority and an opportunity to respond.\n\nSection K: Voting Procedures\n\n1. Voting shall be by secret ballot using a method authorized by this Constitution and Election Regulations, including electronic, physical, postal, or another approved method.\n2. The voting method shall be announced before nominations open and shall not materially change thereafter except as permitted by this Constitution and Election Regulations.\n3. Voting shall be secret.\n4. Each eligible voter shall be entitled to one vote for each position or ballot item.\n5. The Election Commission shall determine polling hours and voting procedures.\n6. The Election Commission may appoint polling officers and technical administrators.\n\nSection L: Electronic Voting\n\n1. Elections may be conducted wholly or partially through electronic means.\n2. Electronic voting systems shall Verify voter identity, Prevent duplicate voting, Protect vote secrecy, Generate audit logs, Preserve election records, Allow independent verification where practicable.\n3. The Election Commission may appoint qualified technical experts to audit or certify electronic voting systems.\n4. Technical failure shall not automatically invalidate an election if reasonable recovery procedures are implemented.\n5. The Election Commission may Extend polling, Suspend polling, Conduct supplementary voting, Use alternative voting methods.\n6. Electronic voting shall not be used unless its security, audit, recovery, and verification requirements are established under Election Regulations or an approved Digital Voting Security Standard.\n\nSection M: Handbook, Ballots and Election Materials\n\n1. The Election Commission shall determine ballot design and election materials.\n2. Physical ballots shall contain appropriate security measures as determined by the Election Commission.\n\n3. Ballots may include serial numbers, official seals, signatures, watermarks, or other security controls.\n4. The Election Commission shall maintain custody and security of election materials.\n5. Electoral operations, nominations, and ballot management shall comply with this Constitution, Election Regulations, and the officially published Election Handbook.\n6. The Handbook shall not amend or override this Constitution or Election Regulations.\n7. Election materials shall remain under documented custody and chain of custody until authorized archive or disposal.\n\nSection N: Election Observers\n\n1. The Election Commission may appoint Election Observers.\n2. Election Observers may include: a. Advisory Members. b. Former Teachers. c. Former Executive Committee members. d. Independent alumni.\n3. Observers may monitor election activities but shall not interfere.\n\nSection O: Certification and Declaration of Results\n\n1. Election results shall be certified by the Chief Election Commissioner.\n2. Certified results shall include Total registered voters, Total votes cast, Valid votes, Invalid votes, Candidate-wise vote counts.\n3. Certified results shall be announced and archived permanently.\n4. In the event of a tie, the Election Commission shall conduct a runoff election unless Election Regulations provide otherwise.\n5. Results shall not be finally certified while a pending recount or lawful process may materially affect the result.\n6. A tie shall be resolved according to Election Regulations; absent such a rule, a runoff shall be held.\n\nSection P: Election Appeals Tribunal\n\n1. An independent Election Appeals Tribunal shall be constituted for each election cycle.\n2. The Tribunal shall consist of: a. One Former Principal or Former Teacher. b. One Senior Founding Member. c. One Advisory Member.\n3. Tribunal members shall not be Candidates, Election Commissioners, Executive Committee, members during the election period. d. Proposers or seconders of candidates.\n4. Appeals must be filed within seven (7) days of the challenged decision.\n5. The Tribunal shall issue its decision within fourteen (14) days.\n6. The Tribunal may Uphold decisions, Modify decisions, Order recounts, Direct corrective action.\n7. Decisions of the Tribunal shall be final and binding.\n\n8. The Tribunal shall hear appeals concerning voter lists, nominations, polling, counting, recounts, certification, and other election matters prescribed by Election Regulations.\n9. General disciplinary matters shall follow the applicable constitutional disciplinary process unless arising directly from an election.\n10. A minor procedural irregularity shall not invalidate an election unless it materially affects election integrity or the result.\n11. Proven material irregularity, fraud, coercion, systemic failure, or unlawful interference may justify recount, corrective action, supplementary voting, or rerun as permitted by this Constitution and Election Regulations.\n\nSection Q: First Election of the Association\n\n1. For the inaugural election only, Article XI Interim Executive Committee shall not directly appoint the Election Commission.\n2. An Interim Election Commission Selection Committee shall be formed consisting of: a. Principal or Vice Principal of Govt. Haraganga College. b. One Senior Founding Member not contesting. c. One Former Teacher. d. One Advisory Member. e. One respected alumnus selected unanimously by the foregoing members.\n3. The Interim Election Commission Selection Committee shall appoint the first Election Commission.\n4. Upon declaration of the first election results, this Section shall automatically cease to have effect.\n\nSection R: Election Emergency\n\n1. The Election Commission may suspend, postpone, extend, relocate, or modify affected election activities when necessary to protect safety, feasibility, or election integrity.\n2. The Commission shall record the reason, action, affected activities, and revised schedule.\n3. Emergency action shall not alter constitutional eligibility, voting rights, or term limits.\n4. Election Regulations shall prescribe detailed emergency procedures.\n\nArticle VI: Financial Management\n\nSection A: Opening Bank account\n\n- Account The bank account shall be opened in the official name of the Association with a recognized bank. The account shall be operated jointly by any two of the following three office bearers: President, General Secretary, and Treasurer.\n\nSection B: Fundraising Through membership fees, donations, fundraising events, and merchandise sales.\n\nSection C: Expenditures Funds shall be allocated for events, educational support, community projects, administrative costs, Centre operations, administrative expenses, meetings, and digital platform maintenance and designated funds:\n\n- Educational Support Fund: For meritorious, financially disadvantaged current students.\n- Community Relief (Poor) Fund: For alumni/families facing severe verified hardship.\n- Social & Recreational Centre Fund: For the acquisition, maintenance, and operation of the Association's physical hub and assets, this will also be used as the Association’s Office.\n- Separate accounts/records shall be maintained for designated funds.\n\nSection D: Auditing & Transparency\n\n- Treasurer presents annual budget/report at AGM.\n- Annual internal audit and Independent audit shall be conducted at least once every financial year or as required by law.\n- All transactions require receipts.\n- All bank transactions shall require two authorized signatures: From President, General Secretary and Treasurer (or EC-approved alternate).\n- Audited financial statements shall be presented at every AGM.\n\nArticle VII: Code of Ethics & Conduct\n\n- Maintain highest ethical standards.\n- Ensure inclusivity and non-discrimination.\n- Protect member confidentiality.\n- Uphold political and religious neutrality. Political neutrality applies to Founding Members, Executive Members, and Advisory Members representing public institutions.\n- Operate with transparency.\n- Disclose and manage conflicts of interest annually.\n\nArticle VIII: Amendments to the Constitution\n\n- Amendments may be proposed by the EC or petition of 20% of Voting Members.\n- Ratification requires a two-thirds majority vote at a properly convened AGM.\n- Proposed amendments must be circulated to Voting Members at least 14 days before the AGM.\n\nArticle IX: Bylaws\n\nSection 1: Governance the EC may establish and amend Bylaws by a two-thirds vote, provided they don't conflict with this Constitution.\n\nSection 2: Meetings AGM once yearly; special meetings with 7 days' notice.\n\nSection 3: Elections Conducted every 3 years; all Voting Members in good standing may vote.\n\nSection 4: Financial Guidelines No funds for political or personal purposes.\n\nSection 5: Political activities The Association shall remain strictly non-political. No member shall use the name, platform, funds or assets of the Association for political activities.\n\nArticle X: Disciplinary Procedures\n\nSection 1: Grounds for Action Misconduct, fraud, misuse of funds, violation of neutrality (for Founding and Executive Members), harassment, discrimination, or criminal conviction.\n\nSection 2: Types of Action Written warning, suspension, removal from committee, revocation of rights, or termination.\n\nSection 3: Procedure\n\n1. Written complaint to Disciplinary Committee. (Defined by EC)\n2. Investigation with the right of defense.\n3. Decision by two-thirds majority of EC.\n4. Judgment documented.\n\nSection 4: Appeal written appeal within 30 days to Appeal Panel; decision is final.\n\nArticle XI: Interim Provisions\n\nSection 1: Purpose of Interim Executive Committee (IEC) may also be referred to as the Convening Committee (CC) or Adhoc Committee (AC) The primary purpose of the IEC is to manage the Association's formation, prepare constitution, execute necessary legal documents for registration, open bank accounts, and organize the First General Meeting and the subsequent First Executive Committee Election.\n\nSection 2: Formation and Tenure The initial Convening Committee (CC) shall select a temporary Interim Executive Committee (IEC), consisting of a President, General Secretary, and Treasurer, to manage legal processes. The IEC shall serve a temporary term, which shall automatically end upon the declaration of results for the First Executive Committee Election conducted under Article V.\n\nSection 3: Powers and Limitations The IEC shall have the limited authority to:\n\n1. Execute legal documents and submissions required for registration.\n2. Open bank accounts and manage administrative funds (initial fees/donations).\n3. Incur expenses strictly related to registration, office setup, and the inaugural election. The IEC is strictly prohibited from entering into long-term contracts, initiating major projects, or amending this Constitution, Digital Platform Structure\n\n4. Coordinate all pre-election events, activities and the smooth transition process culminating in the Executive Committee's assumption of office.\n\nArticle XII: Dissolution of the Association\n\nSection 1: Method of Dissolution The Association may be dissolved only by a resolution passed at a Special General Meeting convened specifically for this purpose. The resolution must be approved by not less than three-fourths (75%) of the Voting Members present and voting.\n\nSection 2: Notice of Dissolution Meeting Notice of such meeting, stating the terms of the proposed resolution, shall be sent to all members at least 30 days in advance.\n\nSection 3: Winding Up Process Upon passing the dissolution resolution:\n\n1. The Executive Committee shall act as the Winding-Up Committee, or appoint one.\n2. All liabilities and obligations of the Association shall be discharged.\n3. No member shall receive any personal benefit from the Association's assets.\n\nSection 4: Disposal of Surplus Assets After settling all debts and liabilities, any remaining assets shall not be distributed among members. They must be transferred to:\n\n1. Govt. Haraganga College for educational or development purposes, OR\n2. Another registered charitable organization with similar objectives, as determined by the Winding-Up Committee and approved by the final General Meeting.\n\nSection 5: Final Returns the Winding-Up Committee shall file all necessary dissolution documents with the relevant government authorities (e.g., Registrar of Societies) as required by law.\n\nSection 6: Cessation of Existence The Association shall be considered dissolved upon completion of the winding-up process and receipt of formal confirmation from the relevant authorities. The dissolution resolution and asset disposal report shall be submitted to the Registrar of Societies within 30 days.\n\nFuture Vision\n\n- Sustainable Educational Fund for underprivileged students.\n- Community Development initiatives.\n- Structured Career Mentorship & Training programs.\n\nThis constitution was ratified to guide the Govt. Haraganga College Alumni Association (HARAGANGIAN).\n\nDocument Version: 4.2 | Date of Ratification: 01.07.2026",
+                            EffectiveDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
-                            Version = "1.2.0"
+                            PdfUrl = "/assets/GHCAA Constitution V4.2.pdf",
+                            Version = "4.2"
                         });
                 });
 
@@ -7745,7 +7753,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 500px;'><h2 style='color: #2c3e50;'>Verification Code</h2><p>Hello <strong>{{FullName}}</strong> metallic,</p><p>Your security code is:</p><div style='font-size: 24px; font-weight: bold; background: #f8f9fa; padding: 15px; text-align: center; border-radius: 5px; color: #c5a059; border: 1px solid #eee;'>{{OtpCode}}</div><p>Valid for 10 minutes. Do not share this code.</p></div>",
                             Code = "OTP_EMAIL",
                             Description = "OTP verification email",
-                            LastUpdated = new DateTime(2026, 8, 2, 16, 34, 26, 837, DateTimeKind.Utc).AddTicks(7045),
+                            LastUpdated = new DateTime(2026, 8, 26, 17, 32, 32, 582, DateTimeKind.Utc).AddTicks(1917),
                             Subject = "GHCAA Verification Code: {{OtpCode}}",
                             Variables = "['FullName', 'OtpCode']"
                         },
@@ -7755,7 +7763,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Welcome to GHCAA</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your membership has been approved! We are excited to have you as part of our community.</p><div style='background: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db;'><p><strong>Membership No:</strong> {{MembershipNumber}}</p><p><strong>Default Password:</strong> <code style='background:#fff; padding:2px 5px;'>{{DefaultPassword}}</code></p></div><p>Please log in and change your password immediately.</p></div>",
                             Code = "WELCOME_EMAIL",
                             Description = "Welcome email",
-                            LastUpdated = new DateTime(2026, 8, 2, 16, 34, 26, 838, DateTimeKind.Utc).AddTicks(3248),
+                            LastUpdated = new DateTime(2026, 8, 26, 17, 32, 32, 582, DateTimeKind.Utc).AddTicks(9028),
                             Subject = "Welcome to GHC Alumni Association!",
                             Variables = "['FullName', 'MembershipNumber', 'DefaultPassword']"
                         },
@@ -7765,7 +7773,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #c5a059;'>Password Reset</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>An administrator has initiated a password reset for your GHCAA account. Click below to set a new password — the link is valid for 24 hours.</p><div style='text-align: center; margin: 30px 0;'><a href='{{ResetUrl}}' style='background: #111; color: #c5a059; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; border: 1px solid #c5a059;'>Reset My Password</a></div><p style='color: #666; font-size: 0.9rem;'>If you did not request this, please ignore this email.</p></div>",
                             Code = "PASSWORD_RESET",
                             Description = "Password reset email",
-                            LastUpdated = new DateTime(2026, 8, 2, 16, 34, 26, 838, DateTimeKind.Utc).AddTicks(3310),
+                            LastUpdated = new DateTime(2026, 8, 26, 17, 32, 32, 582, DateTimeKind.Utc).AddTicks(9108),
                             Subject = "GHCAA Account Password Reset",
                             Variables = "['FullName', 'ResetUrl']"
                         },
@@ -7775,7 +7783,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #e74c3c;'>Application Status Update</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Thank you for your interest in the GHC Alumni Association. After reviewing your application, we regret to inform you that we cannot approve it at this time.</p><div style='background: #fdf2f2; padding: 15px; border-radius: 5px; border-left: 5px solid #e74c3c;'><p><strong>Reason:</strong> {{Reason}}</p></div><p>If you believe this is an error, please contact the association office.</p></div>",
                             Code = "APPLICATION_REJECTED",
                             Description = "Application rejection email",
-                            LastUpdated = new DateTime(2026, 8, 2, 16, 34, 26, 838, DateTimeKind.Utc).AddTicks(3430),
+                            LastUpdated = new DateTime(2026, 8, 26, 17, 32, 32, 582, DateTimeKind.Utc).AddTicks(9293),
                             Subject = "Update on your GHCAA Membership Application",
                             Variables = "['FullName', 'Reason']"
                         },
@@ -7785,7 +7793,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Payment Received</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>We have successfully received your payment. It is currently under verification.</p><div style='background: #f8f9fa; padding: 15px; border-radius: 5px;'><p><strong>Amount:</strong> {{Amount}} BDT</p><p><strong>Transaction ID:</strong> {{TrxID}}</p></div><p>You will be notified once the payment is verified.</p></div>",
                             Code = "PAYMENT_RECEIVED",
                             Description = "Payment received acknowledgment",
-                            LastUpdated = new DateTime(2026, 8, 2, 16, 34, 26, 838, DateTimeKind.Utc).AddTicks(3477),
+                            LastUpdated = new DateTime(2026, 8, 26, 17, 32, 32, 582, DateTimeKind.Utc).AddTicks(9360),
                             Subject = "Payment Received: {{Amount}} BDT",
                             Variables = "['FullName', 'Amount', 'TrxID']"
                         },
@@ -7795,7 +7803,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Payment Status Update</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>The status of your transaction <strong>{{TrxID}}</strong> has been updated to <strong>{{Status}}</strong>.</p><p>Thank you for your contribution.</p></div>",
                             Code = "PAYMENT_STATUS_UPDATED",
                             Description = "Payment status update email",
-                            LastUpdated = new DateTime(2026, 8, 2, 16, 34, 26, 838, DateTimeKind.Utc).AddTicks(3622),
+                            LastUpdated = new DateTime(2026, 8, 26, 17, 32, 32, 582, DateTimeKind.Utc).AddTicks(9399),
                             Subject = "Payment Status Updated: {{Status}}",
                             Variables = "['FullName', 'TrxID', 'Status']"
                         },
@@ -7805,7 +7813,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Family Link Request</h2><p>Hello <strong>{{FullName}}</strong>,</p><p><strong>{{RequesterName}}</strong> has requested to link their account with yours as a <strong>{{Relationship}}</strong>.</p><div style='text-align: center; margin: 30px 0;'><a href='{{ProfileUrl}}' style='background: #c5a059; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; border: 1px solid #c5a059;'>Review Request</a></div><p>Please log in to your profile to accept or decline this request.</p></div>",
                             Code = "FAMILY_LINK_REQUEST",
                             Description = "Family link request email",
-                            LastUpdated = new DateTime(2026, 8, 2, 16, 34, 26, 838, DateTimeKind.Utc).AddTicks(3651),
+                            LastUpdated = new DateTime(2026, 8, 26, 17, 32, 32, 582, DateTimeKind.Utc).AddTicks(9432),
                             Subject = "New Family Link Request from {{RequesterName}}",
                             Variables = "['FullName', 'RequesterName', 'Relationship', 'ProfileUrl']"
                         },
@@ -7815,7 +7823,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Body = "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #27ae60;'>Link Request Accepted</h2><p>Hello <strong>{{FullName}}</strong>,</p><p>Your family link request to <strong>{{TargetName}}</strong> has been accepted.</p><p>You are now connected in the GHCAA network.</p></div>",
                             Code = "FAMILY_LINK_ACCEPTED",
                             Description = "Family link acceptance confirmation",
-                            LastUpdated = new DateTime(2026, 8, 2, 16, 34, 26, 838, DateTimeKind.Utc).AddTicks(3682),
+                            LastUpdated = new DateTime(2026, 8, 26, 17, 32, 32, 582, DateTimeKind.Utc).AddTicks(9467),
                             Subject = "Family Link Request Accepted",
                             Variables = "['FullName', 'TargetName']"
                         });
@@ -7915,11 +7923,22 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("text");
 
+                    b.Property<int?>("OwnerMemberId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerMemberId");
 
                     b.ToTable("EventGalleries");
 
@@ -7933,6 +7952,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             EventDate = new DateTime(2025, 12, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsFeatured = true,
+                            Status = 2,
                             Title = "Centennial"
                         });
                 });
@@ -7955,8 +7975,17 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UploadedByMemberId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -7971,6 +8000,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             Caption = "Gala",
                             EventGalleryId = 1,
                             PhotoPath = "/assets/logo.jpg",
+                            Status = 2,
                             UploadedAt = new DateTime(2026, 3, 15, 10, 17, 45, 660, DateTimeKind.Utc).AddTicks(9570)
                         });
                 });
@@ -8439,9 +8469,15 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.Property<DateTime>("PostedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("text");
+
                     b.Property<string>("Requirements")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -8466,6 +8502,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             PostedByMemberId = 1,
                             PostedDate = new DateTime(2026, 3, 13, 8, 5, 57, 627, DateTimeKind.Utc).AddTicks(6790),
                             Requirements = "",
+                            Status = 2,
                             Title = "Sales Representitive"
                         },
                         new
@@ -8481,6 +8518,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             PostedByMemberId = 1,
                             PostedDate = new DateTime(2026, 2, 24, 0, 0, 0, 0, DateTimeKind.Utc),
                             Requirements = "...",
+                            Status = 2,
                             Title = "Architect"
                         });
                 });
@@ -56916,18 +56954,28 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 1,
-                            BodyHtml = "<p>Govt. Haraganga College, Munshiganj, has stood as a centre of learning since 1938, founded through the initiative of Ashutosh Ganguly with the support of Sher-e-Bangla A. K. Fazlul Huq. Generations of students have passed through its halls and carried its name into public service, business, academia and the arts.</p><p>The Govt. Haraganga College Alumni Association exists to keep that lineage connected.</p>",
+                            BodyHtml = "<p>Govt. Haraganga College opened its doors on <strong>18 December 1938</strong>, at a time when opportunities for higher education outside Dhaka were scarce. It began with a single act of generosity: <strong>Ashutosh Ganguly</strong> of Tongibari donated one lakh rupees &mdash; a considerable fortune then &mdash; so that the young people of Bikrampur would not have to leave home to continue their studies.</p><p>He was not alone in the effort. The local advocate <strong>Satish Chandra Bhattacharya</strong> rallied support among Munshiganj's educationists, and <strong>A. H. M. Wajir Ali</strong>, then sub-divisional magistrate and later a sub-divisional judge &mdash; nephew and son-in-law of Sher-e-Bangla A. K. Fazlul Huq &mdash; lent the project the official backing it needed to take root.</p><p>Nearly nine decades later the college still stands on College Road in Munshiganj Sadar, and the reason it was founded has not changed: to put a serious education within reach of the people of this region.</p>",
                             DisplayOrder = 1,
                             Group = "about",
                             IsActive = true,
                             Key = "about-origin",
-                            Title = "Our Origin"
+                            Title = "The College and Its Origin"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            BodyHtml = "<p>Govt. Haraganga College is a public institution in Munshiganj Sadar teaching at both higher-secondary and degree level, with <strong>16 honours departments</strong> and a faculty of more than <strong>80 teachers</strong>. Beyond the classroom, students run a range of clubs covering culture, sport, debate and community service.</p><p>In its 87 years the college has educated over <strong>one hundred thousand students</strong>, who have gone on into public service, medicine, engineering, teaching, business, journalism and the arts, at home and abroad. It is that shared history &mdash; not a shared graduating year &mdash; that this Association exists to keep alive.</p><ul><li><strong>Campus</strong> &mdash; College Road, Munshiganj Sadar, Munshiganj-1500, Bangladesh</li><li><strong>EIIN</strong> &mdash; 111160 &nbsp;&middot;&nbsp; <strong>College Code</strong> &mdash; 5701</li><li><strong>Principal</strong> &mdash; Professor Md. Kamaruzzaman Khan</li><li><strong>College website</strong> &mdash; <a href=\"https://www.haragangacollege.edu.bd/en\" target=\"_blank\" rel=\"noopener noreferrer\">haragangacollege.edu.bd</a></li></ul><p><em>College facts are drawn from the institution's official website. For admissions, results, routines and academic notices, please refer to the college directly &mdash; this Association is an independent alumni body and does not administer college affairs.</em></p>",
+                            DisplayOrder = 2,
+                            Group = "about",
+                            IsActive = true,
+                            Key = "about-college-today",
+                            Title = "The College Today"
                         },
                         new
                         {
                             Id = 2,
-                            BodyHtml = "<p>The organisation is named the <strong>Govt. Haraganga College Alumni Association (GHCAA)</strong>. Its members are known as <strong>HARAGANGIAN</strong>. The Association was founded on <strong>29 November 2025</strong>.</p><p>The Association is non-political, non-religious, inclusive and non-profit. It is a patron of education and culture and philanthropic in purpose. It does not affiliate with any political party or religious body, and welcomes all alumni without distinction.</p><p><strong>Motto:</strong> Sharing Heritage, Aligning Lives, Integrating Networks<br/><em>&#2405;&#2469;&#2495;&#2489;&#2509;&#2479;&#2503;&#2480; &#2476;&#2495;&#2472;&#2495;&#2478;&#2479;&#2492;, &#2460;&#2496;&#2476;&#2472;&#2503;&#2480; &#2488;&#2478;&#2472;&#2509;&#2476;&#2479;&#2492; &#2451; &#2488;&#2434;&#2489;&#2468;&#2495;&#2480; &#2488;&#2503;&#2468;&#2497;&#2476;&#2472;&#2509;&#2471;&#2472;</em></p>",
-                            DisplayOrder = 2,
+                            BodyHtml = "<p>The <strong>Govt. Haraganga College Alumni Association (GHCAA)</strong> was founded on <strong>29 November 2025</strong> to give the college's graduates a single place to find one another. Its members are known as <strong>HARAGANGIAN</strong>.</p><p>The Association is non-political, non-religious and not-for-profit. It takes no side in party politics and aligns with no religious body; membership is open to every former student of the college without distinction. Its work is philanthropic, and directed at education and culture.</p><p><strong>Motto:</strong> Sharing Heritage, Aligning Lives, Integrating Networks<br/><em>&#2405;&#2469;&#2495;&#2489;&#2509;&#2479;&#2503;&#2480; &#2476;&#2495;&#2472;&#2495;&#2478;&#2479;&#2492;, &#2460;&#2496;&#2476;&#2472;&#2503;&#2480; &#2488;&#2478;&#2472;&#2509;&#2476;&#2479;&#2492; &#2451; &#2488;&#2434;&#2489;&#2468;&#2495;&#2480; &#2488;&#2503;&#2468;&#2497;&#2476;&#2472;&#2509;&#2471;&#2472;</em></p>",
+                            DisplayOrder = 3,
                             Group = "about",
                             IsActive = true,
                             Key = "about-association",
@@ -56936,22 +56984,22 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         new
                         {
                             Id = 3,
-                            BodyHtml = "<p>Every element of the Association's logo carries meaning:</p><ul><li><strong>Historic building</strong> &ndash; the college and its heritage</li><li><strong>Open book</strong> &ndash; knowledge and learning</li><li><strong>Torch</strong> &ndash; enlightenment and guidance</li><li><strong>Mortarboard</strong> &ndash; academic achievement</li><li><strong>Handshake</strong> &ndash; fellowship and mutual support among alumni</li><li><strong>Red and gold border, &ldquo;Est. 2025&rdquo;</strong> &ndash; the founding of the Association</li></ul><p>The Association's flag is white, signifying peace, harmony, non-violence and purity.</p><p>Use of the Association's name, logo, flag or other branding requires prior permission from the Executive Committee.</p>",
-                            DisplayOrder = 3,
+                            BodyHtml = "<p>Every element of the Association's crest carries meaning:</p><ul><li><strong>Historic building</strong> &ndash; the college and its heritage</li><li><strong>Open book</strong> &ndash; knowledge and learning</li><li><strong>Torch</strong> &ndash; enlightenment and guidance</li><li><strong>Mortarboard</strong> &ndash; academic achievement</li><li><strong>Handshake</strong> &ndash; fellowship and mutual support among alumni</li><li><strong>Red and gold border, &ldquo;Est. 2025&rdquo;</strong> &ndash; the founding of the Association</li></ul><p>The Association's flag is white, signifying peace, harmony, non-violence and purity.</p><p>Use of the Association's name, crest, flag or other branding requires prior permission from the Executive Committee.</p>",
+                            DisplayOrder = 4,
                             Group = "about",
                             IsActive = true,
                             Key = "about-logo",
-                            Title = "Logo &amp; Flag"
+                            Title = "Logo & Flag"
                         },
                         new
                         {
                             Id = 4,
-                            BodyHtml = "<ul><li>To build and maintain a lasting bond among the alumni of Govt. Haraganga College.</li><li>To preserve and promote the heritage, history and traditions of the College.</li><li>To support the academic development of current students of the College.</li><li>To provide mentorship, career guidance and networking opportunities to students and alumni.</li><li>To assist alumni and students facing financial hardship through scholarships and welfare support.</li><li>To organise educational, cultural, social and sporting activities.</li><li>To encourage philanthropic and community service initiatives.</li><li>To strengthen cooperation between the Association, the College administration and its teachers.</li><li>To maintain an accurate register of alumni and facilitate communication among them.</li><li>To uphold transparency, accountability and good governance within the Association.</li><li>To undertake any other lawful activity consistent with these objectives.</li></ul>",
-                            DisplayOrder = 4,
+                            BodyHtml = "<p>In practice, the Association's work falls into four areas &mdash; keeping alumni connected, supporting today's students, looking after members in difficulty, and safeguarding the college's history.</p><ul><li><strong>Connection</strong> &mdash; maintaining an accurate alumni register and making it easy for members to find and reach one another.</li><li><strong>Students</strong> &mdash; supporting the academic development of current students, and offering mentorship, career guidance and introductions to alumni working in their field.</li><li><strong>Welfare</strong> &mdash; scholarships and hardship assistance for students and alumni in financial difficulty.</li><li><strong>Community</strong> &mdash; educational, cultural, social and sporting events, and philanthropic initiatives that serve the wider Munshiganj community.</li><li><strong>Heritage</strong> &mdash; preserving and promoting the history and traditions of the college, and working alongside its administration and teachers.</li><li><strong>Governance</strong> &mdash; running the Association itself transparently and accountably, with published accounts and elected officers.</li></ul>",
+                            DisplayOrder = 5,
                             Group = "about",
                             IsActive = true,
                             Key = "about-objectives",
-                            Title = "Purpose &amp; Objectives"
+                            Title = "What We Do"
                         },
                         new
                         {
@@ -57178,7 +57226,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 1,
                             MustChangePassword = false,
                             PasswordHash = "$2a$11$tfrb.BottApcx0P1UuM55erZh.o6IoP6hJyoWbsAKp1jM550S7LX2",
-                            SecurityStamp = "fea8ce8809464758ab1ffc276d8752e7",
+                            SecurityStamp = "a53b89343aa34660813a9a8e69d46cd9",
                             Username = "superadmin"
                         },
                         new
@@ -57191,7 +57239,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 200,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bgubY.ogZhVPp1a9u1gOGO.TcAj/i.YL2cPSPlJwpxVZlD0MLMOQW",
-                            SecurityStamp = "def317764319415e9b4f8b4745123faf",
+                            SecurityStamp = "58fd9d9e3a314d92ae555f734d579424",
                             Username = "2512003"
                         },
                         new
@@ -57204,7 +57252,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 201,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GswHdfsQ2UU.u9HTVWOABO34k6NqHcbA62P0PvOwJj3x0fpSnSmwO",
-                            SecurityStamp = "48557e0668ed49c8b453f702440b9984",
+                            SecurityStamp = "197f61d5287949f2bd2d6e8c9830b7e7",
                             Username = "2512005"
                         },
                         new
@@ -57217,7 +57265,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 202,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ot6i0lsF.4cOAQR9ywj4weyLdnsozY9kjyxvL/j3DK7IxQdX/mPsO",
-                            SecurityStamp = "5e048f29ec89413eaa606f853e0e9b87",
+                            SecurityStamp = "89613ef6207e4236baca658cdf81cdaf",
                             Username = "2512006"
                         },
                         new
@@ -57230,7 +57278,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 203,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SH3DYAgJF5VK7EmjDzKKb./Ni/EEGzYwN9V9uhgVxQECQmut6Njcm",
-                            SecurityStamp = "e6c0faff2eed4f3b8901767a9755585f",
+                            SecurityStamp = "d12deb2dbcae41d8b071c16a8261c0da",
                             Username = "2512012"
                         },
                         new
@@ -57243,7 +57291,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 204,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yzia1Wp2nkIOyVSVJkFzxuXZcmTbBc4HpfJAsj0Bd0sUGzkbx08LC",
-                            SecurityStamp = "f75c7b0a426d4d2c84e4803435ab812e",
+                            SecurityStamp = "12bc6738573e4b0da4fa1e8828135e85",
                             Username = "2512017"
                         },
                         new
@@ -57256,7 +57304,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 205,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FroDWG5yM7eKy1UIMyVJDOaCViX5MCKCqFNJ2Y.on7a5.pJitrGGe",
-                            SecurityStamp = "ab1d3ed6548d42278a457914c5122220",
+                            SecurityStamp = "82069b3523814f27a6b115869b4d8920",
                             Username = "2512019"
                         },
                         new
@@ -57269,7 +57317,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 206,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sjAYFMX9Xx7waH1veUkMnuuye0Y2KtmxLP4f5aViETDuZrjR8exs2",
-                            SecurityStamp = "099438408e044c3292417e543c5eade5",
+                            SecurityStamp = "dddf05bb95bf403c906df9eb988ef503",
                             Username = "2512020"
                         },
                         new
@@ -57282,7 +57330,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 207,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BObIOXSpydLB2Pivmn.9Q.Sm4kibw5I.JGPSFCo9Px6Z.n5pRq3We",
-                            SecurityStamp = "1d6cea319dc8423b80fff9ec207f4218",
+                            SecurityStamp = "7627a35c07da4fd0b137db640efeb657",
                             Username = "2512022"
                         },
                         new
@@ -57295,7 +57343,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 208,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3fPqklIq.onxVlEe4etzyOYKM7dto6t4ErV/S7SGebeGzzNASG0C.",
-                            SecurityStamp = "693ac296128747c685bb6168e142cf54",
+                            SecurityStamp = "e5366799b53a431ba73e82773b5d701a",
                             Username = "2512023"
                         },
                         new
@@ -57308,7 +57356,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 209,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c8qJ6DVCCZ9GwnXfLCmchuijnaHBazZ0dSI53RAbiV9B.AVM7yAcC",
-                            SecurityStamp = "6ab5aae8157046319145cd12c30ac3f0",
+                            SecurityStamp = "80fec2447ba14b709e4ba9e5049d725f",
                             Username = "2512027"
                         },
                         new
@@ -57321,7 +57369,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 210,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jkrkiQFBxvdP2mB1ZMVJ8ublLVTSG4zvAMy4JirXV62u9pkXH1RJa",
-                            SecurityStamp = "4de2276638af471784e1bee6c0b8cf9f",
+                            SecurityStamp = "8db4127258cc4a658083a5ebbbf7240c",
                             Username = "2512028"
                         },
                         new
@@ -57334,7 +57382,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 211,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FOIsMTT98frgxV2VHeTDou7EqFzUCtdxoPdzHMFW/qTCxoJ7vLBEi",
-                            SecurityStamp = "cf01790e5a3b4fdfa78ebcbcec9b8757",
+                            SecurityStamp = "516d1235631546658a94718b0e6cd5cc",
                             Username = "2512029"
                         },
                         new
@@ -57347,7 +57395,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 212,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sd/4srhUSAUbYH.uhdRS6OD7pZ.35Oq.jErojcr7CbBAXa2U5mYWi",
-                            SecurityStamp = "3cc9e4d14a914a2997ff82ec35b85e5e",
+                            SecurityStamp = "7994cfdcb73f44cbbd9b20befa9efcf5",
                             Username = "2512030"
                         },
                         new
@@ -57360,7 +57408,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 213,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Vvvr0eq.g.2duX8iRqKSyO6G4upeGvQ0Swf/0zwc1xI8q1np67Yze",
-                            SecurityStamp = "da8f43ee23ec44f19368ec8812dbee5b",
+                            SecurityStamp = "0e04e92c888e4ac4bae16742b184baff",
                             Username = "2512031"
                         },
                         new
@@ -57373,7 +57421,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 214,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Q/HX3VYn8onko1hpqVIEvOHWxFpk6gQPdfPjQDxBg7iRhqtl2HU26",
-                            SecurityStamp = "9ae7d64232584b81b5611ae9e06ae555",
+                            SecurityStamp = "f2a9cb1bfc1b4d66909b99b0fa20cac7",
                             Username = "2512032"
                         },
                         new
@@ -57386,7 +57434,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 215,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3IBC46Jz4XRmo2djZtySL.pi2khNr3vDno5MuhbJy9mpMWI2Qo.AS",
-                            SecurityStamp = "a3497d171f5a441ea6c30ad34c4fb940",
+                            SecurityStamp = "8bc8a859c00b41ffa19585d7afc36b9f",
                             Username = "2512033"
                         },
                         new
@@ -57399,7 +57447,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 216,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hbigLerJb5XN9wR9ldlvIuY31FMG41TCIXmouS45t8DP9bseQAjmu",
-                            SecurityStamp = "a41d2975bdc746afb5ccd55d2c919f26",
+                            SecurityStamp = "dab3c20186554a3981c122b00ff1e081",
                             Username = "2512034"
                         },
                         new
@@ -57412,7 +57460,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 217,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6yL/0jYdnQeXDzQYCPKDUe07IMhlwoX/WiAasKTHm4m2wqZENEud6",
-                            SecurityStamp = "163ccfedd0e341599566fd51722ab743",
+                            SecurityStamp = "5c4225f6f64946c5b0a47dc771a524f8",
                             Username = "2512035"
                         },
                         new
@@ -57425,7 +57473,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 218,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ecFyIwzmUwW355fXnvPchOOnAuhD6kjOb983y8efFaUoe0BBOBfFC",
-                            SecurityStamp = "eee5727023be464fac92a1feeaea31ab",
+                            SecurityStamp = "da38df4cdcbf4e498fb6902fe399ca10",
                             Username = "2512036"
                         },
                         new
@@ -57438,7 +57486,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 219,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qBLPEMDxHccS3JZ00A5HhuEHt/crwfRJ.Ww71ebbfXw8GsL6/Tzqq",
-                            SecurityStamp = "36e72f9e9d9f4eb59f52d8357a488d62",
+                            SecurityStamp = "ce8b83079b2e4d8d836bbebcd131133f",
                             Username = "2512038"
                         },
                         new
@@ -57451,7 +57499,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 220,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Tfzzp/ndua.KqkZpDAHujuXUP8gMlWonyYFFm5zLvFO4glM95oKXO",
-                            SecurityStamp = "c9aac35fdd954c7dade45c16467b3eac",
+                            SecurityStamp = "89ab8bccd3424b8f966e29bc02375d1c",
                             Username = "2512040"
                         },
                         new
@@ -57464,7 +57512,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 221,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lBML/L8BfT93.lPjK74XieeHlezjfW/YQbbf3a2Ux35OyFSiTzCoK",
-                            SecurityStamp = "0be606ea17714e6eb304d0f8010487ac",
+                            SecurityStamp = "7aa336168b75448fa39056bd01806d5a",
                             Username = "2512043"
                         },
                         new
@@ -57477,7 +57525,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 222,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IYI5nC8pXeC/ILLKxDSlrO79.go6w9zNd7Bfxl.6k5inDGugVDYMq",
-                            SecurityStamp = "17ca8a5872bd46919d45f534df15445a",
+                            SecurityStamp = "f28874ffc6f245eea26b2a3b6ad6f6dc",
                             Username = "2512044"
                         },
                         new
@@ -57490,7 +57538,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 223,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IdHcoYSrZnybG5.4f5Puaun5T7wabOwbM6csvPonQA5lo/NzVnFO6",
-                            SecurityStamp = "9f03df6be01b42e08ca6e4e31ed42224",
+                            SecurityStamp = "8f483c8a39c24b3faf71aa6d400c4fb4",
                             Username = "2512046"
                         },
                         new
@@ -57503,7 +57551,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 224,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2peWn1OG6FBJGuimYZ0i7uGqBTZO.OCw3nb.u2Kr0GoA5IuLx6pMO",
-                            SecurityStamp = "07a83471f70346caae7145fb409155cf",
+                            SecurityStamp = "9fd05b1d9515427d84f7fbd7f56c8db5",
                             Username = "2512047"
                         },
                         new
@@ -57516,7 +57564,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 225,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$l2RCWgEBOsjemOK9K8afm.MWd.r0WO4UyRPSXqb.c5t6tWx8gVp5C",
-                            SecurityStamp = "48a08cf5233943d2ae62d1d75236961e",
+                            SecurityStamp = "0040f813d9b34c359c2d688ade051b7f",
                             Username = "2512049"
                         },
                         new
@@ -57529,7 +57577,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 226,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$huagvDMeI.38NroiYG1A8.OsUO0HgUw96.hmlq/5eCu/oMXN4ejqi",
-                            SecurityStamp = "ba564e9746f84178b799a2810208004a",
+                            SecurityStamp = "48c4b99212f84c26822d42c641110c61",
                             Username = "2512050"
                         },
                         new
@@ -57542,7 +57590,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 227,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DAnoVijefS0kepPjQP33jeT.Rd/w91.JhsL9WLIvXIbBaHPFm6KJW",
-                            SecurityStamp = "9c67c5675cf3473594479098edf47997",
+                            SecurityStamp = "cce10135e53c4583911d0d10970652cf",
                             Username = "2512051"
                         },
                         new
@@ -57555,7 +57603,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 228,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TswhKg4wsZpaf24GbxzsseoG8i4UpSVBYvwqMsEgNIIDE0n2tbz96",
-                            SecurityStamp = "7a4be6e791e1450db946c0ea22529ff0",
+                            SecurityStamp = "d4c08ea4939947469b5567b0c478406f",
                             Username = "2512052"
                         },
                         new
@@ -57568,7 +57616,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 229,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0T.Z4xzwPqsmTk9HP1w0pebWFXb4dGLc3Q3sFSBjn/mPNjz3pPAM2",
-                            SecurityStamp = "259ba7f65fe44deb8ff618b2aa1e7f70",
+                            SecurityStamp = "5d36f58c35e64763b115601819508609",
                             Username = "2512053"
                         },
                         new
@@ -57581,7 +57629,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 230,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IAo2Q35WqBJ0RaPhhqXpT.Bgf6.zDYAXeJ4RQ.8lVMC.J4Vet.xme",
-                            SecurityStamp = "8a16e0556bed45b6821c25c168858d5e",
+                            SecurityStamp = "d63f0376db324d57aa08e529c2b649eb",
                             Username = "2512054"
                         },
                         new
@@ -57594,7 +57642,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 231,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$R8xhLpPU8G8/rUhqeqz19.cG5vhjcr1LBsKl77rtJqVa4zPOmrBbK",
-                            SecurityStamp = "8e9636ab1d3444c3953fb05415b64bd1",
+                            SecurityStamp = "c288a28ee28f4309875e2e5c143e6be8",
                             Username = "2512055"
                         },
                         new
@@ -57607,7 +57655,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 232,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hzr1aVzQNOcQbgHc.egDIuFX4obw5OZiYRiJL6Ij.1o50iHnJhm1i",
-                            SecurityStamp = "61ad6bc657694f5883c264f0f1cd0fa1",
+                            SecurityStamp = "3df3a0d6816e4b05ab063ee61ab1d336",
                             Username = "2512056"
                         },
                         new
@@ -57620,7 +57668,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 233,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$p5eGZKVa.dmM0vG0I8g64.G7T13MTpz2T4EDWSpjA5GbFCqc3J0J.",
-                            SecurityStamp = "f4530064b5ee41bf90385847d66ecb0e",
+                            SecurityStamp = "1416dc1ac3374c0fb1ec19b38f455a9e",
                             Username = "2512057"
                         },
                         new
@@ -57633,7 +57681,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 234,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UooJ6nrRTmbCtU82hEkYtOFUOCdkgI/Py/excA3FBE6qiOnM0iQ7u",
-                            SecurityStamp = "013b19441c5242ffa249513068485620",
+                            SecurityStamp = "a8142b8e50db46d18496b8e254c6025a",
                             Username = "2512058"
                         },
                         new
@@ -57646,7 +57694,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 235,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jgNnEUENo5RNNuZpHjCpxOe1dIC3JniRylfrfn0aWKZLEWjXDb2MG",
-                            SecurityStamp = "beb6fc3581d4405497ebef288c4e90da",
+                            SecurityStamp = "f9b29706354845b6b33a86a30e490b83",
                             Username = "2512059"
                         },
                         new
@@ -57659,7 +57707,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 236,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fvzwdO4mI3BgkeFmNDrxsef2NGaWt/dbgA7eclxQFBjDc1/wiCgZW",
-                            SecurityStamp = "3026671f6a9f4dd6988d254398dd33f6",
+                            SecurityStamp = "802136cbe6f948f9a91eb84fc218d8b9",
                             Username = "2512060"
                         },
                         new
@@ -57672,7 +57720,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 237,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uuwk1ykQe3lq3MC0ODv5l.MM6pSFvZ6V7BCMG5eQAVfbu9.JNW6fq",
-                            SecurityStamp = "8701113af61b4dd2ab8eec9dd95816fe",
+                            SecurityStamp = "ddc5974c7da8490ab0e8ad798efc58a5",
                             Username = "2512061"
                         },
                         new
@@ -57685,7 +57733,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 238,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PHWcZ854H9Pxa6DKmeriFOQtp/wjAfmR2d4NiSfF47EL4OkrDwPOO",
-                            SecurityStamp = "b0797e4b17f94c71a2036d5ce983ffad",
+                            SecurityStamp = "0cca37fc0dfc41f8a913cc0b0c6e3ed2",
                             Username = "2512064"
                         },
                         new
@@ -57698,7 +57746,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 239,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$z1GAxLd4qHnOakhUwxujH.xQPsYH8frZYcfslqY0jVbHW.k1xZd4y",
-                            SecurityStamp = "945a46bfe65c4cdb94029f5163eb7f4b",
+                            SecurityStamp = "ff438fa2840c4717b4a1618b41083095",
                             Username = "2512065"
                         },
                         new
@@ -57711,7 +57759,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 240,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$99HHq/mtvBHPm1RCrY04me3cPvjeQxDud09pE.Z2T1bIdYzGDyfjO",
-                            SecurityStamp = "9fc1730b34b04b85b4d2e2e397e83516",
+                            SecurityStamp = "730e4825d1734c0faa91a6d115281b59",
                             Username = "2512066"
                         },
                         new
@@ -57724,7 +57772,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 241,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nLCQdYoxUHLBSZ/LnEsxCugKrHN1driQ4iILiI60QoAaD8gk3G3oi",
-                            SecurityStamp = "e6e441236da04ecdb75ed3388b833c89",
+                            SecurityStamp = "ec78575307ea453781f022423c5ad240",
                             Username = "2512067"
                         },
                         new
@@ -57737,7 +57785,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 242,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mR1RwTm7zczFiy/mJFWQuunhicDun8HqQ8kql2uTg7I/IE3XG4DnC",
-                            SecurityStamp = "a0ad417fdadf410f9c7b359937d4b4a7",
+                            SecurityStamp = "111c4ccd85484bd4aac0ff5d64a8367d",
                             Username = "2512069"
                         },
                         new
@@ -57750,7 +57798,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 243,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yEDpD8jrOd/jKUnyD.zEHu0FmvjnlhWkrWQ.GF5Aacp/vjm.gw/EC",
-                            SecurityStamp = "5f79b9ca9a84460f90b54abb197b156f",
+                            SecurityStamp = "94216d741d874de0b2adde761aafddec",
                             Username = "2512070"
                         },
                         new
@@ -57763,7 +57811,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 244,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yTrtbtEpElLgkuLm5W6w/u0cykzKjbRozU2Vaj4CbU6tyyqlJsSae",
-                            SecurityStamp = "36bdde2d3b2048b8bd9ca8d0f44fc609",
+                            SecurityStamp = "06a79c92024f401ea2a68783e03df77a",
                             Username = "2512071"
                         },
                         new
@@ -57776,7 +57824,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 245,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wB3InvMG4zC5T8fJgVype.o5rA.X5wrJWb5rgaQL8uazaeIek5S6e",
-                            SecurityStamp = "63280e6087bd4ac49fbc28255106945a",
+                            SecurityStamp = "e95a7c26980d47dfa911c62bd57a1f6a",
                             Username = "2512072"
                         },
                         new
@@ -57789,7 +57837,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 246,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Jiw8jBRBQvkGAbNIKSvZd.ijCgv5CEeGJB5/9PKZ4Gwi6YV167vqS",
-                            SecurityStamp = "ca4269e3196c479fbf7788618c5cfb4c",
+                            SecurityStamp = "ef345ceff9284dc78833f48b9a0989d3",
                             Username = "2512073"
                         },
                         new
@@ -57802,7 +57850,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 247,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/jPyJxAceF7BwXolL8EA3.aqEPKVDIKT9KYFqk.W8fUT8.UsLN7tW",
-                            SecurityStamp = "464a6be9c2254e2dbd6516f9569a532b",
+                            SecurityStamp = "9333aa38b24a4c8a9aca4e43938f66ff",
                             Username = "2512074"
                         },
                         new
@@ -57815,7 +57863,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 248,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hQX.YOIqWapiLMkpyg8APuGzDeDlIgxR.6MXVKHZ2o56h6Heo.4Fa",
-                            SecurityStamp = "55969f4e1e2843ffae0a3d6919ef17ba",
+                            SecurityStamp = "50ac459e20374c0d82e027c289026ef7",
                             Username = "2512075"
                         },
                         new
@@ -57828,7 +57876,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 249,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$iQ13/1tKF80UAJveLDLFguh4Lc4RbZwJw192pLuplII3WGoF5s09i",
-                            SecurityStamp = "0a4da564d2d74d33a3845a733ad71a01",
+                            SecurityStamp = "bf6c976462da40e1870649f5efec15ed",
                             Username = "2512078"
                         },
                         new
@@ -57841,7 +57889,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 250,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Js4IcDp9uQJ8rne5Rrc5uu6PJNKcIbwnQ1RF6jRZ2Az.75.wXZ4Ly",
-                            SecurityStamp = "8ae4ec3c01eb4ddeade4f4456bb1562e",
+                            SecurityStamp = "6af63bbe93e744ebbbbc3d98a84d360a",
                             Username = "2512079"
                         },
                         new
@@ -57854,7 +57902,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 251,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uBn.12b6og8EiTdh8CETU.pPvTAfym3ZAf44m1LWNYFeAmyP/67ne",
-                            SecurityStamp = "253fe3429ec8461fb042c431cb7ded1e",
+                            SecurityStamp = "181ae96cd5534021b89dca6e4fcd15ec",
                             Username = "2512080"
                         },
                         new
@@ -57867,7 +57915,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 252,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Q0X1/3rETAQVIKU82qnORuMwgAWqHxTnLfDgP0B6m1BiFo49QmR/q",
-                            SecurityStamp = "80b99ff5aa3f407382366521d2520065",
+                            SecurityStamp = "c6f6c64de50646dc94936f29af5974e5",
                             Username = "2512082"
                         },
                         new
@@ -57880,7 +57928,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 253,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$QNURF1eYiLroyKonTNtN/.jdA5valfh9.OaTnoJ914G7Q4tAU/rO6",
-                            SecurityStamp = "96328bb0e2254edcbacf4423bc799cdd",
+                            SecurityStamp = "0636b8aa292247b8a408d1fc8bda6529",
                             Username = "2512083"
                         },
                         new
@@ -57893,7 +57941,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 2,
                             MustChangePassword = false,
                             PasswordHash = "$2a$11$Agbw21ukTZFbPtTb1gy9euk0Cp1xM.B4t/yh7Qv3jVt6Jf.mohwPu",
-                            SecurityStamp = "fed773a1957042f1b80dbb7b1174b988",
+                            SecurityStamp = "66a4c5d57c724b6aab0824d171486184",
                             Username = "shalin"
                         },
                         new
@@ -57906,7 +57954,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 254,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YggMlVwR2YYI63Fh/g7ZXO4ehlF3pF7DtF4dLYntImT0DdyhjNoC2",
-                            SecurityStamp = "48642a7190fc42e59a960b9eadd0a31e",
+                            SecurityStamp = "aee55ff57c3a4a8fbfbcaec7abec4688",
                             Username = "2512084"
                         },
                         new
@@ -57919,7 +57967,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 255,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7c1B1sXuKhQ5RObsq/Qy5equot2piRcX6yuDequm/YBAVBG9Xyc3q",
-                            SecurityStamp = "fcc298981fa349dca7423d853f4f73a4",
+                            SecurityStamp = "3ebd3b708bca4503a1323813a55cafc3",
                             Username = "2512087"
                         },
                         new
@@ -57932,7 +57980,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 256,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e6qToIGQ/8boC.vNZOEWSOIWQPVQhfAuXwm216ftYrjppSJ63zYKe",
-                            SecurityStamp = "e076d93da9aa4731a6c52da59007adc0",
+                            SecurityStamp = "89770981e031402c92864771786a545a",
                             Username = "2512088"
                         },
                         new
@@ -57945,7 +57993,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 257,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZmW2bUHD19R1nn3jWTgMZ.vdSHZvhVxxH7048Nm/HV4eYOHxip8sO",
-                            SecurityStamp = "3022cfbf5a0142a3b7bab269415864db",
+                            SecurityStamp = "b5706f1550fa43dd94583e66ac853782",
                             Username = "2512089"
                         },
                         new
@@ -57958,7 +58006,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 258,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nvQpIFK2KEFZS5z1wL4vAO/OgBfjG96G3X8soOtxBK8VL7BDxqj8O",
-                            SecurityStamp = "ed844573ac574596ba2117873e62e6ad",
+                            SecurityStamp = "c28b383267d743299652db4a52898597",
                             Username = "2512091"
                         },
                         new
@@ -57971,7 +58019,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 259,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pryB1BU30ZR5IDdvBTgcr.IQ6yYlWoYxhOSQirA3aImkMdu.wzpXO",
-                            SecurityStamp = "140a31b297fc4ea4bc24d24f1c7161e7",
+                            SecurityStamp = "686ac1ce4eaa408480bb24a1053b7fd4",
                             Username = "2512092"
                         },
                         new
@@ -57984,7 +58032,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 260,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$64Gpwh5gd9lK/Qa/M7T0GeuDsjET7V2HmlxL0zoDa3Ab0QNZNTIru",
-                            SecurityStamp = "a1644cc87a3249cf8a8d32a2aeb09e60",
+                            SecurityStamp = "0d05485cb6ae44b997da943c934f6891",
                             Username = "2512093"
                         },
                         new
@@ -57997,7 +58045,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 261,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5nVU/BWRCh5XVs1W8qj7z.pftPt62rWB8lQOZowFXap3K9Al4jrXa",
-                            SecurityStamp = "1cd6af247f034e62b3bb6a49b1b5d91b",
+                            SecurityStamp = "08ecf1801ba043d7a4dea41985882d84",
                             Username = "2512094"
                         },
                         new
@@ -58010,7 +58058,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 262,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Xg8kewDW11gXSe4ry3Ot3uEy3OHuNCq52dC2.lhyjwI4HxqWMoc/y",
-                            SecurityStamp = "049dcd310c964051a102f49a6f3bfb74",
+                            SecurityStamp = "f7bb5b5994a346e4876b4251479fbecc",
                             Username = "2512095"
                         },
                         new
@@ -58023,7 +58071,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 263,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RmcwCsxIINqn7yDGq6qWV.PVYTilAXr9AFqn3iyOgpbumwcKqrtRW",
-                            SecurityStamp = "df7d452876d847008b2535375b1c3768",
+                            SecurityStamp = "108cc5b44d1c413ba62252bf8a4239b9",
                             Username = "2512096"
                         },
                         new
@@ -58036,7 +58084,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 264,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vV0OA1REbWKvf4R78R7dru1XFTyHhMlNIdJbkc6OjiWRRtnbYkJCe",
-                            SecurityStamp = "8032fc17c9474ecdadee9a89e450b336",
+                            SecurityStamp = "b9f76ad4eef64bbbb7060f1d0eed8a37",
                             Username = "2512097"
                         },
                         new
@@ -58049,7 +58097,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 265,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IyLCepNGcnHtp0MHIfKEC.kE8SNRXCfoWFweCaBPDA09LE.8Q.BB.",
-                            SecurityStamp = "2ffc49168f5146888a3cacdb36e0298c",
+                            SecurityStamp = "0e0e05d1155d476cb07b2c70a26ea22b",
                             Username = "2512098"
                         },
                         new
@@ -58062,7 +58110,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 266,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aIPOPlEEqZKqsr7HdHpfPeeNM8OgKu7M2SQlKH0MfsbOIeKIIfqN.",
-                            SecurityStamp = "d5368a84d4584c339805b74dbfbcb46b",
+                            SecurityStamp = "5427432d18c94122a0383ff9d1c8e0c4",
                             Username = "2512099"
                         },
                         new
@@ -58075,7 +58123,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 267,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7AXJ/cZfy2B05wJzhMX/7uwEiWNDIew0de6qdZ79BQ6TpHYbbvRNy",
-                            SecurityStamp = "4a52f3d6125f4f7fb6e12f00ba84731c",
+                            SecurityStamp = "2e564386c0f54b8db43bf338408ff37f",
                             Username = "2512101"
                         },
                         new
@@ -58088,7 +58136,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 268,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fq3X2HYr.3w7LqwWK/vebekGsnhak246dx1UEMnmxalwd5yxbHioa",
-                            SecurityStamp = "a502bf5d4d9f4909aeec25241deec23e",
+                            SecurityStamp = "7b2206c9ac02427bad6ce55b11ca107a",
                             Username = "2512102"
                         },
                         new
@@ -58101,7 +58149,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 269,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$b4hLTu.hzeB8uSAGXZvlyuvCUyJNSxSdLmSdmbOVeUEk/TmtXPOzK",
-                            SecurityStamp = "2847cd33f7744caf87c3723919baca56",
+                            SecurityStamp = "aedd6b3b3d164332a3a88554a4dd2c1b",
                             Username = "2512103"
                         },
                         new
@@ -58114,7 +58162,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 270,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c/ZVnrJFjAjnrYVBGLmTmOfS667ykLC/MUZSIrLJeZlpSInZQ11nC",
-                            SecurityStamp = "25ac263d34ba4a38ac8d723f442ee5c8",
+                            SecurityStamp = "18d6835628be42fb8f12b7693aec1d42",
                             Username = "2512105"
                         },
                         new
@@ -58127,7 +58175,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 271,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jW52iwpE30og6RKdkHCDVurYSv9OFiHgove74JvCDRQ4TruvaDOcu",
-                            SecurityStamp = "bf0f2b1b34644036b05c7c309249d87e",
+                            SecurityStamp = "484e6bbbf2964b8594bf5e4a0991ca72",
                             Username = "2512106"
                         },
                         new
@@ -58140,7 +58188,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 272,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yLQYQTx20ue7UbAxRr/TEe/UBoPc8U65Sj4uwr0BnRcS.pSt5E.xW",
-                            SecurityStamp = "8a91897eb0c140d8af5ccf04e54c4b88",
+                            SecurityStamp = "214c6a2afd8d4fd4b4e3bb0b7617d3c1",
                             Username = "2512107"
                         },
                         new
@@ -58153,7 +58201,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 273,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$itzxkWW7WGwL.StbpIJhXeUFlAjxopyXh17rcss8dnb44zNrS4e22",
-                            SecurityStamp = "afc2a93b7d4446d38454c59bf7dfc978",
+                            SecurityStamp = "436389b89eae4a23b6d30db8eca485c0",
                             Username = "2512108"
                         },
                         new
@@ -58166,7 +58214,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 274,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IaSy98P3YocAUHiTQUFXce8VP0pqncb5GLc7wjVKMdKkfLYSsvTE.",
-                            SecurityStamp = "bd23149c57944e01aecc2138fde565bc",
+                            SecurityStamp = "f769134058ea465c9333709ce681bf10",
                             Username = "2512110"
                         },
                         new
@@ -58179,7 +58227,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 275,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rl3PmUybSdEhWFcsBECms.VE4ZtoAnr48CQ90.n.rOm72jV1AeFpS",
-                            SecurityStamp = "6cd58c1cd9f2416ea4ba8c67e8f046a1",
+                            SecurityStamp = "2161ce3f447440338ecd35f3bd62b2b2",
                             Username = "2512111"
                         },
                         new
@@ -58192,7 +58240,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 276,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wjim..rbcPH4Y3MVRxseoubvxcINUu8DSu3yxdo.Y4910zB3fDtfi",
-                            SecurityStamp = "0d59aadf78884beb8c3dca4c61030583",
+                            SecurityStamp = "0bdb4f9ccf7a4ce1b47da95fec684768",
                             Username = "2512112"
                         },
                         new
@@ -58205,7 +58253,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 277,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sWtqEtdLNN2/0/BSzj4I9uvxHzg0k9Ws2MyQXEXWg1EQqY4M6PYYm",
-                            SecurityStamp = "0b76f76c19db4aeda325598eb7906df1",
+                            SecurityStamp = "161a72cddecb4b9f84fe3f09c45a9d7e",
                             Username = "2512113"
                         },
                         new
@@ -58218,7 +58266,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 278,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KUtYtBNvqfzNJPnQtsiyYuz7aK816q1ur7fSLasU90.WOEt1kaCd.",
-                            SecurityStamp = "afb1f6ba280a4eafbe83521b300b96dd",
+                            SecurityStamp = "a376e979f3114785ad54976d2667c1af",
                             Username = "2512114"
                         },
                         new
@@ -58231,7 +58279,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 279,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xClAYLs9M6WydVmErgmHBuq2Qqn5Z61qwSeSLxShWFjJQUI6ByOw2",
-                            SecurityStamp = "3f84702ba54a4ed08b81da6697c459b1",
+                            SecurityStamp = "663c344f512c4be4aa7d25678a9e0303",
                             Username = "2512115"
                         },
                         new
@@ -58244,7 +58292,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 280,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$R0qmzqSL2OC0ss93ksVl/ekEEd7nCUbw0M.cu52PYzy3xSw/aWOD6",
-                            SecurityStamp = "c2bc38164d484be69f54cfe4577de5bc",
+                            SecurityStamp = "9410cf91354f4ece9b4220c0f6bdea38",
                             Username = "2512116"
                         },
                         new
@@ -58257,7 +58305,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 281,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pwpz9EeC0tCvl6lCrHcT8.R4XKH9slsFx0MXfn69y4WsdmFt9x2gm",
-                            SecurityStamp = "bd0be7ec70764f79aad020b0ca42783f",
+                            SecurityStamp = "0353efa18d1544908b89c0a7a64f5ab0",
                             Username = "2512117"
                         },
                         new
@@ -58270,7 +58318,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 282,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$j2e8X5Wdk7zuTlZqO96.f.Dry4.sz/zgQdJ.uGzU1x/G/lKAJJ1Ja",
-                            SecurityStamp = "cb55e9362faa4c2abd583179bd46cfb1",
+                            SecurityStamp = "f88df79668444b40b87d388a63382db5",
                             Username = "2512118"
                         },
                         new
@@ -58283,7 +58331,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 283,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yrEr4UEk89Awlfgeiwlw8.uxT1Mw11Knu1RtGvBlTJaL2S0ojHgvW",
-                            SecurityStamp = "e56f0e3f0e4d4205b5f1cfc61c1af939",
+                            SecurityStamp = "4a24ff23f59943e6889fc4b9165166d5",
                             Username = "2512120"
                         },
                         new
@@ -58296,7 +58344,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 284,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$flwErxwZJKqIxYRAH5fihOptgWH84PpmpfluQE7LtPfxM9jJdR3ei",
-                            SecurityStamp = "13f9ed7b7b364a58aca753367f198f1b",
+                            SecurityStamp = "d743361d6e1c433e89531d699af02017",
                             Username = "2512123"
                         },
                         new
@@ -58309,7 +58357,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 285,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g7LqgKpY2YnlkX0e1ULDru5DbxxPYWixTTzqq.sPwSuMkC.fMyGyW",
-                            SecurityStamp = "320638d971d8403c9877008d9a6d0f72",
+                            SecurityStamp = "1bf3f944b4ff4d3da5c81350c1fe0dcd",
                             Username = "2512125"
                         },
                         new
@@ -58322,7 +58370,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 286,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y4GWcYhw/AJVlHZgF/Ng1.sbcDBwiIdHs19tXkw.XYjugJBOiocGq",
-                            SecurityStamp = "e8adbf954d8643fd9fe377f7b7625eae",
+                            SecurityStamp = "8aca50dfe5fa45a09c2776f9afcd3327",
                             Username = "2512126"
                         },
                         new
@@ -58335,7 +58383,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 287,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yWvLF.41EyRSgxEA5nOB6eRf1ZhR65irB4.nlS8msij6SwcK6shu6",
-                            SecurityStamp = "60e4b6e50e644e49b33aed024766a3be",
+                            SecurityStamp = "9b2a904cb301475ebcfa767034f2b3f4",
                             Username = "2512127"
                         },
                         new
@@ -58348,7 +58396,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 288,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Afrra9xYamfSLqLD64/1Fep5T8ADPVecZXDVExV.ErgUx98OEiwbi",
-                            SecurityStamp = "e054c217ee424cbf893e1eb44e6a0dc4",
+                            SecurityStamp = "4f0167fe54f04f168f18d56192047b6f",
                             Username = "2512128"
                         },
                         new
@@ -58361,7 +58409,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 289,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ihU04rgMDkCYz94ZEjDH5OnfkuIYrlcCvHFk.HABM/3pIjCOvOOpa",
-                            SecurityStamp = "b4f3cce634304496b95466804f1587da",
+                            SecurityStamp = "7cfcac7c235a4c01a69384ff7b5f0849",
                             Username = "2512129"
                         },
                         new
@@ -58374,7 +58422,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 290,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ntlxuzUOhakNlNs78a5ma.GxtWbC2SYxb/uIVY8PE73.EDTSnUjki",
-                            SecurityStamp = "e06b66e58e344dc091c31bb6076b57ef",
+                            SecurityStamp = "71f9b4346d4a4b99929aced288d8e9c1",
                             Username = "2512131"
                         },
                         new
@@ -58387,7 +58435,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 291,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XwydG761vljik4h0i9B8uOGvojLRSzH37F5WXtygO/W3VVUoGxDZ6",
-                            SecurityStamp = "55351a83af664dcd930f0ee265e770f4",
+                            SecurityStamp = "895f5427bb784fec80f33c1e8c6b87d2",
                             Username = "2512135"
                         },
                         new
@@ -58400,7 +58448,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 292,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3nnYTCwMBwXxhLKCQ2N1UOUeJZx5WVpKQ588RYYOqBYTsKiHW0YBS",
-                            SecurityStamp = "fe509354eec94694915c86c83f0b1b6d",
+                            SecurityStamp = "67d8a658efea408bbeb221fdbfda9ab7",
                             Username = "2512136"
                         },
                         new
@@ -58413,7 +58461,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 293,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JiOBqgTHgU9MZxDN5vgXie3K6l/5rmjIt8PDxgONBNVmEDzOgLYJq",
-                            SecurityStamp = "66b1394a45d1483fad6d23dc33005c49",
+                            SecurityStamp = "e9c0a3397edc4c1bb35b36f9304609a2",
                             Username = "2512137"
                         },
                         new
@@ -58426,7 +58474,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 294,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$8.Giv6B3xhOjqZFaK7pakO7mLpHkpV3XdjDLnt.hktr3bjd2gH70W",
-                            SecurityStamp = "c7beed6d551f4319977b196bf8762f1f",
+                            SecurityStamp = "d4a34fd9ff66441c926654e6616c00b8",
                             Username = "2512138"
                         },
                         new
@@ -58439,7 +58487,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 295,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cv8mxB9aBEaapcK7EvNjBeGzj3f/ydOsC43sKk8pxScOZaNWHixz6",
-                            SecurityStamp = "3e5ce7fa3c764dcfb4ee823d3d92584a",
+                            SecurityStamp = "0df72d5f17c34447881cf2dbf5ba25c0",
                             Username = "2512139"
                         },
                         new
@@ -58452,7 +58500,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 296,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dLIktPjSPCEmiAfMKHElK./4u6m0iEec0nG7dW6QFstuJBou00hzm",
-                            SecurityStamp = "5ae6aa1ad4784d7d88752b65288e4a1f",
+                            SecurityStamp = "40ba190e5efb41f28f7c5dd3074defb7",
                             Username = "2512140"
                         },
                         new
@@ -58465,7 +58513,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 297,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jww3ymGNLLFJ5d4JBR9JdeaeFOE/rUjOYNsCs0lXcvIzBy.Rq9Rjq",
-                            SecurityStamp = "9a803ded097e45b2850862b8e70d7486",
+                            SecurityStamp = "7ad4cecae3b74ede91c4cc8b9aaf93a4",
                             Username = "2512141"
                         },
                         new
@@ -58478,7 +58526,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 298,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IQo7AM8JPh5m7FvmHLTiK.OkKxcwBbUY5Ja.1mDgdoMvwHKqRM2x6",
-                            SecurityStamp = "ec97d5bea6b74ba3a5ac125d6e38be28",
+                            SecurityStamp = "b896cb57a3724fee9bd982b7d9da4cff",
                             Username = "2512142"
                         },
                         new
@@ -58491,7 +58539,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 299,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KhAkvj5Lmwy4W87T7qcEpOAqzR2AWVGe2sdIYu.tp7jg.UqYqk8/q",
-                            SecurityStamp = "7d1dd4332a0c4e0397ff6e0fc72279fe",
+                            SecurityStamp = "24bb237362a84f0a9c07fc7f53867d19",
                             Username = "2512143"
                         },
                         new
@@ -58504,7 +58552,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 300,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JL.bQJiJFTC0oxSCGzhrtu0RCR0wd5Wjofii7ddNSguVKjxEW6TOy",
-                            SecurityStamp = "24b9e25d75644c2f892bf388d48c66ab",
+                            SecurityStamp = "79b8d0e343a743a6aa6f00ac4e0bce7e",
                             Username = "2512144"
                         },
                         new
@@ -58517,7 +58565,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 301,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oa4jAGIzJ2b3KlvePmdZT.R2Ps9XaVA4oC5xZ.wATitNeXQtZD7o6",
-                            SecurityStamp = "3f9c44ccdd8243ef9dccf44af1758c10",
+                            SecurityStamp = "e41e94ae644e49a4bc54aca87eb878ee",
                             Username = "2512145"
                         },
                         new
@@ -58530,7 +58578,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 302,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BbBjxlPc.mMWtFraAvgLoeg0geSIdSSlaYKjBmSn9Tq5BRueWV6Ei",
-                            SecurityStamp = "04db4e65f6b446cc8a968d2b17caceaa",
+                            SecurityStamp = "21b84ff129f04205ab1d6ab9e11e8d61",
                             Username = "2512146"
                         },
                         new
@@ -58543,7 +58591,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 303,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PF6QKMVB9a1NZKzhbyjRL.WJ9p5zD9f/s3pZiL04aaHZxMFXg5Yum",
-                            SecurityStamp = "592603ad7ce645d9812fda0ad0f54975",
+                            SecurityStamp = "61338fdb57084f20a284e221daa1a6dd",
                             Username = "2512147"
                         },
                         new
@@ -58556,7 +58604,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 304,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y7pe2YC.TooaU6E6E0ofSeeiRgAv8/6rypdXpRDTEDkqSfeNAbsEy",
-                            SecurityStamp = "8eb9f32b5a7d417e86d996d7f372b9b9",
+                            SecurityStamp = "b78787d393884a7581f2c649f6a0e28c",
                             Username = "2512148"
                         },
                         new
@@ -58569,7 +58617,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 305,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gSACwLQRnwAoXr/3.5c0DuTJyLQAQYzBjGWHi26QYUTa7pVdnHBXm",
-                            SecurityStamp = "2cbaf262952e4522a2c8668428aba8ea",
+                            SecurityStamp = "32375e9b41b54d358b1c333905a21f98",
                             Username = "2512149"
                         },
                         new
@@ -58582,7 +58630,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 306,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$QNOjD/wSLKXdogUx1D8TAuWjq8OMnaowqV.ornJSVb0F0RaNiN.J2",
-                            SecurityStamp = "7d295a6b64a64e8bb6fc48e2939cf396",
+                            SecurityStamp = "a92d837f98d4408f82455816521163dc",
                             Username = "2512150"
                         },
                         new
@@ -58595,7 +58643,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 307,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5bu7vDRWeFabXUJ1DgfKn.xi6RJFmiz85f.rp/J1dWbZuiwSfQ3qO",
-                            SecurityStamp = "a3d0ff901b394576a41f78feeafb3cff",
+                            SecurityStamp = "764dd84d10d1483da0b23b06887197c3",
                             Username = "2512151"
                         },
                         new
@@ -58608,7 +58656,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 308,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/g3SVnZEITVGsvqWMTKMTe..vya1R3n8q7mkYewDFsWpU6BaDRYP.",
-                            SecurityStamp = "98b51100cea34af5afba1f18574f25f3",
+                            SecurityStamp = "7d2207351b234138b83da10e242cb29f",
                             Username = "2512152"
                         },
                         new
@@ -58621,7 +58669,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 309,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3wJ9HiEXRAKOJX/p9mhnwO9SQkzTlvi7z9WwBb88IHGFfoDvQn0wO",
-                            SecurityStamp = "26675d88d3aa4b339ebfa3a15bf17088",
+                            SecurityStamp = "2a47b13e0dba441b92ec9f9a1c1b0486",
                             Username = "2512153"
                         },
                         new
@@ -58634,7 +58682,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 310,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e3cfrRqN39Rfj4Xcjmav6ejNjkBWbXfKR9..nNDYiRM7lPsHz4xwa",
-                            SecurityStamp = "8478a0502d954c4d856e13c840490df3",
+                            SecurityStamp = "92d5da804e2f4e8c9f0e79664d969ffd",
                             Username = "2512154"
                         },
                         new
@@ -58647,7 +58695,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 311,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Uk10O52q3J/P1ZRhOTMf9.YBQ794fJvHUEgIFNqA6C8gNwExEsYDq",
-                            SecurityStamp = "02fb9255c6984e95b5fa613717b608e3",
+                            SecurityStamp = "1363db7a0625442b9e878d075279ebe2",
                             Username = "2512155"
                         },
                         new
@@ -58660,7 +58708,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 312,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OqGesYKJ6Hk7lp6zDlcKfu8wZsH3BOyRGgFBF/JtSq0Osa4NUhtIu",
-                            SecurityStamp = "175803138e994ca286aee9b71ba4e36a",
+                            SecurityStamp = "759f4795ef0946feb5acf1a93b5fc26a",
                             Username = "2512156"
                         },
                         new
@@ -58673,7 +58721,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 313,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tSyAXkROSs7.Gz8qfZ4HJ.xE1ezdWBRaRE8JSoglvhIyGGZpm6tUi",
-                            SecurityStamp = "0fdfff0b7c9341d6881f9689acf0b1a0",
+                            SecurityStamp = "1eb5dad044804df58053aa32ee2ebde7",
                             Username = "2512157"
                         },
                         new
@@ -58686,7 +58734,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 314,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1LvHigvbuk26MAaYj.LL0eVUsXCrVC3fNjfiANVs8fR5QczSznFZa",
-                            SecurityStamp = "9090a65f588e41daa14dee8c3c6915fc",
+                            SecurityStamp = "a0b99002c7bf4c7ebab8a7f485c68c18",
                             Username = "2512158"
                         },
                         new
@@ -58699,7 +58747,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 315,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5RBN2wolSQJg0OcZ.hOkou.wenzIYcAz.Uv9HHsgnS6Bb8LKjHWMK",
-                            SecurityStamp = "6db483353a244c22a5cf6c7195d0a0b7",
+                            SecurityStamp = "90bff67fa4534a89b68b9abb627e4c2d",
                             Username = "2512159"
                         },
                         new
@@ -58712,7 +58760,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 316,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$b9nmbrT4C7l9jxY0e1GHQeds/gtWOazoBO/b5jHYVrOmJLFt..k4W",
-                            SecurityStamp = "a2df5391c0a6499aaa3ace1a77e543c8",
+                            SecurityStamp = "df3df2ede7e342af808e95ab077bda14",
                             Username = "2512160"
                         },
                         new
@@ -58725,7 +58773,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 317,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$v1eoWGx6myROHBO1xVjL7./GkSnJ.F3vq0/7rtdHtg.pOU3o91FJq",
-                            SecurityStamp = "9d429bb526004e178ee408721d839754",
+                            SecurityStamp = "f9f83abe8ddf4fe1ad63b2017f95bf06",
                             Username = "2512161"
                         },
                         new
@@ -58738,7 +58786,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 318,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$HpjcJBMM4dSe/Yfx4DaNee9rjFhd4Gw/o1mCKnE9YKXjbVq3ueA/6",
-                            SecurityStamp = "a9838e619cf14b84be392420091a7e03",
+                            SecurityStamp = "bb755a60da5948adb9376a9e7722fb2c",
                             Username = "2512162"
                         },
                         new
@@ -58751,7 +58799,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 319,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4LNiwzjmXBx1ltsVrm9fA.9NK5cOTI/VdLvqN2jttyjoAysIqyRkG",
-                            SecurityStamp = "6b2aa3f470784bc9afc994cdb84857ae",
+                            SecurityStamp = "8cd2e4ddc9094f7893ecc3887f211bd9",
                             Username = "2512163"
                         },
                         new
@@ -58764,7 +58812,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 320,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g8P8ooTnGOm/IoRgf5VaWupIe6jhQU.B7ULlNq8mu3qjop3C/KQM6",
-                            SecurityStamp = "193032ee79624fd8870cabee9525e68b",
+                            SecurityStamp = "fef0aea8d01649ac9ce9b21fd9d49113",
                             Username = "2512164"
                         },
                         new
@@ -58777,7 +58825,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 321,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oWZ/kJ9JgxrZuMU2r1MOdOs43/oDoSpxtB6S1iXFrVJ3amsp1YZUS",
-                            SecurityStamp = "17c7b73d4ff24db1920953cfb3351fe4",
+                            SecurityStamp = "42d41fdf2cfd415fab19ef9a4936f687",
                             Username = "2512165"
                         },
                         new
@@ -58790,7 +58838,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 322,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DYnnZ6.1DtaRVBhJ2x3gAe2CpOFt0baT9bJfR.LdLIYvzdo218gpK",
-                            SecurityStamp = "2182d2a3894c4c33a8496c34d032caeb",
+                            SecurityStamp = "aa2d6c6b9a78474496175ab0d0d7947b",
                             Username = "2512171"
                         },
                         new
@@ -58803,7 +58851,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 323,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FfmszMKvDdboDPgjRPiJ5u57tx7RsrNRTQID1Tcg94ALsdWAI8vGG",
-                            SecurityStamp = "275537047b2444bbbfde6697bdd472ab",
+                            SecurityStamp = "778bc897ca834402b696f9e4da97a309",
                             Username = "2512172"
                         },
                         new
@@ -58816,7 +58864,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 324,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WILy31Hfsqw5d7jLZ7W.zeUaAYF1i1cVPS1dfolXLE8g.pRpUXCUC",
-                            SecurityStamp = "1e0d26e48a28471996d9cfcb9e88c944",
+                            SecurityStamp = "ac84011659fa41fd8e35c2c2a8886546",
                             Username = "2512173"
                         },
                         new
@@ -58829,7 +58877,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 325,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rjR4iVMohY3L0haCcrjzK.Y7P/mO8LRu7qEmIjW5pfv43Zg94kjZa",
-                            SecurityStamp = "d9be0d3676534b3fb904026445d20fef",
+                            SecurityStamp = "6be9730118b14c12835c6726f821645e",
                             Username = "2512174"
                         },
                         new
@@ -58842,7 +58890,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 326,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bLEvBa4jusNM9quOjGYxR.bhX74MC2JmgB23aHlCe4yPTGUgfcW2K",
-                            SecurityStamp = "0d0d062eb06e417e973132fb0609ddbe",
+                            SecurityStamp = "442e94bfb19643de8a87390ad62856a8",
                             Username = "2512175"
                         },
                         new
@@ -58855,7 +58903,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 327,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2vtBt3d5TLy4velV6Zedd.Va9oqUdxR0zSrI0IcDIbwafcxllCzr.",
-                            SecurityStamp = "d918c563d01e43f6ba9d1952a257955b",
+                            SecurityStamp = "27429270a6214c3aa812c7d59f4a5734",
                             Username = "2512176"
                         },
                         new
@@ -58868,7 +58916,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 328,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LeThzfvd99p4swMjRCpZCu0VZTWH/1D40v.qW85fvnowhKOtnhVO.",
-                            SecurityStamp = "217cee466f04463db13f3ac50ef95d87",
+                            SecurityStamp = "8abb5d7b67bd4b8bb1efedcad1dba230",
                             Username = "2512177"
                         },
                         new
@@ -58881,7 +58929,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 329,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/Ev../gVh6Sp/US3frfkCOFiXsfxyrFcE4yImUfCMW9mb/A4LtPi2",
-                            SecurityStamp = "faf03b10b8ed4817a560b9a1ad7d78b3",
+                            SecurityStamp = "b374713581444007b36dfcbb69e78039",
                             Username = "2512179"
                         },
                         new
@@ -58894,7 +58942,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 330,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/JP.ufTdNBrIl.I.Kl.FWeuWsqQ0WS5AYC7iF4VKrc8S.DvtgX9Gu",
-                            SecurityStamp = "bfb20fc9679c493ca32beebac89f4ab5",
+                            SecurityStamp = "91093d12ba3b4f4db104501b49867870",
                             Username = "2512180"
                         },
                         new
@@ -58907,7 +58955,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 331,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FOS3n8c7eYD7spdiQ/X33.NI.HqDnVPvmjCEqm/kZyyQ/zg0Ko8aO",
-                            SecurityStamp = "db6db82e8c524c5a9889af5d8cff5a6f",
+                            SecurityStamp = "1ea649f6414046d9b8bc82e7cb8cbe33",
                             Username = "2512181"
                         },
                         new
@@ -58920,7 +58968,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 332,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fl/Pbyrk7t6/o91g46s9Uuo8PrdWUib/lTvG0PAUBr458O6c6yJe6",
-                            SecurityStamp = "fe4d162839314f8bb5b40323b579c97f",
+                            SecurityStamp = "50a7b1c3164742a798b5ec5e1e839d29",
                             Username = "2512182"
                         },
                         new
@@ -58933,7 +58981,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 333,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$x57kRs3d26QwFMJmWP.xaOsZYWCkbii/28IHbzbV5WRE1BghT4Iau",
-                            SecurityStamp = "a5b956494b024653bbd620226eb8bea8",
+                            SecurityStamp = "9e875ca6bc3b4509af9330806718ca00",
                             Username = "2512183"
                         },
                         new
@@ -58946,7 +58994,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 334,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tRQ3.NKmMl.GfF2MdSh6pOsg3492QJBg.gtrbwP/mWhYJPgZ5FcM6",
-                            SecurityStamp = "3a7c66030196466fb32e03a69b75d8d2",
+                            SecurityStamp = "476e97e19ac24d649eb7a70c8eef3c85",
                             Username = "2512184"
                         },
                         new
@@ -58959,7 +59007,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 335,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KoHJoP1m5QOveLxT21t5RepknI1UPUQvqXVQ.LG4qfoVZYBr7RGIS",
-                            SecurityStamp = "61652d94b4e24a11b7e089f21f226e7f",
+                            SecurityStamp = "8c4de119fe194fc284871ec77542c449",
                             Username = "2512185"
                         },
                         new
@@ -58972,7 +59020,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 336,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y.jiQ1yZ0nu/8e7726Yy/.Exbe7PyvPktVTcbUPkQt4E9CL38FxOe",
-                            SecurityStamp = "fc55e51c52954d0981fc8cfd4be71dd4",
+                            SecurityStamp = "0fe19fd1cb9c4cc190e8d83ac6323a54",
                             Username = "2512187"
                         },
                         new
@@ -58985,7 +59033,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 337,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MmiUFRAtW00qAwUjPhIeE.7XZKUDyJBzsGYf2Hs9d4Yol0oWms2.W",
-                            SecurityStamp = "ccbd686d254a43f784e95ec5c5f54dfc",
+                            SecurityStamp = "47d0d303fd8e4d8796b407aee37c31f1",
                             Username = "2512188"
                         },
                         new
@@ -58998,7 +59046,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 338,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vZxettA5BgLNmqbAptxGquaxRS7Z2vSkoB1upn7q9Lev7jAijAu1m",
-                            SecurityStamp = "983d5b9a5ab04dbc8d9b0ffb059e116f",
+                            SecurityStamp = "db0e9a01d49845cdb65b87fedc4a0de7",
                             Username = "2512189"
                         },
                         new
@@ -59011,7 +59059,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 339,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oQuwOQB4XM1kpaLMbvi2HujUWZCevJOrgPVKHDvOFqcSve0UE2GBW",
-                            SecurityStamp = "d686a6bb018c4b82bff8ca651bf6f33f",
+                            SecurityStamp = "2191754e0e614833ad483446a2b4d0c5",
                             Username = "2512190"
                         },
                         new
@@ -59024,7 +59072,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 340,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6SrXg4MuGZ5kp9q1gNtj4uvFRQiacvehrxVh3EeRlngN0iQmUWoly",
-                            SecurityStamp = "84f13d7c5375465fa6919413336d3233",
+                            SecurityStamp = "2ee51e9e372d4335b91db134f3d4521a",
                             Username = "2512191"
                         },
                         new
@@ -59037,7 +59085,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 341,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JC/7QSa2x5Ui4bghnGT2AOwbZunCfklnD3z/ClfeU2WVOsE1OgfW6",
-                            SecurityStamp = "3de73c10bb3d4162bf944744f847acb6",
+                            SecurityStamp = "5c3be5d2d94d4308a9fbac2323a83d0a",
                             Username = "2512192"
                         },
                         new
@@ -59050,7 +59098,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 342,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0uSDhEHT9iG0vsHHpyrAD.e9an8Nw4Qxpy3dGYqXKDQ0XNowVT5/G",
-                            SecurityStamp = "af56767247144e8ea4195dc53b7f02d6",
+                            SecurityStamp = "08c09b5fcb414698b993b16f5437b13f",
                             Username = "2512195"
                         },
                         new
@@ -59063,7 +59111,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 343,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z4ZRHARi7AbU60lHdA41zOC5y4N360BDbJV7QDgaDrFB9pfDQ5mWi",
-                            SecurityStamp = "2404fd9e49fd4c168077e35c1ee2d929",
+                            SecurityStamp = "230fbdbd4e344d6aad639651785a3f14",
                             Username = "2512196"
                         },
                         new
@@ -59076,7 +59124,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 344,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xO5ySDBoI.tEYWUHU35c.OnXY0xYgjt63wNSqX4D7.Q55PX.sxccW",
-                            SecurityStamp = "462a42bb997341339561382b5186dd43",
+                            SecurityStamp = "285bf4d2e87a4d24a62a5964e864f6ef",
                             Username = "2512197"
                         },
                         new
@@ -59089,7 +59137,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 345,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Eg2nP3bQbv8hqbpD332PPeIclAdbiu575bwrbQkxK1XTOsphU6Qtu",
-                            SecurityStamp = "fa3114ab43d94c9f81d060b7c0568888",
+                            SecurityStamp = "81cc674f2f5a44fda4b87a0c9a6a8935",
                             Username = "2512198"
                         },
                         new
@@ -59102,7 +59150,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 346,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pw3oZwP4tcYa5wmxhbpZSeKfmsR7CCNNBx0nVcLjvGE5EA1rlDIo2",
-                            SecurityStamp = "446b2deedd7245c789355a8d19b31b8b",
+                            SecurityStamp = "17b7ef9c75de44089667b0549190ee09",
                             Username = "2512201"
                         },
                         new
@@ -59115,7 +59163,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 347,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sNEeEfrSjONipCwuuoIQKu4rptd3OPipMHKpprl2TmXX8B3VDVGAO",
-                            SecurityStamp = "1fbfd4f5bc954277a4b616bc04e0ed41",
+                            SecurityStamp = "14e0e8fdb050405bbed3bf1f8883d5f5",
                             Username = "2512204"
                         },
                         new
@@ -59128,7 +59176,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 348,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$C91MxjRA0CuJeXzrJFGB0O4f4kxcIl9AbKQWyTiRP.n063ki3bh0K",
-                            SecurityStamp = "c4d45e7925844d63b03fa8dcd595df76",
+                            SecurityStamp = "ef0e5331c78f40bbb018ef0303583d4c",
                             Username = "2512205"
                         },
                         new
@@ -59141,7 +59189,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 349,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4UHNM6pSctneMe2XJ.PPnOflp7EH4V82tq7KpVS3UH.Hj8zirc/MK",
-                            SecurityStamp = "6c18918d973e438c8712ba285376a8c5",
+                            SecurityStamp = "7becad20c43b4c6e8c4677be18ac63b8",
                             Username = "2512208"
                         },
                         new
@@ -59154,7 +59202,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 350,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UifSbj6M6XIevy./0voXW.k6ai9B7pdG0NuIjq/A9f8d/dYuPKova",
-                            SecurityStamp = "35dc56eb709d45e78f63a267a1b82b99",
+                            SecurityStamp = "8904385ab384420ab74b5c64a4f920d7",
                             Username = "2512210"
                         },
                         new
@@ -59167,7 +59215,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 351,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YHO1l3zMp3V4qZ/adt8C7ekI0WOVje9D.8VF4o9keWk4a5c4L4Of2",
-                            SecurityStamp = "49f350bccce04a2f91196705a738f813",
+                            SecurityStamp = "7456a362388b4c89863e3685ef6333cc",
                             Username = "2512213"
                         },
                         new
@@ -59180,7 +59228,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 352,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$x7ClRastaJ/HI64dufPN/uAWnbQaRAQ6OhdqBEVukLiDjAVN4p2.C",
-                            SecurityStamp = "517ec2dcb7aa46da8b8fe628f40e5ae7",
+                            SecurityStamp = "2a371c635b57409ebd0e3c056e16b5d1",
                             Username = "2512214"
                         },
                         new
@@ -59193,7 +59241,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 353,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2KUVmnkc8GCAW0tBOxLLyeNqseT3P9r/I3fR7Kjrn8cuI1pFtklI.",
-                            SecurityStamp = "abcb69a6bfd449418aaa99250a191e85",
+                            SecurityStamp = "8a43b5faf1484f95983193c89d0376d8",
                             Username = "2512215"
                         },
                         new
@@ -59206,7 +59254,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 354,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.Y0q8bGQE7u3Sxybc96YLuSjntyAV1bumIzoB7EFwt.ptX/VKOgaG",
-                            SecurityStamp = "751bbe74bab24e12b3b58487661eeda0",
+                            SecurityStamp = "9f7023e4e5ff4c8da581a0a79d53ade5",
                             Username = "2512216"
                         },
                         new
@@ -59219,7 +59267,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 355,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7NSpQNt8FKtFkTxFxKmlyOUuIStxovSjb9fxljeiy3JJuyUe64FT6",
-                            SecurityStamp = "4e06c761b2184baeaa62cb0bc192c900",
+                            SecurityStamp = "ef273809a4854fa38061cadfa08700f4",
                             Username = "2512217"
                         },
                         new
@@ -59232,7 +59280,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 356,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jO.2fElE8OmWfXkpzciz1ePaNYIXh/zOlXhIHmpHIVgpkloV4J2Wy",
-                            SecurityStamp = "c2d5e626b42a414ea61858db3f2dc184",
+                            SecurityStamp = "217e79aec8ce4d9f9262a4d3f0554400",
                             Username = "2512218"
                         },
                         new
@@ -59245,7 +59293,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 357,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ny2gLg/SdI6K53vjQMBHIeiK55QPFUS7Ts7sYFTxp6/3zdAFdTPs6",
-                            SecurityStamp = "0952a0b3e65e4738b75cf7ba588b223c",
+                            SecurityStamp = "baba547996aa407293335d72abc26044",
                             Username = "2512219"
                         },
                         new
@@ -59258,7 +59306,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 358,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RZpu4tYS9/ESP9i/vfAL6Otu29eqCrzkKZ5iO1W2ztU5QQqvgtBtC",
-                            SecurityStamp = "17b1b053ca5242aabcbe18e250811599",
+                            SecurityStamp = "c0ca8d2d5fd2420aaf43f6d9eeb69739",
                             Username = "2512220"
                         },
                         new
@@ -59271,7 +59319,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 359,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XsdnEJZFrWwQ76aLY4mKG.MtaKHP6QpccxufNAjIcPqBNJrG55EHi",
-                            SecurityStamp = "26a350d0f1404df8bfa2a5ab3a3eb104",
+                            SecurityStamp = "f75ec3c8415f447bbeec2f577f65d87a",
                             Username = "2512221"
                         },
                         new
@@ -59284,7 +59332,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 360,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jwbmAEkD8x62ll7/DYTOresak9mQytYL/i0oL5k3fCOBP6wopf8qm",
-                            SecurityStamp = "e3f6fb963fc64dae98342ba62bb5d0ff",
+                            SecurityStamp = "886fb66abe18493faa7e978d4bfa5892",
                             Username = "2512222"
                         },
                         new
@@ -59297,7 +59345,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 361,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oiqoqkAFN84H7CFmMAg2kOqbZvE4UWj/KfC7RCxuoI4GcjGHUDAC6",
-                            SecurityStamp = "2aefafdfcf7f45bf84c80d2b2221c38d",
+                            SecurityStamp = "397f59f2667b49f2a61c1f723552e40b",
                             Username = "2512223"
                         },
                         new
@@ -59310,7 +59358,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 362,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.4UDsbS9QdcdT5T0Za8Q9eqWF2xFeUoMzr4QEI3fzNWWtymOspPH.",
-                            SecurityStamp = "789268bde3044d9cb7a7d5d488a39597",
+                            SecurityStamp = "36dce2f199d34f92bcb1e4297e85cd8f",
                             Username = "2512224"
                         },
                         new
@@ -59323,7 +59371,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 363,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mn0XlZ6p4I.tflQiMnOXHOdWBuFVU5KWRI9UdxLZZhLP7lra8gXUS",
-                            SecurityStamp = "915ccb76af9a44b6be78f6f2c2c3d19f",
+                            SecurityStamp = "c526b0c9e1dd4b928e01988b54c3b0d1",
                             Username = "2512228"
                         },
                         new
@@ -59336,7 +59384,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 364,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OUKkyBrAIueHfCLGLokE5.uesNI/kKvkR4zeudjEdADwcuaIlDIP6",
-                            SecurityStamp = "e8e8ec65e0d54507b55f081586aa3433",
+                            SecurityStamp = "c0e80075055942ca8d60dd0a0b94fb05",
                             Username = "2512229"
                         },
                         new
@@ -59349,7 +59397,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 365,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VvZoR500GfkS6OuvvX7mO.OS/ESFYWJ/qUCl45AVqKSsDHtuv9b8W",
-                            SecurityStamp = "a2e4442d4bea490e817322a087a399b9",
+                            SecurityStamp = "e0a15127ee2e4749a17f75a9b339b36d",
                             Username = "2512230"
                         },
                         new
@@ -59362,7 +59410,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 366,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PC0dKCZpjFX9B2Q5Hb4lN.1Hsi5lN8LylIB7M65eaFjcCH83ApLGu",
-                            SecurityStamp = "93ecd60f83ce4746bbbdd5a6755b4001",
+                            SecurityStamp = "3f9674b6a657401da81971bdf2a2b3e8",
                             Username = "2512231"
                         },
                         new
@@ -59375,7 +59423,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 367,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wUxSo6TJUXWmnxDTKdLJYe497KWU4zKtlAngQTfsTXFg4QpVDUbwK",
-                            SecurityStamp = "24be61a0de01446b85ebfc53fbd2cff5",
+                            SecurityStamp = "f4e8a861f62244fbb131b3d7518a9f28",
                             Username = "2512235"
                         },
                         new
@@ -59388,7 +59436,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 368,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$USnH9WqHx7kq.CwugKJxQ.CYdBzGACb0blj7yjJS6XMPt4v/eRVAq",
-                            SecurityStamp = "cef3e1f254d34b93ae06fefd1b0299be",
+                            SecurityStamp = "502f52816a114e6a9d502a023677cc60",
                             Username = "2512236"
                         },
                         new
@@ -59401,7 +59449,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 369,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dWqhygaZ432BqBBHBvVtxOfp3YD/X43i5GVpewUTa/aAeRWi47OY2",
-                            SecurityStamp = "1295a5e35cec48adacb26b0b4e566831",
+                            SecurityStamp = "c2000bbd06c04883bae3f1bc88dc279f",
                             Username = "2512237"
                         },
                         new
@@ -59414,7 +59462,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 370,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$94qdHJr5qC4c8wiQJTCeXeW4LFzRdUxRPhGDVXJuE95gn6MD9XlYS",
-                            SecurityStamp = "e9338cf65d9e416b9a38adc73f542094",
+                            SecurityStamp = "594e01184df84e7ba6cd747005552c2d",
                             Username = "2512238"
                         },
                         new
@@ -59427,7 +59475,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 371,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xFcuSsIBCgP.IphIV280GOW1E0LyXxXGhM/IWdcR5tRHPibKz/w8q",
-                            SecurityStamp = "ae06cbf5805544139b2758cda430168e",
+                            SecurityStamp = "d2715d00b6ec4390b6ecbe9cb2cc1a53",
                             Username = "2512239"
                         },
                         new
@@ -59440,7 +59488,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 372,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4vL3.K5doQ.LqrUkphkNpufLItgkfSH8q8Ry4rwliQt.l8VXq2Zia",
-                            SecurityStamp = "98609cf0e9b44a2588cdf693ec0b736c",
+                            SecurityStamp = "b5467ccee12d4a42a06d1f386c5fee63",
                             Username = "2512240"
                         },
                         new
@@ -59453,7 +59501,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 373,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$20Vzezw2uGCpZ4wvIeCUVe4mlwn/wh9HwqnEOhJ6DtxOcBi7fDeq.",
-                            SecurityStamp = "b28cd39a92a845219b51548adfce2304",
+                            SecurityStamp = "b112ab1431824218a90b0e351099b8d6",
                             Username = "2512243"
                         },
                         new
@@ -59466,7 +59514,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 374,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oEpMeHdho6XsTTByWWmAeecSdGqc7ay1ALkT7djLWiEApxtTTbH3u",
-                            SecurityStamp = "58d89a354a164338adac9be1e53fbbf1",
+                            SecurityStamp = "715b1e73b6df405b8cb827e0dba82ba9",
                             Username = "2512245"
                         },
                         new
@@ -59479,7 +59527,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 375,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MK.MX4X.okdfBXMGrbXT3.vls1z3Oi9m.qc82m.g9vzlpFxEIhcJW",
-                            SecurityStamp = "ac6d0c35cdec4fa4ad81415d318d41fc",
+                            SecurityStamp = "a72d50096d0540f6a4cc178a2b81c107",
                             Username = "2512246"
                         },
                         new
@@ -59492,7 +59540,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 376,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$buXYSUYfV7.hJGJ..psT7eZnLpdmgLKREjUFF3sWVY1HsP.9m48Cu",
-                            SecurityStamp = "64476afe2823459ea060fe8a146dc308",
+                            SecurityStamp = "3d67c1d96d0947d5ad3d30b823ce23f8",
                             Username = "2512247"
                         },
                         new
@@ -59505,7 +59553,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 377,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z1u51ERSwpNLEq/ZgTPo/.iYx14NVz815s54pCMwEcNwBOIlQkSle",
-                            SecurityStamp = "55b1f6e947a34f9cb7f48a5fa1bedeb9",
+                            SecurityStamp = "0e568f0927be422fb670f015c24c7625",
                             Username = "2512248"
                         },
                         new
@@ -59518,7 +59566,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 378,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.twDnwVeqLAoN2GP4NNWCOv9TyOFTCdHIZaWUZws0Xa.9ZnQPcJaq",
-                            SecurityStamp = "6df1b0bba3974653b932b34b49147834",
+                            SecurityStamp = "ed3eff42b4b04b6d8ebe4d57d003604f",
                             Username = "2512249"
                         },
                         new
@@ -59531,7 +59579,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 379,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$B4NykYx3nbTLOtZCz1tPa.KWF1i6u9wpVSSZnr0.0hb.zfwqPmbOq",
-                            SecurityStamp = "2e51f9f422244602a101b3e7f3a15739",
+                            SecurityStamp = "e5695c771b2e4f888b21f1ef5682233b",
                             Username = "2512250"
                         },
                         new
@@ -59544,7 +59592,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 380,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DWWOJ9NO2ucTOnilpPq55uH2mNK0sFAbrFtjFwCQpZxSFeku4.Nxu",
-                            SecurityStamp = "a8e1486b23c14294811cec4dec8ec4f7",
+                            SecurityStamp = "d30e77d095e74b56933a660b2822da76",
                             Username = "2512251"
                         },
                         new
@@ -59557,7 +59605,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 381,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yqKIIJuPGKteficUIUUKnO9GrxyBAEKYUE8qBEWXUDa4PzTy7lzW2",
-                            SecurityStamp = "7bd8a160ce8942a68200d910d10bbefc",
+                            SecurityStamp = "13bade6437fc4b989e488ca9f9b7947a",
                             Username = "2512252"
                         },
                         new
@@ -59570,7 +59618,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 382,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rqbOpZiR/g8kV.u6AgQkp.l2ssvOIqfh4VUkjO91IlL8JQDQCmy56",
-                            SecurityStamp = "a7d8c7e7acf64026beee66b5039d9378",
+                            SecurityStamp = "66a9838fe7bc4696b157987aeeea26f0",
                             Username = "2512253"
                         },
                         new
@@ -59583,7 +59631,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 383,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lAHSG8azRbE.lsQJ6XXsTuXvZUNKtLPQVZTE0pBGcj/f2NAIXBLGu",
-                            SecurityStamp = "ea97ffc0b26e400e9370fa561c1a2954",
+                            SecurityStamp = "8ee24b1493264d32a449a47e04b76f79",
                             Username = "2512254"
                         },
                         new
@@ -59596,7 +59644,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 384,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$H8SYiW5Dtt39seI0r.MBpui7Ztwzy0XMxoP9Y0YnNcD0rKTle6b1G",
-                            SecurityStamp = "939f55da8d4b4e7ea33ccf2c1b71736f",
+                            SecurityStamp = "fb572ee85f614e86adb931914953f5e0",
                             Username = "2512255"
                         },
                         new
@@ -59609,7 +59657,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 385,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$siqrN00r9RpE/r3QgUgS2eqVfjVPG4A2A7ZEtG/d3BTJlUa93E/Xq",
-                            SecurityStamp = "cd7351034a8d452d93e277b1761f3699",
+                            SecurityStamp = "a71e2794b0a94f908d2f63d1abcbc700",
                             Username = "2512256"
                         },
                         new
@@ -59622,7 +59670,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 386,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$CvzBAW6tFZnlM6gx7USphe9aUArYekryS2q2/rLeNSP0FRKMfUKg6",
-                            SecurityStamp = "0fa26e447cf142adb4e56637be6e793e",
+                            SecurityStamp = "f478a6f1c5d54bb1af9074a65bd1e1cb",
                             Username = "2512257"
                         },
                         new
@@ -59635,7 +59683,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 387,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qPYwWp3y.9fmU6Axfnas9eZ7dop/0oAY1pDjgC0VhaaZg2wFfwL0u",
-                            SecurityStamp = "b7aa416b7d234182af8e4a2cff4f7188",
+                            SecurityStamp = "7c18a5a03cc54ae3b22ec4e48c7e8f72",
                             Username = "2512258"
                         },
                         new
@@ -59648,7 +59696,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 388,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$seKBVcd8xOTP7DIZJhpuy.c4ySeN.Ll3Hmu.svSU.cqE7Y0rN.reO",
-                            SecurityStamp = "e9261ee0b8f94325ab0679eed633719f",
+                            SecurityStamp = "565a9313b6434f078aa0c45e78c96311",
                             Username = "2512259"
                         },
                         new
@@ -59661,7 +59709,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 389,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DZkBTAazm.xrHcsG/91PvODErc13IKkWdzfexKLm4MkZYjueWlDSu",
-                            SecurityStamp = "3a9448dcd9174dc1a342b14e65bcb1b4",
+                            SecurityStamp = "ce99bb8b8b744d538d752d124d9a9c4f",
                             Username = "2512260"
                         },
                         new
@@ -59674,7 +59722,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 390,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ty7zHtN.ldFhM0lC/9LPa.DvJElqUfa90CpVwPBqlHhDQgPSBbXvK",
-                            SecurityStamp = "51632f1218654f91b877acacf8176131",
+                            SecurityStamp = "fa962a0842cd4776a8e87dcb805935c4",
                             Username = "2512261"
                         },
                         new
@@ -59687,7 +59735,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 391,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XW30hM5Ozst46kLXB7QKkeOGq7VfaJychgPQo6Gm2I05ToAPD6b0K",
-                            SecurityStamp = "a68b0a0bc8c249498d60927c602b1a65",
+                            SecurityStamp = "ae010116fa5c442087c4a70ce307e37c",
                             Username = "2512262"
                         },
                         new
@@ -59700,7 +59748,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 392,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ySDDwRcK0egdl72sutoJ2uej2xlxTyoNBsu67NHnGv0oqiYOpvu/S",
-                            SecurityStamp = "7ba3cec2938b4ff5b70548fcb57ba5c6",
+                            SecurityStamp = "af48f7ab956e4ad99f02006fc89bde09",
                             Username = "2512263"
                         },
                         new
@@ -59713,7 +59761,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 393,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SZba8wypkEHdCblbs83xH.Z4vCn3p0pvFlIaNfzoOsz6uJSbXBbfC",
-                            SecurityStamp = "5649751c635241b9bbcc7762cfce6282",
+                            SecurityStamp = "3d2b05fbeaf947049f132738889242bc",
                             Username = "2512264"
                         },
                         new
@@ -59726,7 +59774,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 394,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qszh03I2rX.dq8b9u0jY6u91hkWBqAj4aVrJXU3CYESNQO35NVPMq",
-                            SecurityStamp = "740ae8ed9fac4419885644bf6fe0388b",
+                            SecurityStamp = "c2c52233d3df463abe80088bf9782b06",
                             Username = "2512265"
                         },
                         new
@@ -59739,7 +59787,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 395,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2JJSLpVeIodVQ3qPrNZzGetNWY0EVCAaAOAK8NbxMDeGUQDmttnE2",
-                            SecurityStamp = "49096700e9c3455aa8a546b0c61f5a05",
+                            SecurityStamp = "690b7efc33aa4810aadb7a18abf3ca5e",
                             Username = "2512266"
                         },
                         new
@@ -59752,7 +59800,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 396,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9SbKWVyWisSKsbGa/7lLou.zd33hOxPPJDlGCLhViPWbVavfnJKBu",
-                            SecurityStamp = "09e706fef6524b33a05d310ecc011cc2",
+                            SecurityStamp = "a7a7ce9a8b80407db825ccdce3206276",
                             Username = "2512267"
                         },
                         new
@@ -59765,7 +59813,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 397,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e0HQURNiiDfPFYsr6eHgC.iqWRMeOulRETKpOUMH25fg2f.yG9IEu",
-                            SecurityStamp = "2b644ceaa78d49ffa114d497ab66d55a",
+                            SecurityStamp = "af4b8e6c789947c6bce4084b9f9ee7fa",
                             Username = "2512268"
                         },
                         new
@@ -59778,7 +59826,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 398,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$udKiAG39G0MD7XdQ6SZh1OyXIHhCtKFp5q26KoLtCVg8Y9wt/0FnK",
-                            SecurityStamp = "ef6f2f6dbebe47009ffb277c5e65045b",
+                            SecurityStamp = "3ec6261f21554060bd975db65f8275bc",
                             Username = "2512269"
                         },
                         new
@@ -59791,7 +59839,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 399,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aHte3ZZ7vMaDDUFGfKAMtu6tFjDlEc9nUg6iA0g3YhZqNt/4DMzKG",
-                            SecurityStamp = "4573dd2603bb49dea1fdf479120860c2",
+                            SecurityStamp = "81f5dd515a6a4c9ba07f07d99fc759c8",
                             Username = "2512272"
                         },
                         new
@@ -59804,7 +59852,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 400,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$P2wb4SXViXxTyqDO7LLF1.FDpOjBM8So9h983jtv2.bP5OLu/STuK",
-                            SecurityStamp = "c233809a28424e3bbff5eff36518b889",
+                            SecurityStamp = "f71c7b7ef6cb4b1a9e7a68a9fb721ce5",
                             Username = "2512273"
                         },
                         new
@@ -59817,7 +59865,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 401,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Efq4d0R0n/NXIWXREYUsoe6Da6pwVun4Ye6Z2hA/1FI2bnjarCPjm",
-                            SecurityStamp = "44cbdf33567d43d9a9aa8c4a6d039119",
+                            SecurityStamp = "1877654cdb3644e5b7c6b7bca02cdfb8",
                             Username = "2512275"
                         },
                         new
@@ -59830,7 +59878,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 402,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1qpHf4JrhdAY.sW8.xTokuF3p3uIG9PbVIGKTYVxp9JFTihgYrPNu",
-                            SecurityStamp = "aadc55b4eb784c1a9b4a83b53974f8ab",
+                            SecurityStamp = "4bd8a09bf98247be96f7750121a3e319",
                             Username = "2512278"
                         },
                         new
@@ -59843,7 +59891,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 403,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fT1KjuKZNKC40io6FYAVJOSoszbWHFpuNr/GiXlUvw0KpWO8563Ga",
-                            SecurityStamp = "8b780ab3d0cc4f71af7b47529f2f0968",
+                            SecurityStamp = "b2ea33eb91b74fd09ea95be8a8ac52f6",
                             Username = "2512279"
                         },
                         new
@@ -59856,7 +59904,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 404,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9rDuI/ySZNWTpOS.8bk5IO7HtaSQDJ7WYSOnABfvH3VfeFKc96ByC",
-                            SecurityStamp = "9c41ec88f76a4b2ba7dc35cb339ab255",
+                            SecurityStamp = "5fe45ac986c94a0ebe07b42f23630870",
                             Username = "2512280"
                         },
                         new
@@ -59869,7 +59917,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 405,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gc2wWpqn2W0/4jRxudKcIeTH0y/NkPVU3lLPKoaeBs5QudXcgnY8K",
-                            SecurityStamp = "c558681ffc5c4a5daede7fc3abc0cd5a",
+                            SecurityStamp = "6a9fe427958243c3a5095c83b3dec5e9",
                             Username = "2512281"
                         },
                         new
@@ -59882,7 +59930,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 406,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YHHuAhhPWVFhDar1kx0nC.v6OTytbzho0jrzNXLaIx1QDaHzH6iUO",
-                            SecurityStamp = "0b0b75a2acec4f70a8988292d64029d3",
+                            SecurityStamp = "53e236678586462e9a38519759059370",
                             Username = "2512283"
                         },
                         new
@@ -59895,7 +59943,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 407,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$i7rUCp3tYDe9pVJbwONWO.1qKxKJT8i5TsWFIjRjCogJ4tg8CvmX2",
-                            SecurityStamp = "280959baab944b4d8d307c46ddaa0aec",
+                            SecurityStamp = "68bf6ed198b842ee9d2d26bb8e9fca00",
                             Username = "2512284"
                         },
                         new
@@ -59908,7 +59956,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 408,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qlZMHgkDOejvcfgGdO8N6e8sbaj.Yyt0t4btywYWOUQIsTsjwMCIK",
-                            SecurityStamp = "63c8a29e87804e159823a86505d7189e",
+                            SecurityStamp = "02a65138441e4b6e95e3403af7656969",
                             Username = "2512285"
                         },
                         new
@@ -59921,7 +59969,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 409,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lBYvik6PGW/twkT8rGD1Z.Ktjseg4ptHAXBEBQzq4Ul2Hpj1jwSb.",
-                            SecurityStamp = "d2cdd84a656c4ebbaec0d3d01011bf62",
+                            SecurityStamp = "93e8be31b0d74d24ab82d87ce88b9808",
                             Username = "2512286"
                         },
                         new
@@ -59934,7 +59982,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 410,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5fTobSJCB1Yhixaocxed/uzDdlekW5zb5ihH.M79oz2/FMhH9SAqe",
-                            SecurityStamp = "6bd1f916cc534a66825a4531cd772f27",
+                            SecurityStamp = "76647743ae004a95a3f9900c1f510909",
                             Username = "2512287"
                         },
                         new
@@ -59947,7 +59995,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 411,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VnxSr3KjIJ1BqNNE6waHA.ZFtmPLOAZ1MiWtQGvc7E6uo0tXh9/Km",
-                            SecurityStamp = "228c00c9388f4a28af122ec866595e28",
+                            SecurityStamp = "c5f1f7ad5f784192b01fb26669ef552d",
                             Username = "2512288"
                         },
                         new
@@ -59960,7 +60008,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 412,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7XCdUpm7tAx9gx9/cVACwOlv2p4RpUPrtZc/pEryDcC6yfi0Rd7VK",
-                            SecurityStamp = "1ebeb8b38bba49da880660d201642daf",
+                            SecurityStamp = "1d021f87888144aba92b1f7a68fe360d",
                             Username = "2512290"
                         },
                         new
@@ -59973,7 +60021,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 413,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LQrRxM1gtYc3nrA5Q3tM5uqU7oZNEKjyerEo/mgBbeRiK0zIV.sVK",
-                            SecurityStamp = "3966f18f95ac48f2800c50a675207c08",
+                            SecurityStamp = "9e73aa87225e451bbe4ec97974de2fdb",
                             Username = "2512291"
                         },
                         new
@@ -59986,7 +60034,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 414,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$H7Vn3EE8Usx8iLXo0smt.OR/NyZ751.DCs0y6Hhm811tbe/aO3xCO",
-                            SecurityStamp = "1a7ac5d114f348a3ba14d50f6d9a3560",
+                            SecurityStamp = "d21b69f428ab456db65fa06f424df1d2",
                             Username = "2512292"
                         },
                         new
@@ -59999,7 +60047,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 415,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1r.lxCXbb69GNUXmE6QlROIk01zExZIBCIXjJA/BfZr4znNvc4p4m",
-                            SecurityStamp = "4437eb8bab5e4e3cab05cb72a9b43366",
+                            SecurityStamp = "fd69b11f60f64b66bbff497e6e78aa37",
                             Username = "2512293"
                         },
                         new
@@ -60012,7 +60060,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 416,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aeQ4NKwonDgoUbyAjClw4eURIbNd0dDunYi9e93jlAJLZN0tchnaS",
-                            SecurityStamp = "9591bdce3a0d46588ad750159677913c",
+                            SecurityStamp = "963fe679cf1549f5967fa8234f564bd2",
                             Username = "2512294"
                         },
                         new
@@ -60025,7 +60073,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 417,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NbbyXQEntWteNnzSplMKgeogwMazdgizP/F4RXYhpccBuGJIO9OJ6",
-                            SecurityStamp = "f337c975059f410bbb0c6b028aa9c71f",
+                            SecurityStamp = "235e4550441b458bb6d4f7b80d2b8ce3",
                             Username = "2512295"
                         },
                         new
@@ -60038,7 +60086,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 418,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4DIR/UqXFjbM1PjZ.newjOqNLv6MG8SLUF5c//CehsVM5M4CR6lAW",
-                            SecurityStamp = "d7a7354cc38e41788fd6e0e19edc66ed",
+                            SecurityStamp = "1a12f7f2b7ec438aa8a8615158be25f4",
                             Username = "2512296"
                         },
                         new
@@ -60051,7 +60099,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 419,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y6RM0r8mQdj/ABgFGuEZnekYPn7iDgDyWrWcqtxIgOBKMdHONZdw6",
-                            SecurityStamp = "053dfe72228c4496a1c1269ea73bec65",
+                            SecurityStamp = "6b355d84247e4eac89503dc6cb5c4b33",
                             Username = "2512298"
                         },
                         new
@@ -60064,7 +60112,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 420,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aSWvYW.yYQjUUallT.xC3uplaZXzBiUng4FtLWoO7jv61wZwGWCne",
-                            SecurityStamp = "1b55379c9f9542a3ad13f53f2caf1fa2",
+                            SecurityStamp = "f906abe022cc4a40bddb1af3df137355",
                             Username = "2512299"
                         },
                         new
@@ -60077,7 +60125,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 421,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DJrXkPdc7FnW3wUa/qr/JeFFER9Boe6tV21fMiAfNzQJp18msBwoG",
-                            SecurityStamp = "814d5b1915b748f098611d6939920d6a",
+                            SecurityStamp = "875bf4c6f7174c1c82ec8b847fc05001",
                             Username = "2512300"
                         },
                         new
@@ -60090,7 +60138,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 422,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$le5elWrz/gxfd3w4ObcBR.68fP.SfcMhzNLmNkHvPl.YjVVRPyTMu",
-                            SecurityStamp = "e6e7eb6d439c4c11a47f14468e5f3fe8",
+                            SecurityStamp = "d44522fffd6b4bbb9d12b3ca46571487",
                             Username = "2512301"
                         },
                         new
@@ -60103,7 +60151,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 423,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$A5Qd1ZqlstRwyWxMYwDuKOfkL5rL/PR.9i3xBx6MLmV0hSD9I0jhu",
-                            SecurityStamp = "8a61927440494e238be2c85c3d6acb78",
+                            SecurityStamp = "3553358780774b3fa95c54b58b1beba7",
                             Username = "2512302"
                         },
                         new
@@ -60116,7 +60164,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 424,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D9so8bQDXafUgiprCTMTq.PJvqLPFJXVd5IBzZ7Fr37IQX4YeVVmy",
-                            SecurityStamp = "1aa4527e68fc4ee789d3cc84a679647e",
+                            SecurityStamp = "b2853dd6c8fa417586ccc81140c08f5d",
                             Username = "2512303"
                         },
                         new
@@ -60129,7 +60177,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 425,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Fi8RtJXQp9B7KCmS4GPpO.NGJn8q6ve/vbJbiD3IhrURfMQB14qty",
-                            SecurityStamp = "67a4cba8bd1647169bc05cab422fb356",
+                            SecurityStamp = "611b4dab2bf04892b66cdc90759e56ce",
                             Username = "2512305"
                         },
                         new
@@ -60142,7 +60190,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 426,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.LItXhBebIZf9RsVqucCZe3Aw4Uqv61AYz3IjREmMwjq3jA0VyD9i",
-                            SecurityStamp = "2f311b4e1ed148bbb3e5c0e8a7a96e03",
+                            SecurityStamp = "a63ee66ff3bf4f5f90874df4a110ce1f",
                             Username = "2512306"
                         },
                         new
@@ -60155,7 +60203,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 427,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6wum.GAI2WTEFHqDELYnJeYWQ5L6AEmFjgXd6FdxECoTjo0r..tqu",
-                            SecurityStamp = "c378e42159e846e3bb93a2aec0692807",
+                            SecurityStamp = "3ba0daf368134c39a6b305d5ba37946d",
                             Username = "2512308"
                         },
                         new
@@ -60168,7 +60216,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 428,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$If94NoQugW9m/8JlNfsx0uTObjgCFTWfWjN0gqVIdUvigeocS.5o.",
-                            SecurityStamp = "37fa5b0d77ff4d0494d0f0b7bacd703f",
+                            SecurityStamp = "2f2ad388e78c4149a3e67246e0b50342",
                             Username = "2512309"
                         },
                         new
@@ -60181,7 +60229,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 429,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vmktKdLQwm4jkFxXWy6EguFCKnJ7I3bNsEthFcSetpN1.BQhzXEd6",
-                            SecurityStamp = "773e5ed116d4447a9eb4b7e1170d888a",
+                            SecurityStamp = "a95dc07dae354d478f7df05ab8b64205",
                             Username = "2512311"
                         },
                         new
@@ -60194,7 +60242,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 430,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cKC9uo5qOO1r8JaVYR5a4eT71P.BXmEk1.Q3GXyQPpR0.AdfCXXwK",
-                            SecurityStamp = "a23765b4fffd4c03afac1f04932f5f63",
+                            SecurityStamp = "38382b34cde946a681038f7544878582",
                             Username = "2512312"
                         },
                         new
@@ -60207,7 +60255,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 431,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z5riIO3J/NNe4rFGS1zWqOxhk72hFr.oFHSYcohjFeTu/zuSx2OuK",
-                            SecurityStamp = "c74de34d6b2144febec3d432bed28cc1",
+                            SecurityStamp = "21303bd26aec4a599a01d8c2ba849911",
                             Username = "2512313"
                         },
                         new
@@ -60220,7 +60268,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 432,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y3qtkmE4BQZmCT/PVPkTqOebgD6eNWJ0Q0kfwoiRDafPfUSgPdyii",
-                            SecurityStamp = "c3cdb45fb72b4bfb9a68d468728dc6a0",
+                            SecurityStamp = "e15ea23b0d7a498ea820ff67afa9da6c",
                             Username = "2512314"
                         },
                         new
@@ -60233,7 +60281,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 433,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hX0gaCo3g8AoLjoWisWme.T2aNrY93dnmfcbfY09biIaF0eIynnpa",
-                            SecurityStamp = "61706454c6374416b8d2f177e1366e81",
+                            SecurityStamp = "d32426746ad243bfb4c10ab2c7394a02",
                             Username = "2512315"
                         },
                         new
@@ -60246,7 +60294,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 434,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y2DBajoFabP/EJx/Bf3wHe5syaZSvUHVB3djNVUDOPX4zr/huS//i",
-                            SecurityStamp = "e3e7cd4dd6834bffbbdce0da5bbb9bc2",
+                            SecurityStamp = "be362711bc634746b9179d751e85e8d6",
                             Username = "2512316"
                         },
                         new
@@ -60259,7 +60307,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 435,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tUVAYFlk9oKLHIi4.F2Htey/DOAlKM7ayyn/iCmLmkUbUJkvYO8Yy",
-                            SecurityStamp = "5cc2b1f6fcaf46f38b7e3e7090800c70",
+                            SecurityStamp = "a3a19eea92f94d738297ac6be29ed763",
                             Username = "2512319"
                         },
                         new
@@ -60272,7 +60320,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 436,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9fRCatiVIzW3I1MHSlvR4.FKe2zzoOUB3Eo8U65bm7xoMvePy.18m",
-                            SecurityStamp = "9c329da0e9fb4bc8a3861605bea6cdc5",
+                            SecurityStamp = "782c262f80f94df78dbe8e809d23229e",
                             Username = "2512320"
                         },
                         new
@@ -60285,7 +60333,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 437,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cx8FV6h0iGqKr5nNkUB5JeozCe6/PGSlSQUEgYgtk2/FbpgvpywhG",
-                            SecurityStamp = "64ffc220aac841ab98690af924f552ca",
+                            SecurityStamp = "6a09837f6c1f40f4be9591477e22bf28",
                             Username = "2512323"
                         },
                         new
@@ -60298,7 +60346,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 438,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oyNpjAYkMp4ESjQQvFs3ceEB/mpsa5TM0RsbodNX6ndEE9iPIUjPi",
-                            SecurityStamp = "f3484419fd6a46fcb8f85474e90ed30b",
+                            SecurityStamp = "d7f2f2150a5b41be80da056066a04959",
                             Username = "2512324"
                         },
                         new
@@ -60311,7 +60359,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 439,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NwG6el1CbHSLisf50Zr8f.DHNdDqruRebPEEdVEe4IkVdtPYSEw8C",
-                            SecurityStamp = "395c384f7e6a437a885324a8d4bccfd0",
+                            SecurityStamp = "1a6588ff828b4637bb2dc6fe9e1d3ab4",
                             Username = "2512325"
                         },
                         new
@@ -60324,7 +60372,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 440,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fIfvPp4yRGx.jP5C8i3KcOJ0AddBv3rAxVyWku8.J85xtLodJrpVe",
-                            SecurityStamp = "67851ec3da5f4aabbfdf7ccebbc8841c",
+                            SecurityStamp = "fa753beffa01433faaa3a191d3658d35",
                             Username = "2512326"
                         },
                         new
@@ -60337,7 +60385,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 441,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ybxVUctegNGF/vvw1p6r4ObhswkugpwGB9GetdW.OmVj8gYtHNJX6",
-                            SecurityStamp = "50cf4b6392e741f1990b00e522ac2f24",
+                            SecurityStamp = "618703884589448bb312edbf69bb3880",
                             Username = "2512333"
                         },
                         new
@@ -60350,7 +60398,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 442,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$zH4sqG82L1ZXFVvdJEz8IOSRdZZNAh04s/3Oxx/t6/vI/wnJdcjtK",
-                            SecurityStamp = "2014c95bf15f4cffba35d89c81b5b939",
+                            SecurityStamp = "fd3edfb5f2954a2784650ed00ef4aedf",
                             Username = "2512334"
                         },
                         new
@@ -60363,7 +60411,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 443,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LMsgQn4xJRmn.iyVhrwj2e1VqddvU/XdgE5mRHzDTWDHFT4g6camq",
-                            SecurityStamp = "6a15fcf2a2454d8ebf92ca89004bc393",
+                            SecurityStamp = "d66bf9bc937c4b5f98b3ffce624aaa8f",
                             Username = "2512336"
                         },
                         new
@@ -60376,7 +60424,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 444,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PLHjRdE7FL.GVt9yk6f1r.yEFPscMPM09GA18gdueLOUMbpdgtbZC",
-                            SecurityStamp = "42196ad51dd54b38bc09e7c6816a32d4",
+                            SecurityStamp = "5b9c4dbd4faa41089c747659094d42b1",
                             Username = "2512337"
                         },
                         new
@@ -60389,7 +60437,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 445,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cNw4KoTBvxl8H3W.r7dwHukXgIMYhbT.I.V1Lwgp2APSqJLHLPQae",
-                            SecurityStamp = "04c7f3c32da84c389bd89c788671aa6b",
+                            SecurityStamp = "e3a12f07d53347cfa81f6fc7c6d65fa3",
                             Username = "2512338"
                         },
                         new
@@ -60402,7 +60450,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 446,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$i5n1Q24tsHjPp6oDRW8y1eIdqCtMq4WC/7zVRPZEYpvJzzDzEYjt6",
-                            SecurityStamp = "b5c82160a3f3456aba2c63c77ccf0ceb",
+                            SecurityStamp = "a3adc4294ab444498a3d603b350ff80d",
                             Username = "2512339"
                         },
                         new
@@ -60415,7 +60463,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 447,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Z0v2DnsEtVdsNjIhB3ymLekqxvxSn/KmDanI.imaKdQMbCix5TbNi",
-                            SecurityStamp = "53fe4194da2f4f7db91b979eb296695c",
+                            SecurityStamp = "012ac57534124d29b50116bc7f585685",
                             Username = "2512340"
                         },
                         new
@@ -60428,7 +60476,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 448,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wA9b1sCAVJMhBBJxDCA.8.j8HYX3Vuq6Fj8mFEqNpU7mkaCH4T/Kq",
-                            SecurityStamp = "15f3ce4bac3b42048f194ea4914feac0",
+                            SecurityStamp = "bfaca2394fa84c9c8135b227aecff02e",
                             Username = "2512341"
                         },
                         new
@@ -60441,7 +60489,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 449,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y3C/.8rxPxzY6H2nfOME3eFhHaBmF5kQN0p2GnQ8uma.sH5S/sq1S",
-                            SecurityStamp = "2a56b8bbbb494ac289c6616ea37134d1",
+                            SecurityStamp = "8b64d6ac12b440bea8efad2e9dd44e7b",
                             Username = "2512342"
                         },
                         new
@@ -60454,7 +60502,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 450,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$I1iJSX8IHbGsX9lrINKT7eB1elhhxKuczEYeFgd0qJZWLAlsZzl/q",
-                            SecurityStamp = "f27193af0cf04cb1b80af88795cf429f",
+                            SecurityStamp = "4ce8b9be6fad41b996984d08925f56cc",
                             Username = "2512344"
                         },
                         new
@@ -60467,7 +60515,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 451,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TYgC2RsKIG2k2JKQLJI3fungXDHppLkuXUys2lhtt.8xrsFP7CQ.i",
-                            SecurityStamp = "c5e6b112bbcf42edbc987fa8f6822d52",
+                            SecurityStamp = "6556a46c6bce4af38f372eebacbe3d2e",
                             Username = "2512345"
                         },
                         new
@@ -60480,7 +60528,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 452,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$I3ZolCd6b9h0nZrDO8ZC4e3lA2HhoZ2BwMUBnfTSz9vZeS1ioDuh6",
-                            SecurityStamp = "d5badba7197c45318b9cdefd1bc147be",
+                            SecurityStamp = "12b044daf9ac4409a1b0289e35ca8080",
                             Username = "2512346"
                         },
                         new
@@ -60493,7 +60541,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 453,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$92kuZ1c0D0LwDhGEhM4DtOU5DNTSDzoh947Pw1wj.VfWP8qfUbVfm",
-                            SecurityStamp = "a6ffd32921d44779a823bdb5d7336b51",
+                            SecurityStamp = "02458d3957c74f3dade52dbe9df4136e",
                             Username = "2512347"
                         },
                         new
@@ -60506,7 +60554,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 454,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Nu5Lb3aoCOXKb6PeOsGhP.QAOPIZpUUasoaG66CLKGBURlrjyGuBm",
-                            SecurityStamp = "281379b25d9b4c3b8a4a6e5e7009500e",
+                            SecurityStamp = "c69ba798de10487b843913d81c8e2c54",
                             Username = "2512348"
                         },
                         new
@@ -60519,7 +60567,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 455,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DWv2jjDYi2ywzq8BZ2RHle.RIklSVna7gXi5t3w.c/ZY9pQMl8rOy",
-                            SecurityStamp = "c3deafc8804743c99911995584179ff3",
+                            SecurityStamp = "490982843c864499a24630bd9bd2b22d",
                             Username = "2512350"
                         },
                         new
@@ -60532,7 +60580,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 456,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hg5uumPJz7BZyCVIInk5uuNKpL9ASWHN.H.LHa3xj7In2pOsaF2x6",
-                            SecurityStamp = "e834e6fbf287443a88d0a71bf980973d",
+                            SecurityStamp = "e4212e340b3e4669ad61263104934ac0",
                             Username = "2512351"
                         },
                         new
@@ -60545,7 +60593,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 457,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Kbkj7VESGehmi4wCB44nne7.lYEEOW4ABstFIozBQHTzO6JDljzVq",
-                            SecurityStamp = "c4b4e88733fe4954a577c0480be7bd04",
+                            SecurityStamp = "e6a7fea1e49040fbad80385984323fcd",
                             Username = "2512352"
                         },
                         new
@@ -60558,7 +60606,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 458,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7bU41O.RhmZ0Z.ubuGX4d.Sa51a7JHq.LqdgGdt9Tp0HNdVtsPHMm",
-                            SecurityStamp = "1e41c276456c46e7b7f174e6961d40a9",
+                            SecurityStamp = "b8823bf79a4744eca33fa3f5794bebee",
                             Username = "2512353"
                         },
                         new
@@ -60571,7 +60619,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 459,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pCREV8WEHkf5SunPOg.v..K6R8OkQJ92CHzMf7hILXLbqYWmFSiS.",
-                            SecurityStamp = "a308d2f3958941eeb5f8e9137af8d6bb",
+                            SecurityStamp = "a7638c0cc1fa4251b9cd1b520d4f38e0",
                             Username = "2512354"
                         },
                         new
@@ -60584,7 +60632,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 460,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ah3i3Ci.mOgsNGpWw9gJz.VTLJE.JYLOprjAlKeAGMkPFqpELG6pK",
-                            SecurityStamp = "c20206deb18f488098a437e3d4008303",
+                            SecurityStamp = "5f932d45974c471db40d725c845cdefb",
                             Username = "2512355"
                         },
                         new
@@ -60597,7 +60645,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 461,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yq76skWyJR3pOAPc/kxlJeuMX4sE.a5aVDVa8y/WWvGmHCfkFnCc6",
-                            SecurityStamp = "dba584cc3e5c44fdb9d6762306237de3",
+                            SecurityStamp = "4a03b40c6d664c979c140082f2018376",
                             Username = "2512357"
                         },
                         new
@@ -60610,7 +60658,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 462,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$n8udxV9/fdDCpDUwtCrZBO4kz7l./uVyVdlVFYs7rhVPdFTVb20OG",
-                            SecurityStamp = "cad77d332d5449608091ff08b5714139",
+                            SecurityStamp = "b4aefe7c7ba54793af2735db3e83a5c6",
                             Username = "2512362"
                         },
                         new
@@ -60623,7 +60671,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 463,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cPjlk4Ic/4ka3pZXNtlR6uxT8QVNmHZl7NmDZrFbDL08P5MhoPNom",
-                            SecurityStamp = "289f51b3cf664b70ba39f7e6b46e4c2d",
+                            SecurityStamp = "119614a9a48546bab45f5a6321e9090c",
                             Username = "2512363"
                         },
                         new
@@ -60636,7 +60684,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 464,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xbQAdwESgUNSe3gvJf1xz.t1inBpSvGJfw6tQXM/2Sd0mP.OqLQpq",
-                            SecurityStamp = "bd9b8adb42ba4321a4e395fd27ebe38f",
+                            SecurityStamp = "7725572c66ae4d9db01bdc9ff382dc22",
                             Username = "2512364"
                         },
                         new
@@ -60649,7 +60697,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 465,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6uwKgxOSe.TtgB7Q6nYCT.15rt.gnoMG/kn8k2Rm9Zp5Oxi4D0sD.",
-                            SecurityStamp = "9d1c876f5845444389e5ff7f68f087c2",
+                            SecurityStamp = "220e082f152741e1ad00c91d711e56e7",
                             Username = "2512365"
                         },
                         new
@@ -60662,7 +60710,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 466,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gTt/onAEV99hWFTkX6UYRe.3ZgSJNbqFvEdJQiq45meCjbaUIV7VW",
-                            SecurityStamp = "3ad684de6fa343ca9e63ef41f36e5bdd",
+                            SecurityStamp = "ecc6dd7bcd4c4a1d9d3515d7d40cb657",
                             Username = "2512366"
                         },
                         new
@@ -60675,7 +60723,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 467,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$laxUFjS.qkL2GVZ.hrVYC.Px6HDQuM.igshr1PGAJdaHyb0pu5Uf6",
-                            SecurityStamp = "57c16fd9ad3944ec99485fd139a94a88",
+                            SecurityStamp = "32e88ddac58c4f4c9099d93b67bddaca",
                             Username = "2512367"
                         },
                         new
@@ -60688,7 +60736,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 468,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gML107gdkbxXqMmZS/tguuBRMEQso5/KPpLKEVHYCfzxb0fX80h4a",
-                            SecurityStamp = "b14cfdeb42e04c91874f498e14acc475",
+                            SecurityStamp = "1ef6a26177144311a17b77b019d49dc3",
                             Username = "2512368"
                         },
                         new
@@ -60701,7 +60749,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 469,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Lup3q/CcIc3XLmpRnObI5unPHU2Asr.wtPQ62lT8kJCSsvTqppDhu",
-                            SecurityStamp = "0ce454b5e20d4211b5ba0ccbfae546e1",
+                            SecurityStamp = "f9b9f96679c94706991532d705d51d3c",
                             Username = "2512369"
                         },
                         new
@@ -60714,7 +60762,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 470,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GzB8pX3K8rUgY61U5autJ.bMgnlfVkrsqyjMcPUjVFU09QWL08WTa",
-                            SecurityStamp = "97a68fd0517f449083133d0ed866bd1f",
+                            SecurityStamp = "363499bb1be1478cb57d058139d65bdc",
                             Username = "2512370"
                         },
                         new
@@ -60727,7 +60775,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 471,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$36KdDhFHZGl8ISqvRl2cau51D4et776gqePs9Ar1BMmGs1cGzK4BG",
-                            SecurityStamp = "c002e040dcc84a17bf0e97ff381c9d95",
+                            SecurityStamp = "2f67c1a3e92a4fe5ae99fc35fc92c3bf",
                             Username = "2512371"
                         },
                         new
@@ -60740,7 +60788,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 472,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qScOQ.RLpYDzsAefDrVyUOg6z/DvGf8WAZBO8rkQ0IvDwwPxbUS9.",
-                            SecurityStamp = "6f9526b911f84d55a7de938674b970eb",
+                            SecurityStamp = "dc3f8d73efac4924a7efd2e6515d3c15",
                             Username = "2512372"
                         },
                         new
@@ -60753,7 +60801,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 473,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pG.uEmliZ.AUEjgZc/sy4eFENpUAoVF0DYgEdzznerCFLENtlXAxu",
-                            SecurityStamp = "af5dec4a15884259920dd2e2a524e7d6",
+                            SecurityStamp = "8c4a63bf2c6a4b09a38eddea14a7f591",
                             Username = "2512373"
                         },
                         new
@@ -60766,7 +60814,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 474,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/HFkcM5vK0613lhYx9wQiuwypnr/RC63R9c7VabV30LvMuqVGvHbm",
-                            SecurityStamp = "7ea54781ade34aa987a31f75e0ea1015",
+                            SecurityStamp = "509c9501091e47a0b9b5730357a6e6d9",
                             Username = "2512374"
                         },
                         new
@@ -60779,7 +60827,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 475,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0m9iCc8fS3SQSGBMjTFTQe2D/MMuWlYlPIc45wWIqfDCm.hS/Nm06",
-                            SecurityStamp = "92644766b35748058ac30b1fb55747fb",
+                            SecurityStamp = "4a3105f3877a4f6bac5414cd402c979b",
                             Username = "2512376"
                         },
                         new
@@ -60792,7 +60840,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 476,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$E0IvjA90ECierYgaIty/quacXJDj0tkn7d2fs5p2ijFuzJQ5qm1UW",
-                            SecurityStamp = "a28fdf22c7da43968c8f11f02db3302f",
+                            SecurityStamp = "fed5e2cc951b4148bab5d1100af9d13b",
                             Username = "2512377"
                         },
                         new
@@ -60805,7 +60853,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 477,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FiXAUjq1tPFWTIRE0SbHSeJEkaQucqU171QItr2GKr3QWxiOAUr4a",
-                            SecurityStamp = "fb12903b82754401bbc67262959ac9d1",
+                            SecurityStamp = "2ccaaed9862c490aa936374268c605fd",
                             Username = "2512378"
                         },
                         new
@@ -60818,7 +60866,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 478,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$s9mLZSkHQlzl4NLbKTrHRupamQT9lT5RFNYaA2QFeVuFR.9dGwwfy",
-                            SecurityStamp = "c77c0f5ddb484e89a1819adadbde3518",
+                            SecurityStamp = "7bf73a9fa2084f5bb0696417746c5716",
                             Username = "2512379"
                         },
                         new
@@ -60831,7 +60879,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 479,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2c8gBK/QfQh6gcY7svXtRewGcQJ6pZYNXce0z4xnQIxzC7gJ/Dk3y",
-                            SecurityStamp = "024eec9865b5466c824ae6808eedfba8",
+                            SecurityStamp = "dd6866971a994e869af9f3c523b9fbef",
                             Username = "2512380"
                         },
                         new
@@ -60844,7 +60892,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 480,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ag0mmlHm/OGRop2e32/RHeC.q1gDdGt.QGvItSpxrClmlU7aZLrdu",
-                            SecurityStamp = "23ba7512f49d4298865b86dafa0e09df",
+                            SecurityStamp = "cfb44559c4af4353b1ca90ac2be92138",
                             Username = "2512381"
                         },
                         new
@@ -60857,7 +60905,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 481,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$q6L/Hvwe1WSU4BWh0GxFBegnOZZJ9sTyIN0ZwEeGRQHBme9HOhdIe",
-                            SecurityStamp = "dc56074e89ba468294d2c1347870b394",
+                            SecurityStamp = "e979cfe940464dec82526f12cc4cd2be",
                             Username = "2512383"
                         },
                         new
@@ -60870,7 +60918,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 482,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ga8Yye1pV/CeuqAF5F9bI.2cyLGxN5kLhJD.GZuvjjZQh6/2dsjZm",
-                            SecurityStamp = "c9654b30b07747d6b7b93fe9825fbfda",
+                            SecurityStamp = "b9add47dd78b48bbb4d8742e5756aa77",
                             Username = "2512384"
                         },
                         new
@@ -60883,7 +60931,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 483,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5PHQsxTgXlxW8HFeaF1u8ueq1sJPqTTjG8fTau5wt1IYSrunP20M.",
-                            SecurityStamp = "cef2100541ed488f8f3bdae3b112a644",
+                            SecurityStamp = "e02c2d86fd9342219ce226667c7a385d",
                             Username = "2512385"
                         },
                         new
@@ -60896,7 +60944,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 484,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wbW4M2GGKjulDaW3M8Rq6e1DiQuriV3DFGZiHWz8xOFcc8DxJlvga",
-                            SecurityStamp = "4cf0e25ec3974236a03a06332f4e81fc",
+                            SecurityStamp = "9e2d2e9ba1bc4e4a88d11244a0288dbe",
                             Username = "2512386"
                         },
                         new
@@ -60909,7 +60957,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 485,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$O8WS/QemOIecVS8GD4A78ORbzoIQz6kaQbF/oiDfcSFMBOsy4mPAa",
-                            SecurityStamp = "9bf5e6533fd2411e8cb3d7cad04ba3f2",
+                            SecurityStamp = "06dd04f388be4851bc02e6b50511684a",
                             Username = "2512387"
                         },
                         new
@@ -60922,7 +60970,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 486,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c35ioBJYV5mNGCzWuJktxeBo3HveQ2xEfr4k5GIzhDKNg4A/8Zn9K",
-                            SecurityStamp = "e8004132fb504003a7af042b8894b7ae",
+                            SecurityStamp = "c3bc3b2548a54e9c90c4113c6be45f4e",
                             Username = "2512388"
                         },
                         new
@@ -60935,7 +60983,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 487,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OZCgN6GwW7FGlm8iwBwiJeBq6bW2KH3sXGvJpdETM44gjeqQEsmLu",
-                            SecurityStamp = "0384b8a2df45472ca6fccd01e8c5f4e7",
+                            SecurityStamp = "430fc23bb1734869b6602b647a8b7b1b",
                             Username = "2512389"
                         },
                         new
@@ -60948,7 +60996,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 488,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ABSBbEItoS5mIu98xAWSk.n6e.GSOUx28PpGHa.ApXR1Z90XpevFK",
-                            SecurityStamp = "49e636e1ee074bd8aa8609b12618c1fe",
+                            SecurityStamp = "531f951072bb4567b70bcc8879b3cde3",
                             Username = "2512390"
                         },
                         new
@@ -60961,7 +61009,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 489,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xtFlRU96/cClhz4Dp9CY4uq2nqxjyHqWZ6dbi0STkFtegiPrpfVKC",
-                            SecurityStamp = "ae6be1dea4a94c42a56c3702772c5cff",
+                            SecurityStamp = "b2becaf077444598a9ee8262bf67925c",
                             Username = "2512391"
                         },
                         new
@@ -60974,7 +61022,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 490,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aVfKj/RVWvTeV5wKct/btOCwdi3smJZcAhnwtqzFKlzjoxnr8r4dS",
-                            SecurityStamp = "4ada1c4b2c1041a48a3d927fa3d8cf55",
+                            SecurityStamp = "09161369935c45df9f625f45b7d168b3",
                             Username = "2512392"
                         },
                         new
@@ -60987,7 +61035,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 491,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gHebw7bNbf4bCMyLIr8jNelK6O14csjUb5W.KbfqMyTP3OXZpiXKG",
-                            SecurityStamp = "bcba46431f75414e839a0e215857c494",
+                            SecurityStamp = "c02e0faeaafe4588899a6b08c02621d9",
                             Username = "2512393"
                         },
                         new
@@ -61000,7 +61048,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 492,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YbOiQbdPTsb7OwCqGwi5DeDL/7TALNEZfvCbahuoi/Pe1bsoEa6jO",
-                            SecurityStamp = "00a2b9ad496c4116999c5eca7419fd96",
+                            SecurityStamp = "622f0b2e76904436af48ee888f616a63",
                             Username = "2512394"
                         },
                         new
@@ -61013,7 +61061,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 493,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7M71mEz.di2uXDwE1OidCuxuumUgBdONc0XIPOdqYt2sM0oW99qu6",
-                            SecurityStamp = "ad0550d9d7e64625ab53e04e141a29a6",
+                            SecurityStamp = "f7e89573557c47db97f9b8bb86a16178",
                             Username = "2512395"
                         },
                         new
@@ -61026,7 +61074,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 494,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MDFt3Muh7v46yPpRzQIbOesgKxaN5DYvEdvDgDil2NxQAU0IbzhZa",
-                            SecurityStamp = "5f0972b1e1e744488918329b2fcccf05",
+                            SecurityStamp = "b7f1d49d474447d4bc9968a29ade5928",
                             Username = "2512396"
                         },
                         new
@@ -61039,7 +61087,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 495,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$CgUWiXREJVJqJ3NI6is1bOm11R5aHbPz3Y4Yjpx68ucqxIrO3apGW",
-                            SecurityStamp = "3c1702855b504edab78b7f645111088f",
+                            SecurityStamp = "1a006aee59034d549fc118e71db84c5f",
                             Username = "2512397"
                         },
                         new
@@ -61052,7 +61100,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 496,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jIjcV6BdPbMZROy3NueWxubCUm1ZPNoypvALeWoYWsGDwa1v8B60.",
-                            SecurityStamp = "cb57c77642d54073a2dc2b65f522f8ef",
+                            SecurityStamp = "be788b07f36a424db79a137a81ddfa79",
                             Username = "2512398"
                         },
                         new
@@ -61065,7 +61113,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 497,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$I8ma8ZtfYAYXK5OQ5S9Ph.zMEOvtFowsL8e64gWlC3RMwGckNZ6d.",
-                            SecurityStamp = "76145d10307e47389fc573deeb5c72fe",
+                            SecurityStamp = "30fd415814774c9385b2bf51baccc983",
                             Username = "2512400"
                         },
                         new
@@ -61078,7 +61126,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 498,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FrR4/xaxE0TsoQEMGKozueeSd/BdQqDiyKWu9B2JmdA1aGJVRXLJ.",
-                            SecurityStamp = "9b5cb94e8dd44e2d8b7687ace872aaa6",
+                            SecurityStamp = "1e27355cb34d45c794d485d4b0b06e62",
                             Username = "2512401"
                         },
                         new
@@ -61091,7 +61139,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 499,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$QbR1RPJVacdovTYENTRp6.LWBQIUZ.ES28mhdDinGZcfAoaqV0Ym.",
-                            SecurityStamp = "92b4751140c447a1ab8b7386e5509663",
+                            SecurityStamp = "1c671f1b410c46b98e22513ffce6e918",
                             Username = "2512402"
                         },
                         new
@@ -61104,7 +61152,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 500,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$s/Jq53AyKbnD6H.SGANT5.JYv8GM1gM7fCwpMa0HVp1GgLx9sdpKu",
-                            SecurityStamp = "5df64aa800864951a9052e98cc7d8ae1",
+                            SecurityStamp = "6dea0f888781454ebfec021427be02ea",
                             Username = "2512403"
                         },
                         new
@@ -61117,7 +61165,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 501,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$v4XAYUM297a6ZX6h4InBsODlWxqPfYaT1TT1uQ/cP5G63l9XtPKZ6",
-                            SecurityStamp = "4e484f65683c4d70a267494f0af3a7c5",
+                            SecurityStamp = "d99146f58868488f91ca2062ea2aff34",
                             Username = "2512407"
                         },
                         new
@@ -61130,7 +61178,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 502,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SutFSk9rvIa9H2R6ebvGFelGv.fgixu8KYqkYOq9Y9agu6bwunBIu",
-                            SecurityStamp = "2488132722c943b9abaa64db7f096aef",
+                            SecurityStamp = "1a9c20b1fb674892a347db771efc6204",
                             Username = "2512408"
                         },
                         new
@@ -61143,7 +61191,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 503,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JXLoF.ijYl.rcjmifYL9xeBwjgS1i2HEkM1I2xLDAA9KYsSB0SbWa",
-                            SecurityStamp = "b177afe816e046b89e24c80744f95c4b",
+                            SecurityStamp = "af029849ecf949c38ae240ebb58d7886",
                             Username = "2512409"
                         },
                         new
@@ -61156,7 +61204,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 504,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$z9cSAN2Ykc62Vi1gez5wCeqT4SWJZXWmKhyYNzRHCKQ8pNGGzSRnu",
-                            SecurityStamp = "9ea5e89b13374aeaa1cafa3fea4cc9db",
+                            SecurityStamp = "75c732ae95474b62b37eaa504c71c456",
                             Username = "2512413"
                         },
                         new
@@ -61169,7 +61217,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 505,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TqjvQ2IyNMlRJMLG0UpXwe3OgrfrxTu9N89GP5i3oVr9ogvfWUV7O",
-                            SecurityStamp = "998d558e990a4ecd928d6febb03dbce7",
+                            SecurityStamp = "f4b3cdc7250243f8b190606209869506",
                             Username = "2512414"
                         },
                         new
@@ -61182,7 +61230,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 506,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Vrmk87sUED4q0MzCBKfhVuBWFoetIwrEVCqgdTEvK1dbDCMYJ1RE.",
-                            SecurityStamp = "f028778ab8f6425188199c2e4697d7cb",
+                            SecurityStamp = "96c2457c6a2948f5ae5cef3395b36e73",
                             Username = "2512415"
                         },
                         new
@@ -61195,7 +61243,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 507,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uQF.xWDZfvoT65ZH0ZZdbOntKbanhaak.ZcdpEiRqxKWvDqgWQzHy",
-                            SecurityStamp = "60c6959d1ed54002a1b4035da98096b2",
+                            SecurityStamp = "568b0b13342046ea8bdbd2c69c20ddb0",
                             Username = "2512416"
                         },
                         new
@@ -61208,7 +61256,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 508,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2O2bv1YFp6AByuTr6/QPMeCiGuZEA7S/QvxHhc/beTxmm0UJhs6.u",
-                            SecurityStamp = "effcbc095c2f4a20868b423d1dbc6490",
+                            SecurityStamp = "b28df83fe724452cbe21f96dcb8b732d",
                             Username = "2512418"
                         },
                         new
@@ -61221,7 +61269,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 509,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Yqip2VQD7Z3TShC1ybXaZOSk7g1K46LpM.qNtyvLlEKGwdEopcwn2",
-                            SecurityStamp = "2925ce60f58f4cb9a6f3756bb97d9031",
+                            SecurityStamp = "681806970f6b4dc4bb9024fb4046e10c",
                             Username = "2512419"
                         },
                         new
@@ -61234,7 +61282,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 510,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JGixB0FYAuxGXuQ2vGGiKO/hosVbWuqeyOvpqwEWigUczYUPJh9vu",
-                            SecurityStamp = "d4d6a4dd825c4dd3a81e1a04d85efc20",
+                            SecurityStamp = "f90239d2fa904e40b63bc9e5e164941f",
                             Username = "2512420"
                         },
                         new
@@ -61247,7 +61295,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 511,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RXNqq54SMurBhdNASrz4GeJadp.XGWG54VvOlivIWfkIWnpZKdw6C",
-                            SecurityStamp = "4e82498199404e24ac2a40afe4f32745",
+                            SecurityStamp = "b092438c66ff4b069a81fde6c155d3fc",
                             Username = "2512421"
                         },
                         new
@@ -61260,7 +61308,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 512,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$h38YlnDxSUPCSOv5glngeOuveakFcrmygvYIfPDaEqBfbQ3We2ipC",
-                            SecurityStamp = "bda78360c56643d6bc6f863decd727fa",
+                            SecurityStamp = "c519a1c0cb844d839e00a9d079955b30",
                             Username = "2512422"
                         },
                         new
@@ -61273,7 +61321,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 513,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.U8ArrWET0cC1tF/L4Usa.xKkPq3Ta28uP/Lw8LXeyMx5viM2i.FS",
-                            SecurityStamp = "1267582f5a74433b8b583edc330ed1fc",
+                            SecurityStamp = "13de5d4a09684145ad3fa0f9f70f209d",
                             Username = "2512423"
                         },
                         new
@@ -61286,7 +61334,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 514,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$XLwvGDzYVP3N1/NcR8NY9..BZXsg70bBTT4M/9xYTQr7acLsllLte",
-                            SecurityStamp = "152db0def17149ffac6afe4003198368",
+                            SecurityStamp = "8ef00a93f65945b096b3b9925c93a2bd",
                             Username = "2512424"
                         },
                         new
@@ -61299,7 +61347,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 515,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mpbQcsVv1sFSJThfag.88uoEwguTSO5EKOqXrY9vZSzkYcuKDwAQy",
-                            SecurityStamp = "cec5549c5e4a4089a34526145d889dd5",
+                            SecurityStamp = "33dac8eacaf24c3082ddb056ec647ba4",
                             Username = "2512425"
                         },
                         new
@@ -61312,7 +61360,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 516,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PLy2hzC4D4d52xzymKtUre4JFHJdrhiODSe8m02nSCbngkrmi1VJW",
-                            SecurityStamp = "230ee2d3ec734796959468286f64fb47",
+                            SecurityStamp = "6ec1dc9504034112b6ab622b1e6f5a49",
                             Username = "2512426"
                         },
                         new
@@ -61325,7 +61373,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 517,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$82.5Lrvbuiwj2ClW2I2VteCHJTIJ6MusPl.3aMcQ.wwRdovALhY8a",
-                            SecurityStamp = "584f704d01bf418b8743004e01a1331e",
+                            SecurityStamp = "be1c305c41d94ed68d1e98b6e13757d6",
                             Username = "2512427"
                         },
                         new
@@ -61338,7 +61386,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 518,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lcwmDZf3CObDn/lbYOTNBOce3eksBy.WBb5FVKms5ZVGZrYVB.ef2",
-                            SecurityStamp = "b26df61d4f88454bbaae2b1e2c5f5e86",
+                            SecurityStamp = "16486e2b110d48eeae8f2dad49d8f069",
                             Username = "2512428"
                         },
                         new
@@ -61351,7 +61399,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 519,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mV24rDrgIQV/zUhlY/8FauIVCQEMsgHcWmoQ4bqWnTLe1nn7DcSlS",
-                            SecurityStamp = "f8babc24fc204c758bd87b3ae5c2b4c8",
+                            SecurityStamp = "86da75cf494e484e92c28ffabdd9688a",
                             Username = "2512429"
                         },
                         new
@@ -61364,7 +61412,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 520,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$P7qsWBTHxypmuhacDFynOe285pJ7/39iy92H3nnQM4dj9q2adY0pm",
-                            SecurityStamp = "0de4587802684d23a222e2c014ca933b",
+                            SecurityStamp = "9ee1a1bf6a8c49c7b1c962a48a4627a5",
                             Username = "2512430"
                         },
                         new
@@ -61377,7 +61425,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 521,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hdv2QzhAPpS6UczM9ciBiOUk1i1M4l0Hf070.R00j1ESY.9hdaKVe",
-                            SecurityStamp = "2bce75e0c2a1491587f5e33f838fe940",
+                            SecurityStamp = "f1f5fa536e154195be49288a0d1b33cf",
                             Username = "2512431"
                         },
                         new
@@ -61390,7 +61438,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 522,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ubp9OfTEVBDtREq5AWuEGuOQW5RVeMZdQJEUggTumNg.vmycgHsnO",
-                            SecurityStamp = "643b25956b9c42b0a251848441f25f06",
+                            SecurityStamp = "4c90b797f28248b4b818cc56bcf0b2a5",
                             Username = "2512432"
                         },
                         new
@@ -61403,7 +61451,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 523,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$EAoZ967TCJF3n3oqG1k7EO8gdYul/QGnRL.dtjMe58VwTBfKJH6jG",
-                            SecurityStamp = "e79de9ad8b6e46bc91868f2463561902",
+                            SecurityStamp = "aa80258c715343968634f3e322cb0496",
                             Username = "2512433"
                         },
                         new
@@ -61416,7 +61464,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 524,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$c0NjMF7OjQbzrdifOk8wG.9X8iVTMAwLuLseOkM4XjXABysKA9H4e",
-                            SecurityStamp = "7e2fc744e6e647faaf7ea65bebdc9634",
+                            SecurityStamp = "4ecd6b43cfa24f67972addd2234ac8d8",
                             Username = "2512434"
                         },
                         new
@@ -61429,7 +61477,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 525,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D6FvOjwVCQB7nBjNWv3.IeWdMiGwXAKjINB5nVB9iPmwA4RU1UADS",
-                            SecurityStamp = "8a55ddf7487e4d9c9f34a118087ea5b4",
+                            SecurityStamp = "6758d8844e034573a441e2422a7f0f4a",
                             Username = "2512435"
                         },
                         new
@@ -61442,7 +61490,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 526,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vBxaDePnMW28qemIHFF/euTzQv7Da9SAronigEpjVKu817QVZ8/Rq",
-                            SecurityStamp = "17ac63ad39324ba488a3313ed7fa5657",
+                            SecurityStamp = "532751961a3e4933b09071fe4a8a9209",
                             Username = "2512436"
                         },
                         new
@@ -61455,7 +61503,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 527,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rj5tJlPrFti5sUtdONB2XOklvkcXCFnTJXyv44zR6xeyDLn99.RC.",
-                            SecurityStamp = "745429ea3c6c4cb099ef422ddcf93f28",
+                            SecurityStamp = "3d0a23a3305a4b79a33177ffcdc5af46",
                             Username = "2512438"
                         },
                         new
@@ -61468,7 +61516,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 528,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SsNv4t0CqPW9jChoriu8T.E6nN0SHMg8h67tBKEJ2qONZcThrv1fW",
-                            SecurityStamp = "491ff0618e8642ffa1305c73f6ee5ddb",
+                            SecurityStamp = "014e08d4a9614247823b4ebf4775946b",
                             Username = "2512439"
                         },
                         new
@@ -61481,7 +61529,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 529,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hAT6Wp6PXkusu9PFakv.F.Gv50jiBnpgUGYH7b7FqMpeGk18PBQnu",
-                            SecurityStamp = "6c75bf522350482295c3f9180a06c2ba",
+                            SecurityStamp = "d71884b686f2440e9425055c7261e4d4",
                             Username = "2512440"
                         },
                         new
@@ -61494,7 +61542,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 530,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VXlW0tFFDLYM529mOWsEkOr.ze97Ehad454ClhX4.5lEsi3WHy22q",
-                            SecurityStamp = "a9b0252c0a284862ab88fab84a71d2a6",
+                            SecurityStamp = "a3114ab3236b47538a72c48bb8eb48db",
                             Username = "2512441"
                         },
                         new
@@ -61507,7 +61555,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 531,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rx.ctuuhUuUZUo.Saav3PeK0EDYblVlt./TrWQ5fw.mMYGncKXcim",
-                            SecurityStamp = "52cb95038b394a5cbe2fb0145b0f37d8",
+                            SecurityStamp = "d40bd4831da64690a7233f196d62d27c",
                             Username = "2512442"
                         },
                         new
@@ -61520,7 +61568,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 532,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FuE5d8Fknl.OJPkZo7R2wesh4GSnbGtNlav/.r6RECim/2hOW9MTa",
-                            SecurityStamp = "cb03dd93887d4c61bd4278b8442fcd2e",
+                            SecurityStamp = "87af99ee7db34302aa3f85beef30c84a",
                             Username = "2512443"
                         },
                         new
@@ -61533,7 +61581,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 533,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WCivprkYPjbrttdgmB3bneAjxhM6Ile9nCK4c0w7UZ/gFYGnTGt9.",
-                            SecurityStamp = "4604d6546d3e49de910e83839f99bcda",
+                            SecurityStamp = "4aa7cfaf49744125932a481daabb2813",
                             Username = "2512444"
                         },
                         new
@@ -61546,7 +61594,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 534,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$G.exqPChMLRnV.gGPljwTuIAeP6y44OOQEOYSCy3.IZ7.YBlwwW.W",
-                            SecurityStamp = "a3ca01d25d9b48c9bed8b0b703f18fdf",
+                            SecurityStamp = "f72ed4423e2847b5a45bed765e574a68",
                             Username = "2512446"
                         },
                         new
@@ -61559,7 +61607,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 535,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nI4fOHnx0Ekcecsh/SBHtuVuMgc11X0Eh0dDrBE3fxgPtNZeFTxG6",
-                            SecurityStamp = "33cc3d7e265d43f09be4017ba32db990",
+                            SecurityStamp = "2bef6f043adb4cffbcf376cc1957ab2c",
                             Username = "2512447"
                         },
                         new
@@ -61572,7 +61620,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 536,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g.UX5CxRNk5tOfoZn1SiQ.hkk2pm7XEJs5LEcngEYUvCojaM3rxrS",
-                            SecurityStamp = "7db48ff9a6e547378b15a24b4b88c85f",
+                            SecurityStamp = "4671378fdcfd40f5b7c5ad9e08058774",
                             Username = "2512448"
                         },
                         new
@@ -61585,7 +61633,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 537,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$S.7UzJtXDEqndxysEeXihu4BuK605WCJe10slZYW9KtTHWj7tin8.",
-                            SecurityStamp = "6bf18074f1ee43d797b67e5e499b7c41",
+                            SecurityStamp = "412d322770c94e769b7e960524e615df",
                             Username = "2512449"
                         },
                         new
@@ -61598,7 +61646,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 538,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9.AU5/aD2EBJbNyVk8AZ0eEiBCORYx3aNJ7N8sj/QxDD20lfamTYe",
-                            SecurityStamp = "816c29997a984baf9fde48b348504054",
+                            SecurityStamp = "fd651a2d7eea4ed6b92271f5352ac146",
                             Username = "2512450"
                         },
                         new
@@ -61611,7 +61659,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 539,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rLo36OrgyGyZJZi39LH04uog8QKtrcPLCEXlFz98BHV.5.qRxr0Sa",
-                            SecurityStamp = "de9e53c014e44116ae83e6f7c40c7428",
+                            SecurityStamp = "1abc1e423db2490c8d19a0b430593ebe",
                             Username = "2512452"
                         },
                         new
@@ -61624,7 +61672,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 540,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dSLzoSSf4pGWCxjuXepriO5tEYCW0RbE1yzLCVRABdrtriqyVNo/i",
-                            SecurityStamp = "450f5214d06a49eb87e23ea6ba08db26",
+                            SecurityStamp = "7c69e1a562f847bcb30adfc81d1513e6",
                             Username = "2512454"
                         },
                         new
@@ -61637,7 +61685,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 541,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$K0BGHEAp8okxdeWmgHkHz.8.I8lYKcGaSUgPsfV0/zC5OyMBp4LTO",
-                            SecurityStamp = "6effba5e76df41f68d2b62138ffce7fe",
+                            SecurityStamp = "0ec0c138eddd429ca16ee259127d4422",
                             Username = "2512455"
                         },
                         new
@@ -61650,7 +61698,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 542,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$q2A6SctspRrQDRgurqLFguX9QwxT/CltPHnRjtFEcaIyC7CO3nPhO",
-                            SecurityStamp = "e5a746e18cb24cc49b6b770885592ec3",
+                            SecurityStamp = "d9106a0839cf4b10829549229454ee7b",
                             Username = "2512456"
                         },
                         new
@@ -61663,7 +61711,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 543,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$US7BOiM45eJSu/2LoN3TR.Vkb2XhLkoq9YXuHlzAQRs.CIx5CM.Pa",
-                            SecurityStamp = "b712eee9b6324e509885312bc9e4252b",
+                            SecurityStamp = "4a1a730462d9480c8a244fb58d76f111",
                             Username = "2512457"
                         },
                         new
@@ -61676,7 +61724,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 544,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dWqxt81XaVrAG6BOCDpnfuAoeiWAD9C84h6QCK2ZNfypU4ozdyiB6",
-                            SecurityStamp = "179c22990a6e4039adf52a3ac9bd540a",
+                            SecurityStamp = "2cf67623985644acb2d9940bcd473797",
                             Username = "2512458"
                         },
                         new
@@ -61689,7 +61737,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 545,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$U0bsBWyYQHYwte8eZqOb7uUqjzuiBSE62LdrRairZHhzeo2Z4EWyK",
-                            SecurityStamp = "1c751dbd6f6b490386c4a5f3c70c71d4",
+                            SecurityStamp = "ee50f346abe2454cbaf2d97b38ea90ce",
                             Username = "2512459"
                         },
                         new
@@ -61702,7 +61750,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 546,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pywfWxseawgCq1EKJ51.teDO8yT9swisPqXg4nEV2eb8w4w3WNs.a",
-                            SecurityStamp = "ee793d52c6084f239f98d5b9e45d95a1",
+                            SecurityStamp = "7639f14519064141b5b710a9728b26bc",
                             Username = "2512461"
                         },
                         new
@@ -61715,7 +61763,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 547,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rn5NsvkSOO9EFX0i3e77W.cI35gzAVR40Il34TzVpVKpXmelCj/hK",
-                            SecurityStamp = "1ad0101a0d6640eb9e0b42f7793ca5a1",
+                            SecurityStamp = "f89318d12e4441b1a06e53bfc422fed3",
                             Username = "2512462"
                         },
                         new
@@ -61728,7 +61776,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 548,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uY2s2LHhHpf/7WpB6DJZ8.O.IcA.7Jwzj1RdiwHQrT88N53QZ3a.m",
-                            SecurityStamp = "66ffdadccac341f9bc9de4da080442a3",
+                            SecurityStamp = "b26e22e3ad844ce796ce6c0f387cfc3d",
                             Username = "2512463"
                         },
                         new
@@ -61741,7 +61789,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 549,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e2M0bOUhQBLXn5LJHqB/G.XiZ.00j5aq09A5O12yg926PULbt8DPm",
-                            SecurityStamp = "ac047c2c03c9428293d21049ced7d7bb",
+                            SecurityStamp = "cff1333a0aff44b79d6f696e39506a64",
                             Username = "2512465"
                         },
                         new
@@ -61754,7 +61802,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 550,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.vm6KIUGZhLmfKtnNYuauOUEknRGg04K6ktW2qrxu6RPPKHDf.mS.",
-                            SecurityStamp = "a658309ac42c4b95bbc7744f17dd2277",
+                            SecurityStamp = "a0472aaefe3746d2b8fa9526791ec602",
                             Username = "2512466"
                         },
                         new
@@ -61767,7 +61815,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 551,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$EAL0mdRwcod/T.rO4zeOgeHo4ynvyaWrx.DxjcM7.bxYjcORrd9he",
-                            SecurityStamp = "eff4114fd2f249a2a293be1d166aa178",
+                            SecurityStamp = "21894a60510a4f89936d073d520a4adb",
                             Username = "2512467"
                         },
                         new
@@ -61780,7 +61828,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 552,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GG7w8Lj/XBMsGslVzVBnKe0lWNMkGyYSwLY68HEmS4t3AVDsuO9Y6",
-                            SecurityStamp = "a6f499595aec4938b5ce609804d04e04",
+                            SecurityStamp = "dbdf1cbae7214d9cbdfc2bf7271c3744",
                             Username = "2512468"
                         },
                         new
@@ -61793,7 +61841,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 553,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JQ5YRPblEhfSJ0SezLt7eeu5Llz1AusS2hM5XqqIhLk4U2Gkp4UEq",
-                            SecurityStamp = "1d56b46d5f6c49e7878dd56f8d92eca7",
+                            SecurityStamp = "4fe09a71dbee4062b0ee68e35cf87df2",
                             Username = "2512469"
                         },
                         new
@@ -61806,7 +61854,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 554,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PGaqhf8oOT8YdjApClpRIeIEiIGNuCfHGu1J6gwppz8L4qDBH3LnO",
-                            SecurityStamp = "d4788208b8314f4b95e80bcde05274c6",
+                            SecurityStamp = "23c5d9c81db74df993e3c7f5376273ca",
                             Username = "2512471"
                         },
                         new
@@ -61819,7 +61867,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 555,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5pR8zJxaQRfiziA4BQ6oq.d3SAblpYir78GpZZb0bAB0PyxGn1bO2",
-                            SecurityStamp = "f7decc2be96643b39d4279bd71a87411",
+                            SecurityStamp = "5990a0fd8fe548d08c4e3b008a61447f",
                             Username = "2512472"
                         },
                         new
@@ -61832,7 +61880,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 556,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vEk0O3KohFdOfMCdn526yunRIHwqbdckxCjTSnt18MY7tZPHrgCd2",
-                            SecurityStamp = "0684957d66914ef2838a681181f26de3",
+                            SecurityStamp = "9f9ab16d3af642d093ab75266f886539",
                             Username = "2512473"
                         },
                         new
@@ -61845,7 +61893,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 557,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nqdpKchbaQwm6JUruMS32uhLn2.QVN0QNThIjVM1JeGILwoFO3R.6",
-                            SecurityStamp = "943e6fd70b1a410482ac3a266da291bc",
+                            SecurityStamp = "ca27d5348c1d4f64a67af3baa42c5e32",
                             Username = "2512474"
                         },
                         new
@@ -61858,7 +61906,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 558,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Bmukub8ENu.ahnduliPhGuP/jK2LS9P.1YqrPgrSDtytkT/uPOb.C",
-                            SecurityStamp = "b3f5fa4a1f554c09a980aab5bfa8a692",
+                            SecurityStamp = "903106f61be3473289d55d7f3e148781",
                             Username = "2512475"
                         },
                         new
@@ -61871,7 +61919,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 559,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VKMmm6Pspe2xiizB4lXpeeEDkiKHqMBUzDRT4rIAk6HWevxiYcA/2",
-                            SecurityStamp = "6b02f66ddeda44e3b8af7f10976aba98",
+                            SecurityStamp = "11495932c30644a48cbd21b6ee1d8c77",
                             Username = "2512476"
                         },
                         new
@@ -61884,7 +61932,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 560,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$coEjmLh0uCa1T6Fosap4Fu1H.tKytvHjLEzNZhpJQRTzZ04EZjTlW",
-                            SecurityStamp = "2ca07bb107db46a5b649d77a543bb8c8",
+                            SecurityStamp = "8fc7d1e9b7964a9398a3ba8e39c74ab0",
                             Username = "2512477"
                         },
                         new
@@ -61897,7 +61945,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 561,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$te5vOgpvjz9lSqoaaEZx1uvyDDSOVNu4uCItZqa0n2W2Sx5JNzQJ6",
-                            SecurityStamp = "d9468ad24a7a4b1e8ac4961ee62b8067",
+                            SecurityStamp = "6292540255dc4e10a5ea03b69a5ff6ee",
                             Username = "2512478"
                         },
                         new
@@ -61910,7 +61958,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 562,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$orZX6d4ZUjmKLu4HCPeCJOhgTws512Woc4bzoayuubS0UJHG1efsa",
-                            SecurityStamp = "83fb76910b3944feb2d37d34fc273bb4",
+                            SecurityStamp = "155b1794ced647fb9d59b291af4f825f",
                             Username = "2512479"
                         },
                         new
@@ -61923,7 +61971,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 563,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9HvpcMgHWw7FlqSVi.E6ieHcPkGiElY.7P.BpHD6oQGFj5oJE/ieq",
-                            SecurityStamp = "c3bc0b35cb80485d8e9ec60141000696",
+                            SecurityStamp = "8541a42e7d844fab93aa7b0fe84531c8",
                             Username = "2512480"
                         },
                         new
@@ -61936,7 +61984,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 564,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2IH8MOaOruARyhGkipeMJO.I9sJrWKFPp7uhJ7VihI1vT5l2w7KiK",
-                            SecurityStamp = "eb66dd5c855d4ac8b30e22961ce0a0b6",
+                            SecurityStamp = "cc3d8275911944cf92ada62a3ef6b147",
                             Username = "2512481"
                         },
                         new
@@ -61949,7 +61997,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 565,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KoC4g2OSsUl0KVxW2t35z.O4H7CGzExSnY5Lv8xymqmsYWQWaP0jK",
-                            SecurityStamp = "712407f5d5f04569bed55d5f7b2d5877",
+                            SecurityStamp = "76306da63cfc47fe880d1bd5f98d8d21",
                             Username = "2512482"
                         },
                         new
@@ -61962,7 +62010,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 566,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$eQeq78VVv56x4cbYsMDy0em4hjWVqiFbfXYf5j8qm8yvgNhRfqA3u",
-                            SecurityStamp = "27853177413440b893a3cacd6fcdd669",
+                            SecurityStamp = "0c4bb0cb267747d091e09943514a905d",
                             Username = "2512484"
                         },
                         new
@@ -61975,7 +62023,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 567,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5FFBPtFrZWGtGHeeX0ZzE.sGApIS3wzZTiEWL9EL.LdhOiP0VBrX2",
-                            SecurityStamp = "10cb645eb7c04952800faf2eb2023841",
+                            SecurityStamp = "4b4779ec22044a76a51f2c1686828387",
                             Username = "2512485"
                         },
                         new
@@ -61988,7 +62036,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 568,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YO93uk8Z/XvEwrVBWffJv.Hjb54djmL7xblmtlhO1fCZJZMIahgTy",
-                            SecurityStamp = "41d3780b381e4b27869b47977e5510f1",
+                            SecurityStamp = "dbf1839ea4bd46ee9b4fc48ae65aaa95",
                             Username = "2512486"
                         },
                         new
@@ -62001,7 +62049,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 569,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$L5Sic2WSIHXYFS68ExKXWOlGNGoHmV3P8nN9y9l/jrxkWIOgHEuB2",
-                            SecurityStamp = "b1faa6691ce744b0ae23784615c299c5",
+                            SecurityStamp = "c7d18c15032142beb5e4ae79e55519d7",
                             Username = "2512487"
                         },
                         new
@@ -62014,7 +62062,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 570,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$T4oU86qBSNnRzESt43D7IeNQxU6.VSf6BMBxGcBpBhXByq9wIRbMu",
-                            SecurityStamp = "ba85be1c4a654b25bcc2cf3f89e524cf",
+                            SecurityStamp = "27dcecc725004aa7bafd066da901771d",
                             Username = "2512488"
                         },
                         new
@@ -62027,7 +62075,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 571,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.Pvq3GVux/g2skGropLDcev0Qt0jPbQC62q45t067ld8pnwAgxs9G",
-                            SecurityStamp = "52f9bdec8e3045d6a14747a1e4084f85",
+                            SecurityStamp = "43995f4b656e4124b23fed87b0ada716",
                             Username = "2512489"
                         },
                         new
@@ -62040,7 +62088,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 572,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$y4EX9Wjgksb3G.8.Sptedu22IH.qiQuMOWijTMZJaTPR/FZtYFkq6",
-                            SecurityStamp = "0c9c3d89987d4c46b725416b4d03a650",
+                            SecurityStamp = "1e7607fddf1c432c804d60624f8f6766",
                             Username = "2512490"
                         },
                         new
@@ -62053,7 +62101,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 573,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$is33/PGrBIUJTlt7R9FpMO0C8cZS01nkYuv/Gy0.VYoiZa60z2SrC",
-                            SecurityStamp = "70c7ba6b482c4cf198ec700b130cd0f7",
+                            SecurityStamp = "866feade6c214a508cef08090fc839f5",
                             Username = "2512491"
                         },
                         new
@@ -62066,7 +62114,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 574,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6fkm8YjPl.y5GKSSi.k1BezR3PhdnB5GxK/RUQMV06B94IBjGrOHe",
-                            SecurityStamp = "a03e8750effa41f9badbce2a1e52dc7b",
+                            SecurityStamp = "2e553387e5ed4815823060dcb81081e4",
                             Username = "2512492"
                         },
                         new
@@ -62079,7 +62127,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 575,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.iqQKilkfgThwLTeTcb1XenIuoKQ6O08o.d4LoTdN.WwO7Ale1Q4m",
-                            SecurityStamp = "7cf8f123f6db47a78d3803aff6e4f6c3",
+                            SecurityStamp = "5aa8809d323142f0aaa5d7cbf8be9b42",
                             Username = "2512493"
                         },
                         new
@@ -62092,7 +62140,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 576,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IdMa2IBeMS7Fdc/6gLqjbOFyH76ax8yHxhAmOug3llNEE5yFkow1.",
-                            SecurityStamp = "b0398a874187483da8d129755e1a15e5",
+                            SecurityStamp = "d7cf78b4bdf249eaa5ba01314fe6550b",
                             Username = "2512494"
                         },
                         new
@@ -62105,7 +62153,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 577,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6yh43ujNEehB7grOMLTGj.8O3qXahpDdx0nrIUwaGvHR5.QUpvXEm",
-                            SecurityStamp = "2bec528f53ca41d494f8fd0cf99ce947",
+                            SecurityStamp = "c30baef18cb1476da0eeb9991ed0f7e5",
                             Username = "2512495"
                         },
                         new
@@ -62118,7 +62166,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 578,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$T6PAuisvYqjPzr2LgShLEuPY/DcAjJ1F2cWsKh8rxaN46jTFbJLx6",
-                            SecurityStamp = "59f00e11fa9c4b3a9d329e4490ac3188",
+                            SecurityStamp = "95d73371c30f4649843c50a252bf55e4",
                             Username = "2512496"
                         },
                         new
@@ -62131,7 +62179,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 579,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5DjOpOtnBVaMg8ean7piw.jRBdUvOhci7xJI.36kl91IXRIpGoQ32",
-                            SecurityStamp = "e101fa191be64310830d07ecbd8eff83",
+                            SecurityStamp = "9538b4b588d04236b20b68cd496c0023",
                             Username = "2512497"
                         },
                         new
@@ -62144,7 +62192,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 580,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VK9XGdXN7VGyIDFzaxlXfe0Xudza6140QJxWlP4h4hyXJZy7S/Ioe",
-                            SecurityStamp = "35507e184b1f4149b1a0f5d3a9c580a4",
+                            SecurityStamp = "65c83b7b139844d397244f3cc7a4ef9e",
                             Username = "2512498"
                         },
                         new
@@ -62157,7 +62205,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 581,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jPNdTW4sYBbe/23SzueH3eYxkT58BE2jBlg86Ae0oAwSnaB15n5WK",
-                            SecurityStamp = "3cfcf2d584f24b459a707c5acce92277",
+                            SecurityStamp = "5abf485f82f64a808f9262df249e30a7",
                             Username = "2512500"
                         },
                         new
@@ -62170,7 +62218,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 582,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dUoPNa78i7BUWBEGSuRG.umOBmmCNTzJnLBti9WTKwh0Titq.Q99.",
-                            SecurityStamp = "8edba9495c8b413890a15778eb90b859",
+                            SecurityStamp = "0677cf411d1942249a21e6abc90d6de3",
                             Username = "2512501"
                         },
                         new
@@ -62183,7 +62231,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 583,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6Z440vCTpzSji8Tj2q5vLuvLta2JDQRRsrGyyNresoPBlRtgSb.WS",
-                            SecurityStamp = "85008beeb7294f4d96a7e924aabc3495",
+                            SecurityStamp = "78d103d7bb8a420681f3cde77f71335b",
                             Username = "2512502"
                         },
                         new
@@ -62196,7 +62244,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 584,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4MIOH2bzB9.A4F2O3w3Gfeo4n8xONtPNnLEYZWO0xro/O1DZBZPem",
-                            SecurityStamp = "f8e3736b1d4a44c999d903cf8c23e91a",
+                            SecurityStamp = "6435895025b74b7cb99d0beb0a3436dc",
                             Username = "2512503"
                         },
                         new
@@ -62209,7 +62257,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 585,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wu6svGuHK5jFf/RahcEef.DlYENvojK6OpIk2Xdk6uPRYpAU0ntx2",
-                            SecurityStamp = "c78e6b963d4449ef99e90702769f0255",
+                            SecurityStamp = "68cec2a49291485aae7bac19a6ea6da7",
                             Username = "2512504"
                         },
                         new
@@ -62222,7 +62270,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 586,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$p2hPaz8uYh084y1X9.vI3OC/MR3EDSo4BBZT7JNgNA6MeA543tHXy",
-                            SecurityStamp = "5a77ca0c96f445d4b00d3ebad3d25de7",
+                            SecurityStamp = "446d32f17c7147d4961a8a1ec3054ac4",
                             Username = "2512505"
                         },
                         new
@@ -62235,7 +62283,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 587,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$T4C5sNCTBBzQhowfd69CzOlaDpdztIhhxib91fXiEsI.rTD/lY0f2",
-                            SecurityStamp = "40aa96bf1ec342679483d25e06ff273e",
+                            SecurityStamp = "f6806f464d00425e8de4b3f11e45a40e",
                             Username = "2512506"
                         },
                         new
@@ -62248,7 +62296,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 588,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2yjqF/6MFlQahZ2RYu25quIejt/X9DPyqkgqpp.Iqk7wbGMjViEC.",
-                            SecurityStamp = "faae14173ca64dfc9ef1c106b8ab104a",
+                            SecurityStamp = "45e33a13998644a1a072de58bf735374",
                             Username = "2512507"
                         },
                         new
@@ -62261,7 +62309,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 589,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$U7yfRgOGL.LIC1DJRF9Rp.v4kUVXKFBlfjIdmfmwkbryuo45O4H1S",
-                            SecurityStamp = "0332c77fac324cf7a967b95a83293c9f",
+                            SecurityStamp = "a0dc086c68414d1bbb987b0c7099250d",
                             Username = "2512508"
                         },
                         new
@@ -62274,7 +62322,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 590,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4oYEySqZf0c9Fdpm9duKB.OzXz90u.Q0OsZ9NiIXXfx0y51z8hI/i",
-                            SecurityStamp = "4d63fdbbd1d34723ba7443a6ade36569",
+                            SecurityStamp = "4ac8b0f42d884ae7af765ede78fb33d6",
                             Username = "2512509"
                         },
                         new
@@ -62287,7 +62335,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 591,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BsuWKrO1Oi7ySOCVnC9S/eDOQkuC6eF.7vixu3tGe0TLD6rQSgssC",
-                            SecurityStamp = "4080814161e0487084baa46b3a3f7e6d",
+                            SecurityStamp = "1e04bc9d32cc4c3ca5ab6fd1de0c733a",
                             Username = "2512510"
                         },
                         new
@@ -62300,7 +62348,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 592,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nghwivB.mCzQCcMqV58BjuSv5AJLr9SLXcmSEOSmbjQx9IGgS.pWK",
-                            SecurityStamp = "e3f4c9a4859e492ea02c3d5b3e1885ee",
+                            SecurityStamp = "6bc2984e0dbc4546ae6cafe74e68aa9a",
                             Username = "2512512"
                         },
                         new
@@ -62313,7 +62361,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 593,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$RHXSRgE/WDvGP0JWL0Sage15FtJYrHGAvJUORB83R8PM4Wkbg9ehG",
-                            SecurityStamp = "4c2f62a71e39421cbf13a86283f31366",
+                            SecurityStamp = "689491e8967646bba0da38c0d3a8a46c",
                             Username = "2512513"
                         },
                         new
@@ -62326,7 +62374,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 594,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ljPYtbgD.szzKvQvqtW8VeFPz6RT2DULv7fg0JYNFArqv3R3/dypu",
-                            SecurityStamp = "6dc27412161e40db82b9911c2de7bf4f",
+                            SecurityStamp = "7c1324ed78f04e559f1e74c8f12d4bd1",
                             Username = "2512514"
                         },
                         new
@@ -62339,7 +62387,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 595,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fNVfKMi5rNHiaEEdlMmoJ.zyNLvF8CaCXT66jTNkF8nDur5HBmRDy",
-                            SecurityStamp = "dbafe92e14a7475eb2bc94333e1ffbdc",
+                            SecurityStamp = "2e24873b89b84eefa483dab8457a277a",
                             Username = "2512515"
                         },
                         new
@@ -62352,7 +62400,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 596,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sbtfzTEanxw3dy1/XDPpdOwTB/ZMGkCr913JvOOFSdkUKn1hLsZRa",
-                            SecurityStamp = "90b73c489241410796864cef450031c6",
+                            SecurityStamp = "70e4f99dddd84346a7a4035f18313981",
                             Username = "2512516"
                         },
                         new
@@ -62365,7 +62413,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 597,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$z.yW7Mnq2gww1mFHf.l9bOOUC29b/B4FAZqCD/72Ftz2bcloYUtCC",
-                            SecurityStamp = "47eff18919c44aedbb22a6f4ed8c7235",
+                            SecurityStamp = "f0274f5b5bf5483da77aad132a77a10f",
                             Username = "2512517"
                         },
                         new
@@ -62378,7 +62426,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 598,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.vGyGw/6Xc3OpQEEfHUTKOloNKYkVyOtASjs.7B0T7vcZubgMQBf2",
-                            SecurityStamp = "63be83ce3a6546c185930529f8759355",
+                            SecurityStamp = "3ef3c8a0e9804b149fce6a25e655f8ff",
                             Username = "2512518"
                         },
                         new
@@ -62391,7 +62439,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 599,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BSn706J4J7tBwWVfxpbqEOimTDL2CizQtR0Am5bu.cgvRSP8WXVoy",
-                            SecurityStamp = "dd05229e4a9a442d9daca0968825065d",
+                            SecurityStamp = "ccc910a4e06146bfae44c135f7eec9b8",
                             Username = "2512519"
                         },
                         new
@@ -62404,7 +62452,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 600,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$j9jz4k2y1ZMoj9CWA5BJm.RDBmbU62DsizsPc85X1FoGt9EcO02sG",
-                            SecurityStamp = "da157ba5ec5d44f18ec92bed7ba3d12a",
+                            SecurityStamp = "d0546adc62064452b4989ee860ea1d3f",
                             Username = "2512520"
                         },
                         new
@@ -62417,7 +62465,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 601,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$P/irfOyjEKtLP/yhZOvHR.1X25eL6OqYFMGgHHNQT9EYVG6Y/rSvO",
-                            SecurityStamp = "b89566c1490244189356e24aac462c33",
+                            SecurityStamp = "4bbe5066a297442ab912804b7fa93b6f",
                             Username = "2512521"
                         },
                         new
@@ -62430,7 +62478,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 602,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1YVHJHF/UIhHtjCnnG/rq.6DTquo5WEfbTaIRzLY1TptY0lKSdHbW",
-                            SecurityStamp = "ef18416c5d964246aaa115e9e51938af",
+                            SecurityStamp = "f245d28f24384586824c22f9509e5d63",
                             Username = "2512522"
                         },
                         new
@@ -62443,7 +62491,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 603,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ShHdG7YrOjGXXZ.q2KevDepfxAfpLC2xj79oT5NIKwKy6JAb5znGm",
-                            SecurityStamp = "d1a1c80dcb44457fbac8b6998914b706",
+                            SecurityStamp = "d7dfff405ae74378b3fb11530c25d347",
                             Username = "2512524"
                         },
                         new
@@ -62456,7 +62504,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 604,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vJhNmytn7sHi3qcudnBTmeK49H5oE/uB00HFe94qYfj9qnuVICbvi",
-                            SecurityStamp = "9e1cf19602a04afd964a384968861b35",
+                            SecurityStamp = "af517f9278374a368e01993b8bb1dc8d",
                             Username = "2512525"
                         },
                         new
@@ -62469,7 +62517,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 605,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$g4v28/NjZ8vKtNu.Mv3wpeLBl8NFYr6HoQKKcgPCq2EnhljUrqexu",
-                            SecurityStamp = "69d763b8e35f46ff82067f3d292d5a72",
+                            SecurityStamp = "e3b6275ef4ff4e0c97c5abb7d139a09c",
                             Username = "2512526"
                         },
                         new
@@ -62482,7 +62530,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 606,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$awqptD1jO0R735BT.7x56.Erhl5mU.jCcEsVLSBXFTyiAmXTC3rLm",
-                            SecurityStamp = "0d7e9802faa44d3f8d320db3164d3eb2",
+                            SecurityStamp = "3b9c03469d064a81b712d868ffdcca8a",
                             Username = "2512527"
                         },
                         new
@@ -62495,7 +62543,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 607,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pMqsbqrj/lGx1gNRjWAncu38ePeU75c8dvJRpoH9MrJnlsM12Ook2",
-                            SecurityStamp = "8eebb77685184c1697037ecce862b8bc",
+                            SecurityStamp = "3b651048b09b4a0281a1fdd0d993667d",
                             Username = "2512531"
                         },
                         new
@@ -62508,7 +62556,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 608,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VyKBdodxXBOOTdzur7C9wuA.EEwnLZS5Wh/ma.Wlg/S7CGwVeOO7W",
-                            SecurityStamp = "ed47953d350847a989ccedd64d8ce863",
+                            SecurityStamp = "bed411328aaf420cb60924a5edab6e11",
                             Username = "2512532"
                         },
                         new
@@ -62521,7 +62569,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 609,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$imzbMBwSLuLRajG4tmIlaezTx4ae65bCYodlU3MxBHGq2uEVqCH9m",
-                            SecurityStamp = "4fe35e52c5154e6cb382da9a542e69da",
+                            SecurityStamp = "80e664191f5a4837b1ddcea55eb9f2e8",
                             Username = "2512533"
                         },
                         new
@@ -62534,7 +62582,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 610,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$GpkekjOmYi.LQGhz7EVDXu9f4cxWW37I5F/LWOcqgQ1qXoWxHZQlO",
-                            SecurityStamp = "0c1a717d684e47d0b670898231769fc4",
+                            SecurityStamp = "fca4dba3efa645fe874ff01a5387fbe1",
                             Username = "2512534"
                         },
                         new
@@ -62547,7 +62595,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 611,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$CEAKCblDfHl5PtTkIVHgz.YtMQFup1ei59pKbi/yWdpJnn0OaEMZu",
-                            SecurityStamp = "78ad1f909b1f4c50b69f59d120d6609e",
+                            SecurityStamp = "cbe6e3a0886b402ea75e09372e904d1d",
                             Username = "2512537"
                         },
                         new
@@ -62560,7 +62608,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 612,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sJLVKUzqKx2Ps2y90n7IYuh3ACEwncIqI3hjKIO9IWbVVaT.5gg.u",
-                            SecurityStamp = "872b1cc6ca994c1a8e0ebef121f8e3ae",
+                            SecurityStamp = "d2d3b677e8c54ae19a65335a8b862679",
                             Username = "2512538"
                         },
                         new
@@ -62573,7 +62621,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 613,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jrpJagywSxgG/Jk7DoBS9.VLgt/HE46Gwtaw0g06PSTURKxsAAGt.",
-                            SecurityStamp = "681e9aa11e2c4072b488b8dfa95efe80",
+                            SecurityStamp = "99acc16552c14dc6b5c5d1e1ed8416a4",
                             Username = "2512539"
                         },
                         new
@@ -62586,7 +62634,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 614,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$yzgrrH/9sfMexOTby1yq7Oe1eM6S//gMXS4POegKSso8iHwoFBu9a",
-                            SecurityStamp = "76e222896b0c4c399e4a4c58514e2e69",
+                            SecurityStamp = "6f0a6e7140d749f59d3336d541df59ee",
                             Username = "2512541"
                         },
                         new
@@ -62599,7 +62647,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 615,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$LIYPyxmuKlYF1piI/Hg0xuyUUk3jrfXyX4mPpxUk7zEn45pTgzpDS",
-                            SecurityStamp = "7391acd24c8b4456b3ae4f473c0aad9d",
+                            SecurityStamp = "dd821d8f2f994087b8f7ebf12811d6c6",
                             Username = "2512542"
                         },
                         new
@@ -62612,7 +62660,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 616,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$HFFy.g8pigpWLJbRb5UggeTaRuG2X6U2TcLSWHTGjXkZn/fAr9MIe",
-                            SecurityStamp = "74f99c4b84404ecb8bd423b625150434",
+                            SecurityStamp = "ddea2560360b4bc6b649abac4fb3082e",
                             Username = "2512545"
                         },
                         new
@@ -62625,7 +62673,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 617,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7ogKa5wPdW34NMlEMHRrcOjG4CbZgPI337SW7hghJ5JdC80WBEeF2",
-                            SecurityStamp = "6dcc9c7c86be494da37e65368fd69e87",
+                            SecurityStamp = "4c6047a466a5435aab14803f845371d7",
                             Username = "2512547"
                         },
                         new
@@ -62638,7 +62686,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 618,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9vQKYAyCbrFuzIbdlfSrT.6nRxz4eb9D3xtCXCVEsBHwFR56qXBhm",
-                            SecurityStamp = "6a9a208f525d48518356326cdeb20e01",
+                            SecurityStamp = "1b1b678e97494914ba6a0852f8c2e9f0",
                             Username = "2512549"
                         },
                         new
@@ -62651,7 +62699,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 619,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D6pJl.ZkteCJ2Jd43t6OaOoHPnTtIRf0KSxj.waeouD4JCpj7zoFi",
-                            SecurityStamp = "7cdc564752a744f8a7eaa59247e74e11",
+                            SecurityStamp = "ff4b0c47de7643f3bd169653d42da4a0",
                             Username = "2512550"
                         },
                         new
@@ -62664,7 +62712,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 620,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$abBnx7ViwZJ4wfYEe76G5.kdnR3rnL2R.gDDV49CwAv2lCnJbNyOe",
-                            SecurityStamp = "26fce1f387004f8e99267f353c3b24f2",
+                            SecurityStamp = "32a561f761c1407a8c628dec54d458f0",
                             Username = "2512551"
                         },
                         new
@@ -62677,7 +62725,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 621,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Iiv/tX30J9fRgCOAEdcrFeOLRAYzu520giTZewB08JHAEEEgEucDy",
-                            SecurityStamp = "cbdd7ecc41314321892f1dccfc6f1eac",
+                            SecurityStamp = "bb389d0e26e34ca19728d15ae0fd2709",
                             Username = "2512552"
                         },
                         new
@@ -62690,7 +62738,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 622,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xE5A9nDJhlqdwuBYQNpIBOKPBXGZ3DZbLvoZkfvvHeCbOjh3XR1qS",
-                            SecurityStamp = "0c8da5ef766942138d02d5b02836640b",
+                            SecurityStamp = "50c257fddae642049d91127918a3f161",
                             Username = "2512553"
                         },
                         new
@@ -62703,7 +62751,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 623,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/j2vKr/c.nXJ2QI8/j29C.a0mze22H0THoGUtHdPKx9xwnwqcxDom",
-                            SecurityStamp = "19daaba753054088a969cbdcb159743a",
+                            SecurityStamp = "e1746ca3bf97457ea9e3abd8970c03dc",
                             Username = "2512554"
                         },
                         new
@@ -62716,7 +62764,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 624,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$u917YhxG15sjXffU9VGhM.x3Xkg/GhsLuHtmgN7LLiZmALU7SZn8y",
-                            SecurityStamp = "19f765c07ba344f6929b2fcb17228047",
+                            SecurityStamp = "dc974a1153c749ceaa638441ff71f04b",
                             Username = "2512555"
                         },
                         new
@@ -62729,7 +62777,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 625,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$q7g5YIBIfj7I2qcG2SdbxuiZM.lRqUzw6H8lfAGpHAqPHE.MupMyG",
-                            SecurityStamp = "2dadd6d7f60c4233978d42ff7f673272",
+                            SecurityStamp = "6da78dfe8e8441f5a43ac5b65d759a9b",
                             Username = "2512556"
                         },
                         new
@@ -62742,7 +62790,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 626,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2xBETRxeClrC7AUMr1hXKeEi498Bs6FKshVfvKVVpZk8zkyHxrpkq",
-                            SecurityStamp = "e8990dccc1fb4742aa0e63976c324a8e",
+                            SecurityStamp = "02d2bc2a8d724fdcb1c186c71112cfe7",
                             Username = "2512557"
                         },
                         new
@@ -62755,7 +62803,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 627,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$iSYwGrZxzKgKCpSIRVnXj.ojStvLP5rZNK126jV8rthuHXGWE.ZK6",
-                            SecurityStamp = "9c8dd61bf9e0441597f3f4ff2e299aee",
+                            SecurityStamp = "ba932c4ad2aa49d59522cc840d51e0c8",
                             Username = "2512558"
                         },
                         new
@@ -62768,7 +62816,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 628,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WLknfcETrQWekLzUhvKlYOm8LPYcnLfBQQ2Gu.nzlzU/NW4TMx4Nm",
-                            SecurityStamp = "c904908477554e7b8300977e8b7b3b3e",
+                            SecurityStamp = "6e167f53dd994a6f85c73f3303cd2e13",
                             Username = "2512559"
                         },
                         new
@@ -62781,7 +62829,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 629,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Q7UtttbGbJEIG1lOC2YRquhmbWFszplzxTMCClCIfRqc/qYeUd2DC",
-                            SecurityStamp = "deb505bc0e1f4cadaadafb7dff3d787c",
+                            SecurityStamp = "38259ae4f25c47f4b17dae665d9bb6bd",
                             Username = "2512560"
                         },
                         new
@@ -62794,7 +62842,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 630,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wvARiSv3gpzo0qiYPKfAwumMPJLLvXmvZu9SGW3qroOaZ/w4TOuA.",
-                            SecurityStamp = "6710011966ad44a897b8bae23f424923",
+                            SecurityStamp = "9cb14a33a47d41bca5d02b7f78a84ce9",
                             Username = "2512561"
                         },
                         new
@@ -62807,7 +62855,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 631,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Rf1urUZR9IYLvCx0E8Wj..VoT9.vgKNFXRAITKP9ETCFyE0Wl2eZK",
-                            SecurityStamp = "bd7bd9f59ee34d1b8f38806d5d01ffa7",
+                            SecurityStamp = "ffb7b47f6a814faea0445d3ceb9946fb",
                             Username = "2512562"
                         },
                         new
@@ -62820,7 +62868,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 632,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WTpXCcAgBvjPabxhpqr6uugR63/h3Vvai818tZKMdHKBI4O.rKl2y",
-                            SecurityStamp = "bb76afb533274a3cb7ad4fa6356827c4",
+                            SecurityStamp = "2620c45545d649db859d4585a174d141",
                             Username = "2512563"
                         },
                         new
@@ -62833,7 +62881,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 633,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BAJGvYAgwGcv9hkWSLEXkempjxHqvXviE8A75jb6vjfg62g.i6nFq",
-                            SecurityStamp = "ceb6b929a2db428998f8e52bd9b4ce61",
+                            SecurityStamp = "1b2ae1e0e50d46faae710c66448b5766",
                             Username = "2512564"
                         },
                         new
@@ -62846,7 +62894,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 634,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Y6d4PwqosuLtqMzrxlhYfOkjOMsxs.IyCmhxq/w1d7nixV25cgbcq",
-                            SecurityStamp = "0c0c9780685e4a46be00fba94ff4a8c5",
+                            SecurityStamp = "70c039f2ef2047e08d089ec71e9f4080",
                             Username = "2512565"
                         },
                         new
@@ -62859,7 +62907,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 635,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xeqdgQ7tedno.LXK/KqkZ.bgtc7MafNnXV2wPwI4U6dwq4gZvuDmi",
-                            SecurityStamp = "6a2adf64062f429ba030ccc0c5d74f42",
+                            SecurityStamp = "2f9d49711d004236b18f58b36131de2d",
                             Username = "2512566"
                         },
                         new
@@ -62872,7 +62920,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 636,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KKbVNissZ.ovtk5WkqGXru8CROrvcWb/br2Pgh3cep0Tpc1Hp9TqS",
-                            SecurityStamp = "c94877599aa44ba4a49b34cd381cd06e",
+                            SecurityStamp = "16c47ca9889f4bee88ea2434fbd4b3ae",
                             Username = "2512567"
                         },
                         new
@@ -62885,7 +62933,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 637,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$PG8iAlvM1bxtmiPbIjBdkexOz/SAUrNTVxz5Tr4/qroBFaNt.xZKa",
-                            SecurityStamp = "ae27eed60a71449cb52af2f40243b057",
+                            SecurityStamp = "a38edcc7e7f74d63a4b667a563c71504",
                             Username = "2512568"
                         },
                         new
@@ -62898,7 +62946,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 638,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ClOPCxR3sfjdpsQFfM4ULuGaEbt1RaavKdHCsiglUpaHQJ3ZBUA1e",
-                            SecurityStamp = "3b9b79c9070c4596bd511b7f268d9a9d",
+                            SecurityStamp = "b864fda337314adba07bbcc857c610e6",
                             Username = "2512570"
                         },
                         new
@@ -62911,7 +62959,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 639,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rOc/Cm9hK22ocIVLSat8n.01F5d5LXxt.7Ed2RL4tZoWbwH3kr6Yi",
-                            SecurityStamp = "ba601c3966374b6ebdf9e2fdffcf300f",
+                            SecurityStamp = "0a053fbd77164f9db8321c0cd8d5b0d5",
                             Username = "2512571"
                         },
                         new
@@ -62924,7 +62972,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 640,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D1gt2Wodwt7kcvy8wll.VOUeL7./ki4VHvaufxAIRbUOp2ulLnUZ.",
-                            SecurityStamp = "9f5f292606a34d57928794ac07ce81e7",
+                            SecurityStamp = "4d640df52d194f94b49163dcf50a0ac8",
                             Username = "2512572"
                         },
                         new
@@ -62937,7 +62985,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 641,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$e8DWF9bIilmuekdfy/Nan.zWlFubntAhcxKpzS53MjWjrQCmSGOke",
-                            SecurityStamp = "b71ba66fad9f4535a9c23f9e9d6e514b",
+                            SecurityStamp = "691abeb8c47b4d668b5baaa6030d33fd",
                             Username = "2512573"
                         },
                         new
@@ -62950,7 +62998,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 642,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZpepNBhjHMJtwszxJLTy/e3ZuG71DKhxzAFKHGJ4t3Brw4.9E8w7e",
-                            SecurityStamp = "3286a5d2f9aa4e5da1a700484f31cc09",
+                            SecurityStamp = "17efb89cf731422b9e3af37e98867ae0",
                             Username = "2512574"
                         },
                         new
@@ -62963,7 +63011,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 643,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hrXItZ7Nd35/yjJA8Djtd.CRgxaDFwtvkGtGwBXkm3QnvvYwjGrPu",
-                            SecurityStamp = "6aae68ef7bc1448484c2137a0e28e727",
+                            SecurityStamp = "9aa66bb79c9544e5a27f31e24cccc585",
                             Username = "2512575"
                         },
                         new
@@ -62976,7 +63024,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 644,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$kNPbs6fWNneVMshYuLUcquowbGvi8500crXXyq/9R61IPIt8ocBgS",
-                            SecurityStamp = "cedfa9e8310445de8eecf5b449958919",
+                            SecurityStamp = "d9e9d3178218478dbfde34c9d24296ec",
                             Username = "2512578"
                         },
                         new
@@ -62989,7 +63037,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 645,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aWyqEGZNmWWRoYaA2STIo.rSnLnR58NoOP.Qb0fSe21f7mPzptUs6",
-                            SecurityStamp = "5336c2c6a07f444cb4861770aefbdb6e",
+                            SecurityStamp = "76a4984d2031469e92c99868ae7ad929",
                             Username = "2512579"
                         },
                         new
@@ -63002,7 +63050,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 646,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2jC.NghR5WhNFfxlzUyV5ugrb5RKMt7Fi73ZVxcWGM8c1DvH1rsoO",
-                            SecurityStamp = "7c66e88550684f1784eba2be3ee875a9",
+                            SecurityStamp = "d491dfed77fa4a96bf7bc1808056324b",
                             Username = "2512581"
                         },
                         new
@@ -63015,7 +63063,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 647,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NTz.VGywLSeEeY.ZxDUs7eXllRIdDCsOSHaT/tXRaSmfE3D5RNNGm",
-                            SecurityStamp = "01f3bf677d1e49bfa57c8a7f47003136",
+                            SecurityStamp = "252564dbc4e349199068539bff9d5bf0",
                             Username = "2512582"
                         },
                         new
@@ -63028,7 +63076,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 648,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.9vYZmPbrbhpeDqTSuDFHO6lNsZmlI36Y5iqnT23nz.5XGx81/MP.",
-                            SecurityStamp = "14ae1fcc975d4904aaabca11ac721b0b",
+                            SecurityStamp = "54d9415a9f3946a4840052ef1b2fbde1",
                             Username = "2512583"
                         },
                         new
@@ -63041,7 +63089,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 649,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$pzBHhmLv1G1YW3crosbdeu8vK7zYypmMaAKzE7g5U9J0mHVDiKKJ6",
-                            SecurityStamp = "cb2a8590dd4f433d91544f465a08bd48",
+                            SecurityStamp = "6c12a9d3cff2441f8d328f9adf227fa9",
                             Username = "2512584"
                         },
                         new
@@ -63054,7 +63102,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 650,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ISe5ClRDX1BwRhoZIIUVJuW2oZ6hXpuygCz/8d2wN8ZgVeK8PF2LG",
-                            SecurityStamp = "ef017fddd78e462fb42e0044a1430bc8",
+                            SecurityStamp = "92d37d8d811e4fe1aeb0871cc6ffbdde",
                             Username = "2512585"
                         },
                         new
@@ -63067,7 +63115,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 651,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VdtKp1wcVlYT849Mo5BqNeCowyC/G6/PeWlD7q/3J6Neu65KN0IiK",
-                            SecurityStamp = "48c33d41834748ada2fef0cf59301af3",
+                            SecurityStamp = "53510e5307db49ad879b3158dfca9fc5",
                             Username = "2512586"
                         },
                         new
@@ -63080,7 +63128,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 652,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vsQMhOhC2xttV4xyY4ggY.6aZkZ6sHgLSwxkyrVXC26xI2dBtcLha",
-                            SecurityStamp = "acd0257c5c8244a88dbdb36534975c70",
+                            SecurityStamp = "c161dfee3ccb46aba4bd72ac46e7ae37",
                             Username = "2512587"
                         },
                         new
@@ -63093,7 +63141,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 653,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$K1u37GgloWlRgTbKy2WMqOUus.i7PEy1S59qNyqQ/Wf/F3O3.JOq6",
-                            SecurityStamp = "8866e26140db4b7ea462b0ba5c08d84e",
+                            SecurityStamp = "b8c6d720715644508da48a1acfe6c938",
                             Username = "2512588"
                         },
                         new
@@ -63106,7 +63154,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 654,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YqeIagOBaq1qVZLCZ1R9x.7AhixHRqxNR42MyM71GECvXt2A64tvK",
-                            SecurityStamp = "92eeb354519246fe8ea00801fba73f29",
+                            SecurityStamp = "d7b42ff0b9b641868f4ef521ff768b20",
                             Username = "2512589"
                         },
                         new
@@ -63119,7 +63167,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 655,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$fPg0cLTYSWKquWaml/X/P.ieSum63BtTQvIAbMN2/Pgo95IfDkWl6",
-                            SecurityStamp = "9c0c5d5231814620baab10f07223c096",
+                            SecurityStamp = "69a44ec5fba94f4b8bb25474507e10ff",
                             Username = "2512591"
                         },
                         new
@@ -63132,7 +63180,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 656,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$EWd52NCDIS9bf4.T.c56veH91QcdS.GghRGEwVNZOD5KNDn3o93/K",
-                            SecurityStamp = "774dcd50bfb4422b89a09215c9497cb4",
+                            SecurityStamp = "2d6f814fbdc84512b78eb9aafaff85fa",
                             Username = "2512592"
                         },
                         new
@@ -63145,7 +63193,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 657,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tdmILACpTjzHcG8kH0fya.fdNUAtzao9GZYx9XqRklFU5BKT.jTMa",
-                            SecurityStamp = "0c9941bf99c344e883c2b514f716cf02",
+                            SecurityStamp = "a2a326351e3149d0a59946b87fa3a6c9",
                             Username = "2512593"
                         },
                         new
@@ -63158,7 +63206,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 658,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bPWibdXjmoQ3Bz.wBZPCiOwKSuHq008qdSQ2EAqHzH5EB.l1QU6gW",
-                            SecurityStamp = "4e012fa0186748bbbe1e0c8c546a94ff",
+                            SecurityStamp = "4fa4dde4c5b94b79a0a26da0cfe4b812",
                             Username = "2512594"
                         },
                         new
@@ -63171,7 +63219,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 659,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/91ZXF2lXgdXdFN22H9icOpZesjlclmfED8BsX2EPjiX7KyL3ANvq",
-                            SecurityStamp = "fcec9034df83460295675aa9688b8db6",
+                            SecurityStamp = "149ddf2e641648febc40f5ec128921a9",
                             Username = "2512595"
                         },
                         new
@@ -63184,7 +63232,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 660,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/mq57ur.ARUuhKzF5LHf9.MI8cBjN2UoSKRh4wpTovJwFk.C.EG4K",
-                            SecurityStamp = "90a6c4f09cc74d7b9a03eb7a2db9a3a8",
+                            SecurityStamp = "5ce0c03cd3944f169fa025bfd8f95fed",
                             Username = "2512596"
                         },
                         new
@@ -63197,7 +63245,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 661,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$aLdL7k8muKju7V7omi62Wu4G.szINkbsj0tSBXWQrv9c6ZgSHgKH.",
-                            SecurityStamp = "6fd14bda6c7a4f9b86c7061001e37eb0",
+                            SecurityStamp = "203ea15c1a3e4b28a9529cdb10750918",
                             Username = "2512597"
                         },
                         new
@@ -63210,7 +63258,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 662,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9wl36I6JEqOjvjtOqnZXyev16LlXkV4CuLlyfi1uWwoji4r1ZXum6",
-                            SecurityStamp = "26926bd543754f10acc0b645d12846dd",
+                            SecurityStamp = "2430c7939a434474a5df8c72e450ebae",
                             Username = "2512598"
                         },
                         new
@@ -63223,7 +63271,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 663,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$J35lkQDePzO5xBjVh42EjewDtuCMkxcEs6AyaV0rHYob.YD1/3JpW",
-                            SecurityStamp = "c2bbd4e527ce40239ae60761aea7278e",
+                            SecurityStamp = "91301aa7cd794fd9b1196c38ac335ee0",
                             Username = "2512599"
                         },
                         new
@@ -63236,7 +63284,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 664,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$C81KqnpvS99HjS9uJxvXiO3eWAYRtNMpYf7XdtKyRcZQTtB.bqfeu",
-                            SecurityStamp = "0dd9f7c3dac54315bb1c2aacf0c557f2",
+                            SecurityStamp = "a39bf33fdf7b4ecdaff9406f9316f637",
                             Username = "2512600"
                         },
                         new
@@ -63249,7 +63297,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 665,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cBohrvgyZH.BZNTsHmV3nugdOsdiBdE2VX8XGcVyoYPe7AOY5J3DG",
-                            SecurityStamp = "4394000cfbad496f8a362a99f3b0d12f",
+                            SecurityStamp = "453321ca036449bbaa4222ab9aca793d",
                             Username = "2512601"
                         },
                         new
@@ -63262,7 +63310,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 666,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$6gu3ZkxNEBbhq6TIfgMAC.irS254dfPsvOF6aEUv1MJD5/os/ZTlq",
-                            SecurityStamp = "cfd1f48092284d878f217b7f835a52cf",
+                            SecurityStamp = "ba627899bbc7427d824975eac96d8e50",
                             Username = "2512602"
                         },
                         new
@@ -63275,7 +63323,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 667,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9pF/GRYNkpWNCW3M3fpzTef2maA5wdk6i3vd/QPjP3sDZ1EYfjYle",
-                            SecurityStamp = "42a40363d59f4268a02bf34bd2ec3904",
+                            SecurityStamp = "612e6cd2b8974ddeb0893b21c3a75d23",
                             Username = "2512604"
                         },
                         new
@@ -63288,7 +63336,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 668,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3UH9Hgf7iXaecoQimuj6Ju6qmRRjp0rkNn/S8rkmmown68yvDRrB2",
-                            SecurityStamp = "ddc6278d79ca4ffcadb5eca2c78848bd",
+                            SecurityStamp = "eaec2de314074062b9b8268d242a292c",
                             Username = "2512605"
                         },
                         new
@@ -63301,7 +63349,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 669,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$WgSoTWlJA2d1eHDUBWSMSeQY0cg39uC43GfH357xCZsEHzNU3PFba",
-                            SecurityStamp = "950b82debb8649f4aa09617fd3c6173f",
+                            SecurityStamp = "e668e84a54ef4c0e8dedbb6ff1d66af9",
                             Username = "2512607"
                         },
                         new
@@ -63314,7 +63362,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 670,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dZ/Lf/KMlrbPFaUQsBou0..iM1fRzdHuMf9e.G4KmjcHp5fPxlkfO",
-                            SecurityStamp = "08ccb715ee91480982416e560e76e7fd",
+                            SecurityStamp = "c336316f720a4e3e8816da8b1fa4b8e9",
                             Username = "2512609"
                         },
                         new
@@ -63327,7 +63375,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 671,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$HHKA12qT1ReKu1fd3dHasuM3yhccCzznqFIk73ut9E/.K8FT1E.Si",
-                            SecurityStamp = "98224ff2f6c54531af9108b48ba89ec0",
+                            SecurityStamp = "4a8c16d94fa541fb9af0323fd98f01ec",
                             Username = "2512610"
                         },
                         new
@@ -63340,7 +63388,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 672,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$kCSVXQFh97wUPajakvjcU.n54JNqIV3UI.QTejodJmybW9Hd412Km",
-                            SecurityStamp = "d41d3c3ec90a45cfba8e050be9c610ac",
+                            SecurityStamp = "cc65d3311ea8463fbb41e8018e0f1a4f",
                             Username = "2512611"
                         },
                         new
@@ -63353,7 +63401,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 673,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9pXkkPy9ToYIB6zXsyGr7elmriJwx04dtuaHLCmxGQkvW8bilJxeK",
-                            SecurityStamp = "d5e77c23d17f4007b4f297e0edf7607f",
+                            SecurityStamp = "3a71cbaf20764ddabed5db8023972428",
                             Username = "2512612"
                         },
                         new
@@ -63366,7 +63414,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 674,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$79K6XBQGCqBd1tF3ugTYz.hReYaSZqzPYN7iufLFo4Yz/09o5cbCy",
-                            SecurityStamp = "0d7be84c5a4149babd3306b4f5ac84b6",
+                            SecurityStamp = "c481d71d8bdb44cbbc4f11de39760251",
                             Username = "2512614"
                         },
                         new
@@ -63379,7 +63427,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 675,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vc/L9F5xaC3zrhwmEL9oQe2xtE9upUMs/efz1C3XV4opyY4UugB2m",
-                            SecurityStamp = "452f6344625b436bacdbb85d02fe62f0",
+                            SecurityStamp = "a3723d6d41d84d6fab2003385e4428a3",
                             Username = "2512615"
                         },
                         new
@@ -63392,7 +63440,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 676,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$d1ACAfO.93ufYeV7VghgAeDTKpIqgXwscrRRzgvrKYiPKrHteWZ3q",
-                            SecurityStamp = "ea156d5fedac4f2485f9b4bd1f8fe225",
+                            SecurityStamp = "f74af3369181467c8f77d7ccd64c4dc1",
                             Username = "2512616"
                         },
                         new
@@ -63405,7 +63453,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 677,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gFjvNl0IGl6nFvDA2VsUWuZNSMfTmCar6P7Jt8HLL5UiZaUyVqTZK",
-                            SecurityStamp = "ce29a32adad54b33bb3af0362b8929b2",
+                            SecurityStamp = "11d8d19b674c47a5ab1fa848d7b2435a",
                             Username = "2512617"
                         },
                         new
@@ -63418,7 +63466,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 678,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$43wPdz41od6NJjaC4NzFL.Z4E57w5khPDUkkaiP8EKgoju0RyV4pq",
-                            SecurityStamp = "81c2151dcb3742929b52331f9c716b7e",
+                            SecurityStamp = "d7f95426eb4a42458be70b0b3867579d",
                             Username = "2512618"
                         },
                         new
@@ -63431,7 +63479,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 679,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$kK9cVuQ5eFScyqfn9/qYqOWgcKBIIG2i0wAQ4cIwCmUnOeuiAdq9C",
-                            SecurityStamp = "23d546a18f174c6e9f4586b1f3a60724",
+                            SecurityStamp = "33d033744bf3471d891ead1ce5300958",
                             Username = "2512619"
                         },
                         new
@@ -63444,7 +63492,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 680,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dd2/IigRO54Y.I0nqf5vqeMCBHxgYnoLkm0gDni7Ctjx4DYdurIBK",
-                            SecurityStamp = "c941f5725cd74aff96e5aa75db1829c4",
+                            SecurityStamp = "9c0a461a314a412ca9410a3ba3c6a13e",
                             Username = "2512620"
                         },
                         new
@@ -63457,7 +63505,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 681,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ssLosWb.1JmMtFpga96w.uZ/5P4ZRSTRPAW8MrrlHzhk1.OUmFIfO",
-                            SecurityStamp = "f15e42a138f84cf59229d43dee5012bb",
+                            SecurityStamp = "896ef909b8b44d04ac44aae876a400a8",
                             Username = "2512621"
                         },
                         new
@@ -63470,7 +63518,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 682,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$oKeYoZuW5TfdDOY8Sbn5ReEweZhSEF1s0UsJiJp9THr3m0Eswy0.O",
-                            SecurityStamp = "3324dbb6e1ff4eab8e94875ba9f9a98d",
+                            SecurityStamp = "0df85ad7c1c54c399e4295dd998e0a3f",
                             Username = "2512623"
                         },
                         new
@@ -63483,7 +63531,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 683,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bJiWhmpo0nPWJ1R9VT/Vwus1y.WrhJLt09t5YOoTr5Q7sBobyanry",
-                            SecurityStamp = "ed4f8f593a4b4ef0b7a971ba23b571fc",
+                            SecurityStamp = "cab4d8f1c45d455ea36b4412e4091f10",
                             Username = "2512625"
                         },
                         new
@@ -63496,7 +63544,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 684,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MD9SY507BDGLeLigUM6sB.Tn20c4jX1o0HwVqSUsHWfghbC.Fe4uu",
-                            SecurityStamp = "057f8ae9b4394bfe91bdc2b9787b1fb1",
+                            SecurityStamp = "4e0b0b668fc34d14a8889fe21dad35c3",
                             Username = "2512626"
                         },
                         new
@@ -63509,7 +63557,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 685,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$h1Gf22oIsEEpsgzgjUE0cuUtQdmsS.MTmeIqaH2TES2MuaCbKsL62",
-                            SecurityStamp = "604f71880135417b8a09babb81a667c3",
+                            SecurityStamp = "50e7a88f81234c5686f49787396b7561",
                             Username = "2512627"
                         },
                         new
@@ -63522,7 +63570,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 686,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tk0JFSaOCwS8Xh8BgVW9put/sQMieXPcjp2adtrHxUqUYOxGkBYoe",
-                            SecurityStamp = "2d2ac16868bc49f5b864c03454f68a15",
+                            SecurityStamp = "ba87cd25169947cf8d680c1557381e44",
                             Username = "2512628"
                         },
                         new
@@ -63535,7 +63583,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 687,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$E3pa2gPz9r6OY.m8wbviyOi6cmRck/mJd2pwq0n8vU1IyndN1Sspy",
-                            SecurityStamp = "108a4cf3d3ba4079b505e4046abb9c81",
+                            SecurityStamp = "2629bc9ae8db41f6b106729eed110d8c",
                             Username = "2512629"
                         },
                         new
@@ -63548,7 +63596,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 688,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$B8PagpJ0p9JEujJxWYptHOBlR.B.J7Kn9TkDAuiONPSgrmPpDgady",
-                            SecurityStamp = "7170cbffa8354ab4bd450986c53dd8ef",
+                            SecurityStamp = "2b243d74fa034ca99cc09ca2c69b31b5",
                             Username = "2512630"
                         },
                         new
@@ -63561,7 +63609,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 689,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SlhmTN8OPWb5fVwd8ttEAOUj/2MDkdXwnsvKPmm5A07Vi/enjsU0W",
-                            SecurityStamp = "3a606b37fc4f443fbcbc24256afaa64d",
+                            SecurityStamp = "13140620067e42b9a0637b50215c2971",
                             Username = "2512631"
                         },
                         new
@@ -63574,7 +63622,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 690,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vRINmmwY9N1DZ9p.vkiBcOkkNXmPbkruhzAEu29zROAIw0Yx3OAlq",
-                            SecurityStamp = "a217b7de4d5a4716afbe7c7c775bae9f",
+                            SecurityStamp = "0e1d9e3fbf4c48b0b9238d9c163477a8",
                             Username = "2512632"
                         },
                         new
@@ -63587,7 +63635,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 691,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$7Xi0tt32CZhJS6oN7JoaJ.XlJfzWk6KyMtithZ1VdF8HBnu/DjPZS",
-                            SecurityStamp = "44c57ba7fc5a4ccea772edcd7ff0fbff",
+                            SecurityStamp = "8c13f588885c4960a087b1a3748366e2",
                             Username = "2512633"
                         },
                         new
@@ -63600,7 +63648,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 692,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0137IGDcLA5i8r4OBmuTcOOZl/D9mQUYMhsEtkRbS2gveCRThM19S",
-                            SecurityStamp = "680639569ec545f69147d424d1bd279f",
+                            SecurityStamp = "73039e9dd72b4f6bb11a5447bf010caa",
                             Username = "2512634"
                         },
                         new
@@ -63613,7 +63661,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 693,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4z909lfkdLlWuNYLibBFI.zs8Xm4q5GQD0ZhnfWb1mcFgks8e0Kem",
-                            SecurityStamp = "48bc41ebe0f9440487d76a82d64ca399",
+                            SecurityStamp = "b0c2568f41024df7944b74cb14422cfa",
                             Username = "2512635"
                         },
                         new
@@ -63626,7 +63674,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 694,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hgyl6KLGPQcQy5oD0Y0jE.8NeqsSwA8DN1xyx0KH.hf/9Iwu6m7hi",
-                            SecurityStamp = "a2b8caf4a57c4c24aaa11727d2ee46b5",
+                            SecurityStamp = "0dcd670a6acf4218b54b6705537c00ed",
                             Username = "2512636"
                         },
                         new
@@ -63639,7 +63687,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 695,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Gr9X2kc2W1D77mGiG86V7u2nEt3hhEVVjTNwXIYU3oyxyIl5KTM.2",
-                            SecurityStamp = "d93a063bd71a428d9418b7140fbc495d",
+                            SecurityStamp = "c972ee4252a042dca96f1bbbeb7e57dc",
                             Username = "2512637"
                         },
                         new
@@ -63652,7 +63700,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 696,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rP.U0hEsbbUajSYNRYEolevRqbK.EG8v6pPIjo8.Wx2vvwTGzy4/O",
-                            SecurityStamp = "9891fbc493634a78a434425575d5b488",
+                            SecurityStamp = "684d29784e384381b8b26df8f86fbe5b",
                             Username = "2512638"
                         },
                         new
@@ -63665,7 +63713,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 697,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$za3Y7ixqDWS5ncLHZ7Vjv.LyNnXurpJUlK7rwSIZHRiP3i0Meihi6",
-                            SecurityStamp = "d5f1862901dc47fe91f39d7a8c0da8fd",
+                            SecurityStamp = "3cc86aa962714216ac8d0f363fb28e29",
                             Username = "2512639"
                         },
                         new
@@ -63678,7 +63726,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 698,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$jMg/r9Bt71YXP43hWxYZP.zdY2c5dcNqSNLjWChHbJQSGR1ZU1KhK",
-                            SecurityStamp = "4050294f98ed4fdbae7de34ca541b72f",
+                            SecurityStamp = "01eee42d822648d1ad8305589aa632fb",
                             Username = "2512640"
                         },
                         new
@@ -63691,7 +63739,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 699,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$s4ysmdnGLkrfywI.A2wFe.SwaryisE2tXvUyaXfn.r1Csoi.RjGgm",
-                            SecurityStamp = "9923f5df0113409193a14669eeb4356d",
+                            SecurityStamp = "b1886ab68fad4cdb952b9130017431cc",
                             Username = "2512641"
                         },
                         new
@@ -63704,7 +63752,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 700,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$9spDE16jmeYUjKqua9Y5l.eWtvvUClXgjvjNnOTSDIFI.YPZK0dpO",
-                            SecurityStamp = "473433fd53c242faaba28d790e5628e7",
+                            SecurityStamp = "004689cf5581429ebfbfc3b5cc1879f9",
                             Username = "2512642"
                         },
                         new
@@ -63717,7 +63765,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 701,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$DqD69HnixAHh4jNSG28CQeZJO.JMhBHh0FHzxNfTSHkeLx54eEHmS",
-                            SecurityStamp = "f3b4a513d5044bc497d4707e6ee89b3a",
+                            SecurityStamp = "4c61b86d1d184f6b9bc26bf659b57107",
                             Username = "2512643"
                         },
                         new
@@ -63730,7 +63778,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 702,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$rhE/2cs.MMgc6mIIMEpyLO4c.lgjo9B5Vu3Xg/4jakzBGmGxSwsda",
-                            SecurityStamp = "a2743650a4fe45b39e6a49ae34f6d225",
+                            SecurityStamp = "294837322cb24e938e7418d1aaade74f",
                             Username = "2512644"
                         },
                         new
@@ -63743,7 +63791,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 703,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VXsdT1EU45xigk7UTXf.t..50AAwFGHdSoXBQ2Atji8LmSRqg89ce",
-                            SecurityStamp = "39a7f45f68c84f969e13e00720a41722",
+                            SecurityStamp = "794b46153b864635ba63eb2b0a450904",
                             Username = "2512645"
                         },
                         new
@@ -63756,7 +63804,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 704,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$sJ7zF0/wqPNAccT4BFT6AO0yKZ4aR7HlDmG58Vl.u0teX1/NRdm6m",
-                            SecurityStamp = "80c9de08782b474188945838ab891009",
+                            SecurityStamp = "9f5097a39781419990a64cb0bddbb63d",
                             Username = "2512647"
                         },
                         new
@@ -63769,7 +63817,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 705,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FsLNbx7ZIUeYzYb4vNC.yOz1YPzStJuJmFI2pI2jB7dX6qs86UySa",
-                            SecurityStamp = "a1dc28962b0f4b0eb466165a780a5c18",
+                            SecurityStamp = "3049763fb1554268bc85563351cec985",
                             Username = "2512648"
                         },
                         new
@@ -63782,7 +63830,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 706,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0F.VYGeUMvRDwdjUo7RF1ePckkZ7I3F5ha/D.gODwRyr.vseJibma",
-                            SecurityStamp = "66a53aec16234012ae29f61d97a936bf",
+                            SecurityStamp = "ed8ed7f98cbd421f8eb5b8648058ae08",
                             Username = "2512651"
                         },
                         new
@@ -63795,7 +63843,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 707,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VXR4CazHwBrp.Y26ccq0VuPvP3At4FFqT1PWnf9aaboRsgPI7SjJi",
-                            SecurityStamp = "60bbe847fdd04a4184da1e2919de1892",
+                            SecurityStamp = "5d790503f3cd4abc8a7de3bd17c4445e",
                             Username = "2512653"
                         },
                         new
@@ -63808,7 +63856,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 708,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0HTX01/ED4ulBU8kghb/9.5dCnvkNPuWXAT/qI9egt4XOOh37QhZK",
-                            SecurityStamp = "f3e94f76abe1402c81ef58f2cb7e3722",
+                            SecurityStamp = "3138826ab803457ba1e92dfc9e2447ca",
                             Username = "2512654"
                         },
                         new
@@ -63821,7 +63869,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 709,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Jdn.egDmS2WprpBSdFrRuOhXuFHtsGK44xqPyJi4NMAYwQ4JGlnWi",
-                            SecurityStamp = "14252a4452914f49a1194da6002af698",
+                            SecurityStamp = "c5dee6ce9c104fb3baf08400f15516d0",
                             Username = "2512655"
                         },
                         new
@@ -63834,7 +63882,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 710,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BUV8gHqyVPaT7HDe2NQN5.ckOs3y6llGuE.rQnYzwrGDazfyT41L2",
-                            SecurityStamp = "af88401534e84438971ab2f2c5497874",
+                            SecurityStamp = "e2146d91ceaf4d1292f0ba4119bdb34c",
                             Username = "2512656"
                         },
                         new
@@ -63847,7 +63895,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 711,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$D5ajZ0JW4.BlyuqBQkKyouOA//CHc0op3nwuX9HEeoiJJmMpRMFDG",
-                            SecurityStamp = "4bb02f2e38284ffc880237814886e142",
+                            SecurityStamp = "8b70cabd1131416bb090c28cbcfd18ce",
                             Username = "2512657"
                         },
                         new
@@ -63860,7 +63908,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 712,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$OWGsA8kdYECo0EbuQtktoeBVx5fCta8DeKO7lA.YzHBsu1kVtKGFS",
-                            SecurityStamp = "75c1aa4279734e899c6e0d1f6a98b087",
+                            SecurityStamp = "9ac61ab4567f46b2916c35730b528135",
                             Username = "2512658"
                         },
                         new
@@ -63873,7 +63921,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 713,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xzO0plLKGAFuJ3JL9CG0sujfrShcuH4LMiltDiqoClhF3Lv6E85lq",
-                            SecurityStamp = "3f7c584295954e6188a6a8f6ca9a8a20",
+                            SecurityStamp = "16429cd51d054fcb983497050653cf27",
                             Username = "2512659"
                         },
                         new
@@ -63886,7 +63934,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 714,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3gYwsyqb8nfRKJOCmXNHo.rrQjYU9MEYVsCDGsWHeHz/W2jn8nF/C",
-                            SecurityStamp = "776eabce245f43b5be35ef9a202709e2",
+                            SecurityStamp = "c30c509d2f9b42f58d7cbbbd9782a7cb",
                             Username = "2512660"
                         },
                         new
@@ -63899,7 +63947,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 715,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bG1NNjdGaxVclB7ZpyVX0OPNbLIbt.L4G91HdICyZ4qLxcJrAhNPq",
-                            SecurityStamp = "1e58efc20f3c4e31bab5af7f0decdc61",
+                            SecurityStamp = "ddd1d25844cb4978bf5dca1095712a4b",
                             Username = "2512661"
                         },
                         new
@@ -63912,7 +63960,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 716,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$nl22wZhz.JMQdm4CLHDA4u5ogpziKwcYoy2UDrb5CdTjAfMy1Ldg.",
-                            SecurityStamp = "d1e6d3b7e77e46c3a631fe0d9bbb143c",
+                            SecurityStamp = "c4e23fe064ea403eb1d49907a0e6bd92",
                             Username = "2512662"
                         },
                         new
@@ -63925,7 +63973,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 717,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$atFs2tzll/0MoWIT33AQ4uBsRnmZ6WaYgMlSxYYDAeT8FkanPh.I.",
-                            SecurityStamp = "dd7b86d98de84f4286390dca1e72242c",
+                            SecurityStamp = "42cc39931508409394789d87cb90d162",
                             Username = "2512663"
                         },
                         new
@@ -63938,7 +63986,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 718,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NDEqaX2gVwb/yxBA9tvXj.Gis7DkLORiKw4s1QPSpHXLwtFYhyQ/a",
-                            SecurityStamp = "b0a9266696a742be9028b75864262947",
+                            SecurityStamp = "5086759a944b465893d011c85a714d19",
                             Username = "2512664"
                         },
                         new
@@ -63951,7 +63999,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 719,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$X1ire3LrKeAl8EKn8oZZRuVniz7O8eCol0dbwWpovxKREMGRYIEw.",
-                            SecurityStamp = "3ca732aaab7d4a98ba118e97b0773283",
+                            SecurityStamp = "a054f48dad5b40ad89d7f809dad3d52d",
                             Username = "2512665"
                         },
                         new
@@ -63964,7 +64012,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 720,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$dnN7QsRv3ESi44lQzfJ/gOY91otEMXxLARTtiIP4PwwNxD15cg3VW",
-                            SecurityStamp = "26aa31b289ac4660b6e84109902b6621",
+                            SecurityStamp = "dd58ec6a018b4739b80939f30bc27b82",
                             Username = "2512666"
                         },
                         new
@@ -63977,7 +64025,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 721,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IVttNVMFbpQPlOIRdJILHOqDXLaKrVkNjshnI9YCIjrXHtVjppsKW",
-                            SecurityStamp = "988719845eaf422dafa90167ef02eb94",
+                            SecurityStamp = "4596ffa2cb264aa48649f1b0f6bf8ecb",
                             Username = "2512667"
                         },
                         new
@@ -63990,7 +64038,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 722,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$gbwyUrmpHFx7I.JmSOMjXOD1iLi9kGaS32xK/UPuERIwoj53Svp0G",
-                            SecurityStamp = "dd6cbaf669b74fd3a8db7c90b9078b6c",
+                            SecurityStamp = "fb24c0212d444d1e91f454dd2d26b014",
                             Username = "2512669"
                         },
                         new
@@ -64003,7 +64051,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 723,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MLMVlNjJfMFdm7No7KAVHutz3qu1HfQTCuTWT5etqrZUjtcSvsxfC",
-                            SecurityStamp = "4cbcdbb6028d468b873fc1ed67344d29",
+                            SecurityStamp = "908e70ba901e4603abb52cdf91cf7a05",
                             Username = "2512670"
                         },
                         new
@@ -64016,7 +64064,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 724,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Dmhb9.9O/n/5RfNPGGKHvOMvgAWn7rF7nxEv4mqlt2sZhSAM1P1rW",
-                            SecurityStamp = "5af953dd5da344a2923032dcd6942135",
+                            SecurityStamp = "5bc3e28d46724f12b0aad242974222e0",
                             Username = "2512671"
                         },
                         new
@@ -64029,7 +64077,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 725,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0kCwrtkQTEVd75ALMoHfwOFqBr3X6ALRdiZg9V5PNSH33YiuvsDyC",
-                            SecurityStamp = "92dd3242031843d0b5576745712c429f",
+                            SecurityStamp = "aad4a44984de4200be2c3e9290d835ef",
                             Username = "2512672"
                         },
                         new
@@ -64042,7 +64090,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 726,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$.LP0aQVecr5xDF9GrezOk.84r.m3iV/YvHLstA/v5KPgdF4ljSsf.",
-                            SecurityStamp = "1fa16977cc774475ab890c66b7253343",
+                            SecurityStamp = "f6091827a4cb40e9b49f95e0485d0700",
                             Username = "2512673"
                         },
                         new
@@ -64055,7 +64103,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 727,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$NmfQaNj8spWxHeCef3CqHOwh/h1KTv2P05ELEYygd.L6o5Auqam26",
-                            SecurityStamp = "9689708885c64dda8945529b81847154",
+                            SecurityStamp = "24476712914c4979942b7351c99dc2e4",
                             Username = "2512674"
                         },
                         new
@@ -64068,7 +64116,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 728,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UQ5JNr5GJm85jsLGbIKAh.765VNKcBTtISApAILDLwhwYF1VKCK6e",
-                            SecurityStamp = "9ba891111d0142efbb32ed6d7028b3c6",
+                            SecurityStamp = "bca0cd5ac1c44f5b9e5d98b50fb65809",
                             Username = "2512675"
                         },
                         new
@@ -64081,7 +64129,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 729,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2iHzxpoksuDNORsW01wbx.nnu1rEx/yUUd/bocCxZtAh8vBgqdBnq",
-                            SecurityStamp = "d3174b94e9c64d42b2bcd38acfdf1904",
+                            SecurityStamp = "f43be6f69e4b4185b0bc8c5cd5f49595",
                             Username = "2512676"
                         },
                         new
@@ -64094,7 +64142,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 730,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$0zff1Zf/hbVC9pfTYehgSeI7KIqpHYNPp27KyEAAQqTL9a0qBQd96",
-                            SecurityStamp = "0c221d8cb8c348f2b97c26275911c65f",
+                            SecurityStamp = "e34a74f0effa4719a32b46b1d087eb86",
                             Username = "2512677"
                         },
                         new
@@ -64107,7 +64155,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 731,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$K2wzIq5cRTEoJtI5hjtflOip/6J53buymxBdfPp7V8kHLrkPmPYSK",
-                            SecurityStamp = "a033fae6e79b40219a729c740e28d9ad",
+                            SecurityStamp = "ba4f74652cc649c1ba7d30a6d6fc8791",
                             Username = "2512678"
                         },
                         new
@@ -64120,7 +64168,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 732,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$vDMFszDYNanYC6Gt3sXvaOy6aErz2jQiSzZGHCANwQBLOQ1KbVGMq",
-                            SecurityStamp = "bcde7962f0604090acc13ea552fcef8b",
+                            SecurityStamp = "cf352d70667f4d49a391801f39563774",
                             Username = "2512679"
                         },
                         new
@@ -64133,7 +64181,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 733,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UFPix0Yf9cBPkZ6X6d3GsukfSzxLk6T1oE4.0LyE30s2Tb3DlZap2",
-                            SecurityStamp = "995e3f0b716f4cec94b62c2018484602",
+                            SecurityStamp = "0857610d635b47f78f576375c06b4ef4",
                             Username = "2512681"
                         },
                         new
@@ -64146,7 +64194,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 734,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ppEnOZ/QQRMmA6NCZ29wc.xtDAaJRRjD9sPjl7IlXj8Uqqbb9zUcC",
-                            SecurityStamp = "02acda58eb6e47c084cc8f84b7fceff0",
+                            SecurityStamp = "9d7e2d3ffd9f4f3084b1448e4d4906d8",
                             Username = "2512682"
                         },
                         new
@@ -64159,7 +64207,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 735,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$USOoXypZJOxKfz/aH.JyIOwJxtTu8zQFndwyCz.qEECLdkkMhz.vq",
-                            SecurityStamp = "410a8585ef3d42f9a0c954311bb7dc77",
+                            SecurityStamp = "372106b67c2c4baabb8dedd63965e089",
                             Username = "2512683"
                         },
                         new
@@ -64172,7 +64220,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 736,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BJsjzAU9COBOKYZBzin9Fu01v7sNdXVOerovMO.D9U5nXlDbd93oi",
-                            SecurityStamp = "2530bd3daa4846f4859cbaae47c54683",
+                            SecurityStamp = "dcab35277f684e88a4fdeca67e8bdf38",
                             Username = "2512684"
                         },
                         new
@@ -64185,7 +64233,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 737,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZWFeJtfP4sgpf91OKWbrcOUL.q1X2A0urVbY7Wjca4kygnJXnGkgq",
-                            SecurityStamp = "c3d147e7a0f14547832e46436610e8d0",
+                            SecurityStamp = "4ff3c00f3f514fc290a342f507fb8205",
                             Username = "2512685"
                         },
                         new
@@ -64198,7 +64246,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 738,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1DpbA5WGkHnDbjyWmmSXl.KMjeAPi4sF/vGD0OxPC1e1ZKa6Q3ki6",
-                            SecurityStamp = "086082c2ea1b4156b92082d18f6d54af",
+                            SecurityStamp = "f7c4815c3d62431a8a269710a6982b77",
                             Username = "2512686"
                         },
                         new
@@ -64211,7 +64259,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 739,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$JwgDDCx0qCxQcs.ZsOFKCO2lIf12ulkUItEBzdfsZgkYqPDqdCLhy",
-                            SecurityStamp = "88faeaa72eb242f59a3c70001cf8c66e",
+                            SecurityStamp = "ae3a03dda2994337bfda5a1bbce4cec6",
                             Username = "2512687"
                         },
                         new
@@ -64224,7 +64272,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 740,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$uizD7iJUyaCqdulN1GlzvuZT5sTi5zka28hkHOJ9s0xQpI0nYsla6",
-                            SecurityStamp = "1b00c59960ce4525b6a3a9018915dcae",
+                            SecurityStamp = "8d67923e1cd14bf6a25894aaf5a4de53",
                             Username = "2512688"
                         },
                         new
@@ -64237,7 +64285,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 741,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Qafx.i9Z5EnoiMZZ.p2Oz.7mGqlK5CDQMQ1RYNA6PvwNwKFFuP.dm",
-                            SecurityStamp = "2a7c4eb60cc24cf596161736296c79ff",
+                            SecurityStamp = "18fd74d2cc5b45dfbcebe9b3a5f8a2d8",
                             Username = "2512689"
                         },
                         new
@@ -64250,7 +64298,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 742,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$hqAaEY9j4ItcoNg4DBQl9OQsiZVTCDNrwsM.KVzrq4yTTv6chrX3m",
-                            SecurityStamp = "86586f7ae6b440ccac1f5929a1c1f391",
+                            SecurityStamp = "f4aece81c73446f09032045cc2221ec6",
                             Username = "2512690"
                         },
                         new
@@ -64263,7 +64311,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 743,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xb2O/oAB59JLwhIplMDUhuFHFDX24S89vxBfYXh03E26W41xcGBwW",
-                            SecurityStamp = "a76c0c14905444fe90cd6358d29ecedd",
+                            SecurityStamp = "ca59bbfafe01420fa4cbfca07f203aef",
                             Username = "2512691"
                         },
                         new
@@ -64276,7 +64324,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 744,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$mtHxd.nblg5aYQ8g6C.4rO5mT8/wexuU2.7kG9Llf3BAqGlMOiTh6",
-                            SecurityStamp = "c2b8fc4a3f074fd99e805b368ab3ec7b",
+                            SecurityStamp = "f720b6b5ba314678a4bd3b4f8f0abd76",
                             Username = "2512692"
                         },
                         new
@@ -64289,7 +64337,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 745,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$KZu9qaelDGAZXdDvImknJOaJT1x6koqkMWcPxejKQW5NsmNOaB5a2",
-                            SecurityStamp = "f1d1c834319d49dd80cc9270f4af1f12",
+                            SecurityStamp = "c2896b652a7140d3921b89919925d96d",
                             Username = "2512693"
                         },
                         new
@@ -64302,7 +64350,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 746,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Df3TERMy1gDub5B0GtQV.O9zKvy6.5LlIpYyS9q627JymuGDHaUpa",
-                            SecurityStamp = "f3f0c31cc1694403bc2282afbe34a3b5",
+                            SecurityStamp = "4a57eb281df1446dad8b9501c94baad9",
                             Username = "2512694"
                         },
                         new
@@ -64315,7 +64363,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 747,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$iWmugVvDZNYJ9WjdJJl.LO2RrBz1uT5gvcaLT.rv0ZdtoEO8BQfZS",
-                            SecurityStamp = "a963a22ed32f44008906f06e0ef201a0",
+                            SecurityStamp = "c0fd3e5b032348b1aedd75e0bac83445",
                             Username = "2512695"
                         },
                         new
@@ -64328,7 +64376,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 748,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$AVYrk30urV9Q1HZsDXObF.3tqaHGBLXWKQWa5P8REp7d0pBPKpYXm",
-                            SecurityStamp = "88d93d8670c543519caba77162eca9b0",
+                            SecurityStamp = "44e38a076f3d4b5f884c75e2503efdec",
                             Username = "2512696"
                         },
                         new
@@ -64341,7 +64389,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 749,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$FITmXqn9HXgLNktHdrBMOOqmhuotsKWjLXh9rwJn/pPYyqvZnsO1y",
-                            SecurityStamp = "9445dec446f849298c6ddb34ca87db77",
+                            SecurityStamp = "53bee5271c9c4abf8b2d95df045597ff",
                             Username = "2512698"
                         },
                         new
@@ -64354,7 +64402,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 750,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4YxSIp.yZgwb2bc4aNY2FOWaBUgBcZh13FfzLli89WEi1msUE/W/C",
-                            SecurityStamp = "2599c801296e424e8cbab8e664cf58da",
+                            SecurityStamp = "d2cbea868d304f69b576c308be6ca1d9",
                             Username = "2512701"
                         },
                         new
@@ -64367,7 +64415,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 751,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$k5u/IPt0hOsJWDvP01tPGu5UCN5VZ8d7t6pSayWbrmdYuliK.rQw2",
-                            SecurityStamp = "f72085543f3c47dd851ee584671e855e",
+                            SecurityStamp = "cfdd17a905c84d679090986e787e9dcb",
                             Username = "2512702"
                         },
                         new
@@ -64380,7 +64428,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 752,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$1fD9FuBcO8n669HPmpajXebjU8IS7Q1exd.ERjY8rkJq4LXxsyc0m",
-                            SecurityStamp = "ad7083cd01bb44568821dee21ce55750",
+                            SecurityStamp = "bbbc980e2d054cf5ae67c368b7f5b04f",
                             Username = "2512703"
                         },
                         new
@@ -64393,7 +64441,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 753,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SLd1aFOk2bfu8HXrK8CN1utiPwAgFhRH19oMYN/R0hrrKmUf3q6CW",
-                            SecurityStamp = "611269680947469c9a7b5ba066b663e3",
+                            SecurityStamp = "63b3f9d537f1412cb91406ff13105c10",
                             Username = "2512704"
                         },
                         new
@@ -64406,7 +64454,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 754,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$Ub2VcqnzODqYVntoexBAx.8I8K.3qSStGvntqPSd2SOvVpyNkrcSm",
-                            SecurityStamp = "8ea5a22ea8a14a7f9884e3fa9a8effe4",
+                            SecurityStamp = "29d530ff8348410fbff8862ec2fe2d9b",
                             Username = "2512705"
                         },
                         new
@@ -64419,7 +64467,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 755,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$4dsLNKNe9WCXvU30XMlxzuQMTzZ73ecg6Wh2.VORLJuT4A3yLNzgK",
-                            SecurityStamp = "79a76c106b2f4b5999d6cb472980c483",
+                            SecurityStamp = "cb6ab75e4ce6445a9a6f1a38e4dfab90",
                             Username = "2512706"
                         },
                         new
@@ -64432,7 +64480,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 756,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$tnGsoCcQftvGtCiifLBxne3ifeVxJYDIK6kuolItM2bg1y.FQMCMq",
-                            SecurityStamp = "cf684ad9e02f4a3a8d192cbc46dd57c4",
+                            SecurityStamp = "d0449b2e47414442b5f189458f6eee04",
                             Username = "2512707"
                         },
                         new
@@ -64445,7 +64493,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 757,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$U/HCSBaI/2B7rSCJsgR16.XVYH8mvc5eVxQ/wgft2o42kNWlnzBO2",
-                            SecurityStamp = "e8cc0883ffff449e844e24b32a4a4c0a",
+                            SecurityStamp = "1517005064a34c148e800d32e8ee4fdc",
                             Username = "2512708"
                         },
                         new
@@ -64458,7 +64506,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 758,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$alxruN0bkr7q4Wo4wHNHquvXSceeNMXJ6Cj4FAbicrLNawvbFXjRe",
-                            SecurityStamp = "cbd5d2f81d1b4e92b47c09a7d964d378",
+                            SecurityStamp = "7639c803369148088e19ffe74c3aeebc",
                             Username = "2512709"
                         },
                         new
@@ -64471,7 +64519,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 759,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$xfdmpdfHV4bLIgqe4XTSDeuYkYRpueK14p1n/t5IcNOybjxXNSktK",
-                            SecurityStamp = "221811f0c2ff48c5ab1870c78bc40be3",
+                            SecurityStamp = "c52ed53a570945bc90bee1826b77a64a",
                             Username = "2512710"
                         },
                         new
@@ -64484,7 +64532,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 760,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$IVHCIk2RU4aEVrTtYNI3hOPS8dpQTIkXl4IkDePXqN1BjDWyswK5u",
-                            SecurityStamp = "ce995786c6c9447d975ca6cc457aa670",
+                            SecurityStamp = "76e297da1a6f47c48693acd22a218a5e",
                             Username = "2512711"
                         },
                         new
@@ -64497,7 +64545,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 761,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$wsTHZdbGReg1eYtZu64q4eLQWvZNLZVoAicCjAUVoPGDHAAyFjmva",
-                            SecurityStamp = "60f9d808eacc495da413388630159957",
+                            SecurityStamp = "badfa5a91fa4420d8d58538caf72ecf3",
                             Username = "2512712"
                         },
                         new
@@ -64510,7 +64558,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 762,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$VxtJwj0WMqiKOTsul32ysutZ1AgDyUkLcYFOLKFttexOJVcmr9stO",
-                            SecurityStamp = "bde1e00e292340838fec53b8a7ceb616",
+                            SecurityStamp = "ebef43f4451d4ac88da0ca64c6f70dba",
                             Username = "2512713"
                         },
                         new
@@ -64523,7 +64571,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 763,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$f5089NTEHlhOu/U63n5F2.QnkWTKXj09GSUT2vzEdrKvtklhSaw6u",
-                            SecurityStamp = "d57f4787f8c347d494461609b812cf8a",
+                            SecurityStamp = "05d6e62500b643daacf800d879617111",
                             Username = "2512714"
                         },
                         new
@@ -64536,7 +64584,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 764,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$YOeL3ZA1weawpj86/J5jbO2ZWs8RhBMT2M3wxfWWXJDt1Dcy/edym",
-                            SecurityStamp = "74e2914141e546ba983658e42ca8c537",
+                            SecurityStamp = "7a96a52106944fecab15b5782d38df02",
                             Username = "2512715"
                         },
                         new
@@ -64549,7 +64597,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 765,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$/unPJQn6k45G0Hb./kFE1.WuMst3/wAETT3mMP2jMDZ4UfOyIyYti",
-                            SecurityStamp = "639a1f36fe4542589c9615a5b2e6ff5b",
+                            SecurityStamp = "f2a98a9af0c14fc2b4a54eba37c0a0ef",
                             Username = "2512716"
                         },
                         new
@@ -64562,7 +64610,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 766,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$ZquGN7n9v4gEcNjtbkBtReIXgpxdmi6NRrBtWl0LMw8wncG4uWEBC",
-                            SecurityStamp = "119fd3842a5149a68091f06b788151e9",
+                            SecurityStamp = "fcda7a448aac4cd1a24b54762640e3a1",
                             Username = "2512718"
                         },
                         new
@@ -64575,7 +64623,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 767,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$cjJBE6JoeCyvjTZtQLZnE.8aPpNc916VV01xs.6eD0MtnXl8Xtt5K",
-                            SecurityStamp = "3a40dddc858744a98bb0ee7c6540a6f7",
+                            SecurityStamp = "89558d8d64bd470fb31b6fa945fb0745",
                             Username = "2512719"
                         },
                         new
@@ -64588,7 +64636,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 768,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$2.ynZcImdN2cQ62zxXsFWuyGutaGJDgx3bxBealh.RuHlbQyLj./y",
-                            SecurityStamp = "df4f5ada27204ac9984ed9f28537b9d5",
+                            SecurityStamp = "b5e732669a86411fb073fe2cb8089365",
                             Username = "2512722"
                         },
                         new
@@ -64601,7 +64649,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 769,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$t3jx2zoCu8bjgwv.wLMFRu3Of/5g0rFLk4apctHgf/JiadbqOn1CC",
-                            SecurityStamp = "7aa7157f194943df8f5e2140eeb7f5e1",
+                            SecurityStamp = "60d056eb3a294f8e8b3eb97c806292fa",
                             Username = "2512723"
                         },
                         new
@@ -64614,7 +64662,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 770,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$TR1ev90v9W5P9ttcmlOOYekvspGQebDC5xFllNYLDwfuWzdAtlH0q",
-                            SecurityStamp = "6f9757446c1c4603bd00a39de85c6294",
+                            SecurityStamp = "6eb5ca88e51f42e091ad3822a7285de9",
                             Username = "2512724"
                         },
                         new
@@ -64627,7 +64675,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 771,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$BKHVc0SIaD23.1N1DyOCyuFyD4CgbwsF.gw1EFG00pKVtCprPeXNu",
-                            SecurityStamp = "b6f9b92ffaba44afae6a2266033542c0",
+                            SecurityStamp = "de8e4a8f356a4253b8cf34eb33021bdf",
                             Username = "2512725"
                         },
                         new
@@ -64640,7 +64688,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 772,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$lC79x2afyWkFGhLD1xHOfum1AZkLT7MiOAFIkP9y5wvIWVBMIcgfK",
-                            SecurityStamp = "134b45303bea4d4d8447c694255c7a5a",
+                            SecurityStamp = "4dd2000b829d445fba61723cdc385651",
                             Username = "2512726"
                         },
                         new
@@ -64653,7 +64701,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 773,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$a8V3jWtS5OJo5h.q9HaKeejrB1pivA4rt6zzX4KS9HbE9ykGSgNdy",
-                            SecurityStamp = "5c1c181d725b4f73864206451acd27c5",
+                            SecurityStamp = "eb5f7d9f19df455ca2a3aa71e862a5dc",
                             Username = "2512728"
                         },
                         new
@@ -64666,7 +64714,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 774,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$MHgEJJFa0.lkw5LCFR2CIu1kOexVSFiBtbycrBpVXZC55.Hn8yicu",
-                            SecurityStamp = "7cd8b5a835e24feea16e24ec3ec76546",
+                            SecurityStamp = "ce06b57ad5364681bd79f20146675b68",
                             Username = "2512729"
                         },
                         new
@@ -64679,7 +64727,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 775,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$5XUYNdU8KFjnkJ3q78FDau8bjjofXVQbljUyTYYIafCsNrpf5bFe6",
-                            SecurityStamp = "4bb64432ed5d419b9acb204cc91fbe82",
+                            SecurityStamp = "e9fccaee2fc3401fb7409cb127e628b1",
                             Username = "2512730"
                         },
                         new
@@ -64692,7 +64740,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 776,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$bRGETVTcA.KDIcjvEZGG9eLDeNe0.gf8iTBxCsTqBotAityjpssga",
-                            SecurityStamp = "50b640535e264a8792544d47b520fc01",
+                            SecurityStamp = "5dfa72bc4bb1408fb118197ed60f4dea",
                             Username = "2512731"
                         },
                         new
@@ -64705,7 +64753,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 777,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$3R/K4QHO7Dy7KnSQDIrWRObLjCm9nC95E9es9DfYRHu.v/wIkH5yi",
-                            SecurityStamp = "b73230e728024b86a69561561a07d3d5",
+                            SecurityStamp = "0484d81cd91946948f973c7613bcb1fd",
                             Username = "2512732"
                         },
                         new
@@ -64718,7 +64766,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 778,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$SQn7t/mYWToJYsXvB/fgle/pLMjspmp.oy4wkdlAvuGhQigIkuJNC",
-                            SecurityStamp = "d29f8159446d42a583204591959eabbc",
+                            SecurityStamp = "e923a876f4974df39851160725b23abd",
                             Username = "2512734"
                         },
                         new
@@ -64731,7 +64779,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 779,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$UqfiBjOmRYbwIwRAONX7IezPVu6hEf/TM4MI87tQ0iPmfoKNn2i0W",
-                            SecurityStamp = "4e16651eda49446c9088d2169efd8c5f",
+                            SecurityStamp = "1c4de71e1d804940ad8c8323d5dd815f",
                             Username = "2512735"
                         },
                         new
@@ -64744,7 +64792,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 780,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$qdG4fqe7GH7y4weXf/enae6cQCEM85hxn3AdiszkXuWa8I4QBAp0i",
-                            SecurityStamp = "5a9286cabc8545d4b4ac6bc1e83d9036",
+                            SecurityStamp = "3cd813e0c34941b1b74f9322ea586211",
                             Username = "2512737"
                         },
                         new
@@ -64757,7 +64805,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                             MemberId = 781,
                             MustChangePassword = false,
                             PasswordHash = "$2b$11$v73TkKTZE4LTYjYq53zHWe2pmcxbJcg.VnppOi1.ws1f23jiUiKOe",
-                            SecurityStamp = "681338b00fe947dfaf916d7c9a380c23",
+                            SecurityStamp = "3a27a0e2a55b48d59c9b93603365e53b",
                             Username = "2512740"
                         });
                 });
@@ -67796,6 +67844,16 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Budget");
+                });
+
+            modelBuilder.Entity("GHCAA.Domain.Models.EventGallery", b =>
+                {
+                    b.HasOne("GHCAA.Domain.Models.Member", "OwnerMember")
+                        .WithMany()
+                        .HasForeignKey("OwnerMemberId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("OwnerMember");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.EventPhoto", b =>

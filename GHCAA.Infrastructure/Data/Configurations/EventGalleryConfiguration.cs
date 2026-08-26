@@ -14,6 +14,11 @@ namespace GHCAA.Infrastructure.Data.Configurations
                 .WithOne(p => p.EventGallery)
                 .HasForeignKey(p => p.EventGalleryId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(g => g.OwnerMember)
+                .WithMany()
+                .HasForeignKey(g => g.OwnerMemberId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

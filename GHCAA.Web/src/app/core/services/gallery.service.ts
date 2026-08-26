@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
-import { EventGallery } from '../models/business.models';
+import { EventGallery, EventPhoto } from '../models/business.models';
 
 
 @Injectable({
@@ -68,5 +68,44 @@ export class GalleryService {
             formData.append('photo', memory.photo);
         }
         return this.http.post(`${this.apiUrl}`, formData);
+    }
+
+    // Member album management
+    createAlbum(title: string, description?: string): Observable<EventGallery> {
+        return this.http.post<EventGallery>(`${this.apiUrl}/albums`, { title, description });
+    }
+
+    getMyAlbums(): Observable<EventGallery[]> {
+        return this.http.get<EventGallery[]>(`${this.apiUrl}/albums/mine`);
+    }
+
+    addPhotoToAlbum(albumId: number, file: File, caption?: string): Observable<EventPhoto> {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (caption) {
+            formData.append('caption', caption);
+        }
+        return this.http.post<EventPhoto>(`${this.apiUrl}/albums/${albumId}/photos`, formData);
+    }
+
+    // Admin approval workflow
+    getPendingApprovals(): Observable<{ galleries: EventGallery[], photos: EventPhoto[] }> {
+        return this.http.get<{ galleries: EventGallery[], photos: EventPhoto[] }>(`${this.apiUrl}/admin/pending`);
+    }
+
+    approveGallery(id: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/${id}/approve`, {});
+    }
+
+    rejectGallery(id: number, reason: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/${id}/reject`, { reason });
+    }
+
+    approvePhoto(photoId: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/photos/${photoId}/approve`, {});
+    }
+
+    rejectPhoto(photoId: number, reason: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/photos/${photoId}/reject`, { reason });
     }
 }

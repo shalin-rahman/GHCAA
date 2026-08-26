@@ -95,7 +95,7 @@
                         </div>
                         }
 
-                        @if (ev.participantCount) {
+                        @if (ev.requiresRegistration !== false && ev.participantCount) {
                         <div class="participant-count-pill mb-4">
                             <button (click)="toggleParticipants(ev.id)" class="count-btn">
                                 <span class="text-accent font-black">👥 {{ ev.participantCount }} Joined</span>
@@ -105,6 +105,18 @@
                         </div>
                         }
 
+                        @if (ev.requiresRegistration === false) {
+                        <div class="status-badge pending mb-4 w-full text-center">
+                            Informational — no registration required
+                        </div>
+                        <div class="grid gap-2">
+                            <div class="flex gap-2">
+                                <a [href]="getCalendarLink(ev)" target="_blank" class="btn btn-outline btn-xs flex-1">📅
+                                    Sync</a>
+                                <button (click)="askAdmin(ev)" class="btn btn-outline btn-xs flex-1">Query</button>
+                            </div>
+                        </div>
+                        } @else {
                         <div class="grid gap-2">
                             @if (isRegistrationOpen(ev)) {
                             <button (click)="openRegisterModal(ev)" class="btn btn-accent shadow-gold w-full">{{
@@ -118,6 +130,7 @@
                                 <button (click)="askAdmin(ev)" class="btn btn-outline btn-xs flex-1">Query</button>
                             </div>
                         </div>
+                        }
                     </div>
                 </div>
 

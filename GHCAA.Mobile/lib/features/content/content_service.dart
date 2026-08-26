@@ -151,4 +151,75 @@ class GalleryService {
       return response.statusCode == 200;
     } catch (_) { return false; }
   }
+
+  // ---- Member album management ----
+
+  Future<bool> createAlbum(String title, String? description) async {
+    try {
+      final response = await _dio.post('/gallery/albums', data: {
+        'title': title,
+        if (description != null) 'description': description,
+      });
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (_) { return false; }
+  }
+
+  Future<List<dynamic>> getMyAlbums() async {
+    try {
+      final response = await _dio.get('/gallery/albums/mine');
+      return response.data as List<dynamic>;
+    } catch (e) {
+      debugPrint('GalleryService.getMyAlbums failed: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> addPhotoToAlbum(int albumId, String filePath, {String? caption}) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath, filename: 'album_photo.jpg'),
+        if (caption != null) 'caption': caption,
+      });
+      final response = await _dio.post('/gallery/albums/$albumId/photos', data: formData);
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (_) { return false; }
+  }
+
+  // ---- Admin approval workflow ----
+
+  Future<Map<String, List<dynamic>>> getPendingGalleryApprovals() async {
+    try {
+      final response = await _dio.get('/gallery/admin/pending');
+      final data = response.data as Map<String, dynamic>;
+      return {
+        'galleries': (data['galleries'] as List<dynamic>?) ?? [],
+        'photos': (data['photos'] as List<dynamic>?) ?? [],
+      };
+    } catch (e) {
+      debugPrint('GalleryService.getPendingGalleryApprovals failed: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> resolveGalleryApproval(int id, bool approve, {String? reason}) async {
+    try {
+      final endpoint = approve ? 'approve' : 'reject';
+      final response = await _dio.post(
+        '/gallery/admin/$id/$endpoint',
+        data: approve ? null : {'reason': reason},
+      );
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
+
+  Future<bool> resolvePhotoApproval(int photoId, bool approve, {String? reason}) async {
+    try {
+      final endpoint = approve ? 'approve' : 'reject';
+      final response = await _dio.post(
+        '/gallery/photos/$photoId/$endpoint',
+        data: approve ? null : {'reason': reason},
+      );
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
 }

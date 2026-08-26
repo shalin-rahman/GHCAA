@@ -297,5 +297,13 @@ namespace GHCAA.API.Controllers
             if (!success) return NotFound();
             return Ok(new { Message = "Message marked as read." });
         }
+
+        [HttpDelete("contact-messages/{id}")]
+        public async Task<IActionResult> DeleteContactMessage(int id, [FromServices] IContactService contactService, CancellationToken cancellationToken)
+        {
+            var success = await contactService.DeleteMessageAsync(id, cancellationToken);
+            if (!success) return NotFound();
+            return Ok(new { Message = "Message deleted." });
+        }
     }
 }

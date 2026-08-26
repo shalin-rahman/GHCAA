@@ -258,6 +258,18 @@ class FakeGalleryService implements GalleryService {
   Future<bool> addPhotosToGallery(int galleryId, List<String> paths) async => true;
   @override
   Future<bool> removePhoto(int photoId) async => true;
+  @override
+  Future<bool> createAlbum(String title, String? description) async => true;
+  @override
+  Future<List<dynamic>> getMyAlbums() async => [];
+  @override
+  Future<bool> addPhotoToAlbum(int albumId, String filePath, {String? caption}) async => true;
+  @override
+  Future<Map<String, List<dynamic>>> getPendingGalleryApprovals() async => {'galleries': [], 'photos': []};
+  @override
+  Future<bool> resolveGalleryApproval(int id, bool approve, {String? reason}) async => true;
+  @override
+  Future<bool> resolvePhotoApproval(int photoId, bool approve, {String? reason}) async => true;
 }
 
 class FakeJobService implements JobService {
@@ -267,6 +279,10 @@ class FakeJobService implements JobService {
   Future<bool> postJob(Map<String, dynamic> data) async => true;
   @override
   Future<bool> deleteJob(int id) async => true;
+  @override
+  Future<List<dynamic>> getPendingJobs() async => [];
+  @override
+  Future<bool> resolveJobApproval(int id, bool approve, {String? reason}) async => true;
 }
 
 class FakeMentorshipService implements MentorshipService {

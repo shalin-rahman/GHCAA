@@ -50,14 +50,20 @@ namespace GHCAA.Infrastructure.Services
                     RegistrationStartDate = e.RegistrationStartDate,
                     RegistrationEndDate = e.RegistrationEndDate,
                     AdminNote = null, // Secure: Do not leak AdminNote in public listing
-                    ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
+                    ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected),
+                    RequiresRegistration = e.RequiresRegistration
                 })
                 .ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<EventDto>> GetAllEventsForAdminAsync(CancellationToken cancellationToken = default)
         {
+            // Admin must see every event regardless of publish state (IsActive) so it can be
+            // re-published later. AlumniEventConfiguration applies a global HasQueryFilter(e =>
+            // e.IsActive) for all public/portal reads (see GetActiveEventsAsync/GetEventByIdAsync,
+            // which rely on it); this admin-only path explicitly bypasses that filter.
             return await _context.AlumniEvents
+                .IgnoreQueryFilters()
                 .OrderByDescending(e => e.CreatedAt)
                 .Select(e => new EventDto
                 {
@@ -74,7 +80,8 @@ namespace GHCAA.Infrastructure.Services
                     RegistrationStartDate = e.RegistrationStartDate,
                     RegistrationEndDate = e.RegistrationEndDate,
                     AdminNote = e.AdminNote,
-                    ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
+                    ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected),
+                    RequiresRegistration = e.RequiresRegistration
                 })
                 .ToListAsync(cancellationToken);
         }
@@ -99,7 +106,8 @@ namespace GHCAA.Infrastructure.Services
                 RegistrationStartDate = e.RegistrationStartDate,
                 RegistrationEndDate = e.RegistrationEndDate,
                 AdminNote = null, // Secure: Do not leak AdminNote in public detail view
-                ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected)
+                ParticipantCount = _context.EventRegistrations.Count(r => r.EventId == e.Id && r.Status != EventRegistrationStatus.Rejected),
+                RequiresRegistration = e.RequiresRegistration
             };
         }
 
@@ -124,6 +132,7 @@ namespace GHCAA.Infrastructure.Services
                     : null,
                 AllowNonMembers = dto.AllowNonMembers,
                 AdminNote = dto.AdminNote,
+                RequiresRegistration = dto.RequiresRegistration,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -149,7 +158,9 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<AlumniEvent?> UpdateEventAsync(UpdateEventDto dto, CancellationToken cancellationToken = default)
         {
-            var alumniEvent = await _context.AlumniEvents.FirstOrDefaultAsync(e => e.Id == dto.Id, cancellationToken);
+            // IgnoreQueryFilters: without this, an already-unpublished (IsActive == false) event
+            // would be invisible to the global query filter and could never be found/re-published.
+            var alumniEvent = await _context.AlumniEvents.IgnoreQueryFilters().FirstOrDefaultAsync(e => e.Id == dto.Id, cancellationToken);
             if (alumniEvent == null) return null;
 
             alumniEvent.Title = dto.Title;
@@ -171,6 +182,7 @@ namespace GHCAA.Infrastructure.Services
             alumniEvent.AdminNote = dto.AdminNote;
             alumniEvent.ParticipantLimit = dto.ParticipantLimit;
             alumniEvent.HasWaitlist = dto.HasWaitlist;
+            alumniEvent.RequiresRegistration = dto.RequiresRegistration;
 
             await _context.SaveChangesAsync(cancellationToken);
             return alumniEvent;
@@ -178,7 +190,8 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task<bool> DeleteEventAsync(int id, CancellationToken cancellationToken = default)
         {
-            var alumniEvent = await _context.AlumniEvents.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+            // Admin must be able to delete an event it has unpublished; bypass the IsActive filter.
+            var alumniEvent = await _context.AlumniEvents.IgnoreQueryFilters().FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
             if (alumniEvent == null) return false;
 
             _context.AlumniEvents.Remove(alumniEvent);
@@ -193,6 +206,9 @@ namespace GHCAA.Infrastructure.Services
 
             if (!alumniEvent.IsActive)
                 throw new InvalidOperationException("This event is not currently active.");
+
+            if (!alumniEvent.RequiresRegistration)
+                throw new InvalidOperationException("This event does not require registration.");
 
             var now = DateTime.UtcNow;
             if (alumniEvent.RegistrationStartDate.HasValue && now < alumniEvent.RegistrationStartDate.Value)
@@ -475,7 +491,9 @@ namespace GHCAA.Infrastructure.Services
         }
         public async Task<string> UpdateEventLogoAsync(int eventId, UploadedFileDto logo, CancellationToken cancellationToken = default)
         {
-            var alumniEvent = await _context.AlumniEvents.FindAsync(eventId);
+            // FindAsync honors the global IsActive query filter, so an unpublished event would
+            // otherwise be reported as "not found" here. Use an explicit lookup that bypasses it.
+            var alumniEvent = await _context.AlumniEvents.IgnoreQueryFilters().FirstOrDefaultAsync(e => e.Id == eventId, cancellationToken);
             if (alumniEvent == null) throw new ArgumentException("Event not found");
 
             // Save the file. Use eventId for organization.

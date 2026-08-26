@@ -87,11 +87,14 @@
                         <label class="btn btn-secondary btn-sm" style="margin: 0; cursor: pointer;">
                             @if (!uploadingImage()) { <span class="icon">📁</span> }
                             @if (uploadingImage()) { <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner> }
-                            {{ uploadingImage() ? 'Uploading...' : 'Upload' }}
+                            {{ uploadingImage() ? 'Uploading...' : (stagedImageName() ? 'Change Image' : 'Select Image') }}
                             <input type="file" style="display: none;" accept="image/*" (change)="onImageSelect($event)"
                                 [disabled]="uploadingImage()">
                         </label>
                     </div>
+                    @if (stagedImageName()) {
+                    <p class="text-xs text-muted" style="margin-top: 6px;">Selected: {{ stagedImageName() }} (will upload on save)</p>
+                    }
                 </div>
                 @if (form.postType === 'Notice') {
                 <div class="form-group">

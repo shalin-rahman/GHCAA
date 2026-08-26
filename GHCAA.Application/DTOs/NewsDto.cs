@@ -4,6 +4,22 @@ using GHCAA.Domain;
 
 namespace GHCAA.Application.DTOs
 {
+    /// <summary>
+    /// Accepts either an absolute http(s) URL or an app-relative path (e.g. "/uploads/news/x.jpg"),
+    /// since the news image field is populated both by pasting an external URL and by the
+    /// upload-image endpoint, which returns a relative path.
+    /// </summary>
+    public class RelativeOrAbsoluteUrlAttribute : ValidationAttribute
+    {
+        public override bool IsValid(object? value)
+        {
+            if (value is not string s || string.IsNullOrWhiteSpace(s)) return true;
+            if (s.StartsWith("/")) return true;
+            return Uri.TryCreate(s, UriKind.Absolute, out var uri) &&
+                   (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+        }
+    }
+
     public class NewsPostDto
     {
         public int Id { get; set; }
@@ -38,7 +54,7 @@ namespace GHCAA.Application.DTOs
 
         public Enums.PostType PostType { get; set; } = Enums.PostType.News;
 
-        [Url(ErrorMessage = "Image URL must be a valid URL.")]
+        [RelativeOrAbsoluteUrl(ErrorMessage = "Image URL must be a valid URL.")]
         public string? ImageUrl { get; set; }
 
         public string? AttachmentUrl { get; set; }

@@ -36,4 +36,27 @@ class JobService {
       return response.statusCode == 200;
     } catch (_) { return false; }
   }
+
+  // ---- Admin approval workflow ----
+
+  Future<List<dynamic>> getPendingJobs() async {
+    try {
+      final response = await _dio.get('/jobs/admin/pending');
+      return response.data as List<dynamic>;
+    } catch (e) {
+      debugPrint('JobService.getPendingJobs failed: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> resolveJobApproval(int id, bool approve, {String? reason}) async {
+    try {
+      final endpoint = approve ? 'approve' : 'reject';
+      final response = await _dio.post(
+        '/jobs/admin/$id/$endpoint',
+        data: approve ? null : {'reason': reason},
+      );
+      return response.statusCode == 200;
+    } catch (_) { return false; }
+  }
 }

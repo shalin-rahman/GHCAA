@@ -42,7 +42,10 @@
                     </td>
                     <td>{{ msg.createdAt | date:'dd-MM-yyyy' }}</td>
                     <td>
-                        <button class="btn btn-secondary btn-sm" (click)="viewMessage(msg)">View Detail</button>
+                        <div class="action-btns">
+                            <button class="btn btn-secondary btn-sm" (click)="viewMessage(msg)">View Detail</button>
+                            <button class="icon-btn delete" (click)="deleteMessage(msg)" title="Delete Enquiry">🗑️</button>
+                        </div>
                     </td>
                 </tr>
                 } @empty {
@@ -84,6 +87,7 @@
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" (click)="selectedMessage.set(null)">Close</button>
+            <button class="btn btn-outline" (click)="deleteMessage(selectedMessage())">Delete Enquiry</button>
             <a [href]="'mailto:' + selectedMessage().email" class="btn btn-accent">Reply via Email</a>
         </div>
     </div>

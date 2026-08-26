@@ -50,7 +50,7 @@ namespace GHCAA.Tests.Controllers
         public async Task PostJob_ReturnsOk()
         {
             var dto = new CreateJobDto { Title = "Test Job" };
-            _jobServiceMock.Setup(x => x.PostJobAsync(dto, 10, It.IsAny<CancellationToken>()))
+            _jobServiceMock.Setup(x => x.PostJobAsync(dto, 10, false, It.IsAny<CancellationToken>()))
                            .ReturnsAsync(new JobDto { Id = 1 });
 
             var result = await _controller.PostJob(dto, CancellationToken.None);
@@ -92,6 +92,39 @@ namespace GHCAA.Tests.Controllers
             var result = await _controller.DeactivateJob(1, CancellationToken.None);
 
             Assert.That(result, Is.InstanceOf<OkResult>());
+        }
+
+        [Test]
+        public async Task GetPendingJobs_ReturnsOk()
+        {
+            _jobServiceMock.Setup(x => x.GetPendingJobsAsync(It.IsAny<CancellationToken>()))
+                           .ReturnsAsync(new List<JobDto>());
+
+            var result = await _controller.GetPendingJobs(CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task ApproveJob_ReturnsOk_OnSuccess()
+        {
+            _jobServiceMock.Setup(x => x.ApproveJobAsync(1, It.IsAny<CancellationToken>()))
+                           .ReturnsAsync(true);
+
+            var result = await _controller.ApproveJob(1, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task RejectJob_ReturnsNotFound_WhenMissing()
+        {
+            _jobServiceMock.Setup(x => x.RejectJobAsync(1, "reason", It.IsAny<CancellationToken>()))
+                           .ReturnsAsync(false);
+
+            var result = await _controller.RejectJob(1, new JobHubController.RejectJobRequest { Reason = "reason" }, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
         }
     }
 }

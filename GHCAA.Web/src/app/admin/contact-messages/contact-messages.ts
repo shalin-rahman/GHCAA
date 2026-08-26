@@ -68,4 +68,18 @@ export class ContactMessages implements OnInit {
       error: () => this.notify.error('Failed to mark message as read.')
     });
   }
+
+  deleteMessage(msg: any) {
+    if (!confirm('Delete this enquiry permanently?')) return;
+    this.contactService.deleteMessage(msg.id).subscribe({
+      next: () => {
+        this.notify.success('Enquiry deleted.');
+        if (this.selectedMessage()?.id === msg.id) {
+          this.selectedMessage.set(null);
+        }
+        this.loadMessages();
+      },
+      error: () => this.notify.error('Failed to delete enquiry.')
+    });
+  }
 }

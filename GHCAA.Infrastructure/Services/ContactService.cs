@@ -79,5 +79,15 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
+
+        public async Task<bool> DeleteMessageAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var msg = await _db.ContactMessages.FindAsync(new object[] { id }, cancellationToken);
+            if (msg == null) return false;
+
+            _db.ContactMessages.Remove(msg);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
     }
 }

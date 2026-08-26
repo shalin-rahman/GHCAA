@@ -146,6 +146,8 @@ class FakeJobService implements JobService {
   @override Future<List<dynamic>> getAllJobs() async => [];
   @override Future<bool> postJob(Map<String, dynamic> data) async => true;
   @override Future<bool> deleteJob(int id) async => true;
+  @override Future<List<dynamic>> getPendingJobs() async => [];
+  @override Future<bool> resolveJobApproval(int id, bool approve, {String? reason}) async => true;
 }
 
 class FakeChatService implements ChatService {

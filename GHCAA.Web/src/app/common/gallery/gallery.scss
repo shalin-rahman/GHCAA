@@ -159,6 +159,43 @@
     }
 }
 
+.my-albums-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.my-album-row {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .album-info {
+        h4 {
+            margin: 0.35rem 0 0.15rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+    }
+
+    .rejection-note {
+        color: var(--danger-color);
+    }
+
+    .add-photo-inline {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--glass-border);
+    }
+}
+
 @media (max-width: 768px) {
     .header {
         text-align: center;

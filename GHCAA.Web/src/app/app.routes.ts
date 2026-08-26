@@ -242,6 +242,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./admin/article-approval/article-approval').then(m => m.ArticleApproval)
             },
             {
+                path: 'gallery-approvals',
+                loadComponent: () => import('./admin/gallery-approval/gallery-approval').then(m => m.GalleryApproval)
+            },
+            {
+                path: 'job-approvals',
+                loadComponent: () => import('./admin/job-approval/job-approval').then(m => m.JobApproval)
+            },
+            {
                 path: 'contact-messages',
                 loadComponent: () => import('./admin/contact-messages/contact-messages').then(m => m.ContactMessages)
             },

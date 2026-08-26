@@ -33,4 +33,17 @@ export class JobService {
     deleteJob(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${id}`);
     }
+
+    // Admin Approval
+    getPendingJobs(): Observable<Job[]> {
+        return this.http.get<Job[]>(`${this.apiUrl}/admin/pending`);
+    }
+
+    approveJob(id: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/${id}/approve`, {});
+    }
+
+    rejectJob(id: number, reason: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/admin/${id}/reject`, { reason });
+    }
 }

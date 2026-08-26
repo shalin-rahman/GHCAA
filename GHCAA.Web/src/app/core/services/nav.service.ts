@@ -50,6 +50,8 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/gallery', label: 'Gallery Albums', icon: 'gallery', section: 'Content' },
     { path: '/admin/comm', label: 'Communications', icon: 'comm', section: 'Content' },
     { path: '/admin/article-approvals', label: 'Submission Review', icon: 'article-approvals', section: 'Content' },
+    { path: '/admin/gallery-approvals', label: 'Gallery Review', icon: 'gallery-approvals', section: 'Content' },
+    { path: '/admin/job-approvals', label: 'Job Review', icon: 'job-approvals', section: 'Content' },
     { path: '/admin/contact-messages', label: 'Portal Enquiries', icon: 'contact-messages', section: 'Content' },
     { path: '/admin/themes', label: 'Special Themes', icon: 'themes', section: 'Content' },
 

@@ -35,7 +35,8 @@ namespace GHCAA.API.Controllers
                 return BadRequest("Invalid user session");
             }
 
-            var result = await _jobService.PostJobAsync(job, memberId, cancellationToken);
+            var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+            var result = await _jobService.PostJobAsync(job, memberId, isAdmin, cancellationToken);
             return Ok(result);
         }
 
@@ -81,6 +82,35 @@ namespace GHCAA.API.Controllers
 
             var success = await _jobService.DeactivateJobAsync(id, cancellationToken);
             return success ? Ok() : StatusCode(500);
+        }
+
+        [HttpGet("admin/pending")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> GetPendingJobs(CancellationToken cancellationToken)
+        {
+            var jobs = await _jobService.GetPendingJobsAsync(cancellationToken);
+            return Ok(jobs);
+        }
+
+        [HttpPost("admin/{id}/approve")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> ApproveJob(int id, CancellationToken cancellationToken)
+        {
+            var success = await _jobService.ApproveJobAsync(id, cancellationToken);
+            return success ? Ok(new { Message = "Job approved." }) : NotFound();
+        }
+
+        [HttpPost("admin/{id}/reject")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> RejectJob(int id, [FromBody] RejectJobRequest request, CancellationToken cancellationToken)
+        {
+            var success = await _jobService.RejectJobAsync(id, request.Reason, cancellationToken);
+            return success ? Ok(new { Message = "Job rejected." }) : NotFound();
+        }
+
+        public class RejectJobRequest
+        {
+            public string Reason { get; set; } = null!;
         }
     }
 }

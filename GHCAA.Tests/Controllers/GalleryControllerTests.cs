@@ -97,5 +97,73 @@ namespace GHCAA.Tests.Controllers
 
             Assert.That(result, Is.InstanceOf<OkResult>());
         }
+
+        [Test]
+        public async Task CreateAlbum_ReturnsCreatedAtAction()
+        {
+            var request = new GalleryController.CreateAlbumRequest { Title = "My Album", Description = "Desc" };
+            _galleryServiceMock.Setup(x => x.CreateMemberAlbumAsync(10, "My Album", "Desc", It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(new EventGallery { Id = 5, Title = "My Album" });
+
+            var result = await _controller.CreateAlbum(request, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<CreatedAtActionResult>());
+        }
+
+        [Test]
+        public async Task GetMyAlbums_ReturnsOk()
+        {
+            _galleryServiceMock.Setup(x => x.GetMemberAlbumsAsync(10, It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(new List<EventGallery>());
+
+            var result = await _controller.GetMyAlbums(CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task AddPhotoToAlbum_ReturnsForbid_WhenNotOwnerAndNotAdmin()
+        {
+            _galleryServiceMock.Setup(x => x.GetGalleryByIdAsync(5, It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(new EventGallery { Id = 5, OwnerMemberId = 999 });
+
+            var file = new Mock<IFormFile>();
+            var result = await _controller.AddPhotoToAlbum(5, file.Object, "caption", CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<ForbidResult>());
+        }
+
+        [Test]
+        public async Task ApproveGallery_ReturnsOk_OnSuccess()
+        {
+            _galleryServiceMock.Setup(x => x.ApproveGalleryAsync(5, It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(true);
+
+            var result = await _controller.ApproveGallery(5, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task RejectGallery_ReturnsOk_OnSuccess()
+        {
+            _galleryServiceMock.Setup(x => x.RejectGalleryAsync(5, "Not appropriate", It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(true);
+
+            var result = await _controller.RejectGallery(5, new GalleryController.RejectRequest { Reason = "Not appropriate" }, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task ApprovePhoto_ReturnsNotFound_WhenMissing()
+        {
+            _galleryServiceMock.Setup(x => x.ApprovePhotoAsync(99, It.IsAny<CancellationToken>()))
+                               .ReturnsAsync(false);
+
+            var result = await _controller.ApprovePhoto(99, CancellationToken.None);
+
+            Assert.That(result, Is.InstanceOf<NotFoundResult>());
+        }
     }
 }

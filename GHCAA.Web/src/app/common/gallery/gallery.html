@@ -4,10 +4,94 @@
             <h2>Event Gallery</h2>
             <p>Visual journey through Haragangian heritage</p>
         </div>
-        <button class="btn btn-accent" (click)="showUpload.set(true)" *ngIf="!showUpload() && auth.isAuthenticated()">
-            <span class="icon">📸</span> Share Legacy Moment
-        </button>
+        <div class="header-actions flex gap-3" *ngIf="auth.isAuthenticated()">
+            <button class="btn btn-outline" (click)="showAlbums.set(!showAlbums())">
+                <span class="icon">🗂️</span> My Albums
+            </button>
+            <button class="btn btn-accent" (click)="showUpload.set(true)" *ngIf="!showUpload()">
+                <span class="icon">📸</span> Share Legacy Moment
+            </button>
+        </div>
     </div>
+
+    <!-- My Albums -->
+    @if (showAlbums()) {
+    <div class="glass-card my-albums-box animate-reveal-top mb-12">
+        <div class="form-header flex justify-between items-center mb-6">
+            <h3 class="text-accent font-black tracking-widest text-sm uppercase">My Albums</h3>
+            <div class="flex gap-3">
+                <button class="btn btn-secondary btn-sm" (click)="showNewAlbum.set(!showNewAlbum())">
+                    + New Album
+                </button>
+                <button class="close-btn text-muted hover:text-white" (click)="showAlbums.set(false)">✕</button>
+            </div>
+        </div>
+
+        @if (showNewAlbum()) {
+        <form (submit)="createAlbum()" class="new-album-form mb-8">
+            <div class="form-group">
+                <label class="block text-[10px] uppercase font-bold text-muted mb-2">Album Title *</label>
+                <input type="text" [(ngModel)]="newAlbum.title" name="albumTitle" placeholder="e.g. Reunion 2026" class="w-full" required>
+            </div>
+            <div class="form-group">
+                <label class="block text-[10px] uppercase font-bold text-muted mb-2">Description</label>
+                <textarea [(ngModel)]="newAlbum.description" name="albumDesc" rows="2" placeholder="Describe this album..." class="w-full"></textarea>
+            </div>
+            <div class="form-footer flex gap-4 pt-4">
+                <button type="submit" class="btn btn-accent" [disabled]="creatingAlbum()">
+                    {{ creatingAlbum() ? 'Creating...' : 'Create Album' }}
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="showNewAlbum.set(false)">Cancel</button>
+            </div>
+        </form>
+        }
+
+        @if (loadingAlbums()) {
+        <div class="loading-state">
+            <app-logo-spinner [size]="48" [ripple]="false"></app-logo-spinner>
+        </div>
+        } @else {
+        <div class="my-albums-list">
+            @for (album of myAlbums(); track album.id) {
+            <div class="my-album-row glass-card">
+                <div class="album-info">
+                    <span class="status-badge" [class]="getStatusInfo(album.status).class">
+                        {{ getStatusInfo(album.status).label }}
+                    </span>
+                    <h4>{{ album.title }}</h4>
+                    <p class="text-muted text-xs">{{ album.photos.length }} photo(s)</p>
+                    @if (album.status === 'Rejected' && album.rejectionReason) {
+                    <p class="rejection-note text-xs">Reason: {{ album.rejectionReason }}</p>
+                    }
+                </div>
+                <div class="album-actions">
+                    <button class="btn btn-outline btn-sm" (click)="openAddPhoto(album.id)">Add Photos</button>
+                </div>
+                @if (addingPhotoToAlbumId() === album.id) {
+                <div class="add-photo-inline">
+                    <input type="file" #albumFileInput (change)="onAlbumFileSelected($event)" accept="image/*" class="hidden">
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="albumFileInput.click()">
+                        {{ albumPhotoFile ? albumPhotoFile.name : 'Choose Photo' }}
+                    </button>
+                    <div class="form-group">
+                        <input type="text" [(ngModel)]="albumPhotoCaption" name="caption" placeholder="Caption (optional)" class="w-full">
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" class="btn btn-accent btn-sm" (click)="addPhotoToAlbum(album.id)">Upload</button>
+                        <button type="button" class="btn btn-secondary btn-sm" (click)="cancelAddPhoto()">Cancel</button>
+                    </div>
+                </div>
+                }
+            </div>
+            } @empty {
+            <div class="empty-state glass-card">
+                <p>No albums yet. Create one to start sharing your memories.</p>
+            </div>
+            }
+        </div>
+        }
+    </div>
+    }
 
     <!-- Legacy Upload Form -->
     @if (showUpload()) {

@@ -38,6 +38,8 @@ import '../../screens/admin/contact_messages_screen.dart';
 import '../../screens/admin/admin_dashboard_screen.dart';
 import '../../screens/admin/governance_registry_screen.dart';
 import '../../screens/admin/article_approval_screen.dart';
+import '../../screens/admin/gallery_approval_screen.dart';
+import '../../screens/admin/job_approval_screen.dart';
 import '../../screens/admin/gatekeeper_screen.dart';
 import '../../screens/admin/ledger_screen.dart';
 import '../../screens/admin/admin_modules.dart';
@@ -185,6 +187,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/gatekeeper', name: 'admin_gatekeeper', builder: (context, state) => const GatekeeperScreen()),
           GoRoute(path: '/admin/governance', name: 'admin_governance', builder: (context, state) => const AdminGovernanceScreen()),
           GoRoute(path: '/admin/articles', name: 'admin_articles', builder: (context, state) => const ArticleApprovalScreen()),
+          GoRoute(path: '/admin/gallery-approvals', name: 'admin_gallery_approvals', builder: (context, state) => const GalleryApprovalScreen()),
+          GoRoute(path: '/admin/job-approvals', name: 'admin_job_approvals', builder: (context, state) => const JobApprovalScreen()),
           GoRoute(path: '/admin/permissions', name: 'admin_permissions', builder: (context, state) => const PermissionsMatrixScreen()),
           GoRoute(path: '/admin/cms', name: 'admin_cms', builder: (context, state) => const AdminCMS()),
           GoRoute(path: '/chats', name: 'chats', builder: (context, state) => const ChatsScreen()),

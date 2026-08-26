@@ -1,0 +1,105 @@
+<div class="admin-feature">
+    <app-page-header title="Job Review" [total]="pendingJobs().length"
+        emptySubtitle="Review member-submitted job postings">
+        <small subtitle>Showing {{ filteredJobs().length }} of {{ pendingJobs().length }} pending submissions</small>
+    </app-page-header>
+
+    <!-- Search Bar -->
+    <div class="filter-bar">
+        <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
+            placeholder="Search by title, company or poster…"></app-search-bar>
+    </div>
+
+    @if (loading()) {
+    <div class="loading-state glass-card py-20 text-center">
+        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+        <p>Checking for pending submissions...</p>
+    </div>
+    } @else {
+    <div class="submissions-table glass-card table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Job Info</th>
+                    <th>Category</th>
+                    <th>Posted By</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (job of filteredJobs(); track job.id) {
+                <tr>
+                    <td>
+                        <div class="job-info">
+                            <strong>{{ job.title }}</strong>
+                            <p>{{ job.companyName }} • {{ job.location }}</p>
+                        </div>
+                    </td>
+                    <td><span class="badge">{{ getCategoryName(job.jobCategory) }}</span></td>
+                    <td>{{ job.postedByMemberName }}</td>
+                    <td>{{ job.postedDate | date:'dd-MM-yyyy' }}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" (click)="viewJob(job)">Review Job</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="5" class="py-20 text-center italic opacity-50">
+                        {{ searchQuery() ? 'No submissions match your search.' : 'No pending submissions found.' }}
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>
+
+<!-- Review Modal -->
+@if (selectedJob()) {
+<div class="modal-overlay" (click)="selectedJob.set(null)">
+    <div class="modal-box large reveal-top" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Review Job Posting</h3>
+            <button class="close-btn" (click)="selectedJob.set(null)">×</button>
+        </div>
+        <div class="modal-body custom-scrollbar">
+            <div class="job-preview">
+                <div class="preview-meta mb-6 flex gap-4">
+                    <span class="badge bg-gold-gradient text-black">{{ getCategoryName(selectedJob()?.jobCategory || '') }}</span>
+                    <span class="text-muted">Posted by <strong>{{ selectedJob()?.postedByMemberName }}</strong></span>
+                </div>
+                <h1>{{ selectedJob()?.title }}</h1>
+                <p class="text-muted mb-4">{{ selectedJob()?.companyName }} • {{ selectedJob()?.location }}</p>
+                <div class="preview-body mt-8">
+                    {{ selectedJob()?.description }}
+                </div>
+                @if (selectedJob()?.requirements) {
+                <h3 class="mt-8">Requirements</h3>
+                <div class="preview-body">
+                    {{ selectedJob()?.requirements }}
+                </div>
+                }
+
+                <div class="rejection-box mt-10 p-6 glass-card bg-white/5">
+                    <label class="text-xs uppercase font-black mb-4 block">Rejection Note (Only if rejecting)</label>
+                    <textarea [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)"
+                        placeholder="Explain why this job posting is being rejected..."></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer flex justify-between">
+            <button class="btn btn-secondary" (click)="selectedJob.set(null)">Close Review</button>
+            <div class="actions flex gap-4">
+                <button class="btn btn-outline" (click)="reject()" [disabled]="isProcessing()">
+                    {{ isProcessing() ? 'Processing...' : 'Reject Submission' }}
+                </button>
+                <button class="btn btn-accent" (click)="approve()" [disabled]="isProcessing()">
+                    {{ isProcessing() ? 'Approving...' : 'Approve & Publish' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}

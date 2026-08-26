@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Security.Claims;
 using System.Threading;
@@ -171,6 +172,28 @@ namespace GHCAA.Tests.Controllers
 
             var result = await _controller.RejectArticle(1, CancellationToken.None);
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        // Regression coverage for preprod bug: POST /api/news returned 400 whenever the admin
+        // used the "upload image" flow first, because the upload endpoint returns an app-relative
+        // path (e.g. "/uploads/news/x.jpg") and [Url] rejects anything without a scheme.
+        [TestCase(null, true)]
+        [TestCase("", true)]
+        [TestCase("/uploads/news/news_123_abcd.jpg", true)]
+        [TestCase("https://example.com/image.jpg", true)]
+        [TestCase("http://example.com/image.jpg", true)]
+        [TestCase("javascript:alert(1)", false)]
+        [TestCase("not a url", false)]
+        public void CreateNewsDto_ImageUrl_AcceptsRelativePathsAndAbsoluteHttpUrls(string? imageUrl, bool expectedValid)
+        {
+            var dto = new CreateNewsDto { Title = "Valid Title", Content = "Valid content long enough.", ImageUrl = imageUrl };
+            var context = new ValidationContext(dto);
+            var results = new List<ValidationResult>();
+
+            var isValid = Validator.TryValidateObject(dto, context, results, validateAllProperties: true);
+
+            var imageUrlHasError = results.Exists(r => r.MemberNames.Contains(nameof(CreateNewsDto.ImageUrl)));
+            Assert.That(!imageUrlHasError, Is.EqualTo(expectedValid));
         }
     }
 }

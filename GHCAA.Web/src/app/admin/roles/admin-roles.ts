@@ -137,6 +137,17 @@ export class AdminRoles implements OnInit {
             error: () => this.notify.error('Failed to remove role')
         });
     }
+
+    deleteUser(user: any) {
+        if (!confirm(`Permanently delete system administrator "${user.username}"?`)) return;
+        this.http.delete(`/api/roles/users/${user.id}`).subscribe({
+            next: () => {
+                this.notify.success('System administrator account deleted');
+                this.loadData();
+            },
+            error: (err) => this.notify.error(err.error?.message || 'Failed to delete account')
+        });
+    }
 }
 
 

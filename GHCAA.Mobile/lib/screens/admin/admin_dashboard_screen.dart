@@ -71,6 +71,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboardScreen> {
                 _buildQuickAction(context, Icons.campaign, 'COMMUNICATIONS', '/admin/messages'),
                 _buildQuickAction(context, Icons.business, 'MEMBER DIRECTORY', '/directory'),
                 _buildQuickAction(context, Icons.rate_review_outlined, 'ARTICLE REVIEW', '/admin/articles'),
+                _buildQuickAction(context, Icons.photo_library_outlined, 'ALBUM REVIEW', '/admin/gallery-approvals'),
+                _buildQuickAction(context, Icons.work_outline_rounded, 'JOB REVIEW', '/admin/job-approvals'),
                 _buildQuickAction(context, Icons.qr_code_scanner, 'GATEKEEPER', '/admin/gatekeeper'),
               ],
             ),

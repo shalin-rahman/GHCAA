@@ -262,10 +262,10 @@ The assistant runs entirely on internal data with a rule-based engine — it has
 - **Dependencies**: OrgConfig service. The admin-supplied map URL is treated as untrusted: it passes an allow-list check before the iframe is trusted, and no iframe renders if it fails.
 
 ### 7.2 Media Gallery & Albums
-- **Business description**: Visual records of association history categorized by events.
-- **User roles**: Public (read), Admin (CRUD).
-- **Inputs / outputs**: Screen `/gallery`; API `POST /api/gallery`.
-- **Dependencies**: Gallery service, file storage.
+- **Business description**: Visual records of association history categorized by events. Members may also create their own albums and upload photos to them; member-submitted albums/photos enter a `Pending` approval queue and only appear publicly once an Admin/SuperAdmin approves them (or are hidden with a rejection reason).
+- **User roles**: Public (read approved only), Member (create own albums, upload photos, submit for approval), Admin (CRUD, approve/reject submissions).
+- **Inputs / outputs**: Screen `/gallery`; API `POST /api/gallery`, plus member-album and admin approve/reject endpoints under `/api/gallery`.
+- **Dependencies**: Gallery service, file storage, shared admin-notification/email fan-out on new submissions (see AdminNotificationService).
 
 ### 7.3 Theme Management (Special Days)
 - **Business description**: Dynamic UI transformation for special occasions (e.g., Independence Day).
