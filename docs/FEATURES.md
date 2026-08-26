@@ -181,6 +181,11 @@ The platform operates without live payment-gateway credentials. All payment meth
   - Screens: `/constitution` (full text, in-page article ToC, PDF download, collapsible version history),
     `/elections` (the seven `docs/Elections/*.md` documents, viewable and downloadable, with the forms
     handbook split into 18 individually printable forms), `/governance` (member ratification card).
+    `Constitution` is reached from the footer reference links, not the public top nav.
+  - Each split form renders as a **ready-to-use A4 sheet**, not a specimen: association letterhead,
+    reference/date rule, form code chip, ruled write-on fields, tick-box lists, signature grid and
+    seal box. `renderFormMarkdown` (`core/utils/markdown.util.ts`) drives it from a small directive
+    DSL in the source markdown (`:: grid`, `:: sign`, `:: lines`, `Label: ____`, `[ ]`).
   - API: `GET /api/governance/constitution`, `GET /api/governance/constitution/history`,
     `POST /api/governance/constitution/{id}/vote`.
 - **Validations & rules**:
@@ -193,6 +198,12 @@ The platform operates without live payment-gateway credentials. All payment meth
     the reader renders whichever row is `IsActive`, the landing hero routes to `/constitution`
     rather than to a PDF, and superseded versions stay readable in the history panel with their
     own `PdfUrl`. Republishing is one command — see `docs/CONSTITUTION_PUBLISHING.md`.
+  - The letterhead carries **no hardcoded organisational text**: name, crest, address, phone, email,
+    motto and founding date (`branding.establishedOn`) all come from `OrgConfigService`, so a
+    re-branded deployment prints its own forms without a code change.
+  - The sheet is a paper document on both themes: the `--paper-*` tokens are defined once in
+    `:root` in `styles.scss` and deliberately have no dark-theme override, so the form is
+    ink-on-white on screen and on the printer alike (`@page { size: A4 portrait; margin: 14mm 13mm }`).
 - **Dependencies**: Governance service, `ConstitutionSeeder`, in-repo markdown renderer
   (`core/utils/markdown.util.ts`) — no markdown npm dependency.
   `tools/constitution/publish_constitution.py` (PyMuPDF) is a build-time documentation tool, not

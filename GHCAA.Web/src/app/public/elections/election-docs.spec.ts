@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { splitForms, ELECTION_DOCS } from './election-docs';
+import { splitForms, formStage, ELECTION_DOCS } from './election-docs';
 
 describe('ELECTION_DOCS', () => {
     it('has a unique id per document', () => {
@@ -7,8 +7,35 @@ describe('ELECTION_DOCS', () => {
         expect(new Set(ids).size).toBe(ids.length);
     });
 
-    it('marks exactly one document as the forms handbook', () => {
-        expect(ELECTION_DOCS.filter(d => d.isFormsHandbook)).toHaveLength(1);
+    it('has a unique file per document', () => {
+        const files = ELECTION_DOCS.map(d => d.file);
+        expect(new Set(files).size).toBe(files.length);
+    });
+
+    /* The forms handbook is split across two files (ER-01..18 and ER-20..40); a document
+       cannot be both a handbook of forms and a single form. */
+    it('never marks a document as both a handbook and a single form', () => {
+        expect(ELECTION_DOCS.filter(d => d.isFormsHandbook && d.isForm)).toEqual([]);
+    });
+
+    it('keeps every handbook and single form in the Forms group', () => {
+        const forms = ELECTION_DOCS.filter(d => d.isFormsHandbook || d.isForm);
+        expect(forms.length).toBeGreaterThan(0);
+        expect(forms.every(d => d.group === 'Forms')).toBe(true);
+    });
+});
+
+describe('formStage', () => {
+    it('groups a form by the stage of the election it is used in', () => {
+        expect(formStage('ER-01')).toBe('Announcement');
+        expect(formStage('ER-12')).toBe('Nomination');
+        expect(formStage('ER-19')).toBe('Polling day');
+        expect(formStage('ER-30')).toBe('Result');
+        expect(formStage('ER-40')).toBe('Closure and handover');
+    });
+
+    it('puts a code with no number in its own bucket rather than guessing', () => {
+        expect(formStage('ER-')).toBe('Other');
     });
 });
 

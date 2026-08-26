@@ -1,804 +1,601 @@
 # FORM ER-20
 # Vote Counting Authorization Certificate
 
-Election:
-_____________________________
+:: grid
+Election: ___
+Polling Station: ___
+Date: ___
+Time Counting Commenced: ___
+:: end
 
-Polling Station:
-_____________________________
+## Prerequisites Verified
 
-Date:
-_____________________________
+[ ] Poll officially closed
+[ ] Poll Closing Certificate completed
+[ ] Ballot Box Sealing Certificate completed
+[ ] Seal numbers verified
+[ ] Ballot Issue Register reconciled
+[ ] Candidate agents present or notified
+[ ] Observers present
+[ ] Counting hall secured
+[ ] Counting materials available
 
-Time Counting Commenced:
-_____________________________
+## Declaration
 
-Prerequisites Verified
+The Election Commission hereby authorises the commencement of vote counting.
 
-□ Poll officially closed
+:: sign Chief Election Commissioner | Election Commissioner | Election Commissioner
 
-□ Poll Closing Certificate completed
+:: sign Observer / Signature and time
 
-□ Ballot Box Sealing Certificate completed
-
-□ Seal numbers verified
-
-□ Ballot Issue Register reconciled
-
-□ Candidate Agents present/notified
-
-□ Observers present
-
-□ Counting Hall secured
-
-□ Counting materials available
-
-Declaration
-
-The Election Commission hereby authorizes commencement of vote counting.
-
-Chief Election Commissioner __________________
-
-Election Commissioner __________________
-
-Election Commissioner __________________
-
-Observer __________________
-
-Time __________________
-
---------------------------------------------------------
+---
 
 # FORM ER-21
 # Ballot Box Opening Certificate
 
-Election
+:: grid
+Election: ___
+Ballot Box Number: ___
+:: end
 
-Ballot Box Number
+:: grid3
+Seal No. 1: ___
+Seal No. 2: ___
+Seal No. 3: ___
+:: end
 
-Seal No. 1
+## Inspection
 
-Seal No. 2
+[ ] Seals intact
+[ ] Box undamaged
+[ ] Lock intact
+[ ] No evidence of tampering
 
-Seal No. 3
+:: grid
+Opened At (time): ___
+Date: ___
+:: end
 
-Inspection
+:: sign Opened By / Chief Election Commissioner | Witnessed By / Election Commissioner | Witnessed By / Election Commissioner
 
-□ Seal intact
+:: sign Observer | Candidate Agent
 
-□ Box undamaged
+:: lines Remarks | 3
 
-□ Lock intact
-
-□ No evidence of tampering
-
-Opened At
-
-_________
-
-Opened By
-
-Chief Election Commissioner
-
-Witnessed By
-
-Election Commissioner
-
-Election Commissioner
-
-Observer
-
-Candidate Agents
-
-Remarks
-
-___________________________
-
---------------------------------------------------------
+---
 
 # FORM ER-22
 # Ballot Paper Reconciliation Sheet
 
-Registered Voters
+:: grid
+Election: ___
+Polling Station: ___
+:: end
 
-Ballots Received
+## Ballot Account
 
-Ballots Issued
+| Item | Count |
+|------|-------|
+| Registered voters | |
+| Ballots received | |
+| Ballots issued | |
+| Unused ballots | |
+| Spoiled ballots | |
+| Ballots found in box | |
+| Difference | |
 
-Unused Ballots
+:: lines Explanation of any difference | 3
 
-Spoiled Ballots
+:: sign Verified By / Chief Election Commissioner | Election Commissioner | Observer
 
-Ballots Found in Box
-
-Difference
-
-Verified By
-
-Chief Election Commissioner
-
-Commissioner
-
-Observer
-
-Remarks
-
-_________________________________________________
-
---------------------------------------------------------
+---
 
 # FORM ER-23
 # Vote Counting Sheet
 
-Election
+:: grid
+Election: ___
+Position: ___
+Round No.: ___
+Sheet No.: ___
+:: end
 
-Position
+## Count
 
-Round No.
+| Candidate | Symbol | Votes |
+|-----------|--------|-------|
+| | | |
+| | | |
+| | | |
+| | | |
+| | | |
 
-Candidate | Symbol | Votes
+:: grid3
+Rejected Ballots: ___
+Questionable Ballots: ___
+Total Count: ___
+:: end
 
-________________________
+:: sign Counted By | Verified By / Signature and time
 
-________________________
-
-________________________
-
-________________________
-
-Rejected Ballots
-
-Questionable Ballots
-
-Total Count
-
-Counted By
-
-Verified By
-
-Time
-
---------------------------------------------------------
+---
 
 # FORM ER-24
 # Independent Tally Sheet
 
-Election
+:: grid
+Election: ___
+Position: ___
+:: end
 
-Position
+## Independent Counts
 
-Counter A
+| Candidate | Counter A | Counter B | Counter C |
+|-----------|-----------|-----------|-----------|
+| | | | |
+| | | | |
+| | | | |
+| Rejected | | | |
 
-Counter B
+:: grid
+Difference Between Counters: ___
+Counts Reconciled: [ ] Yes [ ] No
+:: end
 
-Counter C
+:: lines Remarks | 3
 
-Candidate A
+:: sign Counter A | Counter B | Counter C
 
-Candidate B
+:: sign Verified By / Chief Election Commissioner
 
-Candidate C
-
-Rejected
-
-Difference
-
-Verified
-
-YES / NO
-
-Remarks
-
-_____________________________
-
---------------------------------------------------------
+---
 
 # FORM ER-25
 # Rejected Ballot Register
 
-Serial No
+:: grid
+Election: ___
+Position: ___
+:: end
 
-Ballot Number
+## Register
 
-Reason
+| Serial No. | Ballot No. | Reason | Decision | Initials |
+|------------|------------|--------|----------|----------|
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
 
-□ No official stamp
+## Grounds Used
 
-□ Multiple selections
+[ ] No official stamp
+[ ] Multiple selections
+[ ] No clear intention
+[ ] Damaged
+[ ] Identifiable markings
+[ ] Other
 
-□ No clear intention
+:: sign Election Commissioner | Chief Election Commissioner
 
-□ Damaged
-
-□ Identifiable markings
-
-□ Other
-
-Decision
-
-Commission Signature
-
---------------------------------------------------------
+---
 
 # FORM ER-26
 # Recount Request
 
-Reference Number
+:: grid
+Reference Number: ___
+Date: ___
+Time Received: ___
+Position: ___
+:: end
 
-Date
+## Applicant
 
-Applicant
+:: grid
+Applicant: ___
+Membership No.: ___
+Candidate Represented: ___
+Phone: ___
+:: end
 
-Candidate
+## Grounds
 
-Position
+[ ] Counting error
+[ ] Mathematical error
+[ ] Invalid ballots counted
+[ ] Tally difference between counters
+[ ] Other
 
-Grounds
+:: lines Detailed explanation | 5
 
-□ Counting Error
+Evidence attached: [ ] Yes [ ] No
 
-□ Mathematical Error
+:: sign Applicant / Signature | Received By / Commission officer and time
 
-□ Invalid Ballots
-
-□ Tally Difference
-
-□ Other
-
-Detailed Explanation
-
-______________________________
-
-Evidence Attached
-
-YES / NO
-
-Received By
-
-Time
-
---------------------------------------------------------
+---
 
 # FORM ER-27
 # Recount Decision
 
-Reference No
+:: grid
+Reference No.: ___
+Applicant: ___
+Position: ___
+Date: ___
+:: end
 
-Applicant
+Decision: [ ] Approved [ ] Rejected
 
-Decision
+:: lines Reason | 4
 
-□ Approved
+:: sign Recount Ordered By / Chief Election Commissioner | Election Commissioner | Election Commissioner
 
-□ Rejected
+:: seal
 
-Reason
-
-______________________________
-
-Recount Ordered By
-
-Chief Election Commissioner
-
-Commission Members
-
-Date
-
---------------------------------------------------------
+---
 
 # FORM ER-28
 # Recount Report
 
-Position
+:: grid
+Election: ___
+Position: ___
+Date of Recount: ___
+Reference No.: ___
+:: end
 
-Original Count
+## Comparison
 
-Recount
+| Candidate | Original Count | Recount | Difference |
+|-----------|----------------|---------|------------|
+| | | | |
+| | | | |
+| | | | |
+| Rejected | | | |
 
-Difference
+:: lines Reason for the difference | 3
 
-Reason
+:: lines Final result and Commission decision | 3
 
-Final Result
+:: sign Chief Election Commissioner | Election Commissioner | Observer
 
-Commission Decision
-
-Signatures
-
-Chief Election Commissioner
-
-Commissioners
-
-Observers
-
---------------------------------------------------------
+---
 
 # FORM ER-29
 # Final Result Sheet
 
-Election
+:: grid
+Election: ___
+Position: ___
+:: end
 
-Position
+## Result
 
-Candidate
+| Candidate | Votes | Percentage | Status |
+|-----------|-------|------------|--------|
+| | | | |
+| | | | |
+| | | | |
+| | | | |
 
-Votes
+:: grid3
+Winner: ___
+Runner-up: ___
+Rejected Ballots: ___
+:: end
 
-Percentage
+Total Votes: ___
 
-Status
+:: sign Certified By / Chief Election Commissioner | Election Commissioner | Election Commissioner
 
-Winner
-
-Runner-up
-
-Rejected Ballots
-
-Total Votes
-
-Certified By
-
-Chief Election Commissioner
-
-Commissioners
-
---------------------------------------------------------
+---
 
 # FORM ER-30
 # Election Result Certification
 
-Election Name
+:: grid
+Election Name: ___
+Election Date: ___
+Polling Stations: ___
+Registered Voters: ___
+Votes Cast: ___
+Turnout Percentage: ___
+Rejected Ballots: ___
+Date of Certification: ___
+:: end
 
-Election Date
+## We Certify That
 
-Polling Stations
+[ ] The election was conducted according to the Constitution.
+[ ] Counting has been completed.
+[ ] Results have been verified.
+[ ] All recounts have been completed.
+[ ] All appeals have been recorded.
 
-Registered Voters
+:: sign Chief Election Commissioner | Election Commissioner | Election Commissioner
 
-Votes Cast
+:: sign Observer | Observer
 
-Turnout %
+:: seal Association Seal
 
-Rejected Ballots
-
-We certify that
-
-□ Election conducted according to Constitution
-
-□ Counting completed
-
-□ Results verified
-
-□ Recounts completed
-
-□ Appeals recorded
-
-Chief Election Commissioner
-
-Election Commissioners
-
-Observers
-
-Association Seal
-
---------------------------------------------------------
+---
 
 # FORM ER-31
 # Result Declaration
 
-Election
-
-Date
-
-Time
+:: grid
+Election: ___
+Date: ___
+Time: ___
+Reference No.: ___
+:: end
 
 The Election Commission hereby declares the following candidates elected.
 
-Office | Candidate | Votes
+| Office | Candidate | Votes |
+|--------|-----------|-------|
+| President | | |
+| Vice President | | |
+| General Secretary | | |
+| Joint Secretary | | |
+| Treasurer | | |
+| Executive Member | | |
+| Executive Member | | |
+| Executive Member | | |
 
-President
+:: sign Certified By / Chief Election Commissioner
 
-Vice President
+:: seal
 
-General Secretary
-
-Joint Secretary
-
-Treasurer
-
-Executive Members
-
-Certified by
-
-Chief Election Commissioner
-
-Seal
-
---------------------------------------------------------
+---
 
 # FORM ER-32
 # Election Complaint Form
 
-Complaint No
+:: grid
+Complaint No.: ___
+Date: ___
+Time: ___
+Election: ___
+:: end
 
-Complainant
+## Parties
 
-Membership No
+:: grid
+Complainant: ___
+Membership No.: ___
+Respondent: ___
+Phone: ___
+:: end
 
-Respondent
+## Nature of Complaint
 
-Date
+[ ] Campaign
+[ ] Polling
+[ ] Counting
+[ ] Result
+[ ] Other
 
-Time
+:: lines Description | 6
 
-Nature of Complaint
+:: lines Evidence attached | 2
 
-□ Campaign
+:: lines Requested relief | 3
 
-□ Polling
+:: sign Complainant / Signature | Received By / Commission officer and time
 
-□ Counting
-
-□ Result
-
-□ Other
-
-Description
-
-Evidence Attached
-
-Requested Relief
-
-Signature
-
---------------------------------------------------------
+---
 
 # FORM ER-33
 # Election Investigation Report
 
-Complaint No
+:: grid
+Complaint No.: ___
+Investigating Officer: ___
+Date Assigned: ___
+Date Submitted: ___
+:: end
 
-Investigating Officer
+:: lines Persons interviewed | 4
 
-Persons Interviewed
+:: lines Evidence reviewed | 3
 
-Evidence Reviewed
+:: lines Documents reviewed | 3
 
-Documents Reviewed
+:: lines Findings | 6
 
-Findings
+:: lines Recommendations | 4
 
-Recommendations
+Submitted To: ___
 
-Submitted To
+:: sign Investigating Officer / Signature and date | Received By / Election Commission
 
-Election Commission
-
---------------------------------------------------------
+---
 
 # FORM ER-34
 # Appeal to Election Appeals Tribunal
 
-Appeal No
+:: grid
+Appeal No.: ___
+Date: ___
+Appellant: ___
+Membership No.: ___
+:: end
 
-Appellant
+:: lines Decision appealed against | 2
 
-Decision Appealed
+:: lines Grounds of appeal | 6
 
-Grounds
+:: lines Supporting evidence | 3
 
-Supporting Evidence
+:: lines Requested relief | 3
 
-Requested Relief
+:: sign Appellant / Signature and date | Received By / Tribunal registrar
 
-Date
-
-Signature
-
---------------------------------------------------------
+---
 
 # FORM ER-35
 # Tribunal Decision
 
-Appeal No
+:: grid
+Appeal No.: ___
+Hearing Date: ___
+Decision Date: ___
+Appellant: ___
+:: end
 
-Hearing Date
+:: lines Tribunal members | 3
 
-Tribunal Members
+:: lines Evidence considered | 4
 
-Evidence Considered
+## Decision
 
-Decision
+[ ] Appeal allowed
+[ ] Appeal partially allowed
+[ ] Appeal dismissed
 
-□ Appeal Allowed
+:: lines Orders | 4
 
-□ Appeal Partially Allowed
+:: lines Reasons | 6
 
-□ Appeal Dismissed
+:: sign Tribunal Member | Tribunal Member | Tribunal Member
 
-Orders
-
-Reasons
-
-Signed
-
-Tribunal Members
-
-Date
-
---------------------------------------------------------
+---
 
 # FORM ER-36
 # Election Completion Report
 
-Election Reference
+:: grid
+Election Reference: ___
+Election Date: ___
+Total Registered Voters: ___
+Votes Cast: ___
+Turnout Percentage: ___
+Candidates: ___
+Complaints Received: ___
+Appeals Filed: ___
+Recounts: ___
+Security Incidents: ___
+:: end
 
-Election Date
+:: lines Lessons learned | 5
 
-Total Registered Voters
+:: lines Recommendations for the next election | 5
 
-Votes Cast
+:: sign Prepared By / Chief Election Commissioner | Election Commissioner
 
-Turnout
-
-Candidates
-
-Complaints Received
-
-Appeals Filed
-
-Recounts
-
-Security Incidents
-
-Lessons Learned
-
-Recommendations
-
-Prepared By
-
-Chief Election Commissioner
-
---------------------------------------------------------
+---
 
 # FORM ER-37
 # Executive Committee Handover Certificate
 
-Outgoing Executive Committee
+:: grid
+Outgoing Committee Term: ___
+Incoming Committee Term: ___
+Date of Handover: ___
+Venue: ___
+:: end
 
-Incoming Executive Committee
+## Items Handed Over
 
-Date
+[ ] Constitution
+[ ] Minute books
+[ ] Membership register
+[ ] Bank documents
+[ ] Cheque books
+[ ] Financial records
+[ ] Fixed assets
+[ ] Office keys
+[ ] Website access
+[ ] Email accounts
+[ ] Social media accounts
+[ ] Digital archive
+[ ] Election archive
+[ ] Contracts
+[ ] Official seal
 
-The following items have been handed over
+:: lines Remarks | 3
 
-□ Constitution
+:: sign Outgoing President | Incoming President
 
-□ Minute Books
+:: sign Outgoing Secretary | Incoming Secretary
 
-□ Membership Register
+:: sign Witness | Witness
 
-□ Bank Documents
-
-□ Cheque Books
-
-□ Financial Records
-
-□ Fixed Assets
-
-□ Office Keys
-
-□ Website Access
-
-□ Email Accounts
-
-□ Social Media Accounts
-
-□ Digital Archive
-
-□ Election Archive
-
-□ Contracts
-
-□ Official Seal
-
-Remarks
-
-Outgoing President
-
-Incoming President
-
-Outgoing Secretary
-
-Incoming Secretary
-
-Witnesses
-
---------------------------------------------------------
+---
 
 # FORM ER-38
 # Election Archive Register
 
-Archive ID
+:: grid
+Election Year: ___
+Prepared On: ___
+:: end
 
-Election Year
+## Register
 
-Document Name
+| Archive ID | Document Name | Pages | Location | Retention Until | Destroyed On | Destroyed By |
+|------------|---------------|-------|----------|-----------------|--------------|--------------|
+| | | | | | | |
+| | | | | | | |
+| | | | | | | |
+| | | | | | | |
 
-Pages
+:: sign Prepared By | Verified By / Chief Election Commissioner
 
-Location
-
-Retention Until
-
-Destroyed On
-
-Destroyed By
-
-Verified By
-
---------------------------------------------------------
+---
 
 # FORM ER-39
 # Election Material Receipt Register
 
-Date
+:: grid
+Election: ___
+Polling Station: ___
+:: end
 
-Time
+## Register
 
-Received From
+| Date | Time | Received From | Material | Quantity | Condition | Seal Number |
+|------|------|---------------|----------|----------|-----------|-------------|
+| | | | | | | |
+| | | | | | | |
+| | | | | | | |
+| | | | | | | |
 
-Material
+:: lines Remarks | 2
 
-Quantity
+:: sign Received By / Name, role, signature | Handed Over By
 
-Condition
-
-Seal Number
-
-Received By
-
-Remarks
-
---------------------------------------------------------
+---
 
 # FORM ER-40
 # Election Closure Certificate
 
-Election Reference
+:: grid
+Election Reference: ___
+Date: ___
+:: end
 
-The Election Commission certifies that
+## The Election Commission Certifies That
 
-□ Election completed
+[ ] The election is completed.
+[ ] Results have been certified.
+[ ] All appeals have concluded.
+[ ] Tribunal decisions have been implemented.
+[ ] The Executive Committee has been installed.
+[ ] Election records have been archived.
+[ ] Election materials have been secured.
+[ ] Financial accounts have been closed.
+[ ] Commission duties are completed.
 
-□ Results certified
+The Election Commission is hereby dissolved effective:
 
-□ Appeals concluded
+Effective Date of Dissolution: ___
 
-□ Tribunal decisions implemented
+:: sign Chief Election Commissioner | Election Commissioner | Election Commissioner
 
-□ Executive Committee installed
+:: sign Association President | Association Secretary
 
-□ Election records archived
-
-□ Election materials secured
-
-□ Financial accounts closed
-
-□ Commission duties completed
-
-The Election Commission is hereby dissolved effective
-
-____________________
-
-Chief Election Commissioner
-
-Election Commissioner
-
-Election Commissioner
-
-Association President
-
-Association Secretary
-
-Association Seal
-
-Date
-
---------------------------------------------------------
-
-APPENDIX A
-Mandatory Signature Matrix
-
-| Document | CEC | EC | Observer | Candidate Agent | Presiding Officer |
-|----------|-----|----|----------|-----------------|-------------------|
-| Poll Opening | ✓ | | ✓ | Optional | ✓ |
-| Poll Closing | ✓ | ✓ | ✓ | Optional | ✓ |
-| Ballot Sealing | ✓ | ✓ | ✓ | Optional | ✓ |
-| Counting Start | ✓ | ✓ | ✓ | Optional | |
-| Counting Completion | ✓ | ✓ | ✓ | Optional | |
-| Result Certification | ✓ | ✓ | ✓ | | |
-| Handover | | | | | |
-
---------------------------------------------------------
-
-APPENDIX B
-Chain of Custody
-
-Election Materials
-
-↓
-
-Material Receipt Register (ER-39)
-
-↓
-
-Polling Officer Verification
-
-↓
-
-Poll Opening Certificate
-
-↓
-
-Voting
-
-↓
-
-Poll Closing Certificate
-
-↓
-
-Ballot Box Sealing Certificate
-
-↓
-
-Counting Authorization
-
-↓
-
-Ballot Box Opening Certificate
-
-↓
-
-Vote Counting Sheets
-
-↓
-
-Independent Tally Sheets
-
-↓
-
-Result Certification
-
-↓
-
-Election Archive Register
-
-↓
-
-Executive Committee Handover
-
-↓
-
-Election Closure Certificate
-
---------------------------------------------------------
-
-APPENDIX C
-Record Retention
-
-| Record | Minimum Retention |
-|---------|-------------------|
-| Ballot Papers | 3 Years (or until all appeals conclude, whichever is later) |
-| Result Sheets | Permanent |
-| Election Certificates | Permanent |
-| Complaints | 10 Years |
-| Appeals | 10 Years |
-| Tribunal Decisions | Permanent |
-| Registers | Permanent |
-| Election Reports | Permanent |
-| Handover Records | Permanent |
-
---------------------------------------------------------
-End of Forms Handbook Part II
+:: seal Association Seal

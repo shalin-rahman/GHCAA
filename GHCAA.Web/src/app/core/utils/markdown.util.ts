@@ -183,3 +183,221 @@ export function renderMarkdownWithAnchors(source: string, maxLevel = 2): string 
         return `<h${level} id="${ids[n++]}">`;
     });
 }
+
+/* ==========================================================================
+   FORM RENDERER
+   --------------------------------------------------------------------------
+   An election form is not prose: it is a printed A4 sheet with ruled fields,
+   tick boxes, a signature panel and a seal. Rendering it through the prose
+   renderer above produced a wall of one-word paragraphs ("Name", "Signature",
+   "Date") with nowhere to write — which is exactly what it looked like.
+
+   `renderFormMarkdown` therefore reads a small, explicit field vocabulary that
+   the handbook source is authored in. Nothing is guessed from the shape of a
+   sentence, so a form can never half-render:
+
+     ## Candidate Information     a section band
+     Name: ____                   a ruled field (label + writing rule)
+     [ ] I am not contesting      a tick-box item (consecutive lines group)
+     Verified: [ ] Yes [ ] No     tick boxes inline in a field label
+     :: grid / :: grid3 / :: end  2- or 3-column field block
+     :: lines Ground of objection | 3      label plus 3 ruled lines
+     :: sign Presiding Officer | Observer  the signature panel
+     :: seal                      the seal circle
+     | a | b |                    a ruled register table (.form-table)
+
+   Anything else falls through to the prose rules (paragraphs, lists, `---`), so
+   the declarations and undertakings that forms carry still read as sentences.
+
+   SECURITY: as above — every character is escaped before any markup is emitted.
+   ========================================================================== */
+
+/** A field label may carry inline tick boxes: `Membership Verified: [ ] Yes [ ] No`. */
+function renderFormInline(text: string): string {
+    // Runs after renderInline (and therefore after escapeHtml), so `[ ]` here can
+    // only ever be literal source characters.
+    return renderInline(text).replace(/\[\s?\]/g, '<span class="box"></span>');
+}
+
+/** `Label: ____` / `Label:` — the trailing underscores are the writing rule. */
+const FIELD_LINE = /^(.+?):[ \t]*_*[ \t]*$/;
+
+/** `:: name rest-of-line` */
+const DIRECTIVE = /^::[ \t]*([a-z0-9]+)[ \t]*(.*)$/i;
+
+function fieldRow(label: string): string {
+    return `<div class="f-row"><span class="f-label">${renderFormInline(label)}</span><span class="f-rule"></span></div>`;
+}
+
+/** `:: sign Chief Election Commissioner | Observer / candidate agent` */
+function signPanel(spec: string): string {
+    const blocks = spec.split('|').map(s => s.trim()).filter(Boolean).map(entry => {
+        // `Who / qualifier` puts the qualifier on a second, lighter line.
+        const [who, ...rest] = entry.split('/');
+        const sub = rest.join('/').trim();
+        return '<div class="sign-block">'
+            + '<span class="sign-space"></span>'
+            + `<span class="sign-who">${renderInline(who.trim())}</span>`
+            + (sub ? `<span class="sign-sub">${renderInline(sub)}</span>` : '')
+            + '</div>';
+    });
+    return `<div class="sign-grid">${blocks.join('')}</div>`;
+}
+
+/** `:: lines Label | 3` — a label with N ruled lines under it (default 3). */
+function ruledLines(spec: string): string {
+    const [labelPart, countPart] = spec.split('|');
+    const count = Math.min(Math.max(parseInt((countPart ?? '').trim(), 10) || 3, 1), 12);
+    const label = (labelPart ?? '').trim();
+    return '<div class="f-lines">'
+        + (label ? `<span class="f-label">${renderFormInline(label)}</span>` : '')
+        + '<i></i>'.repeat(count)
+        + '</div>';
+}
+
+/**
+ * Renders one form section (the output of `splitForms`) as a printable sheet body.
+ * The two leading `# FORM ER-nn` / `# Name` headings become the form's masthead.
+ */
+export function renderFormMarkdown(source: string): string {
+    const lines = (source ?? '').replace(/\r\n/g, '\n').split('\n');
+    const out: string[] = [];
+    /** Open `:: grid` wrapper, so `:: end` knows whether there is one to close. */
+    let gridOpen = false;
+    let i = 0;
+
+    // Masthead: `# FORM ER-01` followed by the form's name.
+    const codeMatch = /^#\s+FORM\s+([A-Za-z0-9-]+)\s*$/.exec((lines[0] ?? '').trim());
+    if (codeMatch) {
+        i = 1;
+        let name = '';
+        while (i < lines.length) {
+            const t = lines[i].trim();
+            if (!t) { i++; continue; }
+            const h = /^#{1,3}\s+(.*)$/.exec(t);
+            if (h) { name = h[1].trim(); i++; }
+            break;
+        }
+        out.push('<header class="f-head">'
+            + `<span class="f-code">FORM ${escapeHtml(codeMatch[1].toUpperCase())}</span>`
+            + (name ? `<h3 class="f-name">${renderInline(name)}</h3>` : '')
+            + '</header>');
+    }
+
+    while (i < lines.length) {
+        const trimmed = lines[i].trim();
+
+        if (!trimmed) { i++; continue; }
+
+        // Directives.
+        const directive = DIRECTIVE.exec(trimmed);
+        if (directive) {
+            const [, rawName, rest] = directive;
+            const name = rawName.toLowerCase();
+            i++;
+            if (name === 'grid' || name === 'grid3') {
+                if (gridOpen) out.push('</div>');
+                out.push(`<div class="f-grid${name === 'grid3' ? ' f-grid-3' : ''}">`);
+                gridOpen = true;
+            } else if (name === 'end') {
+                if (gridOpen) { out.push('</div>'); gridOpen = false; }
+            } else if (name === 'sign') {
+                if (gridOpen) { out.push('</div>'); gridOpen = false; }
+                out.push(signPanel(rest));
+            } else if (name === 'lines') {
+                out.push(ruledLines(rest));
+            } else if (name === 'seal') {
+                out.push(`<div class="seal-box">${escapeHtml(rest.trim() || 'Official Seal')}</div>`);
+            }
+            // An unknown directive is dropped rather than printed as text: a typo must
+            // not leak `:: sgin` onto an official form.
+            continue;
+        }
+
+        // Section band. `###` is treated the same as `##` — a form has one level of
+        // grouping, and a second visual weight only makes the sheet noisier.
+        const heading = /^(#{2,6})\s+(.*)$/.exec(trimmed);
+        if (heading) {
+            if (gridOpen) { out.push('</div>'); gridOpen = false; }
+            out.push(`<h4 class="f-section">${renderInline(heading[2])}</h4>`);
+            i++;
+            continue;
+        }
+
+        // Tick-box run.
+        if (/^\[\s?\]\s+/.test(trimmed)) {
+            const items: string[] = [];
+            while (i < lines.length && /^\[\s?\]\s+/.test(lines[i].trim())) {
+                items.push(`<li><span class="box"></span><span>${renderInline(lines[i].trim().replace(/^\[\s?\]\s+/, ''))}</span></li>`);
+                i++;
+            }
+            out.push(`<ul class="check-list">${items.join('')}</ul>`);
+            continue;
+        }
+
+        // Ruled table (all-sides borders, writable row height).
+        if (trimmed.startsWith('|') && i + 1 < lines.length && TABLE_DIVIDER.test(lines[i + 1].trim())) {
+            if (gridOpen) { out.push('</div>'); gridOpen = false; }
+            const header = splitRow(trimmed);
+            i += 2;
+            const body: string[][] = [];
+            while (i < lines.length && lines[i].trim().startsWith('|')) {
+                body.push(splitRow(lines[i]));
+                i++;
+            }
+            const head = header.map(c => `<th>${renderFormInline(c)}</th>`).join('');
+            const rows = body
+                .map(r => `<tr>${r.map(c => `<td>${renderFormInline(c)}</td>`).join('')}</tr>`)
+                .join('');
+            out.push(`<table class="form-table"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>`);
+            continue;
+        }
+
+        // Ruled field.
+        const field = FIELD_LINE.exec(trimmed);
+        if (field) {
+            out.push(fieldRow(field[1].trim()));
+            i++;
+            continue;
+        }
+
+        // Horizontal rule.
+        if (/^(-{3,}|\*{3,})$/.test(trimmed)) {
+            if (gridOpen) { out.push('</div>'); gridOpen = false; }
+            out.push('<hr>');
+            i++;
+            continue;
+        }
+
+        // Bulleted / numbered list.
+        const ordered = /^\d+\.\s+/.test(trimmed);
+        if (ordered || /^[-*]\s+/.test(trimmed)) {
+            const tag = ordered ? 'ol' : 'ul';
+            const marker = ordered ? /^\d+\.\s+/ : /^[-*]\s+/;
+            const items: string[] = [];
+            while (i < lines.length && marker.test(lines[i].trim())) {
+                items.push(`<li>${renderFormInline(lines[i].trim().replace(marker, ''))}</li>`);
+                i++;
+            }
+            out.push(`<${tag}>${items.join('')}</${tag}>`);
+            continue;
+        }
+
+        // Paragraph — a declaration or an instruction on the form.
+        const para: string[] = [];
+        while (i < lines.length) {
+            const t = lines[i].trim();
+            if (!t || /^(#{1,6}\s|::|\||[-*]\s|\d+\.\s|\[\s?\]\s)/.test(t) || FIELD_LINE.test(t) || /^(-{3,}|\*{3,})$/.test(t)) break;
+            para.push(t);
+            i++;
+        }
+        if (para.length) out.push(`<p>${renderFormInline(para.join(' '))}</p>`);
+    }
+
+    if (gridOpen) out.push('</div>');
+    // `splitForms` cuts the handbook at the next `# FORM` heading, so the `---` that
+    // separates two forms in the source lands at the foot of the preceding one. A rule
+    // hanging under the last signature panel is not part of the form.
+    while (out.length && out[out.length - 1] === '<hr>') out.pop();
+    return out.join('\n');
+}

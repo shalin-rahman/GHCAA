@@ -43,9 +43,8 @@
              [class.active]="isMobileMenuOpen">
             <a routerLink="/" class="nav-link">Home</a>
             <a routerLink="/about" class="nav-link">About</a>
-            <!-- The governing document is public by charter; it gets a top-level link
-                 rather than living only in the footer. Elections/forms hang off it. -->
-            <a routerLink="/constitution" class="nav-link">Constitution</a>
+            <!-- Constitution and Elections & Forms are reference documents, not places a
+                 visitor navigates to on arrival: both are reached from the footer. -->
             <a *ngIf="orgConfigService.isFeatureEnabled('enableEvents')" routerLink="/events" class="nav-link">Events</a>
             <a routerLink="/news" class="nav-link" title="Latest News">News</a>
             <!-- Same feed, deep-linked to its Notices tab — no second page to maintain. -->

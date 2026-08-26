@@ -76,6 +76,7 @@ namespace GHCAA.Infrastructure.Services
                 InstitutionAcronym = "GHC",
                 MembershipNumberPrefix = "GHC-",
                 ApprovalSeal = "GHC APPROVED",
+                EstablishedOn = "29 Nov 2025",
                 LogoUrl = "/assets/logo.png",
                 PrimaryColor = "#121212",
                 AccentColor = "#c5a059"

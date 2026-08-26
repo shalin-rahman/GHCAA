@@ -1298,6 +1298,8 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `ContactComponent` | `contact/` | `ContactService` |
 | `DirectoryComponent` | `directory/` | `NetworkingService` |
 | `MagazineComponent` | `magazine/` | `NewsService` |
+| `ConstitutionPage` | `constitution/` | `GovernanceService` (public read), `markdown.util` |
+| `ElectionsPage` | `elections/` | `OrgConfigService` (letterhead), `markdown.util` (`renderFormMarkdown`) |
 
 ### Common (Shared) Components (`src/app/common/`)
 | Component | Folder | Key Services |
@@ -1366,6 +1368,8 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `/reset-password` | `ResetPassword` | — |
 | `/about`, `/contact` | `About`, `Contact` | — |
 | `/gallery`, `/magazine`, `/directory` | Public components | — |
+| `/constitution` | `ConstitutionPage` | — (footer link; not in the top nav) |
+| `/elections` | `ElectionsPage` | — (`?doc=` selects a document or a split form) |
 | `/events`, `/news`, `/jobs` | Shared components | — |
 | `/payment/success`, `/payment/failed` | `PaymentStatus` | — |
 | `/portal/dashboard` | `Dashboard` | `authGuard` |
@@ -1871,7 +1875,9 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 
 ## Web (Angular) — Test Specs
 
-All test files use Jasmine + Karma. File pattern: `*.spec.ts`
+All test files run on **Vitest** (`npx vitest run` — 64 files / 306 tests), not Jasmine/Karma.
+File pattern: `*.spec.ts`. Note that Vitest does not resolve `templateUrl`, so component specs
+assert on exported pure functions rather than rendered templates.
 
 ### Service Specs (`core/services/`)
 | Spec File | Tests |

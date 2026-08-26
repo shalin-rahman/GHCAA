@@ -226,9 +226,9 @@
         }
 
         .remove-opt {
-            background: rgba(var(--danger-color), 0.1);
+            background: rgba(var(--danger-color-rgb), 0.1);
             color: var(--danger-color);
-            border: 1px solid rgba(var(--danger-color), 0.2);
+            border: 1px solid rgba(var(--danger-color-rgb), 0.2);
             width: 44px;
             height: 44px;
             border-radius: 12px;

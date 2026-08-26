@@ -106,6 +106,7 @@ CREATE UNIQUE INDEX "IX_OrganizationConfigs_OrgId" ON "OrganizationConfigs" ("Or
     "institutionAcronym": "GHC",
     "membershipNumberPrefix": "GHC-",
     "approvalSeal": "GHC APPROVED",
+    "establishedOn": "29 Nov 2025",
     "logoUrl": "/assets/logo.png",
     "primaryColor": "#1a237e",
     "accentColor": "#e53935"

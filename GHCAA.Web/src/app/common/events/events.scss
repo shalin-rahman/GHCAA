@@ -478,8 +478,8 @@
             letter-spacing: 0.5px;
 
             &.approved {
-                background: rgba(39, 174, 96, 0.1);
-                color: #27ae60;
+                background: rgba(var(--success-color-rgb), 0.1);
+                color: var(--success-color);
             }
             &.pending {
                 background: rgba(241, 196, 15, 0.1);

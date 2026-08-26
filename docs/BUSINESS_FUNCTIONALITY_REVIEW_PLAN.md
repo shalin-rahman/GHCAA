@@ -266,6 +266,7 @@ Tests: `FinancialServiceTests`, `FinancialLedgerControllerTests`, `PaymentConfig
 |---|---|---|
 | E1 | EC committee display | `GovernanceController`, `AdminGovernanceController` |
 | E2 | Constitution hub | `GovernanceController` |
+| E2a | Election document library & printable form pad | `ElectionsPage` + `markdown.util.ts` (static assets; letterhead from `ConfigController`) |
 | E3 | News / magazine / gallery | `NewsController`, `GalleryController` |
 | E4 | Communication hub | `CommunicationController` |
 | E5 | Admin audit log | `ActivityController`, `IActivityService` |

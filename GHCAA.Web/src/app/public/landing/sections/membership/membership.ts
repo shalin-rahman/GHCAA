@@ -57,7 +57,7 @@ export class LandingMembership {
             id: 'honorary',
             name: 'Honorary Member',
             shortDesc: 'Distinguished personalities who have brought glory to the institution.',
-            color: '#FF4500',
+            color: 'var(--tier-honorary)',
             criteria: [
                 'Not necessarily an alumni of the college.',
                 'Exceptional national or international achievement in any field.',

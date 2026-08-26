@@ -1,0 +1,400 @@
+/* IEEE-style print stylesheet for the GHCAA documentation book.
+   Single-column manuscript layout by default; add class "two-col" to <body>
+   (build.py --two-column) for the IEEE Transactions two-column layout.
+   Target: A4, duplex, Chrome/Edge "Save as PDF". */
+
+/* ---------- page ---------- */
+
+@page {
+  size: A4;
+  margin: 20mm 18mm 22mm 18mm;
+}
+
+@page :first {
+  margin-top: 34mm;
+}
+
+/* A named page for diagrams too dense to stay legible at the portrait
+   content width (174mm) even after shrinking — e.g. the ERD, the design
+   class diagram, the dependency structure matrix. Applied via the
+   "landscape" page below, which forces onto this page (Chrome/Edge honour
+   named pages; Firefox and Safari fall back to portrait, still legible). */
+@page landscape {
+  size: A4 landscape;
+  margin: 18mm 20mm;
+}
+
+:root {
+  --rule: #000;
+  --muted: #444;
+  --body: 11pt;
+  --lead: 1.42;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  font-family: "Times New Roman", Times, "Liberation Serif", serif;
+  font-size: var(--body);
+  color: #000;
+  background: #f2f2f2;
+}
+
+body {
+  margin: 0 auto;
+  padding: 0;
+  line-height: var(--lead);
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  background: #fff;
+  max-width: 174mm;          /* A4 minus margins, so screen matches print */
+  padding: 18mm 0 24mm;
+}
+
+/* ---------- headings ---------- */
+
+h1, h2, h3, h4 {
+  font-weight: bold;
+  text-align: left;
+  hyphens: manual;
+  break-after: avoid-page;
+  page-break-after: avoid;
+  margin: 0 0 0.5em;
+}
+
+h1 {
+  font-size: 15pt;
+  text-align: center;
+  margin: 0 0 1.4em;
+  padding-bottom: 0.4em;
+  border-bottom: 1.2pt solid var(--rule);
+  break-before: page;
+  page-break-before: always;
+  letter-spacing: 0.01em;
+}
+
+h1:first-of-type { break-before: avoid; page-break-before: auto; }
+
+h2 {
+  font-size: 11.5pt;
+  margin-top: 1.6em;
+  text-transform: none;
+}
+
+h3 {
+  font-size: 11pt;
+  font-style: italic;
+  font-weight: bold;
+  margin-top: 1.2em;
+}
+
+h4 {
+  font-size: 11pt;
+  font-style: italic;
+  font-weight: normal;
+  margin-top: 1em;
+}
+
+/* title page */
+
+.title-page {
+  text-align: center;
+  break-after: page;
+  page-break-after: always;
+  padding: 12mm 0 0;
+}
+
+.title-page .title {
+  font-size: 20pt;
+  border: 0;
+  break-before: avoid;
+  page-break-before: auto;
+  margin-bottom: 0.4em;
+  padding: 0;
+}
+
+.title-page .subtitle {
+  font-size: 13pt;
+  font-style: italic;
+  margin: 0 auto 2.2em;
+  max-width: 130mm;
+  text-align: center;
+}
+
+.part-title {
+  text-align: center;
+  break-before: page;
+  page-break-before: always;
+  margin: 40mm 0 0;
+  font-size: 16pt;
+  letter-spacing: 0.14em;
+  border: 0;
+}
+
+/* ---------- body text ---------- */
+
+p {
+  margin: 0 0 0.62em;
+  orphans: 2;
+  widows: 2;
+}
+
+h1 + p, h2 + p, h3 + p, h4 + p,
+figure + p, blockquote + p { text-indent: 0; }
+
+ul, ol {
+  margin: 0 0 0.7em 0;
+  padding-left: 6mm;
+}
+
+li { margin-bottom: 0.22em; }
+
+blockquote {
+  margin: 0.8em 6mm;
+  padding-left: 3mm;
+  border-left: 2pt solid #999;
+  font-size: 10.5pt;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+blockquote p:last-child { margin-bottom: 0; }
+
+em { font-style: italic; }
+strong { font-weight: bold; }
+
+code, kbd, samp, pre {
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 9pt;
+}
+
+code { background: #f4f4f4; padding: 0 1px; }
+
+pre {
+  background: #f7f7f7;
+  border: 0.5pt solid #ccc;
+  padding: 3mm;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  text-align: left;
+  hyphens: none;
+}
+
+a { color: #000; text-decoration: none; }
+
+hr {
+  border: 0;
+  border-top: 0.5pt solid #bbb;
+  margin: 1.4em 0;
+}
+
+/* ---------- tables (IEEE: caption above, ruled top / header / bottom) ---------- */
+
+figure.tbl {
+  margin: 1.2em 0 1.4em;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  text-align: center;
+}
+
+figure.tbl.long {            /* tables too tall for one page may break */
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+figure.tbl > figcaption {
+  font-size: 9pt;
+  text-align: center;
+  margin: 0 auto 0.5em;
+  max-width: 150mm;
+  break-after: avoid-page;
+  page-break-after: avoid;
+}
+
+figure.tbl > figcaption .label {
+  display: block;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+}
+
+figure.tbl > figcaption .cap { display: block; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 9pt;
+  line-height: 1.28;
+  text-align: left;
+  hyphens: auto;
+  margin: 0 auto;
+}
+
+thead { display: table-header-group; }
+tr { break-inside: avoid; page-break-inside: avoid; }
+
+table thead th {
+  border-top: 1pt solid var(--rule);
+  border-bottom: 0.6pt solid var(--rule);
+  padding: 1.6mm 2mm;
+  font-weight: bold;
+  vertical-align: bottom;
+}
+
+table tbody td {
+  border: 0;
+  padding: 1.3mm 2mm;
+  vertical-align: top;
+}
+
+table tbody tr:last-child td { border-bottom: 1pt solid var(--rule); }
+
+table tbody tr:nth-child(even) { background: #fafafa; }
+
+/* ---------- figures and diagrams (IEEE: caption below) ---------- */
+
+figure.fig {
+  margin: 1.2em 0 1.4em;
+  text-align: center;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+figure.fig .diagram {
+  display: block;
+  margin: 0 auto 0.45em;
+  max-width: 100%;
+}
+
+figure.fig .diagram svg {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Oversized diagrams (caption marked "{landscape}" in the Markdown): break
+   onto their own A4 landscape page instead of shrinking to portrait width,
+   so dense diagrams stay readable rather than being reduced to unreadable
+   type. The content width on that page is the A4 landscape print area minus
+   its own margins (297mm - 2*20mm = 257mm). */
+figure.fig.landscape {
+  page: landscape;
+  break-before: page;
+  page-break-before: always;
+  break-after: page;
+  page-break-after: always;
+}
+
+figure.fig.landscape .diagram,
+figure.fig.landscape > figcaption {
+  max-width: 257mm;
+}
+
+@media screen {
+  figure.fig.landscape {
+    border: 0.5pt dashed #bbb;
+    padding: 4mm 0;
+  }
+}
+
+figure.fig > figcaption {
+  font-size: 9pt;
+  text-align: center;
+  margin: 0 auto;
+  max-width: 150mm;
+  break-before: avoid-page;
+  page-break-before: avoid;
+}
+
+figure.fig > figcaption .label { font-weight: bold; }
+
+/* fallback if the diagram renderer is unavailable */
+.diagram-fallback {
+  border: 0.5pt dashed #999;
+  padding: 3mm;
+  text-align: left;
+  font-size: 8.5pt;
+  white-space: pre-wrap;
+  font-family: "Consolas", "Courier New", monospace;
+}
+
+/* ---------- placeholders the author must complete ---------- */
+
+.todo {
+  background: #fff8d6;
+  border-left: 2pt solid #b58900;
+  padding: 2mm 3mm;
+}
+
+@media print {
+  .todo { background: transparent; border-left: 2pt solid #666; }
+}
+
+/* ---------- two-column IEEE Transactions layout ---------- */
+
+body.two-col {
+  font-size: 10pt;
+  --lead: 1.18;
+  columns: 2;
+  column-gap: 8mm;
+  column-fill: auto;
+  max-width: 174mm;
+}
+
+body.two-col table { font-size: 8pt; }
+body.two-col pre, body.two-col .diagram-fallback { font-size: 7.5pt; }
+
+body.two-col h1,
+body.two-col .part-title,
+body.two-col .title-page,
+body.two-col figure.tbl,
+body.two-col figure.fig {
+  column-span: all;
+}
+
+/* ---------- screen preview only ---------- */
+
+@media screen {
+  body {
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.18);
+    padding-left: 18mm;
+    padding-right: 18mm;
+    max-width: 210mm;
+  }
+}
+
+@media print {
+  html { background: #fff; }
+  body {
+    max-width: none;
+    padding: 0;
+    box-shadow: none;
+  }
+  a[href^="http"] { text-decoration: none; }
+}
+
+/* ---------- caption headings whose artefact lives elsewhere ---------- */
+
+h3.orphan-caption {
+  font-style: normal;
+  font-size: 10pt;
+  text-align: center;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  margin: 1.4em auto 0.4em;
+  max-width: 150mm;
+}
+
+/* ---------- lead-in note between a caption and its artefact ---------- */
+
+figure .note {
+  font-size: 9pt;
+  text-align: center;
+  margin: 0 auto 0.45em;
+  max-width: 150mm;
+  color: var(--muted);
+}
+
+figure.fig .note { margin-top: 0.3em; margin-bottom: 0; }

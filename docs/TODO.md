@@ -1038,7 +1038,7 @@
   - **API/UI.** `GET api/financials/impact/{year}` and `GET api/financials/impact/{year}/pdf`, both `[AllowAnonymous]` (publishing it is the point). Flag `enableImpactReport`. Public `/impact/:year` with a year selector; admin action to set the foreword and publish. Additions to the existing `API_ENDPOINTS.FINANCIALS` block.
   - **Tests.** NUnit: a year with zero records returns a report with zeroed sections rather than null; category totals match a hand-summed fixture; the disbursed-scholarship total equals the sum of the linked `Grant` `FinancialRecord` rows. Vitest: year selector, empty-section rendering.
 
-37.11 [TODO] Per 12.6, nothing in Area 37 is `[DONE]` until `dotnet test`, `npx vitest run`, `npm run type-check` and `npx ng build` all pass. Baselines to beat at the start of this Area: **351 NUnit tests** and **64 vitest files / 286 tests**. Additionally, every item that adds a table must be verified against the 37.0 migration path on a **non-empty** database — a passing suite against a fresh SQLite file proves nothing about preprod (`gotcha_ensurecreated_no_op_existing_db`). Update `docs/FEATURES.md`, `docs/project_map.md`, `docs/SRS.md` and `docs/architecture_data_flow.md` as each item lands, per `feedback_docs_update_scope`.
+37.11 [TODO] Per 12.6, nothing in Area 37 is `[DONE]` until `dotnet test`, `npx vitest run`, `npm run type-check` and `npx ng build` all pass. Baselines to beat at the start of this Area: **351 NUnit tests** and **64 vitest files / 306 tests**. Additionally, every item that adds a table must be verified against the 37.0 migration path on a **non-empty** database — a passing suite against a fresh SQLite file proves nothing about preprod (`gotcha_ensurecreated_no_op_existing_db`). Update `docs/FEATURES.md`, `docs/project_map.md`, `docs/SRS.md` and `docs/architecture_data_flow.md` as each item lands, per `feedback_docs_update_scope`.
 
 ---
 
@@ -1077,3 +1077,65 @@ no code change is involved.
 38.5 [DONE] Docs updated per `feedback_docs_update_scope`: new `docs/CONSTITUTION_PUBLISHING.md`;
 `FEATURES.md` §5.1a, `SRS.md` §3.6.2, `architecture_data_flow.md` §2.D and `project_map.md`
 (build-time tool entry) all carry the always-latest rule.
+
+---
+
+# Area 39 — Election forms as operative documents
+
+**Standing rule (2026-08-26): every change must work in BOTH themes and be implemented
+CENTRALLY** — tokens and shared classes in the single global `GHCAA.Web/src/styles.scss`, never a
+per-component one-off. The one sanctioned exception is recorded in 39.4.
+
+39.1 [DONE] **Forms are ready-to-use documents, not specimens.** Each split form from 36.6 now
+renders as a real association form: letterhead pad (crest, org name, address/phone/email, motto,
+watermark), a Reference/Date rule line, a `FORM ER-nn` code chip, ruled write-on fields, tick-box
+lists, banded section headers, a signature grid and a dashed seal circle. Driven by
+`renderFormMarkdown` in `core/utils/markdown.util.ts` from a small directive DSL in the source
+markdown — `:: grid`, `:: sign Who / qualifier`, `:: lines Label | n` (clamped 1–12),
+`Label: ____` field lines and `[ ]` tick boxes, inline or as a list. The renderer escapes every
+source character before emitting markup, so a stored document still cannot inject HTML. The
+letterhead markup stays inline in `elections.html`; a `pad-sheet` component was considered and
+rejected as an unnecessary abstraction (`feedback_keep_lightweight`).
+
+39.2 [DONE] **A4 print fidelity.** Global `@page { size: A4 portrait; margin: 14mm 13mm }`, the
+on-screen sheet at 210mm × 297mm with matching padding, `break-inside: avoid` on every field
+block and `break-before: page` between sheets. Verified under `emulateMedia({media:'print'})` at
+794 × 1123: **zero overflowing descendants**, and the generated PDF paginates correctly in both
+themes. Because `[innerHTML]` content never receives Angular's `_ngcontent` attribute, every
+class the renderer emits (`.pad-*`, `.form-doc`, `.f-*`, `.sign-*`, `.form-table`, `.check-list`,
+`.seal-box`) lives in global `styles.scss`; only page layout lives in `elections.scss`.
+
+39.3 [DONE] **The letterhead is fully configuration-driven.** No organisational literal remains in
+the form header. `branding.establishedOn` was added end-to-end —
+`GHCAA.Application/DTOs/OrgConfigDto.cs` (`BrandingDto`) →
+`OrgConfigService.BuildGhcaaDefaults()` (seeds `29 Nov 2025`, Constitution Article I) →
+`core/models/org-config.model.ts` → `core/services/org-config.service.ts` fallback →
+`elections.ts` `get establishedOn()`. **No EF migration needed**: `ConfigJson` is deserialized
+straight into the DTO. Documented in `docs/CONFIG_DRIVEN_FRAMEWORK.md` §5.
+**`GHCAA.Web/public/assets/app.config.json` is dead code** — zero references repo-wide and an
+unrelated flat shape; do not add config fields there.
+
+39.4 [DONE] **Forms have no dark theme, by design.** `--paper-bg`, `--paper-ink`,
+`--paper-ink-soft`, `--paper-rule`, `--paper-hairline` and `--paper-band` are defined once in
+`:root` and are the only tokens in the system that deliberately carry **no** `body.dark-theme`
+override and need no `@media print` re-pin: a form is a paper document, printed and signed, so it
+is ink-on-white on screen too. Verified by computed style under both themes — `.pad-sheet` is
+`rgb(255,255,255)` on `rgb(20,24,31)` in each.
+
+39.5 [DONE] **Constitution section subheadings are legible.** `renderParagraph` in
+`public/constitution/constitution.ts` promotes a short `Section N: Title` paragraph (numeric,
+lettered or roman, ≤ 60 chars) to an `<h4>`, and emphasises only the label as
+`<p><strong>Section N:</strong> …</p>` when the body runs on from it. Escaping still happens
+before any markup is emitted.
+
+39.6 [DONE] **`Constitution` removed from the public top nav.** It is reached from the footer
+reference links instead; the `/elections` footer link already existed (`footer.html:32`) and was
+left as-is.
+
+39.7 [DONE] Per 12.6: `npm run type-check` clean, `dotnet build` 0 warnings / 0 errors, `npx
+vitest run` **64 files / 306 tests** green (17 new — 11 for `renderFormMarkdown`, 6 for the
+constitution subheading rules). Visual QA done in both themes for `/elections`,
+`/elections?doc=forms`, `/elections?doc=er-19` and `/constitution`, plus print-media screenshots
+and A4 PDFs. **Known environmental gap:** `npm run build` currently fails in Angular's
+font-inlining plugin (`connect ETIMEDOUT` to `fonts.googleapis.com` at `styles.scss:6`) — not a
+code defect; re-run when the network allows and re-grep the emitted `styles-*.css`.

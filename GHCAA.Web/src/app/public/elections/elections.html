@@ -68,7 +68,9 @@
         }
 
         @else if (selected()!.isFormsHandbook && !openForm()) {
-        <!-- 36.6: the handbook is an index of individually usable forms, not one long page. -->
+        <!-- 36.6: the handbook is a register of individually usable forms, not one long page.
+             Grouped by the stage of the election a form belongs to, because an officer looks
+             for "the form I need at close of poll", not for a number. -->
         <header class="reader-head">
             <h1>{{ selected()!.title }}</h1>
             <p>{{ selected()!.blurb }}</p>
@@ -76,22 +78,90 @@
                 [attr.download]="selected()!.file">Download whole handbook</a>
         </header>
 
-        <div class="form-grid">
-            @for (form of forms(); track form.id) {
-            <article class="glass-card form-card">
-                <span class="form-code">{{ form.code }}</span>
-                <h3>{{ form.title }}</h3>
-                <div class="card-actions">
-                    <button type="button" class="btn btn-accent btn-sm" (click)="showForm(form)">View</button>
-                    <button type="button" class="btn btn-outline btn-sm" (click)="downloadForm(form)">Download</button>
-                </div>
-            </article>
-            }
-        </div>
+        @for (group of formGroups(); track group.stage) {
+        <section class="form-stage">
+            <h2 class="stage-title">
+                <span>{{ group.stage }}</span>
+                <span class="stage-count">{{ group.forms.length }} form{{ group.forms.length === 1 ? '' : 's' }}</span>
+            </h2>
+            <ul class="form-register">
+                @for (form of group.forms; track form.id) {
+                <li class="register-row">
+                    <span class="form-code">{{ form.code }}</span>
+                    <span class="register-name">{{ form.title }}</span>
+                    <span class="register-actions">
+                        <button type="button" class="btn btn-accent btn-sm" (click)="showForm(form)">Open</button>
+                        <button type="button" class="btn btn-outline btn-sm" (click)="downloadForm(form)">Download</button>
+                    </span>
+                </li>
+                }
+            </ul>
+        </section>
+        }
 
         @if (forms().length === 0) {
         <p class="index-note">No individual forms were found in this handbook. Use the download above.</p>
         }
+        }
+
+        @else if (isFormView()) {
+        <!-- A form is an operative document: it is shown on the association letterhead,
+             on an A4 sheet, exactly as it comes out of the printer. -->
+        <div class="form-toolbar no-print">
+            <span class="toolbar-title">{{ sheetTitle }}</span>
+            <span class="toolbar-actions">
+                <button type="button" class="btn btn-accent btn-sm" (click)="print()">Print on A4</button>
+                @if (openForm()) {
+                <button type="button" class="btn btn-outline btn-sm" (click)="downloadForm(openForm()!)">Download</button>
+                } @else {
+                <a class="btn btn-outline btn-sm" [href]="downloadUrl(selected()!)"
+                    [attr.download]="selected()!.file">Download</a>
+                }
+            </span>
+        </div>
+
+        <div class="pad-sheet">
+            <img class="pad-watermark" [src]="crestUrl" alt="" aria-hidden="true" appImgFallback />
+
+            <header class="pad-head">
+                <img class="pad-crest" [src]="crestUrl" [alt]="orgName + ' crest'" appImgFallback />
+                <div>
+                    <h1 class="pad-org">{{ orgName }}</h1>
+                    <dl class="pad-meta">
+                        @if (address) {
+                        <dt>Address</dt>
+                        <dd>{{ address }}</dd>
+                        }
+                        @if (phone) {
+                        <dt>Phone</dt>
+                        <dd>{{ phone }}</dd>
+                        }
+                        @if (email) {
+                        <dt>Email</dt>
+                        <dd>{{ email }}</dd>
+                        }
+                    </dl>
+                </div>
+            </header>
+            <hr class="pad-rule" />
+
+            <!-- Filled in by hand when the form is issued, so it is a rule, not a value. -->
+            <div class="pad-refline">
+                <span>Reference:<i></i></span>
+                <span>Date:<i></i></span>
+            </div>
+
+            <div class="pad-body">
+                <div class="form-doc" [innerHTML]="bodyHtml()"></div>
+            </div>
+
+            <footer class="pad-foot">
+                Established: {{ establishedOn }}
+                @if (motto) {
+                <span class="pad-foot-sep">|</span>{{ motto }}
+                }
+            </footer>
+        </div>
         }
 
         @else {
@@ -117,12 +187,6 @@
             }
 
             <main class="doc-body">
-                @if (openForm()) {
-                <div class="form-toolbar no-print">
-                    <button type="button" class="btn btn-accent btn-sm" (click)="print()">Print this form</button>
-                    <button type="button" class="btn btn-outline btn-sm" (click)="downloadForm(openForm()!)">Download</button>
-                </div>
-                }
                 <article class="glass-card doc-sheet">
                     <div class="doc-prose" [innerHTML]="bodyHtml()"></div>
                 </article>

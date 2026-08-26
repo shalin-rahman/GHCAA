@@ -70,8 +70,11 @@ $campus-fallback: url('/assets/images/concept/artistic_campus_watercolor_1773859
    spacing turned the page into a very long scroll on anything but a large desktop. */
 .main-content {
     padding: clamp(3rem, 7vw, 7rem) 0;
-    background: #000;
-    color: #fff;
+    /* Was #000/#fff. Those literals kept the body of /about black in the light theme while
+       every token-driven child (the .glass-card banner, the cards) went light, so a white
+       heading landed on a pale glass panel. Tokens let the section flip with the theme. */
+    background: var(--bg-color);
+    color: var(--text-main);
     display: flex;
     flex-direction: column;
     gap: clamp(2rem, 5vw, 5rem);
@@ -87,13 +90,13 @@ $campus-fallback: url('/assets/images/concept/artistic_campus_watercolor_1773859
 
 .story-card {
     padding: clamp(1.75rem, 4vw, 3.5rem);
-    background: #050505;
-    border: 1px solid rgba(197, 160, 89, 0.1);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: 0;
 
     &.accent {
         border-color: var(--accent-color);
-        background: #000;
+        background: var(--surface-color);
     }
 
     h3 {
@@ -120,11 +123,12 @@ $campus-fallback: url('/assets/images/concept/artistic_campus_watercolor_1773859
 
     li {
         padding: 0.5rem 1.25rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        /* the pills sit on whatever .main-content is now, so they take its border/surface tokens */
+        border: 1px solid var(--border-color);
         border-radius: 30px;
         font-size: 0.85rem;
         font-weight: 700;
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--surface-subtle);
         backdrop-filter: blur(4px);
     }
 }
@@ -248,4 +252,23 @@ $campus-fallback: url('/assets/images/concept/artistic_campus_watercolor_1773859
     li { margin-bottom: 0.45rem; }
 
     strong { color: var(--text-main); }
+}
+
+/* Decorative line-art of the founder, sat behind the origin card's text. The artwork has
+   an opaque dark ground, so at 15% it disappears into a dark card but shows as a pale
+   rectangle over a light one - it is decoration only, so the light theme goes without it.
+   (Was an inline style="" on the <img>; inline colour/layout bypasses the theme entirely.) */
+.founder-art {
+    position: absolute;
+    right: -50px;
+    bottom: -50px;
+    opacity: 0.15;
+    max-height: 400px;
+    pointer-events: none;
+}
+
+/* :host-context, not `body.light-theme ...` - emulated encapsulation would stamp the
+   component attribute onto the body selector too and the rule would never match. */
+:host-context(body.light-theme) .founder-art {
+    display: none;
 }

@@ -84,7 +84,7 @@
                                 @if (em.member?.photoPath) {
                                 <img [src]="getImageUrl(em.member.photoPath)" class="member-avatar photo" alt="Photo" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid var(--glass-border)" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
                                 } @else {
-                                <div class="avatar" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(212,175,55,0.1);color:#d4af37;font-weight:bold;">{{ em.member?.fullName?.[0] }}</div>
+                                <div class="avatar avatar-fallback" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;">{{ em.member?.fullName?.[0] }}</div>
                                 }
                                 <div class="info" style="display:flex;flex-direction:column;">
                                     <span class="name font-bold">{{ em.member?.fullName }}</span>

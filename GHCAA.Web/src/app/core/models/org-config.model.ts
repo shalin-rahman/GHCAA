@@ -14,6 +14,8 @@ export interface OrgBranding {
   institutionAcronym: string;
   membershipNumberPrefix: string;
   approvalSeal: string;
+  /** Founding date as printed on letterhead — Constitution, Article I. */
+  establishedOn: string;
   logoUrl: string;
   primaryColor: string;
   accentColor: string;

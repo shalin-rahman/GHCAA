@@ -46,6 +46,7 @@ export class OrgConfigService {
           institutionAcronym: 'GHC',
           membershipNumberPrefix: 'GHC-',
           approvalSeal: 'GHC APPROVED',
+          establishedOn: '29 Nov 2025',
           logoUrl: '/assets/logo.png',
           primaryColor: '#121212',
           accentColor: '#c5a059'

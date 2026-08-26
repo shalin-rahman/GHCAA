@@ -1,565 +1,543 @@
-# HARAGANGIAN
-# Forms & Templates Handbook
+# Govt. Haraganga College Alumni Association
+# Election Forms & Templates Handbook
 
-Version: 1.0
+Version: 1.1 | Issued by: Election Commission | Authority: Constitution, Article on Elections
 
-Authority:
-Election Commission
+These are the operative forms of the Election Commission, not specimens. Each form
+prints on A4 under the Association letterhead with its form code, and is complete as
+printed: fill it in, sign it, seal it where indicated and file it in the election record.
+
+How to complete a form: a ruled line is a field to be written on, a square is a box to
+be ticked, and every signature panel must be signed by each officer named beneath it.
+Where a form offers Yes / No, tick one only. Do not alter, renumber or omit a field.
 
 ---
 
 # FORM ER-01
 # Election Notice
 
-Election Reference No.: _______________________
+:: grid
+Election Reference No.: ___
+Date of Notice: ___
+:: end
 
-Date: __________________
+The Election Commission hereby announces the election of the Executive Committee of the
+Govt. Haraganga College Alumni Association, to be held on the schedule below. This
+notice is issued to all voting members under the Constitution and the Election
+Regulations.
 
-The Election Commission hereby announces the election of the Executive Committee of HARAGANGIAN.
+## Election Schedule
 
-Election Schedule
+:: grid
+Election Date: ___
+Polling Time: ___
+Polling Venue: ___
+Nomination Opens: ___
+Nomination Closes: ___
+Scrutiny: ___
+Withdrawal Deadline: ___
+Final Candidate List: ___
+Campaign Period: ___
+Silence Period: ___
+:: end
 
-Election Date:
-____________________
+:: sign Chief Election Commissioner / Signature and date
 
-Polling Time:
-____________________
-
-Polling Venue:
-____________________
-
-Nomination Opens:
-____________________
-
-Nomination Closes:
-____________________
-
-Scrutiny:
-____________________
-
-Withdrawal Deadline:
-____________________
-
-Final Candidate List:
-____________________
-
-Campaign Period:
-____________________
-
-Silence Period:
-____________________
-
-Chief Election Commissioner
-
-Signature
-
-Seal
+:: seal
 
 ---
 
 # FORM ER-02
 # Election Calendar
 
+:: grid
+Election Reference No.: ___
+Prepared On: ___
+:: end
+
+## Activity Schedule
+
 | Activity | Date | Time | Responsible | Completed |
 |-----------|------|------|------------|-----------|
-| Election Notice | | | | |
-| Voter List | | | | |
-| Nomination | | | | |
-| Scrutiny | | | | |
-| Withdrawal | | | | |
-| Candidate List | | | | |
-| Polling | | | | |
-| Counting | | | | |
-| Result | | | | |
+| Election Notice | | | | [ ] |
+| Voter List | | | | [ ] |
+| Nomination | | | | [ ] |
+| Scrutiny | | | | [ ] |
+| Withdrawal | | | | [ ] |
+| Candidate List | | | | [ ] |
+| Polling | | | | [ ] |
+| Counting | | | | [ ] |
+| Result | | | | [ ] |
+
+:: sign Chief Election Commissioner | Election Commissioner
 
 ---
 
 # FORM ER-03
 # Election Commissioner Acceptance
 
-Name
+## Appointee
 
-Membership No
+:: grid
+Name: ___
+Membership No.: ___
+Position: ___
+Date of Appointment: ___
+:: end
 
-Position
+I accept my appointment as Election Commissioner. I declare that:
 
-I accept my appointment as Election Commissioner.
+[ ] I am not contesting this election.
+[ ] I have no conflict of interest.
+[ ] I shall remain neutral throughout the election.
+[ ] I shall follow the Constitution and the Election Regulations.
 
-I declare that
-
-□ I am not contesting election.
-
-□ I have no conflict of interest.
-
-□ I shall remain neutral.
-
-□ I shall follow the Constitution.
-
-Signature
-
-Date
-
-Witness
+:: sign Appointee / Signature and date | Witness / Name, membership no. and signature
 
 ---
 
 # FORM ER-04
 # Declaration of Neutrality
 
-I hereby solemnly declare that
+I hereby solemnly declare that I shall:
 
-I shall
+[ ] Remain impartial in every act and decision.
+[ ] Not campaign for or against any candidate.
+[ ] Not favour any candidate, panel or group.
+[ ] Not disclose confidential information.
+[ ] Perform my duties honestly and to the best of my ability.
 
-• Remain impartial.
+## Declarant
 
-• Not campaign.
+:: grid
+Name: ___
+Membership No.: ___
+Election Role: ___
+Date: ___
+:: end
 
-• Not favour any candidate.
-
-• Not disclose confidential information.
-
-• Perform duties honestly.
-
-Name
-
-Membership
-
-Signature
-
-Date
+:: sign Declarant / Signature
 
 ---
 
 # FORM ER-05
 # Conflict of Interest Declaration
 
-Name
+## Declarant
 
-Position
+:: grid
+Name: ___
+Membership No.: ___
+Position: ___
+Date: ___
+:: end
 
-Do you have
+## Disclosure
 
-Family relationship with candidate?
+Tick the answer that applies to each relationship with any candidate in this election.
 
-YES / NO
+Family relationship with a candidate: [ ] Yes [ ] No
+Business relationship: [ ] Yes [ ] No
+Financial relationship: [ ] Yes [ ] No
+Political relationship: [ ] Yes [ ] No
 
-Business relationship?
+:: lines If any answer is Yes, describe the relationship in full | 4
 
-YES / NO
+## Declaration
 
-Financial relationship?
+I declare that the information given above is true and complete, and I shall report
+immediately any change in these circumstances.
 
-YES / NO
-
-Political relationship?
-
-YES / NO
-
-If yes describe
-
-_____________________
-
-Declaration
-
-I declare the above information is true.
-
-Signature
+:: sign Declarant / Signature and date | Chief Election Commissioner / Received
 
 ---
 
 # FORM ER-06
 # Confidentiality Agreement
 
-I agree to maintain confidentiality regarding
+I agree to maintain confidentiality regarding:
 
-Voting records
+[ ] Voting records and voter data
+[ ] System passwords and access credentials
+[ ] Election documents and internal correspondence
+[ ] Audit reports
+[ ] Complaints and their proceedings
+[ ] Results before official certification
 
-Passwords
+Failure to comply may result in disciplinary action under the Constitution.
 
-Election documents
+## Signatory
 
-Audit reports
+:: grid
+Name: ___
+Membership No.: ___
+Election Role: ___
+Date: ___
+:: end
 
-Complaints
-
-Results before certification
-
-Failure to comply may result in disciplinary action.
-
-Name
-
-Signature
-
-Date
+:: sign Signatory / Signature | Chief Election Commissioner / Countersigned
 
 ---
 
 # FORM ER-07
 # Preliminary Voter Roll Certification
 
-Election
+:: grid
+Election: ___
+Date of Certification: ___
+:: end
 
-Date
+## Roll Summary
 
-Total Members
+:: grid3
+Total Members: ___
+Eligible Voters: ___
+Ineligible Members: ___
+:: end
 
-Eligible Voters
+:: lines Basis of ineligibility (arrears, suspension, membership class) | 3
 
-Ineligible Members
+We certify that the preliminary voter roll has been prepared from the membership
+register and verified against it.
 
-Prepared By
+:: sign Prepared By | Verified By | Approved By / Chief Election Commissioner
 
-Verified By
-
-Approved By
-
-Chief Election Commissioner
-
-Signature
+:: seal
 
 ---
 
 # FORM ER-08
 # Voter Roll Objection
 
-Reference No
+:: grid
+Reference No.: ___
+Date Received: ___
+:: end
 
-Date
+## Objector
 
-Member Name
+:: grid
+Member Name: ___
+Membership No.: ___
+Phone: ___
+Email: ___
+:: end
 
-Membership No
+## Ground of Objection
 
-Ground of Objection
+[ ] Missing name
+[ ] Incorrect information
+[ ] Duplicate entry
+[ ] Ineligible voter listed
 
-□ Missing Name
+:: lines Evidence submitted | 4
 
-□ Incorrect Information
+## Commission Decision
 
-□ Duplicate
+Decision: [ ] Accepted [ ] Rejected
 
-□ Ineligible Voter
+:: lines Reason for the decision | 3
 
-Evidence
-
-Decision
-
-Accepted
-
-Rejected
-
-Reason
-
-Commission Signature
+:: sign Election Commissioner | Chief Election Commissioner
 
 ---
 
 # FORM ER-09
 # Candidate Nomination Form
 
-Election
+Election: ___
 
-Position Applying For
+## Position Applied For
 
-Candidate Information
+Tick one office only. A separate nomination form is required for each office.
 
-Name
+[ ] President
+[ ] Vice President
+[ ] General Secretary
+[ ] Joint Secretary
+[ ] Treasurer
+[ ] Executive Member
 
-Membership Number
+## Candidate Information
 
-Batch
+:: grid
+Name: ___
+Membership Number: ___
+Batch: ___
+Phone: ___
+Email: ___
+Employment: ___
+:: end
 
-Address
+:: lines Address | 2
 
-Phone
+## Proposer and Seconder
 
-Email
+:: grid
+Proposed By: ___
+Membership No.: ___
+Seconded By: ___
+Membership No.: ___
+:: end
 
-Employment
+## Documents Attached
 
-Proposed By
+[ ] Membership certificate copy
+[ ] Photograph
+[ ] Declaration (ER-04)
+[ ] Candidate consent (ER-10)
+[ ] Nomination fee receipt
 
-Membership No
+:: sign Candidate / Signature and date | Received By / Commission officer
 
-Seconded By
-
-Membership No
-
-Attached
-
-□ Membership Copy
-
-□ Photo
-
-□ Declaration
-
-□ Consent
-
-□ Fee Receipt
-
-Candidate Signature
-
-Date
-
-Received By
-
-Application No
+:: grid
+Application No.: ___
+Date and Time Received: ___
+:: end
 
 ---
 
 # FORM ER-10
 # Candidate Consent
 
-I consent to contest the election for
+I consent to contest the election for the position of:
 
-Position
+Position: ___
 
-________________
+I confirm that:
 
-I confirm
+[ ] I satisfy all constitutional requirements for this position.
+[ ] The information I have supplied is correct.
+[ ] I shall follow the Election Regulations and the directions of the Commission.
 
-I satisfy all constitutional requirements.
+## Candidate
 
-Information supplied is correct.
+:: grid
+Name: ___
+Membership No.: ___
+Application No.: ___
+Date: ___
+:: end
 
-I shall follow Election Regulations.
-
-Candidate
-
-Signature
-
-Date
+:: sign Candidate / Signature
 
 ---
 
 # FORM ER-11
 # Nomination Scrutiny Checklist
 
-Application Number
+:: grid
+Application Number: ___
+Candidate: ___
+Position: ___
+Date of Scrutiny: ___
+:: end
 
-Candidate
+## Verification
 
-Membership Verified
+Membership verified: [ ] Yes [ ] No
+Voting member: [ ] Yes [ ] No
+Minimum membership period met: [ ] Yes [ ] No
+Founding member requirement, if applicable: [ ] Yes [ ] No
+Required documents complete: [ ] Yes [ ] No
+Nomination fee paid: [ ] Yes [ ] No
+Declaration signed: [ ] Yes [ ] No
 
-YES / NO
+## Decision
 
-Voting Member
+Decision: [ ] Accepted [ ] Rejected
 
-YES / NO
+:: lines Reason, where the nomination is rejected | 3
 
-Minimum Membership
-
-YES / NO
-
-Founding Member Requirement (if applicable)
-
-YES / NO
-
-Required Documents
-
-YES / NO
-
-Fee Paid
-
-YES / NO
-
-Declaration Signed
-
-YES / NO
-
-Decision
-
-Accepted
-
-Rejected
-
-Reason
-
-Commission Signatures
+:: sign Election Commissioner | Election Commissioner | Chief Election Commissioner
 
 ---
 
 # FORM ER-12
 # Nomination Acceptance Order
 
-Application No
+:: grid
+Application No.: ___
+Order Date: ___
+Candidate: ___
+Position: ___
+:: end
 
-Candidate
+After scrutiny under the Election Regulations, the Election Commission hereby:
 
-Position
+[ ] Accepts the nomination
+[ ] Rejects the nomination
 
-After scrutiny the Election Commission hereby
+:: lines Reasons | 4
 
-□ Accepts
+:: sign Chief Election Commissioner / Signature and date
 
-□ Rejects
-
-the nomination.
-
-Reasons
-
-_________________
-
-Chief Election Commissioner
-
-Signature
+:: seal
 
 ---
 
 # FORM ER-13
 # Candidate Withdrawal
 
-Candidate
+:: grid
+Candidate: ___
+Membership No.: ___
+Position: ___
+Application No.: ___
+:: end
 
-Position
+I voluntarily withdraw my nomination for the position stated above. I understand that
+a withdrawal, once accepted, cannot be revoked.
 
-Application No
+:: sign Candidate / Signature and date | Accepted By / Election Commission
 
-I voluntarily withdraw my nomination.
-
-Candidate Signature
-
-Date
-
-Accepted By
-
-Commission
+:: grid
+Date and Time of Acceptance: ___
+Reference No.: ___
+:: end
 
 ---
 
 # FORM ER-14
 # Final Candidate List
 
-Election
+:: grid
+Election: ___
+Date of Publication: ___
+:: end
 
-Position
+## Candidates
 
-Candidate Name
+| Position | Candidate Name | Election Symbol | Application No. | Remarks |
+|----------|----------------|-----------------|-----------------|---------|
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
 
-Election Symbol
+This is the final list of contesting candidates. No addition or alteration is
+permitted after publication except by order of the Commission.
 
-Application No
+:: sign Chief Election Commissioner / Signature and date
 
-Remarks
-
-Chief Election Commissioner
-
-Seal
+:: seal
 
 ---
 
 # FORM ER-15
 # Poll Opening Certificate
 
-Polling Station
+:: grid
+Election: ___
+Polling Station: ___
+Date: ___
+Opening Time: ___
+:: end
 
-Date
+## Before Polling Commenced
 
-Opening Time
+[ ] Ballot box shown empty to those present
+[ ] Ballot box inspected
+[ ] Ballot box locked
+[ ] Seal applied
 
-Before polling commenced
+:: grid
+Seal Numbers: ___
+Ballot Serial Range Issued: ___
+:: end
 
-□ Ballot Box Empty
+Observer present: [ ] Yes [ ] No
+Candidate agents present: [ ] Yes [ ] No
 
-□ Ballot Box Inspected
+Polling officially commenced at the time recorded above.
 
-□ Ballot Box Locked
-
-□ Seal Applied
-
-Seal Numbers
-
-__________
-
-Observer Present
-
-YES / NO
-
-Candidate Agents Present
-
-YES / NO
-
-Polling officially commenced.
-
-Presiding Officer
-
-Polling Officer
-
-Observer
-
-Candidate Agents
-
-Signatures
+:: sign Presiding Officer | Polling Officer | Observer | Candidate Agent
 
 ---
 
 # FORM ER-16
 # Poll Incident Register
 
-Incident No
+:: grid
+Polling Station: ___
+Date: ___
+:: end
 
-Time
+## Incident
 
-Description
+:: grid
+Incident No.: ___
+Time: ___
+:: end
 
-Persons Involved
+:: lines Description | 4
 
-Witnesses
+:: lines Persons involved (name and membership no.) | 3
 
-Action Taken
+:: lines Witnesses | 2
 
-Reported To
+:: lines Action taken | 3
 
-Officer Signature
+Reported To: ___
 
-Observer Signature
+:: sign Presiding Officer / Signature and time | Observer / Signature
 
 ---
 
 # FORM ER-17
 # Spoiled Ballot Register
 
-Serial No
+:: grid
+Polling Station: ___
+Date: ___
+:: end
 
-Ballot No
+## Register
 
-Reason
+| Serial No. | Ballot No. | Reason | Replacement Ballot No. | Officer Initials |
+|------------|------------|--------|------------------------|------------------|
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
+| | | | | |
 
-Replacement Ballot No
+:: grid
+Total Spoiled Ballots: ___
+Total Replacements Issued: ___
+:: end
 
-Officer Signature
+:: sign Polling Officer | Presiding Officer
 
 ---
 
 # FORM ER-18
 # Poll Closing Certificate
 
-Election
+:: grid
+Election: ___
+Polling Station: ___
+Closing Time: ___
+Date: ___
+:: end
 
-Polling Station
+## Ballot Account
 
-Closing Time
+:: grid
+Registered Voters: ___
+Ballots Issued: ___
+Unused Ballots: ___
+Spoiled Ballots: ___
+Votes Cast: ___
+Ballots Returned to Commission: ___
+:: end
 
-Registered Voters
+We certify that polling closed peacefully at the time recorded above, and that no
+ballot was issued after the official closing time.
 
-Ballots Issued
+:: sign Presiding Officer | Polling Officer | Observer | Candidate Agent
 
-Unused Ballots
-
-Spoiled Ballots
-
-Votes Cast
-
-Polling closed peacefully.
-
-No ballots were issued after official closing time.
-
-Presiding Officer
-
-Polling Officer
-
-Observer
-
-Candidate Agent(s)
-
-Signatures
+:: seal

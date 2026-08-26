@@ -214,7 +214,7 @@
     &.has-file {
         border-style: solid;
         border-color: var(--success-color);
-        background: rgba(var(--success-color), 0.02);
+        background: rgba(var(--success-color-rgb), 0.02);
     }
 
     input {

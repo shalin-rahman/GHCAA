@@ -238,7 +238,11 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusM),
-          borderSide: const BorderSide(color: Colors.redAccent),
+          // Use the central danger token (mirrors web `--danger-color`, already
+          // wired into colorScheme.error above) instead of the raw Material
+          // `Colors.redAccent`, so this stays in sync if the danger color ever
+          // changes.
+          borderSide: const BorderSide(color: dangerColor),
         ),
       ),
     );

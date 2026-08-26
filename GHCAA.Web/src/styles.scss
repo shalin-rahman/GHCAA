@@ -22,7 +22,10 @@
      is --accent-color-rgb). Defining both keeps those hover borders/badges working. */
   --accent-rgb: 197, 160, 89;
   --accent-gold-bright: #e5c15e;
-  --accent-gold-dark: #8e6d2a;
+  /* Darkened from #8e6d2a: as link text on --card-bg/--glass-bg it measured 4.10:1,
+     just under the 4.5:1 AA floor for body-size text. #836327 gives 5.56:1 on white
+     and still reads as gold. */
+  --accent-gold-dark: #836327;
   /* Accent used as TEXT on theme-adaptive surfaces (cards/sections that go light in
      light mode). The raw --accent-color (#c5a059) is a light gold tuned for dark
      backgrounds; on a white card it fails contrast. Light theme => dark gold; dark
@@ -31,10 +34,16 @@
   --accent-text: var(--accent-gold-dark);
 
   --danger-color: #d63031;
+  --danger-color-rgb: 214, 48, 49;
   --success-color: #27ae60;
+  --success-color-rgb: 39, 174, 96;
 
   --text-main: #1a1a1a;
-  --text-muted: #6c757d;
+  /* Darkened from #6c757d, which measured 4.17-4.48:1 against the light surfaces it is
+     actually used on (--card-bg, --glass-bg over white, --section-bg-2) and so missed the
+     4.5:1 AA floor on every public page. #5f676e gives 5.75:1 on white, 5.17:1 on the
+     darkest light surface. */
+  --text-muted: #5f676e;
   --text-on-dark: #ffffff;
 
   /* Semantic section/surface tokens — flip per theme so the dark-first landing
@@ -67,21 +76,40 @@
   --gold-gradient: linear-gradient(135deg, #c5a059 0%, #e5c15e 50%, #8e6d2a 100%);
   --dark-gradient: linear-gradient(135deg, #121212 0%, #2a2a2a 100%);
 
-  /* Membership Tier Colors */
-  --tier-founding: #c5a059;
+  /* Membership Tier Colors.
+     These are used as text (the tier heading on the membership panel) as well as for
+     borders, so they need a light-theme value. The original hues were picked against black
+     and measured 2.15-2.46:1 on a white card - below the 3:1 floor even for large text. The
+     values below are the same hues darkened past 4.9:1 on white; body.dark-theme restores
+     the bright originals. */
+  --tier-founding: #8a6a2e;
   /* Gold - Founding */
-  --tier-executive: #6366f1;
+  --tier-executive: #4f46e5;
   /* Indigo - Executive */
-  --tier-general: #10b981;
+  --tier-general: #0f766e;
   /* Emerald - General */
-  --tier-associate: #8b5cf6;
+  --tier-associate: #7c3aed;
   /* Violet - Associate */
-  --tier-advisory: #f59e0b;
+  --tier-advisory: #b45309;
   /* Amber - Advisory */
+  --tier-honorary: #c2410c;
+  /* Orange - Honorary */
 
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
+
+  /* PAPER — the official-form pad (see "OFFICIAL FORM PAD" below). Everything inside
+     .pad-sheet references these instead of the site surface/text tokens, and these are
+     the ONLY tokens in the sheet that deliberately do NOT flip with the theme: a form is
+     a paper document, printed and signed, so it is always ink-on-white on screen too.
+     Defined once here and never overridden under body.dark-theme. */
+  --paper-bg: #ffffff;
+  --paper-ink: #14181f;
+  --paper-ink-soft: #4a5361;
+  --paper-rule: #1f2530;
+  --paper-hairline: #c8cdd6;
+  --paper-band: #f1f3f7;
 }
 
 body.dark-theme {
@@ -114,8 +142,20 @@ body.dark-theme {
   --card-border: rgba(255, 255, 255, 0.06);
   --card-bg-hover: rgba(255, 255, 255, 0.05);
 
+  /* The --paper-* tokens are intentionally NOT redefined here: a form is a paper
+     document and reads as one on both themes, on screen and on the printer. */
+
   /* Dark theme keeps the original light-gold text (no-op vs dev's dark look). */
   --accent-text: var(--accent-color);
+
+  /* The tier hues as originally designed - these read on black and are too light on white,
+     which is why :root now carries darkened equivalents. */
+  --tier-founding: #c5a059;
+  --tier-executive: #6366f1;
+  --tier-general: #10b981;
+  --tier-associate: #8b5cf6;
+  --tier-advisory: #f59e0b;
+  --tier-honorary: #ff4500;
 }
 
 * {
@@ -161,6 +201,23 @@ h5 {
 
 p {
   color: var(--text-muted);
+}
+
+/* Always-dark islands: the public nav, the footer, the photo heroes on /about and
+   /contact, and the auth sidebars keep a dark ground in BOTH themes. The two rules
+   above are ELEMENT selectors, so they beat any `color: white` set on the island's
+   container — in light theme a heading inside a black hero therefore came out
+   #1a1a1a on black, and body copy came out mid-grey on black. Re-point the text
+   tokens for the whole island instead of restating a colour on every descendant;
+   one class then fixes it in both themes and nothing inside needs a literal. */
+.on-dark {
+  --text-main: #ffffff;
+  --text-strong: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.62);
+  --text-dim: rgba(255, 255, 255, 0.62);
+  --hairline: rgba(255, 255, 255, 0.12);
+  /* the light-theme dark gold is for surfaces that go light; on black use the bright one */
+  --accent-text: var(--accent-color);
 }
 
 /* Layout Grid System */
@@ -2645,7 +2702,10 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
 }
 
 @media print {
-  body * {
+  /* Scoped with :has() to the invitation page. Unscoped, this rule hid EVERY page's
+     content on print (it left only .invitation-card visible), so printing any other
+     printable document — an election form, the constitution — produced a blank sheet. */
+  body:has(.invitation-card) * {
     visibility: hidden !important;
   }
 
@@ -2667,6 +2727,15 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
   }
 
   .no-print {
+    display: none !important;
+  }
+
+  /* Site chrome is never part of a printed document. Declared once here so every
+     printable page (forms, constitution, certificates) inherits the same behaviour. */
+  .glass-nav,
+  .footer,
+  .top-announcement-banner,
+  .doc-hero {
     display: none !important;
   }
 }
@@ -2789,4 +2858,497 @@ $_size: (1: 0.25rem, 2: 0.5rem, 6: 1.5rem, 8: 2rem, 10: 2.5rem, 12: 3rem, 14: 3.
     border-bottom: 1px solid var(--text-dim);
     vertical-align: baseline;
   }
+}
+
+/* ==========================================================================
+   OFFICIAL FORM PAD — the printed letterhead of the association, in the browser
+   --------------------------------------------------------------------------
+   Election forms are filled in by hand by a returning officer, so what the page
+   shows must be the sheet that comes out of the printer: crest, organisation
+   name, address block, reference/date strip, ruled fields, signature panel and
+   the established/motto footer — the layout of the physical pad.
+
+   These classes live HERE, not in elections.scss, for two reasons:
+     1. The field markup is produced by markdown.util.ts and bound with
+        [innerHTML]. Angular stamps _ngcontent attributes only on template
+        elements, never on innerHTML content, so component-scoped styles would
+        never match it (same reason .doc-prose is global).
+     2. Any future printed document (certificates, receipts, notices) is the
+        same pad; it should reuse this, not copy it.
+
+   Colour comes exclusively from the --paper-* tokens, which do not flip with the
+   site theme — see the token block at the top of this file.
+   ========================================================================== */
+
+/* A4 portrait (210mm x 297mm) is the paper these forms are printed on. The
+   on-screen sheet uses the same page box and the same 14mm/13mm margins declared
+   in @page below, so a line that fits on screen fits on the printed sheet and the
+   preview breaks where the paper breaks. */
+.pad-sheet {
+  position: relative;
+  width: 210mm;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 14mm 13mm 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 297mm;
+  background: var(--paper-bg);
+  color: var(--paper-ink);
+  border: 1px solid var(--paper-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+/* The faint centred crest of the pad. Kept behind the content and non-interactive
+   so a long form still reads cleanly over it. */
+.pad-watermark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(62%, 130mm);
+  opacity: 0.07;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.pad-head,
+.pad-body,
+.pad-foot {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Letterhead ---------------------------------------------------------- */
+
+.pad-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.pad-crest {
+  width: 26mm;
+  height: auto;
+  /* logo.jpg is an opaque black square; the transparent PNG is the crest. */
+  background: transparent;
+}
+
+.pad-org {
+  margin: 0 0 0.85rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.15rem, 2.4vw, 1.6rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  color: var(--paper-ink);
+}
+
+/* Address / Phone / Email — a label column and a value column, so the three
+   values align exactly as they do on the printed pad. */
+.pad-meta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.28rem 1.5rem;
+  font-size: 0.82rem;
+}
+
+.pad-meta dt {
+  font-weight: 700;
+  color: var(--paper-ink);
+}
+
+.pad-meta dd {
+  margin: 0;
+  color: var(--paper-ink-soft);
+}
+
+.pad-rule {
+  height: 0;
+  margin: 0.9rem 0 0;
+  border: 0;
+  border-top: 1.5px solid var(--paper-rule);
+}
+
+.pad-refline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  padding: 0.45rem 0 0.5rem;
+  border-bottom: 1.5px solid var(--paper-rule);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.pad-refline span {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex: 1 1 12rem;
+}
+
+/* The writable rule after "Reference:" / "Date:". */
+.pad-refline i {
+  flex: 1;
+  min-width: 6rem;
+  border-bottom: 1px dotted var(--paper-hairline);
+}
+
+/* --- Body / footer ------------------------------------------------------- */
+
+.pad-body {
+  flex: 1;
+  padding: 1.75rem 0 2rem;
+}
+
+.pad-foot {
+  margin-top: auto;
+  padding: 0.6rem 0 6mm;
+  border-top: 1.5px solid var(--paper-rule);
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--paper-ink);
+}
+
+.pad-foot .pad-foot-sep {
+  padding: 0 0.6rem;
+  color: var(--paper-ink-soft);
+}
+
+/* ==========================================================================
+   FORM DOCUMENT — the rendered body of one election form
+   Emitted by renderFormMarkdown() in core/utils/markdown.util.ts.
+   ========================================================================== */
+
+.form-doc {
+  color: var(--paper-ink);
+}
+
+/* Form code + name, centred over a rule like a gazetted form. */
+.form-doc .f-head {
+  margin: 0 0 1.75rem;
+  text-align: center;
+}
+
+.form-doc .f-code {
+  display: inline-block;
+  margin-bottom: 0.55rem;
+  padding: 0.22rem 0.75rem;
+  border: 1.5px solid var(--paper-rule);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.form-doc .f-name {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--paper-ink);
+}
+
+/* Section band — groups related fields so a long form has visible structure. */
+.form-doc .f-section {
+  margin: 1.9rem 0 1rem;
+  padding: 0.35rem 0.7rem;
+  background: var(--paper-band);
+  border-left: 3px solid var(--paper-rule);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--paper-ink);
+}
+
+.form-doc p {
+  margin: 0 0 0.9rem;
+  color: var(--paper-ink);
+}
+
+.form-doc ul:not(.check-list),
+.form-doc ol {
+  margin: 0 0 1.1rem;
+  padding-left: 1.4rem;
+}
+
+.form-doc li {
+  margin-bottom: 0.4rem;
+}
+
+.form-doc hr {
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--paper-hairline);
+}
+
+/* --- Fields -------------------------------------------------------------- */
+
+/* One labelled field: label at its natural width, writing rule filling the rest.
+   Baseline-aligned so the rule sits on the baseline of the label, not below it. */
+.form-doc .f-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  /* Room to actually write between rules — this is the space a hand needs;
+     tighter and the form is unusable on paper. */
+  margin: 0 0 1.15rem;
+  min-height: 1.6rem;
+}
+
+.form-doc .f-label {
+  flex: 0 0 auto;
+  max-width: 60%;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.form-doc .f-rule {
+  flex: 1 1 auto;
+  min-width: 4rem;
+  border-bottom: 1px solid var(--paper-rule);
+  /* Height of the writing space above the rule. */
+  height: 1.35rem;
+}
+
+/* A multi-line answer: several ruled lines under the label. */
+.form-doc .f-lines {
+  margin: 0 0 1.15rem;
+}
+
+.form-doc .f-lines .f-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  max-width: none;
+}
+
+.form-doc .f-lines i {
+  display: block;
+  height: 1.6rem;
+  border-bottom: 1px solid var(--paper-rule);
+}
+
+/* Field grid — two (or three) fields per row, gutters aligned. */
+.form-doc .f-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 2rem;
+}
+
+.form-doc .f-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* --- Checkboxes ---------------------------------------------------------- */
+
+.form-doc .check-list {
+  margin: 0 0 1.1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.form-doc .check-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+}
+
+/* The tick box itself — a real square, printable, never a font glyph (the source
+   used a bare U+25A1, which renders as tofu in a lot of print drivers). */
+.form-doc .box {
+  flex: 0 0 auto;
+  display: inline-block;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-right: 0.35rem;
+  border: 1.5px solid var(--paper-rule);
+  background: var(--paper-bg);
+  vertical-align: -0.12rem;
+}
+
+.form-doc .check-list .box {
+  margin-right: 0;
+  margin-top: 0.12rem;
+}
+
+/* --- Signature panel ----------------------------------------------------- */
+
+.form-doc .sign-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 2.25rem 2.5rem;
+  /* Signatures are the last thing signed and must never be split from the body of
+     the form across a page break. */
+  margin: 2.75rem 0 0.5rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.form-doc .sign-block {
+  text-align: center;
+}
+
+/* Space to sign, then the rule, then who signed — the printed convention. */
+.form-doc .sign-block .sign-space {
+  display: block;
+  height: 3.2rem;
+  border-bottom: 1px solid var(--paper-rule);
+}
+
+.form-doc .sign-block .sign-who {
+  display: block;
+  margin-top: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.form-doc .sign-block .sign-sub {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.72rem;
+  color: var(--paper-ink-soft);
+}
+
+/* Seal box — the certificate forms end with one. */
+.form-doc .seal-box {
+  display: grid;
+  place-content: center;
+  width: 34mm;
+  height: 34mm;
+  margin: 2.25rem 0 0 auto;
+  border: 1.5px dashed var(--paper-hairline);
+  border-radius: 50%;
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper-ink-soft);
+}
+
+/* --- Tables inside a form ------------------------------------------------ */
+
+/* A register or schedule table on a form is ruled on all sides, unlike the
+   borderless .data-table of the app, and its empty cells must stay tall enough
+   to write in. */
+.form-doc .form-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.25rem;
+  font-size: 0.85rem;
+}
+
+.form-doc .form-table th,
+.form-doc .form-table td {
+  border: 1px solid var(--paper-rule);
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  color: var(--paper-ink);
+}
+
+.form-doc .form-table th {
+  background: var(--paper-band);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.form-doc .form-table td {
+  height: 1.9rem;
+}
+
+/* --- Small screens ------------------------------------------------------- */
+
+@media (max-width: 700px) {
+  .pad-sheet {
+    padding: 10mm 7mm 0;
+    min-height: 0;
+    font-size: 0.88rem;
+  }
+
+  .form-doc .f-grid,
+  .form-doc .f-grid-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pad-head {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+
+  .pad-meta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.1rem;
+    text-align: center;
+  }
+
+  .pad-meta dt {
+    margin-top: 0.4rem;
+  }
+}
+
+/* --- Print -------------------------------------------------------------- */
+
+@media print {
+  /* No paper-token re-pinning is needed: --paper-* is ink-on-white on both themes, so
+     what is on screen is what comes out of the printer. Only the sheet's own screen
+     chrome (frame, shadow, page box) is dropped — @page supplies the real margin. */
+  .pad-sheet {
+    width: auto;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    /* The @page margin, not padding, gives the printer the physical margin. */
+    background: var(--paper-bg);
+  }
+
+  /* One form per sheet. */
+  .pad-sheet + .pad-sheet {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .pad-watermark {
+    /* Print drivers drop background images but honour <img>; keep it faint enough
+       that hand-written entries stay legible on paper. */
+    opacity: 0.05;
+  }
+
+  .form-doc .f-section {
+    /* Band fills are unreliable across drivers; the rule is what must survive. */
+    background: transparent;
+    border-left-width: 4px;
+    border-bottom: 1px solid var(--paper-rule);
+  }
+
+  .form-doc .f-row,
+  .form-doc .f-lines,
+  .form-doc .check-list li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+/* Every printed document in the app is A4 portrait. Declared once, globally. */
+@page {
+  size: A4 portrait;
+  margin: 14mm 13mm;
 }

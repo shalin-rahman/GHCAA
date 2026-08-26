@@ -21,6 +21,38 @@ export interface ConstitutionArticle {
 export const CONSTITUTION_PDF_FALLBACK = '/assets/GHCAA Constitution V4.2.pdf';
 
 /**
+ * A `Section 1:` / `Section A:` label opening a paragraph. The stored constitution marks
+ * its subheadings this way; without this they render as ordinary body text and an article
+ * reads as one undifferentiated wall.
+ */
+const SECTION_LABEL = /^(Section\s+[0-9]{1,3}|Section\s+[A-Z]|Section\s+[IVXLCDM]+)\s*[:.—-]\s*([\s\S]*)$/;
+
+/**
+ * A subheading is the label plus its short title and nothing else. Anything longer is a
+ * section whose body runs on from the label in the same paragraph, and only the label is
+ * emphasised there — promoting a whole paragraph to a heading would hide its text.
+ */
+const SUBHEAD_MAX = 60;
+
+/**
+ * Renders one body paragraph. Escaping happens on each piece before any markup is added,
+ * so no stored text can inject HTML.
+ */
+function renderParagraph(text: string): string {
+    const match = SECTION_LABEL.exec(text);
+    if (match) {
+        const label = match[1].trim();
+        const rest = match[2].trim();
+        if (!rest.includes('\n') && rest.length <= SUBHEAD_MAX) {
+            // `.doc-prose h4` already carries the heading weight, colour and scroll offset.
+            return `<h4>${escapeHtml(rest ? `${label}: ${rest}` : label)}</h4>`;
+        }
+        return `<p><strong>${escapeHtml(label)}:</strong> ${escapeHtml(rest).replace(/\n/g, '<br>')}</p>`;
+    }
+    return `<p>${escapeHtml(text).replace(/\n/g, '<br>')}</p>`;
+}
+
+/**
  * Splits the stored plain-text constitution into articles. The seeded format is
  * `Article I: Name and Office` on its own line, followed by body paragraphs.
  * Text before the first `Article` line becomes a preamble.
@@ -44,7 +76,7 @@ export function parseArticles(content: string): ConstitutionArticle[] {
             .split(/\n{2,}/)
             .map(p => p.trim())
             .filter(Boolean)
-            .map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
+            .map(renderParagraph)
             .join('');
         articles.push({ id: n === 1 ? base : `${base}-${n}`, heading, bodyHtml });
         buffer = [];

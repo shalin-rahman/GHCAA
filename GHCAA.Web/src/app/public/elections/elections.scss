@@ -29,18 +29,19 @@
     font-size: 1.1rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--text-dim);
+    /* --text-dim is for de-emphasised captions, not for a section heading: on black it is
+       rgba(255,255,255,0.6) and this uppercase, letter-spaced label read as barely-there
+       grey. A heading takes the heading token. */
+    color: var(--text-main);
 }
 
-.doc-grid,
-.form-grid {
+.doc-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.25rem;
 }
 
-.doc-card,
-.form-card {
+.doc-card {
     display: flex;
     flex-direction: column;
     padding: 1.5rem;
@@ -61,24 +62,6 @@
     }
 }
 
-.form-code {
-    display: inline-block;
-    align-self: flex-start;
-    margin-bottom: 0.7rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: var(--radius-sm);
-    background: var(--surface-subtle);
-    border: 1px solid var(--hairline);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: var(--accent-color);
-}
-
-.form-card h3 {
-    flex: 1;
-}
-
 .card-actions {
     display: flex;
     flex-wrap: wrap;
@@ -92,7 +75,7 @@
     color: var(--text-muted);
 
     a {
-        color: var(--accent-color);
+        color: var(--accent-text);
     }
 }
 
@@ -112,7 +95,7 @@
     border: 0;
     padding: 0;
     font: inherit;
-    color: var(--accent-color);
+    color: var(--accent-text);
     cursor: pointer;
 
     &:hover {
@@ -143,6 +126,96 @@
         line-height: 1.7;
         color: var(--text-muted);
     }
+}
+
+/* --- Forms register ------------------------------------------------------
+   Forty near-identical cards are unusable, so the handbook lists its forms as a
+   register grouped by election stage: code, name, and the two actions. */
+
+.form-stage + .form-stage {
+    margin-top: 2.5rem;
+}
+
+.stage-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin: 0 0 0.85rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-main);
+}
+
+.stage-count {
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.form-register {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.register-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    transition: background 0.2s, border-color 0.2s;
+
+    /* One ruled register, not a stack of boxes: rows share their borders. */
+    & + & {
+        border-top: 0;
+    }
+
+    &:first-child {
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    }
+
+    &:last-child {
+        border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    }
+
+    &:hover {
+        background: var(--card-bg-hover);
+        border-color: var(--accent-color);
+    }
+}
+
+.form-code {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-subtle);
+    border: 1px solid var(--hairline);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    color: var(--accent-text);
+}
+
+.register-name {
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--text-strong);
+}
+
+.register-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
 }
 
 .error-card {
@@ -215,7 +288,7 @@
 
     &:hover,
     &:focus-visible {
-        color: var(--accent-color);
+        color: var(--accent-text);
         border-left-color: var(--accent-color);
     }
 }
@@ -233,11 +306,28 @@
     min-width: 0;
 }
 
+/* Sits above the paper sheet, so it is screen chrome and is dropped when printing. */
 .form-toolbar {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.toolbar-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
     gap: 0.6rem;
-    margin-bottom: 1rem;
 }
 
 .doc-sheet {
@@ -261,6 +351,21 @@
 
     .doc-sheet {
         padding: 1.5rem 1.25rem;
+    }
+}
+
+@media (max-width: 620px) {
+    /* The action column has nowhere to go on a phone, so the row stacks. */
+    .register-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .form-code {
+        justify-self: start;
+    }
+
+    .register-actions {
+        justify-content: flex-start;
     }
 }
 

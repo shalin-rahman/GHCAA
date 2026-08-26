@@ -21,6 +21,8 @@ namespace GHCAA.Application.DTOs
         public string InstitutionAcronym { get; init; } = string.Empty;
         public string MembershipNumberPrefix { get; init; } = string.Empty;
         public string ApprovalSeal { get; init; } = string.Empty;
+        /// <summary>Founding date as it is printed on letterhead — Constitution, Article I.</summary>
+        public string EstablishedOn { get; init; } = string.Empty;
         public string LogoUrl { get; init; } = string.Empty;
         public string PrimaryColor { get; init; } = "#121212";
         public string AccentColor { get; init; } = "#c5a059";

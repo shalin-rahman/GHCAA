@@ -18,11 +18,11 @@
 }
 
 .income h3 {
-    color: #2e7d32;
+    color: var(--success-color);
 }
 
 .expense h3 {
-    color: #c62828;
+    color: var(--danger-color);
 }
 
 .balance h3 {
@@ -41,9 +41,9 @@
 }
 
 .credit {
-    color: #10b981;
+    color: var(--success-color);
 }
 
 .debit {
-    color: #ef4444;
+    color: var(--danger-color);
 }

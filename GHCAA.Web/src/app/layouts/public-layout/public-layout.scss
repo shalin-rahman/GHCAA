@@ -1,7 +1,14 @@
+/* The whole public site sits inside this host, so its background and text colour
+   ARE the page's. Both must be tokens: hardcoding `#000`/`#fff` here painted the
+   page black in BOTH themes while every descendant that reads a token flipped to
+   light values — which is why the light theme showed light cards and near-invisible
+   `--text-dim` headings on a black page. `--page-bg` is the special-day-theme
+   override (set inline by the component when one is active); its fallback must be
+   the theme token, never a literal. */
 :host {
     display: block;
-    background: var(--page-bg, #000);
-    color: #fff;
+    background: var(--page-bg, var(--bg-color));
+    color: var(--text-main);
     min-height: 100vh;
     transition: background 0.6s ease;
 }
@@ -426,4 +433,4 @@ main {
         padding: 0.65rem 0;
         letter-spacing: 1px;
     }
-}
+}

@@ -96,12 +96,16 @@
 .hero h2 {
     font-size: 4.5rem;
     margin-bottom: 1.5rem;
-    color: var(--text-on-dark);
+    /* --text-on-dark is a fixed white; the hero ground is var(--section-bg), which is
+       #ffffff in light theme — the headline was white on white there. --text-strong
+       flips with the theme, so it reads on both grounds. */
+    color: var(--text-strong);
     font-weight: 900;
     letter-spacing: -2px;
     animation: fadeInUp 1s cubic-bezier(0.2, 0, 0.2, 1);
     line-height: 1.1;
-    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    /* the heavy black glow only made sense behind white text on black */
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
 
     .highlight {
         background: var(--gold-gradient);
@@ -157,7 +161,8 @@
     max-width: 900px;
     margin: 0 auto 3rem;
     animation: fadeInUp 1.2s cubic-bezier(0.2, 0, 0.2, 1);
-    color: var(--text-on-dark);
+    /* same reason as .hero h2 above: the ground flips, so the text must too */
+    color: var(--text-main);
     line-height: 1.8;
     font-weight: 400;
 }

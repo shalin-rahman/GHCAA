@@ -41,7 +41,7 @@ section headings, and anything the source left as `____________` blanks.
 
 ```bash
 dotnet test                     # 351 tests
-cd GHCAA.Web && npx vitest run  # 64 files / 286 tests
+cd GHCAA.Web && npx vitest run  # 64 files / 306 tests
 npm run type-check
 ```
 
