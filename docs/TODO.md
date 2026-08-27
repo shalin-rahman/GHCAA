@@ -1252,6 +1252,32 @@ Postgres error confirms its effect already exists (`SqlState` in `42P07`/`42701`
 Commit `3b381f0`, already live on preprod. `docs/RENDER_DEPLOYMENT.md` and `docs/FEATURES.md` updated —
 see [[gotcha_migrationbootstrapper_fixed_offset]].
 
+41.8 [DONE 2026-08-27] Round 2: `/api/jobs` and `/api/gallery` 500s recurred, plus a new `/api/events`
+500, even with `3b381f0` live. Root cause: EF Core runs a migration's operations in one transaction —
+`AddApprovalWorkflowToGalleryAndJobs` mixes new DDL (`Status`/`RejectionReason` columns,
+`AlumniEvents.RequiresRegistration`, an FK) with a trailing `InsertData` seeding `SiteContents` Id=6.
+Under the pre-`3b381f0` bootstrapper an earlier partial run had already left a colliding `SiteContents`
+row, so the retried insert's `23505` unique-violation rolled back the *whole* transaction — DDL included
+— yet still matched the "already exists" baseline logic, marking the migration applied with none of its
+schema changes actually landed. Once falsely baselined, every later boot trusted
+`__EFMigrationsHistory` via plain `Database.MigrateAsync()` and never revisited it, so the missing
+columns persisted across redeploys. Fixed in two parts: (1) the migration now runs
+`DELETE FROM "SiteContents" WHERE "Id" = 6 OR "Key" = 'about-college-today';` immediately before its
+`InsertData`, so the seed can no longer collide; (2) generalized (not hardcoded to this one migration,
+per explicit user request for a "proper fix") — `MigrationBootstrapper` gained
+`SelfHealFalselyBaselinedMigrationsAsync`, run on every boot before `MigrateAsync()`. For every migration
+recorded as applied, it uses EF's `IMigrationsAssembly.CreateMigration(...).UpOperations` to inspect the
+migration's actual operations at runtime, flags any that mix a schema op (`AddColumn`/`CreateTable`) with
+a data op (`InsertData`/`UpdateData`/`DeleteData` — the exact shape that caused this bug), verifies each
+flagged migration's schema targets against `information_schema`, and deletes the history row (forcing
+genuine reapplication) if any are missing. This automatically covers 4 other migrations with the same
+risky shape (`AddSiteContentAndNoticeFields`, `AddDiscussionForums`,
+`PhaseB_S5S8_OtpHmac_PaymentIdempotency_Indexes`, `AddNotificationPreferences`) without editing them
+individually — they weren't touched since they're already applied historically and not currently
+symptomatic; the generic self-heal is defense-in-depth for them. Build clean, 9/9 targeted
+Migration/SiteContent tests pass, full suite re-verified. Not yet deployed/verified live — see
+[[gotcha_migrationbootstrapper_fixed_offset]].
+
 ---
 
 # Area 42 — Elections forms/docs manageable from admin portal (raised by user 2026-08-26, plan only, not yet built)

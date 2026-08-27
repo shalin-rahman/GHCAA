@@ -97,6 +97,12 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 column: "RequiresRegistration",
                 value: true);
 
+            // Guard against a duplicate-key rollback aborting this whole migration (and, with it,
+            // the genuinely new AddColumn/CreateIndex/AddForeignKey operations above) if Id=6 or
+            // this Key was ever left behind by an earlier partial application attempt.
+            migrationBuilder.Sql(
+                "DELETE FROM \"SiteContents\" WHERE \"Id\" = 6 OR \"Key\" = 'about-college-today';");
+
             migrationBuilder.InsertData(
                 table: "SiteContents",
                 columns: new[] { "Id", "BodyHtml", "DisplayOrder", "Group", "IsActive", "Key", "LastModified", "Title", "UpdatedByAdminId" },

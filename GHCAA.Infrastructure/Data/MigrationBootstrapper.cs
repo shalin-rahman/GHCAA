@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
@@ -59,7 +60,75 @@ namespace GHCAA.Infrastructure.Data
                 return;
             }
 
+            await SelfHealFalselyBaselinedMigrationsAsync(ctx, logger, applied);
             await ctx.Database.MigrateAsync();
+        }
+
+        // ctx.Database.MigrateAsync() below trusts __EFMigrationsHistory and will never revisit a
+        // migration recorded there — including one whose "already applied" row is a false positive.
+        // That happens when a migration mixes schema changes (AddColumn/CreateTable) with a data-seed
+        // op (InsertData/UpdateData/DeleteData) in the same transaction: EF runs a migration's Up()
+        // operations as one transaction, so if the seed op collides (duplicate key/etc.), Postgres
+        // rolls back the DDL right along with it — but IsAlreadyExists() below still matches the
+        // collision and baselines the whole migration as applied. See
+        // AddApprovalWorkflowToGalleryAndJobs / 2026-08-27's /api/jobs, /api/gallery and /api/events
+        // 500s for the incident this generalizes from (that migration's seed insert is now guarded
+        // against colliding, but this check covers every migration with the same risky shape, present
+        // or future, not just that one). For each migration marked applied that mixes a schema op with
+        // a data op, verify its AddColumn/CreateTable targets actually exist; if any are missing,
+        // drop that migration's history row so the MigrateAsync call below reapplies it for real.
+        private static async Task SelfHealFalselyBaselinedMigrationsAsync(ApplicationDbContext ctx, ILogger logger, HashSet<string> applied)
+        {
+            var migrationsAssembly = ctx.GetService<IMigrationsAssembly>();
+            var activeProvider = ctx.Database.ProviderName!;
+
+            foreach (var migrationId in applied)
+            {
+                if (!migrationsAssembly.Migrations.TryGetValue(migrationId, out var migrationType))
+                {
+                    continue;
+                }
+
+                var operations = migrationsAssembly.CreateMigration(migrationType, activeProvider).UpOperations;
+
+                var hasSchemaOp = operations.Any(op => op is AddColumnOperation or CreateTableOperation);
+                var hasDataOp = operations.Any(op => op is InsertDataOperation or UpdateDataOperation or DeleteDataOperation);
+                if (!hasSchemaOp || !hasDataOp)
+                {
+                    continue;
+                }
+
+                foreach (var op in operations)
+                {
+                    var (table, column) = op switch
+                    {
+                        AddColumnOperation addColumn => (addColumn.Table, addColumn.Name),
+                        CreateTableOperation createTable => (createTable.Name, null),
+                        _ => (null, null)
+                    };
+
+                    if (table is null)
+                    {
+                        continue;
+                    }
+
+                    var exists = column is null
+                        ? await ctx.Database.SqlQueryRaw<int>(
+                            "SELECT 1 FROM information_schema.tables WHERE table_name = {0}", table).AnyAsync()
+                        : await ctx.Database.SqlQueryRaw<int>(
+                            "SELECT 1 FROM information_schema.columns WHERE table_name = {0} AND column_name = {1}", table, column).AnyAsync();
+
+                    if (!exists)
+                    {
+                        await ctx.Database.ExecuteSqlInterpolatedAsync(
+                            $"DELETE FROM \"__EFMigrationsHistory\" WHERE \"MigrationId\" = {migrationId}");
+                        logger.LogWarning(
+                            "Migration {MigrationId} was recorded as applied but {Table} is missing — history row removed so it will reapply.",
+                            migrationId, column is null ? table : $"{table}.{column}");
+                        break;
+                    }
+                }
+            }
         }
 
         // Legacy database: tables already exist but no migration was ever recorded as applied.
