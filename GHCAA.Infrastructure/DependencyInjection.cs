@@ -20,22 +20,37 @@ namespace GHCAA.Infrastructure
             var provider = configuration.GetValue<string>("DatabaseProvider") ?? "PgSql";
             var connectionString = GetConnectionString(provider, configuration);
 
-            services.AddDbContextPool<ApplicationDbContext, ApplicationDbContext>((sp, options) =>
+            // Every migration file is tagged [DbContext(typeof(<Provider>ApplicationDbContext))] (see
+            // DbContextShims.cs), and EF's IMigrationsAssembly matches migrations to the pooled
+            // context by exact runtime type. Pooling the base ApplicationDbContext type here made
+            // that match always fail — ctx.Database.GetMigrations() silently returned zero
+            // migrations for every provider, so MigrationBootstrapper's MigrateAsync/self-heal logic
+            // was a no-op on every boot, on every environment. Pool the provider-specific shim type
+            // so its runtime type lines up with what the migrations are attributed to.
+            switch (provider.ToLower())
             {
-                switch (provider.ToLower())
-                {
-                    case "sqlite":
+                case "sqlite":
+                    services.AddDbContextPool<ApplicationDbContext, SqliteApplicationDbContext>((sp, options) =>
+                    {
                         options.UseSqlite(connectionString, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-                        break;
-                    case "mysql":
+                        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                    });
+                    break;
+                case "mysql":
+                    services.AddDbContextPool<ApplicationDbContext, MySqlApplicationDbContext>((sp, options) =>
+                    {
                         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-                        break;
-                    default: // PgSql
+                        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                    });
+                    break;
+                default: // PgSql
+                    services.AddDbContextPool<ApplicationDbContext, PgSqlApplicationDbContext>((sp, options) =>
+                    {
                         options.UseNpgsql(connectionString, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
-                        break;
-                }
-                options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-            });
+                        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                    });
+                    break;
+            }
 
             // Add Health Checks
             services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>();

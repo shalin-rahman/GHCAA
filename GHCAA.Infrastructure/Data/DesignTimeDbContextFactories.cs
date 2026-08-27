@@ -26,7 +26,7 @@ namespace GHCAA.Infrastructure.Data
     {
         public override PgSqlApplicationDbContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<PgSqlApplicationDbContext>();
             var conn = Configuration.GetConnectionString("PgSqlConnection");
             optionsBuilder.UseNpgsql(conn, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
 
@@ -39,7 +39,7 @@ namespace GHCAA.Infrastructure.Data
     {
         public override MySqlApplicationDbContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<MySqlApplicationDbContext>();
             var conn = Configuration.GetConnectionString("MySqlConnection");
             var mysqlVersion = new MySqlServerVersion(new Version(8, 0, 36));
             optionsBuilder.UseMySql(conn, mysqlVersion, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
@@ -53,7 +53,7 @@ namespace GHCAA.Infrastructure.Data
     {
         public override SqliteApplicationDbContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<SqliteApplicationDbContext>();
             var conn = Configuration.GetConnectionString("SqliteConnection");
             optionsBuilder.UseSqlite(conn, o => o.MigrationsAssembly("GHCAA.Infrastructure"));
 
