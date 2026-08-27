@@ -311,7 +311,7 @@ High-privilege portal for the Executive Committee and system administrators.
 - JSON-based seed data (`members.json`, `users.json`) synchronized into the database on first creation.
 - Utilities to batch-transform legacy member data (e.g., generating NID-based credentials with BCrypt hashing).
 
-Note: the runtime builds the schema and applies seed data via EF Core `EnsureCreated()` on an empty database (not migrations). Editing seed JSON does not retroactively update an already-created database.
+Note: on a brand-new empty database, the runtime builds the schema and applies seed data via EF Core `EnsureCreated()`. On an existing (already-provisioned) database — preprod/production — `MigrationBootstrapper` runs at boot instead: it baselines any migration whose effect already exists in the live schema (without re-running it) and applies genuinely pending migrations for real via the EF migrator, so schema changes shipped as migrations do reach preprod on the next deploy. Editing seed JSON (`HasData`) still does not retroactively update an already-created database — that still requires a runtime syncer like `ConstitutionSeeder` (see `docs/CONSTITUTION_PUBLISHING.md`).
 
 ### Technical infrastructure
 - Centralized soft-delete architecture using EF Core global query filters — queries never need to check `IsArchived` manually.

@@ -155,7 +155,10 @@ Once Render shows **Live**:
 3. **Deep-link refresh:** navigate into the app, then hit browser **refresh** on a route
    like `/portal/...` → it should still load (SPA fallback working).
 4. **DB:** log in / load data → confirms the app reached Neon. First boot auto-creates the
-   schema via `EnsureCreated()` (no migration step needed).
+   schema via `EnsureCreated()`. Every boot after that runs `MigrationBootstrapper`, which applies
+   any migration added since via the real EF migrator (baselining migrations whose effect already
+   exists in the schema rather than re-running them) — so later schema changes reach preprod without
+   a manual migration step.
 
 **Troubleshooting startup:**
 - **`exit 139` immediately** → `Jwt__Key` is missing or under 32 chars (Step 3).
@@ -163,7 +166,7 @@ Once Render shows **Live**:
   → the app wasn't listening on Render's `PORT`. **Fixed in code**: `Program.cs` now binds to
   `http://0.0.0.0:$PORT` when the `PORT` env var is present (Render sets it automatically). Make sure
   the deployed commit includes this fix.
-- **`relation "..." does not exist` in logs / login fails** → the schema wasn't created. **Fixed in code**: `Program.cs` now calls `EnsureCreated()` on boot for non-Visual profiles (builds schema + seed on the empty Neon DB). Ensure the deployed commit includes it.
+- **`relation "..." does not exist` in logs / login fails** → the schema wasn't created (or is missing a table/column added by a later migration). **Fixed in code**: `Program.cs` now calls `EnsureCreated()` on boot for non-Visual profiles (builds schema + seed on the empty Neon DB), and `MigrationBootstrapper` applies any migration added since (see above). Ensure the deployed commit includes both.
 - **`GET /` returns 401 instead of the web app** → the SPA fallback was caught by the global `RequireAuthenticatedUser` policy. **Fixed in code**: the `MapFallback` now has `.AllowAnonymous()`.
 - **Web app loads but API calls 404/CORS** → confirm same origin (the `/api` path), not an old absolute URL.
 

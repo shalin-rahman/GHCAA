@@ -1241,6 +1241,17 @@ Shipped as part of Area 40 (40.12/40.13).
 bug fixes; final combined state after Area 40 frontend work: `npx vitest run` 315/315 (66 files),
 `flutter test` 28/28 passed.
 
+41.7 [DONE 2026-08-27] Live `GET /api/jobs` and `GET /api/gallery` 500s after the Area 40 deploy —
+root cause was `MigrationBootstrapper.cs` (introduced same day, commit `5c08b99`): on a legacy
+`EnsureCreated()`-built database it wrongly assumed only the single newest migration was pending and
+baselined every earlier one as already-applied without running it, so `AddApprovalWorkflowToGalleryAndJobs`
+failed (its `SiteContents` insert hit a table that was never actually created) and rolled back, leaving
+the new `Status`/`RejectionReason` columns missing. Fixed by walking every migration in order and
+applying each for real via `IMigrator.MigrateAsync(id)`, only baselining (without running) one whose
+Postgres error confirms its effect already exists (`SqlState` in `42P07`/`42701`/`42P06`/`42710`/`23505`).
+Commit `3b381f0`, already live on preprod. `docs/RENDER_DEPLOYMENT.md` and `docs/FEATURES.md` updated —
+see [[gotcha_migrationbootstrapper_fixed_offset]].
+
 ---
 
 # Area 42 — Elections forms/docs manageable from admin portal (raised by user 2026-08-26, plan only, not yet built)
