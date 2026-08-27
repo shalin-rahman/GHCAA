@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 import '../../core/services/device_info_service.dart';
@@ -24,7 +25,9 @@ class AuthService {
       DeviceInfo? device;
       try {
         device = await _ref.read(deviceInfoProvider.future);
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('AuthService.login failed: $e');
+      }
 
       final response = await _dio.post('/auth/login', data: {
         'username': identifier, 
@@ -75,7 +78,9 @@ class AuthService {
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('AuthService.getSocialProviders failed: $e');
+    }
     return [];
   }
 
@@ -162,6 +167,7 @@ class AuthService {
       final response = await _dio.post('/auth/forgot-password', data: {'identifier': identifier});
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('AuthService.forgotPassword failed: $e');
       return false;
     }
   }
@@ -183,6 +189,7 @@ class AuthService {
       final response = await _dio.put('/profile', data: data);
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('AuthService.updateProfile failed: $e');
       return false;
     }
   }
@@ -263,7 +270,8 @@ final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
       return profile;
     }
     return await storage.getProfile();
-  } catch (_) {
+  } catch (e) {
+    debugPrint('userProfileProvider failed: $e');
     return await storage.getProfile();
   }
 });

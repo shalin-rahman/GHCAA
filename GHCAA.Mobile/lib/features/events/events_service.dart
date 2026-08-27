@@ -29,20 +29,29 @@ class EventsService {
         'paymentReference': paymentRef,
       });
       return response.statusCode == 200 || response.statusCode == 201;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('EventsService.registerForEvent failed: $e');
+      return false;
+    }
   }
 
   Future<bool> createEvent(Map<String, dynamic> data) async {
     try {
       final response = await _dio.post('/events/admin', data: data);
       return response.statusCode == 201 || response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('EventsService.createEvent failed: $e');
+      return false;
+    }
   }
 
   Future<bool> deleteEvent(int id) async {
     try {
       final response = await _dio.delete('/events/admin/$id');
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('EventsService.deleteEvent failed: $e');
+      return false;
+    }
   }
 }

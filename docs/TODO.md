@@ -1317,3 +1317,39 @@ per-form fields/attachment, publish state) following `ghcaa-design` conventions.
 seeder/static content.
 42.4 [TODO] Mobile: sync if elections content is surfaced there.
 42.5 [TODO] Tests + docs update per usual closing convention.
+
+---
+
+# Area 43 — Application-wide exception handling & logging audit (raised by user 2026-08-27: "make sure entire application have propers exception handling with logging. best error management")
+
+43.1 [DONE 2026-08-27] Backend: audited `ExceptionMiddleware.cs` and controller-level try/catch blocks
+across `AdminController`, `NotificationController`, `RolesController` for swallowed exceptions and
+missing/weak logging; added structured `ILogger<T>` logging (message templates, not `ex.Message` as the
+template) at each previously-silent catch. Added `GHCAA.Tests/Middleware/ExceptionMiddlewareTests.cs`
+covering the middleware's status-code mapping and logging behavior. `dotnet test` 382/382 passes.
+43.2 [DONE 2026-08-27] Angular web: added `GlobalErrorHandler` (`core/services/global-error-handler.ts`)
+implementing `ErrorHandler`, wired in `app.config.ts` alongside `provideBrowserGlobalErrorListeners()` to
+catch uncaught component/template errors and unhandled promise rejections app-wide (HTTP errors are
+excluded — the interceptor already owns those). Fixed two silent `catchError(() => of(null))` subscribes
+in `auth.service.ts` (`/auth/me` session restore, `logout()`) to log via `console.error` before falling
+back; `refresh()`'s catch was deliberately left unlogged since a 401 there is an expected, routine path,
+not a bug. `npx vitest run` 66 files / 315 tests pass, 0 failures.
+43.3 [DONE 2026-08-27] Flutter mobile: added a `FlutterError.onError` handler in `main.dart` (previously
+only `PlatformDispatcher.instance.onError` existed) so uncaught framework errors are auto-reported to
+Sentry + `debugPrint` instead of relying on a manual user-tapped report button. Swept every Flutter
+service/provider for silent `catch (e) { ... }`/`catch (_) { ... }` blocks that dropped the exception on
+the floor and added `debugPrint('<Class>.<method> failed: $e')` (or `developer.log` in
+`push_notification_service.dart`, matching that file's pre-existing convention) before each fallback —
+covering `financial_service.dart`, `job_service.dart`, `content_service.dart`, `events_service.dart`,
+`auth_service.dart`, `admin_service.dart`, `dynamic_theme_service.dart`, `poll_service.dart`,
+`forum_service.dart`, `assistant_service.dart`, `mentorship_service.dart`, `roles_service.dart`,
+`dropdown_service.dart` (13 files total). No new logging dependency added — `debugPrint`/`developer.log`
+matches this codebase's existing lightweight-logging convention ([[feedback_keep_lightweight]]).
+`flutter analyze` clean (no issues); `flutter test` 66 passing tests unaffected — the 26 failures are all
+pre-existing stale golden pixel-compares in `comprehensive_visual_freeze_test.dart`
+([[session_mobile_ci_golden_fix]], [[session_mobile_login_fixes]]), not caused by this change.
+43.4 [TODO] Live/manual verification: trigger a genuine unhandled error in each app (backend 500,
+Angular runtime error, Flutter uncaught exception) against a running instance to confirm the new
+handlers actually fire and log as expected — not yet done this session.
+**Not yet committed or deployed** — all changes remain unstaged working-tree edits pending explicit
+user go-ahead.

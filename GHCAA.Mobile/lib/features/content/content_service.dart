@@ -59,7 +59,10 @@ class NewsService {
       final endpoint = approve ? 'approve' : 'reject';
       final response = await _dio.post('/news/admin/$id/$endpoint');
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('NewsService.resolveArticle failed: $e');
+      return false;
+    }
   }
 
   Future<List<dynamic>> getGalleryItems() async {
@@ -84,7 +87,10 @@ class NewsService {
 
       final response = await _dio.post('/gallery', data: formData);
       return response.statusCode == 200 || response.statusCode == 201;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('NewsService.uploadGalleryItem failed: $e');
+      return false;
+    }
   }
 }
 
@@ -108,21 +114,30 @@ class GalleryService {
       // POST /api/gallery/admin takes a JSON object
       final response = await _dio.post('/gallery/admin', data: gallery);
       return response.statusCode == 200 || response.statusCode == 201;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('GalleryService.createGallery failed: $e');
+      return false;
+    }
   }
 
   Future<bool> updateGallery(int id, Map<String, dynamic> gallery) async {
     try {
       final response = await _dio.put('/gallery/admin/$id', data: gallery);
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('GalleryService.updateGallery failed: $e');
+      return false;
+    }
   }
 
   Future<bool> deleteGallery(int id) async {
     try {
       final response = await _dio.delete('/gallery/admin/$id');
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('GalleryService.deleteGallery failed: $e');
+      return false;
+    }
   }
 
   Future<String?> uploadPhoto(String filePath) async {
@@ -134,7 +149,9 @@ class GalleryService {
       if (response.statusCode == 200) {
         return response.data['path'];
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('GalleryService.uploadPhoto failed: $e');
+    }
     return null;
   }
 
@@ -142,14 +159,20 @@ class GalleryService {
     try {
       final response = await _dio.post('/gallery/admin/$galleryId/photos', data: paths);
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('GalleryService.addPhotosToGallery failed: $e');
+      return false;
+    }
   }
 
   Future<bool> removePhoto(int photoId) async {
     try {
       final response = await _dio.delete('/gallery/admin/photos/$photoId');
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('GalleryService.removePhoto failed: $e');
+      return false;
+    }
   }
 
   // ---- Member album management ----
@@ -161,7 +184,10 @@ class GalleryService {
         if (description != null) 'description': description,
       });
       return response.statusCode == 200 || response.statusCode == 201;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('GalleryService.createAlbum failed: $e');
+      return false;
+    }
   }
 
   Future<List<dynamic>> getMyAlbums() async {
@@ -182,7 +208,10 @@ class GalleryService {
       });
       final response = await _dio.post('/gallery/albums/$albumId/photos', data: formData);
       return response.statusCode == 200 || response.statusCode == 201;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('GalleryService.addPhotoToAlbum failed: $e');
+      return false;
+    }
   }
 
   // ---- Admin approval workflow ----
@@ -209,7 +238,10 @@ class GalleryService {
         data: approve ? null : {'reason': reason},
       );
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('GalleryService.resolveGalleryApproval failed: $e');
+      return false;
+    }
   }
 
   Future<bool> resolvePhotoApproval(int photoId, bool approve, {String? reason}) async {
@@ -220,6 +252,9 @@ class GalleryService {
         data: approve ? null : {'reason': reason},
       );
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('GalleryService.resolvePhotoApproval failed: $e');
+      return false;
+    }
   }
 }

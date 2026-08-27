@@ -40,6 +40,7 @@ class FinancialService {
       final response = await _dio.get('/financials/my-dues');
       return (response.data['amount'] ?? 0.0).toDouble();
     } catch (e) {
+      debugPrint('FinancialService.getOutstandingDues failed: $e');
       return 0.0;
     }
   }
@@ -58,7 +59,10 @@ class FinancialService {
     try {
       final response = await _dio.delete('/financials/saved-methods/$id');
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('FinancialService.deleteSavedMethod failed: $e');
+      return false;
+    }
   }
 
   Future<String?> getReceiptUrl(int paymentId) async {
@@ -109,7 +113,8 @@ class FinancialService {
       }
       final response = await _dio.post('/financials/record-payment', data: formData);
       return response.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('FinancialService.recordPayment failed: $e');
       return false;
     }
   }

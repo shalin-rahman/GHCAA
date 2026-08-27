@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 import 'lookup_service.dart';
@@ -148,7 +149,9 @@ class DropdownService {
               'requiresReference': e['requiresReference'].toString(),
             }).toList();
           }
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('DropdownService.getOptions failed: $e');
+        }
         return [];
       default:
         return [];

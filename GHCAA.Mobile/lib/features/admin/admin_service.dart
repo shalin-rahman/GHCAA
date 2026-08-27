@@ -40,6 +40,7 @@ class AdminService {
       final response = await _dio.post('/admin/contact-messages/$messageId/read');
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('AdminService.markMessageAsRead failed: $e');
       return false;
     }
   }
@@ -54,6 +55,7 @@ class AdminService {
       });
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('AdminService.resolveApproval failed: $e');
       return false;
     }
   }
@@ -63,6 +65,7 @@ class AdminService {
       final response = await _dio.get('/admin/analytics');
       return response.data as Map<String, dynamic>;
     } catch (e) {
+      debugPrint('AdminService.getGlobalAnalytics failed: $e');
       return {'totalMembers': 0, 'pendingApprovals': 0, 'totalEvents': 0};
     }
   }
@@ -82,14 +85,20 @@ class AdminService {
     try {
       final response = await _dio.post('/admin/governance/periods', data: data);
       return response.statusCode == 201 || response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('AdminService.createECPeriod failed: $e');
+      return false;
+    }
   }
 
   Future<bool> updateECPeriod(int id, Map<String, dynamic> data) async {
     try {
       final response = await _dio.put('/admin/governance/periods/$id', data: data);
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('AdminService.updateECPeriod failed: $e');
+      return false;
+    }
   }
 
   // Financial Ledger
@@ -111,14 +120,20 @@ class AdminService {
     try {
       final response = await _dio.get('/ledger/summary', queryParameters: {'year': year});
       return response.data as Map<String, dynamic>;
-    } catch (_) { return {'totalRevenue': 0, 'totalExpenses': 0, 'netPosition': 0}; }
+    } catch (e) {
+      debugPrint('AdminService.getLedgerSummary failed: $e');
+      return {'totalRevenue': 0, 'totalExpenses': 0, 'netPosition': 0};
+    }
   }
 
   Future<bool> updateMember(int id, Map<String, dynamic> data) async {
     try {
       final response = await _dio.put('/admin/members/$id', data: data);
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('AdminService.updateMember failed: $e');
+      return false;
+    }
   }
 
   // Financial Fee Configuration
@@ -136,14 +151,20 @@ class AdminService {
     try {
       final response = await _dio.post('/financials/fees/config', data: data);
       return response.statusCode == 200 || response.statusCode == 201;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('AdminService.addFeeConfig failed: $e');
+      return false;
+    }
   }
 
   Future<bool> updateFeeConfig(Map<String, dynamic> data) async {
     try {
       final response = await _dio.put('/financials/fees/config', data: data);
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('AdminService.updateFeeConfig failed: $e');
+      return false;
+    }
   }
 
   // Committee Member Management
@@ -161,13 +182,19 @@ class AdminService {
     try {
       final response = await _dio.post('/admin/governance/periods/$periodId/members', data: data);
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('AdminService.assignMemberToCommittee failed: $e');
+      return false;
+    }
   }
 
   Future<bool> removeMemberFromCommittee(int ecMemberId) async {
     try {
       final response = await _dio.delete('/admin/governance/members/$ecMemberId');
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('AdminService.removeMemberFromCommittee failed: $e');
+      return false;
+    }
   }
 }

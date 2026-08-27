@@ -44,6 +44,8 @@ class PushNotificationService {
         await Firebase.initializeApp();
       }
       developer.log('Handling background message: ${message.messageId}');
-    } catch (_) {}
+    } catch (e) {
+      developer.log('PushNotificationService.firebaseMessagingBackgroundHandler failed: $e');
+    }
   }
 }

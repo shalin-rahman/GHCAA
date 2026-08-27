@@ -65,8 +65,8 @@ class ThemeService {
       if (response.statusCode == 200 && response.data != null) {
         return SpecialTheme.fromJson(response.data);
       }
-    } catch (_) {
-      // Background failure is acceptable in production
+    } catch (e) {
+      debugPrint('ThemeService.getActiveTheme failed: $e');
     }
     return null;
   }

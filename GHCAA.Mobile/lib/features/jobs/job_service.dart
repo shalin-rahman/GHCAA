@@ -26,6 +26,7 @@ class JobService {
       final response = await _dio.post('/jobs', data: data);
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
+      debugPrint('JobService.postJob failed: $e');
       return false;
     }
   }
@@ -34,7 +35,10 @@ class JobService {
     try {
       final response = await _dio.delete('/jobs/$id');
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('JobService.deleteJob failed: $e');
+      return false;
+    }
   }
 
   // ---- Admin approval workflow ----
@@ -57,6 +61,9 @@ class JobService {
         data: approve ? null : {'reason': reason},
       );
       return response.statusCode == 200;
-    } catch (_) { return false; }
+    } catch (e) {
+      debugPrint('JobService.resolveJobApproval failed: $e');
+      return false;
+    }
   }
 }

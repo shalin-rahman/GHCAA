@@ -8,6 +8,7 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -30,7 +31,7 @@ namespace GHCAA.Tests.Controllers
             _fileValidationServiceMock.Setup(x => x.Validate(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<FileCategory>(), It.IsAny<long>()))
                                        .Returns(FileValidationResult.Ok());
 
-            _controller = new AdminController(_memberServiceMock.Object, _idCardServiceMock.Object, _fileValidationServiceMock.Object);
+            _controller = new AdminController(_memberServiceMock.Object, _idCardServiceMock.Object, _fileValidationServiceMock.Object, Mock.Of<ILogger<AdminController>>());
 
             SetSuperAdminContext(_controller, 1);
         }

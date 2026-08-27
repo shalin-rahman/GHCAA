@@ -160,7 +160,9 @@ class ForumService {
       if (response.statusCode == 200) {
         return ForumTopic.fromJson(response.data);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('ForumService.getTopic failed: $e');
+    }
     return null;
   }
 
@@ -193,7 +195,9 @@ class ForumService {
       if (response.statusCode == 201 || response.statusCode == 200) {
         return ForumTopic.fromJson(response.data);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('ForumService.createTopic failed: $e');
+    }
     return null;
   }
 
@@ -210,7 +214,9 @@ class ForumService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ForumPost.fromJson(response.data);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('ForumService.createPost failed: $e');
+    }
     return null;
   }
 
@@ -218,7 +224,8 @@ class ForumService {
     try {
       final response = await _dio.delete('/forum/topics/$topicId');
       return response.statusCode == 204 || response.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ForumService.deleteTopic failed: $e');
       return false;
     }
   }
@@ -227,7 +234,8 @@ class ForumService {
     try {
       final response = await _dio.delete('/forum/posts/$postId');
       return response.statusCode == 204 || response.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ForumService.deletePost failed: $e');
       return false;
     }
   }

@@ -19,7 +19,8 @@ class MentorshipService {
         'domain': domain,
       });
       return r.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('MentorshipService.sendRequest failed: $e');
       return false;
     }
   }
@@ -51,7 +52,8 @@ class MentorshipService {
         'note': note,
       });
       return r.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('MentorshipService.respondToRequest failed: $e');
       return false;
     }
   }
@@ -60,7 +62,8 @@ class MentorshipService {
     try {
       final r = await _dio.post('/mentorship/$requestId/complete');
       return r.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('MentorshipService.markComplete failed: $e');
       return false;
     }
   }

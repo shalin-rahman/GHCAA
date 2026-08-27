@@ -11,10 +11,12 @@ namespace GHCAA.API.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;
+        private readonly ILogger<NotificationController> _logger;
 
-        public NotificationController(INotificationService notificationService)
+        public NotificationController(INotificationService notificationService, ILogger<NotificationController> logger)
         {
             _notificationService = notificationService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -30,6 +32,7 @@ namespace GHCAA.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error fetching notifications");
                 return StatusCode(500, new { message = "Error fetching notifications", details = ex.Message });
             }
         }

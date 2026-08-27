@@ -11,11 +11,13 @@ namespace GHCAA.API.Controllers
     {
         private readonly IRoleService _roleService;
         private readonly IUserService _userService;
+        private readonly ILogger<RolesController> _logger;
 
-        public RolesController(IRoleService roleService, IUserService userService)
+        public RolesController(IRoleService roleService, IUserService userService, ILogger<RolesController> logger)
         {
             _roleService = roleService;
             _userService = userService;
+            _logger = logger;
         }
 
         [HttpGet("users")]
@@ -44,6 +46,7 @@ namespace GHCAA.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to create admin user {Username}", dto.Username);
                 return BadRequest(new { Message = ex.Message });
             }
         }

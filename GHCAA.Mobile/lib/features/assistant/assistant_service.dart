@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -14,7 +15,8 @@ class AssistantService {
       if (response.statusCode == 200) {
         return response.data['answer'] as String?;
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('AssistantService.ask failed: $e');
       return 'The assistant is temporarily offline. Please try again later.';
     }
     return 'I am currently unable to process your request. Please try again.';

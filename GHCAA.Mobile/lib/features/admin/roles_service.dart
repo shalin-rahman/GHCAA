@@ -30,7 +30,8 @@ class RolesService {
         'role': role,
       });
       return r.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('RolesService.createAdmin failed: $e');
       return false;
     }
   }
@@ -50,7 +51,8 @@ class RolesService {
     try {
       final r = await _dio.post('/roles', data: '"$roleName"');
       return r.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('RolesService.createRole failed: $e');
       return false;
     }
   }
@@ -62,7 +64,8 @@ class RolesService {
         'roleName': roleName,
       });
       return r.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('RolesService.assignRole failed: $e');
       return false;
     }
   }
@@ -74,7 +77,8 @@ class RolesService {
         'roleName': roleName,
       });
       return r.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('RolesService.removeRole failed: $e');
       return false;
     }
   }

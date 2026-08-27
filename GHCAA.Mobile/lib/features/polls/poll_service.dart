@@ -96,7 +96,8 @@ class PollService {
     try {
       final response = await _dio.post('/polls/$pollId/vote', data: {'optionIds': optionIds});
       return response.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('PollService.vote failed: $e');
       return false;
     }
   }

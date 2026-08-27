@@ -84,8 +84,17 @@ void main() async {
 
   // 3b. Catch background/untracked errors
   PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Uncaught platform error: $error');
     Sentry.captureException(error, stackTrace: stack);
     return true;
+  };
+
+  // 3c. Catch framework errors (build/layout/paint) automatically instead of relying
+  // on the user tapping "DIAGNOSE & REPORT" on the ErrorWidget fallback screen.
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('Uncaught Flutter framework error: ${details.exceptionAsString()}');
+    Sentry.captureException(details.exception, stackTrace: details.stack);
   };
 }
 

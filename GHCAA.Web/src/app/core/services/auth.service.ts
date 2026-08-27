@@ -35,7 +35,10 @@ export class AuthService {
         // 24.39: Restore auth state from httpOnly cookie via /auth/me on page load.
         if (typeof window !== 'undefined' && !this._currentUser()) {
             this.http.get<any>(API_ENDPOINTS.AUTH.ME, { withCredentials: true })
-                .pipe(catchError(() => of(null)))
+                .pipe(catchError(err => {
+                    console.error('Failed to restore session from /auth/me', err);
+                    return of(null);
+                }))
                 .subscribe(me => {
                     if (me) {
                         const user: User = {
@@ -110,7 +113,10 @@ export class AuthService {
 
     logout() {
         this.http.post(API_ENDPOINTS.AUTH.LOGOUT, {}, { withCredentials: true })
-            .pipe(catchError(() => of(null)))
+            .pipe(catchError(err => {
+                console.error('Logout request to server failed; clearing local session anyway', err);
+                return of(null);
+            }))
             .subscribe(() => {
                 this._currentUser.set(null);
                 sessionStorage.removeItem('user_session');

@@ -16,12 +16,14 @@ namespace GHCAA.API.Controllers
         private readonly IMemberService _memberService;
         private readonly IIDCardService _idCardService;
         private readonly IFileValidationService _fileValidationService;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(IMemberService memberService, IIDCardService idCardService, IFileValidationService fileValidationService)
+        public AdminController(IMemberService memberService, IIDCardService idCardService, IFileValidationService fileValidationService, ILogger<AdminController> logger)
         {
             _memberService = memberService;
             _idCardService = idCardService;
             _fileValidationService = fileValidationService;
+            _logger = logger;
         }
 
         [HttpGet("stats")]
@@ -265,6 +267,7 @@ namespace GHCAA.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Admin password reset failed for member {MemberId}", id);
                 return BadRequest(new { Message = ex.Message });
             }
         }
