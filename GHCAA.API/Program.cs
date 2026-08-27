@@ -204,12 +204,17 @@ app.UseWebSockets();
 
 app.UseStaticFiles(); // serve wwwroot at the root /
 
-// Map /api/ paths to wwwroot so the frontend can retrieve the physical images 
+// Map /api/ paths to the same physical root LocalFileStorageService writes to (and
+// SecureFilesController reads from), so the frontend can retrieve the physical images
 // when it concatenates the API base URL with the database's relative 'uploads/...' path.
+// FileStorage:BasePhysicalPath defaults to ContentRootPath/wwwroot (this container's own
+// ephemeral disk) but can be overridden to a mounted persistent volume in production.
+var uploadsBasePath = builder.Configuration["FileStorage:BasePhysicalPath"]
+    ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "uploads")),
+        Path.Combine(uploadsBasePath, "uploads")),
     RequestPath = "/api/uploads"
 });
 
@@ -234,7 +239,12 @@ app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");
 var spaIndexPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "index.html");
 if (File.Exists(spaIndexPath))
 {
-    app.MapFallback(async ctx =>
+    // Explicit "/{**path}" (rather than the parameterless overload's implicit :nonfile
+    // pattern) so this also catches missing static assets (paths with a file extension,
+    // e.g. a deleted upload). Without it, those requests match no endpoint at all and the
+    // global RequireAuthenticatedUser FallbackPolicy challenges them with a misleading 401
+    // instead of a plain 404.
+    app.MapFallback("/{**path}", async ctx =>
     {
         // Keep unknown /api requests as API 404s — never swallow them with index.html.
         if (ctx.Request.Path.StartsWithSegments("/api"))
@@ -242,9 +252,20 @@ if (File.Exists(spaIndexPath))
             ctx.Response.StatusCode = StatusCodes.Status404NotFound;
             return;
         }
+
+        // UseStaticFiles already had first crack at this request; reaching here with a
+        // file-like path (has an extension) means the asset is missing on disk — 404, not
+        // the SPA shell.
+        var lastSegment = ctx.Request.Path.Value?.Split('/').LastOrDefault() ?? "";
+        if (lastSegment.Contains('.'))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+
         ctx.Response.ContentType = "text/html";
         await ctx.Response.SendFileAsync(spaIndexPath);
-    }).AllowAnonymous(); // exempt the SPA shell from the global RequireAuthenticatedUser FallbackPolicy
+    }).AllowAnonymous(); // exempt the SPA shell (and the 404s above) from the global RequireAuthenticatedUser FallbackPolicy
 }
 
 // Ensure the database schema is up to date on boot for non-Visual profiles (Preprod/Production).
