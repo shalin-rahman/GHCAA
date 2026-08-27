@@ -15,6 +15,7 @@ export class LandingEcPreview implements OnInit {
     private networking = inject(NetworkingService);
     committee = signal<any[]>([]);
     isVisible = signal(true);
+    activePeriodTitle = signal<string | null>(null);
 
     ngOnInit() {
         this.networking.getCommittee({}, true).subscribe({
@@ -30,6 +31,14 @@ export class LandingEcPreview implements OnInit {
                 this.committee.set([]);
                 this.isVisible.set(false);
             }
+        });
+
+        this.networking.getPeriods().subscribe({
+            next: (periods) => {
+                const active = (periods || []).find((p: any) => p.isActive);
+                this.activePeriodTitle.set(active?.title ?? null);
+            },
+            error: () => this.activePeriodTitle.set(null)
         });
     }
 

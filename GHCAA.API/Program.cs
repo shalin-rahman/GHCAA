@@ -247,15 +247,26 @@ if (File.Exists(spaIndexPath))
     }).AllowAnonymous(); // exempt the SPA shell from the global RequireAuthenticatedUser FallbackPolicy
 }
 
-// Ensure the database schema exists on boot for non-Visual profiles (Preprod/Production).
-// EnsureCreated builds the schema + HasData seed from the model on an empty database; it is a
-// no-op once the tables exist. The Visual profile has its own recreate/seed path below.
-// Migrations are not applied at runtime for this project.
+// Ensure the database schema is up to date on boot for non-Visual profiles (Preprod/Production).
+// MigrationBootstrapper applies pending EF Core migrations automatically (baselining migration
+// history first on a legacy EnsureCreated()-built database) so new columns/tables ship live
+// without a manual step. The Visual profile has its own recreate/seed path below.
 if (app.Configuration["ASP_SEED_PROFILE"] != "Visual")
 {
     using var schemaScope = app.Services.CreateScope();
     var schemaCtx = schemaScope.ServiceProvider.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
-    schemaCtx.Database.EnsureCreated();
+    try
+    {
+        await GHCAA.Infrastructure.Data.MigrationBootstrapper.EnsureMigratedAsync(schemaCtx, app.Logger);
+    }
+    catch (Exception ex)
+    {
+        // Never let a migration-bootstrap failure take the whole app down: fall back to the
+        // old no-op-on-existing-tables behavior so boot degrades to today's status quo instead
+        // of a hard crash. Whatever caused this needs a human, not a retry loop.
+        app.Logger.LogError(ex, "Migration bootstrap failed; falling back to EnsureCreated. Schema may be stale until this is fixed manually.");
+        schemaCtx.Database.EnsureCreated();
+    }
 }
 
 // Seed OrganizationConfig with GHCAA defaults on first boot (idempotent, fault-tolerant)
@@ -275,6 +286,23 @@ try
 catch (Exception ex)
 {
     app.Logger.LogWarning(ex, "OrgConfig seed skipped — table may not exist yet. Run migrations first.");
+}
+
+// Restore SuperAdmin on protected accounts (config-only list, not admin-UI-editable — see
+// ProtectedSuperAdminSeeder for why this must never move into OrgConfig or a DB table).
+try
+{
+    var protectedSuperAdmins = app.Configuration.GetSection("AppSettings:ProtectedSuperAdmins").Get<string[]>() ?? [];
+    using var protectedAdminScope = app.Services.CreateScope();
+    var protectedAdminCtx = protectedAdminScope.ServiceProvider.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
+    if (await protectedAdminCtx.Database.CanConnectAsync())
+    {
+        await GHCAA.Infrastructure.Data.ProtectedSuperAdminSeeder.EnsureAsync(protectedAdminCtx, protectedSuperAdmins, app.Logger);
+    }
+}
+catch (Exception ex)
+{
+    app.Logger.LogWarning(ex, "Protected SuperAdmin restore skipped.");
 }
 
 // Publish the ratified constitution from Data/Seed/constitution.json (TODO 36.3).

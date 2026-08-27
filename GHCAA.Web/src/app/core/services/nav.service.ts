@@ -53,6 +53,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     { path: '/admin/gallery-approvals', label: 'Gallery Review', icon: 'gallery-approvals', section: 'Content' },
     { path: '/admin/job-approvals', label: 'Job Review', icon: 'job-approvals', section: 'Content' },
     { path: '/admin/contact-messages', label: 'Portal Enquiries', icon: 'contact-messages', section: 'Content' },
+    { path: '/admin/polls', label: 'Polls', icon: 'polls', section: 'Content' },
     { path: '/admin/themes', label: 'Special Themes', icon: 'themes', section: 'Content' },
 
     { path: '/admin/ledger', label: 'Financial Ledger', icon: 'ledger', roles: ['SuperAdmin'], section: 'Finance & Tools' },
