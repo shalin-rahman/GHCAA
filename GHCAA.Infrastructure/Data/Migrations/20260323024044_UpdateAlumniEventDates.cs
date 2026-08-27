@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -15,19 +15,50 @@ namespace GHCAA.Infrastructure.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "AnimatedTexts",
-                table: "SpecialDayThemes");
+            // Guarded: on DBs created via EnsureCreated() the model already reflects the
+            // end-state (no "AnimatedTexts" column, "RegistrationStartDate"/"StartDate" names),
+            // so the plain Drop/Rename calls below would fail with 42703.
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'SpecialDayThemes' AND column_name = 'AnimatedTexts'
+                    ) THEN
+                        ALTER TABLE ""SpecialDayThemes"" DROP COLUMN ""AnimatedTexts"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "RegistrationDeadline",
-                table: "AlumniEvents",
-                newName: "RegistrationStartDate");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'AlumniEvents' AND column_name = 'RegistrationDeadline'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'AlumniEvents' AND column_name = 'RegistrationStartDate'
+                    ) THEN
+                        ALTER TABLE ""AlumniEvents"" RENAME COLUMN ""RegistrationDeadline"" TO ""RegistrationStartDate"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "Date",
-                table: "AlumniEvents",
-                newName: "StartDate");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'AlumniEvents' AND column_name = 'Date'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'AlumniEvents' AND column_name = 'StartDate'
+                    ) THEN
+                        ALTER TABLE ""AlumniEvents"" RENAME COLUMN ""Date"" TO ""StartDate"";
+                    END IF;
+                END $$;
+            ");
 
             migrationBuilder.AlterColumn<string>(
                 name: "AnnouncementText",
@@ -39,64 +70,29 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 oldType: "character varying(200)",
                 oldMaxLength: 200);
 
-            migrationBuilder.AddColumn<int>(
-                name: "Category",
-                table: "MembershipFeeConfigs",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.Sql(@"ALTER TABLE ""MembershipFeeConfigs"" ADD COLUMN IF NOT EXISTS ""Category"" integer NOT NULL DEFAULT 0;");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "EffectiveTo",
-                table: "MembershipFeeConfigs",
-                type: "timestamp with time zone",
-                nullable: true);
+            migrationBuilder.Sql(@"ALTER TABLE ""MembershipFeeConfigs"" ADD COLUMN IF NOT EXISTS ""EffectiveTo"" timestamp with time zone;");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "IsActive",
-                table: "MembershipFeeConfigs",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""MembershipFeeConfigs"" ADD COLUMN IF NOT EXISTS ""IsActive"" boolean NOT NULL DEFAULT FALSE;");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "EndDate",
-                table: "AlumniEvents",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+            migrationBuilder.Sql(@"ALTER TABLE ""AlumniEvents"" ADD COLUMN IF NOT EXISTS ""EndDate"" timestamp with time zone NOT NULL DEFAULT TIMESTAMPTZ '0001-01-01 00:00:00';");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "RegistrationEndDate",
-                table: "AlumniEvents",
-                type: "timestamp with time zone",
-                nullable: true);
+            migrationBuilder.Sql(@"ALTER TABLE ""AlumniEvents"" ADD COLUMN IF NOT EXISTS ""RegistrationEndDate"" timestamp with time zone;");
 
-            migrationBuilder.CreateTable(
-                name: "SavedPaymentMethods",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    MemberId = table.Column<int>(type: "integer", nullable: false),
-                    DisplayName = table.Column<string>(type: "text", nullable: false),
-                    Method = table.Column<string>(type: "text", nullable: false),
-                    AccountNumber = table.Column<string>(type: "text", nullable: false),
-                    Icon = table.Column<string>(type: "text", nullable: true),
-                    IsDefault = table.Column<bool>(type: "boolean", nullable: false),
-                    LastUsedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SavedPaymentMethods", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SavedPaymentMethods_Members_MemberId",
-                        column: x => x.MemberId,
-                        principalTable: "Members",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS ""SavedPaymentMethods"" (
+                ""Id"" integer GENERATED BY DEFAULT AS IDENTITY,
+                ""MemberId"" integer NOT NULL,
+                ""DisplayName"" text NOT NULL,
+                ""Method"" text NOT NULL,
+                ""AccountNumber"" text NOT NULL,
+                ""Icon"" text,
+                ""IsDefault"" boolean NOT NULL,
+                ""LastUsedAt"" timestamp with time zone NOT NULL,
+                ""CreatedAt"" timestamp with time zone NOT NULL,
+                CONSTRAINT ""PK_SavedPaymentMethods"" PRIMARY KEY (""Id""),
+                CONSTRAINT ""FK_SavedPaymentMethods_Members_MemberId"" FOREIGN KEY (""MemberId"") REFERENCES ""Members"" (""Id"") ON DELETE CASCADE
+            );");
 
             migrationBuilder.UpdateData(
                 table: "AlumniEvents",
@@ -202,6 +198,8 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 keyValue: 3,
                 columns: new[] { "Amount", "Category", "Description", "EffectiveDate", "EffectiveTo", "IsActive", "MembershipType" },
                 values: new object[] { 2000.0m, 0, "Executive Fee", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, 1 });
+
+            migrationBuilder.Sql(@"DELETE FROM ""MembershipFeeConfigs"" WHERE ""Id"" IN (4, 5);");
 
             migrationBuilder.InsertData(
                 table: "MembershipFeeConfigs",
@@ -8374,6 +8372,8 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 column: "FinancialCategory",
                 value: 11);
 
+            migrationBuilder.Sql(@"DELETE FROM ""SavedPaymentMethods"" WHERE ""Id"" IN (1, 2);");
+
             migrationBuilder.InsertData(
                 table: "SavedPaymentMethods",
                 columns: new[] { "Id", "AccountNumber", "CreatedAt", "DisplayName", "Icon", "IsDefault", "LastUsedAt", "MemberId", "Method" },
@@ -12478,17 +12478,13 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 column: "SecurityStamp",
                 value: "31992fa48c2b460681b20ec55465e79f");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_SavedPaymentMethods_MemberId",
-                table: "SavedPaymentMethods",
-                column: "MemberId");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_SavedPaymentMethods_MemberId"" ON ""SavedPaymentMethods"" (""MemberId"");");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "SavedPaymentMethods");
+            migrationBuilder.Sql(@"DROP TABLE IF EXISTS ""SavedPaymentMethods"";");
 
             migrationBuilder.DeleteData(
                 table: "MembershipFeeConfigs",
@@ -12500,35 +12496,45 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 keyColumn: "Id",
                 keyValue: 5);
 
-            migrationBuilder.DropColumn(
-                name: "Category",
-                table: "MembershipFeeConfigs");
+            migrationBuilder.Sql(@"ALTER TABLE ""MembershipFeeConfigs"" DROP COLUMN IF EXISTS ""Category"";");
 
-            migrationBuilder.DropColumn(
-                name: "EffectiveTo",
-                table: "MembershipFeeConfigs");
+            migrationBuilder.Sql(@"ALTER TABLE ""MembershipFeeConfigs"" DROP COLUMN IF EXISTS ""EffectiveTo"";");
 
-            migrationBuilder.DropColumn(
-                name: "IsActive",
-                table: "MembershipFeeConfigs");
+            migrationBuilder.Sql(@"ALTER TABLE ""MembershipFeeConfigs"" DROP COLUMN IF EXISTS ""IsActive"";");
 
-            migrationBuilder.DropColumn(
-                name: "EndDate",
-                table: "AlumniEvents");
+            migrationBuilder.Sql(@"ALTER TABLE ""AlumniEvents"" DROP COLUMN IF EXISTS ""EndDate"";");
 
-            migrationBuilder.DropColumn(
-                name: "RegistrationEndDate",
-                table: "AlumniEvents");
+            migrationBuilder.Sql(@"ALTER TABLE ""AlumniEvents"" DROP COLUMN IF EXISTS ""RegistrationEndDate"";");
 
-            migrationBuilder.RenameColumn(
-                name: "StartDate",
-                table: "AlumniEvents",
-                newName: "Date");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'AlumniEvents' AND column_name = 'StartDate'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'AlumniEvents' AND column_name = 'Date'
+                    ) THEN
+                        ALTER TABLE ""AlumniEvents"" RENAME COLUMN ""StartDate"" TO ""Date"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "RegistrationStartDate",
-                table: "AlumniEvents",
-                newName: "RegistrationDeadline");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'AlumniEvents' AND column_name = 'RegistrationStartDate'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'AlumniEvents' AND column_name = 'RegistrationDeadline'
+                    ) THEN
+                        ALTER TABLE ""AlumniEvents"" RENAME COLUMN ""RegistrationStartDate"" TO ""RegistrationDeadline"";
+                    END IF;
+                END $$;
+            ");
 
             migrationBuilder.AlterColumn<string>(
                 name: "AnnouncementText",
@@ -12540,11 +12546,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 oldType: "character varying(500)",
                 oldMaxLength: 500);
 
-            migrationBuilder.AddColumn<List<string>>(
-                name: "AnimatedTexts",
-                table: "SpecialDayThemes",
-                type: "text[]",
-                nullable: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" ADD COLUMN IF NOT EXISTS ""AnimatedTexts"" text[] NOT NULL DEFAULT '{}';");
 
             migrationBuilder.UpdateData(
                 table: "AlumniEvents",

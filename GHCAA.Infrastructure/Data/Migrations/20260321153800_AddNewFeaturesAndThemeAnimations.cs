@@ -30,42 +30,99 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 keyColumn: "Id",
                 keyValue: 3);
 
-            migrationBuilder.RenameColumn(
-                name: "Category",
-                table: "PaymentHistories",
-                newName: "FinancialCategory");
+            // Guarded: on DBs created via EnsureCreated() the model already has FinancialCategory,
+            // so the plain RenameColumn fails with 42703 (column "Category" does not exist).
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'PaymentHistories' AND column_name = 'Category'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'PaymentHistories' AND column_name = 'FinancialCategory'
+                    ) THEN
+                        ALTER TABLE ""PaymentHistories"" RENAME COLUMN ""Category"" TO ""FinancialCategory"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "Category",
-                table: "NewsPosts",
-                newName: "ArticleCategory");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'NewsPosts' AND column_name = 'Category'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'NewsPosts' AND column_name = 'ArticleCategory'
+                    ) THEN
+                        ALTER TABLE ""NewsPosts"" RENAME COLUMN ""Category"" TO ""ArticleCategory"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "Category",
-                table: "Lookups",
-                newName: "LookupGroup");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'Lookups' AND column_name = 'Category'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'Lookups' AND column_name = 'LookupGroup'
+                    ) THEN
+                        ALTER TABLE ""Lookups"" RENAME COLUMN ""Category"" TO ""LookupGroup"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameIndex(
-                name: "IX_Lookups_Category_Value",
-                table: "Lookups",
-                newName: "IX_Lookups_LookupGroup_Value");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM pg_indexes
+                        WHERE tablename = 'Lookups' AND indexname = 'IX_Lookups_Category_Value'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM pg_indexes
+                        WHERE tablename = 'Lookups' AND indexname = 'IX_Lookups_LookupGroup_Value'
+                    ) THEN
+                        ALTER INDEX ""IX_Lookups_Category_Value"" RENAME TO ""IX_Lookups_LookupGroup_Value"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "Category",
-                table: "JobOpportunities",
-                newName: "JobCategory");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'JobOpportunities' AND column_name = 'Category'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'JobOpportunities' AND column_name = 'JobCategory'
+                    ) THEN
+                        ALTER TABLE ""JobOpportunities"" RENAME COLUMN ""Category"" TO ""JobCategory"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "Category",
-                table: "FinancialRecords",
-                newName: "FinancialCategory");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'FinancialRecords' AND column_name = 'Category'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'FinancialRecords' AND column_name = 'FinancialCategory'
+                    ) THEN
+                        ALTER TABLE ""FinancialRecords"" RENAME COLUMN ""Category"" TO ""FinancialCategory"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.AddColumn<string>(
-                name: "SecurityStamp",
-                table: "Users",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.Sql(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""SecurityStamp"" text NOT NULL DEFAULT '';");
 
             migrationBuilder.AlterColumn<string>(
                 name: "AnnouncementText",
@@ -77,240 +134,97 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 oldType: "character varying(100)",
                 oldMaxLength: 100);
 
-            migrationBuilder.AddColumn<List<string>>(
-                name: "AnimatedTexts",
-                table: "SpecialDayThemes",
-                type: "text[]",
-                nullable: false,
-                defaultValue: new string[0]);
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" ADD COLUMN IF NOT EXISTS ""AnimatedTexts"" text[] NOT NULL DEFAULT '{}';");
 
-            migrationBuilder.AddColumn<string>(
-                name: "AnimationStyle",
-                table: "SpecialDayThemes",
-                type: "character varying(50)",
-                maxLength: 50,
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" ADD COLUMN IF NOT EXISTS ""AnimationStyle"" character varying(50) NOT NULL DEFAULT '';");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "EnableGradientFading",
-                table: "SpecialDayThemes",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" ADD COLUMN IF NOT EXISTS ""EnableGradientFading"" boolean NOT NULL DEFAULT FALSE;");
 
-            migrationBuilder.AddColumn<string>(
-                name: "ImageUrl",
-                table: "SpecialDayThemes",
-                type: "character varying(255)",
-                maxLength: 255,
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" ADD COLUMN IF NOT EXISTS ""ImageUrl"" character varying(255) NOT NULL DEFAULT '';");
 
-            migrationBuilder.AddColumn<string>(
-                name: "SidebarColor",
-                table: "SpecialDayThemes",
-                type: "character varying(7)",
-                maxLength: 7,
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" ADD COLUMN IF NOT EXISTS ""SidebarColor"" character varying(7) NOT NULL DEFAULT '';");
 
-            migrationBuilder.AddColumn<int>(
-                name: "ContributionPoints",
-                table: "Members",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" ADD COLUMN IF NOT EXISTS ""ContributionPoints"" integer NOT NULL DEFAULT 0;");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "GdprAcceptedAt",
-                table: "Members",
-                type: "timestamp with time zone",
-                nullable: true);
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" ADD COLUMN IF NOT EXISTS ""GdprAcceptedAt"" timestamp with time zone;");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "HasAcceptedGdpr",
-                table: "Members",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" ADD COLUMN IF NOT EXISTS ""HasAcceptedGdpr"" boolean NOT NULL DEFAULT FALSE;");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "IsFamilyPublic",
-                table: "Members",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" ADD COLUMN IF NOT EXISTS ""IsFamilyPublic"" boolean NOT NULL DEFAULT FALSE;");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "IsVerified",
-                table: "Members",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" ADD COLUMN IF NOT EXISTS ""IsVerified"" boolean NOT NULL DEFAULT FALSE;");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "CheckedInAt",
-                table: "EventRegistrations",
-                type: "timestamp with time zone",
-                nullable: true);
+            migrationBuilder.Sql(@"ALTER TABLE ""EventRegistrations"" ADD COLUMN IF NOT EXISTS ""CheckedInAt"" timestamp with time zone;");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "IsCheckedIn",
-                table: "EventRegistrations",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""EventRegistrations"" ADD COLUMN IF NOT EXISTS ""IsCheckedIn"" boolean NOT NULL DEFAULT FALSE;");
 
-            migrationBuilder.AddColumn<string>(
-                name: "TicketCode",
-                table: "EventRegistrations",
-                type: "text",
-                nullable: true);
+            migrationBuilder.Sql(@"ALTER TABLE ""EventRegistrations"" ADD COLUMN IF NOT EXISTS ""TicketCode"" text;");
 
-            migrationBuilder.AddColumn<int>(
-                name: "Status",
-                table: "AlumniEvents",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.Sql(@"ALTER TABLE ""AlumniEvents"" ADD COLUMN IF NOT EXISTS ""Status"" integer NOT NULL DEFAULT 0;");
 
-            migrationBuilder.AddColumn<string>(
-                name: "Metadata",
-                table: "ActivityLogs",
-                type: "text",
-                nullable: true);
+            migrationBuilder.Sql(@"ALTER TABLE ""ActivityLogs"" ADD COLUMN IF NOT EXISTS ""Metadata"" text;");
 
-            migrationBuilder.AddColumn<string>(
-                name: "UserAgent",
-                table: "ActivityLogs",
-                type: "text",
-                nullable: true);
+            migrationBuilder.Sql(@"ALTER TABLE ""ActivityLogs"" ADD COLUMN IF NOT EXISTS ""UserAgent"" text;");
 
-            migrationBuilder.CreateTable(
-                name: "EventBudgets",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EventId = table.Column<int>(type: "integer", nullable: false),
-                    EstimatedTotal = table.Column<decimal>(type: "numeric", nullable: false),
-                    ActualTotal = table.Column<decimal>(type: "numeric", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EventBudgets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_EventBudgets_AlumniEvents_EventId",
-                        column: x => x.EventId,
-                        principalTable: "AlumniEvents",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS ""EventBudgets"" (
+                ""Id"" integer GENERATED BY DEFAULT AS IDENTITY,
+                ""EventId"" integer NOT NULL,
+                ""EstimatedTotal"" numeric NOT NULL,
+                ""ActualTotal"" numeric NOT NULL,
+                ""CreatedAt"" timestamp with time zone NOT NULL,
+                ""UpdatedAt"" timestamp with time zone,
+                CONSTRAINT ""PK_EventBudgets"" PRIMARY KEY (""Id""),
+                CONSTRAINT ""FK_EventBudgets_AlumniEvents_EventId"" FOREIGN KEY (""EventId"") REFERENCES ""AlumniEvents"" (""Id"") ON DELETE CASCADE
+            );");
 
-            migrationBuilder.CreateTable(
-                name: "EventTasks",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EventId = table.Column<int>(type: "integer", nullable: false),
-                    Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    AssignedMemberId = table.Column<int>(type: "integer", nullable: true),
-                    DueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EventTasks", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_EventTasks_AlumniEvents_EventId",
-                        column: x => x.EventId,
-                        principalTable: "AlumniEvents",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_EventTasks_Members_AssignedMemberId",
-                        column: x => x.AssignedMemberId,
-                        principalTable: "Members",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                });
+            migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS ""EventTasks"" (
+                ""Id"" integer GENERATED BY DEFAULT AS IDENTITY,
+                ""EventId"" integer NOT NULL,
+                ""Title"" character varying(200) NOT NULL,
+                ""Description"" text,
+                ""AssignedMemberId"" integer,
+                ""DueDate"" timestamp with time zone,
+                ""IsCompleted"" boolean NOT NULL,
+                ""CreatedAt"" timestamp with time zone NOT NULL,
+                CONSTRAINT ""PK_EventTasks"" PRIMARY KEY (""Id""),
+                CONSTRAINT ""FK_EventTasks_AlumniEvents_EventId"" FOREIGN KEY (""EventId"") REFERENCES ""AlumniEvents"" (""Id"") ON DELETE CASCADE,
+                CONSTRAINT ""FK_EventTasks_Members_AssignedMemberId"" FOREIGN KEY (""AssignedMemberId"") REFERENCES ""Members"" (""Id"") ON DELETE SET NULL
+            );");
 
-            migrationBuilder.CreateTable(
-                name: "FamilyLinkRequests",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RequesterId = table.Column<int>(type: "integer", nullable: false),
-                    TargetMemberId = table.Column<int>(type: "integer", nullable: false),
-                    Relationship = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    Note = table.Column<string>(type: "text", nullable: true),
-                    RequestedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RespondedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FamilyLinkRequests", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_FamilyLinkRequests_Members_RequesterId",
-                        column: x => x.RequesterId,
-                        principalTable: "Members",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_FamilyLinkRequests_Members_TargetMemberId",
-                        column: x => x.TargetMemberId,
-                        principalTable: "Members",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
+            migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS ""FamilyLinkRequests"" (
+                ""Id"" integer GENERATED BY DEFAULT AS IDENTITY,
+                ""RequesterId"" integer NOT NULL,
+                ""TargetMemberId"" integer NOT NULL,
+                ""Relationship"" integer NOT NULL,
+                ""Status"" integer NOT NULL,
+                ""Note"" text,
+                ""RequestedAt"" timestamp with time zone NOT NULL,
+                ""RespondedAt"" timestamp with time zone,
+                CONSTRAINT ""PK_FamilyLinkRequests"" PRIMARY KEY (""Id""),
+                CONSTRAINT ""FK_FamilyLinkRequests_Members_RequesterId"" FOREIGN KEY (""RequesterId"") REFERENCES ""Members"" (""Id"") ON DELETE RESTRICT,
+                CONSTRAINT ""FK_FamilyLinkRequests_Members_TargetMemberId"" FOREIGN KEY (""TargetMemberId"") REFERENCES ""Members"" (""Id"") ON DELETE RESTRICT
+            );");
 
-            migrationBuilder.CreateTable(
-                name: "GamificationConfigs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ActivityCode = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Points = table.Column<int>(type: "integer", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GamificationConfigs", x => x.Id);
-                });
+            migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS ""GamificationConfigs"" (
+                ""Id"" integer GENERATED BY DEFAULT AS IDENTITY,
+                ""ActivityCode"" text NOT NULL,
+                ""Name"" text NOT NULL,
+                ""Points"" integer NOT NULL,
+                ""IsActive"" boolean NOT NULL,
+                CONSTRAINT ""PK_GamificationConfigs"" PRIMARY KEY (""Id"")
+            );");
 
-            migrationBuilder.CreateTable(
-                name: "EventExpenses",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EventBudgetId = table.Column<int>(type: "integer", nullable: false),
-                    Category = table.Column<string>(type: "text", nullable: false),
-                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    Note = table.Column<string>(type: "text", nullable: true),
-                    SpentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EventExpenses", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_EventExpenses_EventBudgets_EventBudgetId",
-                        column: x => x.EventBudgetId,
-                        principalTable: "EventBudgets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS ""EventExpenses"" (
+                ""Id"" integer GENERATED BY DEFAULT AS IDENTITY,
+                ""EventBudgetId"" integer NOT NULL,
+                ""Category"" text NOT NULL,
+                ""Amount"" numeric NOT NULL,
+                ""Note"" text,
+                ""SpentAt"" timestamp with time zone NOT NULL,
+                ""CreatedAt"" timestamp with time zone NOT NULL,
+                CONSTRAINT ""PK_EventExpenses"" PRIMARY KEY (""Id""),
+                CONSTRAINT ""FK_EventExpenses_EventBudgets_EventBudgetId"" FOREIGN KEY (""EventBudgetId"") REFERENCES ""EventBudgets"" (""Id"") ON DELETE CASCADE
+            );");
 
             migrationBuilder.UpdateData(
                 table: "AlumniEvents",
@@ -340,6 +254,8 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 column: "Status",
                 value: 0);
 
+            migrationBuilder.Sql(@"DELETE FROM ""EmailTemplates"" WHERE ""Id"" IN (-8, -7, -6, -5, -4, -3, -2, -1);");
+
             migrationBuilder.InsertData(
                 table: "EmailTemplates",
                 columns: new[] { "Id", "Body", "Code", "Description", "LastUpdated", "Subject", "Variables" },
@@ -354,6 +270,8 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     { -2, "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px;'><h2 style='color: #2c3e50;'>Welcome to GHCAA</h2><p>Dear <strong>{{FullName}}</strong>,</p><p>Your membership has been approved! We are excited to have you as part of our community.</p><div style='background: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db;'><p><strong>Membership No:</strong> {{MembershipNumber}}</p><p><strong>Default Password:</strong> <code style='background:#fff; padding:2px 5px;'>{{DefaultPassword}}</code></p></div><p>Please log in and change your password immediately.</p></div>", "WELCOME_EMAIL", "Welcome email", new DateTime(2026, 3, 21, 15, 37, 55, 635, DateTimeKind.Utc).AddTicks(8628), "Welcome to GHC Alumni Association!", "['FullName', 'MembershipNumber', 'DefaultPassword']" },
                     { -1, "<div style='font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 500px;'><h2 style='color: #2c3e50;'>Verification Code</h2><p>Hello <strong>{{FullName}}</strong> metallic,</p><p>Your security code is:</p><div style='font-size: 24px; font-weight: bold; background: #f8f9fa; padding: 15px; text-align: center; border-radius: 5px; color: #c5a059; border: 1px solid #eee;'>{{OtpCode}}</div><p>Valid for 10 minutes. Do not share this code.</p></div>", "OTP_EMAIL", "OTP verification email", new DateTime(2026, 3, 21, 15, 37, 55, 634, DateTimeKind.Utc).AddTicks(9573), "GHCAA Verification Code: {{OtpCode}}", "['FullName', 'OtpCode']" }
                 });
+
+            migrationBuilder.Sql(@"DELETE FROM ""GamificationConfigs"" WHERE ""Id"" IN (1, 2, 3, 4);");
 
             migrationBuilder.InsertData(
                 table: "GamificationConfigs",
@@ -379,6 +297,8 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 keyValue: 11,
                 columns: new[] { "Label", "Value" },
                 values: new object[] { "Humanities", "Humanities" });
+
+            migrationBuilder.Sql(@"DELETE FROM ""Lookups"" WHERE ""Id"" IN (1001, 1002, 1003, 1004, 1005, 1006);");
 
             migrationBuilder.InsertData(
                 table: "Lookups",
@@ -16731,55 +16651,31 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 column: "SecurityStamp",
                 value: "7332276428b34ac39df49aeaecf13624");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_EventBudgets_EventId",
-                table: "EventBudgets",
-                column: "EventId",
-                unique: true);
+            migrationBuilder.Sql(@"CREATE UNIQUE INDEX IF NOT EXISTS ""IX_EventBudgets_EventId"" ON ""EventBudgets"" (""EventId"");");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_EventExpenses_EventBudgetId",
-                table: "EventExpenses",
-                column: "EventBudgetId");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_EventExpenses_EventBudgetId"" ON ""EventExpenses"" (""EventBudgetId"");");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_EventTasks_AssignedMemberId",
-                table: "EventTasks",
-                column: "AssignedMemberId");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_EventTasks_AssignedMemberId"" ON ""EventTasks"" (""AssignedMemberId"");");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_EventTasks_EventId",
-                table: "EventTasks",
-                column: "EventId");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_EventTasks_EventId"" ON ""EventTasks"" (""EventId"");");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_FamilyLinkRequests_RequesterId",
-                table: "FamilyLinkRequests",
-                column: "RequesterId");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_FamilyLinkRequests_RequesterId"" ON ""FamilyLinkRequests"" (""RequesterId"");");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_FamilyLinkRequests_TargetMemberId",
-                table: "FamilyLinkRequests",
-                column: "TargetMemberId");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_FamilyLinkRequests_TargetMemberId"" ON ""FamilyLinkRequests"" (""TargetMemberId"");");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "EventExpenses");
+            migrationBuilder.Sql(@"DROP TABLE IF EXISTS ""EventExpenses"";");
 
-            migrationBuilder.DropTable(
-                name: "EventTasks");
+            migrationBuilder.Sql(@"DROP TABLE IF EXISTS ""EventTasks"";");
 
-            migrationBuilder.DropTable(
-                name: "FamilyLinkRequests");
+            migrationBuilder.Sql(@"DROP TABLE IF EXISTS ""FamilyLinkRequests"";");
 
-            migrationBuilder.DropTable(
-                name: "GamificationConfigs");
+            migrationBuilder.Sql(@"DROP TABLE IF EXISTS ""GamificationConfigs"";");
 
-            migrationBuilder.DropTable(
-                name: "EventBudgets");
+            migrationBuilder.Sql(@"DROP TABLE IF EXISTS ""EventBudgets"";");
 
             migrationBuilder.DeleteData(
                 table: "EmailTemplates",
@@ -16851,103 +16747,129 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 keyColumn: "Id",
                 keyValue: 1006);
 
-            migrationBuilder.DropColumn(
-                name: "SecurityStamp",
-                table: "Users");
+            migrationBuilder.Sql(@"ALTER TABLE ""Users"" DROP COLUMN IF EXISTS ""SecurityStamp"";");
 
-            migrationBuilder.DropColumn(
-                name: "AnimatedTexts",
-                table: "SpecialDayThemes");
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" DROP COLUMN IF EXISTS ""AnimatedTexts"";");
 
-            migrationBuilder.DropColumn(
-                name: "AnimationStyle",
-                table: "SpecialDayThemes");
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" DROP COLUMN IF EXISTS ""AnimationStyle"";");
 
-            migrationBuilder.DropColumn(
-                name: "EnableGradientFading",
-                table: "SpecialDayThemes");
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" DROP COLUMN IF EXISTS ""EnableGradientFading"";");
 
-            migrationBuilder.DropColumn(
-                name: "ImageUrl",
-                table: "SpecialDayThemes");
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" DROP COLUMN IF EXISTS ""ImageUrl"";");
 
-            migrationBuilder.DropColumn(
-                name: "SidebarColor",
-                table: "SpecialDayThemes");
+            migrationBuilder.Sql(@"ALTER TABLE ""SpecialDayThemes"" DROP COLUMN IF EXISTS ""SidebarColor"";");
 
-            migrationBuilder.DropColumn(
-                name: "ContributionPoints",
-                table: "Members");
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" DROP COLUMN IF EXISTS ""ContributionPoints"";");
 
-            migrationBuilder.DropColumn(
-                name: "GdprAcceptedAt",
-                table: "Members");
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" DROP COLUMN IF EXISTS ""GdprAcceptedAt"";");
 
-            migrationBuilder.DropColumn(
-                name: "HasAcceptedGdpr",
-                table: "Members");
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" DROP COLUMN IF EXISTS ""HasAcceptedGdpr"";");
 
-            migrationBuilder.DropColumn(
-                name: "IsFamilyPublic",
-                table: "Members");
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" DROP COLUMN IF EXISTS ""IsFamilyPublic"";");
 
-            migrationBuilder.DropColumn(
-                name: "IsVerified",
-                table: "Members");
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" DROP COLUMN IF EXISTS ""IsVerified"";");
 
-            migrationBuilder.DropColumn(
-                name: "CheckedInAt",
-                table: "EventRegistrations");
+            migrationBuilder.Sql(@"ALTER TABLE ""EventRegistrations"" DROP COLUMN IF EXISTS ""CheckedInAt"";");
 
-            migrationBuilder.DropColumn(
-                name: "IsCheckedIn",
-                table: "EventRegistrations");
+            migrationBuilder.Sql(@"ALTER TABLE ""EventRegistrations"" DROP COLUMN IF EXISTS ""IsCheckedIn"";");
 
-            migrationBuilder.DropColumn(
-                name: "TicketCode",
-                table: "EventRegistrations");
+            migrationBuilder.Sql(@"ALTER TABLE ""EventRegistrations"" DROP COLUMN IF EXISTS ""TicketCode"";");
 
-            migrationBuilder.DropColumn(
-                name: "Status",
-                table: "AlumniEvents");
+            migrationBuilder.Sql(@"ALTER TABLE ""AlumniEvents"" DROP COLUMN IF EXISTS ""Status"";");
 
-            migrationBuilder.DropColumn(
-                name: "Metadata",
-                table: "ActivityLogs");
+            migrationBuilder.Sql(@"ALTER TABLE ""ActivityLogs"" DROP COLUMN IF EXISTS ""Metadata"";");
 
-            migrationBuilder.DropColumn(
-                name: "UserAgent",
-                table: "ActivityLogs");
+            migrationBuilder.Sql(@"ALTER TABLE ""ActivityLogs"" DROP COLUMN IF EXISTS ""UserAgent"";");
 
-            migrationBuilder.RenameColumn(
-                name: "FinancialCategory",
-                table: "PaymentHistories",
-                newName: "Category");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'PaymentHistories' AND column_name = 'FinancialCategory'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'PaymentHistories' AND column_name = 'Category'
+                    ) THEN
+                        ALTER TABLE ""PaymentHistories"" RENAME COLUMN ""FinancialCategory"" TO ""Category"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "ArticleCategory",
-                table: "NewsPosts",
-                newName: "Category");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'NewsPosts' AND column_name = 'ArticleCategory'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'NewsPosts' AND column_name = 'Category'
+                    ) THEN
+                        ALTER TABLE ""NewsPosts"" RENAME COLUMN ""ArticleCategory"" TO ""Category"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "LookupGroup",
-                table: "Lookups",
-                newName: "Category");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'Lookups' AND column_name = 'LookupGroup'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'Lookups' AND column_name = 'Category'
+                    ) THEN
+                        ALTER TABLE ""Lookups"" RENAME COLUMN ""LookupGroup"" TO ""Category"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameIndex(
-                name: "IX_Lookups_LookupGroup_Value",
-                table: "Lookups",
-                newName: "IX_Lookups_Category_Value");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM pg_indexes
+                        WHERE tablename = 'Lookups' AND indexname = 'IX_Lookups_LookupGroup_Value'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM pg_indexes
+                        WHERE tablename = 'Lookups' AND indexname = 'IX_Lookups_Category_Value'
+                    ) THEN
+                        ALTER INDEX ""IX_Lookups_LookupGroup_Value"" RENAME TO ""IX_Lookups_Category_Value"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "JobCategory",
-                table: "JobOpportunities",
-                newName: "Category");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'JobOpportunities' AND column_name = 'JobCategory'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'JobOpportunities' AND column_name = 'Category'
+                    ) THEN
+                        ALTER TABLE ""JobOpportunities"" RENAME COLUMN ""JobCategory"" TO ""Category"";
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.RenameColumn(
-                name: "FinancialCategory",
-                table: "FinancialRecords",
-                newName: "Category");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'FinancialRecords' AND column_name = 'FinancialCategory'
+                    ) AND NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'FinancialRecords' AND column_name = 'Category'
+                    ) THEN
+                        ALTER TABLE ""FinancialRecords"" RENAME COLUMN ""FinancialCategory"" TO ""Category"";
+                    END IF;
+                END $$;
+            ");
 
             migrationBuilder.AlterColumn<string>(
                 name: "AnnouncementText",

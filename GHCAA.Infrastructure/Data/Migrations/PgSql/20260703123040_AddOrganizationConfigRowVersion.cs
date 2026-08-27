@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,13 +11,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<byte[]>(
-                name: "RowVersion",
-                table: "OrganizationConfigs",
-                type: "bytea",
-                rowVersion: true,
-                nullable: false,
-                defaultValue: new byte[0]);
+            migrationBuilder.Sql(@"ALTER TABLE ""OrganizationConfigs"" ADD COLUMN IF NOT EXISTS ""RowVersion"" bytea NOT NULL DEFAULT '\x'::bytea;");
 
             migrationBuilder.UpdateData(
                 table: "EmailTemplates",
@@ -4167,9 +4161,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "RowVersion",
-                table: "OrganizationConfigs");
+            migrationBuilder.Sql(@"ALTER TABLE ""OrganizationConfigs"" DROP COLUMN IF EXISTS ""RowVersion"";");
 
             migrationBuilder.UpdateData(
                 table: "EmailTemplates",

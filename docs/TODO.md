@@ -1278,6 +1278,28 @@ symptomatic; the generic self-heal is defense-in-depth for them. Build clean, 9/
 Migration/SiteContent tests pass, full suite re-verified. Not yet deployed/verified live — see
 [[gotcha_migrationbootstrapper_fixed_offset]].
 
+41.9 [DONE 2026-08-27] End-to-end validation of the full migration chain against a throwaway Postgres
+seeded with a `pg_dump` of live preprod (not synthetic data) — so the dry run exercised the real
+`EnsureCreated()`-baselined legacy-schema shape, not a clean-slate DB. Ran `GHCAA.API` against it
+repeatedly and fixed every migration that threw a `42P07`/duplicate-key error, converting the offending
+`CreateTable`/`CreateIndex`/`AddForeignKey`/`InsertData` calls to idempotent raw SQL
+(`CREATE ... IF NOT EXISTS`, a `pg_constraint` existence guard for `AddForeignKey`, and either a
+`DELETE`-guard before `InsertData` on FK-safe lookup tables or a full `INSERT ... ON CONFLICT DO NOTHING`
+conversion otherwise). This went beyond 41.8's self-heal scope — the self-heal only repairs a migration
+*after* it's already been falsely baselined by a prior boot; this pass fixes the underlying collisions so
+they never falsely baseline in the first place. Files fixed: `AddSocialAuthAndPolls`,
+`AddSocialAuthConfig`, `AddOrganizationConfig`, `AddSiteContentAndNoticeFields`, `AddDiscussionForums`,
+`PhaseB_S5S8_OtpHmac_PaymentIdempotency_Indexes`, `AddApprovalWorkflowToGalleryAndJobs` — i.e. all 4
+migrations 41.8 had deliberately left untouched, plus 3 more discovered via a full-folder sweep. Also
+stripped temporary DEBUG logging and a `CanConnectAsync` retry loop from `MigrationBootstrapper.cs` that
+had been added mid-investigation and were no longer needed once the real cause (migration content, not
+connection flakiness) was confirmed. Full chain now applies cleanly end-to-end with zero exceptions
+(`Application started` reached, no `Migration bootstrap failed`/`PostgresException`). Backend suite
+378/378 still passes. Throwaway container and the preprod PII dump were deleted after the run. **Not yet
+committed or deployed** — changes are unstaged working-tree edits pending explicit go-ahead; live preprod
+verification per 41.7/41.8 is still outstanding. See [[session_migration_idempotency_validation]] and
+[[gotcha_migrationbootstrapper_fixed_offset]].
+
 ---
 
 # Area 42 — Elections forms/docs manageable from admin portal (raised by user 2026-08-26, plan only, not yet built)

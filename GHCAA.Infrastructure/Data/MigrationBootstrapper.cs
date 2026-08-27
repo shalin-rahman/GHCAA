@@ -23,38 +23,18 @@ namespace GHCAA.Infrastructure.Data
     {
         public static async Task EnsureMigratedAsync(ApplicationDbContext ctx, ILogger logger)
         {
-            logger.LogWarning("MigrationBootstrapper: DEBUG entered EnsureMigratedAsync");
-            // A serverless Postgres provider (e.g. Neon) can be asleep on a cold boot: the first
-            // connection attempt can time out/fail while the database wakes up, even though a
-            // later attempt seconds later succeeds. A single failed CanConnectAsync used to return
-            // here silently — no log line — which meant migrations were skipped for the entire
-            // boot with no trace of why. Retry a few times with a short delay, and always log if
-            // every attempt fails, so a skipped migration run is never invisible again.
-            var connected = false;
-            for (var attempt = 1; attempt <= 3 && !connected; attempt++)
+            if (!await ctx.Database.CanConnectAsync())
             {
-                connected = await ctx.Database.CanConnectAsync();
-                if (!connected && attempt < 3)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(3));
-                }
-            }
-
-            if (!connected)
-            {
-                logger.LogWarning("MigrationBootstrapper: could not connect to the database after 3 attempts — migrations were not checked/applied this boot.");
                 return;
             }
 
             var allMigrations = ctx.Database.GetMigrations().ToList();
-            logger.LogWarning("MigrationBootstrapper: DEBUG allMigrations.Count={Count}", allMigrations.Count);
             if (allMigrations.Count == 0)
             {
                 return;
             }
 
             var applied = (await ctx.Database.GetAppliedMigrationsAsync()).ToHashSet();
-            logger.LogWarning("MigrationBootstrapper: DEBUG applied.Count={Count}", applied.Count);
             if (applied.Count == 0)
             {
                 // EnsureCreatedAsync returns true only if it just built a brand-new database

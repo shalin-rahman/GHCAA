@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -13,40 +13,15 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "NotifyEventCreation",
-                table: "Members",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" ADD COLUMN IF NOT EXISTS ""NotifyEventCreation"" boolean NOT NULL DEFAULT FALSE;");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "NotifyParticipationApproval",
-                table: "Members",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" ADD COLUMN IF NOT EXISTS ""NotifyParticipationApproval"" boolean NOT NULL DEFAULT FALSE;");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "NotifyRegistrationUpdate",
-                table: "Members",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" ADD COLUMN IF NOT EXISTS ""NotifyRegistrationUpdate"" boolean NOT NULL DEFAULT FALSE;");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "NotifyRelevantUpdates",
-                table: "Members",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" ADD COLUMN IF NOT EXISTS ""NotifyRelevantUpdates"" boolean NOT NULL DEFAULT FALSE;");
 
-            migrationBuilder.AddColumn<string>(
-                name: "Description",
-                table: "Lookups",
-                type: "character varying(500)",
-                maxLength: 500,
-                nullable: true);
+            migrationBuilder.Sql(@"ALTER TABLE ""Lookups"" ADD COLUMN IF NOT EXISTS ""Description"" character varying(500);");
 
             migrationBuilder.UpdateData(
                 table: "EmailTemplates",
@@ -761,6 +736,8 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 keyValue: 1006,
                 column: "Description",
                 value: null);
+
+            migrationBuilder.Sql(@"DELETE FROM ""Lookups"" WHERE ""Id"" IN (2001, 2002, 2003, 2004, 3001, 3002);");
 
             migrationBuilder.InsertData(
                 table: "Lookups",
@@ -8985,25 +8962,15 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 keyColumn: "Id",
                 keyValue: 3002);
 
-            migrationBuilder.DropColumn(
-                name: "NotifyEventCreation",
-                table: "Members");
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" DROP COLUMN IF EXISTS ""NotifyEventCreation"";");
 
-            migrationBuilder.DropColumn(
-                name: "NotifyParticipationApproval",
-                table: "Members");
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" DROP COLUMN IF EXISTS ""NotifyParticipationApproval"";");
 
-            migrationBuilder.DropColumn(
-                name: "NotifyRegistrationUpdate",
-                table: "Members");
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" DROP COLUMN IF EXISTS ""NotifyRegistrationUpdate"";");
 
-            migrationBuilder.DropColumn(
-                name: "NotifyRelevantUpdates",
-                table: "Members");
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" DROP COLUMN IF EXISTS ""NotifyRelevantUpdates"";");
 
-            migrationBuilder.DropColumn(
-                name: "Description",
-                table: "Lookups");
+            migrationBuilder.Sql(@"ALTER TABLE ""Lookups"" DROP COLUMN IF EXISTS ""Description"";");
 
             migrationBuilder.UpdateData(
                 table: "EmailTemplates",

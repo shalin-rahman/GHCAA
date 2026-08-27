@@ -12,33 +12,44 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_NewsCollaborators",
-                table: "NewsCollaborators");
+            // Guarded: on DBs created via EnsureCreated() NewsCollaborators already has the
+            // end-state composite PK (NewsPostId, UserId) with no Id identity column, so the
+            // plain DropPrimaryKey/DropIndex/AlterColumn/AddPrimaryKey sequence below would fail
+            // (42P01 on the index, or a bad PK/identity transition). Only run it when the table
+            // is still in the pre-migration, Id-based-PK shape.
+            migrationBuilder.Sql(@"
+                DO $$
+                DECLARE
+                    pk_is_id boolean;
+                BEGIN
+                    SELECT bool_and(kcu.column_name = 'Id') INTO pk_is_id
+                    FROM information_schema.table_constraints tc
+                    JOIN information_schema.key_column_usage kcu
+                        ON tc.constraint_name = kcu.constraint_name AND tc.table_name = kcu.table_name
+                    WHERE tc.table_name = 'NewsCollaborators' AND tc.constraint_type = 'PRIMARY KEY';
 
-            migrationBuilder.DropIndex(
-                name: "IX_NewsCollaborators_NewsPostId",
-                table: "NewsCollaborators");
+                    IF pk_is_id THEN
+                        ALTER TABLE ""NewsCollaborators"" DROP CONSTRAINT ""PK_NewsCollaborators"";
 
-            migrationBuilder.AddColumn<int>(
-                name: "FailedLoginAttempts",
-                table: "Users",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
+                        IF EXISTS (
+                            SELECT 1 FROM pg_indexes
+                            WHERE tablename = 'NewsCollaborators' AND indexname = 'IX_NewsCollaborators_NewsPostId'
+                        ) THEN
+                            DROP INDEX ""IX_NewsCollaborators_NewsPostId"";
+                        END IF;
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "LockoutUntil",
-                table: "Users",
-                type: "timestamp with time zone",
-                nullable: true);
+                        ALTER TABLE ""NewsCollaborators"" ALTER COLUMN ""Id"" DROP IDENTITY IF EXISTS;
 
-            migrationBuilder.AddColumn<string>(
-                name: "GatewayPaymentId",
-                table: "PaymentHistories",
-                type: "character varying(255)",
-                maxLength: 255,
-                nullable: true);
+                        ALTER TABLE ""NewsCollaborators"" ADD CONSTRAINT ""PK_NewsCollaborators"" PRIMARY KEY (""NewsPostId"", ""UserId"");
+                    END IF;
+                END $$;
+            ");
+
+            migrationBuilder.Sql(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""FailedLoginAttempts"" integer NOT NULL DEFAULT 0;");
+
+            migrationBuilder.Sql(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""LockoutUntil"" timestamp with time zone;");
+
+            migrationBuilder.Sql(@"ALTER TABLE ""PaymentHistories"" ADD COLUMN IF NOT EXISTS ""GatewayPaymentId"" character varying(255);");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Email",
@@ -58,24 +69,24 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 oldClrType: typeof(string),
                 oldType: "text");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "NewsCollaborators",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer")
-                .OldAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+            migrationBuilder.Sql(@"INSERT INTO ""Constitutions"" (""Id"", ""ChangeSummary"", ""Content"", ""EffectiveDate"", ""IsActive"", ""PdfUrl"", ""SupersededDate"", ""Version"")
+VALUES (1, 'Updated membership eligibility criteria and added provisions for digital governance voting.', 'CONSTITUTION OF THE GOVERNMENT HARAGANGA COLLEGE ALUMNI ASSOCIATION (GHCAA)
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_NewsCollaborators",
-                table: "NewsCollaborators",
-                columns: new[] { "NewsPostId", "UserId" });
+Article I: Name and Office
+The name of the association shall be Government Haraganga College Alumni Association, abbreviated as GHCAA.
 
-            migrationBuilder.InsertData(
-                table: "Constitutions",
-                columns: new[] { "Id", "ChangeSummary", "Content", "EffectiveDate", "IsActive", "PdfUrl", "SupersededDate", "Version" },
-                values: new object[] { 1, "Updated membership eligibility criteria and added provisions for digital governance voting.", "CONSTITUTION OF THE GOVERNMENT HARAGANGA COLLEGE ALUMNI ASSOCIATION (GHCAA)\n\nArticle I: Name and Office\nThe name of the association shall be Government Haraganga College Alumni Association, abbreviated as GHCAA.\n\nArticle II: Objectives\nTo foster a spirit of loyalty and to promote the general welfare of Haraganga College. To support the college's goals and to strengthen the ties between alumni, the community, and the college.\n\nArticle III: Membership\nAll former students who have completed at least one academic session at Haraganga College are eligible for membership.\n\nArticle IV: Executive Committee\nThe management of the association shall be vested in an Executive Committee elected every two years.\n\nArticle V: Meetings\nThe Annual General Meeting (AGM) shall be held once a year at a time and place determined by the EC.", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), true, null, null, "1.2.0" });
+Article II: Objectives
+To foster a spirit of loyalty and to promote the general welfare of Haraganga College. To support the college''s goals and to strengthen the ties between alumni, the community, and the college.
+
+Article III: Membership
+All former students who have completed at least one academic session at Haraganga College are eligible for membership.
+
+Article IV: Executive Committee
+The management of the association shall be vested in an Executive Committee elected every two years.
+
+Article V: Meetings
+The Annual General Meeting (AGM) shall be held once a year at a time and place determined by the EC.', TIMESTAMPTZ '2024-01-01 00:00:00', TRUE, NULL, NULL, '1.2.0')
+ON CONFLICT (""Id"") DO NOTHING;");
 
             migrationBuilder.UpdateData(
                 table: "EmailTemplates",
@@ -12383,40 +12394,17 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 columns: new[] { "FailedLoginAttempts", "LockoutUntil", "SecurityStamp" },
                 values: new object[] { 0, null, "94ca055f914e41ac820442caaef4849b" });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_FacebookId",
-                table: "Users",
-                column: "FacebookId",
-                filter: "\"FacebookId\" IS NOT NULL");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_Users_FacebookId"" ON ""Users"" (""FacebookId"") WHERE ""FacebookId"" IS NOT NULL;");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_GoogleId",
-                table: "Users",
-                column: "GoogleId",
-                filter: "\"GoogleId\" IS NOT NULL");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_Users_GoogleId"" ON ""Users"" (""GoogleId"") WHERE ""GoogleId"" IS NOT NULL;");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_ResetToken",
-                table: "Users",
-                column: "ResetToken",
-                filter: "\"ResetToken\" IS NOT NULL");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_Users_ResetToken"" ON ""Users"" (""ResetToken"") WHERE ""ResetToken"" IS NOT NULL;");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PaymentHistories_GatewayPaymentId",
-                table: "PaymentHistories",
-                column: "GatewayPaymentId",
-                unique: true,
-                filter: "\"GatewayPaymentId\" IS NOT NULL");
+            migrationBuilder.Sql(@"CREATE UNIQUE INDEX IF NOT EXISTS ""IX_PaymentHistories_GatewayPaymentId"" ON ""PaymentHistories"" (""GatewayPaymentId"") WHERE ""GatewayPaymentId"" IS NOT NULL;");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Otps_Email_ExpiryAt",
-                table: "Otps",
-                columns: new[] { "Email", "ExpiryAt" });
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_Otps_Email_ExpiryAt"" ON ""Otps"" (""Email"", ""ExpiryAt"");");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Members_Status_IsArchived",
-                table: "Members",
-                columns: new[] { "Status", "IsArchived" });
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_Members_Status_IsArchived"" ON ""Members"" (""Status"", ""IsArchived"");");
         }
 
         /// <inheritdoc />
@@ -12442,10 +12430,6 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 name: "IX_Otps_Email_ExpiryAt",
                 table: "Otps");
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_NewsCollaborators",
-                table: "NewsCollaborators");
-
             migrationBuilder.DropIndex(
                 name: "IX_Members_Status_IsArchived",
                 table: "Members");
@@ -12455,17 +12439,11 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 keyColumn: "Id",
                 keyValue: 1);
 
-            migrationBuilder.DropColumn(
-                name: "FailedLoginAttempts",
-                table: "Users");
+            migrationBuilder.Sql(@"ALTER TABLE ""Users"" DROP COLUMN IF EXISTS ""FailedLoginAttempts"";");
 
-            migrationBuilder.DropColumn(
-                name: "LockoutUntil",
-                table: "Users");
+            migrationBuilder.Sql(@"ALTER TABLE ""Users"" DROP COLUMN IF EXISTS ""LockoutUntil"";");
 
-            migrationBuilder.DropColumn(
-                name: "GatewayPaymentId",
-                table: "PaymentHistories");
+            migrationBuilder.Sql(@"ALTER TABLE ""PaymentHistories"" DROP COLUMN IF EXISTS ""GatewayPaymentId"";");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Email",
@@ -12485,19 +12463,34 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 oldType: "character varying(64)",
                 oldMaxLength: 64);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "NewsCollaborators",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer")
-                .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+            // Guarded mirror of the Up() conversion: only restore the Id-based PK/identity if
+            // NewsCollaborators is currently in the composite-PK (NewsPostId, UserId) shape.
+            migrationBuilder.Sql(@"
+                DO $$
+                DECLARE
+                    pk_is_composite boolean;
+                BEGIN
+                    SELECT COUNT(*) = 2 INTO pk_is_composite
+                    FROM information_schema.table_constraints tc
+                    JOIN information_schema.key_column_usage kcu
+                        ON tc.constraint_name = kcu.constraint_name AND tc.table_name = kcu.table_name
+                    WHERE tc.table_name = 'NewsCollaborators' AND tc.constraint_type = 'PRIMARY KEY';
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_NewsCollaborators",
-                table: "NewsCollaborators",
-                column: "Id");
+                    IF pk_is_composite THEN
+                        ALTER TABLE ""NewsCollaborators"" DROP CONSTRAINT ""PK_NewsCollaborators"";
+
+                        IF NOT EXISTS (
+                            SELECT 1 FROM pg_attribute a
+                            JOIN pg_class c ON a.attrelid = c.oid
+                            WHERE c.relname = 'NewsCollaborators' AND a.attname = 'Id' AND a.attidentity <> ''
+                        ) THEN
+                            ALTER TABLE ""NewsCollaborators"" ALTER COLUMN ""Id"" ADD GENERATED BY DEFAULT AS IDENTITY;
+                        END IF;
+
+                        ALTER TABLE ""NewsCollaborators"" ADD CONSTRAINT ""PK_NewsCollaborators"" PRIMARY KEY (""Id"");
+                    END IF;
+                END $$;
+            ");
 
             migrationBuilder.UpdateData(
                 table: "EmailTemplates",
@@ -16643,10 +16636,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                 column: "SecurityStamp",
                 value: "70df2dc23ba648d9aeffa39ea3240919");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_NewsCollaborators_NewsPostId",
-                table: "NewsCollaborators",
-                column: "NewsPostId");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_NewsCollaborators_NewsPostId"" ON ""NewsCollaborators"" (""NewsPostId"");");
         }
     }
 }

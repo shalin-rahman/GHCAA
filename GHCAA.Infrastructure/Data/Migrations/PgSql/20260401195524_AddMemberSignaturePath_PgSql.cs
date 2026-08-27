@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,11 +11,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "SignaturePath",
-                table: "Members",
-                type: "text",
-                nullable: true);
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" ADD COLUMN IF NOT EXISTS ""SignaturePath"" text;");
 
             migrationBuilder.UpdateData(
                 table: "EmailTemplates",
@@ -8253,9 +8249,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "SignaturePath",
-                table: "Members");
+            migrationBuilder.Sql(@"ALTER TABLE ""Members"" DROP COLUMN IF EXISTS ""SignaturePath"";");
 
             migrationBuilder.UpdateData(
                 table: "EmailTemplates",

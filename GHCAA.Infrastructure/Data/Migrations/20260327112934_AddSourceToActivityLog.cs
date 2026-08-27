@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,11 +11,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Source",
-                table: "ActivityLogs",
-                type: "text",
-                nullable: true);
+            migrationBuilder.Sql(@"ALTER TABLE ""ActivityLogs"" ADD COLUMN IF NOT EXISTS ""Source"" text;");
 
             migrationBuilder.UpdateData(
                 table: "EmailTemplates",
@@ -73,10 +69,9 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 column: "LastUpdated",
                 value: new DateTime(2026, 3, 27, 11, 29, 30, 42, DateTimeKind.Utc).AddTicks(3336));
 
-            migrationBuilder.InsertData(
-                table: "Members",
-                columns: new[] { "Id", "AppliedDate", "ApprovedBy", "ApprovedDate", "BloodGroup", "Category", "ContributionPoints", "DateOfBirth", "Email", "EmailVerified", "EmergencyContactName", "EmergencyContactPhone", "EmergencyContactRelation", "FatherName", "FullName", "GdprAcceptedAt", "Gender", "HasAcceptedGdpr", "HasAcceptedTerms", "IsAddressPublic", "IsArchived", "IsEmailPublic", "IsFamilyPublic", "IsMobilePublic", "IsNIDPublic", "IsVerified", "LastUpdateDate", "MembershipNumber", "MembershipType", "MobileNo", "MotherName", "NID", "PermanentAddress", "PhotoPath", "PresentAddress", "Status", "TShirtSize" },
-                values: new object[] { 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), 2, 0, 0, new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "shalin.rahman@gmail.com", true, "Emergency", "01700000000", "Family", "Father", "Shalin Rahman", null, 0, false, true, false, false, false, false, false, false, true, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "GHC-0000000002", 3, "01700000002", "Mother", "0000000002", "Munshiganj", null, "Munshiganj", 1, "L" });
+            migrationBuilder.Sql(@"INSERT INTO ""Members"" (""Id"", ""AppliedDate"", ""ApprovedBy"", ""ApprovedDate"", ""BloodGroup"", ""Category"", ""ContributionPoints"", ""DateOfBirth"", ""Email"", ""EmailVerified"", ""EmergencyContactName"", ""EmergencyContactPhone"", ""EmergencyContactRelation"", ""FatherName"", ""FullName"", ""GdprAcceptedAt"", ""Gender"", ""HasAcceptedGdpr"", ""HasAcceptedTerms"", ""IsAddressPublic"", ""IsArchived"", ""IsEmailPublic"", ""IsFamilyPublic"", ""IsMobilePublic"", ""IsNIDPublic"", ""IsProfileComplete"", ""IsVerified"", ""LastUpdateDate"", ""MembershipNumber"", ""MembershipType"", ""MobileNo"", ""MotherName"", ""NID"", ""NotifyEventCreation"", ""NotifyParticipationApproval"", ""NotifyRegistrationUpdate"", ""NotifyRelevantUpdates"", ""PermanentAddress"", ""PhotoPath"", ""PresentAddress"", ""Status"", ""TShirtSize"")
+VALUES (2, TIMESTAMPTZ '2024-01-01 00:00:00', 1, TIMESTAMPTZ '2024-01-01 00:00:00', 2, 0, 0, TIMESTAMPTZ '1990-01-01 00:00:00', 'shalin.rahman@gmail.com', TRUE, 'Emergency', '01700000000', 'Family', 'Father', 'Shalin Rahman', NULL, 0, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TIMESTAMPTZ '2024-01-01 00:00:00', 'GHC-0000000002', 3, '01700000002', 'Mother', '0000000002', FALSE, FALSE, FALSE, FALSE, 'Munshiganj', NULL, 'Munshiganj', 1, 'L')
+ON CONFLICT (""Id"") DO NOTHING;");
 
             migrationBuilder.UpdateData(
                 table: "Users",
@@ -4159,15 +4154,11 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 column: "SecurityStamp",
                 value: "360d95f5690144f09bd0b7c783b593fe");
 
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "CreatedAt", "IsActive", "IsArchived", "MemberId", "MustChangePassword", "PasswordHash", "ResetToken", "ResetTokenExpiry", "SecurityStamp", "Username" },
-                values: new object[] { 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), true, false, 1, false, "$2a$11$yUryc8gFlef8/.jJugVivORnhn76z3IW1HsiAiRjrIvZfPltqSlaC", null, null, "21e8c25cd3b34c64b6a0e3b6496574f7", "superadmin" });
+            migrationBuilder.Sql(@"INSERT INTO ""Users"" (""Id"", ""CreatedAt"", ""FailedLoginAttempts"", ""IsActive"", ""IsArchived"", ""MemberId"", ""MustChangePassword"", ""PasswordHash"", ""ResetToken"", ""ResetTokenExpiry"", ""SecurityStamp"", ""Username"")
+VALUES (1, TIMESTAMPTZ '2024-01-01 00:00:00', 0, TRUE, FALSE, 1, FALSE, '$2a$11$yUryc8gFlef8/.jJugVivORnhn76z3IW1HsiAiRjrIvZfPltqSlaC', NULL, NULL, '21e8c25cd3b34c64b6a0e3b6496574f7', 'superadmin')
+ON CONFLICT (""Id"") DO NOTHING;");
 
-            migrationBuilder.InsertData(
-                table: "UserRoles",
-                columns: new[] { "RolesId", "UsersId" },
-                values: new object[] { 1, 1 });
+            migrationBuilder.Sql(@"INSERT INTO ""UserRoles"" (""RolesId"", ""UsersId"") VALUES (1, 1) ON CONFLICT (""RolesId"", ""UsersId"") DO NOTHING;");
         }
 
         /// <inheritdoc />
@@ -4188,9 +4179,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                 keyColumn: "Id",
                 keyValue: 1);
 
-            migrationBuilder.DropColumn(
-                name: "Source",
-                table: "ActivityLogs");
+            migrationBuilder.Sql(@"ALTER TABLE ""ActivityLogs"" DROP COLUMN IF EXISTS ""Source"";");
 
             migrationBuilder.UpdateData(
                 table: "EmailTemplates",
