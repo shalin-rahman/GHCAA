@@ -147,10 +147,12 @@ encoded in software before procedural legitimacy is damaged.
 **In scope.** Member registration and the approval workflow; profile management with per-field
 privacy control; authentication, including one-time password verification and social sign-in; the
 membership directory; dues generation and manual payment with proof upload and administrative
-verification; the financial ledger; events with registration, waitlisting and QR-coded attendance;
-news and notices; mass communication; the constitution hub with version history and amendment
-voting; Executive Committee records; member polls; digital identity cards and certificates; site
-content administration; and an administration console covering all of the above. Three clients: a
+verification; the financial ledger; events with registration, waitlisting, QR-coded attendance and
+a member-submitted photograph gallery subject to administrative approval; news and notices; mass
+communication; a member-posted job board subject to administrative approval; the constitution hub
+with version history and amendment voting; Executive Committee records; member polls; digital
+identity cards and certificates; site content administration; and an administration console
+covering all of the above. Three clients: a
 public web site, a member portal and admin console in the same Angular application, and a Flutter
 mobile application for members.
 

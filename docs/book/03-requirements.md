@@ -181,6 +181,10 @@ mechanism is described in §7.4 and its threat rationale in §9.5.
 | FR-16 | The system shall record attendance by scanning the member's identity code at the venue, and shall reject a code that does not correspond to a valid registration for that event. | I, C | S |
 | FR-17 | The system shall maintain a per-event photograph gallery, uploaded by administrators, visible according to the event's publication setting. | I | C |
 | FR-18 | The system shall report per event the registered count, the waitlisted count, the attended count and the fee collected. | I | S |
+| FR-53 | The system shall permit a member to submit a photograph or album to an event's gallery, and shall hold the submission unpublished until an administrator approves or rejects it, with a recorded reason on rejection. | I | C |
+
+FR-53 extends FR-17 on the same reasoning as FR-27 for news: a submission from a member is content
+until an officer has looked at it, not a publication in its own right.
 
 ### 3.3.4 Payments, Dues and Financial Records
 
@@ -268,6 +272,18 @@ unreliable, which was observed rather than reported. FR-52 is stated as a functi
 rather than a usability aspiration because the failure it addresses, namely a form cleared by a
 dropped connection, was the single most common complaint about the interim tooling the Association
 had tried.
+
+### 3.3.9 Job Board
+
+| ID | Requirement | Source | Pri |
+| --- | --- | --- | --- |
+| FR-54 | The system shall permit a member to post a job or career opportunity, and shall hold the posting unpublished until an administrator approves or rejects it, with a recorded reason on rejection. | *[Placeholder — source to be confirmed by the author]* | C |
+
+*[Placeholder — to be completed by the author. The Job Board was not part of the original
+elicitation and has no interview, document, observation or competitor-analysis record behind it;
+FR-54 is stated provisionally from the shipped behaviour alone and the Source column above should
+be replaced once genuine provenance (or a documented decision to add the feature outside the
+original study) is recorded.]*
 
 ## 3.4 Non-Functional Requirements
 
