@@ -1295,10 +1295,23 @@ stripped temporary DEBUG logging and a `CanConnectAsync` retry loop from `Migrat
 had been added mid-investigation and were no longer needed once the real cause (migration content, not
 connection flakiness) was confirmed. Full chain now applies cleanly end-to-end with zero exceptions
 (`Application started` reached, no `Migration bootstrap failed`/`PostgresException`). Backend suite
-378/378 still passes. Throwaway container and the preprod PII dump were deleted after the run. **Not yet
-committed or deployed** — changes are unstaged working-tree edits pending explicit go-ahead; live preprod
-verification per 41.7/41.8 is still outstanding. See [[session_migration_idempotency_validation]] and
+378/378 still passes. Throwaway container and the preprod PII dump were deleted after the run.
+**Committed 2026-08-28** as `2b98bd6` "Refactor database migrations to use raw SQL for table and index
+creation" (confirmed via `git log`) — live preprod verification per 41.7/41.8 is presumed covered by
+that deploy, not independently re-checked. See [[session_migration_idempotency_validation]] and
 [[gotcha_migrationbootstrapper_fixed_offset]].
+
+---
+
+41.10 [DONE 2026-08-28] Live 404s on `main-*.js`/`chunk-*.js` after a deploy — root cause was
+`app.UseStaticFiles()` (`Program.cs`) serving `index.html` with no cache-control headers at all, so a
+browser could hold a stale cached copy across a redeploy; its `<script>` tags then requested the
+*previous* build's hashed JS filenames, which no longer exist once the new build replaces `wwwroot`.
+Fixed via `StaticFileOptions.OnPrepareResponse`: `index.html` now gets
+`Cache-Control: no-cache, no-store, must-revalidate` + `Pragma: no-cache` + `Expires: 0`, forcing
+revalidation on every load so a new deploy is always picked up. Hashed JS/CSS left as-is (unhashed
+default headers) since their filename already changes whenever content does. `dotnet build` 0/0
+warnings/errors.
 
 ---
 

@@ -202,7 +202,23 @@ app.UseRateLimiter(); // Apply Rate Limiting
 
 app.UseWebSockets();
 
-app.UseStaticFiles(); // serve wwwroot at the root /
+// serve wwwroot at the root /. index.html must never be browser-cached: its <script> tags
+// reference build-hashed filenames (main-*.js, chunk-*.js) that are deleted on every new
+// deploy, so a cached copy of index.html from a prior deploy 404s on those old hashes until
+// a hard refresh. The hashed JS/CSS themselves are fine to leave uncached (unhashed default)
+// since their filename already changes whenever content changes.
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        if (ctx.File.Name.Equals("index.html", StringComparison.OrdinalIgnoreCase))
+        {
+            ctx.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+            ctx.Context.Response.Headers.Pragma = "no-cache";
+            ctx.Context.Response.Headers.Expires = "0";
+        }
+    }
+});
 
 // Map /api/ paths to the same physical root LocalFileStorageService writes to (and
 // SecureFilesController reads from), so the frontend can retrieve the physical images
