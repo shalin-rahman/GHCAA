@@ -85,7 +85,7 @@ public class NetworkingServiceTests : TestBase
         var john = await CreateAndSaveTestMemberAsync("John Smith", "john.nt@example.com", "01100000092", "1234567892");
         john.Status = Enums.MembershipStatus.Active;
         john.AcademicHistory = new List<AcademicRecord> { new AcademicRecord { InstitutionName = "Govt. Haraganga College", Degree = "Hons", Subject = "Business", PassingYear = 1940, IsGHC = true } };
-        john.ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "BankCorp", Designation = "Manager", Sector = "Banking", IsCurrent = true, StartDate = DateTime.UtcNow.AddYears(-2) } };
+        john.ProfessionalHistory = new List<ProfessionalRecord> { new ProfessionalRecord { OrganizationName = "BankCorp", Designation = "Manager", Sector = "Banking-NT-Test", IsCurrent = true, StartDate = DateTime.UtcNow.AddYears(-2) } };
 
         await _context.SaveChangesAsync();
 
@@ -94,8 +94,10 @@ public class NetworkingServiceTests : TestBase
         res1.Items.Should().HaveCount(1);
         res1.Items.First().FullName.Should().Be("Jane Doe");
 
-        // 2. Test ProfessionalSector filter (Banking)
-        var res2 = await _service.SearchMembersAsync(new MemberSearchFilterDto { ProfessionalSector = "Banking", PageSize = 100 });
+        // 2. Test ProfessionalSector filter — a plain "Banking" value collided with real alumni
+        // records added to the seed (several actual bankers), so this uses a distinctive marker
+        // that can't collide with genuine seed data instead of relying on "currently unique in seed".
+        var res2 = await _service.SearchMembersAsync(new MemberSearchFilterDto { ProfessionalSector = "Banking-NT-Test", PageSize = 100 });
         res2.Items.Should().HaveCount(1);
         res2.Items.First().FullName.Should().Be("John Smith");
 

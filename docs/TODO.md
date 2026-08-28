@@ -1600,3 +1600,74 @@ cap total row count) — an error-log table with no retention policy will grow f
 degrade the very queries meant to search it.
 45.7 [TODO] Tests + docs update per usual closing convention (`dotnet test`, `npx vitest run`,
 `npx tsc --noEmit`, live verification that a genuine error actually appears in the new admin screen).
+
+---
+
+# Area 46 — May 2026 alumni registration batch import (raised by user 2026-08-28: import
+`GHCAA.Tools/HRAGANGIAN Alumni Registration May 2026 02.csv` into seed)
+
+46.1 [DONE] Imported 47 new members from the Google-Form CSV export into the seed JSON
+(`GHCAA.Infrastructure/Data/Seed/{members,users,user_roles,academic_records,professional_records,
+payment_histories}.json`) plus a matching EF migration (`AddMay2026AlumniRegistrationBatch`,
+`GHCAA.Infrastructure/Data/Migrations/PgSql/`) so it actually reaches an already-created Postgres DB
+(HasData alone only seeds a brand-new `EnsureCreated()` database — see
+[[gotcha_ensurecreated_no_op_existing_db]]). Mapping: CSV `Member No` → `Member.NID` +
+`MembershipNumber = "GHC-" + NID` (matches the existing 584-member convention exactly — those aren't
+real national IDs either); real `Gender`/`BloodGroup` values this time (existing bulk import has them
+all at `0/Unknown`); `AcademicRecord` created for all 47 (`InstitutionName = "Govt. Haraganga
+College"`, `IsGHC = true`); `ProfessionalRecord` created for the 37 rows with an Organization or
+Designation; `PaymentHistory` created for all 47 at ৳1,000 (current active "General Membership Fee"
+per `fee_configs.json`), `FinancialCategory = MembershipFee` — note the seed JSON's payment records
+use a `"Category"` key that does NOT match the C# property name `FinancialCategory`
+(`System.Text.Json` default options are case-sensitive AND name-sensitive), so every existing
+seeded payment silently defaults to `FinancialCategory.MembershipFee = 0` regardless of what its JSON
+`"Category"` value says — a pre-existing quirk, not touched, but worth knowing before trusting that
+field on old rows. `User` created per member (`Username = NID`, `PasswordHash` = bcrypt of the NID
+itself, `MustChangePassword = true` — per explicit user decision, forcing a real password on first
+login) + `UserRoles` (Member).
+
+46.2 [DONE] Real data-integrity conflicts found and resolved (all confirmed via `MemberConfiguration.cs`
+unique indexes on `Email`/`NID`/`MobileNo`, and `PaymentHistories.IX_PaymentHistories_TransactionId`):
+- 8 rows had an email shared with another registrant (4 family members using `kamal.uddin1276@gmail.com`,
+  2 using `ahsankabir.bot@gmail.com` — both already the email of an existing member, ids 389/203
+  respectively — plus one couple sharing `mdnurulhaquegazi@gmail.com` within this CSV) — disambiguated
+  with a Gmail `+MemberNo` tag (`local+2605023@gmail.com`), matching the exact convention the original
+  584-member bulk seed already used for its own row collisions (`haragangian+row583@gmail.com`).
+- One couple (2605023/2605024) shared mobile `01339956569` — kept on the first, synthesized
+  `01339956570` (last digit bumped) for the second per explicit user decision, since neither had an
+  alternate number available.
+- 6 "Cash" transaction references (no real reference number) plus one shared bKash number
+  (`01878375387`, used by 2 rows) collided under the unique `TransactionId` index — **this was only
+  caught because the first migration-apply attempt failed with a real `23505` unique-violation
+  mid-batch** (transaction rolled back cleanly, migration removed, seed files reverted, re-fixed,
+  regenerated) — disambiguated the same way, `Cash-2605011` etc.
+- 6 rows had a blank `Passing Year:` — fell back to `Admission Year` per explicit user decision
+  (`AcademicRecord.PassingYear` is non-nullable).
+- Member 2608046 has a Qatar mobile number (`+97455637444`) that won't pass the app's `^01\d{9}$`
+  registration validator if he ever edits his profile through the UI — left as the real number,
+  flagged rather than fabricated into the wrong shape.
+
+46.3 [DONE] A real, unrelated test failure surfaced by adding genuine data:
+`NetworkingServiceTests.SearchMembersAsync_WithNewTableFilters_ShouldReturnCorrectMembers` filtered on
+`ProfessionalSector = "Banking"` expecting exactly 1 seed match — several of the new alumni are
+actual bankers, so the filter now (correctly) matched 6. The test already had a same-shape comment
+("PassingYear 1938 — unique in seed") flagging this exact fragility class. Fixed by giving the test's
+synthetic member a collision-proof sector marker (`"Banking-NT-Test"`) instead of depending on
+"currently unique in the shared seed," which any future real-data addition could break again.
+`dotnet test` 382/382 after the fix.
+
+46.4 [DONE] Live-verified end-to-end: applied the migration to the local Postgres dev DB (`dotnet ef
+database update`), started the API, logged in as the first new member (username/password = their
+NID, `2605001`/`2605001`) and confirmed the returned profile (name, email, mobile, blood group,
+academic record) matches the CSV row exactly; `mustChangePassword: true` as expected. Admin
+members-list total is 632 (584 original + 47 new + 1 pre-existing unrelated `GHC-DEMO-0001` test
+account). Confirmed `paymentStatus`/`tShirtSize` display quirks on the new members' detail view are
+identical to the pre-existing baseline behavior on an original 584-batch member (id 781) — not a
+regression, a pre-existing DTO-mapping gap unrelated to this import, not chased further.
+
+46.5 [TODO] Not touched: the org-wide Financial Ledger (`FinancialRecord`/`financial_records.json`)
+has zero rows — the existing 584-member bulk import never populated it either, so the new 47
+members' ৳47,000 in membership fees is correctly reflected in `PaymentHistories` (per-member ledger)
+but not in the aggregate income/expense ledger view. This is a pre-existing gap in how seeded/bulk
+member data relates to the org ledger, not something this import introduced — flagging for whoever
+next needs the aggregate ledger to reflect bulk-imported history.
