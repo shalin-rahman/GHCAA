@@ -19,4 +19,10 @@ The repo `/docs` folder holds prior analysis and reference material. Read the re
 - `architecture_data_flow.md` — data flow diagram/notes.
 - `db_connection.txt` — DB connection reference.
 
-Related: [[project_map.md]] (class/route map at repo root), [[gotcha_date_format_converter.md]].
+- `book/` — the dissertation/documentation book source (Markdown, one file per chapter) and its
+  builder; see `docs/book/README.md` for build instructions and house style, and
+  `docs/DOCUMENTATION_BOOK_OUTLINE.md` for the full 13-chapter structure. Chapters 1-6 exist as of
+  this note; see [[session_documentation_book_ch4-6.md]] before continuing it.
+
+Related: [[project_map.md]] (class/route map at repo root), [[gotcha_date_format_converter.md]],
+[[session_documentation_book_ch4-6.md]], [[gotcha_book_builder_table_captions.md]].

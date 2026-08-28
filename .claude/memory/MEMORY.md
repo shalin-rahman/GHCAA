@@ -15,3 +15,5 @@
 - [session_portal_member_photo.md](session_portal_member_photo.md) — top-right header avatar now shows real member photo across all /portal/* pages; test with member Id 201 for a matched photo
 - [gotcha_seed_json_vs_live_db.md](gotcha_seed_json_vs_live_db.md) — editing Seed/*.json alone does NOT update the already-created SQLite DB's Members table; check live DB directly when debugging
 - [reference_docs_folder.md](reference_docs_folder.md) — what's in the repo /docs folder (BUSINESS_FINDINGS, config framework, payment workflow); read before re-reviewing
+- [session_documentation_book_ch4-6.md](session_documentation_book_ch4-6.md) — dissertation Chapters 4-6 (methodology, system analysis, architecture) written into docs/book/, wired into build.py, builds clean
+- [gotcha_book_builder_table_captions.md](gotcha_book_builder_table_captions.md) — docs/book build.py only captions tables written as "### Table N.N — ..." headings, not bold text

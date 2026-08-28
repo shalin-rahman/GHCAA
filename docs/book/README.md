@@ -13,7 +13,13 @@ stays readable and diffable.
 | `01-introduction.md` | Part I, Chapter 1 — Introduction |
 | `02-literature-review.md` | Part I, Chapter 2 — Literature and systems review |
 | `03-requirements.md` | Part I, Chapter 3 — Requirements engineering |
+| `04-methodology.md` | Part II, Chapter 4 — Research methodology |
+| `05-system-analysis.md` | Part II, Chapter 5 — System analysis and behavioural modelling |
+| `06-architecture.md` | Part II, Chapter 6 — System architecture and design |
 | `99-references.md` | IEEE numbered bibliography and the Association's governing documents |
+
+Chapters 7-13 (Part III construction/validation and Part IV evaluation/closure) are not yet written;
+see `docs/DOCUMENTATION_BOOK_OUTLINE.md` for their planned structure.
 
 The bound order is fixed by the `CHAPTERS` list at the top of `build/build.py`. Adding a chapter means
 adding its filename there; the builder does not glob the directory, so a stray draft cannot wander
