@@ -3,7 +3,6 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AlertService } from '../../core/services/alert.service';
 import { ProfileService } from '../../core/services/profile.service';
-import { JobService } from '../../core/services/job.service';
 import { EventsService } from '../../core/services/events.service';
 import { NetworkingService } from '../../core/services/networking.service';
 import { NewsService } from '../../core/services/news.service';
@@ -23,13 +22,11 @@ import { getMembershipTypeLabel } from '../../core/constants/app.constants';
 export class Dashboard implements OnInit {
   alertService = inject(AlertService);
   private profileService = inject(ProfileService);
-  private jobService = inject(JobService);
   private eventsService = inject(EventsService);
   private networkingService = inject(NetworkingService);
   private newsService = inject(NewsService);
 
   profile = signal<any>(null);
-  jobCount = signal<number>(0);
   eventCount = signal<number>(0);
   recentMembers = signal<any[]>([]);
   recentNews = signal<any[]>([]);
@@ -51,15 +48,12 @@ export class Dashboard implements OnInit {
 
     forkJoin({
       profile: this.profileService.getProfile().pipe(catchError(() => of(null))),
-      jobs: this.jobService.getJobs().pipe(catchError(() => of([]))),
       events: this.eventsService.getEvents().pipe(catchError(() => of([]))),
       members: this.networkingService.getRecentlyJoined(6).pipe(catchError(() => of({items:[]}))),
       news: this.newsService.getNews(undefined, true).pipe(catchError(() => of([])))
     }).subscribe({
-      next: ({ profile, jobs, events, members, news }) => {
+      next: ({ profile, events, members, news }) => {
         this.profile.set(profile);
-
-        this.jobCount.set((jobs as any[]).length);
 
         const upcoming = (events as any[]).filter(e => new Date(e.startDate) >= new Date());
         this.eventCount.set(upcoming.length);

@@ -6,6 +6,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
@@ -47,7 +48,7 @@ namespace GHCAA.API.Controllers
         }
 
         // Admin Management
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         [HttpPost]
         public async Task<IActionResult> CreateLookup([FromBody] LookupItem item, CancellationToken cancellationToken)
         {
@@ -55,7 +56,7 @@ namespace GHCAA.API.Controllers
             return CreatedAtAction(nameof(GetByGroup), new { group = result.LookupGroup }, result);
         }
 
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLookup(int id, [FromBody] LookupItem item, CancellationToken cancellationToken)
         {
@@ -64,7 +65,7 @@ namespace GHCAA.API.Controllers
             return Ok(new { Message = "Lookup updated successfully" });
         }
 
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLookup(int id, CancellationToken cancellationToken)
         {

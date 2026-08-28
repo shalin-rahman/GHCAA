@@ -13,7 +13,7 @@ namespace GHCAA.Domain
         // File / OTP / Payment support enums
         public enum FileUploadType { Photo, Certificate, PaymentProof, Signature, GalleryPhoto, NewsImage, NoticeDocument }
         public enum FileUploadStatus { Pending, Approved, Rejected }
-        public enum OtpPurpose { Registration, PasswordReset }
+        public enum OtpPurpose { Registration, PasswordReset, AdminStepUp }
         public enum PaymentStatus { Pending, Completed, Failed, Refunded }
 
         // Financial Ledger Enums

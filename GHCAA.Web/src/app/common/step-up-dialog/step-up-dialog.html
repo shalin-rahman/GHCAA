@@ -1,0 +1,45 @@
+@if (stepUp.isOpen()) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="step-up-title">
+    <div class="modal-box step-up-box">
+        <div class="modal-header">
+            <h3 id="step-up-title">Confirm it's you</h3>
+            <button type="button" class="close-btn" (click)="stepUp.cancel()" aria-label="Cancel verification">&times;</button>
+        </div>
+
+        <div class="modal-content">
+            <p class="text-main">
+                This action is protected. Enter the 6-digit code sent to your registered email
+                address to continue.
+            </p>
+
+            @if (stepUp.infoMessage(); as info) {
+            <p class="step-up-info">{{ info }}</p>
+            }
+
+            @if (stepUp.errorMessage(); as err) {
+            <p class="step-up-error" role="alert">{{ err }}</p>
+            }
+
+            <div class="form-group">
+                <label for="stepUpCode">Verification code</label>
+                <input id="stepUpCode" type="text" inputmode="numeric" autocomplete="one-time-code"
+                    maxlength="6" placeholder="000000" [(ngModel)]="code" name="stepUpCode"
+                    (keyup.enter)="submit()" [disabled]="stepUp.verifying()" />
+            </div>
+
+            <div class="step-up-actions">
+                <button type="button" class="btn btn-primary" (click)="submit()"
+                    [disabled]="!isCodeValid() || stepUp.verifying()">
+                    {{ stepUp.verifying() ? 'Verifying…' : 'Verify and continue' }}
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="stepUp.requestCode()"
+                    [disabled]="stepUp.sending() || stepUp.verifying()">
+                    {{ stepUp.sending() ? 'Sending…' : 'Resend code' }}
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="stepUp.cancel()"
+                    [disabled]="stepUp.verifying()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+}

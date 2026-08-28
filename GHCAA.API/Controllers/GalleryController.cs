@@ -8,6 +8,8 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -28,13 +30,13 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("upload-photo")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> UploadPhoto(IFormFile file, CancellationToken cancellationToken)
         {
             var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Image, 10 * 1024 * 1024);
             if (!validation.IsValid) return BadRequest(new { Message = validation.ErrorMessage });
 
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (!int.TryParse(memberIdClaim, out var memberId))
             {
                 // Fallback to simpler user ID claim if needed, but Admin should have MemberId
@@ -58,7 +60,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("all")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetAllGalleries(CancellationToken cancellationToken)
         {
             // Admin sees everything
@@ -67,7 +69,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPatch("admin/{id}/toggle-active")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> ToggleActive(int id, CancellationToken cancellationToken)
         {
             var gallery = await _galleryService.GetGalleryByIdAsync(id, cancellationToken);
@@ -79,7 +81,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPatch("admin/{id}/toggle-featured")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> ToggleFeatured(int id, CancellationToken cancellationToken)
         {
             var gallery = await _galleryService.GetGalleryByIdAsync(id, cancellationToken);
@@ -100,10 +102,10 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> CreateGallery([FromBody] EventGallery gallery, CancellationToken cancellationToken)
         {
-            var adminIdClaim = User.FindFirst("MemberId")?.Value;
+            var adminIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (int.TryParse(adminIdClaim, out var adminId))
             {
                 gallery.CreatedByAdminId = adminId;
@@ -114,7 +116,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPut("admin/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> UpdateGallery(int id, [FromBody] EventGallery updatedGallery, CancellationToken cancellationToken)
         {
             var existingGallery = await _galleryService.GetGalleryByIdAsync(id, cancellationToken);
@@ -132,7 +134,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/{id}/photos")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> AddPhotos(int id, [FromBody] List<string> photoPaths, CancellationToken cancellationToken)
         {
             var result = await _galleryService.AddPhotosToGalleryAsync(id, photoPaths, cancellationToken);
@@ -140,7 +142,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("admin/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> DeleteGallery(int id, CancellationToken cancellationToken)
         {
             var result = await _galleryService.DeleteGalleryAsync(id, cancellationToken);
@@ -148,7 +150,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("admin/photos/{photoId}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> RemovePhoto(int photoId, CancellationToken cancellationToken)
         {
             var result = await _galleryService.RemovePhotoAsync(photoId, cancellationToken);
@@ -158,7 +160,7 @@ namespace GHCAA.API.Controllers
         // ---- Member quick single-photo submission (previously dead POST api/gallery) ----
 
         [HttpPost]
-        [Authorize(Policy = "MemberOnly")]
+        [Authorize(Policy = Constants.Policies.MemberOnly)]
         public async Task<IActionResult> SubmitMemberPhoto([FromForm] string title, [FromForm] string? description, IFormFile file, CancellationToken cancellationToken)
         {
             if (!TryGetMemberId(out var memberId)) return Unauthorized();
@@ -178,7 +180,7 @@ namespace GHCAA.API.Controllers
         // ---- Member album management ----
 
         [HttpPost("albums")]
-        [Authorize(Policy = "MemberOnly")]
+        [Authorize(Policy = Constants.Policies.MemberOnly)]
         public async Task<IActionResult> CreateAlbum([FromBody] CreateAlbumRequest request, CancellationToken cancellationToken)
         {
             if (!TryGetMemberId(out var memberId)) return Unauthorized();
@@ -188,7 +190,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("albums/mine")]
-        [Authorize(Policy = "MemberOnly")]
+        [Authorize(Policy = Constants.Policies.MemberOnly)]
         public async Task<IActionResult> GetMyAlbums(CancellationToken cancellationToken)
         {
             if (!TryGetMemberId(out var memberId)) return Unauthorized();
@@ -198,7 +200,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("albums/{id}/photos")]
-        [Authorize(Policy = "MemberOnly")]
+        [Authorize(Policy = Constants.Policies.MemberOnly)]
         public async Task<IActionResult> AddPhotoToAlbum(int id, IFormFile file, [FromForm] string? caption, CancellationToken cancellationToken)
         {
             if (!TryGetMemberId(out var memberId)) return Unauthorized();
@@ -223,7 +225,7 @@ namespace GHCAA.API.Controllers
         // ---- Admin approval workflow ----
 
         [HttpGet("admin/pending")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetPendingApprovals(CancellationToken cancellationToken)
         {
             var galleries = await _galleryService.GetPendingGalleryApprovalsAsync(cancellationToken);
@@ -232,7 +234,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/{id}/approve")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> ApproveGallery(int id, CancellationToken cancellationToken)
         {
             var result = await _galleryService.ApproveGalleryAsync(id, cancellationToken);
@@ -240,7 +242,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/{id}/reject")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> RejectGallery(int id, [FromBody] RejectRequest request, CancellationToken cancellationToken)
         {
             var result = await _galleryService.RejectGalleryAsync(id, request.Reason, cancellationToken);
@@ -248,7 +250,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("photos/{photoId}/approve")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> ApprovePhoto(int photoId, CancellationToken cancellationToken)
         {
             var result = await _galleryService.ApprovePhotoAsync(photoId, cancellationToken);
@@ -256,7 +258,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("photos/{photoId}/reject")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> RejectPhoto(int photoId, [FromBody] RejectRequest request, CancellationToken cancellationToken)
         {
             var result = await _galleryService.RejectPhotoAsync(photoId, request.Reason, cancellationToken);
@@ -265,7 +267,7 @@ namespace GHCAA.API.Controllers
 
         private bool TryGetMemberId(out int memberId)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             return int.TryParse(memberIdClaim, out memberId);
         }
 

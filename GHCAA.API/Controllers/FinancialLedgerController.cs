@@ -5,13 +5,14 @@ using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/ledger")]
     [Route("api/financial/ledger")]
-    [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
+    [Authorize(Policy = Constants.Policies.SuperAdminOnly)] // Strict role parity: Sync with frontend superAdminGuard
     public class FinancialLedgerController : ControllerBase
     {
         private readonly IFinancialLedgerService _ledgerService;
@@ -36,6 +37,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> AddRecord([FromBody] FinancialRecord record, CancellationToken cancellationToken)
         {
             var adminIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -49,6 +51,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> UpdateRecord(int id, [FromBody] FinancialRecord record, CancellationToken cancellationToken)
         {
             record.Id = id;
@@ -57,6 +60,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> DeleteRecord(int id, CancellationToken cancellationToken)
         {
             var success = await _ledgerService.DeleteRecordAsync(id, cancellationToken);

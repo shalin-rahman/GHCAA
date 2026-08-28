@@ -4,12 +4,13 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/admin/members/import")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = Constants.Policies.AdminOnly)]
     public class MemberImportController : ControllerBase
     {
         private readonly IMemberImportService _importService;

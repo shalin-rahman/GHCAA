@@ -173,7 +173,7 @@ public class MemberService_LinkedIn_Tests : TestBase
             }
         };
 
-        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("123");
 
         // Act

@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -22,7 +24,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("me")]
         public async Task<IActionResult> GetMyActivity(CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
                 return BadRequest("Invalid user session");
 
@@ -31,7 +33,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("admin/{memberId}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetMemberActivity(int memberId, CancellationToken cancellationToken)
         {
             var logs = await _activityService.GetMemberActivityAsync(memberId, 50, cancellationToken);
@@ -39,7 +41,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("admin/global")]
-        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
+        [Authorize(Policy = Constants.Policies.SuperAdminOnly)] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> GetGlobalActivity(CancellationToken cancellationToken)
         {
             var logs = await _activityService.GetRecentGlobalActivityAsync(50, cancellationToken);

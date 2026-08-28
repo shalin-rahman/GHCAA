@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { catchError, throwError, BehaviorSubject, switchMap, filter, take, Observable } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
+import { StepUpService } from '../services/step-up.service';
 import { environment } from '../../../environments/environment';
 
 // 24.44: Shared refresh state — one in-flight refresh serves all concurrent 401s.
@@ -12,6 +13,7 @@ const refreshDone$ = new BehaviorSubject<boolean>(false);
 export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
     const notify = inject(NotificationService);
+    const stepUp = inject(StepUpService);
 
     let outReq = req;
 
@@ -47,6 +49,16 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
                 && !req.url.includes('/api/auth/me')
                 && !req.url.includes('/api/auth/logout')) {
                 return handle401(outReq, next, authService, notify, error);
+            }
+
+            // 7.13: The action is allowed for this role but needs a fresh OTP verification.
+            // Raise the step-up dialog and retry once the admin verifies; the API re-issues the
+            // access-token cookie with the step_up_verified_at claim, so the retry just works.
+            if (error.status === 403
+                && (error.error?.code ?? error.error?.Code) === 'STEP_UP_REQUIRED') {
+                return stepUp.challenge().pipe(
+                    switchMap(verified => verified ? next(outReq) : throwError(() => error))
+                );
             }
 
             return handleError(error, req, authService, notify);

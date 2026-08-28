@@ -5,6 +5,8 @@ using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using GHCAA.Domain;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -35,7 +37,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("my-history")]
         public async Task<IActionResult> GetMyPaymentHistory(CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
                 if (User.IsInRole("SuperAdmin"))
@@ -52,7 +54,7 @@ namespace GHCAA.API.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> RecordPayment([FromForm] CreatePaymentHistoryDto dto, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var memberId))
             {
                 dto.MemberId = memberId;
@@ -70,7 +72,7 @@ namespace GHCAA.API.Controllers
             return Ok(result);
         }
 
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         [HttpPatch("update-status/{id}")]
         public async Task<IActionResult> UpdateStatus(int id, [FromQuery] Domain.Enums.PaymentStatus status, [FromQuery] string? notes, CancellationToken cancellationToken)
         {
@@ -84,7 +86,7 @@ namespace GHCAA.API.Controllers
             // Security check: If not admin, verify ownership
             if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
             {
-                var memberIdClaim = User.FindFirst("MemberId")?.Value;
+                var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
                 if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
                 {
                     return Unauthorized("Invalid session.");
@@ -102,7 +104,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("my-dues")]
         public async Task<IActionResult> GetMyDues(CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             int memberId;
             if (memberIdClaim == null || !int.TryParse(memberIdClaim, out memberId))
             {
@@ -119,7 +121,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("dues/generate")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GenerateAnnualDues([FromQuery] int year, CancellationToken cancellationToken)
         {
             await _financialService.GenerateAnnualDuesAsync(year, cancellationToken);
@@ -127,7 +129,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("fees/config")]
-        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
+        [Authorize(Policy = Constants.Policies.SuperAdminOnly)] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> GetFeeConfigs(CancellationToken cancellationToken)
         {
             var configs = await _financialService.GetMembershipFeeConfigsAsync(cancellationToken);
@@ -135,10 +137,10 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("fees/config")]
-        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
+        [Authorize(Policy = Constants.Policies.SuperAdminOnly)] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> AddFeeConfig([FromBody] CreateMembershipFeeConfigDto dto, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var adminId))
             {
                 return Unauthorized();
@@ -149,10 +151,10 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPut("fees/config")]
-        [Authorize(Policy = "SuperAdminOnly")] // Strict role parity: Sync with frontend superAdminGuard
+        [Authorize(Policy = Constants.Policies.SuperAdminOnly)] // Strict role parity: Sync with frontend superAdminGuard
         public async Task<IActionResult> UpdateFeeConfig([FromBody] UpdateMembershipFeeConfigDto dto, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var adminId))
             {
                 return Unauthorized();
@@ -168,7 +170,7 @@ namespace GHCAA.API.Controllers
             // If not admin, can only see own history
             if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
             {
-                var myMemberId = User.FindFirst("MemberId")?.Value;
+                var myMemberId = User.FindFirst(AppClaimTypes.MemberId)?.Value;
                 if (myMemberId != memberId.ToString()) return Forbid();
             }
 
@@ -177,7 +179,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("payment/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> DeletePayment(int id, CancellationToken cancellationToken)
         {
             var success = await _financialService.DeletePaymentAsync(id, cancellationToken);
@@ -185,7 +187,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("member/{memberId}/history")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetMemberPaymentHistory(int memberId, CancellationToken cancellationToken)
         {
             var history = await _financialService.GetMemberPaymentHistoryAsync(memberId, cancellationToken);
@@ -195,7 +197,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("saved-methods")]
         public async Task<IActionResult> GetSavedPaymentMethods(CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
 
             var methods = await _financialService.GetSavedPaymentMethodsAsync(memberId, cancellationToken);
@@ -205,7 +207,7 @@ namespace GHCAA.API.Controllers
         [HttpPost("saved-methods")]
         public async Task<IActionResult> AddSavedPaymentMethod([FromBody] CreateSavedPaymentMethodDto dto, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
 
             var result = await _financialService.AddSavedPaymentMethodAsync(memberId, dto, cancellationToken);
@@ -215,7 +217,7 @@ namespace GHCAA.API.Controllers
         [HttpDelete("saved-methods/{id}")]
         public async Task<IActionResult> DeleteSavedPaymentMethod(int id, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId)) return Unauthorized();
 
             var result = await _financialService.DeleteSavedPaymentMethodAsync(memberId, id, cancellationToken);

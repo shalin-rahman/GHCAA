@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using GHCAA.Domain;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = Constants.Policies.AdminOnly)]
     [ApiController]
     [Route("api/admin")]
     public class AdminController : ControllerBase
@@ -92,7 +94,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> ApproveMember(int id, [FromBody] ApproveMemberDto dto, CancellationToken cancellationToken)
         {
             // 24.51: Read admin identity from the JWT claim, not the request body.
-            if (!int.TryParse(User.FindFirst("MemberId")?.Value, out var adminMemberId))
+            if (!int.TryParse(User.FindFirst(AppClaimTypes.MemberId)?.Value, out var adminMemberId))
                 return Unauthorized();
 
             try
@@ -119,7 +121,7 @@ namespace GHCAA.API.Controllers
         public async Task<IActionResult> RejectMember(int id, [FromBody] RejectMemberDto dto, CancellationToken cancellationToken)
         {
             // 24.51: Read admin identity from the JWT claim, not the request body.
-            if (!int.TryParse(User.FindFirst("MemberId")?.Value, out var adminMemberId))
+            if (!int.TryParse(User.FindFirst(AppClaimTypes.MemberId)?.Value, out var adminMemberId))
                 return Unauthorized();
 
             try
@@ -135,7 +137,8 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("members/{id}")]
-        [Authorize(Policy = "SuperAdminOnly")]
+        [Authorize(Policy = Constants.Policies.SuperAdminOnly)]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> ArchiveMember(int id, CancellationToken cancellationToken)
         {
             var success = await _memberService.ArchiveMemberAsync(id, cancellationToken);
@@ -144,7 +147,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("members/bulk-archive-inactive")]
-        [Authorize(Policy = "SuperAdminOnly")]
+        [Authorize(Policy = Constants.Policies.SuperAdminOnly)]
         public async Task<IActionResult> BulkArchiveInactive(CancellationToken cancellationToken)
         {
             var count = await _memberService.BulkArchiveInactiveMembersAsync(cancellationToken);
@@ -152,7 +155,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("members/{id}/restore")]
-        [Authorize(Policy = "SuperAdminOnly")]
+        [Authorize(Policy = Constants.Policies.SuperAdminOnly)]
         public async Task<IActionResult> RestoreMember(int id, CancellationToken cancellationToken)
         {
             var success = await _memberService.RestoreMemberAsync(id, cancellationToken);
@@ -171,7 +174,7 @@ namespace GHCAA.API.Controllers
         [HttpPut("members/{id}")]
         public async Task<IActionResult> UpdateMemberAdmin(int id, [FromBody] AdminMemberUpdateDto dto, CancellationToken cancellationToken)
         {
-            var adminIdClaim = User.FindFirst("MemberId")?.Value;
+            var adminIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(adminIdClaim) || !int.TryParse(adminIdClaim, out var adminId))
             {
                 return Unauthorized();

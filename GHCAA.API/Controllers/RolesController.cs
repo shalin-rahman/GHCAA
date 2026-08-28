@@ -1,10 +1,11 @@
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
-    [Authorize(Policy = "SuperAdminOnly")]
+    [Authorize(Policy = Constants.Policies.SuperAdminOnly)]
     [ApiController]
     [Route("api/roles")]
     public class RolesController : ControllerBase
@@ -55,7 +56,7 @@ namespace GHCAA.API.Controllers
         {
             public string Username { get; set; } = null!;
             public string Password { get; set; } = null!;
-            public string Role { get; set; } = "Admin";
+            public string Role { get; set; } = Constants.Roles.Admin;
         }
 
 
@@ -90,6 +91,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("users/{id}")]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> DeleteUser(int id, CancellationToken cancellationToken)
         {
             var success = await _userService.DeleteSystemAdminAsync(id, cancellationToken);

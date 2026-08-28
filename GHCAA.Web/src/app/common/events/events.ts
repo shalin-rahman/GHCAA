@@ -11,6 +11,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { FinancialService } from '../../core/services/financial.service';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
+import { ROUTES } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-events',
@@ -124,7 +125,7 @@ export class Events implements OnInit {
     }
     if (this.isGuest() && !ev.allowNonMembers) {
       this.notify.warning('This event is for members only. Please log in to register.');
-      window.location.href = '/login';
+      window.location.href = ROUTES.LOGIN;
       return;
     }
     

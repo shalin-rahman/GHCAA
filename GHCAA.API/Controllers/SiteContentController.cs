@@ -3,6 +3,7 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
@@ -26,7 +27,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("admin")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var blocks = await _service.GetAllAsync(cancellationToken);
@@ -34,7 +35,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
             var block = await _service.GetByIdAsync(id, cancellationToken);
@@ -42,7 +43,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> Create([FromBody] UpsertSiteContentDto dto, CancellationToken cancellationToken)
         {
             if (!TryGetAdminId(out var adminId)) return Unauthorized();
@@ -52,7 +53,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> Update(int id, [FromBody] UpsertSiteContentDto dto, CancellationToken cancellationToken)
         {
             if (!TryGetAdminId(out var adminId)) return Unauthorized();
@@ -69,7 +70,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
             var success = await _service.DeleteAsync(id, cancellationToken);

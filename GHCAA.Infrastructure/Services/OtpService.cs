@@ -34,13 +34,15 @@ namespace GHCAA.Infrastructure.Services
             return Convert.ToHexString(hash).ToLowerInvariant(); // 64 lowercase hex chars
         }
 
-        public async Task<string> GenerateAndSendOtpAsync(string email, CancellationToken cancellationToken = default)
+        public async Task<string> GenerateAndSendOtpAsync(string email, Domain.Enums.OtpPurpose purpose = Domain.Enums.OtpPurpose.Registration, CancellationToken cancellationToken = default)
         {
             var plainCode = RandomNumberGenerator.GetInt32(100_000, 1_000_000).ToString();
 
-            // Invalidate all previous unverified OTPs for this email so only the latest is valid.
+            // Invalidate previous unverified OTPs for this email and purpose so only the latest is
+            // valid. Scoped by purpose so issuing a step-up code can't silently void a pending
+            // registration code (and vice versa).
             var previous = await _db.Otps
-                .Where(o => o.Email == email && !o.IsVerified)
+                .Where(o => o.Email == email && !o.IsVerified && o.Purpose == purpose)
                 .ToListAsync(cancellationToken);
             foreach (var old in previous)
                 old.IsVerified = true;
@@ -49,7 +51,8 @@ namespace GHCAA.Infrastructure.Services
             {
                 Email = email,
                 Code = ComputeOtpHash(plainCode, email), // store hash, not plaintext
-                ExpiryAt = DateTime.UtcNow.AddMinutes(_expiryMinutes)
+                ExpiryAt = DateTime.UtcNow.AddMinutes(_expiryMinutes),
+                Purpose = purpose
             };
 
             await _db.Otps.AddAsync(otp, cancellationToken);
@@ -63,12 +66,13 @@ namespace GHCAA.Infrastructure.Services
             return plainCode;
         }
 
-        public async Task<bool> VerifyOtpAsync(string email, string code, CancellationToken cancellationToken = default)
+        public async Task<bool> VerifyOtpAsync(string email, string code, Domain.Enums.OtpPurpose purpose = Domain.Enums.OtpPurpose.Registration, CancellationToken cancellationToken = default)
         {
-            // Find the latest active OTP for this email regardless of the submitted code,
-            // so we can increment Attempts even on a miss.
+            // Find the latest active OTP for this email and purpose regardless of the submitted
+            // code, so we can increment Attempts even on a miss. Purpose is part of the lookup so
+            // a code issued for one flow can never satisfy a challenge from another.
             var otp = await _db.Otps
-                .Where(o => o.Email == email && !o.IsVerified && o.ExpiryAt > DateTime.UtcNow)
+                .Where(o => o.Email == email && !o.IsVerified && o.Purpose == purpose && o.ExpiryAt > DateTime.UtcNow)
                 .OrderByDescending(o => o.CreatedAt)
                 .FirstOrDefaultAsync(cancellationToken);
 

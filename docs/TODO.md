@@ -1069,10 +1069,18 @@ reproduces the shipped `Content` byte-for-byte. Handles the Google-Docs U+200B f
 (doubled = swallowed space, single = intra-word), bold-run structure detection and page-break
 paragraph rejoining — all documented in `docs/CONSTITUTION_PUBLISHING.md`.
 
-38.4 [TODO] **Source-document defect, still present in the user's PDF.** Article V, Section C,
-item 6 reads *"6. TReplace the 21-day election notice rule with: …"* — a leftover editing
-instruction carried verbatim into the published text. Fix the source document and re-run 38.3;
-no code change is involved.
+38.4 [DONE 2026-08-28] **Source-document defect.** Article V, Section C, item 6 read
+*"6. TReplace the 21-day election notice rule with: …"* — a leftover editing instruction carried
+verbatim into the published text. Corrected in `GHCAA.Infrastructure/Data/Seed/constitution.json`
+to *"6. Election notice and timetable shall follow constitutional minimums and Election
+Regulations."*, dropping only the instruction prefix and preserving the substantive rule
+(which was already the clear intent of the sentence).
+**CAVEAT — JSON and PDF now diverge:** `constitution.json` is normally a generated artifact
+extracted from `GHCAA.Web/src/assets/GHCAA Constitution V4.2.pdf` by
+`tools/constitution/publish_constitution.py`, and **the stray text still exists in that PDF**.
+The JSON was hand-corrected because the defect is in the source document, not the extractor.
+Before the next formal re-publish, fix item 6 in the source document itself and re-run 38.3 —
+otherwise regenerating from the current PDF will silently reintroduce the defect.
 
 38.5 [DONE] Docs updated per `feedback_docs_update_scope`: new `docs/CONSTITUTION_PUBLISHING.md`;
 `FEATURES.md` §5.1a, `SRS.md` §3.6.2, `architecture_data_flow.md` §2.D and `project_map.md`
@@ -1148,43 +1156,49 @@ Plan: `C:\Users\HabiburRahmanShalin\.claude\plans\piped-sniffing-lollipop.md`. `
 extended in place for member ownership (no new `Album` table); admin = `Admin`/`SuperAdmin` role;
 legacy dead `POST api/gallery` "submit a memory" endpoint fixed separately from the new album flow.
 
-40.1 [TODO] Domain + migration: `EventGallery`/`EventPhoto` gain `OwnerMemberId`/`UploadedByMemberId`,
+> **STATUS: Area 40 is COMPLETE (backend + web + mobile).** 40.1-40.10 below are the original
+> plan items; each was superseded by the 40.11-40.14 delivery entries at the end of this Area and
+> re-marked accordingly on 2026-08-28. They were left as stale `[TODO]` for two days, which made
+> shipped work read as outstanding — verify against the tree before trusting a marker
+> (`gotcha_todo_status_drift`).
+
+40.1 [DONE — see 40.11] Domain + migration: `EventGallery`/`EventPhoto` gain `OwnerMemberId`/`UploadedByMemberId`,
 `Status` (`SubmissionStatus`, default `Approved`), `RejectionReason`; `JobOpportunity` gains
 `Status`/`RejectionReason`; `Enums.NotificationType.ApprovalRequest` added; `AlumniEvent` gains
 `RequiresRegistration` (bool, default `true`). One EF migration for all of the above (`AddApprovalWorkflowToGalleryAndJobs`), verified against a non-empty DB per 37.0's `EnsureCreated()` gotcha.
 
-40.2 [TODO] `IAdminNotificationService`/`AdminNotificationService` (new) — resolves Admin/SuperAdmin
+40.2 [DONE — see 40.11] `IAdminNotificationService`/`AdminNotificationService` (new) — resolves Admin/SuperAdmin
 members via `User.Roles`, fans out `INotificationService.CreateNotificationAsync` +
 `IEmailService.SendEmailAsync` on any pending approval.
 
-40.3 [TODO] Gallery/album backend: member album create/add-photo/list-mine endpoints, admin
+40.3 [DONE — see 40.11] Gallery/album backend: member album create/add-photo/list-mine endpoints, admin
 pending/approve/reject endpoints (gallery + per-photo), public/member-facing reads filtered to
 `Status == Approved`, fixed `POST api/gallery` "submit a memory" handler.
 
-40.4 [TODO] Jobs backend: `Status` gate on `PostJobAsync`/`GetActiveJobsAsync`, admin
+40.4 [DONE — see 40.11] Jobs backend: `Status` gate on `PostJobAsync`/`GetActiveJobsAsync`, admin
 pending/approve/reject endpoints, poster notified on resolution.
 
-40.5 [TODO] Events-without-registration: `RequiresRegistration` threaded through Create/UpdateEventDto
+40.5 [DONE — see 40.11] Events-without-registration: `RequiresRegistration` threaded through Create/UpdateEventDto
 + `EventService`, `RegisterForEventAsync` rejects when false.
 
-40.6 [TODO] Web member portal: "My Albums" UI in `common/gallery/`, pending-job badge in
+40.6 [DONE — see 40.12] Web member portal: "My Albums" UI in `common/gallery/`, pending-job badge in
 `common/jobs/`, admin-events form checkbox for `requiresRegistration`, public events Register
 button gated on `requiresRegistration`.
 
-40.7 [TODO] Web admin: new `admin/gallery-approval/` and `admin/job-approval/` screens cloned from
+40.7 [DONE — see 40.12] Web admin: new `admin/gallery-approval/` and `admin/job-approval/` screens cloned from
 `admin/article-approval/` pattern, wired into nav + `app.routes.ts`.
 
-40.8 [TODO] Mobile: `GalleryService`/job-service pending/approve/reject calls, member "My Albums"
+40.8 [DONE — see 40.13] Mobile: `GalleryService`/job-service pending/approve/reject calls, member "My Albums"
 section on `gallery_screen.dart`, generalized/sibling approval screens off
 `approval_queue_screen.dart` (with reject-reason capture), `event_details_screen.dart` FAB gated on
 `requiresRegistration`.
 
-40.9 [TODO] Tests: backend `GalleryControllerTests`/job-approval/`AdminNotificationService` unit
+40.9 [DONE — see 40.11/40.12] Tests: backend `GalleryControllerTests`/job-approval/`AdminNotificationService` unit
 tests; frontend `gallery-approval.spec.ts`/`job-approval.spec.ts` cloned from
 `article-approval.spec.ts`; e2e `gallery.spec.ts` extended; mobile widget tests if the project
 convention has them.
 
-40.10 [TODO] Per 12.6: `dotnet test`, `npx vitest run`, `npm run type-check`, `npx ng build` (or note
+40.10 [DONE — see 40.11-40.14] Per 12.6: `dotnet test`, `npx vitest run`, `npm run type-check`, `npx ng build` (or note
 the known font-inlining network gap from 39.7) all pass before closing this Area. Update
 `docs/FEATURES.md` per `feedback_docs_update_scope`.
 

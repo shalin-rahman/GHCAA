@@ -1,5 +1,6 @@
 using System.Text;
 using GHCAA.Application.Security;
+using GHCAA.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Hosting;
@@ -69,9 +70,9 @@ namespace GHCAA.API.Extensions
         {
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("SuperAdminOnly", policy => policy.RequireRole("SuperAdmin"));
-                options.AddPolicy("AdminOnly", policy => policy.RequireRole("SuperAdmin", "Admin"));
-                options.AddPolicy("MemberOnly", policy => policy.RequireRole("SuperAdmin", "Admin", "Member"));
+                options.AddPolicy(Constants.Policies.SuperAdminOnly, policy => policy.RequireRole(Constants.Roles.SuperAdmin));
+                options.AddPolicy(Constants.Policies.AdminOnly, policy => policy.RequireRole(Constants.Roles.SuperAdmin, Constants.Roles.Admin));
+                options.AddPolicy(Constants.Policies.MemberOnly, policy => policy.RequireRole(Constants.Roles.SuperAdmin, Constants.Roles.Admin, Constants.Roles.Member));
 
                 // 3d: Secure-by-default — any action without an explicit [Authorize]/[AllowAnonymous]
                 // now requires authentication instead of being implicitly public.

@@ -5,12 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.Domain;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/admin/polls")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = Constants.Policies.AdminOnly)]
     public class AdminPollController : ControllerBase
     {
         private readonly IPollService _pollService;
@@ -22,7 +24,7 @@ namespace GHCAA.API.Controllers
 
         private int GetAdminMemberId()
         {
-            var claim = User.FindFirst("MemberId");
+            var claim = User.FindFirst(AppClaimTypes.MemberId);
             return claim != null ? int.Parse(claim.Value) : 0;
         }
 

@@ -3,6 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { filter, map, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { ROUTES } from '../constants/app.constants';
 
 const CHANGE_PASSWORD_URL = '/portal/change-password';
 
@@ -28,7 +29,7 @@ export const authGuard = (_route: ActivatedRouteSnapshot, state: RouterStateSnap
             if (!auth.isAuthenticated()) {
                 // 29D.8: Preserve the attempted URL so login can return the user to where they were
                 // headed instead of always dumping them on the dashboard.
-                return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+                return router.createUrlTree([ROUTES.LOGIN], { queryParams: { returnUrl: state.url } });
             }
 
             // S7.6: Force password change before accessing any protected route.
@@ -58,7 +59,7 @@ export const adminGuard = () => {
                 return true;
             }
 
-            return router.parseUrl('/portal/dashboard');
+            return router.parseUrl(ROUTES.PORTAL_DASHBOARD);
         })
     );
 };
@@ -77,7 +78,7 @@ export const superAdminGuard = () => {
                 return true;
             }
 
-            return router.parseUrl('/admin/dashboard');
+            return router.parseUrl(ROUTES.ADMIN_DASHBOARD);
         })
     );
 };

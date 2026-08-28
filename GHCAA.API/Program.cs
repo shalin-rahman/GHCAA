@@ -356,23 +356,6 @@ catch (Exception ex)
     app.Logger.LogWarning(ex, "OrgConfig seed skipped — table may not exist yet. Run migrations first.");
 }
 
-// Restore SuperAdmin on protected accounts (config-only list, not admin-UI-editable — see
-// ProtectedSuperAdminSeeder for why this must never move into OrgConfig or a DB table).
-try
-{
-    var protectedSuperAdmins = app.Configuration.GetSection("AppSettings:ProtectedSuperAdmins").Get<string[]>() ?? [];
-    using var protectedAdminScope = app.Services.CreateScope();
-    var protectedAdminCtx = protectedAdminScope.ServiceProvider.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
-    if (await protectedAdminCtx.Database.CanConnectAsync())
-    {
-        await GHCAA.Infrastructure.Data.ProtectedSuperAdminSeeder.EnsureAsync(protectedAdminCtx, protectedSuperAdmins, app.Logger);
-    }
-}
-catch (Exception ex)
-{
-    app.Logger.LogWarning(ex, "Protected SuperAdmin restore skipped.");
-}
-
 // Publish the ratified constitution from Data/Seed/constitution.json (TODO 36.3).
 // EnsureCreated above is a no-op on an existing database, so the model's HasData seed never
 // re-runs there; without this, a newly ratified version could never reach preprod. The syncer is
@@ -405,6 +388,26 @@ if (app.Configuration["ASP_SEED_PROFILE"] == "Visual")
 
     // MANUAL SEEDING: Force override EF Core snapshots with fresh data from Seed/Visual
     OverrideEFCoreMigratedData(context);
+}
+
+// Restore SuperAdmin on protected accounts (config-only list, not admin-UI-editable — see
+// ProtectedSuperAdminSeeder for why this must never move into OrgConfig or a DB table).
+// Must run LAST: the Visual-profile block above wipes and re-inserts every User row from
+// Seed/Visual/users.json (which carries no role data), so restoring roles before that point
+// gets silently undone (TODO 44.18).
+try
+{
+    var protectedSuperAdmins = app.Configuration.GetSection("AppSettings:ProtectedSuperAdmins").Get<string[]>() ?? [];
+    using var protectedAdminScope = app.Services.CreateScope();
+    var protectedAdminCtx = protectedAdminScope.ServiceProvider.GetRequiredService<GHCAA.Infrastructure.Data.ApplicationDbContext>();
+    if (await protectedAdminCtx.Database.CanConnectAsync())
+    {
+        await GHCAA.Infrastructure.Data.ProtectedSuperAdminSeeder.EnsureAsync(protectedAdminCtx, protectedSuperAdmins, app.Logger);
+    }
+}
+catch (Exception ex)
+{
+    app.Logger.LogWarning(ex, "Protected SuperAdmin restore skipped.");
 }
 
 app.Run();

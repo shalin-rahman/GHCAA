@@ -302,7 +302,7 @@ namespace GHCAA.Infrastructure.Services
                     IsActive = true
                 };
 
-                var memberRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Member", cancellationToken);
+                var memberRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == Constants.Roles.Member, cancellationToken);
                 if (memberRole != null) user.Roles.Add(memberRole);
 
                 _db.Users.Add(user);
@@ -359,11 +359,11 @@ namespace GHCAA.Infrastructure.Services
         /// </summary>
         private static string PickPrimaryRoleNameForClient(ICollection<Role>? roles)
         {
-            if (roles == null || roles.Count == 0) return "Member";
+            if (roles == null || roles.Count == 0) return Constants.Roles.Member;
             var names = roles.Where(r => !string.IsNullOrWhiteSpace(r.Name)).Select(r => r.Name!).ToList();
-            if (names.Count == 0) return "Member";
-            if (names.Contains("SuperAdmin")) return "SuperAdmin";
-            if (names.Contains("Admin")) return "Admin";
+            if (names.Count == 0) return Constants.Roles.Member;
+            if (names.Contains(Constants.Roles.SuperAdmin)) return Constants.Roles.SuperAdmin;
+            if (names.Contains(Constants.Roles.Admin)) return Constants.Roles.Admin;
             return names[0];
         }
         public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default)

@@ -4,6 +4,7 @@ using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
@@ -27,14 +28,14 @@ namespace GHCAA.API.Controllers
             return Ok(theme);
         }
 
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         [HttpGet("all")]
         public async Task<ActionResult<List<SpecialDayTheme>>> GetAllThemes()
         {
             return Ok(await _themeService.GetAllThemesAsync());
         }
 
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         [HttpPost]
         public async Task<ActionResult<SpecialDayTheme>> CreateTheme(SpecialDayTheme theme)
         {
@@ -42,7 +43,7 @@ namespace GHCAA.API.Controllers
             return CreatedAtAction(nameof(GetAllThemes), new { id = created.Id }, created);
         }
 
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTheme(int id, SpecialDayTheme theme)
         {
@@ -51,7 +52,7 @@ namespace GHCAA.API.Controllers
             return NoContent();
         }
 
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTheme(int id)
         {

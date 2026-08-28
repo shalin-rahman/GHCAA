@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { API_ENDPOINTS } from '../../core/constants/app.constants';
+import { API_ENDPOINTS, ROUTES } from '../../core/constants/app.constants';
 import { Icon } from '../../common/icon/icon';
 
 @Component({
@@ -58,7 +58,7 @@ export class ChangePassword {
         // 29A.1: drop the forced flag so authGuard lets the user into the portal.
         this.auth.clearMustChangePassword();
         this.notify.success('Password changed successfully.');
-        this.router.navigate(['/portal/dashboard']);
+        this.router.navigate([ROUTES.PORTAL_DASHBOARD]);
       },
       error: (err) => {
         this.loading.set(false);

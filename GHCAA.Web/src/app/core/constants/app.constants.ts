@@ -441,6 +441,17 @@ export const ensureValidAcademicData = (member: any) => {
     }
 };
 
+// Router-navigable paths reused across multiple TS call-sites (router.navigate/parseUrl/
+// createUrlTree). Deliberately scoped to paths that appeared duplicated in more than one
+// file — not a full route table, and not used from templates (Angular routerLink can't
+// import a TS constant without each component re-exposing it, which isn't worth doing for
+// a handful of stable, low-churn destinations).
+export const ROUTES = {
+    LOGIN: '/login',
+    PORTAL_DASHBOARD: '/portal/dashboard',
+    ADMIN_DASHBOARD: '/admin/dashboard'
+};
+
 export const API_ENDPOINTS = {
     ADMIN: {
         MEMBERS: '/api/admin/members',
@@ -459,6 +470,9 @@ export const API_ENDPOINTS = {
         RESEND_OTP: '/api/auth/resend-otp',
         STATUS: '/api/auth/status',
         PROVIDERS: '/api/auth/providers',
+        // 7.13: admin step-up (re-verify by emailed OTP before destructive/financial actions)
+        STEP_UP_REQUEST: '/api/auth/admin/step-up/request',
+        STEP_UP_VERIFY: '/api/auth/admin/step-up/verify',
         GOOGLE: '/api/auth/google',
         FACEBOOK: '/api/auth/facebook',
         REFRESH: '/api/auth/refresh',

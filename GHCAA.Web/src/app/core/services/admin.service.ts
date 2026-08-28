@@ -53,7 +53,8 @@ export interface DashboardStats {
     applied: number;
     active: number;
     inactive: number;
-    balance: number;
+    // null = caller is not permitted to see it (non-SuperAdmin), which is not the same as 0.
+    balance: number | null;
     lastUpdated: string;
 }
 

@@ -7,6 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { LoginDto, User } from '../../core/models/auth.models';
 import { Icon } from '../../common/icon/icon';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { ROUTES } from '../../core/constants/app.constants';
 
 declare var google: any;
 declare var FB: any;
@@ -146,7 +147,7 @@ export class Login implements OnInit {
     if (user.role === 'Admin' || user.role === 'SuperAdmin') {
       this.router.navigate(['/admin/approvals']);
     } else {
-      this.router.navigate(['/portal/dashboard']);
+      this.router.navigate([ROUTES.PORTAL_DASHBOARD]);
     }
   }
 

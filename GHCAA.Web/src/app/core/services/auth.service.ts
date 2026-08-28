@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, map, catchError, of, switchMap } from 'rxjs';
 import { LoginDto, TokenResponseDto, User } from '../models/auth.models';
-import { API_ENDPOINTS } from '../constants/app.constants';
+import { API_ENDPOINTS, ROUTES } from '../constants/app.constants';
 
 // Non-sensitive display fields stored in sessionStorage (no token).
 type SessionUser = Omit<User, 'token'> & { token?: never };
@@ -110,7 +110,7 @@ export class AuthService {
             if (this.isAuthenticated()) {
                 this._currentUser.set(null);
                 sessionStorage.removeItem('user_session');
-                this.router.navigate(['/login'], { queryParams: { expired: true } });
+                this.router.navigate([ROUTES.LOGIN], { queryParams: { expired: true } });
             }
         }, this.TIMEOUT_MS);
     }
@@ -155,7 +155,7 @@ export class AuthService {
                 this._currentUser.set(null);
                 sessionStorage.removeItem('user_session');
                 localStorage.removeItem('user_session');
-                this.router.navigate(['/login']);
+                this.router.navigate([ROUTES.LOGIN]);
             });
     }
 

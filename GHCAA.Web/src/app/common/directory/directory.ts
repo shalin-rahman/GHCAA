@@ -46,6 +46,19 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
         return major && major !== 'None' ? `in ${major}` : '';
     }
 
+    // 'Unknown' is a real stored value for professionalSector (see PROFESSIONAL_SECTORS), so it
+    // has to be treated as absent here or the directory renders "at Unknown" to the public.
+    getProfessionDisplay(designation?: string, sector?: string): string {
+        const clean = (v?: string) => {
+            const t = (v ?? '').trim();
+            return !t || t.toLowerCase() === 'unknown' || t.toLowerCase() === 'n/a' ? '' : t;
+        };
+        const role = clean(designation);
+        const org = clean(sector);
+        if (role && org) return `${role} at ${org}`;
+        return role || org;
+    }
+
     private currentPage = 1;
     private readonly PAGE_SIZE = 20;
     private searchDebounce: any;

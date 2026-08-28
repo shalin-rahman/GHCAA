@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Middleware
 {
@@ -37,14 +38,14 @@ namespace GHCAA.API.Middleware
                     claims.Add(new Claim(ClaimTypes.NameIdentifier, "200"));
                     claims.Add(new Claim(ClaimTypes.Name, "mdshamsulislam"));
                     claims.Add(new Claim(ClaimTypes.Role, "Member"));
-                    claims.Add(new Claim("MemberId", "200"));
+                    claims.Add(new Claim(AppClaimTypes.MemberId, "200"));
                 }
                 else if (token == "visual_admin_token" || token == "visual_superadmin_token")
                 {
                     claims.Add(new Claim(ClaimTypes.NameIdentifier, "1"));
                     claims.Add(new Claim(ClaimTypes.Name, "superadmin"));
                     claims.Add(new Claim(ClaimTypes.Role, "SuperAdmin"));
-                    claims.Add(new Claim("MemberId", "1"));
+                    claims.Add(new Claim(AppClaimTypes.MemberId, "1"));
                 }
 
                 if (claims.Count > 0)

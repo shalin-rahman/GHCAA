@@ -2,7 +2,6 @@ import { createAuthServiceMock } from '../../core/testing/testing-utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Dashboard } from './dashboard';
 import { ProfileService } from '../../core/services/profile.service';
-import { JobService } from '../../core/services/job.service';
 import { EventsService } from '../../core/services/events.service';
 import { NetworkingService } from '../../core/services/networking.service';
 import { AlertService } from '../../core/services/alert.service';
@@ -16,7 +15,6 @@ describe('Dashboard Component', () => {
     let component: Dashboard;
     let fixture: ComponentFixture<Dashboard>;
     let profileServiceMock: any;
-    let jobServiceMock: any;
     let eventsServiceMock: any;
     let networkingServiceMock: any;
     let alertServiceMock: any;
@@ -26,9 +24,6 @@ describe('Dashboard Component', () => {
     beforeEach(async () => {
         profileServiceMock = {
             getProfile: vi.fn().mockReturnValue(of({ fullName: 'Test' }))
-        };
-        jobServiceMock = {
-            getJobs: vi.fn().mockReturnValue(of([]))
         };
         eventsServiceMock = {
             getEvents: vi.fn().mockReturnValue(of([])),
@@ -53,7 +48,6 @@ describe('Dashboard Component', () => {
             imports: [Dashboard],
             providers: [
                 { provide: ProfileService, useValue: profileServiceMock },
-                { provide: JobService, useValue: jobServiceMock },
                 { provide: EventsService, useValue: eventsServiceMock },
                 { provide: NetworkingService, useValue: networkingServiceMock },
                 { provide: AlertService, useValue: alertServiceMock },
@@ -74,7 +68,6 @@ describe('Dashboard Component', () => {
 
     it('should load overview data on init', () => {
         expect(profileServiceMock.getProfile).toHaveBeenCalled();
-        expect(jobServiceMock.getJobs).toHaveBeenCalled();
         expect(eventsServiceMock.getEvents).toHaveBeenCalled();
         expect(networkingServiceMock.getRecentlyJoined).toHaveBeenCalled();
     });

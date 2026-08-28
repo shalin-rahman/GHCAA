@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static GHCAA.Domain.Enums;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/admin/social-auth")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = Constants.Policies.AdminOnly)]
     public class AdminSocialAuthController : ControllerBase
     {
         private readonly ApplicationDbContext _db;

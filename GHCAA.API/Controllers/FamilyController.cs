@@ -7,6 +7,7 @@ using GHCAA.Application.Interfaces;
 using static GHCAA.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -24,7 +25,7 @@ namespace GHCAA.API.Controllers
 
         private int GetMemberId()
         {
-            var claim = User.FindFirst("MemberId")?.Value;
+            var claim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(claim) || !int.TryParse(claim, out var memberId))
                 throw new UnauthorizedAccessException();
             return memberId;

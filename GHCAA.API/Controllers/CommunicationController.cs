@@ -13,7 +13,7 @@ namespace GHCAA.API.Controllers
 {
     [ApiController]
     [Route("api/admin/comm")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = Constants.Policies.AdminOnly)]
     public class CommunicationController : ControllerBase
     {
         private readonly ICommunicationService _commService;

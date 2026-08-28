@@ -28,7 +28,48 @@ namespace GHCAA.Infrastructure.Services
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         }
 
-        public string CreateToken(User user)
+        public string CreateToken(User user) => CreateToken(user, stepUpVerifiedAtEpoch: null);
+
+        public string CreateStepUpToken(User user) =>
+            CreateToken(user, stepUpVerifiedAtEpoch: DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+
+        public string CreateTokenWithCarriedStepUp(User user, long stepUpVerifiedAtEpochSeconds) =>
+            CreateToken(user, stepUpVerifiedAtEpochSeconds);
+
+        public long? TryGetValidStepUpEpoch(string? previousAccessToken, int ttlMinutes)
+        {
+            if (string.IsNullOrWhiteSpace(previousAccessToken)) return null;
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = _config["Jwt:Issuer"] ?? "GHCAA",
+                ValidateAudience = true,
+                ValidAudience = _config["Jwt:Audience"] ?? "GHCAA",
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = _key,
+                // The whole point is to read a token past its 60-minute expiry — only the
+                // signature/issuer/audience need to check out, proving it's genuinely one we
+                // issued, before its step-up claim can be trusted and carried forward.
+                ValidateLifetime = false
+            };
+
+            try
+            {
+                var principal = new JwtSecurityTokenHandler().ValidateToken(previousAccessToken, validationParameters, out _);
+                var claim = principal.FindFirst(StepUpClaim.Type)?.Value;
+                if (long.TryParse(claim, out var epoch) && StepUpClaim.IsValid(epoch, ttlMinutes))
+                    return epoch;
+            }
+            catch
+            {
+                // Malformed, forged, or wrong-key token: never carry a claim forward from it.
+            }
+
+            return null;
+        }
+
+        private string CreateToken(User user, long? stepUpVerifiedAtEpoch)
         {
             var claims = new List<Claim>
             {
@@ -38,13 +79,16 @@ namespace GHCAA.Infrastructure.Services
             };
 
             if (user.MemberId.HasValue)
-                claims.Add(new Claim("MemberId", user.MemberId.Value.ToString()));
+                claims.Add(new Claim(AppClaimTypes.MemberId, user.MemberId.Value.ToString()));
 
             if (user.Roles != null)
             {
                 foreach (var role in user.Roles.Where(r => !string.IsNullOrEmpty(r.Name)))
                     claims.Add(new Claim(ClaimTypes.Role, role.Name));
             }
+
+            if (stepUpVerifiedAtEpoch.HasValue)
+                claims.Add(new Claim(StepUpClaim.Type, stepUpVerifiedAtEpoch.Value.ToString()));
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256Signature);
 

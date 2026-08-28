@@ -1,0 +1,27 @@
+/* Layout only — colours, surfaces and the modal shell come from the global tokens and the
+   shared .modal-overlay / .modal-box / .form-group / .btn classes in styles.scss. */
+
+.step-up-box {
+    max-width: 420px;
+}
+
+.step-up-info,
+.step-up-error {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+}
+
+.step-up-info {
+    color: var(--text-muted);
+}
+
+.step-up-error {
+    color: var(--danger-color);
+}
+
+.step-up-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -44,7 +45,7 @@ namespace GHCAA.API.Controllers
             if (!isAdmin)
             {
                 // If not admin, check if the current user is the owner
-                var currentMemberIdClaim = User.FindFirst("MemberId")?.Value;
+                var currentMemberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
                 if (string.IsNullOrEmpty(currentMemberIdClaim) || fileUpload.MemberId.ToString() != currentMemberIdClaim)
                 {
                     _logger.LogWarning("Unauthorized access attempt to secure file {Path} by user {User}", normalizedPath, User.Identity?.Name);

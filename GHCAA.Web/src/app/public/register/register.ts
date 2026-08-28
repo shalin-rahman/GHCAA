@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
 import { PaymentPortalComponent } from '../../common/payment-portal/payment-portal.component';
 import { FinancialService } from '../../core/services/financial.service';
-import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES } from '../../core/constants/app.constants';
+import { ACADEMIC_DATA, IS_HSC, ensureValidAcademicData, BLOOD_GROUP_OPTIONS, GENDER_OPTIONS, TSHIRT_SIZES, ROUTES } from '../../core/constants/app.constants';
 import { OrgConfigService } from '../../core/services/org-config.service';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { parseDisplayDate } from '../../core/utils/date.util';
@@ -335,7 +335,7 @@ export class Register implements OnDestroy {
       next: () => {
         this.loading.set(false);
         this.notify.success('Email verified! Your application is now pending review.');
-        this.router.navigate(['/login']);
+        this.router.navigate([ROUTES.LOGIN]);
       },
       error: () => {
         this.loading.set(false);

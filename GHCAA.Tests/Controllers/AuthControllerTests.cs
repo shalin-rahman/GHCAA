@@ -7,6 +7,7 @@ using GHCAA.Domain.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
 
@@ -35,7 +36,9 @@ namespace GHCAA.Tests.Controllers
             var envMock = new Mock<IWebHostEnvironment>();
             envMock.SetupGet(x => x.EnvironmentName).Returns("Development");
 
-            _controller = new AuthController(_authServiceMock.Object, _tokenServiceMock.Object, _context, envMock.Object);
+            var configMock = new Mock<IConfiguration>();
+
+            _controller = new AuthController(_authServiceMock.Object, _tokenServiceMock.Object, _context, envMock.Object, configMock.Object);
 
             // Provide a real DefaultHttpContext so Response.Cookies.Append works.
             _controller.ControllerContext = new ControllerContext

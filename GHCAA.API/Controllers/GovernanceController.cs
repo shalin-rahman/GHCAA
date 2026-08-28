@@ -5,6 +5,7 @@ using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -61,7 +62,7 @@ namespace GHCAA.API.Controllers
         [HttpPost("constitution/{id:int}/vote")]
         public async Task<IActionResult> VoteOnAmendment(int id, [FromBody] bool isFor, [FromQuery] string? comments, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
                 return Unauthorized();
 

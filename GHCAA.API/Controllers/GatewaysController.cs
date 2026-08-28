@@ -6,6 +6,7 @@ using GHCAA.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -47,7 +48,7 @@ namespace GHCAA.API.Controllers
                 return BadRequest(new { message = "Reference is required." });
 
             int? memberId = null;
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var midClaim))
             {
                 memberId = midClaim;

@@ -5,12 +5,13 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { ToastComponent } from './common/toast/toast';
+import { StepUpDialog } from './common/step-up-dialog/step-up-dialog';
 import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ToastComponent],
+  imports: [RouterOutlet, ToastComponent, StepUpDialog],
   templateUrl: './app.html'
 })
 export class App {

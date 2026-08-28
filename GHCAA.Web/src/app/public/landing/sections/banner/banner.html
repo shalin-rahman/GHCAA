@@ -22,20 +22,27 @@
                 Constitution</a>
         </div>
 
+        <!-- Every figure here is a real count from GET /api/lookups/stats. No `|| fallback`
+             literals: a fallback fires on a genuine 0 and silently publishes a fabricated
+             number. A stat with no data is hidden instead. -->
         <div class="hero-stats" *ngIf="stats()">
-            <div class="stat-item">
-                <span class="stat-value">{{ stats().totalActiveMembers || 1200 }}+</span>
+            <div class="stat-item" *ngIf="stats().totalActiveMembers">
+                <span class="stat-value">{{ stats().totalActiveMembers }}</span>
                 <span class="stat-label">Total Members</span>
             </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <span class="stat-value">{{ stats().publishedEvents || 50 }}+</span>
+            <ng-container *ngIf="stats().totalActiveMembers && stats().publishedEvents">
+                <div class="stat-divider"></div>
+            </ng-container>
+            <div class="stat-item" *ngIf="stats().publishedEvents">
+                <span class="stat-value">{{ stats().publishedEvents }}</span>
                 <span class="stat-label">Events Hosted</span>
             </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <span class="stat-value">{{ stats().alumniChapters || 12 }}+</span>
-                <span class="stat-label">Global Chapters</span>
+            <ng-container *ngIf="stats().publishedEvents && stats().currentECMembers">
+                <div class="stat-divider"></div>
+            </ng-container>
+            <div class="stat-item" *ngIf="stats().currentECMembers">
+                <span class="stat-value">{{ stats().currentECMembers }}</span>
+                <span class="stat-label">Executive Committee</span>
             </div>
         </div>
     </div>

@@ -3,6 +3,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -29,7 +30,7 @@ namespace GHCAA.API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostJob([FromBody] CreateJobDto job, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
                 return BadRequest("Invalid user session");
@@ -43,7 +44,7 @@ namespace GHCAA.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateJob(int id, [FromBody] CreateJobDto job, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
                 return BadRequest("Invalid user session");
@@ -69,7 +70,7 @@ namespace GHCAA.API.Controllers
         [HttpPatch("deactivate/{id}")]
         public async Task<IActionResult> DeactivateJob(int id, CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
 
             var job = await _jobService.GetJobByIdAsync(id, cancellationToken);
@@ -85,7 +86,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("admin/pending")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetPendingJobs(CancellationToken cancellationToken)
         {
             var jobs = await _jobService.GetPendingJobsAsync(cancellationToken);
@@ -93,7 +94,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/{id}/approve")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> ApproveJob(int id, CancellationToken cancellationToken)
         {
             var success = await _jobService.ApproveJobAsync(id, cancellationToken);
@@ -101,7 +102,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/{id}/reject")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> RejectJob(int id, [FromBody] RejectJobRequest request, CancellationToken cancellationToken)
         {
             var success = await _jobService.RejectJobAsync(id, request.Reason, cancellationToken);

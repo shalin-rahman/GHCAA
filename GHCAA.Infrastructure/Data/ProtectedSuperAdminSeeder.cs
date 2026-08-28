@@ -1,3 +1,4 @@
+using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,7 @@ namespace GHCAA.Infrastructure.Data
         {
             if (protectedUsernames.Count == 0) return;
 
-            var superAdminRole = await db.Roles.FirstOrDefaultAsync(r => r.Name == "SuperAdmin");
+            var superAdminRole = await db.Roles.FirstOrDefaultAsync(r => r.Name == Constants.Roles.SuperAdmin);
             if (superAdminRole is null)
             {
                 logger.LogWarning("ProtectedSuperAdminSeeder: SuperAdmin role not found; skipping.");

@@ -11,8 +11,6 @@
             <a routerLink="/directory">Member Directory</a>
             <a routerLink="/register">Member Registry</a>
             <a *ngIf="orgConfigService.isFeatureEnabled('enableJobHub')" routerLink="/jobs">Career Hub</a>
-            <a routerLink="/mentorship">Mentorship Hub</a>
-            <a routerLink="/professionals">Professional Hub</a>
         </div>
 
         <div class="footer-links">
@@ -21,13 +19,12 @@
             <a *ngIf="orgConfigService.isFeatureEnabled('enableEvents')" routerLink="/events">Global Events</a>
             <a routerLink="/magazine">Digital Magazine</a>
             <a *ngIf="orgConfigService.isFeatureEnabled('enableGallery')" routerLink="/gallery">Photo Gallery</a>
-            <a routerLink="/articles">Community Blog</a>
+            <a routerLink="/portal/articles">Community Blog</a>
         </div>
 
         <div class="footer-links">
             <h4>Governance</h4>
-            <a routerLink="/committee">Executive Committee</a>
-            <a routerLink="/financials">Financial Portal</a>
+            <a routerLink="/portal/governance">Executive Committee</a>
             <a routerLink="/constitution">Constitution</a>
             <a routerLink="/elections">Elections &amp; Forms</a>
             <a routerLink="/about">Vision & Mission</a>

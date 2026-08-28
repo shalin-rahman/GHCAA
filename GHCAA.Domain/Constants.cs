@@ -9,6 +9,17 @@ namespace GHCAA.Domain
             public const string Member = "Member";
         }
 
+        // Authorization POLICY names (registered once in ServiceExtensions.AddAppAuthorization),
+        // referenced from every [Authorize(Policy = ...)] attribute. Distinct from Roles above —
+        // a policy can require more than one role, so the two are not interchangeable even where
+        // a policy happens to share a role's name today.
+        public static class Policies
+        {
+            public const string AdminOnly = "AdminOnly";
+            public const string SuperAdminOnly = "SuperAdminOnly";
+            public const string MemberOnly = "MemberOnly";
+        }
+
         public static class ConfigKeys
         {
             public const string MaxFileSizeBytes = "FileStorage:MaxFileSizeBytes";

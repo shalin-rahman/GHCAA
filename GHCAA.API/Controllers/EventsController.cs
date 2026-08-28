@@ -6,6 +6,8 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -69,7 +71,7 @@ namespace GHCAA.API.Controllers
             int? memberId = null;
             if (User.Identity?.IsAuthenticated == true)
             {
-                var memberIdClaim = User.FindFirst("MemberId")?.Value;
+                var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
                 if (!string.IsNullOrEmpty(memberIdClaim) && int.TryParse(memberIdClaim, out var mid))
                 {
                     memberId = mid;
@@ -110,7 +112,7 @@ namespace GHCAA.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetMyRegistrations(CancellationToken cancellationToken)
         {
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             if (string.IsNullOrEmpty(memberIdClaim) || !int.TryParse(memberIdClaim, out var memberId))
             {
                 if (User.IsInRole("SuperAdmin"))
@@ -131,7 +133,7 @@ namespace GHCAA.API.Controllers
             if (registration == null) return NotFound();
 
             bool isAdmin = User.IsInRole("Admin");
-            var memberIdClaim = User.FindFirst("MemberId")?.Value;
+            var memberIdClaim = User.FindFirst(AppClaimTypes.MemberId)?.Value;
 
             if (!isAdmin)
             {
@@ -152,7 +154,7 @@ namespace GHCAA.API.Controllers
         // --- ADMIN ENDPOINTS ---
 
         [HttpGet("admin/all")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetAllEventsForAdmin(CancellationToken cancellationToken)
         {
             var events = await _eventService.GetAllEventsForAdminAsync(cancellationToken);
@@ -160,7 +162,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto, CancellationToken cancellationToken)
         {
             var result = await _eventService.CreateEventAsync(dto, cancellationToken);
@@ -168,7 +170,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPut("admin/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> UpdateEvent(int id, [FromBody] UpdateEventDto dto, CancellationToken cancellationToken)
         {
             dto.Id = id;
@@ -177,7 +179,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("admin/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> DeleteEvent(int id, CancellationToken cancellationToken)
         {
             var success = await _eventService.DeleteEventAsync(id, cancellationToken);
@@ -185,7 +187,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/{id}/logo")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> UploadEventLogo(int id, IFormFile logo, CancellationToken cancellationToken)
         {
             var logoValidation = _fileValidationService.ValidateFormFile(logo, FileCategory.Image, 5 * 1024 * 1024);
@@ -208,7 +210,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("admin/registrations")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetAllRegistrations(int page = 1, int pageSize = 10, int? eventId = null, string? status = null, string? search = null, CancellationToken cancellationToken = default)
         {
             var registrations = await _eventService.GetAllRegistrationsForAdminAsync(page, pageSize, eventId, status, search, cancellationToken);
@@ -216,7 +218,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/approve-registration")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> ApproveRegistration([FromBody] ApproveRegistrationDto dto, CancellationToken cancellationToken)
         {
             var adminIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -230,7 +232,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/registrations/{id}/send-invitation")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> SendInvitation(int id, CancellationToken cancellationToken)
         {
             var success = await _eventService.SendInvitationEmailAsync(id, cancellationToken);
@@ -238,7 +240,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/checkin/qr")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> QRCodeCheckIn([FromBody] QrCheckInDto dto, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(dto.TicketCode)) return BadRequest();
@@ -249,7 +251,7 @@ namespace GHCAA.API.Controllers
         // --- Operations (Tasks & Budget) ---
 
         [HttpGet("admin/{eventId}/tasks")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetEventTasks(int eventId, CancellationToken cancellationToken)
         {
             var tasks = await _eventService.GetEventTasksAsync(eventId, cancellationToken);
@@ -257,7 +259,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/tasks")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> CreateTask([FromBody] CreateEventTaskDto dto, CancellationToken cancellationToken)
         {
             var task = await _eventService.CreateEventTaskAsync(dto, cancellationToken);
@@ -265,7 +267,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/tasks/{id}/toggle")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> ToggleTask(int id, CancellationToken cancellationToken)
         {
             var success = await _eventService.ToggleTaskStatusAsync(id, cancellationToken);
@@ -273,7 +275,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("admin/tasks/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> DeleteTask(int id, CancellationToken cancellationToken)
         {
             var success = await _eventService.DeleteTaskAsync(id, cancellationToken);
@@ -281,7 +283,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("admin/{eventId}/budget")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetEventBudget(int eventId, CancellationToken cancellationToken)
         {
             var budget = await _eventService.GetEventBudgetAsync(eventId, cancellationToken);
@@ -289,7 +291,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/budget")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> UpdateBudget([FromBody] UpdateEventBudgetDto dto, CancellationToken cancellationToken)
         {
             var success = await _eventService.UpdateEventBudgetAsync(dto, cancellationToken);
@@ -297,7 +299,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("admin/expenses")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> AddExpense([FromBody] AddEventExpenseDto dto, CancellationToken cancellationToken)
         {
             var expense = await _eventService.AddEventExpenseAsync(dto, cancellationToken);
@@ -305,7 +307,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("admin/expenses/{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> DeleteExpense(int id, CancellationToken cancellationToken)
         {
             var success = await _eventService.DeleteExpenseAsync(id, cancellationToken);

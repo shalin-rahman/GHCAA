@@ -258,7 +258,7 @@ namespace GHCAA.Infrastructure.Services
                 await _db.SaveChangesAsync(cancellationToken);
 
                 // Generate & send OTP
-                await _otp.GenerateAndSendOtpAsync(member.Email ?? string.Empty, cancellationToken);
+                await _otp.GenerateAndSendOtpAsync(member.Email ?? string.Empty, cancellationToken: cancellationToken);
 
                 await _activityService.LogActivityAsync(member.Id, "Registration", "New registry filing submitted for review.", member.Id, cancellationToken: cancellationToken);
 
@@ -299,7 +299,7 @@ namespace GHCAA.Infrastructure.Services
         public async Task<bool> VerifyEmailAsync(string email, string otpCode, CancellationToken cancellationToken = default)
         {
             // Verify OTP
-            var isValid = await _otp.VerifyOtpAsync(email, otpCode, cancellationToken);
+            var isValid = await _otp.VerifyOtpAsync(email, otpCode, cancellationToken: cancellationToken);
             if (!isValid)
             {
                 _logger.LogWarning("Invalid OTP attempt for email {Email}", email);
@@ -336,7 +336,7 @@ namespace GHCAA.Infrastructure.Services
                 return false;
             }
 
-            await _otp.GenerateAndSendOtpAsync(email, cancellationToken);
+            await _otp.GenerateAndSendOtpAsync(email, cancellationToken: cancellationToken);
             _logger.LogInformation("OTP resent to email {Email}", email);
             return true;
         }
@@ -1455,7 +1455,6 @@ namespace GHCAA.Infrastructure.Services
                 TotalActiveMembers = activeMembers,
                 CurrentECMembers = ecMembers,
                 PublishedEvents = totalEvents,
-                AlumniChapters = 12, // Placeholder
                 LastUpdated = DateTime.UtcNow
             };
         }

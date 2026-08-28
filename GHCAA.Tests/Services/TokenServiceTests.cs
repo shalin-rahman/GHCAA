@@ -147,5 +147,104 @@ namespace GHCAA.Tests.Services
             var bytes = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(token));
             return Convert.ToHexString(bytes).ToLowerInvariant();
         }
+
+        // ---- 7.13: step-up claim issuance and carry-forward across refresh -----------------
+
+        [Test]
+        public void CreateStepUpToken_IncludesStepUpClaim_WithCurrentTimestamp()
+        {
+            var user = new User { Id = 1, Username = "admin" };
+            var before = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+            var token = _service.CreateStepUpToken(user);
+
+            var claim = new JwtSecurityTokenHandler().ReadJwtToken(token).Claims.Single(c => c.Type == GHCAA.Application.Security.StepUpClaim.Type);
+            long.Parse(claim.Value).Should().BeInRange(before, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        }
+
+        [Test]
+        public void CreateToken_PlainLogin_NeverIncludesStepUpClaim()
+        {
+            var user = new User { Id = 1, Username = "admin" };
+
+            var token = _service.CreateToken(user);
+
+            new JwtSecurityTokenHandler().ReadJwtToken(token).Claims
+                .Should().NotContain(c => c.Type == GHCAA.Application.Security.StepUpClaim.Type);
+        }
+
+        [Test]
+        public void TryGetValidStepUpEpoch_ReturnsEpoch_WhenPreviousTokenWasStepUpVerifiedAndWithinTtl()
+        {
+            var user = new User { Id = 1, Username = "admin" };
+            var previousToken = _service.CreateStepUpToken(user);
+
+            var epoch = _service.TryGetValidStepUpEpoch(previousToken, ttlMinutes: 60);
+
+            epoch.Should().NotBeNull();
+        }
+
+        [Test]
+        public void TryGetValidStepUpEpoch_ReturnsNull_WhenPreviousTokenHasNoStepUpClaim()
+        {
+            var user = new User { Id = 1, Username = "admin" };
+            var previousToken = _service.CreateToken(user); // plain login token
+
+            var epoch = _service.TryGetValidStepUpEpoch(previousToken, ttlMinutes: 60);
+
+            epoch.Should().BeNull();
+        }
+
+        [Test]
+        public void TryGetValidStepUpEpoch_ReturnsNull_WhenVerificationHasExceededTtl()
+        {
+            var user = new User { Id = 1, Username = "admin" };
+            var previousToken = _service.CreateStepUpToken(user);
+
+            // A 0-minute TTL means "must have verified this instant" — any elapsed time fails it,
+            // simulating a token from well outside the grace window without needing to wait.
+            var epoch = _service.TryGetValidStepUpEpoch(previousToken, ttlMinutes: 0);
+
+            epoch.Should().BeNull();
+        }
+
+        [Test]
+        public void TryGetValidStepUpEpoch_ReturnsNull_ForATokenSignedWithADifferentKey()
+        {
+            var user = new User { Id = 1, Username = "admin" };
+            var otherConfig = new Mock<IConfiguration>();
+            otherConfig.Setup(x => x["Jwt:Key"]).Returns("a_completely_different_super_secret_key_of_32_chars_plus");
+            otherConfig.Setup(x => x["Jwt:Issuer"]).Returns("GHCAA");
+            otherConfig.Setup(x => x["Jwt:Audience"]).Returns("GHCAA");
+            var otherService = new TokenService(otherConfig.Object, _mockEnv.Object, NullLogger<TokenService>.Instance, _context);
+            var forgedToken = otherService.CreateStepUpToken(user);
+
+            // Never trust a step-up claim carried in from a token this service didn't sign —
+            // otherwise a forged token could bypass OTP verification outright.
+            var epoch = _service.TryGetValidStepUpEpoch(forgedToken, ttlMinutes: 60);
+
+            epoch.Should().BeNull();
+        }
+
+        [Test]
+        public void TryGetValidStepUpEpoch_ReturnsNull_ForNullOrEmptyInput()
+        {
+            _service.TryGetValidStepUpEpoch(null, 60).Should().BeNull();
+            _service.TryGetValidStepUpEpoch("", 60).Should().BeNull();
+        }
+
+        [Test]
+        public void CreateTokenWithCarriedStepUp_PreservesTheOriginalVerificationTimestamp()
+        {
+            var user = new User { Id = 1, Username = "admin" };
+            var originalEpoch = DateTimeOffset.UtcNow.AddDays(-10).ToUnixTimeSeconds();
+
+            var refreshed = _service.CreateTokenWithCarriedStepUp(user, originalEpoch);
+
+            var claim = new JwtSecurityTokenHandler().ReadJwtToken(refreshed).Claims.Single(c => c.Type == GHCAA.Application.Security.StepUpClaim.Type);
+            // The 30-day grace period must count from the ORIGINAL verification, not be reset to
+            // "now" on every refresh — otherwise it would never lapse for an active session.
+            long.Parse(claim.Value).Should().Be(originalEpoch);
+        }
     }
 }

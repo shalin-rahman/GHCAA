@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -98,7 +99,7 @@ namespace GHCAA.API.Controllers
 
         private int GetMemberId()
         {
-            var claim = User.FindFirst("MemberId");
+            var claim = User.FindFirst(AppClaimTypes.MemberId);
             if (claim != null && int.TryParse(claim.Value, out int id))
             {
                 return id;

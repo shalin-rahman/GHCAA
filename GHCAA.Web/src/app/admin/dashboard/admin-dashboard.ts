@@ -34,6 +34,7 @@ export class AdminDashboard implements OnInit {
 
   stats = signal<DashboardStats | null>(null);
   recentNews = signal<any[]>([]);
+  publishedArticleCount = signal(0);
   upcomingEvents = signal<any[]>([]);
   loading = signal(true);
   now = new Date();
@@ -52,7 +53,9 @@ export class AdminDashboard implements OnInit {
           applied: s.applied ?? s.Applied ?? 0,
           active: s.active ?? s.Active ?? 0,
           inactive: s.inactive ?? s.Inactive ?? 0,
-          balance: s.balance ?? s.Balance ?? 0,
+          // Keep null distinct from 0: the API returns null for non-SuperAdmin (balance is
+          // restricted), and coercing that to 0 showed every plain Admin a confident "৳0".
+          balance: s.balance ?? s.Balance ?? null,
           lastUpdated: s.lastUpdated ?? s.LastUpdated ?? new Date().toISOString()
         };
         
@@ -65,6 +68,11 @@ export class AdminDashboard implements OnInit {
                      new Date(a.publishedAt || a.PublishedAt || a.createdAt || a.CreatedAt).getTime()
         );
         this.recentNews.set(sorted.slice(0, 4));
+        // Count the whole set, not the 4 shown below it — the tile is a total, and
+        // getNewsAdmin returns drafts too, so only published items count toward it.
+        this.publishedArticleCount.set(
+          newsItems.filter((n: any) => (n.isPublished ?? n.IsPublished) !== false).length
+        );
 
         // Take up to 4 upcoming events
         const eventItems = Array.isArray(events) ? events : ((events as any)?.items || []);

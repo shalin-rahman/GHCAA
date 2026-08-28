@@ -80,7 +80,7 @@
         <div class="glass-card stat-card ripple-effect dark">
             <div class="stat-icon">💰</div>
             <div class="stat-body">
-                <h3>{{ formatBDT(stats()?.balance || 0) }}</h3>
+                <h3>{{ stats()?.balance == null ? 'Restricted' : formatBDT(stats()!.balance!) }}</h3>
                 <p>Net Fund Balance</p>
             </div>
             <button class="action-btn gold" routerLink="/admin/ledger">Ledger</button>
@@ -90,7 +90,7 @@
         <div class="glass-card stat-card ripple-effect">
             <div class="stat-icon">📰</div>
             <div class="stat-body">
-                <h3>{{ recentNews().length }}</h3>
+                <h3>{{ publishedArticleCount() }}</h3>
                 <p>Published Articles</p>
             </div>
             <button class="action-btn" routerLink="/admin/news">Manage</button>

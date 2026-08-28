@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -23,7 +24,7 @@ namespace GHCAA.API.Controllers
         // 24.50: Returns null when the claim is absent or not a valid integer, avoiding int.Parse crash.
         private int? GetMemberId()
         {
-            var value = User.FindFirst("MemberId")?.Value;
+            var value = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             return int.TryParse(value, out var id) ? id : null;
         }
 

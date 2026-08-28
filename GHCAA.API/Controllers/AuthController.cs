@@ -1,5 +1,6 @@
 using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
+using GHCAA.Application.Security;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
@@ -19,13 +21,15 @@ namespace GHCAA.API.Controllers
         private readonly ITokenService _tokenService;
         private readonly GHCAA.Infrastructure.Data.ApplicationDbContext _db;
         private readonly IWebHostEnvironment _env;
+        private readonly IConfiguration _config;
 
-        public AuthController(IAuthService authService, ITokenService tokenService, GHCAA.Infrastructure.Data.ApplicationDbContext db, IWebHostEnvironment env)
+        public AuthController(IAuthService authService, ITokenService tokenService, GHCAA.Infrastructure.Data.ApplicationDbContext db, IWebHostEnvironment env, IConfiguration config)
         {
             _authService = authService;
             _tokenService = tokenService;
             _db = db;
             _env = env;
+            _config = config;
         }
 
         [HttpGet("providers")]
@@ -94,7 +98,7 @@ namespace GHCAA.API.Controllers
                 .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
             if (user == null) { ClearAuthCookies(); return Unauthorized(); }
 
-            var newAccessToken = _tokenService.CreateToken(user);
+            var newAccessToken = CreateRefreshedAccessToken(user);
             SetCookie("access_token", newAccessToken, TimeSpan.FromMinutes(65));
             SetCookie("refresh_token", newRefreshToken, TimeSpan.FromDays(7));
             SetXsrfCookie(TimeSpan.FromDays(7));
@@ -133,7 +137,7 @@ namespace GHCAA.API.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var username = User.FindFirst(ClaimTypes.Name)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Member";
-            var memberId = User.FindFirst("MemberId")?.Value;
+            var memberId = User.FindFirst(AppClaimTypes.MemberId)?.Value;
 
             return Ok(new
             {
@@ -155,6 +159,76 @@ namespace GHCAA.API.Controllers
 
             ClearAuthCookies();
             return Ok();
+        }
+
+        // 7.13: Step-up verification. An admin already holds a valid session; these two endpoints
+        // prove they still control the account's email inbox before a destructive/financial action
+        // is allowed through [RequireStepUp].
+        [HttpPost("admin/step-up/request")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
+        public async Task<IActionResult> RequestStepUp([FromServices] IOtpService otpService, CancellationToken cancellationToken)
+        {
+            var user = await LoadCurrentUserAsync(cancellationToken);
+            var email = user?.Member?.Email;
+
+            if (user == null || string.IsNullOrWhiteSpace(email))
+                return BadRequest(new { Message = "No email address is on file for this account." });
+
+            await otpService.GenerateAndSendOtpAsync(email, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
+            return Ok(new { Message = "A verification code has been sent to your registered email address." });
+        }
+
+        [HttpPost("admin/step-up/verify")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
+        public async Task<IActionResult> VerifyStepUp([FromBody] StepUpVerifyDto dto, [FromServices] IOtpService otpService, CancellationToken cancellationToken)
+        {
+            var user = await LoadCurrentUserAsync(cancellationToken);
+            var email = user?.Member?.Email;
+
+            if (user == null || string.IsNullOrWhiteSpace(email))
+                return BadRequest(new { Message = "No email address is on file for this account." });
+
+            var verified = await otpService.VerifyOtpAsync(email, dto.Code, Domain.Enums.OtpPurpose.AdminStepUp, cancellationToken);
+            if (!verified)
+                return BadRequest(new { Message = "That verification code is invalid or has expired." });
+
+            // Re-issue the access token carrying the step-up claim. The refresh token is left
+            // alone: this raises the current session's assurance level, it is not a new login.
+            var stepUpToken = _tokenService.CreateStepUpToken(user);
+            SetCookie("access_token", stepUpToken, TimeSpan.FromMinutes(65));
+
+            return Ok(new { Token = stepUpToken });
+        }
+
+        // 7.13: A refresh must not silently reset the ~30-day step-up grace period — the access
+        // token is refreshed roughly hourly, far more often than the OTP challenge should ever
+        // need to reappear. The (now-expired) outgoing access_token cookie is the only place that
+        // grace period is recorded, so it's read here, signature-checked, and carried forward
+        // onto the new token if still within TTL. A fresh login never does this (Login() calls
+        // plain CreateToken), so signing back in after signing out always starts unverified.
+        private string CreateRefreshedAccessToken(GHCAA.Domain.Models.User user)
+        {
+            var ttlMinutes = int.TryParse(_config["AppSettings:StepUpTtlMinutes"], out var v) && v > 0
+                ? v
+                : StepUpClaim.DefaultTtlMinutes;
+
+            Request.Cookies.TryGetValue("access_token", out var previousAccessToken);
+            var carriedEpoch = _tokenService.TryGetValidStepUpEpoch(previousAccessToken, ttlMinutes);
+
+            return carriedEpoch.HasValue
+                ? _tokenService.CreateTokenWithCarriedStepUp(user, carriedEpoch.Value)
+                : _tokenService.CreateToken(user);
+        }
+
+        private async Task<GHCAA.Domain.Models.User?> LoadCurrentUserAsync(CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
+                return null;
+
+            return await _db.Users
+                .Include(u => u.Roles)
+                .Include(u => u.Member)
+                .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
         }
 
         [HttpPost("reset-password")]

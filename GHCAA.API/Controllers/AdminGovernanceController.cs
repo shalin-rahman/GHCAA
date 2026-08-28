@@ -4,10 +4,11 @@ using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
 
 namespace GHCAA.API.Controllers
 {
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = Constants.Policies.AdminOnly)]
     [ApiController]
     [Route("api/admin/governance")]
     public class AdminGovernanceController : ControllerBase
@@ -73,6 +74,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("members/{ecMemberId}/hard-delete")]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> DeleteECMember(int ecMemberId, CancellationToken cancellationToken)
         {
             var success = await _governanceService.DeleteECMemberAsync(ecMemberId, cancellationToken);

@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -21,7 +23,7 @@ namespace GHCAA.API.Controllers
 
         private int GetMemberId()
         {
-            var val = User.FindFirst("MemberId")?.Value;
+            var val = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             return int.TryParse(val, out var id) ? id : 0;
         }
 
@@ -84,7 +86,7 @@ namespace GHCAA.API.Controllers
 
         /// <summary>Admin view of all mentorship requests.</summary>
         [HttpGet("admin/all")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetAllForAdmin(CancellationToken ct)
         {
             return Ok(await _service.GetAllForAdminAsync(ct));

@@ -2,6 +2,8 @@ using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Domain;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -18,13 +20,13 @@ namespace GHCAA.API.Controllers
 
         // Strict role parity: Sync with frontend superAdminGuard
         [HttpPut]
-        [Authorize(Policy = "SuperAdminOnly")]
+        [Authorize(Policy = Constants.Policies.SuperAdminOnly)]
         public async Task<IActionResult> UpdateConfig([FromBody] OrgConfigDto dto)
         {
             if (dto is null)
                 return BadRequest("Config payload is required.");
 
-            var adminId = User.FindFirst("MemberId")?.Value ?? string.Empty;
+            var adminId = User.FindFirst(AppClaimTypes.MemberId)?.Value ?? string.Empty;
             await configService.UpdateConfigAsync(dto, adminId);
             return NoContent();
         }

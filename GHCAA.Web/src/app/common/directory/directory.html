@@ -120,9 +120,9 @@
                         <span class="icon">🎓</span>
                         <span class="batch-text">Batch: <strong>{{ m.passingYear || 'N/A' }}</strong> ({{ m.degree || 'N/A' }} {{ getMajorDisplay(m.degree, m.subject) }})</span>
                     </div>
-                    <div class="info-item" *ngIf="m.professionalSector">
+                    <div class="info-item" *ngIf="getProfessionDisplay(m.designation, m.professionalSector)">
                         <span class="icon">💼</span>
-                        <span>{{ m.designation }} at {{ m.professionalSector }}</span>
+                        <span>{{ getProfessionDisplay(m.designation, m.professionalSector) }}</span>
                     </div>
                     <div class="info-item" *ngIf="m.bloodGroup">
                         <span class="icon">🩸</span>
@@ -204,8 +204,9 @@
                 </div>
                 <div class="viewer-main">
                     <h2>{{ selectedMember()?.fullName }}</h2>
-                    <p class="role">{{ selectedMember()?.designation }} at {{ selectedMember()?.professionalSector }}
-                    </p>
+                    @if (getProfessionDisplay(selectedMember()?.designation, selectedMember()?.professionalSector); as profession) {
+                    <p class="role">{{ profession }}</p>
+                    }
                     <div class="social-tags">
                         <span class="tag">🎓 Batch: <strong>{{ selectedMember()?.passingYear || 'N/A' }}</strong> ({{ selectedMember()?.degree || 'N/A' }} {{ getMajorDisplay(selectedMember()?.degree, selectedMember()?.subject) }})</span>
                         <span class="tag">🩸 {{ getBloodGroupName(selectedMember()?.bloodGroup) }}</span>

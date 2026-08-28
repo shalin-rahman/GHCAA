@@ -1,6 +1,7 @@
 using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GHCAA.Application.Security;
 
 namespace GHCAA.API.Controllers
 {
@@ -62,7 +63,7 @@ namespace GHCAA.API.Controllers
         private bool TryGetMemberId(out int memberId)
         {
             memberId = 0;
-            var memberIdStr = User.FindFirst("MemberId")?.Value;
+            var memberIdStr = User.FindFirst(AppClaimTypes.MemberId)?.Value;
             return !string.IsNullOrEmpty(memberIdStr) && int.TryParse(memberIdStr, out memberId);
         }
     }

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_ENDPOINTS } from '../constants/app.constants';
 
 export interface PaymentConfig {
     id: number;
@@ -31,7 +32,7 @@ export class PaymentConfigService {
     private http = inject(HttpClient);
 
     getActivePaymentMethods(): Observable<PaymentConfig[]> {
-        return this.http.get<PaymentConfig[]>('/api/payment-config/active');
+        return this.http.get<PaymentConfig[]>(API_ENDPOINTS.PAYMENT_CONFIG.PUBLIC);
     }
 
     // Admin methods

@@ -45,7 +45,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpGet("admin")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetAllNewsForAdmin(CancellationToken cancellationToken)
         {
             var news = await _newsService.GetAllNewsForAdminAsync(cancellationToken);
@@ -55,7 +55,7 @@ namespace GHCAA.API.Controllers
         [HttpGet("pending")]
         [HttpGet("admin/pending")]
         [HttpGet("News/Pending")] // Mobile Alias
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> GetPendingSubmissions(CancellationToken cancellationToken)
         {
             var news = await _newsService.GetPendingSubmissionsAsync(cancellationToken);
@@ -63,7 +63,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> CreateNews([FromBody] CreateNewsDto dto, CancellationToken cancellationToken)
         {
             var authorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -77,7 +77,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> UpdateNews(int id, [FromBody] UpdateNewsDto dto, CancellationToken cancellationToken)
         {
             dto.Id = id;
@@ -86,7 +86,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> DeleteNews(int id, CancellationToken cancellationToken)
         {
             var success = await _newsService.DeleteNewsAsync(id, cancellationToken);
@@ -140,7 +140,7 @@ namespace GHCAA.API.Controllers
 
         [HttpPost("{id:int}/approve")]
         [HttpPost("admin/{id:int}/approve")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> ApproveArticle(int id, CancellationToken cancellationToken)
         {
             var success = await _newsService.ApproveArticleAsync(id, cancellationToken);
@@ -149,7 +149,7 @@ namespace GHCAA.API.Controllers
 
         [HttpPost("{id:int}/reject")]
         [HttpPost("admin/{id:int}/reject")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> RejectArticle(int id, CancellationToken cancellationToken)
         {
             var success = await _newsService.RejectArticleAsync(id, cancellationToken);
@@ -157,7 +157,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("{id:int}/collaborators/{userId:int}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> AddCollaborator(int id, int userId, CancellationToken cancellationToken)
         {
             var success = await _newsService.AddCollaboratorAsync(id, userId, cancellationToken);
@@ -165,7 +165,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpDelete("{id:int}/collaborators/{userId:int}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = Constants.Policies.AdminOnly)]
         public async Task<IActionResult> RemoveCollaborator(int id, int userId, CancellationToken cancellationToken)
         {
             var success = await _newsService.RemoveCollaboratorAsync(id, userId, cancellationToken);
@@ -203,7 +203,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("upload-document")]
-        [Authorize(Policy = "AdminOnly")] // Notices are admin-authored only
+        [Authorize(Policy = Constants.Policies.AdminOnly)] // Notices are admin-authored only
         public async Task<IActionResult> UploadDocument(IFormFile file, CancellationToken cancellationToken)
         {
             var validation = _fileValidationService.ValidateFormFile(file, FileCategory.Document, 10 * 1024 * 1024);

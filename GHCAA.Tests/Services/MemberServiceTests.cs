@@ -116,7 +116,7 @@ public class MemberServiceTests : TestBase
 
         dto.PaymentMethodId = payConfig.Id;
 
-        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("123456");
 
         // Act
@@ -212,7 +212,7 @@ public class MemberServiceTests : TestBase
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedPath);
 
-        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("123456");
 
         // Act
@@ -247,7 +247,7 @@ public class MemberServiceTests : TestBase
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedPath);
 
-        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("123456");
 
         // Act
@@ -276,7 +276,7 @@ public class MemberServiceTests : TestBase
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedPath);
 
-        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("123456");
 
         // Act
@@ -294,14 +294,14 @@ public class MemberServiceTests : TestBase
     {
         // Arrange
         var dto = CreateValidDto();
-        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(dto.Email, It.IsAny<CancellationToken>()))
+        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(dto.Email, It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("123456");
 
         // Act
         await _service.RegisterAsync(dto, null, null, null);
 
         // Assert
-        _mockOtp.Verify(x => x.GenerateAndSendOtpAsync(dto.Email, It.IsAny<CancellationToken>()), Times.Once);
+        _mockOtp.Verify(x => x.GenerateAndSendOtpAsync(dto.Email, It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -332,7 +332,7 @@ public class MemberServiceTests : TestBase
         member.EmailVerified = false;
         await _context.SaveChangesAsync();
 
-        _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<CancellationToken>()))
+        _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         // Act
@@ -354,7 +354,7 @@ public class MemberServiceTests : TestBase
         member.EmailVerified = false;
         await _context.SaveChangesAsync();
 
-        _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<CancellationToken>()))
+        _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         // Act
@@ -373,7 +373,7 @@ public class MemberServiceTests : TestBase
         var email = "nonexistent@example.com";
         var otpCode = "123456";
 
-        _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<CancellationToken>()))
+        _mockOtp.Setup(x => x.VerifyOtpAsync(email, otpCode, It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         // Act
@@ -517,7 +517,7 @@ public class MemberServiceTests : TestBase
             .ReturnsAsync((Stream s, string fn, int mid, Enums.FileUploadType t, CancellationToken ct) =>
                 $"uploads/members/{mid}/{t.ToString().ToLower()}/{fn}");
 
-        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockOtp.Setup(x => x.GenerateAndSendOtpAsync(It.IsAny<string>(), It.IsAny<GHCAA.Domain.Enums.OtpPurpose>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("123456");
 
         // Act
