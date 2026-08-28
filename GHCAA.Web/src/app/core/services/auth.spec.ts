@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { ApplicationRef } from '@angular/core';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AuthService } from './auth.service';
@@ -15,6 +16,9 @@ describe('AuthService', () => {
     });
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
+    // The constructor's /auth/me call is deferred via afterNextRender (NG0200 guard) —
+    // tick the ApplicationRef so the deferred callback fires before we expect the request.
+    TestBed.inject(ApplicationRef).tick();
     // Flush the /auth/me request triggered by the constructor when no session exists.
     httpMock.expectOne(API_ENDPOINTS.AUTH.ME).flush(null, { status: 401, statusText: 'Unauthorized' });
   });

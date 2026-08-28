@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, afterNextRender } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, map, catchError, of, switchMap } from 'rxjs';
@@ -33,30 +33,38 @@ export class AuthService {
     constructor() {
         this.initActivityTracking();
         // 24.39: Restore auth state from httpOnly cookie via /auth/me on page load.
+        // NG0200 guard: AuthService is providedIn:'root', so it can be constructed mid-render
+        // (e.g. a header component injecting it during its own construction). If the /auth/me
+        // response happened to resolve inside that same change-detection flush, the resulting
+        // signal writes below would land mid-check and throw ExpressionChangedAfterItHasBeenCheckedError.
+        // afterNextRender defers the call (and its signal mutations) until after the first render
+        // pass has fully settled, so it can never race the initial CD cycle.
         if (typeof window !== 'undefined' && !this._currentUser()) {
-            this.http.get<any>(API_ENDPOINTS.AUTH.ME, { withCredentials: true })
-                .pipe(catchError(err => {
-                    console.error('Failed to restore session from /auth/me', err);
-                    return of(null);
-                }))
-                .subscribe(me => {
-                    if (me) {
-                        const user: User = {
-                            username: me.username,
-                            memberId: me.memberId,
-                            role: me.role ?? 'Member',
-                            token: '',      // token is httpOnly — not accessible to JS
-                            fullName: me.fullName ?? me.username,
-                            email: me.email,
-                            mobileNo: me.mobileNo,
-                            mustChangePassword: me.mustChangePassword ?? false
-                        };
-                        this._currentUser.set(user);
-                        sessionStorage.setItem('user_session', JSON.stringify(this.toSessionUser(user)));
-                        this.resetTimer();
-                    }
-                    this._authChecked.set(true);
-                });
+            afterNextRender(() => {
+                this.http.get<any>(API_ENDPOINTS.AUTH.ME, { withCredentials: true })
+                    .pipe(catchError(err => {
+                        console.error('Failed to restore session from /auth/me', err);
+                        return of(null);
+                    }))
+                    .subscribe(me => {
+                        if (me) {
+                            const user: User = {
+                                username: me.username,
+                                memberId: me.memberId,
+                                role: me.role ?? 'Member',
+                                token: '',      // token is httpOnly — not accessible to JS
+                                fullName: me.fullName ?? me.username,
+                                email: me.email,
+                                mobileNo: me.mobileNo,
+                                mustChangePassword: me.mustChangePassword ?? false
+                            };
+                            this._currentUser.set(user);
+                            sessionStorage.setItem('user_session', JSON.stringify(this.toSessionUser(user)));
+                            this.resetTimer();
+                        }
+                        this._authChecked.set(true);
+                    });
+            });
         }
     }
 
