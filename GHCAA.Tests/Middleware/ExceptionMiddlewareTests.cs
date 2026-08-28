@@ -14,13 +14,13 @@ namespace GHCAA.Tests.Middleware
     [TestFixture]
     public class ExceptionMiddlewareTests
     {
-        private static async Task<(HttpContext Context, string Body, string LoggedMessage)> InvokeAsync(
+        private static async Task<(HttpContext Context, string Body, string? LoggedMessage)> InvokeAsync(
             string environmentName, Exception exceptionToThrow)
         {
             var envMock = new Mock<IHostEnvironment>();
             envMock.Setup(e => e.EnvironmentName).Returns(environmentName);
 
-            string loggedMessage = null;
+            string? loggedMessage = null;
             var loggerMock = new Mock<ILogger<ExceptionMiddleware>>();
             loggerMock
                 .Setup(l => l.Log(
@@ -28,13 +28,13 @@ namespace GHCAA.Tests.Middleware
                     It.IsAny<EventId>(),
                     It.IsAny<It.IsAnyType>(),
                     It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception, string>>()))
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()))
                 .Callback(new InvocationAction(invocation =>
                 {
                     var state = invocation.Arguments[2];
                     var formatter = invocation.Arguments[4];
-                    var invokeMethod = formatter.GetType().GetMethod("Invoke");
-                    loggedMessage = (string)invokeMethod.Invoke(formatter, new[] { state, invocation.Arguments[3] });
+                    var invokeMethod = formatter.GetType().GetMethod("Invoke")!;
+                    loggedMessage = (string?)invokeMethod.Invoke(formatter, new[] { state, invocation.Arguments[3] });
                 }));
 
             var middleware = new ExceptionMiddleware(
@@ -57,7 +57,7 @@ namespace GHCAA.Tests.Middleware
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
                 exceptionToThrow,
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.Once);
 
             return (context, body, loggedMessage);

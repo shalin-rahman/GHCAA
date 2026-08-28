@@ -18,9 +18,9 @@
 
 **Author.** Md Habibur Rahman, Roll 220, 7th Batch, Evening Master's in Information Technology (EMIT)
 
-**Supervisor.** *[name, designation — to be completed]*
+**Supervisor.** Dr. Kazi Muheymin-Us-Sakib, Professor, Institute of Information Technology, University of Dhaka
 
-**Department and institution.** Institute of Information Technology (IIT), University of Dhaka, Dhaka, Bangladesh
+**Department and institution.** Executive Masters in Information and Technology Program, Batch-7, Institute of Information Technology (IIT), University of Dhaka, Dhaka, Bangladesh
 
 **Submitted.** *[month, year of submission]*
 

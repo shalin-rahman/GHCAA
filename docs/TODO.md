@@ -1529,11 +1529,42 @@ asserts the generic message and that the raw text is absent).
 naming, call-site updates) with regression risk disproportionate to a naming/debugging-clarity issue
 — worth doing deliberately, not as a drive-by.
 
-44.17 [TODO] Not fixed — the server-side `OutputCacheMiddleware` caches the SPA-shell fallback
-response independently of the 41.10/44.1 `Cache-Control` headers (observed in a live log). Not
-currently causing an incident since a Render redeploy restarts the container and clears the cache,
-but worth an explicit exclusion policy (e.g. `.CacheOutput(policy => policy.NoCache())` on the
-fallback route) at some point so the two caching layers don't diverge.
+44.17 [SUPERSEDED by 44.20] The `OutputCacheMiddleware`/compression-mismatch theory below turned out
+to be wrong — see 44.20 for the real cause and fix of the live outage this was originally guessing
+at. `OutputCacheMiddleware` does still cache the SPA-shell fallback response independently of the
+41.10/44.1 `Cache-Control` headers, and an explicit `.CacheOutput(policy => policy.NoCache())`
+exclusion on that route remains a reasonable follow-up, but it was never the cause of any observed
+404/`NS_ERROR_CORRUPTED_CONTENT` incident.
+
+44.20 [DONE] **Live preprod outage 2026-08-28: every static asset (main-*.js, chunk-*.js,
+styles-*.css, /assets/*, /api/uploads/*) 404'd in production — including index.html itself when
+requested directly — while `GET /` still served fine.** Root cause: `f47d066`'s `MapFallback` change
+from the parameterless overload (which uses an implicit `:nonfile` route constraint) to an explicit
+`"/{**path}"` pattern with NO constraint, to fix a separate "missing upload returns 401 not 404"
+problem. Consequence: ASP.NET Core's endpoint routing matches routes (including this catch-all)
+*before* `UseStaticFiles` gets a turn, and `StaticFileMiddleware` unconditionally backs off once
+`context.GetEndpoint()` is non-null — confirmed via `Microsoft.AspNetCore.StaticFiles` debug logging:
+`"Static files was skipped as the request already matched an endpoint."` So literally every request
+matched the fallback route first and got swallowed by its "file-like path → 404" heuristic; static
+files middleware never got to serve anything. Reproduced locally end-to-end (real `dotnet publish`
+output + real Angular `preprod` build, run with `ASPNETCORE_ENVIRONMENT=Production`) before touching
+any code — first suspected (wrongly) an `OutputCache`/`ResponseCompression` `Accept-Encoding`
+mismatch (see 44.17), then a Render build-cache staleness issue (ruled out: a full "Clear build
+cache & deploy" rebuilt everything from scratch and the bug persisted identically), before isolating
+the actual mechanism via `IWebHostEnvironment.WebRootFileProvider` debug output (file correctly
+found) and `Microsoft.AspNetCore.Routing`/`StaticFiles` debug logs (endpoint matched first, static
+files middleware skipped). **Fix** (`GHCAA.API/Program.cs`): restored `:nonfile` on the fallback
+route (`"/{**path:nonfile}"`), and moved the "missing file-like path → 404 instead of a misleading
+401" logic out of the routed endpoint into plain `app.Use(...)` middleware (scoped to `/api/uploads`
+and non-`/api` paths) positioned right after both `UseStaticFiles` blocks — plain middleware executes
+in registration order and never participates in endpoint-routing precedence, so it can't shadow real
+static files the way a routed catch-all can. Verified locally: real static files 200, missing static
+file 404, missing upload 404 (not 401), unknown `/api` route 404, SPA deep link still 200. Added a
+`WebApplicationFactory<Program>`-based regression suite,
+`GHCAA.Tests/Integration/SpaStaticFileFallbackTests.cs` (7 tests, boots the real pipeline against a
+throwaway wwwroot), plus `[assembly: InternalsVisibleTo("GHCAA.Tests")]` on `GHCAA.API.csproj` and the
+`Microsoft.AspNetCore.Mvc.Testing` package on `GHCAA.Tests.csproj` to make that possible. See
+[[gotcha_mapfallback_nonfile_routing_precedence]].
 
 44.18 [TODO] Not fixed — pre-existing, not caused by this session: local seed data has `superadmin`
 restoring a session with `role: "Member"` (not `SuperAdmin`), so `/admin/dashboard` redirects to

@@ -388,6 +388,38 @@ public class EventServiceTests : TestBase
     }
 
     [Test]
+    public async Task RegisterForEventAsync_ShouldNotThrow_AndShouldLogWarning_WhenParticipationEmailFails()
+    {
+        // fc06894 hardened this path: a broken mail send (bad SMTP config, template error) used to
+        // be silently swallowed. Registration must still succeed, but the failure now goes through
+        // ILogger<EventService> instead of vanishing entirely.
+        var member = new Member { FullName = "EVT4", Email = "e4@t.com", NID = "9999", MobileNo = "9999", FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A", EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0" };
+        var ev = new AlumniEvent { Title = "Mail Fail Event", Description = "D", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddHours(2), Location = "L" };
+        _context.Members.Add(member);
+        _context.AlumniEvents.Add(ev);
+        await _context.SaveChangesAsync();
+
+        _communicationMock
+            .Setup(c => c.SendIndividualEmailAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("SMTP down"));
+
+        Func<Task> act = async () => await _service.RegisterForEventAsync(
+            new RegisterForEventDto { EventId = ev.Id, PaymentReference = "P" }, member.Id, null);
+
+        await act.Should().NotThrowAsync();
+
+        _context.EventRegistrations.Any(r => r.EventId == ev.Id && r.MemberId == member.Id).Should().BeTrue();
+
+        _loggerMock.Verify(l => l.Log(
+            LogLevel.Error,
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((v, t) => true),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    [Test]
     public async Task CheckInParticipantAsync_ShouldFail_WhenNotApproved()
     {
         // 29A.5: a Pending (or Rejected/Waitlisted) registration must not be able to check in

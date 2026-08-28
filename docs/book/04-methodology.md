@@ -1,0 +1,390 @@
+# PART II — METHOD AND DESIGN
+
+# Chapter 4 — Research Methodology
+
+This chapter does two things a conventional methodology chapter often does not. It states the
+method, and it commits in advance to what will count as success, so that Chapter 12 has no room to
+choose its evidence after the fact. Everything measured later in this document is measured against
+a criterion fixed here.
+
+## 4.1 Research Paradigm and Philosophical Position
+
+The work sits in the pragmatist tradition rather than the positivist or interpretivist ones. The
+question that drove it was not "what is universally true of alumni platforms" but "what artefact,
+built and evaluated in this setting, resolves the problem stated in §1.3, and what does building it
+teach". Pragmatism treats an idea's worth by what it lets you do, which is the right test for a
+piece of software: a requirement, an architectural choice or a business rule is warranted here if it
+produces a working, checkable consequence, not because it follows from a prior theory of alumni
+engagement.
+
+This has a direct consequence for how claims in this dissertation are read. A statement such as "the
+manual payment path is the correct design for this institution" is not offered as a general
+proposition about payment systems. It is offered as a proposition that held, for this Association,
+under the constraints of §1.6, and that is defended by the evidence Chapter 12 assembles. Where the
+literature review of Chapter 2 disagrees with a choice made here, §12.9 says so rather than quietly
+picking a side.
+
+The researcher and the builder are the same person, which pragmatism does not treat as a defect to
+apologise for but as a fact to disclose and manage. §4.10 and §12.11 return to what that dual role
+costs the evaluation.
+
+## 4.2 Design Science Research as the Governing Method
+
+Design science research treats the artefact itself as the unit of contribution: a design science
+study must produce something built, not only something argued, and must evaluate what was built
+against stated criteria [4]. Hevner et al. organise this around three cycles that must all close before
+the work is complete [4].
+
+The **relevance cycle** connects the environment, meaning the Association, its constitution and its
+current practice, to the research. It supplies the requirements of Chapter 3 and receives the
+artefact back for field testing; the formal technical review sessions of 3 and 29 July 2026, recorded
+in §3.12 with an officer of the Association acting as domain reviewer, are this cycle closing partway
+through the project rather than only at the end.
+
+The **rigour cycle** connects the research to the existing knowledge base: the architecture,
+requirements-engineering, security and governance literature surveyed in Chapter 2, and the standards
+listed in the front matter. Every architectural and design choice in Chapter 6 is checked against this
+literature before it is treated as settled, and §6.2 records where the literature's default advice
+was rejected and why.
+
+The **design cycle** is the inner loop of building and evaluating, repeated across the increments
+Chapter 7 reports and gated, in every increment, by the verification discipline described in §4.4.
+This is the cycle that ran most often. It is also the cycle for which the repository itself is the
+clearest evidence, since every one of the two hundred and three commits between 9 February and 28
+August 2026 is a turn of it.
+
+## 4.3 Mapping Design Science Activities to the Work Performed
+
+Peffers et al. resolve the design cycle into six activities, and the table below states, for each
+one, what was actually done and where it is reported [5]. The sixth activity, communication, is this
+document.
+
+| DSR activity | What was done | Evidence and chapter |
+| --- | --- | --- |
+| Problem identification and motivation | Observation of the paper-based application, cash-and-ledger collection and Facebook-circulated constitution described in §1.2 | §1.2, §1.3 |
+| Definition of objectives for a solution | The eight objectives of §1.5, each traced to a research question | §1.5 |
+| Design and development | Forty-six numbered work areas recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-seven API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
+| Demonstration | The artefact running against a seeded database, exercised in the formal technical review sessions of §3.12 and deployed to the pre-production environment of Chapter 10 | §3.12, Ch. 10 |
+| Evaluation | Executed against the plan declared in §4.5 | Ch. 8, Ch. 12 |
+| Communication | This dissertation, and the documentation corpus in `docs/` that a successor maintainer would read first | Whole document |
+
+The "design and development" row understates nothing by omission and nothing by exaggeration: the
+forty-six areas are `docs/TODO.md`'s own numbering, several of them opened explicitly "raised by
+user" on a dated request, which is the clearest documentary evidence available that the relevance
+cycle kept running throughout construction rather than only at the requirements stage.
+
+## 4.4 Software Process Model and its Justification
+
+Three conventional alternatives were considered and rejected, each for a reason specific to this
+project's constraints rather than as a general criticism of the alternative.
+
+**Waterfall** requires a requirements specification to be frozen before design begins. Section 3.12
+shows that the specification itself changed on formal technical review, after code already existed
+for the flows concerned; a waterfall commitment would have forced a choice between reopening a closed
+phase or shipping a specification known to be wrong. Given a single maintainer working unpaid and
+irregular hours, a long single-pass cycle also carries a schedule risk waterfall does not price
+well: any interruption of months, which the maintainer's other obligations made a real possibility,
+would have left no working system at all.
+
+**Spiral development** [Boehm's risk-driven prototyping, 31] fits a setting with the analytic capacity
+to run a formal risk assessment before each cycle. That apparatus is disproportionate to a
+single-developer project; the risk identification that spiral development would have scheduled as a
+distinct activity happened here as an ordinary part of reading the constitution and testing the
+software, and is reported honestly as such in §4.8 rather than dressed up as a formal spiral.
+
+**Named agile methods** such as Scrum presuppose a team, and most of their machinery, being sprint
+ceremonies, a product owner distinct from the developer, and story-point estimation for the purpose
+of team capacity planning, has no referent when the team is one person who is also the sole
+stakeholder for every technical decision. What survived from the agile literature was the principle
+behind it rather than its ceremonies: working software after every increment, and requirements that
+change in response to what the working software reveals [53], [54].
+
+What was actually followed is incremental and evolutionary delivery in the sense Lehman describes
+software's continuing growth and increasing complexity as inherent to a live system rather than as a
+process failure [55]: forty-six work areas, opened as problems were found or requested, each closed
+against a gate rather than against a date. The gate is stated plainly in `docs/TODO.md`'s own
+verification standard: "no task marked done until its test passes", and the phased remediation plans
+in `docs/PLAN.md` end each phase with an explicit gate line, for example `dotnet test` (API),
+`flutter analyze` and `ng build` all green before Phase 1 of the July 2026 review remediation could be
+considered closed. That is a borrowed piece of the V-model, verification tied to the unit of work
+that produced the thing being verified, grafted onto an otherwise incremental lifecycle. Figure 4.4
+draws the loop as it actually ran.
+
+The rest of the project's software-engineering standards, being architectural conformance, coding
+convention and definition of done, are stated once in §3.7 and enforced at every increment rather
+than only at a phase boundary; this is what the incremental choice cost in process overhead and what
+it bought in resilience to interruption.
+
+## 4.5 Evaluation Strategy
+
+This is the point of the chapter. Everything below is a commitment made before any measurement in
+Chapters 8 and 12 was taken, so that a result reported later can be checked against what was promised
+here rather than against a criterion chosen to fit the result.
+
+### 4.5.1 Functional evaluation
+
+Requirement coverage is read off the traceability matrix established in §3.9 as Table 3.4. A
+requirement of priority Must is scored as covered only if it traces to a passing automated test; a
+requirement traced to code with no test is reported as uncovered, not as covered by inspection. The
+matrix is closed, meaning every requirement given a final verdict, in §12.2.
+
+### 4.5.2 Quality evaluation
+
+Quality is read against ISO/IEC 25010's characteristics [6], each evidenced by a static product
+metric or a test result defined in §4.6, computed over the delivered solution and reported per layer
+rather than as a single blended figure, because a blended figure would hide exactly the
+domain-versus-presentation distinction the risk-weighted coverage targets of §4.6 depend on.
+
+### 4.5.3 Performance evaluation
+
+The workload model is the one implied by the quality-attribute scenarios QAS-01 and QAS-02 of §3.5:
+concurrent reads against the directory and event listings, and a cold page load on a mid-range
+handset profile. Measurement is taken against the pre-production deployment described in Chapter 10,
+which runs the same container image as production on a smaller instance tier; the instrument used to
+generate concurrent load, and the results, are recorded in §8.11, since naming a tool here before it
+has been run would commit this section to a choice that has not yet been tested for suitability.
+
+### 4.5.4 Security evaluation
+
+Two instruments, run together rather than as alternatives. The threat model of Chapter 9, built by
+STRIDE walk-through of the data-flow diagram in Figure 9.1, gives coverage of *attack classes*. The
+OWASP ASVS level 2 checklist [7] gives coverage of *control families*. Section 9.13 reports both, and
+a control is scored conformant only where a specific code location or configuration enforces it, in
+the same style as the design-principle evidence table of §6.11.
+
+### 4.5.5 Usability evaluation
+
+Three instruments: task-based testing of the registration and payment-declaration flows against the
+completion criterion of NFR-U2, the System Usability Scale against the published benchmark of 68
+[33] per NFR-U3, and a heuristic walkthrough against Nielsen's heuristics [35] for the flows the
+task-based test does not reach. The instruments themselves, being the task script and the SUS
+questionnaire, are reproduced in Appendix J so that the criterion can be checked against what
+participants actually saw.
+
+### 4.5.6 Expert and stakeholder evaluation
+
+This is not a separate activity invented for the evaluation chapter; it is the formal technical
+review already reported in §3.12, and its findings log at `docs/BUSINESS_FINDINGS.md` is read a
+second time in §12.7 for what it says about the delivered system rather than about the specification.
+The reviewer's role, an officer of the Association acting as domain reviewer rather than as a
+software professional, is unchanged between the two readings.
+
+## 4.6 Metrics Definition
+
+Each metric is given here with its formula, the tool that computes it and the threshold that will be
+compared against it, so that §8.14 and Chapter 12 apply rather than choose these numbers.
+
+### Table 4.2 — Metric definitions
+
+| Metric | Formula / method | Tool | Target |
+| --- | --- | --- | --- |
+| Statement and branch coverage | Lines and branches exercised ÷ total, per test run | `coverlet.collector` 6.0.2 via `dotnet test`, per NUnit 4.2.2 project | Risk-weighted by module criticality; see §8.14.5 |
+| Mutation score | Mutants killed ÷ mutants generated | Recorded where run; §8.14.5 states where it was not | Corrective measure against coverage alone |
+| Cyclomatic complexity | McCabe's independent-path count per method [57] | Static analysis over the solution | Flagged above 10 per method |
+| Coupling between objects (CBO), afferent/efferent coupling, instability | Chidamber and Kemerer's suite [56]; instability = efferent ÷ (afferent + efferent) | Static analysis over the solution | Plotted against Martin's main sequence, §8.14.3 |
+| Maintainability index | Oman and Hagemeister's composite of volume, complexity and comment ratio [58] | Static analysis over the solution | No fixed target; trended across the increments recorded in `docs/TODO.md` |
+| Response latency | Wall-clock time from request to first byte, 95th percentile | Concurrent-request harness against pre-production; instrument named in §8.11 | Per NFR-P1, NFR-P2, NFR-P5 |
+| System Usability Scale | Ten-item questionnaire, Brooke's scoring [33] | Paper or digital form, Appendix J | ≥ 68 |
+| ASVS conformance | Control satisfied / not satisfied / not applicable, by control family | Manual checklist against ASVS 4.0.3 [7] | Full level 2 coverage of applicable families |
+| Requirement coverage | Requirements traced to a passing test ÷ total Must requirements | Traceability matrix, Table 3.4 | 100% of Must |
+
+## 4.7 Data Collection and Analysis Procedures
+
+Four kinds of data are collected, and each has a different analysis treatment. Automated test results
+and coverage reports are quantitative and are aggregated directly; no sampling is involved since the
+population is the whole test run. Static-analysis output, being complexity and coupling figures, is
+quantitative and is analysed by threshold and by distribution, per §8.14.2 and §8.14.3, rather than by
+a single mean that would hide the worst offenders the maintainability argument actually depends on.
+Formal-technical-review findings, held in `docs/BUSINESS_FINDINGS.md`, are qualitative records
+classified by module, layer and severity as the log itself already tags them; §3.12 and §12.7 read
+that classification rather than re-coding it, so that the analysis is traceable to the artefact rather
+than to a scheme invented after the fact. Usability data, being task completion, time on task and SUS
+responses, is quantitative on a small purposive sample and is reported descriptively, with the sample
+size stated alongside every figure so that no percentage is read as more precise than the sample
+supports.
+
+## 4.8 Risk Management: the RMMM Plan
+
+Risk was not managed through a separate formal apparatus running alongside development. It was
+managed through the same mechanism that managed everything else: a numbered, dated work item in
+`docs/TODO.md`, closed against a test. That is disclosed here rather than dressed up, and the risk
+table below is built from the actual severity classifications the project used at the time, not
+reconstructed after the fact to look tidier than the record.
+
+### Table 4.3 — RMMM table
+
+| Risk | Category | Probability | Impact | Mitigation | Monitoring signal | Outcome |
+| --- | --- | --- | --- | --- | --- | --- |
+| Single maintainer unavailable for an extended period | Project | Medium | High | Documentation corpus (`project_map.md`, `TODO.md`, `architecture_data_flow.md`) written to let a successor start without the author present | Elapsed time since last commit | Open; mitigated, not eliminated |
+| Payment amount not verified against the originating record before crediting membership (TODO 29-B.2) | Technical, security | Medium | High | Removed the `amount > 0` short-circuit; callback amount always compared to the originating `PaymentHistory` amount | Payment and approval integration tests | Closed, Phase 2 of the July 2026 remediation |
+| Administrative action attributed to a hardcoded admin identifier rather than the acting user (TODO 29-F.1) | Technical, audit integrity | Medium | High | Acting admin read from the JWT `MemberId` claim on every approval and rejection path | Code review; audit-log spot check | Closed, Phase 2 |
+| Event capacity exceeded under concurrent registration (TODO 29-A.4) | Technical | Medium | Medium | Occupying-status count corrected to include all statuses that hold a place, cap enforced even when waitlisting is off, insert guarded against concurrent overfill | Concurrent-registration test | Closed, Phase 1 |
+| Date format inconsistency between `dd-MM-yyyy` display and ISO-8601 wire format risking silent data corruption across clients (TODO Area 23, 29-F.3) | Technical | High (had already caused defects) | High | ISO-8601 fixed as the canonical wire format; `DateFormatConverter` and client parsers reconciled to it | `DateFormatConverterTests.cs`, 20 pinning tests | Closed and test-pinned, 2026-08-22 |
+| `Database.EnsureCreated()` no-op on a non-empty database leaving seeded configuration and constitution data stale after a schema change | Technical | High | Medium | `ConstitutionSeeder.SyncAsync` runs at boot, inserts unknown versions, refreshes changed text in place, supersedes rather than deletes | Boot log; constitution version shown in the public reader | Closed; mechanism is now load-bearing, §6.5.6 |
+| Manual payment verification backlog exceeding officer capacity as membership grows | Operational | Medium | Medium | Administrative queue ordered by age with a thirty-day flag (FR-23, DC-08); workload quantified rather than assumed away | Age of oldest unverified item in the queue | Open; monitored, not solved, §12.6 |
+| Volunteer officer turnover losing institutional knowledge of platform operation | Organisational | Medium | Medium | Administration console designed to be operable without developer involvement (NFR-M4); documentation corpus | Handover interval, three-year committee term (DC-09) | Open; structural mitigation only |
+
+Two things about this table are worth stating plainly. First, every closed row closed because a test
+was written that would fail if the defect recurred, which is the definition-of-done requirement of
+§3.7 applied to risk rather than to features. Second, the three rows left open are left open
+honestly: none of them has a technical fix waiting to be applied, and each is a property of the
+Association's size and volunteer structure rather than of the software.
+
+## 4.9 Research Ethics
+
+Two distinct ethical questions arise in this project, and they are kept separate rather than
+answered by one paragraph that quietly covers both.
+
+The first concerns the human participants of the elicitation study reported in §3.1. Their approval
+reference, consent procedure and the safeguards applied to their material are recorded in §3.1.3 as
+an unresolved placeholder, and this chapter does not repeat or attempt to answer it; there is exactly
+one place in the document where that gap is recorded, so that it can be found and closed once.
+
+The second concerns the personal data of the Association's real members, which the platform holds in
+production and which the maintainer necessarily saw during development and testing. That question is
+answered, not deferred, in the front matter's Ethics Statement and Data-Protection Declaration and
+expanded in §9.11: the principles applied are purpose limitation, minimisation, default
+non-disclosure and a stated retention position, applied because Bangladesh's data-protection statute
+was in draft rather than in force at the time of writing, and because no third-party ethics body
+governs a single volunteer's handling of his own association's data. No production member data
+appears anywhere in this dissertation; every figure, screenshot and test fixture quoted from this
+point forward is synthesised.
+
+## 4.10 Limitations of the Chosen Method
+
+The dual role of researcher and sole developer is the limitation that most affects how the rest of
+this document should be read. Every finding in Chapter 8, and every judgement in §12.9 about whether
+this project's answer to RQ3 is the right one, was reached by the same person who wrote the code
+being judged. The formal technical review of §3.12 is the one point at which an independent party,
+an officer of the Association, checked the work against something other than the author's own
+standard, and its five specification defects and the pattern among them, that a walkthrough catches
+what a re-reading does not, are reported for that reason rather than suppressed as evidence the
+author's judgement was imperfect.
+
+The incremental process, chosen for the reasons of §4.4, also means the requirement set of Chapter 3
+and the architecture of Chapter 6 were not fixed before construction began in the sense a waterfall
+study would fix them; the version presented in this dissertation is the state reached by 28 August
+2026, and §11.7 records the changes of scope that occurred on the way there rather than presenting
+the final state as though it had been the plan from the start.
+
+Finally, this is a single-case design science study in Runeson and Höst's sense [10]. The evaluation
+plan of §4.5 is thorough for this case, but generalising its results to another association requires
+the argument of §12.13 about what transfers, not an assumption that it transfers automatically.
+
+## 4.11 Summary
+
+The method is design science research, run as Hevner's three cycles and Peffers' six activities,
+delivered through forty-six incrementally opened work areas gated by an automated test rather than by
+a calendar date. The evaluation plan is fixed in this chapter across six dimensions, each with a
+named metric, tool and threshold, before Chapter 8 measures anything. Risk was managed through the
+same gated work-item mechanism as everything else, and the RMMM table of §4.8 is built from the
+project's own severity record rather than reconstructed for presentation. Two ethical questions are
+kept distinct, one of them still open and recorded as such. Chapter 5 now turns from method to the
+system itself, modelling its behaviour and extracting the business rules the constitution imposes.
+
+---
+
+## Figures and Tables
+
+### Figure 4.1 — Design Science Research framework with this project's instantiation labelled
+
+```mermaid
+flowchart LR
+    subgraph ENV["Environment"]
+      E1[Govt. Haraganga College<br/>Alumni Association]
+      E2[Constitution v4.2<br/>and election documents]
+      E3[Manual practice:<br/>paper, cash, ledger]
+    end
+    subgraph DSR["Design Science Research"]
+      direction TB
+      B[Build:<br/>Ch. 5-7 artefact]
+      E[Evaluate:<br/>Ch. 8, 12]
+      B --> E --> B
+    end
+    subgraph KB["Knowledge base"]
+      K1[Architecture and<br/>requirements literature, Ch. 2]
+      K2[Standards: ISO/IEC 25010,<br/>29148, 42010, ASVS]
+    end
+    ENV -->|Relevance cycle:<br/>requirements, field test| DSR
+    DSR -->|Relevance cycle:<br/>artefact, findings| ENV
+    KB -->|Rigour cycle:<br/>theories, methods| DSR
+    DSR -->|Rigour cycle:<br/>additions to knowledge, §13.2| KB
+```
+
+### Figure 4.2 — Design Science process model as executed
+
+```mermaid
+flowchart LR
+    A1[1. Identify problem<br/>§1.2, §1.3] --> A2[2. Define objectives<br/>§1.5]
+    A2 --> A3[3. Design and develop<br/>Chs. 5-7]
+    A3 --> A4[4. Demonstrate<br/>§3.12, Ch. 10]
+    A4 --> A5[5. Evaluate<br/>§4.5, Chs. 8, 12]
+    A5 --> A6[6. Communicate<br/>this dissertation]
+    A5 -.->|finding changes<br/>a requirement or design| A2
+    A4 -.->|review finds a<br/>specification defect, §3.12| A2
+```
+
+### Figure 4.3 — Research design overview: phases, inputs, outputs, evaluation points
+
+```mermaid
+flowchart TB
+    subgraph P1["Phase: Problem and context"]
+      I1[(Constitution, election docs,<br/>interviews, observation)] --> O1[Requirements, Ch. 3]
+    end
+    subgraph P2["Phase: Method and design"]
+      O1 --> O2[Architecture and models,<br/>Ch. 5-6]
+    end
+    subgraph P3["Phase: Construction"]
+      O2 --> O3[Implemented artefact,<br/>Ch. 7]
+      O3 --> V1{{Gate: automated<br/>tests pass}}
+      V1 -->|no| O3
+    end
+    subgraph P4["Phase: Evaluation"]
+      V1 -->|yes| O4[Verification and validation,<br/>Ch. 8]
+      O4 --> O5[Evaluation against RQs,<br/>Ch. 12]
+    end
+```
+
+### Figure 4.4 — Process model diagram of the adopted incremental lifecycle
+
+```mermaid
+flowchart LR
+    S([Work item opened:<br/>defect, request or finding]) --> D[Design the change<br/>against existing architecture]
+    D --> C[Construct and<br/>self-test]
+    C --> G{{Definition of done:<br/>§3.7 checklist}}
+    G -->|fails| C
+    G -->|passes| M[Merge, update<br/>project_map.md]
+    M --> R[Deploy to<br/>pre-production, Ch. 10]
+    R --> N([Next work item])
+    N -.-> S
+```
+
+### Figure 4.5 — Risk exposure matrix
+
+```mermaid
+quadrantChart
+    title Risk probability against impact, Table 4.3
+    x-axis Low Probability --> High Probability
+    y-axis Low Impact --> High Impact
+    quadrant-1 Monitor closely
+    quadrant-2 Act first
+    quadrant-3 Accept
+    quadrant-4 Act, low urgency
+    Maintainer unavailability: [0.45, 0.85]
+    Payment amount bypass: [0.45, 0.85]
+    Admin attribution: [0.45, 0.85]
+    Event capacity race: [0.45, 0.55]
+    Date format drift: [0.85, 0.85]
+    EnsureCreated seed drift: [0.85, 0.55]
+    Verification backlog: [0.45, 0.55]
+    Officer turnover: [0.45, 0.55]
+```
+
+### Table 4.1 — Evaluation plan
+
+| Research question | Criterion | Metric | Instrument | Threshold |
+| --- | --- | --- | --- | --- |
+| RQ1 | Requirement set fit for the domain | Requirement coverage; FTR defect count | Traceability matrix, Table 3.4; findings log | 100% of Must traced; FTR defects resolved or recorded |
+| RQ2 | Architecture satisfies quality-attribute scenarios at bounded cost | Coupling, cohesion, maintainability index; operating cost | Static analysis, §8.14; cost model, §10.10 | Thresholds of Table 4.2; cost within Association's stated means |
+| RQ3 | Governance rules encoded without loss of procedural legitimacy | DC-to-code trace completeness; ASVS conformance on governance endpoints | Table 3.4 DC column; §9.13 | Every DC of priority M traced and enforced |
+| RQ4 | Measured quality against ISO/IEC 25010 | All metrics of Table 4.2 | As listed | As listed |

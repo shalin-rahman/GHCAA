@@ -31,6 +31,9 @@ CHAPTERS = [
     "01-introduction.md",
     "02-literature-review.md",
     "03-requirements.md",
+    "04-methodology.md",
+    "05-system-analysis.md",
+    "06-architecture.md",
     "99-references.md",
 ]
 

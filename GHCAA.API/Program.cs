@@ -239,6 +239,35 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/api/uploads"
 });
 
+// A GET/HEAD for a file-like path (has an extension) that neither UseStaticFiles block above
+// served reaches here as a genuinely missing asset (e.g. a deleted upload) — return a plain 404
+// instead of letting it fall through unmatched to the global RequireAuthenticatedUser
+// FallbackPolicy, which would otherwise challenge it with a misleading 401.
+//
+// This MUST be plain middleware, not a MapFallback/routed endpoint. Endpoint routing matches
+// routes before StaticFileMiddleware gets a turn, and StaticFileMiddleware unconditionally skips
+// serving whenever context.GetEndpoint() is already non-null — so a routed catch-all matching
+// file-like paths (as this used to be, via MapFallback("/{**path}") with no :nonfile constraint)
+// silently disables static file serving for every asset, not just missing ones. Confirmed via
+// Microsoft.AspNetCore.StaticFiles debug logging: "Static files was skipped as the request
+// already matched an endpoint." Keep this as app.Use(...) so it never competes with routing.
+app.Use(async (ctx, next) =>
+{
+    var path = ctx.Request.Path;
+    var lastSegment = path.Value?.Split('/').LastOrDefault() ?? "";
+    var isFileLike = lastSegment.Contains('.');
+    // Scoped to /api/uploads specifically (not all of /api) so this never shadows a real
+    // controller route whose path happens to contain a dot (e.g. an email address segment).
+    var isMissingUpload = path.StartsWithSegments("/api/uploads") && isFileLike;
+    var isMissingNonApiAsset = !path.StartsWithSegments("/api") && isFileLike;
+    if (isMissingUpload || isMissingNonApiAsset)
+    {
+        ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+        return;
+    }
+    await next(ctx);
+});
+
 // 29B.4: Removed QueryStringTokenMiddleware. Accepting the JWT via ?token=/?access_token=
 // leaked it into proxy/access logs and the browser Referer header. No client relies on it —
 // secure files are fetched with the Authorization header — so the query-token path was pure
@@ -260,25 +289,14 @@ app.MapHub<GHCAA.API.Hubs.NotificationHub>("/api/hubs/notifications");
 var spaIndexPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "index.html");
 if (File.Exists(spaIndexPath))
 {
-    // Explicit "/{**path}" (rather than the parameterless overload's implicit :nonfile
-    // pattern) so this also catches missing static assets (paths with a file extension,
-    // e.g. a deleted upload). Without it, those requests match no endpoint at all and the
-    // global RequireAuthenticatedUser FallbackPolicy challenges them with a misleading 401
-    // instead of a plain 404.
-    app.MapFallback("/{**path}", async ctx =>
+    // The ":nonfile" constraint is required — it excludes file-like paths (has an extension)
+    // from matching this route at all, so real static assets stay fully handled by
+    // UseStaticFiles above instead of being shadowed by this catch-all. See the app.Use(...)
+    // 404 middleware above for how a missing file-like path still gets a plain 404.
+    app.MapFallback("/{**path:nonfile}", async ctx =>
     {
         // Keep unknown /api requests as API 404s — never swallow them with index.html.
         if (ctx.Request.Path.StartsWithSegments("/api"))
-        {
-            ctx.Response.StatusCode = StatusCodes.Status404NotFound;
-            return;
-        }
-
-        // UseStaticFiles already had first crack at this request; reaching here with a
-        // file-like path (has an extension) means the asset is missing on disk — 404, not
-        // the SPA shell.
-        var lastSegment = ctx.Request.Path.Value?.Split('/').LastOrDefault() ?? "";
-        if (lastSegment.Contains('.'))
         {
             ctx.Response.StatusCode = StatusCodes.Status404NotFound;
             return;
