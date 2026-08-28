@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -38,7 +39,10 @@ class GatewayService {
       });
       return PaymentInitiationResponse.fromJson(response.data);
     } catch (e) {
-      return PaymentInitiationResponse(success: false, message: e.toString());
+      // e.toString() on a DioException includes the full request URI and can include response
+      // body detail — that was rendered straight into a user-facing SnackBar (events_screen.dart).
+      debugPrint('GatewayService.initiate failed: $e');
+      return PaymentInitiationResponse(success: false, message: 'Could not start the payment. Please try again.');
     }
   }
 }

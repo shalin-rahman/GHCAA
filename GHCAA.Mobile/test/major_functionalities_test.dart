@@ -222,7 +222,10 @@ void main() {
 
         expect(response.success, isFalse);
         expect(response.gatewayUrl, isNull);
-        expect(response.message, contains('Connection Reset'));
+        // The raw exception text (which can include the request URI/response body) is no longer
+        // surfaced to the user-facing message — only logged via debugPrint.
+        expect(response.message, isNot(contains('Connection Reset')));
+        expect(response.message, 'Could not start the payment. Please try again.');
       });
     });
   });

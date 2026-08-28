@@ -1364,5 +1364,239 @@ pre-existing stale golden pixel-compares in `comprehensive_visual_freeze_test.da
 43.4 [TODO] Live/manual verification: trigger a genuine unhandled error in each app (backend 500,
 Angular runtime error, Flutter uncaught exception) against a running instance to confirm the new
 handlers actually fire and log as expected — not yet done this session.
-**Not yet committed or deployed** — all changes remain unstaged working-tree edits pending explicit
-user go-ahead.
+Committed as `fc06894`.
+
+---
+
+# Area 44 — Full-app review of the last 2 days' fixes (raised by user 2026-08-28: "review entire
+application. make sure all issues are taken cared")
+
+Three parallel code-reviewer passes (backend, web, mobile) audited every fix from Areas 40–43 plus
+41.10 for correctness, not just superficial patching. Real, verified bugs were found in all three
+layers — several of today's own "fixes" were themselves incomplete. All findings below were fixed
+this session (not merely logged) and re-verified: `dotnet test` 382/382, `npx vitest run` 66 files /
+317 tests, `npx tsc --noEmit` clean, `ng build --configuration development` clean, `flutter analyze`
+clean, `flutter test --exclude-tags=golden` 28/28.
+
+44.1 [DONE] Backend — `Program.cs`'s `MapFallback` handler (the code path that serves the SPA shell
+for almost every real navigation, `/`, `/portal/...`, a refreshed deep link) never carried the
+41.10 no-cache headers — only an explicit `GET /index.html` did, via `UseStaticFiles`'
+`OnPrepareResponse`. The actual fix for the `main-*.js`/`chunk-*.js` 404 bug was inert for normal
+traffic. Added the same three headers directly in `MapFallback` before `SendFileAsync`.
+
+44.2 [DONE] Backend — `MigrationBootstrapper.SelfHealFalselyBaselinedMigrationsAsync`'s risky-shape
+check (`AddColumnOperation`/`CreateTableOperation` mixed with `InsertData`/`UpdateData`/`DeleteData`)
+could never match any current migration, because every migration converted to raw SQL in 41.9/
+[[session_migration_idempotency_validation]] materializes as a single opaque `SqlOperation`, not
+those typed ops — the whole method was dead code against exactly the migrations it exists to guard
+(`AddApprovalWorkflowToGalleryAndJobs` and friends). Extended it to also regex-extract
+`CREATE TABLE`/`ADD COLUMN` targets out of `SqlOperation.Sql` text and always verify those; also
+schema-qualified the `information_schema` probes (`table_schema = current_schema()`) and fixed the
+`SqlQueryRaw<int>` column-naming (`SELECT 1 AS "Value"`) which could otherwise throw and silently
+disable the whole bootstrapper. See [[gotcha_migrationbootstrapper_fixed_offset]].
+
+44.3 [DONE] Backend — `BaselineLegacyDatabaseAsync` only logged an aggregate baselined/applied count;
+added per-migration `LogInformation` (id + Postgres `SqlState`) since that's exactly the diagnostic
+the 2026-08-27 incident needed and didn't have.
+
+44.4 [DONE] Backend — `ForumService.DeleteTopicAsync`/`DeletePostAsync` used `FindAsync`, which
+applies `ForumTopicConfiguration`/`ForumPostConfiguration`'s global query filter
+(`IsActive && Category.IsActive` / `IsActive && Topic.IsActive`) — the same bug class as the
+`AlumniEvent` fix in 41.4, just undiscovered there: a SuperAdmin could never moderate a topic/post
+under an already-deactivated category, silently no-op'ing with an apparent-success 204. Fixed with
+`.IgnoreQueryFilters()`, matching the `AlumniEvent`/`MemberService`/`AuthService` convention.
+
+44.5 [DONE] Backend — hardening sweep on findings that don't map to a single root cause: `HealthController`
+leaked raw DB exception text (host/port/credentials) on its anonymous endpoint, and its "FileStorage"
+check never actually checked anything (fixed to test `Directory.Exists`); `ExceptionMiddleware` didn't
+guard `Response.HasStarted`, so a throw after a response started writing (mid-`SendFileAsync`, a
+streaming export) replaced the real logged error with a generic connection reset; the
+`/api/uploads` `PhysicalFileProvider` threw at startup if its root didn't exist yet — harmless today,
+fatal the day `FileStorage:BasePhysicalPath` points at a freshly-mounted empty disk (added
+`Directory.CreateDirectory`); `EventService`'s participation-email catch was fully silent with no
+`ILogger` in the class at all (added one).
+
+44.6 [DONE] Web — **critical**: the NG0200 fix (`afterNextRender` deferring `/auth/me`) turned a
+pre-existing race into a deterministic bug. `AlertService`'s constructor (present on every page via
+the header/nav) unconditionally called the `[Authorize]` `GET /api/notifications`; for any guest that
+401s, and the interceptor's `handle401` (not excluding that URL) chased it into
+`refresh() → fail → logout() → POST /api/auth/logout` (also `[Authorize]`, also not excluded) `→ 401
+→ handle401` again — an unbounded refresh/logout/redirect loop for a first-time anonymous visitor,
+complete with an "Invalid credentials" toast and a bounce to `/login`. Fixed in
+`global-http.interceptor.ts` (exclude `/api/auth/me` and `/api/auth/logout` from `handle401`) and in
+`auth.service.ts` (`X-Skip-Error-Notify` on the `/auth/me` probe) and in `alert.service.ts` (gate
+`loadNotifications()` on `authChecked()` via `effect()`, same pattern as 44.7 below).
+
+44.7 [DONE] Web — the deferred `/auth/me` restore also means `authGuard`/`adminGuard`/`superAdminGuard`
+(`auth.guard.ts`) and three components' `ngOnInit()` one-shot `isAuthenticated()` reads
+(`gallery.ts`'s "My Albums", `payment-portal.component.ts`'s saved methods, `events.ts`'s
+`loadMyRegistrations`) can run before the restore resolves — worst case, a valid member opening a
+`/portal/...` deep link in a new tab (empty per-tab `sessionStorage`) gets bounced to `/login`
+despite a valid session cookie, or a logged-in member's own data silently never loads with no retry.
+Fixed: the three guards now wait for `authChecked()` via `toObservable(...).pipe(filter(Boolean),
+take(1))` before deciding; the three components gate their load call on an `effect()` keyed to
+`authChecked()`, mirroring the existing pattern in `events.ts`'s `deepLinkEffect` (30.26). Also
+applied the same `afterNextRender` deferral to `ThemeService` (`activeSpecialTheme`, read directly in
+`public-layout.html`) for consistency, since it has the identical shape.
+
+44.8 [DONE] Web — `admin-news.ts`'s 41.2 staged-upload fix only covered the image field:
+`onImageSelect` never called `validateUploadFile` (a renamed non-image file was accepted at
+select-time and only rejected server-side, after which the whole submit aborted), and
+`onDocumentSelect` still uploaded the PDF immediately on file-select — the exact bug 41.2 fixed for
+images — so cancelling the form after picking a document orphaned it on the server. Fixed both:
+image select now validates before staging; document select now stages
+(`stagedDocumentFile`/`stagedDocumentName`) and uploads only as part of `saveNews`'s chain
+(image → document → submit), matching every other admin upload form.
+
+44.9 [DONE] Web — `GlobalErrorHandler` tested `instanceof HttpErrorResponse` before unwrapping an
+unhandled-promise-rejection wrapper, so an `HttpErrorResponse` thrown inside a promise
+(`firstValueFrom`/`toPromise()` call sites) arrived as `{rejection: HttpErrorResponse}`, missed the
+check, and got double-reported on top of the interceptor's own toast. Fixed the ordering (unwrap
+first, then check). Also removed an unused `NgZone` import.
+
+44.10 [DONE] Mobile — **major**: `FlutterError.onError`/`PlatformDispatcher.instance.onError` (added
+in 43.3) were both assigned *after* `SentryFlutter.init(...)`, silently detaching Sentry's own
+`FlutterErrorIntegration`/`OnErrorIntegration` (which install by chaining to whatever handler already
+exists at init time) — losing unhandled-vs-handled crash classification, silent-error filtering, and
+context collection, while also risking a Sentry-report flood since our handler unconditionally
+reported every frame of a persistent layout error with no `silent` check. Fixed by moving both
+assignments before `SentryFlutter.init` (chaining to the pre-existing default via a saved reference
+for `FlutterError.onError`) so Sentry's integrations wrap around them correctly.
+
+44.11 [DONE] Mobile — the 43.2 logging sweep's file list missed the three most security-relevant
+catches in the codebase: `auth_service.dart`'s `login`/`_socialLogin`/`register` all logged nothing
+before returning a generic error string. Added `debugPrint` to all three, and fixed a pre-existing
+mislabeled log (a catch around `deviceInfoProvider` printed `"AuthService.login failed"`).
+
+44.12 [DONE] Mobile — event registration bugs found outside the 43-file sweep, all pre-existing (not
+introduced this session, but surfaced by the same audit): `events_screen.dart`'s payment button
+routed every registration-required event through the SSLCommerz/DGePay sheet regardless of
+`requiresPayment`, so a free-but-registration-required event pushed a $0 gateway charge and never
+actually called `registerForEvent` — member never registered. Fixed with a `registerFreeEvent` path
+mirroring `event_details_screen.dart`'s correct branching. Separately, `event_details_screen.dart`'s
+register handler ignored `registerForEvent`'s `bool` return (the service logs-and-returns `false`
+rather than throwing on failure — 43's swallow-and-log-false convention), so a duplicate/closed/
+expired-session registration attempt displayed "Registration successful." regardless. Fixed to check
+the result. Also: `event_details_screen.dart`'s participant-count/entry-fee/"REGISTERED MEMBERS"
+block wasn't gated by `requiresRegistration` like the FAB already was (an informational-only event
+showed a permanent "No members registered yet."); `events_screen.dart`'s role check constructed a
+brand-new `FutureProvider` literal inside `build()` on every rebuild (leaking providers,
+self-perpetuating re-fetches) instead of using the existing stable `roleProvider` — fixed both; and a
+`dynamic > 0` comparison on `registrationFee` that would throw if the API ever serialized it as a
+string — fixed with `num.tryParse`.
+
+44.13 [DONE] Mobile — `file_service.dart`'s `uploadProfilePhoto`/`uploadArticleImage` silently
+returned `null` on any exception (indistinguishable from a user-cancelled picker); added `debugPrint`
+to both. `event_details_screen.dart`'s `eventDetailsProvider` similarly swallowed everything into a
+"Event not found." with no log; added one.
+
+44.14b [DONE] Live local verification: ran the API (`dotnet run --project GHCAA.API --urls http://localhost:5087`, against real local Postgres — also incidentally re-confirmed 44.2's migration fix applies `AddApprovalWorkflowToGalleryAndJobs` cleanly) and the Angular dev server (`npm start`), then drove it headlessly with Playwright (login as `superadmin`, portal/admin dashboards, gallery, events) capturing the browser console. Found two more real issues:
+- `AlertService`/`AuthService`/interceptor were still logging **three** separate error-shaped console
+  entries (browser's own network-error log, the interceptor's skip-notify `console.error`, and
+  `auth.service.ts`'s own `console.error`) for the entirely routine "guest not logged in" 401 on
+  every single anonymous page load — a side effect of 43.2's blanket "log every catch" sweep applied
+  to what is actually an expected response, not a failure. Fixed by special-casing 401 on
+  `/api/auth/me` in both `auth.service.ts`'s `catchError` and the interceptor's `handleError` to skip
+  logging entirely (the browser's own native network-tab log line for the 401 is unavoidable and
+  present on every site doing this pattern — not fixable from app code, and not a bug).
+- `proxy.conf.json`'s `/api` context lacked `"ws": true`, so local `ng serve` couldn't proxy the
+  WebSocket upgrade for `/api/hubs/chat`/`/api/hubs/notifications` (SignalR hubs live under `/api/`
+  since the BUG-002 fix; the separate `/hubs` proxy context with `ws:true` is now dead/pointing at a
+  path nothing uses). Caused an intermittent `net::ERR_CONNECTION_TIMED_OUT` console error, local-dev
+  only (production is same-origin, no proxy). Fixed by adding `"ws": true` to the `/api` context.
+- One remaining console entry (`403` on `GET /api/gallery/albums/mine` while logged in as the seeded
+  `superadmin` test account) is a pre-existing local-seed-data mismatch
+  ([[session_area33_review_triage]] already documented an admin login role/seed mismatch in the local
+  DB) — not caused by any change this session, not chased further.
+Re-verified: `npx tsc --noEmit` clean, `npx vitest run` 66 files/317 tests pass.
+
+44.15 [DONE] Mobile — closed out the remaining minor logging gaps from 44.13/reviewer finding C:
+`gateway_service.dart`'s failure message no longer leaks the raw Dio exception (request URI/response
+body) into the user-facing SnackBar in `events_screen.dart` — returns a generic message, logs the
+real error via `debugPrint`. Added `debugPrint` to every previously-silent catch in
+`support_service.dart` (both `SupportService` and the `FamilyService` it also defines — disambiguated
+in the log text, since there are 3 unrelated classes named `FamilyService` in this codebase:
+`features/family/`, `features/networking/`, and this one in `features/support/`),
+`networking/family_service.dart`, `networking_service.dart`, `lookup_service.dart`,
+`notification_service.dart`, `role_service.dart`, `governance_api.dart`, and `main.dart`'s two bare
+`catch (_) {}` blocks. `flutter analyze` clean, `flutter test --exclude-tags=golden` 28/28 (one test
+updated: `gateway_service`'s failure-wrapper test asserted the old raw-exception passthrough, now
+asserts the generic message and that the raw text is absent).
+
+44.16 [TODO] Not fixed — deliberately out of scope for a logging sweep: 3 classes are all named
+`FamilyService` (`features/family/family_service.dart`, `features/networking/family_service.dart`,
+`features/support/support_service.dart`). Renaming is a real refactor (import aliasing, provider
+naming, call-site updates) with regression risk disproportionate to a naming/debugging-clarity issue
+— worth doing deliberately, not as a drive-by.
+
+44.17 [TODO] Not fixed — the server-side `OutputCacheMiddleware` caches the SPA-shell fallback
+response independently of the 41.10/44.1 `Cache-Control` headers (observed in a live log). Not
+currently causing an incident since a Render redeploy restarts the container and clears the cache,
+but worth an explicit exclusion policy (e.g. `.CacheOutput(policy => policy.NoCache())` on the
+fallback route) at some point so the two caching layers don't diverge.
+
+44.18 [TODO] Not fixed — pre-existing, not caused by this session: local seed data has `superadmin`
+restoring a session with `role: "Member"` (not `SuperAdmin`), so `/admin/dashboard` redirects to
+`/portal/dashboard` and `GET /api/gallery/albums/mine` 403s locally under that account. Matches the
+already-documented [[session_area33_review_triage]] admin login role/seed mismatch — needs its own
+investigation into the local DB seed, not a code fix. **Confirmed NOT affecting `shalin`**: a live
+local login as `shalin` returns `"role":"SuperAdmin"` — `ProtectedSuperAdminSeeder`
+([[feedback_protected_superadmin_pattern]]) is intact and working, untouched by anything in this
+session. The role oddity is specific to the separate seeded `superadmin` test account.
+
+44.19 [DONE] Web — centralized the "run this once authChecked() settles AND the user turns out to be
+logged in" pattern (introduced 4 times this session: `AlertService`, `gallery.ts`, `events.ts`,
+`payment-portal.component.ts`) behind one method, `AuthService.whenAuthenticated(callback)`, instead
+of leaving 4 near-identical inline `effect()` blocks. All 4 call sites now read as a single line;
+`AuthService` is the natural home since it owns `authChecked`/`isAuthenticated`. Left
+`events.ts`'s `deepLinkEffect` (30.26) and `payment-portal.component.ts`'s `saveRequested`-sync effect
+alone — different shape (one gates on `authChecked()` alone with a `setTimeout`, the other has nothing
+to do with auth). Updated `createAuthServiceMock` (testing-utils.ts) plus 3 ad-hoc component-local
+mocks (`gallery.spec.ts`, `events.spec.ts`, `payment-portal.component.spec.ts`) to implement
+`whenAuthenticated` as a synchronous check-and-call, matching how each test already sets up mock
+state before construction. Re-verified: `npx tsc --noEmit` clean, `npx vitest run` 66 files/317 tests,
+and a live local run (API + `ng serve`, login as `superadmin`, portal/admin/gallery) — behavior
+unchanged, no regression.
+
+---
+
+# Area 45 — SuperAdmin error-log viewer (raised by user 2026-08-28: "super admin role should able to
+view application error logs from UI, able to search, by date or error details or part"), plan only,
+not yet built
+
+Today errors only reach `stdout` (`ExceptionMiddleware`'s `ILogger.LogError`, plus every
+`ILogger<T>.LogError`/`LogWarning` call added across Areas 43/44) and Render's log stream — nothing
+is persisted queryably, so there is nothing for an admin UI to read from yet. Per
+[[feedback_keep_lightweight]], the right shape here is a dedicated small table + a thin capture
+sink, not a logging framework (Serilog/ELK/Seq) — this app has deliberately avoided that class of
+dependency so far.
+
+45.1 [TODO] Explore/plan (Plan Mode required — spans Domain/Infrastructure/API/Web): decide the
+capture point(s). Candidates to reconcile: a custom `ILoggerProvider` registered in `Program.cs`
+alongside the console provider (captures every `ILogger` call app-wide, broadest coverage, more
+plumbing); vs. writing directly from `ExceptionMiddleware` only (captures unhandled exceptions —
+matches this request's literal wording, "application error logs" — much simpler, but misses
+`LogWarning`/handled-but-logged errors from the Area 43/44 sweep). Confirm which with the user before
+building either.
+45.2 [TODO] Domain + migration: new `ErrorLog` entity — at minimum `Id`, `OccurredAt` (UTC,
+indexed), `Level` (Error/Warning), `Message`, `ExceptionType`, `StackTrace`, `Source` (controller/
+middleware/class name), `RequestPath`, `RequestMethod`, `UserId`/`Username` (nullable — many errors
+are pre-auth or background). Raw SQL migration per the idempotent-migration convention established
+in 41.9/44.2 ([[gotcha_migrationbootstrapper_fixed_offset]]).
+45.3 [TODO] Infrastructure: the capture sink decided in 45.1, writing rows via a scoped/background
+write (never let logging itself throw or block the request it's logging) — batch or fire-and-forget
+inserts so a logging-table write can't become a new source of request latency or failure.
+45.4 [TODO] API: `GET /api/admin/error-logs` (`[Authorize(Policy = "SuperAdminOnly")]`, matching the
+existing policy convention in `ServiceExtensions.cs`) with query params for date range, free-text
+search (message/exception-type/stack-trace substring), level, and pagination — push filtering to the
+DB query, not an in-memory scan, since this table will grow unbounded without a retention policy
+(see 45.6).
+45.5 [TODO] Web admin: new `admin/error-logs/` screen (list + filters: date range picker, text search,
+level dropdown; row expansion for full stack trace) — follow `ghcaa-design` conventions and the
+existing admin list-page pattern (search bar + filters component already used elsewhere, e.g.
+`admin-news.ts`/`admin-members.ts` — reuse `SearchBarComponent`/`PageHeaderComponent`, don't rebuild).
+45.6 [TODO] Retention/cleanup: decide and implement a bound (e.g. delete rows older than N days, or
+cap total row count) — an error-log table with no retention policy will grow forever and eventually
+degrade the very queries meant to search it.
+45.7 [TODO] Tests + docs update per usual closing convention (`dotnet test`, `npx vitest run`,
+`npx tsc --noEmit`, live verification that a genuine error actually appears in the new admin screen).

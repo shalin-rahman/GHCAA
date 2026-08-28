@@ -24,6 +24,7 @@ class NotificationService {
       final response = await _dio.post('/notifications/$id/read');
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('NotificationService.markAsRead failed: $e');
       return false;
     }
   }

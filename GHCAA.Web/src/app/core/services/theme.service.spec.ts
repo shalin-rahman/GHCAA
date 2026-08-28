@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { ApplicationRef } from '@angular/core';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ThemeService } from './theme.service';
 import { API_ENDPOINTS } from '../constants/app.constants';
@@ -30,8 +31,10 @@ describe('ThemeService', () => {
         });
         service = TestBed.inject(ThemeService);
         httpMock = TestBed.inject(HttpTestingController);
-        
-        // Constructor fires loadActiveSpecialTheme() automatically
+
+        // The constructor's loadActiveSpecialTheme() call is deferred via afterNextRender (same
+        // NG0200 guard as AuthService) — tick the ApplicationRef so it fires before we expect it.
+        TestBed.inject(ApplicationRef).tick();
         const req = httpMock.expectOne(`${API_ENDPOINTS.THEMES}/active`);
         req.flush({});
     });

@@ -227,10 +227,15 @@ app.UseStaticFiles(new StaticFileOptions
 // ephemeral disk) but can be overridden to a mounted persistent volume in production.
 var uploadsBasePath = builder.Configuration["FileStorage:BasePhysicalPath"]
     ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+var uploadsPhysicalPath = Path.Combine(uploadsBasePath, "uploads");
+// PhysicalFileProvider throws DirectoryNotFoundException at construction if the root is absent —
+// harmless today because wwwroot/uploads ships committed, but FileStorage:BasePhysicalPath is
+// meant to be pointed at a freshly-mounted (empty) persistent disk in production, which would
+// otherwise crash the app at boot.
+Directory.CreateDirectory(uploadsPhysicalPath);
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
-        Path.Combine(uploadsBasePath, "uploads")),
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPhysicalPath),
     RequestPath = "/api/uploads"
 });
 
@@ -279,6 +284,14 @@ if (File.Exists(spaIndexPath))
             return;
         }
 
+        // Almost every real navigation (/, /portal/..., a refreshed deep link) lands here rather
+        // than on an explicit GET /index.html, so this handler — not UseStaticFiles'
+        // OnPrepareResponse above — is what actually serves the shell most of the time. It must
+        // carry the same no-cache headers, or the "index.html never gets cached" guarantee above
+        // is a no-op for normal traffic.
+        ctx.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+        ctx.Response.Headers.Pragma = "no-cache";
+        ctx.Response.Headers.Expires = "0";
         ctx.Response.ContentType = "text/html";
         await ctx.Response.SendFileAsync(spaIndexPath);
     }).AllowAnonymous(); // exempt the SPA shell (and the 404s above) from the global RequireAuthenticatedUser FallbackPolicy

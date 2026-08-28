@@ -24,6 +24,7 @@ class RoleService {
       final response = await _dio.post('/Roles/assign', data: {'memberId': memberId, 'roleName': roleName});
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('RoleService.assignRole failed: $e');
       return false;
     }
   }

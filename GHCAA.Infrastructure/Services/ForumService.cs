@@ -182,7 +182,12 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task DeleteTopicAsync(int topicId, int memberId, bool isSuperAdmin)
         {
-            var topic = await _context.ForumTopics.FindAsync(topicId);
+            // FindAsync applies ForumTopicConfiguration's global query filter (IsActive &&
+            // Category.IsActive), so a topic under an already-deactivated category could never be
+            // found here — moderation on it silently no-op'd. IgnoreQueryFilters() so an admin can
+            // still act on it (matches the AlumniEvent admin-path convention elsewhere).
+            var topic = await _context.ForumTopics.IgnoreQueryFilters()
+                .FirstOrDefaultAsync(t => t.Id == topicId);
             if (topic == null) return;
 
             if (topic.AuthorId != memberId && !isSuperAdmin)
@@ -194,7 +199,8 @@ namespace GHCAA.Infrastructure.Services
 
         public async Task DeletePostAsync(int postId, int memberId, bool isSuperAdmin)
         {
-            var post = await _context.ForumPosts.FindAsync(postId);
+            var post = await _context.ForumPosts.IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.Id == postId);
             if (post == null) return;
 
             if (post.AuthorId != memberId && !isSuperAdmin)

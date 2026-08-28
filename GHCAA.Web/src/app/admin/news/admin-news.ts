@@ -49,6 +49,8 @@ export class AdminNews implements OnInit {
     uploadingDocument = signal(false);
     stagedImageFile: File | null = null;
     stagedImageName = signal<string | null>(null);
+    stagedDocumentFile: File | null = null;
+    stagedDocumentName = signal<string | null>(null);
 
     form: any = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, collaborators: [] };
 
@@ -72,6 +74,8 @@ export class AdminNews implements OnInit {
         this.form = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, collaborators: [] };
         this.stagedImageFile = null;
         this.stagedImageName.set(null);
+        this.stagedDocumentFile = null;
+        this.stagedDocumentName.set(null);
         this.showForm.set(true);
     }
 
@@ -79,6 +83,8 @@ export class AdminNews implements OnInit {
         this.editingId.set(post.id);
         this.stagedImageFile = null;
         this.stagedImageName.set(null);
+        this.stagedDocumentFile = null;
+        this.stagedDocumentName.set(null);
         this.form = {
             title: post.title,
             content: post.content,
@@ -103,11 +109,20 @@ export class AdminNews implements OnInit {
         const file = input.files?.[0];
         if (!file) return;
 
+        const error = validateUploadFile(file, 'image');
+        if (error) {
+            this.notify.error(error);
+            input.value = '';
+            return;
+        }
+
         this.stagedImageFile = file;
         this.stagedImageName.set(file.name);
     }
 
     onDocumentSelect(event: Event) {
+        // Stage only, same convention as the image field — uploading immediately (the previous
+        // behavior) orphaned the file on the server if the form was then cancelled instead of saved.
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
         if (!file) return;
@@ -119,24 +134,15 @@ export class AdminNews implements OnInit {
             return;
         }
 
-        this.uploadingDocument.set(true);
-        this.newsService.uploadDocument(file).subscribe({
-            next: (res) => {
-                this.form.attachmentUrl = res.url;
-                this.form.attachmentFileName = res.fileName;
-                this.notify.success('Document uploaded successfully');
-                this.uploadingDocument.set(false);
-            },
-            error: () => {
-                this.notify.error('Document upload failed');
-                this.uploadingDocument.set(false);
-            }
-        });
+        this.stagedDocumentFile = file;
+        this.stagedDocumentName.set(file.name);
     }
 
     removeDocument() {
         this.form.attachmentUrl = '';
         this.form.attachmentFileName = '';
+        this.stagedDocumentFile = null;
+        this.stagedDocumentName.set(null);
     }
 
     cancelForm() {
@@ -144,6 +150,8 @@ export class AdminNews implements OnInit {
         this.editingId.set(null);
         this.stagedImageFile = null;
         this.stagedImageName.set(null);
+        this.stagedDocumentFile = null;
+        this.stagedDocumentName.set(null);
     }
 
     saveNews(form: any) {
@@ -156,22 +164,50 @@ export class AdminNews implements OnInit {
         if (this.saving()) return;
 
         this.saving.set(true);
+        this.uploadStagedImageThenDocument();
+    }
 
-        const stagedFile = this.stagedImageFile;
-        if (stagedFile) {
+    private uploadStagedImageThenDocument() {
+        const stagedImage = this.stagedImageFile;
+        if (stagedImage) {
             this.uploadingImage.set(true);
-            this.newsService.uploadImage(stagedFile).subscribe({
+            this.newsService.uploadImage(stagedImage).subscribe({
                 next: (res) => {
                     this.form.imageUrl = res.url;
                     this.uploadingImage.set(false);
                     this.stagedImageFile = null;
                     this.stagedImageName.set(null);
-                    this.submitNews();
+                    this.uploadStagedDocumentThenSubmit();
                 },
                 error: () => {
                     this.uploadingImage.set(false);
                     this.saving.set(false);
                     this.notify.error('Image upload failed.');
+                }
+            });
+            return;
+        }
+
+        this.uploadStagedDocumentThenSubmit();
+    }
+
+    private uploadStagedDocumentThenSubmit() {
+        const stagedDocument = this.stagedDocumentFile;
+        if (stagedDocument) {
+            this.uploadingDocument.set(true);
+            this.newsService.uploadDocument(stagedDocument).subscribe({
+                next: (res) => {
+                    this.form.attachmentUrl = res.url;
+                    this.form.attachmentFileName = res.fileName;
+                    this.uploadingDocument.set(false);
+                    this.stagedDocumentFile = null;
+                    this.stagedDocumentName.set(null);
+                    this.submitNews();
+                },
+                error: () => {
+                    this.uploadingDocument.set(false);
+                    this.saving.set(false);
+                    this.notify.error('Document upload failed.');
                 }
             });
             return;

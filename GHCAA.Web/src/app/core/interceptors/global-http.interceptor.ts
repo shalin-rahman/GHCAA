@@ -36,9 +36,16 @@ export const globalHttpInterceptor: HttpInterceptorFn = (req, next) => {
     return next(outReq).pipe(
         catchError((error: HttpErrorResponse) => {
             // 24.44: On 401, attempt token refresh before giving up.
+            // /api/auth/me is the session-restore probe every page load fires while possibly
+            // still a guest — a 401 there is the expected "not logged in" answer, not a session
+            // expiry, so it must never trigger refresh→logout. /api/auth/logout is excluded too:
+            // logout() itself calls it, and if that call 401s (session already gone), routing it
+            // back through handle401 → refresh fails → logout() again is an infinite retry loop.
             if (error.status === 401
                 && !req.url.includes('/api/auth/login')
-                && !req.url.includes('/api/auth/refresh')) {
+                && !req.url.includes('/api/auth/refresh')
+                && !req.url.includes('/api/auth/me')
+                && !req.url.includes('/api/auth/logout')) {
                 return handle401(outReq, next, authService, notify, error);
             }
 
@@ -89,6 +96,13 @@ function handleError(
     authService: AuthService,
     notify: NotificationService
 ): Observable<never> {
+    // A 401 on the /auth/me session-restore probe means "not logged in" — the expected answer
+    // for every guest on every page load, not an error. Skip both the toast (already covered by
+    // X-Skip-Error-Notify) and the console.error that branch would otherwise still emit.
+    if (error.status === 401 && req.url.includes('/api/auth/me')) {
+        return throwError(() => error);
+    }
+
     const skipNotify = req.headers.has('X-Skip-Error-Notify');
     let errorMessage = 'An unexpected error occurred';
 

@@ -1,4 +1,4 @@
-import { Injectable, signal, effect, inject } from '@angular/core';
+import { Injectable, signal, effect, inject, afterNextRender } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_ENDPOINTS } from '../constants/app.constants';
 import { tap } from 'rxjs';
@@ -38,8 +38,10 @@ export class ThemeService {
             localStorage.setItem('ghcaa_theme', mode);
         });
 
-        // Initial load
-        this.loadActiveSpecialTheme();
+        // Deferred for consistency with AuthService's same-shape NG0200 guard: this is a root
+        // service whose constructor mutates a signal (`activeSpecialTheme`) that templates read
+        // directly (e.g. public-layout.html), and it can be constructed mid-render.
+        afterNextRender(() => this.loadActiveSpecialTheme());
     }
 
     loadActiveSpecialTheme() {

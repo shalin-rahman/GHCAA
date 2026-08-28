@@ -54,6 +54,24 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
       }
     }
 
+    Future<void> registerFreeEvent(int eventId, String eventTitle) async {
+      // A free-but-registration-required event has no payment step — it must call
+      // registerForEvent directly instead of routing through the gateway sheet (that flow was
+      // pushing an SSLCommerz/DGePay charge for amount 0 and never actually registering the
+      // member).
+      final success = await ref.read(eventsServiceProvider).registerForEvent(eventId);
+      if (!context.mounted) return;
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration successful.')));
+        ref.invalidate(eventsListProvider);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Registration failed. It may already be registered, closed, or your session expired.'),
+          backgroundColor: Colors.redAccent,
+        ));
+      }
+    }
+
     Future<void> handleEventPayment(double amount, String eventTitle) async {
       showModalBottomSheet(
         context: context,
@@ -89,7 +107,9 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
 
     final eventsAsync = ref.watch(eventsListProvider);
     final searchQuery = ref.watch(eventSearchQueryProvider);
-    final roleAsync = ref.watch(FutureProvider((ref) => ref.read(authServiceProvider).getRole()));
+    // roleProvider (auth_service.dart) — a FutureProvider literal here would be a brand-new,
+    // never-disposed provider on every rebuild, re-fetching and re-entering `loading` each time.
+    final roleAsync = ref.watch(roleProvider);
     final isAdmin = roleAsync.value?.isStaffAdminRole ?? false;
 
 
@@ -241,7 +261,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                         child: Text(AppUtils.formatDate(ev['startDate']), style: Theme.of(context).textTheme.labelLarge, overflow: TextOverflow.ellipsis),
                                                       ),
                                                       const SizedBox(width: 8),
-                                                      if (ev['registrationFee'] != null && ev['registrationFee'] > 0)
+                                                      if ((num.tryParse('${ev['registrationFee']}') ?? 0) > 0)
                                                         Flexible(
                                                           child: Text(AppUtils.formatCurrency(ev['registrationFee']), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.royalGold, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis),
                                                         )
@@ -262,7 +282,13 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                                     child: ElevatedButton.icon(
                                                       onPressed: isOpen ? () {
                                                         HapticFeedback.lightImpact();
-                                                        handleEventPayment((ev['registrationFee'] ?? 0).toDouble(), ev['title'] ?? 'Event');
+                                                        final eventId = ev['id'] as int;
+                                                        final title = ev['title'] ?? 'Event';
+                                                        if (ev['requiresPayment'] == true) {
+                                                          handleEventPayment((ev['registrationFee'] ?? 0).toDouble(), title);
+                                                        } else {
+                                                          registerFreeEvent(eventId, title);
+                                                        }
                                                       } : null,
                                                       icon: Icon(isOpen ? Icons.how_to_reg_rounded : Icons.lock_clock_outlined, size: 18),
                                                       label: Text(isOpen ? 'CONFIRM REGISTRATION' : 'REGISTRATION CLOSED'),

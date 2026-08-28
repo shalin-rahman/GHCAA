@@ -1,4 +1,5 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { ApplicationRef } from '@angular/core';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ThemeToggle } from './theme-toggle';
 import { ThemeService } from '../../core/services/theme.service';
@@ -21,7 +22,9 @@ describe('ThemeToggle', () => {
         component = fixture.componentInstance;
         httpMock = TestBed.inject(HttpTestingController);
 
-        // ThemeService's constructor fires loadActiveSpecialTheme().
+        // ThemeService's constructor defers loadActiveSpecialTheme() via afterNextRender (NG0200
+        // guard) — tick the ApplicationRef so it fires before we expect the request.
+        TestBed.inject(ApplicationRef).tick();
         httpMock.expectOne(`${API_ENDPOINTS.THEMES}/active`).flush({});
         fixture.detectChanges();
     });

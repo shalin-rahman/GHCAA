@@ -26,7 +26,7 @@ class AuthService {
       try {
         device = await _ref.read(deviceInfoProvider.future);
       } catch (e) {
-        debugPrint('AuthService.login failed: $e');
+        debugPrint('AuthService.login: device info unavailable: $e');
       }
 
       final response = await _dio.post('/auth/login', data: {
@@ -59,6 +59,7 @@ class AuthService {
         return null; // Success
       }
     } catch (e) {
+      debugPrint('AuthService.login failed: $e');
       if (e is DioException) {
         if (e.response?.statusCode == 401) {
           return "Invalid username or password.";
@@ -109,6 +110,7 @@ class AuthService {
         return null; // Success
       }
     } catch (e) {
+      debugPrint('AuthService._socialLogin failed ($path): $e');
       if (e is DioException) {
         return e.response?.data?['message'] ?? e.response?.data?['error'] ?? "Authentication failed.";
       }
@@ -155,6 +157,7 @@ class AuthService {
       final response = await _dio.post('/auth/register', data: formData);
       return (response.statusCode == 200 || response.statusCode == 201) ? null : "Submission failed.";
     } catch (e) {
+      debugPrint('AuthService.register failed: $e');
       if (e is DioException) {
         return e.response?.data?['message'] ?? e.response?.data?['error'] ?? "Data mismatch or connection error.";
       }

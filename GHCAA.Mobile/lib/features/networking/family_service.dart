@@ -50,6 +50,7 @@ class FamilyService {
       });
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('FamilyService.sendRequest (networking) failed: $e');
       return false;
     }
   }
@@ -62,6 +63,7 @@ class FamilyService {
       });
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('FamilyService.respondToRequest (networking) failed: $e');
       return false;
     }
   }
@@ -71,6 +73,7 @@ class FamilyService {
       final response = await _dio.post('/family-links/$requestId/cancel');
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('FamilyService.cancelRequest (networking) failed: $e');
       return false;
     }
   }
@@ -80,6 +83,7 @@ class FamilyService {
       final response = await _dio.delete('/family-links/remove/$requestId');
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('FamilyService.removeLink (networking) failed: $e');
       return false;
     }
   }

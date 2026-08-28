@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -77,6 +78,18 @@ namespace GHCAA.Infrastructure.Data
         // or future, not just that one). For each migration marked applied that mixes a schema op with
         // a data op, verify its AddColumn/CreateTable targets actually exist; if any are missing,
         // drop that migration's history row so the MigrateAsync call below reapplies it for real.
+        // Raw-SQL migrations (the house style since the idempotency pass — CREATE ... IF NOT EXISTS,
+        // ON CONFLICT DO NOTHING, etc.) show up as a single opaque SqlOperation, not typed
+        // AddColumn/CreateTable/InsertData ops — so the type-based risky-shape check below can't see
+        // them at all. Pull CREATE TABLE / ADD COLUMN targets out of the raw SQL text with a regex
+        // instead so those migrations are still covered.
+        private static readonly Regex CreateTableRegex = new(
+            @"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?""?(?<table>[A-Za-z_][A-Za-z0-9_]*)""?",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex AddColumnRegex = new(
+            @"ALTER\s+TABLE\s+""?(?<table>[A-Za-z_][A-Za-z0-9_]*)""?\s+ADD\s+COLUMN\s+(?:IF\s+NOT\s+EXISTS\s+)?""?(?<column>[A-Za-z_][A-Za-z0-9_]*)""?",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private static async Task SelfHealFalselyBaselinedMigrationsAsync(ApplicationDbContext ctx, ILogger logger, HashSet<string> applied)
         {
             var migrationsAssembly = ctx.GetService<IMigrationsAssembly>();
@@ -91,32 +104,54 @@ namespace GHCAA.Infrastructure.Data
 
                 var operations = migrationsAssembly.CreateMigration(migrationType, activeProvider).UpOperations;
 
-                var hasSchemaOp = operations.Any(op => op is AddColumnOperation or CreateTableOperation);
-                var hasDataOp = operations.Any(op => op is InsertDataOperation or UpdateDataOperation or DeleteDataOperation);
-                if (!hasSchemaOp || !hasDataOp)
+                var targets = new List<(string Table, string? Column)>();
+                foreach (var op in operations)
+                {
+                    switch (op)
+                    {
+                        case AddColumnOperation addColumn:
+                            targets.Add((addColumn.Table, addColumn.Name));
+                            break;
+                        case CreateTableOperation createTable:
+                            targets.Add((createTable.Name, null));
+                            break;
+                        case SqlOperation sqlOp when sqlOp.Sql is not null:
+                            // A raw-SQL migration mixing DDL with a data statement is exactly the
+                            // risky shape this method exists to catch, and we can't type-check that
+                            // from a single opaque string — so any CREATE TABLE/ADD COLUMN found here
+                            // is always treated as needing verification, regardless of what else is
+                            // in the migration.
+                            foreach (Match m in CreateTableRegex.Matches(sqlOp.Sql))
+                                targets.Add((m.Groups["table"].Value, null));
+                            foreach (Match m in AddColumnRegex.Matches(sqlOp.Sql))
+                                targets.Add((m.Groups["table"].Value, m.Groups["column"].Value));
+                            break;
+                    }
+                }
+
+                if (targets.Count == 0)
                 {
                     continue;
                 }
 
-                foreach (var op in operations)
+                // Typed-op migrations only count as risky when a schema op is mixed with a data op —
+                // preserves the original scope for those. Raw-SQL targets found via regex are always
+                // checked, since we can't tell whether the surrounding SqlOperation also seeds data.
+                var hasTypedSchemaOp = operations.Any(op => op is AddColumnOperation or CreateTableOperation);
+                var hasTypedDataOp = operations.Any(op => op is InsertDataOperation or UpdateDataOperation or DeleteDataOperation);
+                var hasSqlOp = operations.Any(op => op is SqlOperation);
+                if (!hasSqlOp && (!hasTypedSchemaOp || !hasTypedDataOp))
                 {
-                    var (table, column) = op switch
-                    {
-                        AddColumnOperation addColumn => (addColumn.Table, addColumn.Name),
-                        CreateTableOperation createTable => (createTable.Name, null),
-                        _ => (null, null)
-                    };
+                    continue;
+                }
 
-                    if (table is null)
-                    {
-                        continue;
-                    }
-
+                foreach (var (table, column) in targets)
+                {
                     var exists = column is null
                         ? await ctx.Database.SqlQueryRaw<int>(
-                            "SELECT 1 FROM information_schema.tables WHERE table_name = {0}", table).AnyAsync()
+                            "SELECT 1 AS \"Value\" FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = {0}", table).AnyAsync()
                         : await ctx.Database.SqlQueryRaw<int>(
-                            "SELECT 1 FROM information_schema.columns WHERE table_name = {0} AND column_name = {1}", table, column).AnyAsync();
+                            "SELECT 1 AS \"Value\" FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = {0} AND column_name = {1}", table, column).AnyAsync();
 
                     if (!exists)
                     {
@@ -151,6 +186,14 @@ namespace GHCAA.Infrastructure.Data
                 }
                 catch (Exception ex) when (IsAlreadyExists(ex))
                 {
+                    // Per-migration detail (not just the aggregate count below) is exactly the
+                    // diagnostic this class of incident needs — a 23505 unique-violation baseline is
+                    // the specific shape that has previously masked a rolled-back DDL change.
+                    var sqlState = ex is PostgresException pg ? pg.SqlState
+                        : ex.InnerException is PostgresException innerPg ? innerPg.SqlState : "unknown";
+                    logger.LogInformation(
+                        "Migration {MigrationId} baselined without running (SqlState {SqlState}): effect already exists.",
+                        id, sqlState);
                     await ctx.Database.ExecuteSqlRawAsync(historyRepository.GetInsertScript(new HistoryRow(id, "9.0.0")));
                     baselined++;
                 }

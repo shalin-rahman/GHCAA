@@ -1,4 +1,5 @@
 import { createAuthServiceMock } from '../../core/testing/testing-utils';
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Events } from './events';
 import { EventsService } from '../../core/services/events.service';
@@ -42,7 +43,13 @@ describe('Events Component', () => {
         const authServiceMock = {
             isAuthenticated: vi.fn().mockReturnValue(false),
             currentUser: vi.fn().mockReturnValue(null),
-            getToken: vi.fn().mockReturnValue(null)
+            getToken: vi.fn().mockReturnValue(null),
+            // Real signal (not vi.fn()) — whenAuthenticated() reads it directly.
+            authChecked: signal(true),
+            // Mirrors AuthService.whenAuthenticated: a synchronous check-and-call is enough here.
+            whenAuthenticated: vi.fn((callback: () => void) => {
+                if (authServiceMock.authChecked() && authServiceMock.isAuthenticated()) callback();
+            })
         };
 
         await TestBed.configureTestingModule({

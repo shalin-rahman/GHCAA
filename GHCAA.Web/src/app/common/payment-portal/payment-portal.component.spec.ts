@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { PaymentPortalComponent } from './payment-portal.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RegistrationService } from '../../core/services/registration.service';
@@ -20,7 +21,13 @@ describe('PaymentPortalComponent', () => {
       deleteSavedMethod: vi.fn().mockReturnValue(of({}))
     };
     mockAuthService = {
-      isAuthenticated: vi.fn().mockReturnValue(true)
+      isAuthenticated: vi.fn().mockReturnValue(true),
+      // Real signal (not vi.fn()) — whenAuthenticated() reads it directly.
+      authChecked: signal(true),
+      // Mirrors AuthService.whenAuthenticated: a synchronous check-and-call is enough here.
+      whenAuthenticated: vi.fn((callback: () => void) => {
+        if (mockAuthService.authChecked() && mockAuthService.isAuthenticated()) callback();
+      })
     };
 
     await TestBed.configureTestingModule({

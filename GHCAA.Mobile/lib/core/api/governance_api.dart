@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'api_client.dart';
 
@@ -40,7 +41,8 @@ class GovernanceApi {
         queryParameters: comments != null ? {'comments': comments} : null,
       );
       return true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('GovernanceApi.voteOnAmendment failed: $e');
       return false;
     }
   }

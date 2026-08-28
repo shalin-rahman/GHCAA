@@ -20,7 +20,13 @@ describe('Gallery Component', () => {
         const authServiceMock = {
             isAuthenticated: computed(() => false),
             currentUser: computed(() => null),
-            getToken: vi.fn().mockReturnValue(null)
+            getToken: vi.fn().mockReturnValue(null),
+            // Real signal (not vi.fn()) — whenAuthenticated() reads it directly.
+            authChecked: signal(true),
+            // Mirrors AuthService.whenAuthenticated: a synchronous check-and-call is enough here.
+            whenAuthenticated: vi.fn((callback: () => void) => {
+                if (authServiceMock.authChecked() && authServiceMock.isAuthenticated()) callback();
+            })
         };
 
         const notificationServiceMock = {

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/api/api_client.dart';
@@ -39,6 +40,7 @@ class FileService {
         return response.data['PhotoPath'];
       }
     } catch (e) {
+      debugPrint('FileService.uploadProfilePhoto failed: $e');
       return null;
     }
     return null;
@@ -56,6 +58,7 @@ class FileService {
         return response.data['relativePath'];
       }
     } catch (e) {
+      debugPrint('FileService.uploadArticleImage failed: $e');
       return null;
     }
     return null;

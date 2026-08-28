@@ -61,13 +61,32 @@ void main() async {
     ),
   );
   
-  // 2. Load Environment Config
+  // 2b. Catch background/untracked errors. Installed BEFORE SentryFlutter.init below —
+  // sentry_flutter's OnErrorIntegration/FlutterErrorIntegration CHAIN to whatever handler is
+  // already installed at init time rather than replacing it, so installing after init would
+  // silently detach Sentry's own crash classification (unhandled vs handled), silent-error
+  // filtering, and context collection, on top of firing once per frame for a persistent error.
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Uncaught platform error: $error');
+    return false; // let Sentry's chained default handler (installed by init, below) also run
+  };
+
+  // 2c. Catch framework errors (build/layout/paint) automatically instead of relying
+  // on the user tapping "DIAGNOSE & REPORT" on the ErrorWidget fallback screen. Also installed
+  // before init, for the same chaining reason.
+  final defaultFlutterOnError = FlutterError.onError;
+  FlutterError.onError = (FlutterErrorDetails details) {
+    debugPrint('Uncaught Flutter framework error: ${details.exceptionAsString()}');
+    defaultFlutterOnError?.call(details);
+  };
+
+  // 3. Load Environment Config
   await dotenv.load(fileName: ".env");
 
   final dsn = dotenv.env['SENTRY_DSN'];
-  
+
   if (dsn != null && dsn.isNotEmpty && dsn != 'https://example@sentry.io/project') {
-    // 3. Initialize Sentry Observability (Industry Standard)
+    // 4. Initialize Sentry Observability (Industry Standard)
     await SentryFlutter.init(
       (options) {
         options.dsn = dsn;
@@ -81,21 +100,6 @@ void main() async {
     debugPrint('Sentry Observability Offline: No valid DSN provided.');
     _initAndRunApp();
   }
-
-  // 3b. Catch background/untracked errors
-  PlatformDispatcher.instance.onError = (error, stack) {
-    debugPrint('Uncaught platform error: $error');
-    Sentry.captureException(error, stackTrace: stack);
-    return true;
-  };
-
-  // 3c. Catch framework errors (build/layout/paint) automatically instead of relying
-  // on the user tapping "DIAGNOSE & REPORT" on the ErrorWidget fallback screen.
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    debugPrint('Uncaught Flutter framework error: ${details.exceptionAsString()}');
-    Sentry.captureException(details.exception, stackTrace: details.stack);
-  };
 }
 
 Future<void> _initAndRunApp() async {
@@ -108,7 +112,9 @@ Future<void> _initAndRunApp() async {
       await Firebase.initializeApp();
       try {
         FirebaseMessaging.onBackgroundMessage(PushNotificationService.firebaseMessagingBackgroundHandler);
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Background message handler registration failed: $e');
+      }
     } catch (e) {
       debugPrint('Cloud Notification Service Initialization Failed: $e');
     }
@@ -178,7 +184,9 @@ class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBin
       if (Firebase.apps.isNotEmpty) {
         ref.read(pushNotificationServiceProvider).initialize();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Push notification service init failed: $e');
+    }
     
     return Listener(
       behavior: HitTestBehavior.translucent,

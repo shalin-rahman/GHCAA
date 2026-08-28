@@ -19,6 +19,9 @@ final eventDetailsProvider = FutureProvider.family<Map<String, dynamic>?, int>((
     final response = await dio.get('/events/$eventId');
     return response.data as Map<String, dynamic>;
   } catch (e) {
+    // A null result renders as "Event not found." — without logging, a 500/403/timeout is
+    // indistinguishable from a genuinely deleted event.
+    debugPrint('eventDetailsProvider($eventId) failed: $e');
     return null;
   }
 });
@@ -104,13 +107,20 @@ class EventDetailsScreen extends ConsumerWidget {
                        Text(event['description'] ?? 'No details available.', style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.5)),
                        const SizedBox(height: 16),
                        _buildStatRow('Start Date', AppUtils.formatDate(event['startDate'] ?? event['eventDate'])),
-                       _buildStatRow('Participants', '${event['participantCount'] ?? 0} listed'),
-                       _buildStatRow('Entry Fee', event['requiresPayment'] == false ? 'FREE' : AppUtils.formatCurrency(event['registrationFee'])),
+                       // An informational-only event (requiresRegistration == false) has no
+                       // registration/participation concept at all — the FAB is already hidden
+                       // for it above; these rows must be hidden too, not just the button.
+                       if (event['requiresRegistration'] != false) ...[
+                         _buildStatRow('Participants', '${event['participantCount'] ?? 0} listed'),
+                         _buildStatRow('Entry Fee', event['requiresPayment'] == false ? 'FREE' : AppUtils.formatCurrency(event['registrationFee'])),
+                       ],
                        _buildStatRow('Non-Members', event['allowNonMembers'] == true ? 'ALLOWED' : 'MEMBERS ONLY'),
-                       const SizedBox(height: 24),
-                       const Text('REGISTERED MEMBERS', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
-                       const SizedBox(height: 12),
-                       _buildAttendeeList(event['registrations'] as List<dynamic>? ?? []),
+                       if (event['requiresRegistration'] != false) ...[
+                         const SizedBox(height: 24),
+                         const Text('REGISTERED MEMBERS', style: TextStyle(color: AppTheme.royalGold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                         const SizedBox(height: 12),
+                         _buildAttendeeList(event['registrations'] as List<dynamic>? ?? []),
+                       ],
                      ],
                    )
                 ),
@@ -293,11 +303,23 @@ class EventDetailsScreen extends ConsumerWidget {
 
                   setStateModal(() => isSaving = true);
                   try {
-                    await ref.read(eventsServiceProvider).registerForEvent(
+                    // registerForEvent logs-and-returns false on failure rather than throwing
+                    // (a duplicate registration, a closed event, an expired session) — the result
+                    // must be checked, or a failed registration reports "successful" to the member.
+                    final success = await ref.read(eventsServiceProvider).registerForEvent(
                       eventId,
                       amount: requiresPayment ? double.tryParse(amountCtrl.text) : null,
                       paymentRef: 'APP-REG-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}'
                     );
+                    if (!success) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Registration failed. It may already be registered, closed, or your session expired.'),
+                          backgroundColor: Colors.redAccent,
+                        ));
+                      }
+                      return;
+                    }
                     if (ctx.mounted) Navigator.pop(ctx);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration successful.')));

@@ -81,7 +81,8 @@ namespace GHCAA.Tests.Workflows
                 realTimeMock.Object,
                 orgConfigMock.Object);
 
-            _eventService = new EventService(_context, _commMock.Object, _storageMock.Object, gamificationMock.Object, _notificationMock.Object);
+            var eventLoggerMock = new Mock<ILogger<EventService>>();
+            _eventService = new EventService(_context, _commMock.Object, _storageMock.Object, gamificationMock.Object, _notificationMock.Object, eventLoggerMock.Object);
         }
 
         [Test]

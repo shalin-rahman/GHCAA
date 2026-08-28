@@ -1,5 +1,5 @@
-import { Injectable, signal, computed, inject, afterNextRender } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, signal, computed, inject, afterNextRender, effect } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, map, catchError, of, switchMap } from 'rxjs';
 import { LoginDto, TokenResponseDto, User } from '../models/auth.models';
@@ -30,6 +30,21 @@ export class AuthService {
     private inactivityTimer: any;
     private readonly TIMEOUT_MS = 10 * 60 * 1000;
 
+    // Centralizes the "run this once the deferred /auth/me restore has settled AND the user turns
+    // out to be logged in" pattern — every consumer of member-only data on a page that doesn't
+    // itself go through authGuard (gallery "My Albums", saved payment methods, "my event
+    // registrations") needs this same gate, or a fresh page load races the restore and the data
+    // silently never loads. Call from a component's constructor/field initializer (a live
+    // injection context) exactly like the callers below do with a plain effect() today —
+    // this just avoids re-deriving the same 3-line effect at every call site.
+    whenAuthenticated(callback: () => void): void {
+        effect(() => {
+            if (this._authChecked() && this._currentUser()) {
+                callback();
+            }
+        });
+    }
+
     constructor() {
         this.initActivityTracking();
         // 24.39: Restore auth state from httpOnly cookie via /auth/me on page load.
@@ -41,9 +56,20 @@ export class AuthService {
         // pass has fully settled, so it can never race the initial CD cycle.
         if (typeof window !== 'undefined' && !this._currentUser()) {
             afterNextRender(() => {
-                this.http.get<any>(API_ENDPOINTS.AUTH.ME, { withCredentials: true })
+                // A guest visitor gets a routine 401 here — it must never surface as an error
+                // toast (X-Skip-Error-Notify) or feed the interceptor's refresh/logout cascade
+                // (the interceptor separately excludes /api/auth/me from that by URL).
+                this.http.get<any>(API_ENDPOINTS.AUTH.ME, {
+                    withCredentials: true,
+                    headers: new HttpHeaders().set('X-Skip-Error-Notify', 'true')
+                })
                     .pipe(catchError(err => {
-                        console.error('Failed to restore session from /auth/me', err);
+                        // A 401 here just means "not logged in" — the expected answer for every
+                        // guest on every page load, not a failure worth logging. Anything else
+                        // (network error, 500, timeout) is a genuine problem worth keeping.
+                        if (err?.status !== 401) {
+                            console.error('Failed to restore session from /auth/me', err);
+                        }
                         return of(null);
                     }))
                     .subscribe(me => {

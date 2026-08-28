@@ -8,6 +8,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using GHCAA.Domain;
 using static GHCAA.Domain.Enums;
 
@@ -20,14 +21,16 @@ namespace GHCAA.Infrastructure.Services
         private readonly IFileStorageService _fileStorageService;
         private readonly IGamificationService _gamificationService;
         private readonly INotificationService _notificationService;
+        private readonly ILogger<EventService> _logger;
 
-        public EventService(ApplicationDbContext context, ICommunicationService communicationService, IFileStorageService fileStorageService, IGamificationService gamificationService, INotificationService notificationService)
+        public EventService(ApplicationDbContext context, ICommunicationService communicationService, IFileStorageService fileStorageService, IGamificationService gamificationService, INotificationService notificationService, ILogger<EventService> logger)
         {
             _context = context;
             _communicationService = communicationService;
             _fileStorageService = fileStorageService;
             _gamificationService = gamificationService;
             _notificationService = notificationService;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<EventDto>> GetActiveEventsAsync(CancellationToken cancellationToken = default)
@@ -322,7 +325,12 @@ namespace GHCAA.Infrastructure.Services
             {
                 await SendEventEmailAsync(registration, "EVENT_PARTICIPATION_RECEIVED", cancellationToken);
             }
-            catch { /* Suppress email errors to ensure registration succeeds */ }
+            catch (Exception ex)
+            {
+                // Don't fail the registration over a notification failure, but a permanently
+                // broken mail path (bad SMTP config, template error) is otherwise undetectable.
+                _logger.LogError(ex, "Failed to send EVENT_PARTICIPATION_RECEIVED email for registration {RegistrationId}", registration.Id);
+            }
 
             return registration;
         }

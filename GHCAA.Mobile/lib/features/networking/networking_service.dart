@@ -37,6 +37,7 @@ class NetworkingService {
       }
       return { 'items': (response.data as List<dynamic>?) ?? [], 'totalItems': 0 };
     } catch (e) {
+      debugPrint('NetworkingService.searchAlumni failed: $e');
       return { 'items': [], 'totalItems': 0 };
     }
   }
@@ -46,6 +47,7 @@ class NetworkingService {
       final response = await _dio.get('/profile');
       return response.data as Map<String, dynamic>;
     } catch (e) {
+      debugPrint('NetworkingService.getProfile failed: $e');
       return null;
     }
   }
@@ -79,6 +81,7 @@ class NetworkingService {
       final response = await _dio.put('/profile/update', data: data);
       return response.statusCode == 200;
     } catch (e) {
+      debugPrint('NetworkingService.updateProfile failed: $e');
       return false;
     }
   }

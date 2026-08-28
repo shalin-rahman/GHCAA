@@ -48,11 +48,17 @@ export class Gallery implements OnInit {
   albumPhotoCaption = '';
   albumPhotoFile: File | null = null;
 
+  constructor() {
+    // Gated on authChecked() rather than a one-shot isAuthenticated() read in ngOnInit: the
+    // /auth/me session restore is deferred (see AuthService), so on a fresh page load a member's
+    // "My Albums" would otherwise never fetch — ngOnInit runs before the restore resolves and
+    // nothing re-checks afterward. authChecked() is already true on construction whenever a
+    // cached session was found, so the common case still loads immediately.
+    this.auth.whenAuthenticated(() => this.loadMyAlbums());
+  }
+
   ngOnInit() {
     this.refresh();
-    if (this.auth.isAuthenticated()) {
-      this.loadMyAlbums();
-    }
   }
 
   loadMyAlbums() {

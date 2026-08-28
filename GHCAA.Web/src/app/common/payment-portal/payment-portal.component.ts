@@ -287,15 +287,19 @@ export class PaymentPortalComponent implements OnInit {
     effect(() => {
         this.saveRequested.emit({ save: this.saveInfo(), label: this.saveLabel() });
     });
+
+    // Gated on authChecked() rather than a one-shot isAuthenticated() read in ngOnInit: the
+    // /auth/me session restore is deferred (see AuthService), so a member's saved payment
+    // methods would otherwise never load on a fresh page — ngOnInit runs before the restore
+    // resolves and nothing re-checks afterward. authChecked() is already true on construction
+    // whenever a cached session was found, so the common case still loads immediately.
+    this.authService.whenAuthenticated(() => this.loadSavedMethods());
   }
 
   isLoggedIn() { return this.authService.isAuthenticated(); }
 
   ngOnInit() {
     this.loadPublicMethods();
-    if (this.isLoggedIn()) {
-      this.loadSavedMethods();
-    }
   }
 
   loadPublicMethods() {

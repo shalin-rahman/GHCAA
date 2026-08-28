@@ -12,14 +12,12 @@ namespace GHCAA.API.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly IEmailService _email;
-        private readonly IFileStorageService _storage;
         private readonly IConfiguration _config;
 
-        public HealthController(ApplicationDbContext db, IEmailService email, IFileStorageService storage, IConfiguration config)
+        public HealthController(ApplicationDbContext db, IEmailService email, IConfiguration config)
         {
             _db = db;
             _email = email;
-            _storage = storage;
             _config = config;
         }
 
@@ -43,17 +41,22 @@ namespace GHCAA.API.Controllers
                 health.Checks.Add(new { Name = "Database", Status = canConnect ? "Healthy" : "Unhealthy" });
                 if (!canConnect) allHealthy = false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                health.Checks.Add(new { Name = "Database", Status = "Error", Message = ex.Message });
+                // Anonymous endpoint — never leak raw exception text (host/port/credentials can
+                // appear in Npgsql connection-failure messages).
+                health.Checks.Add(new { Name = "Database", Status = "Error" });
                 allHealthy = false;
             }
 
             // 2. Storage Check
             try
             {
-                // Test writing/reading a small temp file logic or just check directory
-                health.Checks.Add(new { Name = "FileStorage", Status = "Healthy" });
+                var uploadsBasePath = _config["FileStorage:BasePhysicalPath"]
+                    ?? Path.Combine(AppContext.BaseDirectory, "wwwroot");
+                var storageOk = Directory.Exists(uploadsBasePath);
+                health.Checks.Add(new { Name = "FileStorage", Status = storageOk ? "Healthy" : "Unhealthy" });
+                if (!storageOk) allHealthy = false;
             }
             catch { health.Checks.Add(new { Name = "FileStorage", Status = "Error" }); allHealthy = false; }
 

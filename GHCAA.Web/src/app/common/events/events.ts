@@ -73,9 +73,17 @@ export class Events implements OnInit {
     contributionAmount: [null as number | null]
   });
 
+  constructor() {
+    // Gated on authChecked() rather than a one-shot isAuthenticated() read in ngOnInit: the
+    // /auth/me session restore is deferred (see AuthService), so a member's registrations would
+    // otherwise never load on a fresh page — ngOnInit runs before the restore resolves and
+    // nothing re-checks afterward. authChecked() is already true on construction whenever a
+    // cached session was found, so the common case still loads immediately.
+    this.auth.whenAuthenticated(() => this.loadMyRegistrations());
+  }
+
   ngOnInit() {
     this.loadEvents();
-    this.loadMyRegistrations();
   }
 
   loadEvents() {

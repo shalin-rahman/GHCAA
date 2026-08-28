@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 
@@ -33,6 +34,7 @@ class LookupService {
       }
       return {};
     } catch (e) {
+      debugPrint('LookupService.getAllLookups failed: $e');
       return {};
     }
   }
@@ -42,6 +44,7 @@ class LookupService {
       final response = await _dio.get('/lookups/$group');
       return response.data as List<dynamic>;
     } catch (e) {
+      debugPrint('LookupService.getByGroup($group) failed: $e');
       return [];
     }
   }

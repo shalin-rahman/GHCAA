@@ -27,6 +27,17 @@ namespace GHCAA.API.Middleware
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unhandled exception processing {Method} {Path}", context.Request.Method, context.Request.Path);
+
+                // A throw after the response has already started writing (e.g. mid-SendFileAsync,
+                // a streaming export, a compression flush) can't have its status/headers changed —
+                // doing so anyway throws InvalidOperationException, which replaces the real error
+                // above with a generic connection reset and hides what actually happened.
+                if (context.Response.HasStarted)
+                {
+                    throw;
+                }
+
+                context.Response.Clear();
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 

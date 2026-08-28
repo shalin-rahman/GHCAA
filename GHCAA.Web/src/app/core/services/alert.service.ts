@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
+import { AuthService } from './auth.service';
 
 export interface AppNotification {
     id: number;
@@ -18,13 +19,19 @@ export interface AppNotification {
 })
 export class AlertService {
     private http = inject(HttpClient);
+    private auth = inject(AuthService);
     private apiUrl = API_ENDPOINTS.NOTIFICATIONS.BASE;
 
     notifications = signal<AppNotification[]>([]);
     unreadCount = signal<number>(0);
 
     constructor() {
-        this.loadNotifications();
+        // GET /api/notifications is [Authorize] — calling it unconditionally for a guest (this
+        // service is constructed from the header/nav, present on every page) 401s and, before
+        // this gate, fed the interceptor's refresh→logout cascade exactly like the /auth/me
+        // restore did. authChecked() is already true on construction whenever a cached session
+        // was found, so the logged-in fast path still loads immediately.
+        this.auth.whenAuthenticated(() => this.loadNotifications());
     }
 
     loadNotifications() {
