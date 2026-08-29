@@ -3,14 +3,29 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/app.constants';
 
+export const MessageChannels = { Email: 'Email', Sms: 'Sms' } as const;
+export type MessageChannel = typeof MessageChannels[keyof typeof MessageChannels];
+
 export interface EmailTemplate {
     id: number;
+    channel: MessageChannel;
     code: string;
     subject: string;
     body: string;
     description: string;
     variables?: string;
 }
+
+/** Canonical member + org-level variables the backend substitutes into template bodies (CommunicationService.BuildTemplateVariables). */
+export const TEMPLATE_VARIABLES = {
+    Member: [
+        'FullName', 'FatherName', 'MotherName', 'DateOfBirth', 'Gender', 'BloodGroup', 'NID',
+        'MembershipNumber', 'MembershipType', 'Email', 'MobileNo', 'PresentAddress', 'PermanentAddress',
+        'Status', 'Category', 'AppliedDate', 'ApprovedDate',
+        'PassingYear', 'HSCAdmissionYear', 'SubjectGroup', 'ProfessionalSector', 'Designation'
+    ],
+    Organization: ['OrgName', 'OrgShortName', 'SupportEmail', 'PortalUrl', 'CurrentYear']
+};
 
 export interface EmailLog {
     id: number;

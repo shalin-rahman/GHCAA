@@ -180,6 +180,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
+                        <th>Channel</th>
                         <th>Code</th>
                         <th>Description</th>
                         <th>Subject Pattern</th>
@@ -189,9 +190,10 @@
                 <tbody>
                     @for (temp of filteredTemplates(); track temp.id) {
                     <tr>
+                        <td><span class="badge-info">{{ temp.channel || 'Email' }}</span></td>
                         <td class="font-bold text-accent">{{ temp.code }}</td>
                         <td>{{ temp.description }}</td>
-                        <td><small>{{ temp.subject }}</small></td>
+                        <td><small>{{ temp.channel === channels.Sms ? '(SMS – no subject)' : temp.subject }}</small></td>
                         <td class="actions-cell">
                             <div class="action-group">
                                 <button class="btn btn-outline btn-sm" (click)="editTemplate(temp)">Edit ↗</button>
@@ -201,7 +203,7 @@
                     </tr>
                     } @empty {
                     <tr>
-                        <td colspan="4">
+                        <td colspan="5">
                             <div class="empty-state py-12">
                                 <span class="text-3xl mb-2 block">📄</span>
                                 <p class="text-muted italic">{{ templateSearch() ? 'No templates match your search.' : 'No communication templates found.' }}</p>
@@ -292,26 +294,52 @@
             <div class="modal-body">
                 <div class="form-grid">
                     <div class="form-group">
+                        <label>Channel</label>
+                        <select [(ngModel)]="editingTemplate()!.channel" [disabled]="!!editingTemplate()?.id">
+                            <option [value]="channels.Email">Email</option>
+                            <option [value]="channels.Sms">SMS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Template Code (Unique)</label>
                         <input type="text" [(ngModel)]="editingTemplate()!.code" [disabled]="!!editingTemplate()?.id">
                     </div>
-                    <div class="form-group">
+                    @if (editingTemplate()!.channel !== channels.Sms) {
+                    <div class="form-group full">
                         <label>Subject Pattern</label>
                         <input type="text" [(ngModel)]="editingTemplate()!.subject">
                     </div>
+                    }
                     <div class="form-group full">
                         <label>Description (Internal Use)</label>
                         <input type="text" [(ngModel)]="editingTemplate()!.description">
                     </div>
                     <div class="form-group full">
-                        <label>Variable Placeholders (JSON list, e.g. ["FullName", "MemberId"])</label>
-                        <input type="text" [(ngModel)]="editingTemplate()!.variables" placeholder='["FullName", "RegistrationYear"]'>
-                        <small class="opacity-50 italic">List strings exactly as they appear in template tags like [FullName].</small>
+                        <label>Available Variables</label>
+                        <div class="variable-chip-group">
+                            @for (v of templateVariables.Member; track v) {
+                            <button type="button" class="variable-chip" (click)="insertVariable(v)">{{ v }}</button>
+                            }
+                        </div>
+                        <small class="opacity-50 italic">Organization</small>
+                        <div class="variable-chip-group">
+                            @for (v of templateVariables.Organization; track v) {
+                            <button type="button" class="variable-chip" (click)="insertVariable(v)">{{ v }}</button>
+                            }
+                        </div>
+                        <small class="opacity-50 italic">Click a variable to insert it at the cursor.</small>
                     </div>
+                    @if (editingTemplate()!.channel === channels.Sms) {
+                    <div class="form-group full">
+                        <label>SMS Body ({{ editingTemplate()!.body?.length || 0 }} chars, {{ smsSegmentCount() }} segment(s))</label>
+                        <textarea #smsBodyInput rows="6" [(ngModel)]="editingTemplate()!.body"></textarea>
+                    </div>
+                    } @else {
                     <div class="form-group full">
                         <label>HTML Content</label>
                         <app-rich-text-editor [(value)]="editingTemplate()!.body" height="350px"></app-rich-text-editor>
                     </div>
+                    }
                 </div>
             </div>
             <div class="modal-footer">

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { AdminCommService } from './admin-comm.service';
+import { AdminCommService, MessageChannels } from './admin-comm.service';
 import { API_ENDPOINTS } from '../constants/app.constants';
 
 describe('AdminCommService', () => {
@@ -59,11 +59,22 @@ describe('AdminCommService', () => {
     });
 
     it('should handle template update', () => {
-        const template = { id: 1, code: 'C1', subject: 'S', body: 'B', description: 'D' };
+        const template = { id: 1, channel: MessageChannels.Email, code: 'C1', subject: 'S', body: 'B', description: 'D' };
         service.saveTemplate(template).subscribe(r => expect(r).toBeTruthy());
 
         const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.COMMUNICATION}/templates/1`);
         expect(req.request.method).toBe('PUT');
+        expect(req.request.body.channel).toBe(MessageChannels.Email);
         req.flush({});
+    });
+
+    it('should round-trip an Sms-channel template on create', () => {
+        const template = { id: 0, channel: MessageChannels.Sms, code: 'SMS1', subject: '', body: 'Your code is {{OtpCode}}', description: 'D' };
+        service.saveTemplate(template).subscribe(r => expect(r).toBeTruthy());
+
+        const req = httpMock.expectOne(`${API_ENDPOINTS.ADMIN.COMMUNICATION}/templates`);
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body.channel).toBe(MessageChannels.Sms);
+        req.flush({ ...template, id: 5 });
     });
 });

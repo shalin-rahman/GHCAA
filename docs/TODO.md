@@ -2199,3 +2199,52 @@ this doesn't become a second untracked follow-up — one test file, one PR, cove
 controller. Also extend `GHCAA.Tests/Services/MemberServiceTests.cs` or
 `GHCAA.Tests/Controllers/AdminControllerTests.cs` per 49.3.B.4 for the refresh-token-revocation
 regression test.
+
+# Area 50 — Admin-configurable email/SMS template bodies (raised by user 2026-08-29/30: "need to
+manage emails body to be confurable with all relevant informations, this also for sms (if used) by
+admin") [DONE 2026-08-30]
+
+Expanded the template-variable set used when substituting `{{Var}}` placeholders into admin-authored
+`EmailTemplate` rows, and added the data-model/admin-UI abstraction for SMS templates (channel picked
+by the user: build the shared abstraction for both channels, wire real sending for Email only —
+SMS stays configurable-but-dormant, matching `GreenwebSmsService`'s existing zero-caller state).
+
+50.1 [DONE] `GHCAA.Domain/Enums.cs`: added `MessageChannel { Email, Sms }`. `EmailTemplate.Channel`
+(default `Email`) added via a hand-written idempotent PgSql migration
+(`Migrations/PgSql/20260829173937_AddChannelToEmailTemplate.cs`) — the `dotnet ef migrations add`
+auto-scaffold produced a 25k-line file from the known non-deterministic seed-drift issue (see
+`gotcha_pending_model_changes_seed` in memory), so the `Up()`/`Down()` bodies were trimmed by hand to
+just the real `ADD COLUMN`, following the same pattern already used in `AddSourceToActivityLog`.
+
+50.2 [DONE] `CommunicationService.cs`: consolidated the two previously-independent variable-building
+call sites (`SendEmailByCodeAsync`'s 2-var dict and `SendTemplatedEmailAsync`'s ~15-var dict) into one
+`BuildTemplateVariables(member, cancellationToken)`, so a template resolves the same variables no
+matter which send path delivers it. Added member fields `Status`/`Category`/`AppliedDate`/
+`ApprovedDate`; added org fields `OrgName`/`OrgShortName`/`SupportEmail`/`PortalUrl`/`CurrentYear`
+sourced from `IOrgConfigService.GetConfigAsync()` (already injected). Fixed `ReplacePlaceholders` to
+HTML-encode substituted values on the Email channel via `WebUtility.HtmlEncode` — closes the raw
+member-controlled-value injection gap already logged as 48.12 (a `<script>`-laden `FullName` no
+longer lands unescaped in an HTML email body). `UpdateTemplateAsync`'s explicit field whitelist now
+also copies `Channel` (it was silently dropping any field not listed there).
+
+50.3 [DONE] `admin-comm` (web): template editor gained a Channel toggle — Email keeps the existing
+shared `app-rich-text-editor`; SMS swaps to a plain `<textarea>` with a 160-char segment counter and
+hides the Subject field. The old free-text "Variable Placeholders (JSON list)" input (no canonical
+list, admins could mistype/forget names) was replaced with a clickable variable-chip reference panel
+(Member / Organization groups) that inserts `{{VarName}}` at the cursor — `RichTextEditor` gained a
+reusable `insertAtCursor` method for this. Templates list shows a Channel badge. All channel string
+comparisons go through a centralized `MessageChannels` constant (`admin-comm.service.ts`), not
+literals, per this repo's existing magic-string-centralization convention.
+
+50.4 [DONE] Tests: `CommunicationServiceTests.cs` extended (org-var substitution on both send paths,
+HTML-encoding of a malicious `FullName`, Sms-channel template Create/Update/Get round-trip);
+`admin-comm.service.spec.ts` extended (channel round-trips through save); new
+`admin-comm.spec.ts` and `rich-text-editor.spec.ts` added (state-level assertions only — this
+project's `vitest.config.ts` strips every `templateUrl` to an empty template for all specs, so
+DOM-structure assertions against `admin-comm.html` are not possible in this harness). Final state:
+514/514 backend tests, 73 files/362 frontend tests, `ng build --configuration production` and
+`tsc --noEmit` both clean.
+
+Not done (explicitly out of scope this round, per user's channel-scope decision): no SMS send method
+was wired — `ISmsService`/`GreenwebSmsService` remain untouched and still have zero callers anywhere
+in the codebase.

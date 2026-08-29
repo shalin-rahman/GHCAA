@@ -1,7 +1,7 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminCommService, EmailTemplate, EmailLog } from '../../core/services/admin-comm.service';
+import { AdminCommService, EmailTemplate, EmailLog, TEMPLATE_VARIABLES, MessageChannels } from '../../core/services/admin-comm.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ActivatedRoute } from '@angular/router';
 import { getAcademicYears, MEMBERSHIP_TYPE_OPTIONS } from '../../core/constants/app.constants';
@@ -20,6 +20,12 @@ export class AdminComm implements OnInit {
     private commService = inject(AdminCommService);
     private notify = inject(NotificationService);
     private route = inject(ActivatedRoute);
+
+    @ViewChild(RichTextEditor) bodyEditor?: RichTextEditor;
+    @ViewChild('smsBodyInput') smsBodyInput?: ElementRef<HTMLTextAreaElement>;
+
+    readonly templateVariables = TEMPLATE_VARIABLES;
+    readonly channels = MessageChannels;
 
     templates = signal<EmailTemplate[]>([]);
     logs = signal<EmailLog[]>([]);
@@ -164,6 +170,7 @@ export class AdminComm implements OnInit {
     addNewTemplate() {
         this.editingTemplate.set({
             id: 0,
+            channel: this.channels.Email,
             code: '',
             description: '',
             subject: '',
@@ -174,6 +181,37 @@ export class AdminComm implements OnInit {
 
     cancelEdit() {
         this.editingTemplate.set(null);
+    }
+
+    // Plain method (not a computed signal): editingTemplate().body is mutated in place by
+    // ngModel, which never marks the editingTemplate signal dirty, so a computed() here would
+    // cache a stale count. A plain method re-evaluates on every change-detection tick instead.
+    smsSegmentCount(): number {
+        const len = this.editingTemplate()?.body?.length || 0;
+        return len === 0 ? 0 : Math.ceil(len / 160);
+    }
+
+    /** Inserts a `{{VarName}}` placeholder at the cursor of whichever body editor is active for the current channel. */
+    insertVariable(varName: string) {
+        const template = this.editingTemplate();
+        if (!template) return;
+        const placeholder = `{{${varName}}}`;
+
+        if (template.channel === this.channels.Sms) {
+            const el = this.smsBodyInput?.nativeElement;
+            const current = template.body || '';
+            if (el) {
+                const start = el.selectionStart ?? current.length;
+                const end = el.selectionEnd ?? current.length;
+                template.body = current.slice(0, start) + placeholder + current.slice(end);
+                const cursor = start + placeholder.length;
+                setTimeout(() => el.setSelectionRange(cursor, cursor));
+            } else {
+                template.body = current + placeholder;
+            }
+        } else {
+            this.bodyEditor?.insertAtCursor(placeholder);
+        }
     }
 
     selectAllYears() {

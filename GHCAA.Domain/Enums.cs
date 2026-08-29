@@ -50,5 +50,8 @@ namespace GHCAA.Domain
 
         public enum NotificationType { EventCreation, ParticipationApproval, RegistrationUpdate, GeneralSystem, DirectMessage, ApprovalRequest }
         public enum SocialProvider { Google, Facebook }
+
+        // Communication Template Enums
+        public enum MessageChannel { Email, Sms }
     }
 }

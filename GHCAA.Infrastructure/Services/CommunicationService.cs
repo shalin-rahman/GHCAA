@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using GHCAA.Application.DTOs;
 using GHCAA.Application.Interfaces;
 using GHCAA.Domain;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Infrastructure.Services
 {
@@ -161,6 +163,7 @@ namespace GHCAA.Infrastructure.Services
             existing.Code = template.Code;
             existing.Description = template.Description;
             existing.Variables = template.Variables;
+            existing.Channel = template.Channel;
             existing.LastUpdated = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);
@@ -213,21 +216,16 @@ namespace GHCAA.Infrastructure.Services
                 return;
             }
 
-            var vars = new Dictionary<string, string>();
-            if (member != null)
-            {
-                vars["FullName"] = member.FullName;
-                vars["MembershipNumber"] = member.MembershipNumber ?? "Pending";
-                // ... more common vars could be added here if needed for all templates
-            }
+            var vars = await BuildTemplateVariables(member, cancellationToken);
 
             if (customVars != null)
             {
                 foreach (var kvp in customVars) vars[kvp.Key] = kvp.Value;
             }
 
-            string subject = ReplacePlaceholders(template.Subject, vars);
-            string body = ReplacePlaceholders(template.Body, vars);
+            bool encodeHtml = template.Channel == MessageChannel.Email;
+            string subject = ReplacePlaceholders(template.Subject, vars, encodeHtml);
+            string body = ReplacePlaceholders(template.Body, vars, encodeHtml);
 
             await SendAndLogEmailAsync(to, subject, body, templateCode, "Templated", cancellationToken);
         }
@@ -330,42 +328,16 @@ namespace GHCAA.Infrastructure.Services
                 return;
             }
 
-            var vars = new Dictionary<string, string>();
-
-            if (member != null)
-            {
-                vars["FullName"] = member.FullName;
-                vars["FatherName"] = member.FatherName;
-                vars["MotherName"] = member.MotherName;
-                vars["DateOfBirth"] = member.DateOfBirth.ToString("dd MMM yyyy");
-                vars["Gender"] = member.Gender.ToString();
-                vars["BloodGroup"] = member.BloodGroup.ToString();
-                vars["NID"] = member.NID;
-                vars["MembershipNumber"] = member.MembershipNumber ?? "Pending";
-                vars["MembershipType"] = member.MembershipType.ToString();
-                vars["Email"] = member.Email;
-                vars["MobileNo"] = member.MobileNo;
-                vars["PresentAddress"] = member.PresentAddress;
-                vars["PermanentAddress"] = member.PermanentAddress;
-
-                var ghc = member.AcademicHistory.FirstOrDefault(a => a.IsGHC);
-                var hsc = member.AcademicHistory.FirstOrDefault(a => a.Degree == "HSC");
-                var prof = member.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent);
-
-                vars["PassingYear"] = ghc?.PassingYear.ToString() ?? "N/A";
-                vars["HSCAdmissionYear"] = hsc?.AdmissionYear.ToString() ?? "N/A";
-                vars["SubjectGroup"] = ghc?.Subject ?? "N/A";
-                vars["ProfessionalSector"] = prof?.Sector ?? "N/A";
-                vars["Designation"] = prof?.Designation ?? "N/A";
-            }
+            var vars = await BuildTemplateVariables(member, cancellationToken);
 
             if (customVars != null)
             {
                 foreach (var kvp in customVars) vars[kvp.Key] = kvp.Value;
             }
 
-            string subject = ReplacePlaceholders(template.Subject, vars);
-            string body = ReplacePlaceholders(template.Body, vars);
+            bool encodeHtml = template.Channel == MessageChannel.Email;
+            string subject = ReplacePlaceholders(template.Subject, vars, encodeHtml);
+            string body = ReplacePlaceholders(template.Body, vars, encodeHtml);
 
             await SendAndLogEmailAsync(to, subject, body, templateCode, "Templated Broadcast", cancellationToken);
         }
@@ -399,12 +371,63 @@ namespace GHCAA.Infrastructure.Services
             await _db.SaveChangesAsync(cancellationToken);
         }
 
-        private string ReplacePlaceholders(string text, Dictionary<string, string> vars)
+        /// <summary>
+        /// Builds the shared member + org variable set for template substitution. Used by both
+        /// SendEmailByCodeAsync and SendTemplatedEmailAsync so a template picked from the
+        /// admin-visible variable list resolves identically no matter which send path is used.
+        /// </summary>
+        private async Task<Dictionary<string, string>> BuildTemplateVariables(Member? member, CancellationToken cancellationToken)
+        {
+            var vars = new Dictionary<string, string>();
+
+            if (member != null)
+            {
+                vars["FullName"] = member.FullName;
+                vars["FatherName"] = member.FatherName;
+                vars["MotherName"] = member.MotherName;
+                vars["DateOfBirth"] = member.DateOfBirth.ToString("dd MMM yyyy");
+                vars["Gender"] = member.Gender.ToString();
+                vars["BloodGroup"] = member.BloodGroup.ToString();
+                vars["NID"] = member.NID;
+                vars["MembershipNumber"] = member.MembershipNumber ?? "Pending";
+                vars["MembershipType"] = member.MembershipType.ToString();
+                vars["Email"] = member.Email;
+                vars["MobileNo"] = member.MobileNo;
+                vars["PresentAddress"] = member.PresentAddress;
+                vars["PermanentAddress"] = member.PermanentAddress;
+                vars["Status"] = member.Status.ToString();
+                vars["Category"] = member.Category.ToString();
+                vars["AppliedDate"] = member.AppliedDate.ToString("dd MMM yyyy");
+                vars["ApprovedDate"] = member.ApprovedDate?.ToString("dd MMM yyyy") ?? "N/A";
+
+                var ghc = member.AcademicHistory.FirstOrDefault(a => a.IsGHC);
+                var hsc = member.AcademicHistory.FirstOrDefault(a => a.Degree == "HSC");
+                var prof = member.ProfessionalHistory.FirstOrDefault(p => p.IsCurrent);
+
+                vars["PassingYear"] = ghc?.PassingYear.ToString() ?? "N/A";
+                vars["HSCAdmissionYear"] = hsc?.AdmissionYear.ToString() ?? "N/A";
+                vars["SubjectGroup"] = ghc?.Subject ?? "N/A";
+                vars["ProfessionalSector"] = prof?.Sector ?? "N/A";
+                vars["Designation"] = prof?.Designation ?? "N/A";
+            }
+
+            var org = await _orgConfigService.GetConfigAsync();
+            vars["OrgName"] = org.Branding.FullName;
+            vars["OrgShortName"] = org.Branding.ShortName;
+            vars["SupportEmail"] = org.Contact.SupportEmail;
+            vars["PortalUrl"] = org.Contact.PortalBaseUrl;
+            vars["CurrentYear"] = DateTime.UtcNow.Year.ToString();
+
+            return vars;
+        }
+
+        private string ReplacePlaceholders(string text, Dictionary<string, string> vars, bool encodeHtml)
         {
             return Regex.Replace(text, @"\{\{(.+?)\}\}", m =>
             {
                 string key = m.Groups[1].Value.Trim();
-                return vars.TryGetValue(key, out string? value) ? value : m.Value;
+                if (!vars.TryGetValue(key, out string? value)) return m.Value;
+                return encodeHtml ? System.Net.WebUtility.HtmlEncode(value) : value;
             });
         }
 

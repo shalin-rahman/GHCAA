@@ -137,6 +137,32 @@
     }
 }
 
+// ─── Variable Chips (Template Editor) ─────────────
+.variable-chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.variable-chip {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: rgba(var(--accent-color-rgb, 212, 175, 55), 0.12);
+        color: var(--accent-text);
+        border-color: rgba(var(--accent-color-rgb, 212, 175, 55), 0.3);
+    }
+}
+
 // ─── Radio Grid (Target Audience) ─────────────────
 .radio-grid {
     display: flex;

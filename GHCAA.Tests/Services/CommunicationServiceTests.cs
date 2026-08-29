@@ -22,6 +22,8 @@ public class CommunicationServiceTests : TestBase
     private Mock<IOrgConfigService> _mockOrgConfig = null!;
     private CommunicationService _service = null!;
 
+    private GHCAA.Application.DTOs.OrgConfigDto _mockConfig = null!;
+
     [SetUp]
     public void Setup()
     {
@@ -29,8 +31,12 @@ public class CommunicationServiceTests : TestBase
         _mockLogger = new Mock<ILogger<CommunicationService>>();
         _mockOrgConfig = new Mock<IOrgConfigService>();
 
-        var mockConfig = new GHCAA.Application.DTOs.OrgConfigDto();
-        _mockOrgConfig.Setup(x => x.GetConfigAsync()).ReturnsAsync(mockConfig);
+        _mockConfig = new GHCAA.Application.DTOs.OrgConfigDto
+        {
+            Branding = new GHCAA.Application.DTOs.BrandingDto { FullName = "GHC Alumni Association", ShortName = "GHCAA" },
+            Contact = new GHCAA.Application.DTOs.ContactDto { SupportEmail = "support@ghcaa.org", PortalBaseUrl = "https://ghcaa.example/portal" }
+        };
+        _mockOrgConfig.Setup(x => x.GetConfigAsync()).ReturnsAsync(_mockConfig);
 
         _service = new CommunicationService(_context, _mockEmail.Object, _mockLogger.Object, _mockOrgConfig.Object);
     }
@@ -137,5 +143,86 @@ public class CommunicationServiceTests : TestBase
         // Assert
         _mockEmail.Verify(x => x.SendEmailAsync("exec@e.com", "Type Subject", It.Is<string>(b => b.Contains("Type Body")), It.IsAny<CancellationToken>()), Times.Once);
         _mockEmail.Verify(x => x.SendEmailAsync("general@e.com", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    public async Task SendEmailByCodeAsync_ShouldSubstituteOrgLevelVariables()
+    {
+        // Org variables must resolve on the SendEmailByCodeAsync path (used by SendIndividualEmailAsync),
+        // not just the fuller SendTemplatedEmailAsync path — both now share BuildTemplateVariables.
+        var member = new Member
+        {
+            FullName = "Org Var Tester", Email = "orgvar@e.com", NID = "1", MobileNo = "0",
+            FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A",
+            EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0"
+        };
+        _context.Members.Add(member);
+        _context.EmailTemplates.Add(new EmailTemplate
+        {
+            Code = "ORG_VARS",
+            Subject = "Welcome to {{OrgName}}",
+            Body = "Contact us: {{SupportEmail}} or visit {{PortalUrl}} ({{CurrentYear}})",
+            Description = "Org var test"
+        });
+        await _context.SaveChangesAsync();
+
+        await _service.SendIndividualEmailAsync(member.Id, "ORG_VARS");
+
+        _mockEmail.Verify(x => x.SendEmailAsync(
+            "orgvar@e.com",
+            "Welcome to GHC Alumni Association",
+            It.Is<string>(b => b.Contains("support@ghcaa.org") && b.Contains("https://ghcaa.example/portal") && b.Contains(DateTime.UtcNow.Year.ToString())),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public async Task SendTemplatedEmailAsync_ShouldHtmlEncodeMemberSuppliedValues()
+    {
+        // A member with markup in FullName must not have it injected raw into the email HTML.
+        var year = 1999;
+        var member = new Member
+        {
+            FullName = "<script>alert(1)</script>", Email = "xss@e.com", NID = "1", MobileNo = "0",
+            FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A",
+            EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0",
+            AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsGHC = true, PassingYear = year, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } }
+        };
+        _context.Members.Add(member);
+        _context.EmailTemplates.Add(new EmailTemplate { Code = "XSS_TEST", Subject = "S", Body = "Hello {{FullName}}", Description = "XSS test" });
+        await _context.SaveChangesAsync();
+
+        await _service.SendBatchEmailAsync(new List<int> { year }, "XSS_TEST");
+
+        _mockEmail.Verify(x => x.SendEmailAsync(
+            "xss@e.com",
+            "S",
+            It.Is<string>(b => !b.Contains("<script>") && b.Contains("&lt;script&gt;")),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public async Task SmsChannelTemplate_ShouldRoundTripThroughCreateUpdateGet()
+    {
+        // Abstraction check: an Sms-channel template must persist and read back correctly even
+        // though no send path is wired for it yet.
+        var created = await _service.CreateTemplateAsync(new EmailTemplate
+        {
+            Code = "SMS_TEST",
+            Channel = MessageChannel.Sms,
+            Subject = "",
+            Body = "Your OTP is {{OtpCode}}",
+            Description = "SMS OTP test"
+        });
+
+        created.Channel.Should().Be(MessageChannel.Sms);
+
+        created.Body = "Your OTP code is {{OtpCode}}";
+        var updated = await _service.UpdateTemplateAsync(created);
+        updated.Channel.Should().Be(MessageChannel.Sms);
+        updated.Body.Should().Be("Your OTP code is {{OtpCode}}");
+
+        var fetched = await _service.GetTemplateByCodeAsync("SMS_TEST");
+        fetched.Should().NotBeNull();
+        fetched!.Channel.Should().Be(MessageChannel.Sms);
     }
 }

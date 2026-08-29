@@ -75,6 +75,20 @@ export class RichTextEditor implements AfterViewInit, OnChanges, OnDestroy {
         this.valueChange.emit(text);
     }
 
+    /** Inserts text at the current cursor position (Quill selection, or end of content as a fallback). */
+    insertAtCursor(text: string): void {
+        if (this.quill) {
+            const range = this.quill.getSelection(true) || { index: this.quill.getLength(), length: 0 };
+            this.quill.insertText(range.index, text);
+            this.quill.setSelection(range.index + text.length, 0);
+            this.value = this.quill.root.innerHTML;
+            this.valueChange.emit(this.value);
+        } else {
+            this.value = (this.value || '') + text;
+            this.valueChange.emit(this.value);
+        }
+    }
+
     private initQuill(): void {
         if (!this.editorContainer) {
             return;

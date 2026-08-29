@@ -1,10 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using static GHCAA.Domain.Enums;
 
 namespace GHCAA.Domain.Models
 {
     public class EmailTemplate
     {
         public int Id { get; set; }
+
+        public MessageChannel Channel { get; set; } = MessageChannel.Email;
 
         [Required]
         [MaxLength(50)]
