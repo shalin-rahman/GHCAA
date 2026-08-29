@@ -91,5 +91,41 @@ namespace GHCAA.Tests.Data
                 "System.Text.Json silently drops unmatched keys instead of failing, which is exactly " +
                 "how the 'Category' (should be 'ArticleCategory') bug reached production undetected.");
         }
+
+        // Regression coverage for the "PhotoPath": "..." bug (GHCAA.Infrastructure/Data/Seed/photos.json's
+        // EventPhoto Id=1 live-DB row, mirroring the earlier news.json "ImageUrl": "..." incident): a
+        // path/URL field can hold a syntactically valid JSON string that is still garbage — punctuation-only
+        // placeholder text left over from manual data entry. Key-matching alone doesn't catch this since the
+        // key is correct; this asserts every *Path/*Url string value is either null/empty or contains at
+        // least one alphanumeric character, so a bare "..." placeholder fails fast in CI instead of only
+        // surfacing as a live 404 in the browser.
+        [TestCaseSource(nameof(SeedFiles))]
+        public void SeedFile_EveryPathOrUrlValue_IsNotPunctuationPlaceholder((string File, Type EntityType) seed)
+        {
+            var path = Path.Combine(SeedDirectory(), seed.File);
+            var json = File.ReadAllText(path);
+            using var doc = JsonDocument.Parse(json);
+
+            var badValues = new List<string>();
+            foreach (var record in doc.RootElement.EnumerateArray())
+            {
+                foreach (var prop in record.EnumerateObject())
+                {
+                    if (prop.Value.ValueKind != JsonValueKind.String) continue;
+                    if (!prop.Name.EndsWith("Path", StringComparison.OrdinalIgnoreCase) &&
+                        !prop.Name.EndsWith("Url", StringComparison.OrdinalIgnoreCase)) continue;
+
+                    var value = prop.Value.GetString();
+                    if (string.IsNullOrEmpty(value)) continue;
+                    if (!value.Any(char.IsLetterOrDigit))
+                        badValues.Add($"{prop.Name}=\"{value}\"");
+                }
+            }
+
+            badValues.Should().BeEmpty(
+                $"every *Path/*Url value in {seed.File} must contain real content, not punctuation-only " +
+                "placeholder text like \"...\" — this exact pattern reached both news.json and photos.json " +
+                "in production and only surfaced as a browser 404, not a deserialization failure.");
+        }
     }
 }
