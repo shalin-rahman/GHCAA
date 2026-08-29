@@ -1,9 +1,21 @@
+/*
+ * Background photograph of the original Govt. Haraganga College building, same asset and
+ * fallback chain as the /about banner (about.scss) — replace the file at this path to change
+ * both at once. The linear-gradient scrim keeps the existing dark login-card readable over it.
+ */
 .login-page {
     height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #050505;
+    background-color: #050505;
+    background-image:
+        linear-gradient(rgba(5, 5, 5, 0.82), rgba(5, 5, 5, 0.88)),
+        url('/assets/images/campus/ghc-old-building.jpg'),
+        url('/assets/images/concept/artistic_campus_watercolor_1773859737909.png');
+    background-size: cover, cover, cover;
+    background-position: center, center, center;
+    background-repeat: no-repeat, no-repeat, no-repeat;
     position: relative;
     overflow: hidden;
     font-family: 'Outfit', 'Inter', sans-serif;

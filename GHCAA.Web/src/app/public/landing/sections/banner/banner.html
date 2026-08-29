@@ -4,7 +4,10 @@
         <div class="hero-logo-box">
             <app-logo-spinner [size]="160" [ripple]="false"></app-logo-spinner>
         </div>
-        <h2 class="reveal-text">Reconnecting <span class="highlight">HARAGANGIAN</span></h2>
+        <h1 class="reveal-text">Reconnecting <span class="highlight">HARAGANGIAN</span></h1>
+        <p class="hero-institution-line">
+            The Official Alumni Association of {{ orgConfigService.config()?.branding?.institutionName || 'Govt. Haraganga College' }}, Munshiganj
+        </p>
         <div class="reveal-subtitle">
             <div class="subtitle-pill px-10">
                 Sharing Heritage, Aligning Lives, Integrating Networks

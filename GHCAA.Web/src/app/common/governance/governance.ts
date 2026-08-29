@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { NetworkingService, MemberSummary } from '../../core/services/networking.service';
 import { ConstitutionService, Constitution } from '../../core/services/constitution.service';
 import { getECPositionName, getECPositionForPeriod } from '../../core/constants/app.constants';
+import { formatPeriodRange } from '../../core/utils/date.util';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 
@@ -87,6 +88,10 @@ export class Governance implements OnInit {
             },
             error: err => console.error('Failed to load governance periods', err)
         });
+    }
+
+    periodLabel(p: { title: string; startDate: string | Date; endDate?: string | Date; isActive: boolean }): string {
+        return `${p.title} (${formatPeriodRange(p)})`;
     }
 
     onPeriodChange(id: any) {

@@ -182,6 +182,17 @@ supersedes, without deleting, a version a newer one has replaced, precisely so t
 production database that was created months earlier still receives a constitution amendment shipped
 today.
 
+A separate risk sits in `LoadSeed<T>`'s deserialisation step itself rather than in when it runs:
+`System.Text.Json.JsonSerializer.Deserialize<List<T>>` silently discards any JSON key that does not
+match a public property on `T`, with no exception and no log line. A field renamed on the entity
+without the same rename in its seed file therefore reaches production as a quietly wrong default —
+confirmed in practice, not hypothetically, when a stale `Category` key (the entity's real property
+had been renamed to `ArticleCategory`/`JobCategory`/`FinancialCategory`) left several thousand seeded
+records defaulted to the wrong enum value across three unrelated seed files. The mitigation is a
+reflection-based regression test (`SeedDataIntegrityTests`) that parses each seed file's raw JSON keys
+and asserts every one matches a real property on its target type, turning a silent runtime default
+into a build-time failure.
+
 ## 6.6 Interface Design
 
 The API resource model follows a `/api/[controller]` convention with sub-resources expressed as path
@@ -199,8 +210,17 @@ structural decision rather than a local check: `SecurityStampMiddleware`, which 
 role change take effect within one request rather than at token expiry; the query-string token
 allowance in the middleware pipeline, which exists only to let a file download authenticate without a
 custom header and is scoped, in the pipeline order of Figure 6.15, to run before the ordinary
-authentication step rather than replacing it; and the payment-gateway posture of §9.9, under which the
-platform never stores a payment credential of its own.
+authentication step rather than replacing it; the payment-gateway posture of §9.9, under which the
+platform never stores a payment credential of its own; and step-up authentication for destructive,
+financial and identity-changing admin actions, which re-verifies an already-authenticated Admin or
+SuperAdmin session by email OTP before it may reach one of five gated endpoints. The verification
+result is carried as a claim on the JWT rather than as server-side session state — the API has no
+session store to hold it in — so a claim's continued validity across the access token's routine
+hourly refresh is established by validating the outgoing token's signature and issuer before its
+step-up claim is trusted forward, not by re-running the OTP challenge on every refresh. A 30-day
+grace period since last verification, not a per-action or per-login prompt, was the deliberate
+trade-off between the control's purpose (limiting the blast radius of a stolen or misused session)
+and admin usability.
 
 ## 6.8 User-Interface Design
 

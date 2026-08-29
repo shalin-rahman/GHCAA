@@ -85,7 +85,20 @@
 7.10 [DONE] Mobile: Credentials stored only upon explicit biometric opt-in
 7.11 [DONE] Mobile: SharedPreferences preservation on logout (preserving layout)
 7.12 [DONE] Mobile: Unified userProfileProvider to prevent sync-re-fetch loops
-7.13 [TODO] Security: Two-Factor Authentication (2FA) for admin actions
+7.13 [DONE 2026-08-29] Security: Admin step-up (2FA) for destructive/financial/identity actions.
+Reuses the existing `IOtpService` (new `OtpPurpose.AdminStepUp`, OTP codes now scoped by purpose
+so a registration code can never satisfy a step-up challenge) rather than building new OTP
+plumbing. New `POST /api/auth/admin/step-up/request` + `/verify` endpoints; a
+`[RequireStepUp]` action filter gates 7 endpoints: member archive, EC hard-delete, financial
+ledger add/update/delete, system-admin delete, payment-config delete. Verification is a JWT claim
+(`step_up_verified_at`) with a **30-day grace period since last verification** (not per-action —
+tuned down from an initial 15-minute design per user feedback: "don't want OTP on every
+action/login"), carried forward across the access token's hourly silent refresh via
+`TokenService.TryGetValidStepUpEpoch` (validates the outgoing token's signature before trusting
+its claim) so the grace period survives normal activity but a fresh login always starts
+unverified. Angular: `StepUpService` + `app-step-up-dialog` (mounted once at app root next to
+`<app-toast>`) + an interceptor branch that catches `403 STEP_UP_REQUIRED` and retries. 20 new
+backend tests + 8 frontend tests. `dotnet test` 468/468, `npx vitest run` 335/335 pass.
 7.14 [DONE 2026-08-22] Security: Biometric Authentication (FaceID/Fingerprint) VERIFIED 2026-08-22 — this was already implemented and mis-tracked. `local_auth ^2.2.0` is in `pubspec.yaml`; `lib/core/services/biometric_service.dart` exposes `isBiometricsAvailable()`, `getAvailableBiometrics()`, `authenticate({reason})` with a graceful Flutter-Web false; `auth_service.login(..., enableBiometric)` stores credentials only on opt-in; `app_home_screen.dart` gates the fast-login affordance on `_checkBiometrics()`.
 7.15 [DONE] Security: Social Auth (OAuth2) - LinkedIn/Google
 7.16 [TODO] Hardening: SSL Pinning and Binary Obfuscation
@@ -1580,14 +1593,16 @@ throwaway wwwroot), plus `[assembly: InternalsVisibleTo("GHCAA.Tests")]` on `GHC
 `Microsoft.AspNetCore.Mvc.Testing` package on `GHCAA.Tests.csproj` to make that possible. See
 [[gotcha_mapfallback_nonfile_routing_precedence]].
 
-44.18 [TODO] Not fixed — pre-existing, not caused by this session: local seed data has `superadmin`
-restoring a session with `role: "Member"` (not `SuperAdmin`), so `/admin/dashboard` redirects to
-`/portal/dashboard` and `GET /api/gallery/albums/mine` 403s locally under that account. Matches the
-already-documented [[session_area33_review_triage]] admin login role/seed mismatch — needs its own
-investigation into the local DB seed, not a code fix. **Confirmed NOT affecting `shalin`**: a live
-local login as `shalin` returns `"role":"SuperAdmin"` — `ProtectedSuperAdminSeeder`
-([[feedback_protected_superadmin_pattern]]) is intact and working, untouched by anything in this
-session. The role oddity is specific to the separate seeded `superadmin` test account.
+44.18 [DONE 2026-08-29] **Root cause found and fixed**: not a seed-data problem — a seeder-ordering
+bug in `Program.cs`. `ProtectedSuperAdminSeeder.EnsureAsync` ran correctly, but the Visual-profile
+block ran *after* it and, via `OverrideEFCoreMigratedData`, wiped and re-inserted every `User` row
+from `Seed/Visual/users.json` (which carries no role data) — silently undoing the just-restored
+`SuperAdmin` role on every local boot. Fixed by moving the protected-admin restore to run *last*,
+after the Visual-profile reseed, so it's never undone. Also added `"superadmin"` to
+`AppSettings:ProtectedSuperAdmins` (previously only `"shalin"` was listed, despite this TODO
+explicitly naming `superadmin` as affected). 5 new tests in
+`GHCAA.Tests/Services/ProtectedSuperAdminSeederTests.cs`, including one that reproduces the exact
+wipe-then-reseed sequence and asserts the role survives. `dotnet test` 468/468 pass.
 
 44.19 [DONE] Web — centralized the "run this once authChecked() settles AND the user turns out to be
 logged in" pattern (introduced 4 times this session: `AlertService`, `gallery.ts`, `events.ts`,
@@ -1716,3 +1731,135 @@ members' ৳47,000 in membership fees is correctly reflected in `PaymentHistorie
 but not in the aggregate income/expense ledger view. This is a pre-existing gap in how seeded/bulk
 member data relates to the org ledger, not something this import introduced — flagging for whoever
 next needs the aggregate ledger to reflect bulk-imported history.
+
+# Area 47 — Live preprod triage: seed-data integrity, dashboard accuracy, landing polish (2026-08-29)
+
+47.1 [DONE] **Seed-data integrity regression suite.** New `GHCAA.Tests/Data/SeedDataIntegrityTests.cs`
+reflects every `LoadSeed<T>("*.json")` call in `ApplicationDbContext` and asserts every JSON key in
+the file matches a real public property on its target entity — `System.Text.Json.Deserialize`
+silently drops unmatched keys with no error, so a renamed/stale field name in seed data reaches
+production undetected. Caught 3 real, previously-live bugs on first run: `news.json` had a stray
+`Category` key (should be `ArticleCategory`) causing every seeded article to silently default to
+`ArticleCategory.Event` regardless of its real type; `jobs.json` had the same `Category`→
+`JobCategory` mismatch on both listings; `members.json` carried a dead `ECPosition` key (uniform `0`
+across all 631 records, never bound to anything — real EC roles live in `ECMember`/`ECPeriod`).
+`payment_histories.json` had the same `Category`→`FinancialCategory` mismatch on 1166 of 1213
+transactions, meaning every one of them silently defaulted to `FinancialCategory.Other` instead of
+its real category. All 4 seed files fixed; live preprod DB backfilled to match (`NewsPosts`,
+`JobOpportunities`, `PaymentHistories` — 1166-row single-round-trip bulk `UPDATE`).
+
+47.2 [DONE] **Dashboard "Net Fund Balance" undercounted real income.** `MemberService.GetDashboardStatsAsync`
+only summed `FinancialRecords` (the manually-entered org ledger) — confirmed **empty (0 rows)** on
+live preprod — while `PaymentHistories` (real member registration/membership/event payments) held
+1213 completed transactions totaling ৳1,796,000, entirely excluded from the balance shown to
+SuperAdmins. Fixed: balance now = ledger income + completed `PaymentHistories` − ledger expense.
+Matches the gap already flagged in Area 46's May-2026-import note above.
+
+47.3 [DONE] **Admin dashboard KPI-tile inconsistency.** "Active Members" was the only stat-card with a
+progress-bar/rate treatment ("X% of total") the sibling cards didn't have — visually flagged as
+"design broken" and, since bulk-imported members are all seeded `Status=Active`, the number is
+almost always identical to "Total Alumni" right next to it, making the emphasis read as duplicated
+info. Normalized to the same plain-card layout as its siblings; removed the now-dead
+`membershipRate` getter.
+
+47.4 [DONE] **Recent-News widget mislabeled an article as an Event** (green "LIVE" badge on a
+Pending-status article) — root cause was 47.1's `ArticleCategory` bug, now fixed at the data layer.
+Also fixed the widget's own status badge, which only distinguished Draft/"Live" and had no
+Pending state — now uses the shared `SUBMISSION_STATUS_MAP` (Draft/Pending Approval/Approved/Rejected).
+
+47.5 [DONE] **Login/about-us campus background.** `/assets/images/campus/ghc-old-building.jpg` was
+referenced by `about.scss` but the file never existed (permanent 404, silent fallback to concept
+art). Real photo added (source watermark removed via feathered blur — no inpainting tool available);
+also wired into `login.scss`, which previously had no campus photo at all (flat `#050505`).
+
+47.6 [DONE] **EC period dates never displayed anywhere** — both the landing page's EC preview and the
+governance page's period selector showed only the period title, never its date range. Added
+`formatPeriodRange()` (`core/utils/date.util.ts`) — an *active* period always reads "YYYY - Present"
+regardless of its stored target end date, since `isActive` is the real signal of whether it has
+concluded. Live preprod's one period ("Founding Interim Executive Committee", 2024-12-01 →
+2026-06-30 target) now correctly shows "(Period: 2024 - Present)". **Not done**: a second, older
+"2015-2017" committee period the user referenced was never entered into the system at all — needs
+real confirmed dates/title before it can be added; not invented here.
+
+47.7 [DONE] Misc landing-page polish: removed the "Ready to Step Into the Legacy?" CTA banner
+section entirely (component + registration deleted); hero headline and all section headers (shared
+`.section-header h2` class) reduced 15% font size; inter-section vertical padding centralized into
+one `--section-padding-y` token (was `padding: 5rem 0` duplicated 8× in `landing.scss`) and reduced
+20% (`5rem`→`4rem`); "Join This Tier" button no longer stretches full-width (no explicit width, so
+it filled its flex/grid ancestor unlike every other `.btn.btn-accent` on the page — now `width: fit-content`
+like its siblings); new `image.util.ts` `safeImageUrl()` guard (shared by gallery/admin-dashboard/
+article-approval/member-articles) so a non-URL string (bad seed/import data) never reaches an `<img src>` again.
+
+47.8 [DONE] **SEO baseline** — `robots.txt` and `sitemap.xml` (neither existed), a canonical `<link>`,
+and `AlumniOrganization` JSON-LD structured data in `index.html` targeting "Govt. Haraganga College
+Munshiganj" / "Alumni Association"; `robots.txt` disallows `/admin/` and `/portal/` so only the
+public site is indexed.
+
+47.9 [DONE] **Mutation-coverage audit** (this session, full report in chat history — not reproduced
+here) found ~60% of POST/PUT/DELETE actions covered; closed the two highest-risk gaps it flagged —
+`RolesController.DeleteUser` and `AdminGovernanceController.DeleteECMember`, both `[RequireStepUp]`-
+protected destructive deletes with zero prior coverage (`GHCAA.Tests/Controllers/DestructiveStepUpActionsTests.cs`).
+**Not done**: the remaining ~40% gap (notably `AuthController`'s non-Login actions — social login,
+refresh, logout, the step-up request/verify endpoints this session added, reset-password — and
+`LookupsController`'s full CRUD) is still open; report exists but no further remediation started.
+
+47.10 [TODO] Still open, explicitly deferred: `docs/deploy_connection.txt` committed live-credentials
+file (flagged, not rotated); `docs/BUSINESS_FUNCTIONALITY_REVIEW_PLAN.md:79` has a real password in
+plain text (flagged, not scrubbed); member profile photos are genuinely missing for most of the 631
+bulk-imported alumni (not a bug — no photo was ever supplied at import time).
+
+`dotnet test` 486/486, `npx vitest run` 70 files / 347 tests, `ng build` clean throughout this Area.
+
+47.11 [DONE] **SEO baseline round 2**: homepage `<h1>` was actually an `<h2>` (the hero headline) —
+the single most search-weighted tag on the site's most important page had none; fixed. Per-route
+`<title>` via Angular Router's native `title:` route property (was one static site-wide title for
+every page) + a small `Meta`-service hook in `app.ts` reading `route.data.description` on navigation,
+covering home/about/contact/events/news/jobs/register/etc. Added a visible "Official Alumni
+Association of Govt. Haraganga College, Munshiganj" line under the hero H1 (config-driven off
+`OrgConfigService`) so the college's own name appears in real page content, not just metadata —
+targets "Govt. Haraganga College" / "Haraganga College" queries specifically, not just "Haragangian".
+`robots.txt`/`sitemap.xml`/canonical/JSON-LD from 47.8 already covered the crawl-layer half of this.
+
+47.12 [DONE] Added missing unit tests for this Area's two new shared/central utilities:
+`image.util.spec.ts` (`safeImageUrl` — used by gallery/admin-dashboard/article-approval/member-articles)
+and confirmed `date.util.spec.ts` (`formatPeriodRange`) was updated when its behavior was simplified
+(dropped the "YYYY - Present" branch per user feedback — always shows real stored years now, no
+"ongoing" language, single period only; no second historical 2015-2017 period was added — real
+dates for that were never confirmed).
+
+47.13 [TODO] **Mutation (POST/PUT/DELETE) coverage remediation — task breakdown.** 47.9 closed the top
+2 items (`RolesController.DeleteUser`, `AdminGovernanceController.DeleteECMember`). Remaining ~35%,
+broken into independently-completable tasks below. Common approach for all of them: one new
+`GHCAA.Tests/Controllers/*Tests.cs` file per controller, mocking the underlying service interface
+(same pattern as `DestructiveStepUpActionsTests.cs`/`GalleryControllerTests.cs`) — one success-path
+test + one failure-path test per action is the target depth; this is breadth-over-depth work, not
+deep edge-case testing. Run `dotnet test` after each task, not just at the end.
+
+47.13.1 [TODO] **`AuthController` non-Login actions** (highest priority — the security surface, and
+this session's own new step-up endpoints are among the untested ones): `GoogleLogin`, `FacebookLogin`,
+`Refresh`, `RefreshMobile`, `Logout`, `RequestStepUp`, `VerifyStepUp`, `ResetPassword`. New file
+`AuthControllerMutationTests.cs`.
+
+47.13.2 [TODO] **`LookupsController` full CRUD** (`CreateLookup`/`UpdateLookup`/`DeleteLookup`) — zero
+coverage today, controls dropdown/lookup master data; same "silent bad data" risk class as this
+Area's seed-integrity bugs (47.1). New file `LookupsControllerTests.cs`.
+
+47.13.3 [TODO] **`RolesController` remaining actions** (`CreateAdmin`, `CreateRole`, `AssignRole`,
+`RemoveRole` — `DeleteUser` already covered per 47.9). Extend the existing
+`DestructiveStepUpActionsTests.cs` or add a sibling `RolesControllerTests.cs`.
+
+47.13.4 [TODO] **`AdminPollController`** (`DeletePoll`, `ToggleStatus` — `CreatePoll` already covered).
+New file or extend existing poll test coverage.
+
+47.13.5 [TODO] **`PaymentConfigController`** (`Create`, `Toggle`, `Delete` — `Update`/`SeedDefaults`
+already covered per the mutation-coverage audit). New file `PaymentConfigControllerTests.cs`.
+
+47.13.6 [TODO] Lower priority, batch together when picked up: `AdminController` (`SyncMembers`,
+`BulkArchiveInactive`, `RestoreMember`, photo/signature/document-upload actions), `GalleryController`
+(`UploadPhoto`, `ToggleActive`, `ToggleFeatured`, `SubmitMemberPhoto`), `CommunicationController`
+template CRUD (`CreateTemplate`/`UpdateTemplate`/`DeleteTemplate`), `FamilyController`/
+`FamilyLinkController` remaining gaps (`CancelRequest`/`UnlinkMember`/`Remove`/`Cancel`).
+
+47.13.7 [TODO] Once 47.13.1–47.13.6 are done, re-run the original mutation-coverage audit methodology
+(grep every `[HttpPost]/[HttpPut]/[HttpPatch]/[HttpDelete]` action, cross-reference against test
+files) to confirm the gap is actually closed rather than assuming from this list.

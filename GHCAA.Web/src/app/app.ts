@@ -3,7 +3,8 @@
  * Version: 2.0.5 - Professional Suite
  */
 import { Component, inject } from '@angular/core';
-import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { RouterOutlet, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Meta } from '@angular/platform-browser';
 import { ToastComponent } from './common/toast/toast';
 import { StepUpDialog } from './common/step-up-dialog/step-up-dialog';
 import { filter } from 'rxjs';
@@ -16,12 +17,29 @@ import { filter } from 'rxjs';
 })
 export class App {
   private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
+  private meta = inject(Meta);
+
+  private static readonly DEFAULT_DESCRIPTION =
+    'Official portal of the Haragangians. Reconnecting Haraganga College members worldwide through heritage, networking, and advancement.';
 
   constructor() {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       window.scrollTo({ top: 0, behavior: 'instant' });
+      this.updateMetaDescription();
     });
+  }
+
+  // Angular Router's `title` route property sets <title> natively; there's no equivalent for
+  // <meta name="description">, so each route that wants a unique one carries it in `data.description`
+  // and this reads it off the deepest activated route on every navigation. Routes without one keep
+  // the site-wide default from index.html rather than being left blank.
+  private updateMetaDescription(): void {
+    let route = this.activatedRoute;
+    while (route.firstChild) route = route.firstChild;
+    const description = route.snapshot.data['description'] ?? App.DEFAULT_DESCRIPTION;
+    this.meta.updateTag({ name: 'description', content: description });
   }
 }

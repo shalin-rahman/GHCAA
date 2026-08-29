@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { safeImageUrl } from '../../core/utils/image.util';
 import { NewsService } from '../../core/services/news.service';
 import { NewsPost } from '../../core/models/business.models';
 import { NotificationService } from '../../core/services/notification.service';
@@ -100,5 +101,9 @@ export class ArticleApproval implements OnInit {
         this.isProcessing.set(false);
       }
     });
+  }
+
+  safeImg(url?: string | null): string {
+    return safeImageUrl(url, '/assets/placeholders/image-placeholder.svg');
   }
 }

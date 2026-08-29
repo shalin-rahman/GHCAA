@@ -31,6 +31,18 @@ A granular, module-by-module breakdown of the platform's features — including 
   - Role-based access: granular JWT claims for Member vs Admin vs SuperAdmin.
 - **Dependencies**: JWT token service.
 
+### 1.2a Admin Step-Up Verification (2FA)
+- **Business description**: A second, email-OTP verification required before destructive/financial/identity admin actions (member archive, EC hard-delete, financial ledger writes, system-admin delete, payment-config delete) even for an already-authenticated Admin/SuperAdmin session.
+- **User roles**: Admin, SuperAdmin.
+- **Inputs / outputs**:
+  - API: `POST /api/auth/admin/step-up/request`, `POST /api/auth/admin/step-up/verify`.
+  - Key fields: 6-digit OTP code, delivered to the admin's registered email.
+- **Validations & rules**:
+  - Once verified, a 30-day grace period applies (tracked via a JWT claim carried forward across normal token refreshes) — not a per-action or per-login re-prompt.
+  - A fresh login always starts unverified; the grace period only survives continued activity within an existing session.
+  - OTP codes are purpose-scoped (`OtpPurpose.AdminStepUp`), so a registration or password-reset code can never satisfy a step-up challenge.
+- **Dependencies**: Existing `IOtpService`/email template plumbing (no new OTP infrastructure).
+
 ### 1.3 Personal Profile & Privacy Control
 - **Business description**: Members manage personal, academic, and professional information with granular privacy toggles.
 - **User roles**: Member.

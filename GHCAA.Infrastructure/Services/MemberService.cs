@@ -885,15 +885,25 @@ namespace GHCAA.Infrastructure.Services
             decimal? balance = null;
             if (isPrivileged)
             {
-                var totalCollection = await _db.FinancialRecords
+                // Two separate income sources feed the org's actual funds: the general ledger
+                // (FinancialRecords — donations/grants/manually-recorded income and expenses) and
+                // member payment collection (PaymentHistories — registration/membership/event
+                // fees taken through the payment flow). Summing only FinancialRecords understates
+                // the real balance whenever it's sparse/empty and PaymentHistories carries the
+                // actual transaction volume, which is the normal case for this org.
+                var ledgerIncome = await _db.FinancialRecords
                     .Where(r => r.RecordType == Enums.FinancialRecordType.Income)
                     .SumAsync(r => r.Amount, cancellationToken);
 
-                var totalExpense = await _db.FinancialRecords
+                var ledgerExpense = await _db.FinancialRecords
                     .Where(r => r.RecordType == Enums.FinancialRecordType.Expense)
                     .SumAsync(r => r.Amount, cancellationToken);
 
-                balance = totalCollection - totalExpense;
+                var memberPayments = await _db.PaymentHistories
+                    .Where(p => p.Status == Enums.PaymentStatus.Completed)
+                    .SumAsync(p => p.Amount, cancellationToken);
+
+                balance = ledgerIncome + memberPayments - ledgerExpense;
             }
 
             return new

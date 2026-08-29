@@ -32,7 +32,7 @@
                 <tr>
                     <td>
                         <div class="article-info">
-                            <img class="thumb" [src]="article.imageUrl || '/assets/placeholders/image-placeholder.svg'"
+                            <img class="thumb" [src]="safeImg(article.imageUrl)"
                                 alt="" appImgFallback>
                             <div class="txt">
                                 <strong>{{ article.title }}</strong>
@@ -72,7 +72,7 @@
         <div class="modal-body custom-scrollbar">
             <div class="article-preview">
                 @if (selectedArticle()?.imageUrl) {
-                <img [src]="selectedArticle()?.imageUrl" alt="Cover" class="preview-hero" appImgFallback>
+                <img [src]="safeImg(selectedArticle()?.imageUrl)" alt="Cover" class="preview-hero" appImgFallback>
                 }
                 <div class="preview-meta mb-6 flex gap-4">
                     <span class="badge bg-gold-gradient text-black">{{ selectedArticle()?.articleCategory }}</span>

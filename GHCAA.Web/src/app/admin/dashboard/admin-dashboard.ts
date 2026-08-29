@@ -2,12 +2,14 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { safeImageUrl } from '../../core/utils/image.util';
 import { AdminService, DashboardStats } from '../../core/services/admin.service';
 import { NavService } from '../../core/services/nav.service';
 import { NewsService } from '../../core/services/news.service';
 import { EventsService } from '../../core/services/events.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
 
 interface StatCard {
   icon: string;
@@ -88,17 +90,21 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  get membershipRate(): number {
-    const s = this.stats();
-    if (!s || !s.totalMembers) return 0;
-    return Math.round((s.active / s.totalMembers) * 100);
-  }
-
   get inactiveCount(): number {
     return this.stats()?.inactive ?? 0;
   }
 
   formatBDT(value: number): string {
     return `৳${value.toLocaleString('en-BD')}`;
+  }
+
+  // '' sentinel fallback (rather than the shared util's default logo) so the template's
+  // existing @if/@else (thumb vs. 📄 placeholder icon) keeps working unchanged.
+  safeImg(item: { coverImageUrl?: string | null; imageUrl?: string | null }): string {
+    return safeImageUrl(item.coverImageUrl || item.imageUrl, '');
+  }
+
+  newsStatus(item: { status?: string | number }): { label: string; class: string } {
+    return SUBMISSION_STATUS_MAP[item.status ?? 'Approved'] ?? SUBMISSION_STATUS_MAP['Approved'];
   }
 }

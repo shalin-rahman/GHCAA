@@ -34,6 +34,15 @@ export function toWireDate(value: any): string | null {
   return `${y}-${mo}-${da}`;
 }
 
+/** An EC (or any) period's start/end -> "YYYY" (no end date) or "YYYY - YYYY". Always the real
+ *  stored years — no "Present"/"ongoing" label, regardless of the isActive flag. */
+export function formatPeriodRange(period: { startDate: string | Date; endDate?: string | Date | null; isActive: boolean }): string {
+  const startYear = new Date(period.startDate).getFullYear();
+  if (!period.endDate) return `${startYear}`;
+  const endYear = new Date(period.endDate).getFullYear();
+  return startYear === endYear ? `${startYear}` : `${startYear} - ${endYear}`;
+}
+
 /** dd-MM-yyyy (or ISO) -> Date for validation/comparison. null if unparseable. */
 export function parseDisplayDate(value: any): Date | null {
   if (!value) return null;

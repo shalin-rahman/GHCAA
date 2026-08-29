@@ -50,12 +50,7 @@
                 <h3>{{ stats()?.active || 0 }}</h3>
                 <p>Active Members</p>
             </div>
-            <div class="stat-rate">
-                <div class="rate-bar">
-                    <div class="rate-fill" [style.width]="membershipRate + '%'"></div>
-                </div>
-                <span class="rate-label">{{ membershipRate }}% of total</span>
-            </div>
+            <button class="action-btn" routerLink="/admin/members">Manage</button>
         </div>
 
         <div class="glass-card stat-card ripple-effect accent">
@@ -114,9 +109,9 @@
             <div class="news-feed-list">
                 @for (item of recentNews(); track item.id) {
                 <div class="news-feed-item">
-                    @if (item.coverImageUrl || item.imageUrl) {
+                    @if (safeImg(item); as thumb) {
                     <div class="news-thumb">
-                        <img [src]="item.coverImageUrl || item.imageUrl" [alt]="item.title" appImgFallback>
+                        <img [src]="thumb" [alt]="item.title" appImgFallback>
                     </div>
                     } @else {
                     <div class="news-thumb-placeholder">📄</div>
@@ -126,8 +121,8 @@
                         <strong>{{ item.title }}</strong>
                         <small>{{ item.publishedAt || item.createdAt | date:'dd-MM-yyyy' }}</small>
                     </div>
-                    <div class="news-status-chip" [class.published]="item.status !== 'Draft'">
-                        {{ item.status === 'Draft' ? 'Draft' : 'Live' }}
+                    <div class="news-status-chip" [class]="newsStatus(item).class">
+                        {{ newsStatus(item).label }}
                     </div>
                 </div>
                 }

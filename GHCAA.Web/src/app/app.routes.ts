@@ -9,54 +9,71 @@ export const routes: Routes = [
         children: [
             {
                 path: '',
-                loadComponent: () => import('./public/landing/landing').then(m => m.Landing)
+                loadComponent: () => import('./public/landing/landing').then(m => m.Landing),
+                title: 'Govt. Haraganga College Alumni Association | Haragangian Portal',
+                data: { description: 'Official alumni association of Govt. Haraganga College, Munshiganj — reconnecting Haragangians worldwide through heritage, networking, and advancement.' }
             },
             {
                 path: 'login',
-                loadComponent: () => import('./public/login/login').then(m => m.Login)
+                loadComponent: () => import('./public/login/login').then(m => m.Login),
+                title: 'Member Login | GHCAA'
             },
             {
                 path: 'register',
-                loadComponent: () => import('./public/register/register').then(m => m.Register)
+                loadComponent: () => import('./public/register/register').then(m => m.Register),
+                title: 'Join the Association | GHCAA',
+                data: { description: 'Register as a member of the Govt. Haraganga College Alumni Association (GHCAA), Munshiganj.' }
             },
             {
                 path: 'reset-password',
-                loadComponent: () => import('./public/reset-password/reset-password').then(m => m.ResetPassword)
+                loadComponent: () => import('./public/reset-password/reset-password').then(m => m.ResetPassword),
+                title: 'Reset Password | GHCAA'
             },
             {
                 path: 'about',
-                loadComponent: () => import('./public/about/about').then(m => m.About)
+                loadComponent: () => import('./public/about/about').then(m => m.About),
+                title: 'About Us | Govt. Haraganga College Alumni Association',
+                data: { description: 'The history, mission, and legacy of Govt. Haraganga College, Munshiganj and its Alumni Association.' }
             },
             {
                 path: 'contact',
-                loadComponent: () => import('./public/contact/contact').then(m => m.Contact)
+                loadComponent: () => import('./public/contact/contact').then(m => m.Contact),
+                title: 'Contact Us | GHCAA',
+                data: { description: 'Get in touch with the Govt. Haraganga College Alumni Association secretariat.' }
             },
             {
                 // Public governance surface. Both pages are anonymous by design — the
                 // constitution and the election rules must be readable without a login.
                 path: 'constitution',
-                loadComponent: () => import('./public/constitution/constitution').then(m => m.ConstitutionPage)
+                loadComponent: () => import('./public/constitution/constitution').then(m => m.ConstitutionPage),
+                title: 'Constitution | GHCAA'
             },
             {
                 path: 'elections',
-                loadComponent: () => import('./public/elections/elections').then(m => m.ElectionsPage)
+                loadComponent: () => import('./public/elections/elections').then(m => m.ElectionsPage),
+                title: 'Elections & Governance | GHCAA'
             },
             {
                 path: 'gallery',
                 loadComponent: () => import('./common/gallery/gallery').then(m => m.Gallery),
-                canActivate: [featureGuard('enableGallery')]
+                canActivate: [featureGuard('enableGallery')],
+                title: 'Event Gallery | GHCAA'
             },
             {
                 path: 'magazine',
-                loadComponent: () => import('./public/magazine/magazine').then(m => m.Magazine)
+                loadComponent: () => import('./public/magazine/magazine').then(m => m.Magazine),
+                title: 'Alumni Magazine | GHCAA'
             },
             {
                 path: 'directory',
-                loadComponent: () => import('./public/directory/public-directory').then(m => m.PublicDirectory)
+                loadComponent: () => import('./public/directory/public-directory').then(m => m.PublicDirectory),
+                title: 'Alumni Directory | GHCAA'
             },
             {
                 path: 'events',
                 canActivate: [featureGuard('enableEvents')],
+                title: 'Events | GHCAA',
+                data: { description: 'Upcoming and past events hosted by the Govt. Haraganga College Alumni Association, Munshiganj.' },
                 children: [
                     { path: '', loadComponent: () => import('./common/events/events').then(m => m.Events) },
                     { path: ':id', loadComponent: () => import('./common/events/events').then(m => m.Events) }
@@ -64,12 +81,15 @@ export const routes: Routes = [
             },
             {
                 path: 'news',
-                loadComponent: () => import('./common/news/news').then(m => m.News)
+                loadComponent: () => import('./common/news/news').then(m => m.News),
+                title: 'News & Notices | GHCAA',
+                data: { description: 'Latest news, updates, and notices from Govt. Haraganga College Alumni Association, Munshiganj.' }
             },
             {
                 path: 'jobs',
                 loadComponent: () => import('./common/jobs/jobs').then(m => m.Jobs),
-                canActivate: [featureGuard('enableJobHub')]
+                canActivate: [featureGuard('enableJobHub')],
+                title: 'Job Hub | GHCAA'
             },
             {
                 path: 'payment',

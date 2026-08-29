@@ -10,6 +10,10 @@
      the page (`.filter-bar` at >=1024px) knows the offset to stick below. */
   --header-height: 4.5rem;
 
+  /* Single source for the vertical rhythm between landing-page sections — was
+     `padding: 5rem 0;` duplicated verbatim ~7 times across landing.scss. */
+  --section-padding-y: 4rem;
+
   /* Core Brand Palette - "Obsidian & Gold Leaf" */
   --bg-color: #ffffff;
   --surface-color: #f8f9fa;

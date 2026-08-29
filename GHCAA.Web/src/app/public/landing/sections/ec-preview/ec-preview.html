@@ -4,7 +4,12 @@
         <div class="section-header">
             <h2>Executive Committee</h2>
             @if (activePeriodTitle()) {
-            <p class="ec-period">{{ activePeriodTitle() }}</p>
+            <p class="ec-period">
+                {{ activePeriodTitle() }}
+                @if (activePeriodDateRange()) {
+                <span class="ec-period-dates">(Period: {{ activePeriodDateRange() }})</span>
+                }
+            </p>
             }
             <p>The leadership driving our association forward.</p>
             <div class="underline"></div>

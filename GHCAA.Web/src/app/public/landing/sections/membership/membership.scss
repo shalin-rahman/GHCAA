@@ -1,1 +1,10 @@
 /* Styles inherited from parent landing.scss */
+
+// The shared .btn/.btn-accent/.btn-sm classes only set padding/font-size/border-radius, not
+// width, so an anchor with no other width constraint stretches to fill this panel's full
+// column width. Every other landing CTA (e.g. jobs-preview's "Explore Job Hub") stays compact
+// because it happens to sit in a narrower flex/grid context — this is the one spot that needed
+// an explicit width to match the shared button system's intended compact-pill look.
+.tier-content-panel > .btn {
+    width: fit-content;
+}

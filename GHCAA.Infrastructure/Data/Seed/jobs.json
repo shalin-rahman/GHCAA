@@ -12,8 +12,7 @@
     "PostedDate": "2026-03-13T08:05:57.627679Z",
     "ExpiryDate": null,
     "IsActive": true,
-    "Category": 3,
-    "PostedById": null
+    "JobCategory": 3
   },
   {
     "Id": 1,
@@ -28,7 +27,6 @@
     "PostedDate": "2026-02-24T00:00:00Z",
     "ExpiryDate": "2026-04-30T23:59:59Z",
     "IsActive": true,
-    "Category": 0,
-    "PostedById": null
+    "JobCategory": 0
   }
 ]

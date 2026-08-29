@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { LookupService } from '../../../../core/services/lookup.service';
 import { CommonModule } from '@angular/common';
 import { LogoSpinnerComponent } from '../../../../common/logo-spinner/logo-spinner';
+import { OrgConfigService } from '../../../../core/services/org-config.service';
 
 @Component({
     selector: 'landing-banner',
@@ -13,6 +14,7 @@ import { LogoSpinnerComponent } from '../../../../common/logo-spinner/logo-spinn
 })
 export class LandingBanner implements OnInit {
     private lookupService = inject(LookupService);
+    orgConfigService = inject(OrgConfigService);
     stats = signal<any>(null);
 
     ngOnInit() {

@@ -7,7 +7,7 @@
         <div class="period-selector-wrap" *ngIf="periods().length > 1">
             <select [ngModel]="selectedPeriodId()" (ngModelChange)="onPeriodChange($event)" class="period-select">
                 @for (p of periods(); track p.id) {
-                <option [value]="p.id">{{ p.title }} {{ p.isActive ? '(Current)' : '' }}</option>
+                <option [value]="p.id">{{ periodLabel(p) }}</option>
                 }
             </select>
         </div>

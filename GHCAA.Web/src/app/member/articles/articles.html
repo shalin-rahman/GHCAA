@@ -25,7 +25,7 @@
         <div class="grid">
             @for (article of mySubmissions(); track article.id) {
             <div class="glass-card article-card reveal-card">
-                <div class="card-image" [style.background-image]="'url(' + (article.imageUrl || '/assets/placeholder.jpg') + ')'">
+                <div class="card-image" [style.background-image]="'url(' + safeImg(article.imageUrl) + ')'">
                     <span class="status-badge" [class]="getStatusInfo(article.status).class">
                         {{ getStatusInfo(article.status).label }}
                     </span>

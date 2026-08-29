@@ -3,12 +3,12 @@
     "Id": 1,
     "Title": "Library Completion",
     "Content": "...",
-    "Category": 0,
     "PublishDate": "2026-03-01T00:00:00Z",
     "IsActive": true,
-    "ImageUrl": "...",
+    "ImageUrl": null,
     "AuthorId": 2,
     "LastModified": null,
-    "Status": 1
+    "Status": 1,
+    "ArticleCategory": 2
   }
 ]

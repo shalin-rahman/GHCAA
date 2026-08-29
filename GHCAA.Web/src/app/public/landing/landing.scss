@@ -93,8 +93,8 @@
     }
 }
 
-.hero h2 {
-    font-size: 4.5rem;
+.hero h1 {
+    font-size: 3.825rem; /* 4.5rem - 15% */
     margin-bottom: 1.5rem;
     /* --text-on-dark is a fixed white; the hero ground is var(--section-bg), which is
        #ffffff in light theme — the headline was white on white there. --text-strong
@@ -130,6 +130,14 @@
     }
 }
 
+.hero-institution-line {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin: 0 0 1.5rem;
+    letter-spacing: 0.3px;
+}
+
 .subtitle-pill {
     background: var(--glass-bg);
     backdrop-filter: blur(24px);
@@ -161,7 +169,7 @@
     max-width: 900px;
     margin: 0 auto 3rem;
     animation: fadeInUp 1.2s cubic-bezier(0.2, 0, 0.2, 1);
-    /* same reason as .hero h2 above: the ground flips, so the text must too */
+    /* same reason as .hero h1 above: the ground flips, so the text must too */
     color: var(--text-main);
     line-height: 1.8;
     font-weight: 400;
@@ -270,7 +278,7 @@
 }
 
 .purpose-identity-section {
-    padding: 5rem 0;
+    padding: var(--section-padding-y) 0;
     background: var(--bg-color);
     border-top: 1px solid rgba(197, 160, 89, 0.05);
 
@@ -591,7 +599,7 @@
 }
 
 .jobs-preview-section {
-    padding: 5rem 0;
+    padding: var(--section-padding-y) 0;
     border-bottom: 1px solid rgba(197, 160, 89, 0.1);
     background: var(--bg-color);
 }
@@ -705,7 +713,7 @@
 }
 
 .membership-section {
-    padding: 5rem 0;
+    padding: var(--section-padding-y) 0;
     background: var(--section-bg-2);
     border-top: 1px solid rgba(197, 160, 89, 0.05);
 }
@@ -727,7 +735,7 @@
     }
 
     h2 {
-        font-size: 3rem;
+        font-size: 2.55rem; /* 3rem - 15% */
         font-weight: 900;
         letter-spacing: -1.5px;
         text-transform: uppercase;
@@ -919,7 +927,7 @@
 
 .news-section {
     background: var(--section-bg-2);
-    padding: 5rem 0;
+    padding: var(--section-padding-y) 0;
 }
 
 .news-grid {
@@ -933,7 +941,7 @@
 }
 
 .events-preview-section {
-    padding: 5rem 0;
+    padding: var(--section-padding-y) 0;
     background: var(--section-bg);
 }
 
@@ -1098,7 +1106,7 @@
 }
 
 .ec-section {
-    padding: 5rem 0;
+    padding: var(--section-padding-y) 0;
     background: var(--section-bg);
     color: var(--text-strong);
 }
@@ -1175,7 +1183,7 @@
 
 .stat-banner {
     background: var(--section-bg);
-    padding: 5rem 0;
+    padding: var(--section-padding-y) 0;
     border-top: 1px solid rgba(197, 160, 89, 0.1);
     border-bottom: 1px solid rgba(197, 160, 89, 0.1);
 }
@@ -1200,7 +1208,7 @@
 }
 
 .final-cta {
-    padding: 5rem 0;
+    padding: var(--section-padding-y) 0;
     background: var(--section-bg);
 
     .cta-content {
@@ -1388,8 +1396,8 @@
         padding-bottom: 4rem;
     }
 
-    .hero h2 {
-        font-size: clamp(1.4rem, 6vw, 2.2rem);
+    .hero h1 {
+        font-size: clamp(1.19rem, 5.1vw, 1.87rem); /* 15% smaller */
         line-height: 1.2;
         padding: 0 1rem;
 
@@ -1536,7 +1544,7 @@
     }
 
     .section-header h2 {
-        font-size: 2.2rem;
+        font-size: 1.87rem; /* 2.2rem - 15% */
     }
 }
 
@@ -1555,11 +1563,22 @@
     gap: 1.5rem;
     font-size: 0.95rem;
 
+    // The global .empty-placeholder.dark rule in styles.scss hardcodes a fixed dark
+    // background + always-white text (a "spotlight" card meant to look the same in both
+    // themes). This landing-specific variant instead wants a subtle theme-aware treatment,
+    // and both rules share the exact same selector — so without an explicit `p` color here,
+    // the global rule's `.dark p { color: white }` wins by cascade order and renders
+    // invisible white-on-near-white text in light theme. Setting it explicitly on `p` (same
+    // specificity as the global rule, loaded after it) keeps this variant properly theme-aware.
     &.dark {
         background: rgba(197, 160, 89, 0.03);
         border-color: rgba(197, 160, 89, 0.1);
         color: var(--text-dim);
         border-style: solid;
+
+        p {
+            color: var(--text-dim);
+        }
     }
 
     .pulse-dot {

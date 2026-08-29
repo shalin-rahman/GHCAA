@@ -14,6 +14,7 @@ import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { ImgFallbackDirective } from '../../common/directives/img-fallback.directive';
+import { safeImageUrl } from '../../core/utils/image.util';
 
 @Component({
   selector: 'app-member-articles',
@@ -180,5 +181,9 @@ export class MemberArticles implements OnInit {
 
   getCategoryLabel(val: string) {
     return getArticleCategoryLabel(val);
+  }
+
+  safeImg(url?: string | null): string {
+    return safeImageUrl(url, '/assets/placeholder.jpg');
   }
 }

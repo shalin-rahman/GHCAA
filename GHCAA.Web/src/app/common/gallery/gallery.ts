@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { LogoSpinnerComponent } from '../logo-spinner/logo-spinner';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
+import { safeImageUrl } from '../../core/utils/image.util';
 import { SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
 
 @Component({
@@ -189,13 +190,12 @@ export class Gallery implements OnInit {
     window.open(this.validImg(path), '_blank', 'noopener,noreferrer');
   }
 
-  // A real image path is absolute (/uploads/…) or a full URL. Anything else — empty,
-  // or bad seed data like "..." — falls back to the bundled logo so the card/detail
-  // shows a placeholder instead of a broken-image glyph.
-  // Runtime 404s (file missing on server / ephemeral disk) are now handled centrally by
-  // the `appImgFallback` directive (30.9) on the template's <img>.
+  // Runtime 404s (file missing on server / ephemeral disk) are handled centrally by the
+  // `appImgFallback` directive (30.9) on the template's <img>; this guards the other case —
+  // a truthy but non-URL value (bad seed/import data) that would otherwise pass straight
+  // through and fire a request the server can never satisfy.
   validImg(path?: string | null): string {
-    return path && (path.startsWith('/') || path.startsWith('http')) ? path : '/assets/logo.png';
+    return safeImageUrl(path);
   }
 }
 

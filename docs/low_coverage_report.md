@@ -9,6 +9,17 @@
 > (web `vitest` = 60 files / 244 tests). Most of the `0.00` rows below — `MemberService`,
 > `FinancialService`, the API controllers — now have real tests under `GHCAA.Tests/Services/`
 > (~20 classes) and `GHCAA.Tests/Controllers/` (18 classes). See TODO 27.3–27.6, all DONE.
+>
+> **UPDATE 2026-08-29:** `dotnet test` = **468 passed / 0 failed**, `npx vitest run` = **69 files /
+> 335 tests**. Two previously-zero-coverage classes not listed below were closed out this session
+> (identified by a targeted gap analysis, not a coverage-report regeneration): `MemberImportService`
+> (639 lines, the largest untested backend unit — bulk CSV import, reflection-based mapping) and
+> `GalleryService` (Area 40 approval workflow). New files: `GHCAA.Tests/Services/MemberImportServiceTests.cs`
+> (13 tests), `GHCAA.Tests/Services/GalleryServiceTests.cs` (17 tests). Frontend:
+> `org-config.service.spec.ts` added for the highest-fan-in Angular service (18 consumers), which
+> also had zero coverage. `FinancialService`/`IDCardService` rows below are still not independently
+> re-verified this session — treat as unconfirmed until the report is actually regenerated (item 3
+> below is still open).
 > 2. **The headline percentage is meaningless.** "Total lines valid: 1,002,454" for a codebase this
 > size means the coverlet run swept generated/vendor output (`bin/`, `obj/`, migrations), so the
 > 0.43% line-rate is an artifact of the denominator, not a measurement. No coverage threshold is

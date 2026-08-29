@@ -9,7 +9,6 @@ import { LandingEventsPreview } from './sections/events-preview/events-preview';
 import { LandingNewsPreview } from './sections/news-preview/news-preview';
 import { LandingEcPreview } from './sections/ec-preview/ec-preview';
 import { LandingGalleryPreview } from './sections/gallery-preview/gallery-preview';
-import { LandingCtaBanner } from './sections/cta-banner/cta-banner';
 
 @Component({
   selector: 'app-landing',
@@ -23,8 +22,7 @@ import { LandingCtaBanner } from './sections/cta-banner/cta-banner';
     LandingEventsPreview,
     LandingNewsPreview,
     LandingGalleryPreview,
-    LandingEcPreview,
-    LandingCtaBanner
+    LandingEcPreview
   ],
   templateUrl: './landing.html',
   styleUrl: './landing.scss',

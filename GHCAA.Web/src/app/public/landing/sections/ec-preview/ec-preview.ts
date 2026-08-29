@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NetworkingService } from '../../../../core/services/networking.service';
 import { getECPositionName, getCurrentECPosition } from '../../../../core/constants/app.constants';
+import { formatPeriodRange } from '../../../../core/utils/date.util';
 import { ImgFallbackDirective } from '../../../../common/directives/img-fallback.directive';
 
 @Component({
@@ -16,6 +17,7 @@ export class LandingEcPreview implements OnInit {
     committee = signal<any[]>([]);
     isVisible = signal(true);
     activePeriodTitle = signal<string | null>(null);
+    activePeriodDateRange = signal<string | null>(null);
 
     ngOnInit() {
         this.networking.getCommittee({}, true).subscribe({
@@ -37,8 +39,12 @@ export class LandingEcPreview implements OnInit {
             next: (periods) => {
                 const active = (periods || []).find((p: any) => p.isActive);
                 this.activePeriodTitle.set(active?.title ?? null);
+                this.activePeriodDateRange.set(active ? formatPeriodRange(active) : null);
             },
-            error: () => this.activePeriodTitle.set(null)
+            error: () => {
+                this.activePeriodTitle.set(null);
+                this.activePeriodDateRange.set(null);
+            }
         });
     }
 
