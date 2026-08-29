@@ -191,7 +191,11 @@ had been renamed to `ArticleCategory`/`JobCategory`/`FinancialCategory`) left se
 records defaulted to the wrong enum value across three unrelated seed files. The mitigation is a
 reflection-based regression test (`SeedDataIntegrityTests`) that parses each seed file's raw JSON keys
 and asserts every one matches a real property on its target type, turning a silent runtime default
-into a build-time failure.
+into a build-time failure. A distinct failure mode surfaced later, on a correctly-named key: a path
+field holding punctuation-only placeholder text (`"..."`) instead of a real value, which deserialises
+without complaint and only surfaces as a broken image in a browser. The same test file was extended
+with a second, value-level assertion — every `*Path`/`*Url` string must contain at least one
+alphanumeric character — since a correct key name is not by itself evidence of a correct value.
 
 ## 6.6 Interface Design
 
@@ -205,7 +209,7 @@ Appendix F.
 ## 6.7 Security Architecture
 
 Summarised here as a design view; the threat model, control mapping and residual risk are Chapter 9's
-subject. Three mechanisms are worth naming as architecture rather than as detail, because each is a
+subject. Four mechanisms are worth naming as architecture rather than as detail, because each is a
 structural decision rather than a local check: `SecurityStampMiddleware`, which makes a credential or
 role change take effect within one request rather than at token expiry; the query-string token
 allowance in the middleware pipeline, which exists only to let a file download authenticate without a
@@ -217,10 +221,22 @@ SuperAdmin session by email OTP before it may reach one of five gated endpoints.
 result is carried as a claim on the JWT rather than as server-side session state — the API has no
 session store to hold it in — so a claim's continued validity across the access token's routine
 hourly refresh is established by validating the outgoing token's signature and issuer before its
-step-up claim is trusted forward, not by re-running the OTP challenge on every refresh. A 30-day
-grace period since last verification, not a per-action or per-login prompt, was the deliberate
-trade-off between the control's purpose (limiting the blast radius of a stolen or misused session)
-and admin usability.
+step-up claim is trusted forward, not by re-running the OTP challenge on every refresh. The grace
+period since last verification was originally set to 30 days for admin usability, but a security
+review found this let the claim ride along on every hourly refresh for the full window, so a stolen
+or left-open session almost always already carried a valid one — defeating the control's own stated
+purpose. It was reduced to 30 minutes, the usability trade-off now resting on the claim surviving
+several refreshes within one working session rather than on a long calendar window.
+
+A fifth mechanism belongs alongside these for the same reason: which scheme a request arrived over is
+not a property Kestrel can observe directly once TLS is terminated at the hosting platform's edge and
+the request is forwarded to the container over plain HTTP. `ForwardedHeadersOptions`, registered as
+the first middleware in the pipeline — ahead of exception handling, CORS and everything else — trusts
+the edge's `X-Forwarded-Proto` header so that `HttpContext.Request.IsHttps` reports correctly for
+every later stage: the HSTS header, the HTTPS redirect, and any authorization decision that might
+otherwise assume an unencrypted request. Placing this ahead of `UseHsts()`/`UseHttpsRedirection()`
+rather than treating it as an unrelated Dockerfile or platform concern is the structural point — three
+independent controls share one upstream dependency, and only one of them names it.
 
 ## 6.8 User-Interface Design
 

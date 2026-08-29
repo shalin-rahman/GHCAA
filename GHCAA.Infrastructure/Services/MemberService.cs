@@ -31,6 +31,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly IFinancialService _financialService;
         private readonly IRealTimeService _realTimeService;
         private readonly IOrgConfigService _orgConfigService;
+        private readonly ITokenService _tokenService;
 
         public MemberService(
             ApplicationDbContext db,
@@ -47,7 +48,8 @@ namespace GHCAA.Infrastructure.Services
             IGamificationService gamification,
             IFinancialService financialService,
             IRealTimeService realTimeService,
-            IOrgConfigService orgConfigService)
+            IOrgConfigService orgConfigService,
+            ITokenService tokenService)
         {
             _db = db;
             _storage = storage;
@@ -64,6 +66,7 @@ namespace GHCAA.Infrastructure.Services
             _financialService = financialService;
             _realTimeService = realTimeService;
             _orgConfigService = orgConfigService;
+            _tokenService = tokenService;
         }
 
         public async Task<int> RegisterAsync(MemberRegistrationDto dto, UploadedFileDto? photo, UploadedFileDto? certificate, UploadedFileDto? paymentProof, CancellationToken cancellationToken = default)
@@ -794,6 +797,9 @@ namespace GHCAA.Infrastructure.Services
             {
                 user.IsArchived = true;
                 user.SecurityStamp = Guid.NewGuid().ToString("N"); // Invalidate all active JWTs
+                // Rotating the stamp alone doesn't stop /api/auth/refresh from minting a fresh
+                // access token carrying the new stamp — the refresh token itself must be revoked.
+                await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
             }
 
             // End active EC roles
@@ -1089,13 +1095,26 @@ namespace GHCAA.Infrastructure.Services
                 Items = memberDtos
             };
         }
-        public async Task<bool> AdminUpdateMemberAsync(int id, AdminMemberUpdateDto dto, int adminId, CancellationToken cancellationToken = default)
+        public async Task<bool> AdminUpdateMemberAsync(int id, AdminMemberUpdateDto dto, int adminId, bool isPrivilegedCaller, CancellationToken cancellationToken = default)
         {
             var member = await _db.Members
                 .Include(m => m.AcademicHistory)
                 .Include(m => m.ProfessionalHistory)
                 .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
             if (member == null) return false;
+
+            // A plain Admin must never be able to rewrite a SuperAdmin's linked email — that email
+            // is where SendAdminPasswordResetLinkAsync's reset link goes, so together the two would
+            // let a lower-privileged Admin take over a SuperAdmin account.
+            if (!isPrivilegedCaller)
+            {
+                var targetIsSuperAdmin = await _db.Users
+                    .Where(u => u.MemberId == id)
+                    .SelectMany(u => u.Roles)
+                    .AnyAsync(r => r.Name == "SuperAdmin", cancellationToken);
+                if (targetIsSuperAdmin)
+                    throw new UnauthorizedAccessException("Only a SuperAdmin may edit a SuperAdmin's own member record.");
+            }
 
             // Track membership type change
             if (member.MembershipType != dto.MembershipType)
@@ -1241,6 +1260,7 @@ namespace GHCAA.Infrastructure.Services
                 {
                     user.SecurityStamp = Guid.NewGuid().ToString("N");
                     await _db.SaveChangesAsync(cancellationToken);
+                    await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
                     _logger.LogWarning("SecurityStamp rotated for member {MemberId} — all existing sessions terminated.", id);
                 }
             }
@@ -1321,12 +1341,18 @@ namespace GHCAA.Infrastructure.Services
             return path;
         }
 
-        public async Task<(bool Success, string? ResetUrl)> SendAdminPasswordResetLinkAsync(int memberId, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string? ResetUrl)> SendAdminPasswordResetLinkAsync(int memberId, bool isPrivilegedCaller, CancellationToken cancellationToken = default)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
+            var user = await _db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
             var member = await _db.Members.FindAsync(new object[] { memberId }, cancellationToken);
 
             if (user == null || member == null) return (false, null);
+
+            // A plain Admin must never be able to force a reset link onto a SuperAdmin's own
+            // account — paired with the same guard in AdminUpdateMemberAsync, this closes the
+            // email-rewrite-then-reset takeover path.
+            if (!isPrivilegedCaller && user.Roles.Any(r => r.Name == "SuperAdmin"))
+                throw new UnauthorizedAccessException("Only a SuperAdmin may reset a SuperAdmin's own password.");
 
             // Generate a secure token
             var token = Guid.NewGuid().ToString("N");
@@ -1421,7 +1447,11 @@ namespace GHCAA.Infrastructure.Services
             }
 
             if (usersToArchive.Count > 0)
+            {
                 await _db.SaveChangesAsync(cancellationToken);
+                foreach (var user in usersToArchive)
+                    await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
+            }
 
             // Bulk end active EC roles
             await _db.ECMembers

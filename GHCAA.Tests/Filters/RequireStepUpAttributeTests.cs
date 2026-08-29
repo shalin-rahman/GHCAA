@@ -76,9 +76,10 @@ public class RequireStepUpAttributeTests
     [Test]
     public async Task Denies_WhenStepUpClaimIsExpired()
     {
-        // Default TTL is now 30 days (per the "long grace period since last login" model), so
-        // "expired" has to mean well past that, not the old 15-minute window.
-        var context = BuildContext(EpochMinutesAgo(31 * 24 * 60).ToString());
+        // Default TTL is 30 minutes (reduced from 30 days by the 2026-08-29 security audit —
+        // a 30-day TTL rode along on every hourly access-token refresh, so a stolen cookie almost
+        // always already carried a valid claim). "Expired" just needs to be past that window.
+        var context = BuildContext(EpochMinutesAgo(31).ToString());
 
         await new RequireStepUpAttribute().OnActionExecutionAsync(context, () =>
             Task.FromResult<ActionExecutedContext>(null!));

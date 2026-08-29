@@ -41,7 +41,7 @@ namespace GHCAA.Tests.Services
             var financials = new Mock<IFinancialService>();
             var orgConfig = new Mock<IOrgConfigService>();
 
-            _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object, financials.Object, new Mock<IRealTimeService>().Object, orgConfig.Object);
+            _service = new MemberService(_context, storage.Object, otp.Object, email.Object, user.Object, comm.Object, logger.Object, activity.Object, notify.Object, config.Object, gamification.Object, financials.Object, new Mock<IRealTimeService>().Object, orgConfig.Object, new Mock<ITokenService>().Object);
 
             if (!_context.ECPeriods.Any(p => p.Title == "Interim Executive Committee"))
             {
@@ -72,7 +72,7 @@ namespace GHCAA.Tests.Services
             };
 
             // Act
-            await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1);
+            await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1, isPrivilegedCaller: true);
 
             // Assert
             var ecMember = await _context.ECMembers.Include(em => em.ECPeriod).FirstOrDefaultAsync(em => em.MemberId == member.Id);
@@ -107,7 +107,7 @@ namespace GHCAA.Tests.Services
             });
 
             // Act
-            await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1);
+            await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1, isPrivilegedCaller: true);
 
             // Assert
             var records = await _context.ECMembers.Where(em => em.MemberId == member.Id).ToListAsync();

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using GHCAA.Application.Interfaces;
 using GHCAA.Domain.Models;
 using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
@@ -12,13 +13,15 @@ namespace GHCAA.Tests.Services
     public class UserServiceTests : TestBase
     {
         private Mock<ILogger<UserService>> _mockLogger = null!;
+        private Mock<ITokenService> _mockTokenService = null!;
         private UserService _service = null!;
 
         [SetUp]
         public void Setup()
         {
             _mockLogger = new Mock<ILogger<UserService>>();
-            _service = new UserService(_context, _mockLogger.Object);
+            _mockTokenService = new Mock<ITokenService>();
+            _service = new UserService(_context, _mockLogger.Object, _mockTokenService.Object);
         }
 
         [Test]

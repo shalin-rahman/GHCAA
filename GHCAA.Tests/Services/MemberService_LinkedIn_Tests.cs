@@ -59,7 +59,8 @@ public class MemberService_LinkedIn_Tests : TestBase
             _mockGamification.Object,
             _mockFinancialService.Object,
             new Mock<IRealTimeService>().Object,
-            mockOrgConfigService.Object
+            mockOrgConfigService.Object,
+            new Mock<ITokenService>().Object
         );
     }
 

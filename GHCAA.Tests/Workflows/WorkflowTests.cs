@@ -79,7 +79,8 @@ namespace GHCAA.Tests.Workflows
                 gamificationMock.Object,
                 _financialService,
                 realTimeMock.Object,
-                orgConfigMock.Object);
+                orgConfigMock.Object,
+                new Mock<ITokenService>().Object);
 
             var eventLoggerMock = new Mock<ILogger<EventService>>();
             _eventService = new EventService(_context, _commMock.Object, _storageMock.Object, gamificationMock.Object, _notificationMock.Object, eventLoggerMock.Object);

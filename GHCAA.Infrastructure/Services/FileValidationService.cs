@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using GHCAA.Application.Interfaces;
 
@@ -7,6 +8,8 @@ namespace GHCAA.Infrastructure.Services
     {
         private static readonly string[] ImageContentTypes = { "image/jpeg", "image/png", "image/webp" };
         private static readonly string[] DocumentContentTypes = { "image/jpeg", "image/png", "image/webp", "application/pdf" };
+        private static readonly string[] ImageExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
+        private static readonly string[] DocumentExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".pdf" };
 
         public FileValidationResult Validate(Stream content, string fileName, string? contentType, long length, FileCategory category, long maxSizeBytes)
         {
@@ -20,6 +23,16 @@ namespace GHCAA.Infrastructure.Services
             var normalizedContentType = contentType?.ToLowerInvariant();
             if (string.IsNullOrEmpty(normalizedContentType) || !allowed.Contains(normalizedContentType))
                 return FileValidationResult.Fail("Unsupported file type.");
+
+            // A matching Content-Type + magic bytes alone doesn't stop the ORIGINAL filename's
+            // extension from being kept on disk (LocalFileStorageService only force-renames
+            // FileUploadType.Photo to .jpg). Without this, a real JPEG uploaded as "x.html" with
+            // Content-Type: image/jpeg passes every check above and is served back as text/html
+            // from the app's own origin — an HTML-injection/phishing vector. Reject it here too.
+            var allowedExtensions = category == FileCategory.Image ? ImageExtensions : DocumentExtensions;
+            var extension = Path.GetExtension(fileName)?.ToLowerInvariant();
+            if (string.IsNullOrEmpty(extension) || !allowedExtensions.Contains(extension))
+                return FileValidationResult.Fail("Unsupported file extension.");
 
             if (!content.CanSeek || !content.CanRead)
                 return FileValidationResult.Fail("Invalid file stream.");

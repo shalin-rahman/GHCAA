@@ -15,6 +15,7 @@ namespace GHCAA.Infrastructure.Services
         private readonly ICommunicationService _communication;
         private readonly ILogger<OtpService> _logger;
         private readonly int _expiryMinutes;
+        private readonly string _hashKey;
         private const int MaxOtpAttempts = 5;
 
         public OtpService(ApplicationDbContext db, ICommunicationService communication, IConfiguration config, ILogger<OtpService> logger)
@@ -23,14 +24,22 @@ namespace GHCAA.Infrastructure.Services
             _communication = communication;
             _logger = logger;
             _expiryMinutes = int.TryParse(config["OtpSettings:ExpiryMinutes"], out var v) ? v : 10;
+            // SECURITY AUDIT (2026-08-29): previously keyed on the email address, which is not a
+            // secret — that made this an effectively unkeyed hash of a 6-digit code, brute-forceable
+            // in microseconds from a DB dump. Reuses the JWT signing key as the HMAC secret (a real
+            // server-side secret already required to be configured) rather than introduce a new
+            // required config value; email still goes into the message for per-user domain separation.
+            _hashKey = config["OtpSettings:HashKey"] ?? config["Jwt:Key"]
+                ?? throw new InvalidOperationException("OtpSettings:HashKey or Jwt:Key must be configured.");
         }
 
-        // 24.20: HMAC-SHA256(message=code, key=email) — ties the hash to the email so the same code
-        // for different users produces different stored values, preventing cross-email replay.
-        private static string ComputeOtpHash(string code, string email)
+        // HMAC-SHA256(message="{email}:{code}", key=server secret) — keyed on a real secret so the
+        // hash can't be brute-forced from a DB dump alone; email stays in the message so the same
+        // code for different users still produces different stored values.
+        private string ComputeOtpHash(string code, string email)
         {
-            using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(email));
-            var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(code));
+            using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_hashKey));
+            var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes($"{email}:{code}"));
             return Convert.ToHexString(hash).ToLowerInvariant(); // 64 lowercase hex chars
         }
 

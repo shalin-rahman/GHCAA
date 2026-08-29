@@ -23,6 +23,7 @@ public class OtpPurposeIsolationTests : TestBase
         var mockConfig = new Mock<IConfiguration>();
         var mockLogger = new Mock<ILogger<OtpService>>();
         mockConfig.Setup(x => x["OtpSettings:ExpiryMinutes"]).Returns("10");
+        mockConfig.Setup(x => x["Jwt:Key"]).Returns("otp-service-test-dummy-hmac-key-please-32chars");
         _service = new OtpService(_context, mockCommunication.Object, mockConfig.Object, mockLogger.Object);
     }
 

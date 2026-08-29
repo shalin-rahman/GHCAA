@@ -96,7 +96,10 @@ namespace GHCAA.API.Controllers
 
             var user = await _db.Users.Include(u => u.Roles)
                 .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
-            if (user == null) { ClearAuthCookies(); return Unauthorized(); }
+            // A terminated/archived member's SecurityStamp rotation and refresh-token revocation
+            // race the client's already-issued refresh token; !IsActive is the backstop that closes
+            // that window even if revocation is somehow missed at the point of deactivation.
+            if (user == null || !user.IsActive || user.IsArchived) { ClearAuthCookies(); return Unauthorized(); }
 
             var newAccessToken = CreateRefreshedAccessToken(user);
             SetCookie("access_token", newAccessToken, TimeSpan.FromMinutes(65));
@@ -121,7 +124,7 @@ namespace GHCAA.API.Controllers
 
             var user = await _db.Users.Include(u => u.Roles)
                 .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
-            if (user == null) return Unauthorized();
+            if (user == null || !user.IsActive || user.IsArchived) return Unauthorized();
 
             var newAccessToken = _tokenService.CreateToken(user);
 

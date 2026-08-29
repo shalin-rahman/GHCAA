@@ -75,9 +75,9 @@ run-app.bat
 
 | Role | Username | Password |
 |---|---|---|
-| SuperAdmin | `superadmin` | `SuperAdminPassword123!` |
-| Admin | `shalin` | `Shalin@2024!` |
-| Member | `demo_user` | `DemoPass123!` |
+| SuperAdmin | `superadmin` | *(redacted 2026-08-29 — was committed here in plaintext; `shalin`'s value matched a live preprod credential. Rotate any password ever listed in this table and store test credentials outside git, e.g. a local `.env.test` or the team's password manager.)* |
+| Admin | `shalin` | *(redacted — see above; this one was live, not just a local seed value)* |
+| Member | `demo_user` | *(redacted — see above)* |
 
 Optional: `scripts/setup-test-data.ps1` for edge-case dataset.
 

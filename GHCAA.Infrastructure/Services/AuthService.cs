@@ -392,6 +392,7 @@ namespace GHCAA.Infrastructure.Services
             user.SecurityStamp = Guid.NewGuid().ToString("N");
 
             await _db.SaveChangesAsync(cancellationToken);
+            await _tokenService.RevokeAllRefreshTokensAsync(user.Id, cancellationToken);
             _logger.LogInformation("Password reset successful for user {Username}", user.Username);
 
             await _activityService.LogActivityAsync(member.Id, "Password Reset", "User reset their password via email link.", cancellationToken: cancellationToken);

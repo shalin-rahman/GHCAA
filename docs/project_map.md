@@ -463,9 +463,9 @@ graph TD
 | `RestoreMemberAsync(memberId, ct)` | `Task<bool>` | Admin |
 | `ReactivateMemberAsync(memberId, ct)` | `Task<bool>` | Admin |
 | `GetAllMembersAsync(page, pageSize, search, status, category, type, includeArchived, isSuperAdmin, ct)` | `Task<object>` | Admin |
-| `AdminUpdateMemberAsync(id, dto, adminId, ct)` | `Task<bool>` | Admin |
+| `AdminUpdateMemberAsync(id, dto, adminId, isPrivilegedCaller, ct)` | `Task<bool>` | Admin |
 | `RejectMemberAsync(id, adminId, reason, ct)` | `Task<bool>` | Admin |
-| `SendAdminPasswordResetLinkAsync(memberId, ct)` | `Task<(bool, string?)>` | Admin |
+| `SendAdminPasswordResetLinkAsync(memberId, isPrivilegedCaller, ct)` | `Task<(bool, string?)>` | Admin |
 | `GetPublicStatsAsync(ct)` | `Task<object>` | Public |
 | `UpdateMemberDocumentsAsync(id, cert, proof, ct)` | `Task<bool>` | Admin |
 | `UpdateMemberPhotoAsync(memberId, photo, ct)` | `Task<string>` | Member |
@@ -1176,7 +1176,7 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 | `getCommittee()` | `(params?, silent?) => Observable<MemberSummary[]>` | `GET /networking/committee` |
 | `getPeriods()` | `() => Observable<any[]>` | `GET /networking/periods` |
 | `searchMembers()` | `(filter) => Observable<PagedResult<MemberSummary>>` | `GET /networking/search` |
-| `getMemberProfile()` | `(id) => Observable<any>` | `GET /networking/member/:id` |
+| `getMemberProfile()` | `(id) => Observable<any>` | `GET /networking/member/:id` (`[AllowAnonymous]`; since the 2026-08-29 security review, `NetworkingService.MapToDto` leaves `NID`/`DateOfBirth`/`FatherName`/`MotherName`/`EmergencyContact*`/`CertificatePath` unset on this path — those only populate on the authenticated owner/admin profile via `MemberService.GetProfileAsync`) |
 | `getUpdates()` | `(params) => Observable<MemberSummary[]>` | `GET /networking/updates` |
 | `getRecentlyJoined()` | `(limit?) => Observable<PagedResult<MemberSummary>>` | `GET /networking/search?sortBy=joinDate` |
 

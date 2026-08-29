@@ -44,7 +44,11 @@ namespace GHCAA.Infrastructure.Services
             try
             {
                 // Format: token=YOUR_TOKEN&to=RECIPIENT_NUMBER&message=YOUR_MESSAGE
-                var url = $"{_baseUrl}?token={_token}&to={mobileNo.TrimStart('+')}&message={Uri.EscapeDataString(message)}";
+                // mobileNo is currently regex-constrained to digits only at registration, but that
+                // guarantee lives in a different layer (MemberRegistrationValidator) — escape it
+                // here too so a future write path without that same validation can't inject an
+                // extra query parameter (e.g. overriding `message=`) into this request.
+                var url = $"{_baseUrl}?token={_token}&to={Uri.EscapeDataString(mobileNo.TrimStart('+'))}&message={Uri.EscapeDataString(message)}";
 
                 var response = await _httpClient.GetAsync(url, cancellationToken);
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);

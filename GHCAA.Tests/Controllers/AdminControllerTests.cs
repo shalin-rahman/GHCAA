@@ -100,7 +100,7 @@ namespace GHCAA.Tests.Controllers
         [Test]
         public async Task ResetPasswordAdmin_ReturnsOk_OnSuccess()
         {
-            _memberServiceMock.Setup(x => x.SendAdminPasswordResetLinkAsync(100, It.IsAny<CancellationToken>()))
+            _memberServiceMock.Setup(x => x.SendAdminPasswordResetLinkAsync(100, It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                               .ReturnsAsync((true, "http://reset"));
 
             var result = await _controller.ResetPasswordAdmin(100, CancellationToken.None);
@@ -112,7 +112,7 @@ namespace GHCAA.Tests.Controllers
         public async Task UpdateMemberAdmin_ReturnsOk_OnSuccess()
         {
             var dto = new AdminMemberUpdateDto { FullName = "Updated Name" };
-            _memberServiceMock.Setup(x => x.AdminUpdateMemberAsync(100, dto, 1, It.IsAny<CancellationToken>()))
+            _memberServiceMock.Setup(x => x.AdminUpdateMemberAsync(100, dto, 1, It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                               .ReturnsAsync(true);
 
             var result = await _controller.UpdateMemberAdmin(100, dto, CancellationToken.None);

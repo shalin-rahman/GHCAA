@@ -47,10 +47,14 @@ namespace GHCAA.Infrastructure.Services
             if (!string.IsNullOrEmpty(filter.Query))
             {
                 var q = filter.Query.ToLower();
+                // This endpoint is [AllowAnonymous] (public directory search). Matching on Email
+                // regardless of IsEmailPublic turns a non-empty result into an oracle: an attacker
+                // submits a guessed address and confirms it belongs to a real member even though
+                // MapToSummary correctly masks that same address as "Confidential" in the response.
                 query = query.Where(m =>
                     m.FullName.ToLower().Contains(q) ||
                     (m.MembershipNumber != null && m.MembershipNumber.ToLower().Contains(q)) ||
-                    (m.Email != null && m.Email.ToLower().Contains(q)));
+                    (m.IsEmailPublic && m.Email != null && m.Email.ToLower().Contains(q)));
             }
 
             if (filter.PassingYear.HasValue)
@@ -156,18 +160,16 @@ namespace GHCAA.Infrastructure.Services
                 MembershipNumber = m.MembershipNumber,
                 Status = m.Status,
 
-                // Personal
-                FatherName = m.FatherName,
-                MotherName = m.MotherName,
-                DateOfBirth = m.DateOfBirth.ToLocalTime(),
+                // Personal — this DTO backs the [AllowAnonymous] public directory profile
+                // (NetworkingController.GetPublicProfile), so identity-verification fields
+                // (NID, DOB, parents' names, emergency contact) and certificate file paths
+                // must never appear here regardless of any privacy flag. The authenticated
+                // owner/admin view of a member's full profile is a separate DTO build in
+                // MemberService.GetProfileAsync, not this one.
                 AppliedDate = m.AppliedDate.ToLocalTime(),
                 ApprovedDate = m.ApprovedDate.HasValue ? m.ApprovedDate.Value.ToLocalTime() : null,
                 Gender = m.Gender,
                 BloodGroup = m.BloodGroup,
-                NID = m.NID,
-                EmergencyContactName = m.EmergencyContactName,
-                EmergencyContactRelation = m.EmergencyContactRelation,
-                EmergencyContactPhone = m.EmergencyContactPhone,
 
                 // History
                 AcademicHistory = m.AcademicHistory.Select(a => new AcademicRecordDto
@@ -179,8 +181,7 @@ namespace GHCAA.Infrastructure.Services
                     AdmissionYear = a.AdmissionYear,
                     PassingYear = a.PassingYear,
                     IsGHC = a.IsGHC,
-                    Result = a.Result,
-                    CertificatePath = a.CertificatePath
+                    Result = a.Result
                 }).ToList(),
                 ProfessionalHistory = m.ProfessionalHistory.Select(p => new ProfessionalRecordDto
                 {

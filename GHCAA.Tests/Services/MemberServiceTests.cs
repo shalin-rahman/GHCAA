@@ -59,7 +59,8 @@ public class MemberServiceTests : TestBase
             _mockGamification.Object,
             _mockFinancialService.Object,
             new Mock<IRealTimeService>().Object,
-            mockOrgConfigService.Object
+            mockOrgConfigService.Object,
+            new Mock<ITokenService>().Object
         );
     }
 
@@ -793,7 +794,7 @@ public class MemberServiceTests : TestBase
         };
 
         // Act
-        var result = await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1);
+        var result = await _service.AdminUpdateMemberAsync(member.Id, updateDto, 1, isPrivilegedCaller: true);
 
         // Assert
         result.Should().BeTrue();

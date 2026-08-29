@@ -8,6 +8,7 @@ using GHCAA.Application.Interfaces;
 using GHCAA.Application.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 
 // Load environment variables from .env file (useful for local overrides)
 DotNetEnv.Env.Load();
@@ -66,7 +67,13 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-    bool isTestEnv = configuration["ASP_SEED_PROFILE"] == "Visual" || builder.Environment.IsDevelopment();
+    // SECURITY AUDIT (2026-08-29): was `configuration["ASP_SEED_PROFILE"] == "Visual" ||
+    // IsDevelopment()` — a plain env var (ASP_SEED_PROFILE=Visual) set on the live Render service,
+    // with no other symptom, silently collapsed every rate limit below to a shared "__test__"
+    // bucket at 500-10000x the real limit. Visual profile is already required to ALSO be
+    // Development everywhere else it's checked (see VisualTestAuthMiddleware's gate below), so
+    // relaxed limits should only ever depend on being in Development, never on this env var alone.
+    bool isTestEnv = builder.Environment.IsDevelopment();
 
     // 29B.5: Login policy keyed per source IP (not per {ip,username}). The previous per-username
     // key handed each distinct username its own 5/min bucket, so one IP could password-spray
@@ -169,6 +176,22 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// SECURITY AUDIT (2026-08-29): must run before everything else. Render terminates TLS at its edge
+// and forwards to this container over plain HTTP with X-Forwarded-Proto: https — without this,
+// Request.IsHttps is permanently false in production, which silently made THREE controls inert:
+// SecurityHeadersMiddleware's HSTS header (gated on IsHttps, below), app.UseHsts() (added below),
+// and app.UseHttpsRedirection() (which also can't resolve a redirect port without this). Render is
+// the sole ingress, and its proxy IP isn't in a known private range, so KnownNetworks/KnownProxies
+// must be cleared — accept the trust-any-forwarder tradeoff only because nothing but Render's edge
+// can reach this container directly.
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+};
+forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
 // Use Exception Middleware first to catch all subsequent errors
 app.UseMiddleware<ExceptionMiddleware>();
 
@@ -191,6 +214,7 @@ app.UseOutputCache();
 
 if (!app.Environment.IsDevelopment())
 {
+    app.UseHsts();
     app.UseHttpsRedirection();
 }
 

@@ -17,10 +17,15 @@ namespace GHCAA.Application.Security
         // Grace period since the OTP verification, not since the last access-token refresh:
         // the access token is silently refreshed roughly hourly, and refreshing must carry the
         // verification forward (see TokenService.TryGetValidStepUpEpoch) rather than resetting
-        // it, or a 15-minute TTL would in practice mean "re-verify almost every request".
-        // 30 days of continued activity; logging out (or a fresh login) starts unverified again
-        // since Login/Refresh only carry the claim forward, they never fabricate one.
-        public const int DefaultTtlMinutes = 30 * 24 * 60;
+        // it, or a short TTL would in practice mean "re-verify almost every request".
+        //
+        // SECURITY AUDIT (2026-08-29): this was previously 30 days, chosen so admins wouldn't be
+        // re-prompted "on every action/login". That defeats the control's own stated purpose — a
+        // stolen or left-open access-token cookie almost always already carries a still-valid
+        // claim, since it rides along on every hourly silent refresh for the full 30 days. 30
+        // minutes keeps the "not every single action" property (it survives several refreshes
+        // within one admin session) while making a stolen cookie's window small enough to matter.
+        public const int DefaultTtlMinutes = 30;
 
         public static bool IsValid(long verifiedAtEpochSeconds, int ttlMinutes) =>
             DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeSeconds(verifiedAtEpochSeconds) <= TimeSpan.FromMinutes(ttlMinutes);

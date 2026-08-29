@@ -2,6 +2,7 @@ using GHCAA.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GHCAA.Domain;
+using System.ComponentModel.DataAnnotations;
 
 namespace GHCAA.API.Controllers
 {
@@ -38,6 +39,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("users")]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> CreateAdmin([FromBody] CreateAdminDto dto, CancellationToken cancellationToken)
         {
             try
@@ -55,6 +57,11 @@ namespace GHCAA.API.Controllers
         public class CreateAdminDto
         {
             public string Username { get; set; } = null!;
+
+            [Required(ErrorMessage = "Password is required.")]
+            [MinLength(8, ErrorMessage = "Password must be at least 8 characters.")]
+            [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$",
+                ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, and one digit.")]
             public string Password { get; set; } = null!;
             public string Role { get; set; } = Constants.Roles.Admin;
         }
@@ -75,6 +82,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("assign")]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> AssignRole(int userId, string roleName, CancellationToken cancellationToken)
         {
             var success = await _roleService.AssignRoleToUserAsync(userId, roleName, cancellationToken);

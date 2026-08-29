@@ -32,13 +32,13 @@ A granular, module-by-module breakdown of the platform's features — including 
 - **Dependencies**: JWT token service.
 
 ### 1.2a Admin Step-Up Verification (2FA)
-- **Business description**: A second, email-OTP verification required before destructive/financial/identity admin actions (member archive, EC hard-delete, financial ledger writes, system-admin delete, payment-config delete) even for an already-authenticated Admin/SuperAdmin session.
+- **Business description**: A second, email-OTP verification required before destructive/financial/identity admin actions (member archive, EC hard-delete, financial ledger writes, system-admin delete, payment-config delete, role assignment, admin-account creation, bulk member archive, admin-initiated password reset, alumni sync) even for an already-authenticated Admin/SuperAdmin session.
 - **User roles**: Admin, SuperAdmin.
 - **Inputs / outputs**:
   - API: `POST /api/auth/admin/step-up/request`, `POST /api/auth/admin/step-up/verify`.
   - Key fields: 6-digit OTP code, delivered to the admin's registered email.
 - **Validations & rules**:
-  - Once verified, a 30-day grace period applies (tracked via a JWT claim carried forward across normal token refreshes) — not a per-action or per-login re-prompt.
+  - Once verified, a 30-minute grace period applies (tracked via a JWT claim carried forward across normal token refreshes) — not a per-action or per-login re-prompt. (Originally 30 days; a 2026-08-29 security review found that let the claim ride along on every hourly token refresh for the full window, so a stolen or left-open session almost always already carried a valid one, defeating the control's purpose.)
   - A fresh login always starts unverified; the grace period only survives continued activity within an existing session.
   - OTP codes are purpose-scoped (`OtpPurpose.AdminStepUp`), so a registration or password-reset code can never satisfy a step-up challenge.
 - **Dependencies**: Existing `IOtpService`/email template plumbing (no new OTP infrastructure).

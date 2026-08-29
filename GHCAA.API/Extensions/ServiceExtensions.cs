@@ -32,7 +32,11 @@ namespace GHCAA.API.Extensions
                     ValidAudience = jwt["Audience"] ?? "GHCAA",
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-                    ValidateLifetime = true
+                    ValidateLifetime = true,
+                    // Default ClockSkew is 5 minutes, silently extending every ~60-minute access
+                    // token to ~65 minutes of actual validity. 30s covers real clock drift without
+                    // meaningfully weakening the token's stated lifetime.
+                    ClockSkew = TimeSpan.FromSeconds(30)
                 };
 
                 options.Events = new JwtBearerEvents

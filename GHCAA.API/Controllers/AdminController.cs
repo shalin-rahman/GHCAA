@@ -45,6 +45,7 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("sync-members")]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> SyncMembers(CancellationToken cancellationToken)
         {
             var count = await _memberService.SyncAlumniAsync(cancellationToken);
@@ -148,6 +149,7 @@ namespace GHCAA.API.Controllers
 
         [HttpPost("members/bulk-archive-inactive")]
         [Authorize(Policy = Constants.Policies.SuperAdminOnly)]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> BulkArchiveInactive(CancellationToken cancellationToken)
         {
             var count = await _memberService.BulkArchiveInactiveMembersAsync(cancellationToken);
@@ -180,10 +182,20 @@ namespace GHCAA.API.Controllers
                 return Unauthorized();
             }
 
-            // Admins can update all membership information
-            var success = await _memberService.AdminUpdateMemberAsync(id, dto, adminId, cancellationToken);
-            if (!success) return NotFound();
-            return Ok(new { Message = "Member updated by admin successfully" });
+            // Admins can update all membership information — except a fellow SuperAdmin's own
+            // linked member record, otherwise a plain Admin could rewrite a SuperAdmin's email
+            // to one they control and self-serve a password reset (see ResetPasswordAdmin below).
+            try
+            {
+                var isPrivileged = User.IsInRole("SuperAdmin");
+                var success = await _memberService.AdminUpdateMemberAsync(id, dto, adminId, isPrivileged, cancellationToken);
+                if (!success) return NotFound();
+                return Ok(new { Message = "Member updated by admin successfully" });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
         }
 
         [HttpPost("members/{id}/photo")]
@@ -257,16 +269,22 @@ namespace GHCAA.API.Controllers
         }
 
         [HttpPost("members/{id}/reset-password-admin")]
+        [GHCAA.API.Filters.RequireStepUp]
         public async Task<IActionResult> ResetPasswordAdmin(int id, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _memberService.SendAdminPasswordResetLinkAsync(id, cancellationToken);
+                var isPrivileged = User.IsInRole("SuperAdmin");
+                var result = await _memberService.SendAdminPasswordResetLinkAsync(id, isPrivileged, cancellationToken);
                 if (!result.Success) return NotFound(new { Message = "Member or user account not found. Please ensure the member is approved and active." });
                 return Ok(new
                 {
                     Message = "Password reset link has been sent to the member's registered email address."
                 });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
             }
             catch (Exception ex)
             {

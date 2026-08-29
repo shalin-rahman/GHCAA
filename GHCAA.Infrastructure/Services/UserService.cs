@@ -16,12 +16,14 @@ namespace GHCAA.Infrastructure.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly ILogger<UserService> _logger;
+        private readonly ITokenService _tokenService;
         private const string PasswordChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        public UserService(ApplicationDbContext db, ILogger<UserService> logger)
+        public UserService(ApplicationDbContext db, ILogger<UserService> logger, ITokenService tokenService)
         {
             _db = db;
             _logger = logger;
+            _tokenService = tokenService;
         }
 
         public async Task<User> CreateUserAccountAsync(int memberId, string username, string password, CancellationToken cancellationToken = default)
@@ -114,6 +116,10 @@ namespace GHCAA.Infrastructure.Services
             user.MustChangePassword = false;
             user.SecurityStamp = Guid.NewGuid().ToString("N"); // S5.4: invalidate existing JWTs
             await _db.SaveChangesAsync(cancellationToken);
+            // A rotated SecurityStamp only invalidates access tokens — /api/auth/refresh mints a
+            // fresh one carrying the new stamp and sails through, so a still-valid refresh token
+            // must be revoked too or this "kill switch" is a no-op against it.
+            await _tokenService.RevokeAllRefreshTokensAsync(userId, cancellationToken);
             return true;
         }
 
