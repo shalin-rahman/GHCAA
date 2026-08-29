@@ -89,6 +89,21 @@ namespace GHCAA.Tests.Integration
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
+        // Regression coverage for the EventPhotos/Members "broken image" console-noise fix: a missing
+        // uploaded IMAGE (ephemeral Render disk wiped on redeploy, or bad seed/DB data) should render
+        // silently via the shared placeholder instead of spamming the console with a 404, while a
+        // missing non-image upload (e.g. a PDF certificate) must still 404 honestly above.
+        [Test]
+        public async Task MissingUploadImage_Returns200WithPlaceholder_NotSpammy404()
+        {
+            var response = await _client.GetAsync("/uploads/members/2/newsimage/does-not-exist.jpg");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.Content.Headers.ContentType!.MediaType.Should().Be("image/svg+xml");
+            var body = await response.Content.ReadAsStringAsync();
+            body.Should().Contain("placeholder");
+        }
+
         [Test]
         public async Task UnknownApiRoute_Returns404_NotSpaShell()
         {

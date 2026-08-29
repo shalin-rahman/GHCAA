@@ -37,6 +37,9 @@ namespace GHCAA.Tests.Integration
             Directory.CreateDirectory(Path.Combine(WebRoot, "uploads", "sample"));
             File.WriteAllText(Path.Combine(WebRoot, "uploads", "sample", "existing.txt"), "present");
 
+            Directory.CreateDirectory(Path.Combine(WebRoot, "assets", "placeholders"));
+            File.WriteAllText(Path.Combine(WebRoot, "assets", "placeholders", "image-placeholder.svg"), "<svg>placeholder</svg>");
+
             _dbPath = Path.Combine(_contentRoot, "test.db");
 
             Environment.SetEnvironmentVariable("ASP_SEED_PROFILE", "Visual");

@@ -251,6 +251,8 @@ app.UseStaticFiles(new StaticFileOptions
 // silently disables static file serving for every asset, not just missing ones. Confirmed via
 // Microsoft.AspNetCore.StaticFiles debug logging: "Static files was skipped as the request
 // already matched an endpoint." Keep this as app.Use(...) so it never competes with routing.
+var uploadImagePlaceholderPath = Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "assets", "placeholders", "image-placeholder.svg");
+var uploadImageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg" };
 app.Use(async (ctx, next) =>
 {
     var path = ctx.Request.Path;
@@ -262,6 +264,21 @@ app.Use(async (ctx, next) =>
     var isMissingNonApiAsset = !path.StartsWithSegments("/api") && isFileLike;
     if (isMissingUpload || isMissingNonApiAsset)
     {
+        // A missing /uploads/* image (ephemeral Render disk wiped on redeploy, or a stale/bad
+        // seed value) is expected to recur until a persistent disk is mounted — surfacing it as
+        // a 404 just spams the browser console for something the UI already renders as a broken
+        // image anyway. Substitute the same placeholder <img> callers already fall back to
+        // on-error, with a real 200, so it's silent. Non-upload missing assets (e.g. a stale JS
+        // chunk after a deploy) must keep failing loudly, so this is scoped to /uploads specifically.
+        var isUploadPath = path.Value?.Contains("/uploads/", StringComparison.OrdinalIgnoreCase) == true;
+        var isImage = uploadImageExtensions.Any(ext => lastSegment.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+        if (isUploadPath && isImage && File.Exists(uploadImagePlaceholderPath))
+        {
+            ctx.Response.ContentType = "image/svg+xml";
+            await ctx.Response.SendFileAsync(uploadImagePlaceholderPath);
+            return;
+        }
+
         ctx.Response.StatusCode = StatusCodes.Status404NotFound;
         return;
     }
