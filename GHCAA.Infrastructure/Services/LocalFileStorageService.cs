@@ -38,6 +38,7 @@ namespace GHCAA.Infrastructure.Services
         private int DefaultQuality => _config.GetValue<int>(Constants.ConfigKeys.ImageCompressionQuality, Constants.Defaults.ImageQuality);
         private int FallbackQuality => _config.GetValue<int>(Constants.ConfigKeys.ImageCompressionFallbackQuality, Constants.Defaults.FallbackImageQuality);
         private int TargetSizeKB => _config.GetValue<int>(Constants.ConfigKeys.ImageCompressionTargetSizeKB, Constants.Defaults.TargetImageSizeKB);
+        private int MaxDimensionPx => _config.GetValue<int>(Constants.ConfigKeys.ImageCompressionMaxDimensionPx, Constants.Defaults.ImageMaxDimensionPx);
 
         private bool IsSecureType(Enums.FileUploadType type)
         {
@@ -107,6 +108,15 @@ namespace GHCAA.Infrastructure.Services
                     if (fileStream.CanSeek) fileStream.Position = 0;
 
                     using var image = await Image.LoadAsync(fileStream, cancellationToken);
+
+                    if (image.Width > MaxDimensionPx || image.Height > MaxDimensionPx)
+                    {
+                        image.Mutate(x => x.Resize(new ResizeOptions
+                        {
+                            Mode = ResizeMode.Max,
+                            Size = new Size(MaxDimensionPx, MaxDimensionPx)
+                        }));
+                    }
 
                     var encoder = new JpegEncoder { Quality = DefaultQuality };
 

@@ -331,7 +331,7 @@
                     </div>
                     @if (editingTemplate()!.channel === channels.Sms) {
                     <div class="form-group full">
-                        <label>SMS Body ({{ editingTemplate()!.body?.length || 0 }} chars, {{ smsSegmentCount() }} segment(s))</label>
+                        <label>SMS Body ({{ editingTemplate()!.body.length || 0 }} chars, {{ smsSegmentCount() }} segment(s))</label>
                         <textarea #smsBodyInput rows="6" [(ngModel)]="editingTemplate()!.body"></textarea>
                     </div>
                     } @else {

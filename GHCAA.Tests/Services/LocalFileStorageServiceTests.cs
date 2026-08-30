@@ -4,6 +4,9 @@ using GHCAA.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace GHCAA.Tests.Services;
 
@@ -261,6 +264,53 @@ public class LocalFileStorageServiceTests
         // Act & Assert
         var act = async () => await service.SaveFileAsync(stream, "test.jpg", 1, Enums.FileUploadType.Photo);
         act.Should().ThrowAsync<InvalidOperationException>();
+    }
+
+    private static MemoryStream CreateJpeg(int width, int height)
+    {
+        using var image = new Image<Rgba32>(width, height);
+        var stream = new MemoryStream();
+        image.SaveAsJpeg(stream, new JpegEncoder { Quality = 90 });
+        stream.Position = 0;
+        return stream;
+    }
+
+    [Test]
+    public async Task SaveFileAsync_WithOversizedGalleryPhoto_ShouldResizeToMaxDimension()
+    {
+        // Arrange
+        var inMemorySettings = new Dictionary<string, string> {
+            {"FileStorage:BasePhysicalPath", _testDirectory},
+            {"FileStorage:ImageCompression:MaxDimensionPx", "800"}
+        };
+        var testConfig = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings!).Build();
+        var service = new LocalFileStorageService(testConfig, _mockLogger.Object);
+        var stream = CreateJpeg(3000, 2000); // 3:2 landscape, both dims exceed the 800px cap
+
+        // Act
+        var relativePath = await service.SaveFileAsync(stream, "album.jpg", 1, Enums.FileUploadType.GalleryPhoto);
+
+        // Assert
+        var fullPath = Path.Combine(_testDirectory, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        using var saved = await Image.LoadAsync(fullPath);
+        saved.Width.Should().Be(800);
+        saved.Height.Should().Be(533); // 2000/3000 * 800, rounded by ImageSharp's Max resize mode
+    }
+
+    [Test]
+    public async Task SaveFileAsync_WithSmallGalleryPhoto_ShouldNotUpscale()
+    {
+        // Arrange
+        var stream = CreateJpeg(200, 150); // well under the default 1920px cap
+
+        // Act
+        var relativePath = await _service.SaveFileAsync(stream, "album.jpg", 1, Enums.FileUploadType.GalleryPhoto);
+
+        // Assert
+        var fullPath = Path.Combine(_testDirectory, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        using var saved = await Image.LoadAsync(fullPath);
+        saved.Width.Should().Be(200);
+        saved.Height.Should().Be(150);
     }
 
     [Test]

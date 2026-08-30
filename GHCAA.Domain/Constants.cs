@@ -30,6 +30,7 @@ namespace GHCAA.Domain
             public const string ImageCompressionQuality = "FileStorage:ImageCompression:Quality";
             public const string ImageCompressionFallbackQuality = "FileStorage:ImageCompression:FallbackQuality";
             public const string ImageCompressionTargetSizeKB = "FileStorage:ImageCompression:TargetSizeKB";
+            public const string ImageCompressionMaxDimensionPx = "FileStorage:ImageCompression:MaxDimensionPx";
 
             public const string AllowedOrigins = "AppSettings:AllowedOrigins";
             public const string ClientUrl = "AppSettings:ClientUrl";
@@ -49,6 +50,7 @@ namespace GHCAA.Domain
             public const int ImageQuality = 85;
             public const int FallbackImageQuality = 70;
             public const int TargetImageSizeKB = 350;
+            public const int ImageMaxDimensionPx = 1920; // longest side; display images never need more
 
             public const string ImportEmailBase = "haragangian";
             public const string MembershipPrefix = "GHC-";

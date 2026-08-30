@@ -395,6 +395,11 @@ build_output.txt
 test_results.txt
 graphify-out
 
+# Multi-RID dotnet publish output (accidentally committed 2026-03-28, 178MB/230 files incl.
+# native libs for every runtime identifier) — never needed by the Dockerfile, just bloats
+# every clone/build.
+build_output/
+
 # Claude memory is per-machine/session scratch state (canonical store lives outside the repo at
 # ~/.claude/projects/.../memory/) — never check it into git, it only goes stale and diverges.
 .claude/memory/
