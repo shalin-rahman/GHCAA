@@ -2873,3 +2873,33 @@ logo medallion side-by-side (or flag left / logo+text right), each clearly label
 / "Official Emblem") so a visitor doesn't read them as the same image repeated. Reuse the existing
 `.story-card`/`glass-card` section styling already established on this page rather than a new
 one-off layout.
+
+59.2 [DONE] **Priority: P2 | Depends on: none.** User reported garbled Bengali tagline text on the
+About page: `"॥থিহ্যের বিনিময়..."` instead of `"ঐতিহ্যের বিনিময়..."`. Confirmed the **source code**
+(`OrgConfigService.cs:182`, the `"bn"` `LocalePackDto.Tagline` default) already has the **correct**
+text — this was never a code bug to begin with. Real root cause: `GetConfigAsync`
+(`OrgConfigService.cs:26-37`) only falls back to `BuildGhcaaDefaults()` when the `OrganizationConfig`
+DB row is entirely missing; once a row exists, it's trusted completely, and `UpdateConfigAsync`
+(`OrgConfigService.cs:39-58`) round-trips the **entire** `OrgConfigDto` on every admin save (Org
+Config admin form only has fields for Branding/Workflow/Features, confirmed no Localization/tagline
+field exists in `admin/org-config/org-config.html`) — so a `Localization` value captured into the
+live DB row before this tagline was corrected in source stayed permanently stale, being silently
+re-saved untouched every time an admin edited anything else in Org Config. **Fixed as a self-heal**,
+matching this repo's own established pattern for code-vs-stored-data drift (`ConstitutionSeeder`,
+`MigrationBootstrapper`): `GetConfigAsync` now always overlays `Localization` from
+`BuildGhcaaDefaults()` onto whatever was loaded, via `dto with { Localization = ... }` (`OrgConfigDto`
+is a record) — since no admin UI ever intentionally edits this section, it should always reflect
+current source, not whatever got frozen into a row historically. This also self-heals any *future*
+copy fix the same way, not just this one instance. Verified via `dotnet build`, the 9 existing
+OrgConfig-specific tests, and a full `dotnet test` run (516/516 including these).
+
+59.3 [DONE] **Priority: P4 | Depends on: none.** User asked to make the About page's story-card
+boxes have close word/character counts — confirmed a real imbalance: the "Historic Foundation" card
+(`about.html:26-37`) ran ~75 words while the "Vision" card (`about.html:39-53`) ran only ~30 words
+plus a short mission-pills list, reading visually lopsided in the two-card grid. Expanded the Vision
+paragraph (kept all existing dynamic `orgConfigService` bindings — org full name/short name/member
+nickname — and its factual meaning unchanged, just elaborated with real content already implied by
+its own mission-pills list: networking, mentorship, heritage) to ~75 words, matching Historic
+Foundation's length. Did not touch the admin-managed CMS story blocks (`blocks()`, shown instead of
+this static fallback when Site Content has entries) — that's admin-authored content, not something
+to silently rewrite. Verified via `ng build --configuration production` (clean).

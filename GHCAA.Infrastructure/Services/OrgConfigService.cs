@@ -30,9 +30,18 @@ namespace GHCAA.Infrastructure.Services
             {
                 entry.AbsoluteExpirationRelativeToNow = CacheTtl;
                 var record = await db.OrganizationConfigs.AsNoTracking().FirstOrDefaultAsync();
-                return record is not null
+                var dto = record is not null
                     ? JsonSerializer.Deserialize<OrgConfigDto>(record.ConfigJson, JsonOpts) ?? BuildGhcaaDefaults()
                     : BuildGhcaaDefaults();
+
+                // Localization copy has no admin UI to edit it deliberately (org-config admin form
+                // only touches Branding/Workflow/Features), but a stored config row round-trips the
+                // *entire* DTO on every admin save (UpdateConfigAsync serializes the whole object),
+                // so any Localization text captured into a row before a later source-code copy fix
+                // (e.g. a corrected Bengali tagline) stays permanently stale otherwise. Since this
+                // section is code-owned, always serve the current source value rather than trusting
+                // whatever happened to be persisted.
+                return dto with { Localization = BuildGhcaaDefaults().Localization };
             }))!;
         }
 
