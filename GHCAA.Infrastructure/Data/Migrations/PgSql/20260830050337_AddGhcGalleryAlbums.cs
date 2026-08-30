@@ -16,7 +16,7 @@ INSERT INTO ""EventGalleries"" (""Id"", ""Title"", ""Description"", ""EventDate"
 VALUES
     (2, 'GHC 1st Grand Reunion', 'Photo memories from the first grand reunion of GHC alumni.', '2026-01-24T09:00:00Z', 'College Campus Ground', '2026-08-30T00:00:00Z', 1, true, false, NULL, 2, NULL),
     (3, 'Bangla New Year', 'Celebrating Pohela Boishakh with the GHC alumni community.', '2026-04-14T00:00:00Z', NULL, '2026-08-30T00:00:00Z', 1, true, false, NULL, 2, NULL),
-    (4, 'Campus', 'Scenes from the Gyaneswari High College campus.', '2026-08-29T00:00:00Z', NULL, '2026-08-30T00:00:00Z', 1, true, false, NULL, 2, NULL),
+    (4, 'Campus', 'Scenes from the Gyaneswari High College campus.', '2026-08-29T00:00:00Z', NULL, '2026-08-30T00:00:00Z', 1, true, true, NULL, 2, NULL),
     (5, 'Iftar 2026', 'Iftar gathering with GHC alumni and guests.', '2026-03-14T07:21:00Z', 'Darbar Party Center', '2026-08-30T00:00:00Z', 1, true, false, NULL, 2, NULL),
     (6, 'New Principal', 'Welcoming the new principal of Gyaneswari High College.', '2026-08-26T00:00:00Z', NULL, '2026-08-30T00:00:00Z', 1, true, false, NULL, 2, NULL),
     (7, 'Principal Abul Kasem Kulkharni', 'Tribute photos of Principal Abul Kasem Kulkharni.', '2026-08-16T00:00:00Z', NULL, '2026-08-30T00:00:00Z', 1, true, false, NULL, 2, NULL)

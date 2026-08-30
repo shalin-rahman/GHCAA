@@ -40,7 +40,7 @@
     "CreatedAt": "2026-08-30T00:00:00Z",
     "CreatedByAdminId": 1,
     "IsActive": true,
-    "IsFeatured": false,
+    "IsFeatured": true,
     "Location": null
   },
   {
