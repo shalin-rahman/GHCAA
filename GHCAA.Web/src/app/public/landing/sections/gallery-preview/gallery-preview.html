@@ -8,13 +8,15 @@
         </div>
 
         <div class="gallery-grid">
-            @for (photo of getFeaturedPhotos(); track photo.id) {
+            @for (album of albums(); track album.id) {
+            @if (currentPhoto(album); as photo) {
             <div class="gallery-item glass-card" (click)="viewFull(photo.photoPath)">
-                <img [src]="photo.photoPath" [alt]="photo.galleryTitle" appImgFallback="/assets/placeholders/image-placeholder.svg">
+                <img [src]="photo.photoPath" [alt]="album.title" appImgFallback="/assets/placeholders/image-placeholder.svg">
                 <div class="gallery-overlay">
-                    <span>{{ photo.galleryTitle }}</span>
+                    <span>{{ album.title }}</span>
                 </div>
             </div>
+            }
             } @empty {
             <!-- Empty state fallback if no photos exist yet -->
             <div class="gallery-item glass-card placeholder">

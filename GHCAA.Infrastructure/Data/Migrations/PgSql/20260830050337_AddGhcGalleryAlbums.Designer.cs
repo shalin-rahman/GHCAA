@@ -8587,7 +8587,7 @@ namespace GHCAA.Infrastructure.Data.Migrations.PgSql
                             Description = "Scenes from the Gyaneswari High College campus.",
                             EventDate = new DateTime(2026, 8, 29, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
-                            IsFeatured = false,
+                            IsFeatured = true,
                             Status = 2,
                             Title = "Campus"
                         },

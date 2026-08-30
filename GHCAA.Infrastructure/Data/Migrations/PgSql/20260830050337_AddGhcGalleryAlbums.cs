@@ -51,15 +51,24 @@ VALUES
     (26, 7, '/assets/gallery/principal-abul-kasem-kulkharni/album_principal-abul-kasem-kulkharni_02.jpeg', NULL, '2026-08-30T00:00:00Z', NULL, 2, NULL),
     (27, 7, '/assets/gallery/principal-abul-kasem-kulkharni/album_principal-abul-kasem-kulkharni_03.jpeg', NULL, '2026-08-30T00:00:00Z', NULL, 2, NULL)
 ON CONFLICT (""Id"") DO NOTHING;
+
+-- Explicit-Id inserts above don't advance the identity sequence backing these columns, so the
+-- next admin-created album/photo would collide on nextval() until the sequence walks past these
+-- rows on its own. Force it forward now.
+SELECT setval(pg_get_serial_sequence('""EventGalleries""', 'Id'), GREATEST((SELECT MAX(""Id"") FROM ""EventGalleries""), 1));
+SELECT setval(pg_get_serial_sequence('""EventPhotos""', 'Id'), GREATEST((SELECT MAX(""Id"") FROM ""EventPhotos""), 1));
 ");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // Delete by the seeded PhotoPath prefix / known Title set rather than by Id range —
+            // once real albums/photos are created (Ids continue past 27 per the sequence fix
+            // above), an Id-range delete would risk destroying genuine user data instead.
             migrationBuilder.Sql(@"
-DELETE FROM ""EventPhotos"" WHERE ""Id"" BETWEEN 2 AND 27;
-DELETE FROM ""EventGalleries"" WHERE ""Id"" BETWEEN 2 AND 7;
+DELETE FROM ""EventPhotos"" WHERE ""PhotoPath"" LIKE '/assets/gallery/%';
+DELETE FROM ""EventGalleries"" WHERE ""Title"" IN ('GHC 1st Grand Reunion', 'Bangla New Year', 'Campus', 'Iftar 2026', 'New Principal', 'Principal Abul Kasem Kulkharni');
 ");
         }
     }
