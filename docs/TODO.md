@@ -2785,7 +2785,7 @@ showing `NaN` again); `ec-preview.html` shows `({{ activePeriodDateRange() }})` 
 no "Period:" label — next to the period title. Verified via `dotnet build`, full `dotnet test`
 (516/516) and `ng build --configuration production`/vitest (372/372), all clean.
 
-58.7 [TODO] **Priority: P3 | Depends on: none.** On the public landing page, any section with zero
+58.7 [DONE] **Priority: P3 | Depends on: none.** On the public landing page, any section with zero
 records should hide itself entirely rather than render an "empty" placeholder message. Currently
 most preview sections only set `isVisible.set(false)` on a request **error**, not when the request
 succeeds with zero items — so an empty section today shows a placeholder message instead of just
@@ -2798,6 +2798,15 @@ intentional (showing the org structure exists even with unfilled seats), not the
 it" case as a preview list simply having nothing to show yet; confirm with the user whether EC
 should also hide when `committee()` is empty, or is exempt like `member/polls` was exempted in 58.2.
 `landing-purpose`/`landing-membership` are not data-driven previews (static content), out of scope.
+**Implemented (defaulted EC to stay exempt, per the same reasoning as its own note above — no
+explicit override given, so left as the safer no-behavior-change default):** `news-preview.ts`,
+`events-preview.ts`, `jobs-preview.ts`, `gallery-preview.ts`, `recent-members-preview.ts` now all
+set `isVisible` based on the actual result length, not just on error; removed each one's now-dead
+`@empty` placeholder markup (`news-preview.html`, `events-preview.html`, `jobs-preview.html`,
+`gallery-preview.html` — the last one had 4 **fabricated** fake album names like "Annual Picnic
+2024" as filler, now gone entirely rather than ever shown). `ec-preview.html`'s "Vacant seats"
+placeholder deliberately left untouched. Verified via `ng build --configuration production` (clean)
+and vitest (372/372, no existing spec asserted on the removed placeholders).
 
 58.3 [DONE — verified working, no bug found] **Priority: n/a | Depends on: none.** User asked how
 members are restricted to voting on active/open polls only. Checked both ends — already correctly
@@ -2853,7 +2862,7 @@ after deploy; the fix itself is unambiguous (a real click target is now visible 
 # Area 59 — Association flag on the public About page (raised by user 2026-08-31, referencing
 https://ghcaa-ryl6.onrender.com/about)
 
-59.1 [TODO] **Priority: P4 | Depends on: none.** Add an "About The Association" section to the
+59.1 [DONE] **Priority: P4 | Depends on: none.** Add an "About The Association" section to the
 public About page (`GHCAA.Web/src/app/public/about/about.html`) showing the association's **flag**
 as a separate, distinct visual from the logo image — not the logo alone reused twice. Checked the
 actual design spec so this isn't guessed: `GHCAA.Infrastructure/Data/Seed/constitution.json`
@@ -2873,6 +2882,13 @@ logo medallion side-by-side (or flag left / logo+text right), each clearly label
 / "Official Emblem") so a visitor doesn't read them as the same image repeated. Reuse the existing
 `.story-card`/`glass-card` section styling already established on this page rather than a new
 one-off layout.
+**Implemented exactly as planned:** new "Official Emblem"/"Official Flag" card pair in `about.html`
+(reusing `.story-card`/`glass-card`), both rendered from the same `assets/logo.png` — the emblem
+shown plainly, the flag shown centered on a `var(--paper-bg)` white panel (new `.symbol-display`/
+`.flag-display` in `about.scss`, mirroring `landing.scss`'s `--paper-bg` "never flips with theme"
+token for the same reason: a flag is a physical object, not themeable UI chrome). No new image
+asset, no admin upload flow. Verified via `ng build --configuration production` (clean) and vitest
+(372/372).
 
 59.2 [DONE] **Priority: P2 | Depends on: none.** User reported garbled Bengali tagline text on the
 About page: `"॥থিহ্যের বিনিময়..."` instead of `"ঐতিহ্যের বিনিময়..."`. Confirmed the **source code**
@@ -2903,3 +2919,49 @@ its own mission-pills list: networking, mentorship, heritage) to ~75 words, matc
 Foundation's length. Did not touch the admin-managed CMS story blocks (`blocks()`, shown instead of
 this static fallback when Site Content has entries) — that's admin-authored content, not something
 to silently rewrite. Verified via `ng build --configuration production` (clean).
+
+---
+
+# Area 60 — Mobile parity plan for this session's portal changes (raised by user 2026-08-31: "plan
+for mobile tasks that have in portal but missed and needed")
+
+A codebase-wide comparison (member portal `GHCAA.Web/src/app/member/`+`common/` vs. `GHCAA.Mobile/lib/`)
+found mobile already has an equivalent screen for essentially every member-facing web feature —
+Dashboard, Profile, Payments/Financials, Directory, Jobs, Mentorship Hub, Events, News, Gallery,
+Polls, Chats/Forum, Notifications, Governance, Digital ID. This is a **plan only** — nothing below
+has been implemented; each item needs its own scoping/estimate before work starts.
+
+**Explicitly rejected, not a real gap:** the initial pass flagged "port the new Table/Card view
+toggle to mobile Directory/Jobs/Gallery/News" as a gap. That is **not applicable to mobile** — a
+wide multi-column data table is a desktop/web affordance; phone-width screens already use a
+card/list layout for exactly the reason a table wouldn't fit, and that's the *correct* mobile
+pattern, not a missing feature. Do not port table views to mobile.
+
+60.1 [TODO] **Priority: P4 | Depends on: none.** Mobile's News screen
+(`GHCAA.Mobile/lib/screens/member/news_screen.dart`) has not been re-checked against this session's
+web News restyle (55.4 — compact dashboard-style feed-list replacing the old card grid, News-only).
+Verify whether mobile's News screen still uses a materially different layout convention than both
+the (also News-only, web-side) restyled section and mobile's own established list-screen patterns
+elsewhere (Jobs, Gallery) — if it's already visually consistent with mobile's own conventions, no
+action needed; a redesign is only warranted if it's inconsistent with itself, not to chase visual
+parity with a web-specific style choice.
+
+60.2 [TODO] **Priority: P3 | Depends on: none.** Confirm this session's two *behavioral* (not
+visual) fixes protect mobile automatically, since both are enforced server-side, not client-side:
+  - 54.6 — event registration blocked past `EndDate` even with no `RegistrationEndDate` set. Mobile's
+    event registration call hits the same `RegisterForEventAsync` backend method, so this should
+    already be covered with no mobile code change — but verify mobile's own UI doesn't *also* have a
+    client-side "can register" check duplicating the old (pre-fix) logic, which would show a
+    misleading enabled button that the server then rejects.
+  - 58.3 — poll voting already correctly blocked past `ExpiryDate`/inactive server-side
+    (`PollService.VoteAsync`), confirmed already correct — no web fix was needed, so nothing to
+    check on mobile for this one specifically, included here only for completeness of the sweep.
+
+60.3 [TODO] **Priority: P4 | Depends on: none.** Messages vs. Chat+Forum naming mismatch: web has a
+single "Messages" page (`member/messages`); mobile splits the same networking space into a separate
+Chats screen and a Forum feature (`chats_screen.dart`/`chat_room_screen.dart` +
+`forum_categories_screen.dart`/`forum_topics_screen.dart`/`forum_topic_detail_screen.dart`). Not
+confirmed whether these map to the same backend feature/data model or web's Messages covers ground
+mobile's split model doesn't (e.g. direct 1:1 alumni messaging vs. threaded forum discussion) —
+needs a closer read of both the web and mobile networking/messaging services before concluding
+anything is actually missing; flagged as needs-verification, not a confirmed gap.

@@ -19,7 +19,12 @@ export class LandingRecentMembersPreview implements OnInit {
         // 55.3: api/networking/search is already [AllowAnonymous] (same one the public Directory
         // page uses) — no new backend endpoint needed for this preview.
         this.networking.getRecentlyJoined(8).subscribe({
-            next: (result) => this.members.set(result?.items || []),
+            // 58.7: hide the whole section when there's nothing to show, not just on error.
+            next: (result) => {
+                const items = result?.items || [];
+                this.members.set(items);
+                this.isVisible.set(items.length > 0);
+            },
             error: () => {
                 this.members.set([]);
                 this.isVisible.set(false);

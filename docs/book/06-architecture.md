@@ -310,7 +310,14 @@ and a fallback chain of cache, then database, then a built-in default so that a 
 row cannot crash the application, holds branding, contact details, currency, feature toggles such as
 `enableForum` and `enableMentorship`, and workflow settings such as the membership approval mode.
 `GET /api/config` is public and `PUT /api/config` is SuperAdmin-only, which is the interface design
-principle of §6.6 applied to configuration itself. At the time of writing the Angular and Flutter
+principle of §6.6 applied to configuration itself. One field group is a deliberate exception to the
+"database wins" rule: `Localization` (UI copy strings, e.g. per-locale tagline text) is always
+overlaid from the built-in defaults on every read, regardless of what a stored config row holds,
+because no admin screen edits it directly — a stored row only carries it forward incidentally
+(`UpdateConfigAsync` round-trips the whole DTO on any Branding/Workflow save), so trusting a stale
+copy there would let a source-code text fix never actually reach production (found and fixed
+2026-08-31, a corrected Bengali tagline that had been serving a pre-fix value from an old row). At
+the time of writing the Angular and Flutter
 clients' consumption of this configuration is only partially complete, which `docs/CONFIG_DRIVEN_FRAMEWORK.md`
 itself records as Phase 2 and Phase 3, "TODO"; §13.6.2 carries the remaining wiring forward.
 

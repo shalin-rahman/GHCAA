@@ -30,7 +30,9 @@ export class LandingEventsPreview implements OnInit {
                 // Combine and sort by startDate
                 const combined = [...active, ...latestClosed].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
+                // 58.7: hide the whole section when there's nothing to show, not just on error.
                 this.events.set(combined);
+                this.isVisible.set(combined.length > 0);
             },
             error: () => {
                 this.events.set([]);

@@ -114,6 +114,43 @@ $campus-fallback: url('/assets/images/concept/artistic_campus_watercolor_1773859
     }
 }
 
+/* 59.1: Official Emblem + Official Flag. The flag has no separate image asset — Constitution
+   Article I Section 7 defines it as "a solid white background with the association's logo
+   positioned prominently in the center," so it's rendered live here from the same logo.png rather
+   than a commissioned second asset, and stays in sync automatically if the logo is ever updated. */
+.symbol-card {
+    text-align: center;
+}
+
+.symbol-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 220px;
+    margin-bottom: 1.5rem;
+
+    img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+}
+
+.flag-display {
+    /* --paper-bg (defined in landing.scss's :root, global): pure white regardless of theme,
+       reused here rather than a literal #fff since this represents a physical printed object
+       (the flag), the same reasoning --paper-bg already exists for. */
+    background: var(--paper-bg);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    padding: 1.5rem;
+
+    img {
+        max-height: 70%;
+        max-width: 70%;
+    }
+}
+
 .mission-pills {
     display: flex;
     flex-wrap: wrap;

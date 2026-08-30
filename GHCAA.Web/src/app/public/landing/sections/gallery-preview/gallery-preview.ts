@@ -32,6 +32,8 @@ export class LandingGalleryPreview implements OnInit, OnDestroy {
         this.galleryService.getGalleries(true).subscribe({
             next: (data) => {
                 this.galleries.set(data);
+                // 58.7: hide the whole section when there's nothing to show, not just on error.
+                this.isVisible.set(this.albums().length > 0);
                 // Only start cycling once there's at least one multi-photo album to cycle —
                 // avoids a timer ticking forever (and scheduling change detection every tick)
                 // on an empty/error/single-photo landing page.

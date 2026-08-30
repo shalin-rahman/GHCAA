@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { authGuard, adminGuard } from './auth.guard';
+import { authGuard, adminGuard, memberGuard } from './auth.guard';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 describe('AuthGuards', () => {
@@ -102,6 +102,31 @@ describe('AuthGuards', () => {
             const result = await runGuard(TestBed.runInInjectionContext(() => adminGuard()));
             expect(result).toBe('/portal/dashboard');
             expect(routerMock.parseUrl).toHaveBeenCalledWith('/portal/dashboard');
+        });
+    });
+
+    // 58.1: an Admin/SuperAdmin account with no linked Member record previously reached every
+    // /portal/* page (authGuard alone only checks isAuthenticated()); those pages assume a real
+    // memberId server-side, so a memberless admin landed on broken pages instead of being routed
+    // somewhere that actually applies to them.
+    describe('memberGuard', () => {
+        it('allows a user with a memberId through', async () => {
+            (authServiceMock.currentUser as any).mockReturnValue({ role: 'Member', memberId: 42 });
+            const result = await runGuard(TestBed.runInInjectionContext(() => memberGuard(anyRoute, stateFor('/portal/profile'))));
+            expect(result).toBe(true);
+        });
+
+        it('redirects a memberless admin to the admin dashboard', async () => {
+            (authServiceMock.currentUser as any).mockReturnValue({ role: 'SuperAdmin', memberId: undefined });
+            const result = await runGuard(TestBed.runInInjectionContext(() => memberGuard(anyRoute, stateFor('/portal/payments'))));
+            expect(result).toBe('/admin/dashboard');
+            expect(routerMock.parseUrl).toHaveBeenCalledWith('/admin/dashboard');
+        });
+
+        it('lets a memberless admin through to change-password specifically, to avoid a redirect loop with authGuard', async () => {
+            (authServiceMock.currentUser as any).mockReturnValue({ role: 'SuperAdmin', memberId: undefined });
+            const result = await runGuard(TestBed.runInInjectionContext(() => memberGuard(anyRoute, stateFor('/portal/change-password'))));
+            expect(result).toBe(true);
         });
     });
 });

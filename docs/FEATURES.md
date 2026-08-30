@@ -29,6 +29,11 @@ A granular, module-by-module breakdown of the platform's features — including 
 - **Validations & rules**:
   - Verification requirement: email must be OTP-verified before login is permitted.
   - Role-based access: granular JWT claims for Member vs Admin vs SuperAdmin.
+  - `memberGuard` (2026-08-31): an Admin/SuperAdmin account with no linked Member record (e.g. a
+    `ProtectedSuperAdminSeeder`-created account) is now redirected away from `/portal/*` to
+    `/admin/dashboard` instead of reaching member-only pages (Profile, Payments, Dashboard) that
+    assume a real `memberId` and previously rendered broken/blank. Web-only — mobile's own auth flow
+    isn't affected by this route guard.
 - **Dependencies**: JWT token service.
 
 ### 1.2a Admin Step-Up Verification (2FA)
@@ -87,9 +92,17 @@ A granular, module-by-module breakdown of the platform's features — including 
   - API: `POST /api/events/register`.
   - Key fields: payment reference, receipt upload, contribution amount.
 - **Validations & rules**:
-  - Lifecycle: registration permitted only for active events before the deadline.
+  - Lifecycle: registration permitted only for active events before the deadline, and now also
+    hard-blocked once the event's own `EndDate` has passed even if no `RegistrationEndDate` was
+    ever set (2026-08-31 fix — previously an event with no registration deadline stayed open for
+    registration indefinitely after it had already ended).
   - Deduplication: prevents multiple registrations per user/guest for the same event.
   - Member enforcement: guest entry restricted by the event's `AllowNonMembers` policy.
+- **Display**: event lifecycle status (Unpublished / Upcoming / Ongoing / Ended) is now computed
+  from dates via `getEventStatus`/`getEventStatusMeta` (`GHCAA.Web/src/app/core/utils/date.util.ts`)
+  and shown on both the admin events list and the public/member events list — the admin's manual
+  publish flag (`IsActive`) only controls Unpublished vs. published, it no longer implies "currently
+  happening."
 - **Dependencies**: Financial service, file storage (receipts).
 
 ### 2.3 Event Management (Admin)
@@ -144,12 +157,14 @@ The platform operates without live payment-gateway credentials. All payment meth
   - API: `GET /api/networking/search`, `GET /api/networking/member/{id}`.
   - Key fields: search query, batch/department filters.
 - **Validations & rules**: results are strictly governed by each member's privacy toggles; masked fields never leak in response DTOs.
+- **Display**: defaults to a `.data-table` view (Table/Card toggle) on the full `/directory` page; the compact embedded mode (used as an in-app picker elsewhere) always stays card-based regardless. The public landing page also shows a "Recently Joined Haragangians" preview (photo/name/batch, no membership number) between the Membership and Jobs sections, reusing this same anonymous `search` endpoint (2026-08-31).
 - **Dependencies**: Networking service.
 
 ### 4.2 Professional Job Hub
 - **Business description**: Internal portal for sharing and applying for job opportunities within the alumni network.
 - **User roles**: Member.
 - **Inputs / outputs**: Screen `/portal/jobs`; API `GET /api/jobs`, `POST /api/jobs`.
+- **Display**: defaults to a `.data-table` view (Table/Card toggle); this is also where "Mentorship" category postings live (2026-08-31).
 - **Dependencies**: Job Hub service.
 
 ### 4.3 Direct Peer Messaging
@@ -259,12 +274,14 @@ The assistant runs entirely on internal data with a rule-based engine — it has
 - **Business description**: One board for both association news and official notices, discriminated by a `PostType` field on the same `NewsPost` entity. News may carry an image; notices may additionally carry a PDF document. Admins manage both from a single admin screen with a News/Notice tab filter.
 - **User roles**: Public (read), Member (may submit *news* articles for approval), Admin (CRUD on both). **Notices are admin-post-only** — the member-facing submit endpoint rejects `PostType.Notice` from non-admins.
 - **Inputs / outputs**: Screens `/news` (public + portal feed, tab-filtered; `/news?type=Notice` deep-links the Notices tab from the public nav) and `/admin/news`; APIs `GET /api/news?postType=`, `POST /api/news`, `POST /api/news/upload-image`, `POST /api/news/upload-document` (AdminOnly, PDF, 10 MB).
+- **Display**: `/news` defaults to a `.data-table` view (Table/Card toggle), and admin/news does too. The public landing page's "Latest Announcements" preview instead uses a compact feed-list (dot/title/excerpt/date, matching the member dashboard's "Latest News" widget design) rather than a card grid — a deliberate, News-only style exception (2026-08-31).
 - **Dependencies**: News service, file storage, file-validation service.
 
 ### 7.1a Site Content CMS (About Us / Contact intro)
 - **Business description**: Admin-editable content blocks that render the public About Us page and the Contact page intro, so institutional copy changes without a redeploy. Each block is a keyed record (`about-origin`, `about-association`, `about-logo`, `about-objectives`, `contact-intro`) with a title, rich-text body, display order, and active flag. Seeded from the GHCAA Constitution; the public page falls back to its previous static markup if the API returns nothing.
 - **User roles**: Public (read active blocks), Admin (CRUD, reorder, activate/deactivate).
 - **Inputs / outputs**: Screens `/about`, `/contact`, `/admin/site-content`; APIs `GET /api/site-content?group=` (anonymous), `GET /api/site-content/admin`, `POST`/`PUT /{id}`/`DELETE /{id}` (all AdminOnly).
+- **Official Emblem & Flag (2026-08-31)**: `/about`'s static fallback (shown when no CMS blocks exist) now also shows an "Official Emblem"/"Official Flag" card pair, both rendered from the existing `assets/logo.png` — the flag shown centered on a solid white panel per Constitution Article I §7 ("a solid white background with the association's logo positioned prominently in the center"). No separate flag image asset; not admin-editable via CMS (it's a fixed, constitution-derived design, not free-form copy).
 - **Dependencies**: SiteContent service, `HtmlSanitizer` (body HTML is sanitized server-side on every write), shared rich-text editor component.
 
 ### 7.1b Contact details configuration
@@ -277,6 +294,7 @@ The assistant runs entirely on internal data with a rule-based engine — it has
 - **Business description**: Visual records of association history categorized by events. Members may also create their own albums and upload photos to them; member-submitted albums/photos enter a `Pending` approval queue and only appear publicly once an Admin/SuperAdmin approves them (or are hidden with a rejection reason).
 - **User roles**: Public (read approved only), Member (create own albums, upload photos, submit for approval), Admin (CRUD, approve/reject submissions).
 - **Inputs / outputs**: Screen `/gallery`; API `POST /api/gallery`, plus member-album and admin approve/reject endpoints under `/api/gallery`.
+- **Display**: both `/gallery` (member/public) and `/admin/gallery` default to a `.data-table` view (Table/Card toggle); card view (cover-photo grid) remains available for visual browsing (2026-08-31).
 - **Dependencies**: Gallery service, file storage, shared admin-notification/email fan-out on new submissions (see AdminNotificationService).
 
 ### 7.3 Theme Management (Special Days)

@@ -18,7 +18,12 @@ export class LandingJobsPreview implements OnInit {
 
     ngOnInit() {
         this.jobService.getJobs(undefined, true).subscribe({
-            next: (data) => this.jobs.set(data.slice(0, 2)),
+            // 58.7: hide the whole section when there's nothing to show, not just on error.
+            next: (data) => {
+                const items = data.slice(0, 2);
+                this.jobs.set(items);
+                this.isVisible.set(items.length > 0);
+            },
             error: () => {
                 this.jobs.set([]);
                 this.isVisible.set(false);

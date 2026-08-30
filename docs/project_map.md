@@ -1290,7 +1290,7 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 ### Public Components (`src/app/public/`)
 | Component | Folder | Key Services |
 |---|---|---|
-| `LandingComponent` | `landing/` | `EventsService`, `NewsService`, `NetworkingService`, `ThemeService`, `GalleryService` (via `sections/gallery-preview` — renders every active album, each auto-cycling its own photos) |
+| `LandingComponent` | `landing/` | `EventsService`, `NewsService`, `NetworkingService`, `ThemeService`, `GalleryService` (via `sections/gallery-preview` — renders every active album, each auto-cycling its own photos). Also `sections/recent-members-preview` (`NetworkingService.getRecentlyJoined`, added 2026-08-31, sits between Membership and Jobs). Every data-driven preview section (News/Events/Jobs/Gallery/Recently-Joined) now hides itself entirely when its result set is empty, rather than showing a placeholder message — EC preview is the one deliberate exception, since its "Vacant seat" fallback is intentional. |
 | `LoginComponent` | `login/` | `AuthService`, `AlertService` |
 | `RegisterComponent` | `register/` | `RegistrationService`, `LookupService` |
 | `ResetPasswordComponent` | `reset-password/` | `AuthService` |

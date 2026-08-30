@@ -18,7 +18,13 @@ export class LandingNewsPreview implements OnInit {
 
     ngOnInit() {
         this.newsService.getNews(undefined, true).subscribe({
-            next: (data) => this.news.set(data.slice(0, 3)),
+            // 58.7: hide the whole section when there's nothing to show, not just on error —
+            // an empty landing section previously still rendered its "no announcements" placeholder.
+            next: (data) => {
+                const items = data.slice(0, 3);
+                this.news.set(items);
+                this.isVisible.set(items.length > 0);
+            },
             error: () => {
                 this.news.set([]);
                 this.isVisible.set(false);
