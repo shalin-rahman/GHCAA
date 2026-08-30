@@ -22,17 +22,8 @@
     "Key": "about-association",
     "Group": "about",
     "Title": "The Association",
-    "BodyHtml": "<p>The <strong>Govt. Haraganga College Alumni Association (GHCAA)</strong> was founded on <strong>29 November 2025</strong> to give the college's graduates a single place to find one another. Its members are known as <strong>HARAGANGIAN</strong>.</p><p>The Association is non-political, non-religious and not-for-profit. It takes no side in party politics and aligns with no religious body; membership is open to every former student of the college without distinction. Its work is philanthropic, and directed at education and culture.</p><p><strong>Motto:</strong> Sharing Heritage, Aligning Lives, Integrating Networks<br/><em>&#2405;&#2469;&#2495;&#2489;&#2509;&#2479;&#2503;&#2480; &#2476;&#2495;&#2472;&#2495;&#2478;&#2479;&#2492;, &#2460;&#2496;&#2476;&#2472;&#2503;&#2480; &#2488;&#2478;&#2472;&#2509;&#2476;&#2479;&#2492; &#2451; &#2488;&#2434;&#2489;&#2468;&#2495;&#2480; &#2488;&#2503;&#2468;&#2497;&#2476;&#2472;&#2509;&#2471;&#2472;</em></p>",
+    "BodyHtml": "<p>The <strong>Govt. Haraganga College Alumni Association (GHCAA)</strong> was founded on <strong>29 November 2025</strong> to give the college's graduates a single place to find one another. Its members are known as <strong>HARAGANGIAN</strong>.</p><p>The Association is non-political, non-religious and not-for-profit. It takes no side in party politics and aligns with no religious body; membership is open to every former student of the college without distinction. Its work is philanthropic, and directed at education and culture.</p><p><strong>Motto:</strong> Sharing Heritage, Aligning Lives, Integrating Networks<br/><em>ঐতিহ্যের বিনিময়, জীবনের সমন্বয় ও সংহতির সেতুবন্ধন</em></p><p>Every element of the Association's crest carries meaning: the historic building for the college and its heritage, the open book for knowledge and learning, the torch for enlightenment and guidance, the mortarboard for academic achievement, the handshake for fellowship and mutual support among alumni, and the red and gold border with &ldquo;Est. 2025&rdquo; for the founding of the Association. The Association's flag is white, signifying peace, harmony, non-violence and purity.</p><p>Use of the Association's name, crest, flag or other branding requires prior permission from the Executive Committee.</p>",
     "DisplayOrder": 3,
-    "IsActive": true
-  },
-  {
-    "Id": 3,
-    "Key": "about-logo",
-    "Group": "about",
-    "Title": "Logo & Flag",
-    "BodyHtml": "<p>Every element of the Association's crest carries meaning:</p><ul><li><strong>Historic building</strong> &ndash; the college and its heritage</li><li><strong>Open book</strong> &ndash; knowledge and learning</li><li><strong>Torch</strong> &ndash; enlightenment and guidance</li><li><strong>Mortarboard</strong> &ndash; academic achievement</li><li><strong>Handshake</strong> &ndash; fellowship and mutual support among alumni</li><li><strong>Red and gold border, &ldquo;Est. 2025&rdquo;</strong> &ndash; the founding of the Association</li></ul><p>The Association's flag is white, signifying peace, harmony, non-violence and purity.</p><p>Use of the Association's name, crest, flag or other branding requires prior permission from the Executive Committee.</p>",
-    "DisplayOrder": 4,
     "IsActive": true
   },
   {

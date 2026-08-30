@@ -15,6 +15,11 @@
         <div class="glass-card story-card reveal-bottom">
             <div class="card-tag">{{ block.group | uppercase }}</div>
             <h3>{{ block.title }}</h3>
+            @if (block.key === 'about-association') {
+            <div class="assoc-flag-badge" title="Official flag">
+                <img src="/assets/logo.png" alt="Association flag" class="waving-flag" appImgFallback>
+            </div>
+            }
             <div class="cms-body" [innerHTML]="block.bodyHtml"></div>
             <div class="feature-line"></div>
         </div>
@@ -39,6 +44,9 @@
         <div class="glass-card story-card accent reveal-right">
             <div class="card-tag">OUR PURPOSE</div>
             <h3>The {{ orgConfigService.config()?.branding?.shortName }} Vision</h3>
+            <div class="assoc-flag-badge" title="Official flag">
+                <img src="/assets/logo.png" alt="Association flag" class="waving-flag" appImgFallback>
+            </div>
             <p>
                 The {{ orgConfigService.config()?.branding?.fullName }} ({{ orgConfigService.config()?.branding?.shortName }}) isn't just a registry;
                 it's a brotherhood spanning every batch since our mother institution's founding. We connect alumni across the globe
@@ -55,27 +63,6 @@
         </div>
     </div>
     }
-
-    <!-- Symbols of the Association: Emblem + Flag, per Constitution Article I, Section 7 -->
-    <div class="story-grid symbols-grid">
-        <div class="glass-card story-card symbol-card reveal-left">
-            <div class="card-tag">OFFICIAL EMBLEM</div>
-            <div class="symbol-display">
-                <img src="/assets/logo.png" alt="Official emblem of the association" appImgFallback>
-            </div>
-            <p>The association's crest — a shield bearing the open book, torch, graduation cap, and
-                handshake, framed by the institution's historic façade.</p>
-        </div>
-
-        <div class="glass-card story-card symbol-card reveal-right">
-            <div class="card-tag">OFFICIAL FLAG</div>
-            <div class="symbol-display flag-display">
-                <img src="/assets/logo.png" alt="Official flag of the association" appImgFallback>
-            </div>
-            <p>Per Article I, Section 7 of the Constitution: a solid white field with the association's
-                emblem centered — white symbolizing peace, harmony, non-violence, and purity.</p>
-        </div>
-    </div>
 
     <!-- Governance Section -->
     <div class="heritage-banner glass-card reveal-bottom">

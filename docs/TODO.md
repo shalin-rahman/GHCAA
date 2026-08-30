@@ -2920,6 +2920,32 @@ Foundation's length. Did not touch the admin-managed CMS story blocks (`blocks()
 this static fallback when Site Content has entries) — that's admin-authored content, not something
 to silently rewrite. Verified via `ng build --configuration production` (clean).
 
+59.4 [DONE] **Priority: P2 | Depends on: none.** User asked to remove the "Logo & Flag" About-page
+section (the 59.1 Emblem/Flag card pair read as two near-duplicate boxes since both render the same
+`logo.png`), distribute its crest/flag content onto "The Association" content, and add a
+wave-on-hover animation to the surviving flag visual. Also reported garbled Bengali motto text on
+the live site — this turned out to be a **second, separate instance** of the 59.2 bug: the CMS `SiteContents` row
+`Key = about-association` carries its own independently-seeded copy of the tagline with wrong
+numeric character references (`&#2405;&#2469;` decoding to `"॥থ"` instead of `"ঐত"`), unrelated to
+the `OrganizationConfig`/`OrgConfigService` row 59.2 already fixed —
+`SiteContent` has no self-heal (it's admin-editable content, so overlaying source defaults on every
+boot would silently clobber real admin edits), so this needed a one-time data fix, not a self-heal.
+Removed the `about-logo` CMS block (`GHCAA.Infrastructure/Data/Seed/site_content.json`) and merged
+its crest/flag description plus the corrected motto into `about-association`'s `BodyHtml`; same
+change shipped to production via a hand-written idempotent migration
+(`20260831000000_FixAssociationContentMergeLogoFlag.cs`, matched by `Key` not `Id` — UPDATE/DELETE
+are no-ops if re-run) rather than scaffolded `UpdateData`/`DeleteData` (`dotnet ef migrations add`
+here always also emits unrelated `Users.SecurityStamp`/`EmailTemplates.LastUpdated` churn, see
+`gotcha_pending_model_changes_seed`). Also fixed the same wrong entities in the historical
+`20260802163432_AddSiteContentAndNoticeFields.cs` seed insert (cosmetic — doesn't affect already-
+migrated prod data, only future from-scratch DBs). In `about.html`, removed the hardcoded
+`symbols-grid` (Emblem+Flag) block entirely and added a small `.assoc-flag-badge` (still
+`logo.png`, no new asset) inside the CMS-rendered card where `block.key === 'about-association'`,
+plus the same badge in the static fallback's "Vision" card; new `flag-wave` CSS keyframe animation
+plays on `:hover`. Page section count: header + 4 CMS blocks (Origin, College Today, Association,
+What We Do) + governance/pillars banner = 6, as requested. Verified via `dotnet build` (0 errors),
+`npx tsc --noEmit`, and `ng build --configuration production` (clean).
+
 ---
 
 # Area 60 — Mobile parity plan for this session's portal changes (raised by user 2026-08-31: "plan

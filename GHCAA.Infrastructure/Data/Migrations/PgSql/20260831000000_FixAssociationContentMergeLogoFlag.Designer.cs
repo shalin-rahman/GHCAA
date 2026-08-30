@@ -3,17 +3,20 @@ using System;
 using GHCAA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GHCAA.Infrastructure.Data.Migrations
+namespace GHCAA.Infrastructure.Data.Migrations.PgSql
 {
     [DbContext(typeof(PgSqlApplicationDbContext))]
-    partial class PgSqlApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260831000000_FixAssociationContentMergeLogoFlag")]
+    partial class FixAssociationContentMergeLogoFlag
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,7 +70,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("AcademicRecords", (string)null);
+                    b.ToTable("AcademicRecords");
 
                     b.HasData(
                         new
@@ -7694,7 +7697,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("MemberId", "Timestamp");
 
-                    b.ToTable("ActivityLogs", (string)null);
+                    b.ToTable("ActivityLogs");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.AlumniEvent", b =>
@@ -7767,7 +7770,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AlumniEvents", (string)null);
+                    b.ToTable("AlumniEvents");
 
                     b.HasData(
                         new
@@ -7878,7 +7881,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("ConstitutionId", "MemberId")
                         .IsUnique();
 
-                    b.ToTable("AmendmentVotes", (string)null);
+                    b.ToTable("AmendmentVotes");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ChatMessage", b =>
@@ -7911,7 +7914,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("ChatMessages", (string)null);
+                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.Constitution", b =>
@@ -7948,7 +7951,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Constitutions", (string)null);
+                    b.ToTable("Constitutions");
 
                     b.HasData(
                         new
@@ -7995,7 +7998,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ContactMessages", (string)null);
+                    b.ToTable("ContactMessages");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ECMember", b =>
@@ -8030,7 +8033,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("ECMembers", (string)null);
+                    b.ToTable("ECMembers");
 
                     b.HasData(
                         new
@@ -8231,7 +8234,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ECPeriods", (string)null);
+                    b.ToTable("ECPeriods");
 
                     b.HasData(
                         new
@@ -8288,7 +8291,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmailLogs", (string)null);
+                    b.ToTable("EmailLogs");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.EmailTemplate", b =>
@@ -8332,7 +8335,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("EmailTemplates", (string)null);
+                    b.ToTable("EmailTemplates");
 
                     b.HasData(
                         new
@@ -8453,7 +8456,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("EventId")
                         .IsUnique();
 
-                    b.ToTable("EventBudgets", (string)null);
+                    b.ToTable("EventBudgets");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.EventExpense", b =>
@@ -8487,7 +8490,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("EventBudgetId");
 
-                    b.ToTable("EventExpenses", (string)null);
+                    b.ToTable("EventExpenses");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.EventGallery", b =>
@@ -8536,7 +8539,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("OwnerMemberId");
 
-                    b.ToTable("EventGalleries", (string)null);
+                    b.ToTable("EventGalleries");
 
                     b.HasData(
                         new
@@ -8661,7 +8664,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("EventGalleryId");
 
-                    b.ToTable("EventPhotos", (string)null);
+                    b.ToTable("EventPhotos");
 
                     b.HasData(
                         new
@@ -8959,7 +8962,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                         .IsUnique()
                         .HasFilter("\"MemberId\" IS NOT NULL");
 
-                    b.ToTable("EventRegistrations", (string)null);
+                    b.ToTable("EventRegistrations");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.EventTask", b =>
@@ -8999,7 +9002,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("EventTasks", (string)null);
+                    b.ToTable("EventTasks");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.FamilyLinkRequest", b =>
@@ -9037,7 +9040,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("TargetMemberId");
 
-                    b.ToTable("FamilyLinkRequests", (string)null);
+                    b.ToTable("FamilyLinkRequests");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.FileUpload", b =>
@@ -9076,7 +9079,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("MemberId", "UploadType");
 
-                    b.ToTable("FileUploads", (string)null);
+                    b.ToTable("FileUploads");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.FinancialRecord", b =>
@@ -9119,7 +9122,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FinancialRecords", (string)null);
+                    b.ToTable("FinancialRecords");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ForumCategory", b =>
@@ -9147,7 +9150,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ForumCategories", (string)null);
+                    b.ToTable("ForumCategories");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ForumPost", b =>
@@ -9188,7 +9191,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("TopicId");
 
-                    b.ToTable("ForumPosts", (string)null);
+                    b.ToTable("ForumPosts");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ForumTopic", b =>
@@ -9238,7 +9241,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("ForumTopics", (string)null);
+                    b.ToTable("ForumTopics");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.GamificationConfig", b =>
@@ -9265,7 +9268,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GamificationConfigs", (string)null);
+                    b.ToTable("GamificationConfigs");
 
                     b.HasData(
                         new
@@ -9365,7 +9368,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("PostedById");
 
-                    b.ToTable("JobOpportunities", (string)null);
+                    b.ToTable("JobOpportunities");
 
                     b.HasData(
                         new
@@ -9439,7 +9442,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("LookupGroup", "Value")
                         .IsUnique();
 
-                    b.ToTable("Lookups", (string)null);
+                    b.ToTable("Lookups");
 
                     b.HasData(
                         new
@@ -10521,7 +10524,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("Status", "IsArchived");
 
-                    b.ToTable("Members", (string)null);
+                    b.ToTable("Members");
 
                     b.HasData(
                         new
@@ -38371,7 +38374,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("PaymentHistoryId");
 
-                    b.ToTable("MembershipDues", (string)null);
+                    b.ToTable("MembershipDues");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.MembershipFeeConfig", b =>
@@ -38412,7 +38415,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MembershipFeeConfigs", (string)null);
+                    b.ToTable("MembershipFeeConfigs");
 
                     b.HasData(
                         new
@@ -38505,7 +38508,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("MembershipHistories", (string)null);
+                    b.ToTable("MembershipHistories");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.MentorshipRequest", b =>
@@ -38549,7 +38552,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("RequesterId");
 
-                    b.ToTable("MentorshipRequests", (string)null);
+                    b.ToTable("MentorshipRequests");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.NewsCollaborator", b =>
@@ -38570,7 +38573,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("NewsCollaborators", (string)null);
+                    b.ToTable("NewsCollaborators");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.NewsPost", b =>
@@ -38628,7 +38631,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("NewsPosts", (string)null);
+                    b.ToTable("NewsPosts");
 
                     b.HasData(
                         new
@@ -38681,7 +38684,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.OrganizationConfig", b =>
@@ -38761,7 +38764,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("Email", "ExpiryAt");
 
-                    b.ToTable("Otps", (string)null);
+                    b.ToTable("Otps");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.PaymentConfiguration", b =>
@@ -38854,7 +38857,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PaymentConfigurations", (string)null);
+                    b.ToTable("PaymentConfigurations");
 
                     b.HasData(
                         new
@@ -39037,7 +39040,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("MemberId", "TransactionId");
 
-                    b.ToTable("PaymentHistories", (string)null);
+                    b.ToTable("PaymentHistories");
 
                     b.HasData(
                         new
@@ -53854,7 +53857,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Polls", (string)null);
+                    b.ToTable("Polls");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.PollOption", b =>
@@ -53876,7 +53879,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("PollId");
 
-                    b.ToTable("PollOptions", (string)null);
+                    b.ToTable("PollOptions");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.PollVote", b =>
@@ -53908,7 +53911,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("PollOptionId", "MemberId")
                         .IsUnique();
 
-                    b.ToTable("PollVotes", (string)null);
+                    b.ToTable("PollVotes");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.ProfessionalRecord", b =>
@@ -53953,7 +53956,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("ProfessionalRecords", (string)null);
+                    b.ToTable("ProfessionalRecords");
 
                     b.HasData(
                         new
@@ -60772,7 +60775,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId", "IsRevoked");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.Role", b =>
@@ -60789,7 +60792,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
 
                     b.HasData(
                         new
@@ -60848,7 +60851,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("SavedPaymentMethods", (string)null);
+                    b.ToTable("SavedPaymentMethods");
 
                     b.HasData(
                         new
@@ -60919,7 +60922,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("Key")
                         .IsUnique();
 
-                    b.ToTable("SiteContents", (string)null);
+                    b.ToTable("SiteContents");
 
                     b.HasData(
                         new
@@ -61018,7 +61021,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("Provider")
                         .IsUnique();
 
-                    b.ToTable("SocialAuthConfigs", (string)null);
+                    b.ToTable("SocialAuthConfigs");
                 });
 
             modelBuilder.Entity("GHCAA.Domain.Models.SpecialDayTheme", b =>
@@ -61078,7 +61081,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SpecialDayThemes", (string)null);
+                    b.ToTable("SpecialDayThemes");
 
                     b.HasData(
                         new
@@ -61184,7 +61187,7 @@ namespace GHCAA.Infrastructure.Data.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
 
                     b.HasData(
                         new
