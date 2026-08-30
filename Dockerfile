@@ -30,23 +30,22 @@ COPY ["GHCAA.API/GHCAA.API.csproj", "GHCAA.API/"]
 COPY ["GHCAA.Application/GHCAA.Application.csproj", "GHCAA.Application/"]
 COPY ["GHCAA.Domain/GHCAA.Domain.csproj", "GHCAA.Domain/"]
 COPY ["GHCAA.Infrastructure/GHCAA.Infrastructure.csproj", "GHCAA.Infrastructure/"]
-COPY ["GHCAA.Tests/GHCAA.Tests.csproj", "GHCAA.Tests/"]
 
-# Restore all projects
+# Restore the API only. GHCAA.Tests is deliberately never restored/built/tested in this image —
+# `dotnet test` already runs as its own gating CI job (api-tests in ghcaa-ci-preprod.yml) on every
+# push to preprod, before deploy-preprod ever triggers this Render build. Building+testing the full
+# suite a second time here was pure redundant work with zero added safety, and running the NUnit
+# suite's WebApplicationFactory-based integration tests (SpaStaticFileFactory boots the whole app
+# per test) on Render's build machine is what pushed a preprod deploy over 8GB and OOM'd
+# (2026-08-30, commit 5546a34). Removing it also makes every future deploy faster.
 RUN dotnet restore "GHCAA.API/GHCAA.API.csproj"
-RUN dotnet restore "GHCAA.Tests/GHCAA.Tests.csproj"
 
 # Copy all source code
 COPY . .
 
-# --- BUILD ENTIRE SOLUTION first (so all project references are compiled) ---
+# --- BUILD API ---
 WORKDIR "/src"
 RUN dotnet build "GHCAA.API/GHCAA.API.csproj" -c $BUILD_CONFIGURATION --no-restore
-RUN dotnet build "GHCAA.Tests/GHCAA.Tests.csproj" -c $BUILD_CONFIGURATION --no-restore
-
-# --- UNIT TEST STAGE (excludes filesystem-dependent tests incompatible with Linux container) ---
-RUN dotnet test "GHCAA.Tests/GHCAA.Tests.csproj" -c $BUILD_CONFIGURATION --no-restore --no-build \
-    --filter "FullyQualifiedName!~LocalFileStorageServiceTests"
 
 # --- PUBLISH STAGE ---
 FROM build AS publish
