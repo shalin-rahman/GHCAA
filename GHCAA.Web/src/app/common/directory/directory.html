@@ -73,12 +73,83 @@
         </div>
     </div>
 
+    <div class="tabs tab-nav view-toggle" *ngIf="!isCompact">
+        <button type="button" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">☰ Table</button>
+        <button type="button" [class.active]="viewMode() === 'card'" (click)="viewMode.set('card')">▦ Card</button>
+    </div>
+
     <!-- Results -->
     <div class="member-list">
         @if (loading()) {
         <div class="loading-state">
             <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
             <p>Searching directory...</p>
+        </div>
+        } @else if (!isCompact && viewMode() === 'table') {
+        <div class="glass-card table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Membership No.</th>
+                        <th>Batch</th>
+                        <th>Profession</th>
+                        <th>Blood Group</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (m of members(); track m.id) {
+                    <tr>
+                        <td class="title-cell">
+                            <div class="flex items-center gap-3">
+                                <div class="avatar-container" style="width:36px;height:36px;flex-shrink:0;">
+                                    @if (m.photoPath) {
+                                    <img [src]="m.photoPath" alt="Profile" class="avatar-img"
+                                        appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                                    } @else {
+                                    <div class="avatar">{{ m.fullName[0] }}</div>
+                                    }
+                                </div>
+                                <span>{{ m.fullName }}</span>
+                            </div>
+                        </td>
+                        <td>{{ m.membershipNumber || 'REG-PENDING' }}</td>
+                        <td>{{ m.passingYear || 'N/A' }} ({{ m.degree || 'N/A' }} {{ getMajorDisplay(m.degree, m.subject) }})</td>
+                        <td>{{ getProfessionDisplay(m.designation, m.professionalSector) || '—' }}</td>
+                        <td>{{ m.bloodGroup ? getBloodGroupName(m.bloodGroup) : '—' }}</td>
+                        <td class="actions-cell">
+                            <button class="btn btn-outline btn-sm" *ngIf="!disableProfile" (click)="viewProfile(m.id)">Profile Details ↗</button>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr class="empty-row">
+                        <td colspan="6" class="text-center py-20 italic opacity-50">No members found matching your search. Try different filters.</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Infinite Scroll Sentinel & Fallbacks (table view) -->
+        <div #sentinel class="scroll-sentinel">
+            @if (loadingMore()) {
+            <div class="load-more-spinner">
+                <app-logo-spinner [size]="20" [ripple]="false"></app-logo-spinner>
+                <span>Syncing Haragangian records...</span>
+            </div>
+            } @else if (hasMore()) {
+            <div class="manual-load">
+                <p class="scroll-instruction">Scroll down for all {{ totalItems() }} members</p>
+                <button class="btn btn-outline btn-sm" (click)="loadNextPage()">Load More Members ↓</button>
+            </div>
+            } @else if (members().length > 0) {
+            <div class="all-loaded">
+                <span class="divider-line"></span>
+                <span class="all-loaded-text">✓ All {{ totalItems() }} members loaded</span>
+                <span class="divider-line"></span>
+            </div>
+            }
         </div>
         } @else {
         <div class="grid-container">

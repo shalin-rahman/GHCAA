@@ -29,6 +29,8 @@ export class AdminGallery implements OnInit {
     isUploading = signal(false);
     uploadedFiles = signal<File[]>([]);
     searchQuery = signal('');
+    // 54.1: table is the default view; grid remains available for cover-photo browsing.
+    viewMode = signal<'table' | 'grid'>('table');
 
     getImageUrl(path: string | null | undefined): string {
         if (!path) return '';

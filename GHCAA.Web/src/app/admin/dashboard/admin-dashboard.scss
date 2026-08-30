@@ -117,7 +117,6 @@
     &:hover {
         transform: translateY(-4px);
         box-shadow: 0 16px 40px rgba(0,0,0,0.18);
-        .action-btn { opacity: 1; transform: translateY(0); }
     }
 
     .stat-icon {
@@ -165,6 +164,10 @@
     }
 
     .action-btn {
+        /* 58.5: was opacity:0/translateY(6px) by default, only revealed on parent :hover — this
+           made a real, working routerLink invisible until hovered, which read as "the button
+           doesn't work" (especially on touch, where there's no hover-before-tap). Always visible
+           now, matching how every other action button in the app behaves. */
         position: absolute;
         bottom: 0; right: 0;
         background: var(--primary-color);
@@ -176,8 +179,6 @@
         text-transform: uppercase;
         border-top-left-radius: 10px;
         cursor: pointer;
-        opacity: 0;
-        transform: translateY(6px);
         transition: all 0.25s;
         letter-spacing: 0.5px;
 

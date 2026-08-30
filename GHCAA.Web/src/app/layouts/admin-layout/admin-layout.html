@@ -29,11 +29,15 @@
         </div>
 
         <div class="nav-footer">
-            <!-- Sign Out + user identity live in the top-right header only (no duplication). -->
+            <!-- Sign Out + user identity live in the top-right header only (no duplication).
+                 Hidden for admin accounts with no linked Member record (memberGuard would just
+                 bounce them straight back to /admin/dashboard otherwise). -->
+            @if (auth.currentUser()?.memberId) {
             <a routerLink="/portal/dashboard" class="nav-item exit-item">
                 <span class="nav-icon"><app-icon name="back"></app-icon></span>
                 <span class="nav-label">Member Portal</span>
             </a>
+            }
         </div>
     </nav>
 
@@ -45,7 +49,9 @@
                 <app-breadcrumb [root]="(orgConfig.config()?.branding?.shortName || 'Admin') + ' Admin'"
                     [current]="currentPageTitle()"></app-breadcrumb>
                 <div class="header-right">
+                    @if (auth.currentUser()?.memberId) {
                     <a routerLink="/portal/dashboard" class="header-btn">Exit Admin</a>
+                    }
                     <app-user-menu [roleLabel]="auth.currentUser()?.role ?? ''"></app-user-menu>
                 </div>
             </div>

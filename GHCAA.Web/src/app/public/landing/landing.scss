@@ -738,7 +738,10 @@ body.dark-theme .hero {
 
 .section-header {
     text-align: center;
-    margin-bottom: 8rem;
+    /* 55.1: was 8rem — the gap between this header block and each section's content below was
+       flagged (red-boxed on a live screenshot) as excessive across every landing section that
+       uses this shared rule (Purpose, EC preview, Membership, Events/News/Gallery/Jobs previews). */
+    margin-bottom: 6.4rem;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
@@ -764,7 +767,7 @@ body.dark-theme .hero {
     p {
         color: var(--text-dim);
         font-size: 1.1rem;
-        margin-bottom: 3rem;
+        margin-bottom: 2.4rem; /* 55.1: was 3rem — part of the same 20% gap reduction */
     }
 
     .underline {
@@ -948,14 +951,88 @@ body.dark-theme .hero {
     padding: var(--section-padding-y) 0;
 }
 
-.news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 3rem;
-    margin-top: 6rem;
-    max-width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
+/* 55.4: compact feed-list matching the member dashboard's .activity-feed/.feed-item design,
+   replacing the card-grid previously used here (still used by Events/Jobs/Gallery previews). */
+.news-feed-list {
+    max-width: 800px;
+    margin: 6rem auto 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--hairline);
+}
+
+.news-feed-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 2rem 0.5rem;
+    border-bottom: 1px solid var(--hairline);
+    text-decoration: none;
+    transition: 0.3s ease;
+
+    &:hover {
+        background: var(--surface-subtle);
+
+        .dot {
+            background: var(--gold-gradient);
+        }
+
+        .arrow {
+            transform: translateX(4px);
+            opacity: 1;
+        }
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent-color);
+        margin-top: 0.4rem;
+        flex-shrink: 0;
+    }
+
+    .text {
+        flex: 1;
+        min-width: 0;
+
+        strong {
+            display: block;
+            color: var(--text-strong);
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: var(--text-dim);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin: 0 0 0.5rem;
+            line-height: 1.6;
+        }
+
+        small {
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+    }
+
+    .arrow {
+        color: var(--accent-color);
+        font-size: 1.25rem;
+        opacity: 0.4;
+        flex-shrink: 0;
+        transition: 0.3s ease;
+        margin-top: 0.3rem;
+    }
 }
 
 .events-preview-section {
@@ -1091,35 +1168,6 @@ body.dark-theme .hero {
         width: 100%;
         height: 100%;
         object-fit: contain;
-    }
-}
-
-.news-card {
-    padding: 3rem;
-    background: var(--section-bg);
-    border: 1px solid rgba(197, 160, 89, 0.1);
-    border-radius: 0;
-
-    &:hover {
-        background: var(--section-bg-3);
-        border-color: var(--accent-color);
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-    }
-
-    h3 {
-        color: var(--text-strong);
-        font-size: 1.5rem;
-    }
-
-    p {
-        color: var(--text-dim);
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        margin-top: 1rem;
-        line-height: 1.6;
     }
 }
 
@@ -1528,10 +1576,14 @@ body.dark-theme .hero {
         margin: 0 auto;
     }
 
-    .news-grid,
     .jobs-compact-grid,
     .events-preview-grid {
         grid-template-columns: 1fr;
+    }
+
+    .news-feed-item {
+        padding: 1.5rem 0.25rem;
+        gap: 0.85rem;
     }
 
     .section-footer .btn {
@@ -1549,7 +1601,6 @@ body.dark-theme .hero {
     }
 
     .tier-content-panel,
-    .news-card,
     .job-mini-card,
     .event-mini-card {
         padding: 1.5rem;

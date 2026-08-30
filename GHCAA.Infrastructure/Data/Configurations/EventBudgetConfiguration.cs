@@ -14,6 +14,10 @@ namespace GHCAA.Infrastructure.Data.Configurations
                 .WithOne()
                 .HasForeignKey<EventBudget>(b => b.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Matches AlumniEvent's own HasQueryFilter(e => e.IsActive) — without this, EF warns
+            // (10622) that an inactive event's required Event navigation is unreachable.
+            builder.HasQueryFilter(b => b.Event != null && b.Event.IsActive);
         }
     }
 }

@@ -27,6 +27,10 @@ export class Directory implements OnInit, AfterViewInit, OnDestroy {
     private notify = inject(NotificationService);
     private router = inject(Router);
 
+    // 58.2: table is the default view for the full page; the compact embedded mode (used inside
+    // e.g. the messages "start conversation" picker) always stays card-based regardless of this.
+    viewMode = signal<'table' | 'card'>('table');
+
     members = signal<MemberSummary[]>([]);
     loading = signal(true);      // initial/search load
     loadingMore = signal(false); // scroll-triggered load

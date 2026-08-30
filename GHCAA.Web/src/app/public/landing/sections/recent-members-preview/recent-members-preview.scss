@@ -1,0 +1,70 @@
+/* 55.3: mirrors landing.scss's .ec-section/.ec-carousel/.ec-card pattern (the closest existing
+   landing section using NetworkingService) — kept local since this is the only section using it. */
+.recent-members-section {
+    padding: var(--section-padding-y) 0;
+    background: var(--section-bg-2);
+}
+
+.recent-members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 2rem;
+    margin: 6rem auto 0;
+    max-width: 1000px;
+}
+
+.recent-member-card {
+    padding: 1.5rem 1rem;
+    text-align: center;
+    background: var(--section-bg);
+    border: 1px solid var(--hairline);
+    transition: 0.4s cubic-bezier(0.2, 0, 0.2, 1);
+
+    &:hover {
+        border-color: var(--accent-color);
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    h4 {
+        color: var(--text-strong);
+        font-size: 1rem;
+        font-weight: 800;
+        margin: 0.75rem 0 0.25rem;
+    }
+
+    small {
+        color: var(--text-dim);
+        font-size: 0.75rem;
+    }
+}
+
+.rm-photo {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(197, 160, 89, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--primary-rgb), 0.05);
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.rm-avatar-ph {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--accent-color);
+}

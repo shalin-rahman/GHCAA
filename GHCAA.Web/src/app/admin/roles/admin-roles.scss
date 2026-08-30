@@ -72,38 +72,26 @@
     }
 }
 
-.actions {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
+/* 54.4: this used to be nested under `.actions`, a class no longer (if ever) present on any
+   ancestor in admin-roles.html — the rule never matched anything, so the dropdown rendered as a
+   totally unstyled native <select>. Made top-level and reuses the same tokens/appearance as the
+   centralized `.form-group select` style (styles.scss) instead of a bespoke background/chevron,
+   so it matches every other dropdown in the app. */
+.role-select {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-    .role-select {
-        appearance: none;
-        background-color: var(--card-bg);
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='gold'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 0.75rem center;
-        background-size: 1rem;
-        padding: 0.5rem 2.5rem 0.5rem 1rem;
-        border-radius: 8px;
-        border: 1px solid var(--glass-border);
-        color: var(--text-main);
-        font-size: 0.85rem;
-        font-weight: 600;
-        outline: none;
-        transition: all 0.2s ease;
-        cursor: pointer;
-
-        &:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1);
-        }
-
-        option {
-            background-color: #1a1a1a;
-            color: white;
-            padding: 10px;
-        }
+    &:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.1);
     }
 }
 

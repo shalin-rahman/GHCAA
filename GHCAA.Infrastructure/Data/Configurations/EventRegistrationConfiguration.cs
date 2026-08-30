@@ -19,6 +19,10 @@ namespace GHCAA.Infrastructure.Data.Configurations
             builder.HasIndex(r => new { r.EventId, r.GuestEmail })
                 .IsUnique()
                 .HasFilter("\"GuestEmail\" IS NOT NULL");
+
+            // Matches AlumniEvent's own HasQueryFilter(e => e.IsActive) — without this, EF warns
+            // (10622) that an inactive event's required Event navigation is unreachable.
+            builder.HasQueryFilter(r => r.Event != null && r.Event.IsActive);
         }
     }
 }

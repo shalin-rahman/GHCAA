@@ -142,10 +142,19 @@
                                 <option [value]="r.name">{{ r.name }}</option>
                                 }
                             </select>
+                            @if (user.roles.length === 1) {
                             <button class="btn btn-accent btn-sm !py-1.5"
-                                (click)="assignRole(user.id, roleSelect.value)">
+                                (click)="updateRole(user.id, user.roles[0], roleSelect.value)"
+                                title="Replace the current role with the selected one">
+                                Update
+                            </button>
+                            } @else {
+                            <button class="btn btn-accent btn-sm !py-1.5"
+                                (click)="assignRole(user.id, roleSelect.value)"
+                                title="Add the selected role in addition to existing ones">
                                 Assign
                             </button>
+                            }
                             @if (!user.memberId) {
                             <button class="icon-btn delete" (click)="deleteUser(user)"
                                 title="Delete System Administrator Account">🗑️</button>

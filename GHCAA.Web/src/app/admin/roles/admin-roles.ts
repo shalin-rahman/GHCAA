@@ -128,6 +128,27 @@ export class AdminRoles implements OnInit {
         });
     }
 
+    // 54.4: "Assign" only ever added a role — there was no single action to replace a user's one
+    // existing role with another, so an admin had to manually remove the old chip and pick a new
+    // one. This does remove-then-assign as one click, and is only offered when the user has
+    // exactly one role (multi-role users keep the original additive Assign + per-chip remove flow,
+    // since "replace which one?" isn't unambiguous there).
+    updateRole(userId: number, oldRole: string, newRole: string) {
+        if (oldRole === newRole) return;
+        this.http.post('/api/roles/remove', null, { params: { userId, roleName: oldRole } }).subscribe({
+            next: () => {
+                this.http.post('/api/roles/assign', null, { params: { userId, roleName: newRole } }).subscribe({
+                    next: () => {
+                        this.notify.success(`Role updated to ${newRole}`);
+                        this.loadData();
+                    },
+                    error: () => this.notify.error('Role removed but failed to assign the new one — please assign it manually.')
+                });
+            },
+            error: () => this.notify.error('Failed to update role')
+        });
+    }
+
     removeRole(userId: number, roleName: string) {
         this.http.post('/api/roles/remove', null, { params: { userId, roleName } }).subscribe({
             next: () => {

@@ -23,6 +23,8 @@ export class News implements OnInit {
   news = signal<NewsPost[]>([]);
   loading = signal(true);
   selectedPost = signal<NewsPost | null>(null);
+  // 58.2: table is the default view; card view stays available via a toggle.
+  viewMode = signal<'table' | 'card'>('table');
 
   /** '' = everything; the feed is one list filtered client-side, so switching costs no request. */
   postTypeFilter = signal<'' | PostType>('');

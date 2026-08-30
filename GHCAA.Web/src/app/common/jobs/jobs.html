@@ -90,6 +90,10 @@
                 }
             </select>
         </div>
+        <div class="tabs tab-nav view-toggle">
+            <button type="button" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">☰ Table</button>
+            <button type="button" [class.active]="viewMode() === 'card'" (click)="viewMode.set('card')">▦ Card</button>
+        </div>
     </div>
 
     <!-- Job Grid -->
@@ -98,6 +102,50 @@
         <div class="loading-state">
             <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
             <p>Scanning for opportunities...</p>
+        </div>
+        } @else if (viewMode() === 'table') {
+        <div class="glass-card table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Company / Location</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Posted By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (job of jobs(); track job.id) {
+                    <tr>
+                        <td class="title-cell">
+                            {{ job.title }}
+                            @if (job.jobCategory === 'Mentorship') { <span class="badge mentor">MENTORSHIP</span> }
+                        </td>
+                        <td>{{ job.companyName }} • {{ job.location }}</td>
+                        <td>{{ getCategoryName(job.jobCategory) }}</td>
+                        <td>
+                            @if (isOwnPending(job)) {
+                            <span class="status-badge" [class]="getStatusInfo(job.status).class">{{ getStatusInfo(job.status).label }}</span>
+                            } @else { — }
+                        </td>
+                        <td>{{ job.postedByMemberName || 'Alumni' }}</td>
+                        <td class="actions-cell">
+                            @if (canEdit(job)) {
+                            <button class="icon-btn" (click)="editJob(job)" title="Edit">✏️</button>
+                            <button class="icon-btn delete" (click)="deleteJob(job.id)" title="Delete">🗑️</button>
+                            }
+                            <button class="btn btn-outline btn-sm" (click)="viewJob(job)">Details ↗</button>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr class="empty-row">
+                        <td colspan="6" class="text-center py-20 italic opacity-50">No open opportunities. Be the bridge — share one!</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
         </div>
         } @else {
         <div class="grid">

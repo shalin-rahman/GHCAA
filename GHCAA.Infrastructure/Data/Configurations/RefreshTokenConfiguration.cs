@@ -13,6 +13,10 @@ namespace GHCAA.Infrastructure.Data.Configurations
             builder.HasIndex(r => r.TokenHash).IsUnique();
             // Composite index for the common lookup: hash + not revoked + not expired.
             builder.HasIndex(r => new { r.UserId, r.IsRevoked });
+
+            // Matches User's own HasQueryFilter(u => !u.IsArchived) — without this, EF warns
+            // (10622) that an archived user's required User navigation is unreachable.
+            builder.HasQueryFilter(r => r.User != null && !r.User.IsArchived);
         }
     }
 }

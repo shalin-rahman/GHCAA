@@ -14,6 +14,10 @@ namespace GHCAA.Infrastructure.Data.Configurations
                 .WithMany()
                 .HasForeignKey(t => t.AssignedMemberId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // Matches AlumniEvent's own HasQueryFilter(e => e.IsActive) — without this, EF warns
+            // (10622) that an inactive event's required Event navigation is unreachable.
+            builder.HasQueryFilter(t => t.Event != null && t.Event.IsActive);
         }
     }
 }

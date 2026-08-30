@@ -49,13 +49,8 @@
                         </span>
                     </td>
                     <td class="actions-cell">
-                        <button class="action-btn edit" (click)="openEditForm(c)">
-                            <span>✏️</span> Edit
-                        </button>
-                        <button class="action-btn archive text-red-500" (click)="deleteConfig(c.id)"
-                            title="Delete Fee">
-                            <span>⏳</span> Delete
-                        </button>
+                        <button class="icon-btn" (click)="openEditForm(c)" title="Edit">✏️</button>
+                        <button class="icon-btn delete" (click)="deleteConfig(c.id)" title="Delete Fee">🗑️</button>
                     </td>
                 </tr>
                 } @empty {

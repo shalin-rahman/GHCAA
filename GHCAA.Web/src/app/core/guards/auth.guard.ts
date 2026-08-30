@@ -46,6 +46,36 @@ export const authGuard = (_route: ActivatedRouteSnapshot, state: RouterStateSnap
 };
 
 /**
+ * Functional guard for member-only portal routes. An Admin/SuperAdmin account created without a
+ * linked Member record (e.g. via ProtectedSuperAdminSeeder) previously could still reach every
+ * /portal/* page — Profile, Payments, Dashboard — since authGuard only checks isAuthenticated().
+ * Those pages all assume a real memberId server-side (ProfileController.GetProfile returns 401
+ * without one), so a memberless admin landed on broken/empty member pages instead of being routed
+ * somewhere that actually applies to them.
+ */
+export const memberGuard = (_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+
+    return waitForAuthChecked(auth).pipe(
+        map(() => {
+            if (auth.currentUser()?.memberId) {
+                return true;
+            }
+
+            // Mirrors authGuard's own change-password special-case: a memberless admin forced
+            // into a password change must still be able to reach that one page, or authGuard's
+            // redirect there and this guard's redirect away from /portal would loop forever.
+            if (state.url.startsWith(CHANGE_PASSWORD_URL)) {
+                return true;
+            }
+
+            return router.parseUrl(ROUTES.ADMIN_DASHBOARD);
+        })
+    );
+};
+
+/**
  * Functional guard for admin-only routes
  */
 export const adminGuard = () => {

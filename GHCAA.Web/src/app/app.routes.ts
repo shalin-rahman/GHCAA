@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, adminGuard, superAdminGuard } from './core/guards/auth.guard';
+import { authGuard, adminGuard, superAdminGuard, memberGuard } from './core/guards/auth.guard';
 import { featureGuard } from './core/guards/feature.guard';
 
 export const routes: Routes = [
@@ -107,7 +107,7 @@ export const routes: Routes = [
     {
         path: 'portal',
         loadComponent: () => import('./layouts/portal-layout/portal-layout').then(m => m.PortalLayout),
-        canActivate: [authGuard],
+        canActivate: [authGuard, memberGuard],
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             {

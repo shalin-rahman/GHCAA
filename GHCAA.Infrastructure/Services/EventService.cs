@@ -220,6 +220,12 @@ namespace GHCAA.Infrastructure.Services
             if (alumniEvent.RegistrationEndDate.HasValue && now > alumniEvent.RegistrationEndDate.Value)
                 throw new InvalidOperationException("Registration for this event is closed.");
 
+            // 54.6: RegistrationEndDate is optional — an admin who never set one previously had no
+            // gate at all once the event itself had already ended. The event's own EndDate is the
+            // hard backstop regardless of whether a registration deadline was configured.
+            if (now > alumniEvent.EndDate)
+                throw new InvalidOperationException("This event has already ended.");
+
             // Check for existing registration for this event
             bool alreadyRegistered = false;
             if (memberId.HasValue)

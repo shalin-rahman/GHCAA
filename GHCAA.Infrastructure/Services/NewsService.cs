@@ -114,7 +114,7 @@ namespace GHCAA.Infrastructure.Services
                 AttachmentFileName = dto.AttachmentFileName,
                 IsActive = dto.IsActive,
                 AuthorId = authorId,
-                PublishDate = DateTime.UtcNow,
+                PublishDate = dto.PublishDate ?? DateTime.UtcNow,
                 ExternalCollaborators = dto.Collaborators != null ? string.Join(", ", dto.Collaborators) : null
             };
 
@@ -133,6 +133,7 @@ namespace GHCAA.Infrastructure.Services
             existing.ArticleCategory = dto.ArticleCategory;
             existing.Status = dto.Status;
             existing.PostType = dto.PostType;
+            if (dto.PublishDate.HasValue) existing.PublishDate = dto.PublishDate.Value;
             existing.ImageUrl = dto.ImageUrl;
             existing.AttachmentUrl = dto.AttachmentUrl;
             existing.AttachmentFileName = dto.AttachmentFileName;

@@ -9,6 +9,7 @@ import { LandingEventsPreview } from './sections/events-preview/events-preview';
 import { LandingNewsPreview } from './sections/news-preview/news-preview';
 import { LandingEcPreview } from './sections/ec-preview/ec-preview';
 import { LandingGalleryPreview } from './sections/gallery-preview/gallery-preview';
+import { LandingRecentMembersPreview } from './sections/recent-members-preview/recent-members-preview';
 
 @Component({
   selector: 'app-landing',
@@ -22,7 +23,8 @@ import { LandingGalleryPreview } from './sections/gallery-preview/gallery-previe
     LandingEventsPreview,
     LandingNewsPreview,
     LandingGalleryPreview,
-    LandingEcPreview
+    LandingEcPreview,
+    LandingRecentMembersPreview
   ],
   templateUrl: './landing.html',
   styleUrl: './landing.scss',

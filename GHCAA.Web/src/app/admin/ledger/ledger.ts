@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LedgerService } from '../../core/services/ledger.service';
@@ -26,6 +26,10 @@ export class Ledger implements OnInit {
 
   transactions = signal<any[]>([]);
   summary = signal<LedgerSummary | null>(null);
+  // 54.3: FinancialLedgerService.GetSummaryAsync already groups every record by
+  // RecordType+FinancialCategory server-side — this just filters that existing data to the
+  // Income half for display; no new backend call.
+  incomeByCategory = computed(() => (this.summary()?.details ?? []).filter(d => d.type === 'Income'));
   loading = signal(true);
   showForm = signal(false);
   submitting = signal(false);

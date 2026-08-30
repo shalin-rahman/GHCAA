@@ -12,12 +12,58 @@
             </button>
             }
         </div>
+        <div class="tabs tab-nav view-toggle">
+            <button type="button" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">☰ Table</button>
+            <button type="button" [class.active]="viewMode() === 'card'" (click)="viewMode.set('card')">▦ Card</button>
+        </div>
     </div>
 
     @if (loading()) {
     <div class="loading-state py-20 text-center">
         <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
         <p>Loading news...</p>
+    </div>
+    } @else if (filteredNews().length === 0) {
+    <div class="empty-state glass-card">
+        <p>
+            @if (postTypeFilter() === 'Notice') { No notices published at the moment. }
+            @else if (postTypeFilter() === 'News') { No news stories available at the moment. }
+            @else { No news posts available at the moment. Stay tuned! }
+        </p>
+    </div>
+    } @else if (viewMode() === 'table') {
+    <div class="glass-card table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th>Author</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (post of filteredNews(); track post.id) {
+                <tr (click)="selectPost(post)">
+                    <td><span class="pill" [class.notice]="post.postType === 'Notice'">{{ post.postType === 'Notice' ? 'Notice' : 'News' }}</span></td>
+                    <td class="title-cell">{{ post.title }}</td>
+                    <td>{{ getArticleCategoryLabel(post.articleCategory) }}</td>
+                    <td>{{ post.createdAt | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ post.authorName }}</td>
+                    <td class="actions-cell">
+                        @if (post.attachmentUrl) {
+                        <a [href]="post.attachmentUrl" target="_blank" rel="noopener" class="icon-btn"
+                            (click)="$event.stopPropagation()"
+                            [title]="post.attachmentFileName || 'Download document'">📄</a>
+                        }
+                        <button class="btn btn-outline btn-sm" (click)="$event.stopPropagation(); selectPost(post)">Details ↗</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
     </div>
     } @else {
     <div class="news-list">
@@ -48,14 +94,6 @@
                 </div>
             </div>
         </article>
-        } @empty {
-        <div class="empty-state glass-card">
-            <p>
-                @if (postTypeFilter() === 'Notice') { No notices published at the moment. }
-                @else if (postTypeFilter() === 'News') { No news stories available at the moment. }
-                @else { No news posts available at the moment. Stay tuned! }
-            </p>
-        </div>
         }
     </div>
     }

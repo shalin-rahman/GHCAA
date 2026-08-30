@@ -21,6 +21,16 @@
     }
 }
 
+/* 58.2: table view's cover thumbnail — mirrors admin-gallery's .table-thumb. */
+.table-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    background-color: rgba(var(--primary-rgb), 0.05);
+}
+
 .gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));

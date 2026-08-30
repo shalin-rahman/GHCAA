@@ -52,23 +52,80 @@
     }
 
     <!-- Search Bar -->
-    <div class="filter-bar">
+    <div class="filter-bar flex items-center gap-4">
         <app-search-bar [value]="searchQuery()" (valueChange)="searchQuery.set($event)"
             placeholder="Search albums by title or location…"></app-search-bar>
+        <div class="tabs tab-nav view-toggle">
+            <button type="button" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">☰ Table</button>
+            <button type="button" [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')">▦ Grid</button>
+        </div>
     </div>
 
+    @if (loading()) {
+    <div class="loading-state full">
+        <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
+        <p>Gathering your visual legacy...</p>
+    </div>
+    } @else if (filteredGalleries().length === 0) {
+    <div class="empty-state full">
+        <span>🖼️</span>
+        <p>{{ searchQuery() ? 'No albums match your search.' : 'No albums captured yet. Start by creating a new visual asset.' }}</p>
+    </div>
+    } @else if (viewMode() === 'table') {
+    <div class="glass-card table-wrap mt-4">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Cover</th>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Photos</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (gallery of filteredGalleries(); track gallery.id) {
+                <tr>
+                    <td>
+                        <div class="table-thumb" (click)="selectGallery(gallery)">
+                            @if (gallery.photos && gallery.photos.length > 0) {
+                            <img [src]="getImageUrl(gallery.photos[0].photoPath)" alt="Cover" appImgFallback>
+                            } @else {
+                            <span class="text-2xl">📸</span>
+                            }
+                        </div>
+                    </td>
+                    <td class="title-cell">{{ gallery.title }}</td>
+                    <td>{{ gallery.eventDate | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ gallery.location || '—' }}</td>
+                    <td>{{ gallery.photos.length }}</td>
+                    <td>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="status-badge" [class.active]="gallery.isActive"
+                                [class.inactive]="!gallery.isActive" (click)="toggleActive(gallery.id)">
+                                {{ gallery.isActive ? 'Public' : 'Hidden' }}
+                            </span>
+                            @if (gallery.isFeatured) {
+                            <span class="status-badge featured">★ Featured</span>
+                            }
+                        </div>
+                    </td>
+                    <td class="actions-cell">
+                        <button class="btn btn-outline btn-sm" (click)="selectGallery(gallery)">Configure</button>
+                        <button class="icon-btn" (click)="openEditForm(gallery)" title="Edit Info">✏️</button>
+                        <button class="icon-btn" (click)="toggleFeatured(gallery.id)"
+                            [title]="gallery.isFeatured ? 'Unfeature' : 'Feature'">★</button>
+                        <button class="icon-btn delete" (click)="deleteGallery(gallery.id)" title="Delete Album">🗑️</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    } @else {
     <div class="album-grid mt-4">
-        @if (loading()) {
-        <div class="loading-state full">
-            <app-logo-spinner [size]="64" [ripple]="false"></app-logo-spinner>
-            <p>Gathering your visual legacy...</p>
-        </div>
-        } @else if (filteredGalleries().length === 0) {
-        <div class="empty-state full">
-            <span>🖼️</span>
-            <p>{{ searchQuery() ? 'No albums match your search.' : 'No albums captured yet. Start by creating a new visual asset.' }}</p>
-        </div>
-        } @else {
         @for (gallery of filteredGalleries(); track gallery.id) {
         <div class="album-card reveal-top" [style.animation-delay]="($index * 50) + 'ms'">
             <div class="album-preview" (click)="selectGallery(gallery)">
@@ -118,8 +175,8 @@
             </div>
         </div>
         }
-        }
     </div>
+    }
 </div>
 
 <!-- Gallery Detail Modal -->

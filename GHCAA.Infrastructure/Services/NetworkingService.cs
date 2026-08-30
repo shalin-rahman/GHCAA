@@ -132,7 +132,7 @@ namespace GHCAA.Infrastructure.Services
         {
             return await _db.ECPeriods
                 .OrderByDescending(p => p.StartDate)
-                .Select(p => new { p.Id, p.Title, p.IsActive })
+                .Select(p => new { p.Id, p.Title, p.IsActive, p.StartDate, p.EndDate })
                 .ToListAsync(cancellationToken);
         }
 

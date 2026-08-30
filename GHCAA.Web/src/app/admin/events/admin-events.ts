@@ -14,6 +14,7 @@ import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { NotificationService } from '../../core/services/notification.service';
 import { NavService } from '../../core/services/nav.service';
 import { OrgConfigService } from '../../core/services/org-config.service';
+import { getEventStatusMeta } from '../../core/utils/date.util';
 
 
 @Component({
@@ -30,6 +31,10 @@ export class AdminEvents implements OnInit {
     public nav = inject(NavService);
     public orgConfigService = inject(OrgConfigService);
 
+
+    // Date-computed lifecycle badge (Upcoming/Ongoing/Ended/Unpublished) — replaces the raw
+    // isActive-only Active/Archived badge, which never reflected the event's own dates.
+    getStatusMeta = getEventStatusMeta;
 
     events = signal<AlumniEvent[]>([]);
     registrations = signal<any[]>([]);

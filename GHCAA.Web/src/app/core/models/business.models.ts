@@ -193,6 +193,7 @@ export interface CreateNewsDto {
     articleCategory: ArticleCategory;
     postType?: PostType;
     status?: SubmissionStatus;
+    publishDate?: string | Date;
     imageUrl?: string;
     attachmentUrl?: string;
     attachmentFileName?: string;

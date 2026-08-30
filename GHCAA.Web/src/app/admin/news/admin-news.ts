@@ -6,7 +6,7 @@ import { NewsService } from '../../core/services/news.service';
 import { NewsPost, PostType } from '../../core/models/business.models';
 import { validateUploadFile } from '../../core/utils/file-validation.util';
 import { NotificationService } from '../../core/services/notification.service';
-import { ARTICLE_CATEGORIES, getArticleCategoryLabel, POST_TYPE_TABS, matchesPostType } from '../../core/constants/app.constants';
+import { ARTICLE_CATEGORIES, getArticleCategoryLabel, POST_TYPE_TABS, matchesPostType, SUBMISSION_STATUS_MAP } from '../../core/constants/app.constants';
 import { LogoSpinnerComponent } from '../../common/logo-spinner/logo-spinner';
 import { PageHeaderComponent } from '../../common/page-header/page-header.component';
 import { SearchBarComponent } from '../../common/search-bar/search-bar.component';
@@ -52,7 +52,7 @@ export class AdminNews implements OnInit {
     stagedDocumentFile: File | null = null;
     stagedDocumentName = signal<string | null>(null);
 
-    form: any = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, collaborators: [] };
+    form: any = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, publishDate: this.toDateInputValue(new Date()), collaborators: [] };
 
     ngOnInit() { 
         this.loadNews(); 
@@ -71,7 +71,7 @@ export class AdminNews implements OnInit {
 
     openForm() {
         this.editingId.set(null);
-        this.form = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, collaborators: [] };
+        this.form = { title: '', content: '', articleCategory: 'Regular', postType: 'News', imageUrl: '', attachmentUrl: '', attachmentFileName: '', isActive: true, status: 2, publishDate: this.toDateInputValue(new Date()), collaborators: [] };
         this.stagedImageFile = null;
         this.stagedImageName.set(null);
         this.stagedDocumentFile = null;
@@ -95,6 +95,7 @@ export class AdminNews implements OnInit {
             attachmentFileName: post.attachmentFileName || '',
             isActive: post.isActive,
             status: post.status ?? 2,
+            publishDate: this.toDateInputValue(post.createdAt),
             collaborators: post.collaborators || []
         };
         this.showForm.set(true);
@@ -218,7 +219,11 @@ export class AdminNews implements OnInit {
 
     private submitNews() {
         const id = this.editingId();
-        const obs = id ? this.newsService.updateNews(id, this.form) : this.newsService.createNews(this.form);
+        // The date input only carries a bare "yyyy-MM-dd" string with no timezone/time component;
+        // PublishDate is a timestamptz column, so it must go over the wire as a real UTC ISO string
+        // (same conversion admin-events.ts's toSafeISO does) or Npgsql rejects the save.
+        const payload = { ...this.form, publishDate: this.toSafeISO(this.form.publishDate) };
+        const obs = id ? this.newsService.updateNews(id, payload) : this.newsService.createNews(payload);
 
         obs.subscribe({
             next: () => {
@@ -247,6 +252,23 @@ export class AdminNews implements OnInit {
 
     getCategoryLabel(cat: any): string {
         return getArticleCategoryLabel(cat);
+    }
+
+    getStatusMeta(status: any): { label: string, class: string } {
+        return SUBMISSION_STATUS_MAP[status] || { label: 'Unknown', class: 'pending' };
+    }
+
+    private toSafeISO(val: any): string | undefined {
+        if (!val) return undefined;
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? undefined : d.toISOString();
+    }
+
+    private toDateInputValue(date: string | Date): string {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return '';
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     }
 
     updateCollaborators(event: string) {

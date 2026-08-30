@@ -14,6 +14,10 @@ namespace GHCAA.Infrastructure.Data.Configurations
                 .WithMany(p => p.Options)
                 .HasForeignKey(o => o.PollId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Matches Poll's own HasQueryFilter(p => !p.IsArchived) — without this, EF warns
+            // (10622) that an archived poll's required Poll navigation is unreachable.
+            builder.HasQueryFilter(o => o.Poll != null && !o.Poll.IsArchived);
         }
     }
 }

@@ -27,6 +27,10 @@ namespace GHCAA.Infrastructure.Data.Configurations
 
             builder.HasIndex(v => new { v.PollOptionId, v.MemberId })
                 .IsUnique();
+
+            // Matches Member's own HasQueryFilter(m => !m.IsArchived) — without this, EF warns
+            // (10622) that an archived member's required Member navigation is unreachable.
+            builder.HasQueryFilter(v => v.Member != null && !v.Member.IsArchived);
         }
     }
 }

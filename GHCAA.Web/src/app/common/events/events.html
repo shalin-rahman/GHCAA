@@ -33,8 +33,11 @@
 
                     <!-- Column 2: Narrative -->
                     <div class="event-details">
-                        <div class="type-pill">
-                            {{ ev.allowNonMembers ? 'Guests Welcome' : 'Members Only' }}
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <div class="type-pill">
+                                {{ ev.allowNonMembers ? 'Guests Welcome' : 'Members Only' }}
+                            </div>
+                            <span class="status-badge" [class]="getStatusMeta(ev).class">{{ getStatusMeta(ev).label }}</span>
                         </div>
                         <h3>{{ ev.title }}</h3>
                         <p>{{ ev.description }}</p>

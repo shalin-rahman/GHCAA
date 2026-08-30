@@ -79,6 +79,10 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Publish Date <span class="required-star">*</span></label>
+                    <input type="date" [(ngModel)]="form.publishDate" name="publishDate" required>
+                </div>
+                <div class="form-group">
                     <label>Cover Image</label>
                     <div class="image-upload-wrapper" style="display: flex; gap: 10px; align-items: center;">
                         <input type="url" [(ngModel)]="form.imageUrl" name="imageUrl" #imageUrlInput="ngModel"
@@ -197,8 +201,8 @@
                     <td><span class="pill">{{ post.postType === 'Notice' ? 'Notice' : 'News' }}</span></td>
                     <td><span class="pill">{{ getCategoryLabel(post.articleCategory) }}</span></td>
                     <td>
-                        <span class="status-badge" [class.active]="post.isActive" [class.inactive]="!post.isActive">
-                            {{ post.isActive ? 'Published' : 'Draft' }}
+                        <span class="status-badge" [class]="getStatusMeta(post.status).class">
+                            {{ getStatusMeta(post.status).label }}
                         </span>
                     </td>
                     <td>{{ post.createdAt | date:'dd-MM-yyyy' }}</td>

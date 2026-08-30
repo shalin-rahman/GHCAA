@@ -21,6 +21,10 @@ export class AdminPolls implements OnInit {
   polls = signal<PollDto[]>([]);
   loading = signal(false);
   showCreateModal = signal(false);
+  // 58.2: table is the default view; card view (with the per-option progress bars) stays
+  // available via a toggle.
+  viewMode = signal<'table' | 'card'>('table');
+  selectedPoll = signal<PollDto | null>(null);
 
   newPoll: CreatePollDto = {
     title: '',

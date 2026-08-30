@@ -12,6 +12,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { FinancialService } from '../../core/services/financial.service';
 import { ImgFallbackDirective } from '../directives/img-fallback.directive';
 import { ROUTES } from '../../core/constants/app.constants';
+import { getEventStatusMeta } from '../../core/utils/date.util';
 
 @Component({
   selector: 'app-events',
@@ -315,10 +316,21 @@ export class Events implements OnInit {
   isRegistrationOpen(ev: AlumniEvent): boolean {
     if (!ev.isActive) return false;
     const now = new Date();
+    // 54.6: registrationEndDate is optional — without this, an event with no explicit
+    // registration deadline stayed "open" here indefinitely even long after its own endDate.
+    if (ev.endDate && new Date(ev.endDate) < now) return false;
     if (ev.registrationStartDate && new Date(ev.registrationStartDate) > now) return false;
     if (ev.registrationEndDate && new Date(ev.registrationEndDate) < now) return false;
     return true;
   }
+
+  isEventEnded(ev: AlumniEvent): boolean {
+    return !!ev.endDate && new Date(ev.endDate) < new Date();
+  }
+
+  // Date-computed lifecycle badge (Upcoming/Ongoing/Ended) shown on each event card — the event's
+  // visible status was previously implied only by the register button's Open/Closed state.
+  getStatusMeta = getEventStatusMeta;
 
   askAdmin(ev: AlumniEvent) {
     const message = `I have a question about the event: ${ev.title}`;

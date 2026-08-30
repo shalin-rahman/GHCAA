@@ -25,6 +25,8 @@ export class Gallery implements OnInit {
 
   galleries = signal<EventGallery[]>([]);
   loading = signal(true);
+  // 58.2: table is the default view; the visual card/cover-photo grid stays available via a toggle.
+  viewMode = signal<'table' | 'card'>('table');
   selectedGallery = signal<EventGallery | null>(null);
   
   showUpload = signal(false);

@@ -6,6 +6,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap');
 
 :root {
+  /* Without this, native form controls (date/time picker icons + their popups) always
+     render with the browser's light-mode chrome, regardless of body.dark-theme below —
+     making e.g. the calendar icon on a type="date" input nearly invisible against a
+     dark input background. */
+  color-scheme: light;
+
   /* 30.4: rendered height of `.top-bar` — shared so any sticky element lower in
      the page (`.filter-bar` at >=1024px) knows the offset to stick below. */
   --header-height: 4.5rem;
@@ -117,6 +123,8 @@
 }
 
 body.dark-theme {
+  color-scheme: dark;
+
   --bg-color: #000000;
   --surface-color: #0c0c0c;
   --primary-color: #1a1a1a;

@@ -54,6 +54,10 @@ namespace GHCAA.Application.DTOs
 
         public Enums.PostType PostType { get; set; } = Enums.PostType.News;
 
+        // Optional: admin can backdate/postdate a post. Null keeps the service's default
+        // (now on create, unchanged on update).
+        public DateTime? PublishDate { get; set; }
+
         [RelativeOrAbsoluteUrl(ErrorMessage = "Image URL must be a valid URL.")]
         public string? ImageUrl { get; set; }
 

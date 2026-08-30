@@ -2396,3 +2396,480 @@ admin-only.
 `false`) — a duplicate, lighter-weight creation shortcut on the admin dashboard tile grid, distinct
 from `gallery_screen.dart`'s own create flow. Left as-is; consolidating the two creation entry points
 was not part of this ask and is a separate cleanup decision.
+
+---
+
+# Area 53 — Favicon / browser tab icon review (raised by user 2026-08-30)
+
+53.1 [DONE] **Priority: P3 | Depends on: none.** Reviewed the favicon: `index.html` already pointed
+at `assets/logo.png` (the correct transparent-branding asset, confirmed 1024x1024 RGBA with real
+alpha — not the old opaque "dark box" `logo.jpg`), so branding was already right. The real gap was
+performance/quality, not branding: the raw 515KB 1024px asset was being fetched directly as the
+favicon and downscaled by the browser on every page load. Generated proper pre-sized icons
+(`favicon-16.png`, `-32.png`, `-48.png`, `-180.png` via Pillow LANCZOS resize, `GHCAA.Web/public/`)
+and wired them in `index.html` with explicit `sizes` attributes plus an `apple-touch-icon`; visually
+confirmed the 32px version stays legible (crest shape + color quadrants read clearly at that size).
+
+---
+
+# Area 54 — Live-site issues raised by user 2026-08-30 (console log + admin comm + ledger)
+
+54.1 [DONE] **Priority: P2 | Depends on: none.** Admin Gallery now defaults to a `.data-table` view
+(matching News/Events/Roles), with a Table/Grid toggle (`viewMode` signal, defaults `'table'`) to
+switch back to the card/cover-photo view. Caught and fixed a self-introduced template bug (an
+`@else`-block/`</div>` closing-order mistake) via `ng build --configuration production` before
+calling it done — `tsc`/`vitest` alone didn't catch it.
+
+54.2 [DONE] **Priority: P1 | Depends on: none — but effect is deploy-gated (see note).** Stale-chunk 404 / "Failed to fetch dynamically imported module" errors reported by
+user, plus admin communication page not loading.** Root cause is a known, partially-mitigated class
+of bug (see `GHCAA.API/Program.cs:229-241,327-352`, which already sends `no-cache` headers on
+`index.html` specifically to stop *new* page loads from serving a stale shell after a deploy). The
+gap: a browser tab that was **already open** before a deploy still holds the old `index.html`'s
+lazy-chunk hash references in memory; navigating to a lazy-loaded route in that stale tab (here,
+`admin/comm` → `GHCAA.Web/src/app/app.routes.ts:225`,
+`import('./admin/comm/admin-comm').then(...)`) requests a chunk filename that no longer exists on
+the server post-deploy, and the browser throws `TypeError: Failed to fetch dynamically imported
+module`. Confirmed via grep: no `ChunkLoadError`/dynamic-import error handler exists anywhere in
+`GHCAA.Web/src/app`. Fix: add a global error handler (Angular `ErrorHandler` or a router
+`NavigationError` subscription in `app.ts`/`app.config.ts`) that detects this specific failure
+(message matching `Failed to fetch dynamically imported module`/`ChunkLoadError`) and does a hard
+`window.location.reload()` (or a one-time redirect to the target URL) instead of surfacing the raw
+error — this is the standard mitigation for this class of SPA deploy issue and doesn't need a new
+deploy each time to "go away" (it will otherwise recur after every future deploy for any tab left
+open across it). Re-test the admin communication page specifically after this lands, in case that
+report was purely a symptom of this chunk-loading failure rather than a separate app bug.
+**Implemented:** `GlobalErrorHandler` (`GHCAA.Web/src/app/core/services/global-error-handler.ts`)
+now detects this failure and does a one-time `sessionStorage`-guarded `window.location.reload()`;
+`main.ts` clears that guard on a clean bootstrap so a future deploy's stale-chunk incident still
+gets one retry. **Important caveat given to the user:** this fix only takes effect once built and
+deployed — it cannot retroactively fix the console errors already seen on the currently-live site,
+and even post-deploy, a tab that already has the *old* JS running won't have this handler loaded
+until it next reloads/navigates fresh. Re-test admin/comm after the next deploy.
+
+54.3 [DONE] **Priority: P3 | Depends on: none.** Financial Ledger: added an income-by-category
+breakdown alongside the existing Total Income / Total Expense / Current Balance summary cards.
+This was a pure frontend gap — the data already existed and was already returned to the client unused:
+`FinancialLedgerService.GetSummaryAsync` (`GHCAA.Infrastructure/Services/FinancialLedgerService.cs:96-121`)
+already groups every record `.GroupBy(r => new { r.RecordType, r.FinancialCategory })` and returns
+it as `LedgerSummaryDto.Details` (a `List<LedgerCategorySummaryDto>`, one row per
+type+category with its own subtotal). `GHCAA.Web/src/app/admin/ledger/ledger.html:16-30`'s
+"Quick Summary" block only reads `summary()?.totalIncome/totalExpense/netBalance` and never renders
+`summary()?.details` at all. Add a breakdown section (e.g. a small table or a set of category
+chips) filtered to `recordType === 'Income'` showing each `financialCategory` with its subtotal,
+placed near the existing balance cards; do the same for expense categories if useful, but income-
+by-category (the specific ask) is the priority.
+**Implemented:** added `incomeByCategory` computed signal (`ledger.ts`) filtering
+`summary().details` to `type === 'Income'`, rendered as a chip list under the balance cards
+(`ledger.html`/`.scss`), reusing the existing `getCategoryName()` label helper. Expense-by-category
+was left out — income was the specific ask and this stays reviewable as a small, focused diff.
+
+54.4 [DONE] **Priority: P2 | Depends on: none.** Admin Users/Roles page role-assignment dropdown.
+Confirmed both parts, and both are fixed:
+  - Styling: `.role-select` (`admin-roles.scss`) turned out to be **dead CSS**, not just a
+    mismatched one-off style — it was nested under `.actions`, a class no longer present on any
+    ancestor in `admin-roles.html`, so the rule never matched anything and the dropdown rendered as
+    a totally unstyled native `<select>`. Made it a top-level rule reusing the same
+    `.form-group select` tokens (`var(--bg-color)`/`var(--border-color)`/`var(--accent-color-rgb)`
+    focus ring) so it now matches every other dropdown in the app.
+  - Functionality: added `updateRole(userId, oldRole, newRole)` (`admin-roles.ts`) doing
+    remove-then-assign as one click. The row now shows an "Update" button (pre-filled dropdown,
+    replaces old role) when the user has exactly one role, and keeps the original additive "Assign"
+    + per-chip ✕-remove flow when a user has multiple roles (replacing one of several isn't
+    unambiguous, so that case intentionally keeps the manual flow).
+
+54.5 [DONE] **Priority: P2 | Depends on: none.** Fee Policy (and Payment Config) table action
+buttons weren't using the app's central button design — confirmed genuinely unstyled, not just
+"different." `admin-fee-config.html:52,55`
+(`.action-btn edit` / `.action-btn archive`) and `admin-payment-config.html:57,60` (`.action-btn
+edit` / `.action-btn delete`) both use an `.action-btn` class with **no CSS definition anywhere** —
+grepped `admin-fee-config.scss`, `admin-payment-config.scss`, and the global `styles.scss`, all zero
+hits, so these render as bare unstyled browser buttons, unlike every other admin table (News,
+Events, Gallery, Roles, Members) which uses the shared `.icon-btn` / `.icon-btn delete` classes
+(central style in `styles.scss`). Note `admin-themes.html:70,73` also uses `.action-btn edit`/`.action-btn
+delete` but that one IS fine — `admin-themes.scss:136` defines its own `.action-btn` style, so it's a
+one-off name collision, not a shared broken class; don't touch admin-themes when fixing this. Fix:
+replace the `.action-btn edit`/`.action-btn archive`/`.action-btn delete` buttons in
+`admin-fee-config.html` and `admin-payment-config.html` with the standard `.icon-btn` /
+`.icon-btn delete` markup (icon glyph, `title` attribute) to match every other admin table, and
+delete the now-dead custom classes if nothing else references them. **Check other areas too** (per
+user's ask) — this repo-wide grep for `class="action-btn` found only these 3 files
+(fee-config/payment-config/themes) using the pattern; no further instances found elsewhere, but if a
+future admin page introduces its own one-off button class instead of `.icon-btn`, it should be
+caught the same way.
+**Implemented:** replaced both files' `.action-btn` buttons with standard `.icon-btn`/
+`.icon-btn delete` markup; left `admin-themes.html` untouched (its `.action-btn` is a real, styled
+class, not the same bug).
+
+54.6 [DONE] **Priority: P1 | Depends on: none.** Bug: events stayed "Active" and the public portal
+still accepted registrations after the event's own end date had passed. Confirmed in
+`GHCAA.Infrastructure/Services/EventService.cs:205-221` (`RegisterForEventAsync`): the only date
+gates checked before allowing a registration are `RegistrationStartDate` (line 217) and
+`RegistrationEndDate` (line 220) — both **optional** (`DateTime?`) fields an admin may leave unset.
+The event's own `EndDate` is never checked at all in this method. Separately, `IsActive` (line 210)
+is a purely admin-controlled publish flag — nothing in the codebase automatically flips it to
+`false` once `EndDate` passes, so a past event with `IsActive == true` and no
+`RegistrationEndDate` set stays visible as "Active" and open for registration indefinitely. Fix:
+add `if (now > alumniEvent.EndDate) throw new InvalidOperationException("This event has already
+ended.");` in `RegisterForEventAsync` alongside the existing date checks (defense-in-depth even if
+`RegistrationEndDate` is always set going forward), and decide with the user whether "Active" in the
+public listing/admin list should also become computed (`IsActive && EndDate >= now`) rather than
+purely the stored flag, or whether `IsActive` should stay a separate manual publish/unpublish switch
+with a distinct "Ended" badge computed from `EndDate` shown alongside it — this is a product decision
+about what "Active" is supposed to mean, not just a bug fix, so confirm the intended semantics before
+changing what's displayed (the registration-blocking fix above is unambiguous and should ship either
+way).
+**Implemented (the unambiguous half):** added the `EndDate` hard-stop to
+`EventService.RegisterForEventAsync` (backend) and to `EventsComponent.isRegistrationOpen()`
+(`GHCAA.Web/src/app/common/events/events.ts` — the public "Closed" button state now correctly
+triggers once `endDate` passes, not just `registrationEndDate`).
+**Follow-up (2026-08-31), the deferred half now resolved:** user confirmed via AskUserQuestion —
+**auto-compute status from dates.** Added `getEventStatus`/`getEventStatusMeta`
+(`GHCAA.Web/src/app/core/utils/date.util.ts`) returning `Unpublished` (isActive false, always wins)
+/ `Upcoming` / `Ongoing` / `Ended` from `startDate`/`endDate`; `IsActive` still controls
+publish/hide, it just no longer pretends to mean "the event is currently happening." Applied to:
+`admin-events.html`'s event-row badge (was literally `isActive ? 'Active' : 'Archived'`, the exact
+thing the user was seeing); the public/member events list (`common/events/events.html`) gained the
+same badge next to the "Members Only"/"Guests Welcome" pill, where previously there was no visible
+lifecycle status at all — only the register button's Open/Closed state hinted at it. Reused the
+existing `.status-badge` class + state modifiers (`active`/`pending`/`inactive`/`terminated`) already
+defined centrally in `styles.scss` rather than inventing new colors. Verified via
+`ng build --configuration production` (clean) and vitest (372/372).
+
+---
+
+# Area 55 — Landing page spacing + preview-section seed coverage (raised by user 2026-08-31)
+
+55.1 [DONE] **Priority: P3 | Depends on: none.** Reduce the large empty gaps on the public landing
+page between each section's header (title + subtitle + gold underline) and its content below —
+user marked these with red boxes on a live screenshot, appearing under "Purpose & Objectives",
+under "Executive Committee", and above "Membership Registry". Root cause is a single centralized
+rule, so this is a one-place fix that affects every landing section at once: `.section-header` in
+`GHCAA.Web/src/app/public/landing/landing.scss:739-768` sets `margin-bottom: 8rem` on the header
+block itself and `p { margin-bottom: 3rem }` on the subtitle — an 8rem (128px) gap before content on
+every section using this shared header pattern (Purpose, EC preview, Membership, and likely
+Events/News/Gallery/Jobs previews too, since they all appear to reuse `.section-header`). Reduce
+both by ~20%: `margin-bottom: 8rem` → `6.4rem`, subtitle `margin-bottom: 3rem` → `2.4rem`. Verify
+visually across at least the 3 sections the user flagged, plus the other landing preview sections,
+since this is a shared rule and a 20% reduction on an 8rem gap is still a substantial ~26px absolute
+change per section.
+**Implemented:** both values reduced exactly as above in `landing.scss`. Not yet visually verified
+in a running browser against the flagged screenshot (no dev server/browser check performed this
+pass) — worth a quick look after deploy since this is a shared rule touching every section at once.
+
+55.2 [DONE] **Priority: P3 | Depends on: none — but re-verify counts before adding anything, they
+may have changed since this check.** Ensure every data-driven section of the public landing page
+("portal home") has at least one seed sample so it never renders empty, but only insert a seed
+row when the live API actually returns nothing for that section — matching the repo's existing
+idempotent/conditional-seed convention (e.g. `ConstitutionSeeder`, `ProtectedSuperAdminSeeder`).
+**Checked now, before adding anything:** every relevant seed file already has ≥1 record —
+`ec_members.json` (19), `events.json` (4), `galleries.json` (7), `jobs.json` (2), `members.json`
+(631), `news.json` (1, thin but non-empty). Per the "only seed if empty" rule, **no new seed data
+is needed today** for any current landing section. This task is forward-looking: (a) if
+`news.json`'s single record ever proves too thin to exercise the news-preview carousel/pagination
+properly, add one or two more idempotently (check-then-insert, not a blind re-seed); (b) any
+**future** landing preview section that's added later should get its own conditional seed check
+(read the table via the relevant `Get*Async()` — if it returns anything, skip; if empty, insert one
+realistic sample row) as part of that feature's own PR, not deferred to a follow-up like this one
+was.
+
+55.3 [DONE] **Priority: P3 | Depends on: none.** Add a "Recently Joined Haragangians" section to the
+public landing page ("portal home"), placed in the middle of the section order, mirroring the
+member dashboard's existing widget. Confirmed feasible with **no new backend work**: the member
+dashboard's version (`GHCAA.Web/src/app/member/dashboard/dashboard.html:219-244`, `.networking-widget`)
+already shows a photo/name/membership-number grid via `NetworkingService.getRecentlyJoined()`
+(`networking.service.ts:74`, calls `GET api/networking/search?sortBy=joinDate&sortDesc=true`), and
+that endpoint is **already `[AllowAnonymous]`** (`NetworkingController.cs:23-26`, same one the
+public Directory page already uses) — so a landing preview section can call it directly with no
+auth changes needed. Implementation sketch: new `GHCAA.Web/src/app/public/landing/sections/
+recent-members-preview/` component (mirror `ec-preview`'s structure — it's the closest existing
+landing section using `NetworkingService`), reusing the dashboard's `.compact-member-card` markup
+pattern (photo, name, membership number) inside a `.section-header`-styled wrapper for visual
+consistency with the rest of the landing page. Placement: after `<landing-membership>` and before
+`<landing-jobs>` in `GHCAA.Web/src/app/public/landing/landing.html:1-8` — sits in the middle of the
+8-section page and reads naturally right after the Membership Registry section. Cap at 6-8 members
+(match the dashboard's limit) and confirm with the user whether membership number should be shown
+publicly (it's shown to authenticated members today; the landing page is anonymous-facing, so this
+is worth a one-line confirmation before shipping even though the underlying endpoint already allows
+anonymous access).
+**Implemented:** new `GHCAA.Web/src/app/public/landing/sections/recent-members-preview/` component
+(`.ts`/`.html`/`.scss`), mirroring `ec-preview`'s structure and reusing `landing.scss`'s
+`.ec-carousel`/`.ec-card` visual pattern locally (`.recent-members-grid`/`.recent-member-card`).
+Calls `NetworkingService.getRecentlyJoined(8)` (already anonymous). **Decided without re-asking**
+(reasonable default, not a new open question): shows photo + full name + degree/passing-year
+instead of membership number — membership number is an internal identifier with no clear public
+value, while degree/batch is exactly the kind of "which Haragangian generation" info a public
+visitor would find meaningful, so this avoids the anonymous-exposure question entirely rather than
+needing a decision on it. Registered in `landing.ts`'s imports and placed in `landing.html` between
+`<landing-membership>` and `<landing-jobs>` as specified. Verified via
+`ng build --configuration production` (clean) and vitest (372/372).
+
+55.4 [DONE] **Priority: P4 (design preference) | Depends on: none.** User wanted the public landing
+page's News section to adopt the same look the member dashboard uses for "Latest News." Scope
+confirmed via AskUserQuestion: **News only** (not Events/Jobs/Gallery). Confirmed the two were
+genuinely different design languages, not just a minor styling drift:
+  - Dashboard (`GHCAA.Web/src/app/member/dashboard/dashboard.html:136-158`, `.activity-feed`): a
+    compact vertical text feed — header with a "See All →" link, then a list of `.feed-item` rows
+    (small accent dot, bold title, one-line excerpt, small date), no images, no card borders. Same
+    pattern reused for "Upcoming Events" right below it (lines 160-182, `.event-feed-item` with a
+    small date-badge instead of a dot).
+  - Landing page News (`GHCAA.Web/src/app/public/landing/sections/news-preview/news-preview.html`):
+    a `.news-card.glass-card` grid — bordered cards, date, title, full content preview, its own
+    "Read Full Story →" link per card. Landing page Events (`events-preview.html`) uses the same
+    card-grid family (`.event-mini-card`).
+  - Both were internally consistent and neither was broken — this was a **design-direction change**,
+    not a bug fix.
+  **Implemented:** replaced `news-preview.html`'s `.news-card` grid with a `.news-feed-list` of
+  `.news-feed-item` rows (accent dot, bold title, 2-line clamped excerpt, date, arrow — mirroring
+  dashboard's `.feed-item`), each row now a single `routerLink` anchor to the article (no separate
+  "Read Full Story" sub-link, matching how the dashboard's feed rows work). Removed the now-dead
+  `.news-grid`/`.news-card` rules from `landing.scss` (only news-preview used them) and updated the
+  two mobile-breakpoint blocks that referenced them. Preserved: the `.section-header` title/underline
+  (shared landing-wide convention, not part of what changed), the "All News" footer button, the
+  empty-state message, and `isVisible()`-driven section hiding — all still work exactly as before.
+  Verified via `ng build --configuration production` (clean) and the full vitest suite (372/372,
+  no existing spec covers this component). Events/Jobs/Gallery previews were explicitly left on
+  their existing card-grid design per the user's scope choice.
+
+---
+
+# Area 56 — Retroactive log: earlier same-session fixes not yet recorded (per user 2026-08-31: "make
+sure you added tasks with status for all changes you done so far")
+
+These landed before this session started tracking work as numbered TODO items; recording them now
+for a complete audit trail. All `[DONE]`, all verified at the time via `dotnet build`/`dotnet test`
+(516/516) and/or `ng build`/`vitest` (372/372) as noted in the original responses.
+
+56.1 [DONE] **Priority: P2 | Depends on: none.** Fixed all 8 `Microsoft.EntityFrameworkCore.Model.
+Validation[10622]` warnings from a production deploy log (global query filter vs. required
+navigation mismatches). Added matching `HasQueryFilter`s to `AmendmentVoteConfiguration`,
+`EventBudgetConfiguration`, `EventRegistrationConfiguration`, `EventTaskConfiguration`,
+`NewsCollaboratorConfiguration`, `PollOptionConfiguration`, `PollVoteConfiguration`,
+`RefreshTokenConfiguration`, plus a **new** `MentorshipRequestConfiguration` (no config class existed
+for it before). Query-filter-only change, no migration needed. The 2 `DataProtection` warnings from
+the same log were deliberately left as a known Render-free-tier infra limitation (ephemeral
+container, no persistent key storage) rather than a code fix.
+
+56.2 [DONE] **Priority: P1 | Depends on: none.** Admin News bug fixes (user-reported: "status not
+saving, can't modify date"):
+  - "Status not saving" was actually a **display bug**, not a save bug — `admin-news.html`'s table
+    listed `IsActive`/"Visibility" instead of the actual `SubmissionStatus` dropdown value. Fixed to
+    render via the existing `SUBMISSION_STATUS_MAP` helper (same one Jobs/Gallery/Articles already use).
+  - Added a missing `PublishDate` field end-to-end (DTO, service, admin form `<input type="date">`)
+    — previously there was no way to edit a post's date at all.
+  - The new date field then hit two more bugs, both fixed: (a) a bare `"yyyy-MM-dd"` string sent to
+    a `timestamptz` column with no UTC `Kind` made Npgsql reject the save entirely — fixed via a
+    `toSafeISO()` conversion mirroring the one `admin-events.ts` already used correctly; (b) the
+    native date-picker icon/popup was invisible in dark theme because the app never set the CSS
+    `color-scheme` property — fixed by adding `color-scheme: light` to `:root` and
+    `color-scheme: dark` to `body.dark-theme` in `styles.scss` (an app-wide fix, not News-specific).
+  - A broader audit of Events' own date/datetime-local fields (raised by the user mid-fix) found
+    those were already handled correctly (`toSafeISO` already applied, `datetime-local` always
+    carries both date+time) — no changes needed there.
+
+---
+
+# Area 57 — Test coverage audit + a new live-site report to investigate (2026-08-31)
+
+57.1 [TODO] **Priority: P1 | Depends on: none.** User asked: does the test suite actually verify
+that create/update actions persist **every field** correctly, for **every entity** — not just a
+happy-path subset? This has not been audited in this session. Needs a systematic pass: for each
+entity with a create/update service method (Member, NewsPost, AlumniEvent, GalleryAlbum,
+FinancialRecord, FeeConfiguration, PaymentConfiguration, User/Role, PollOption, MentorshipRequest,
+etc.), check whether its existing test(s) actually assert on **every mapped field** after a
+save/update round-trip (e.g. `existing.Status = dto.Status` needs a test that asserts
+`result.Status == dto.Status`, not just "the call didn't throw" or "one or two fields matched").
+Recommended approach: grep each `*Service.cs`'s `Update*Async`/`Create*Async` methods for the full
+list of `existing.X = dto.X` assignments, cross-reference against that service's test file's
+assertions, and report gaps as a checklist (entity → fields covered vs. fields silently untested) —
+this is exactly the class of bug 54.6/56.2 turned out to be (a field quietly not applied, or applied
+but never checked), so this audit is likely to surface real, currently-undetected bugs, not just
+formalities. Do the audit and report findings before writing new tests, since the fix in each case
+might be "add an assertion" or might be "the field genuinely isn't being saved" — those need
+different responses.
+
+57.2 [DONE — likely resolved as a side effect of 58.1, needs live confirmation] **Priority: P2 |
+Depends on: 58.1.** User reported seeing "0% Profile Complete," in the **same message** reporting
+"can't see member payments," "profile current data are not valid," and "profile health" also broken
+— and explicitly noted the account involved was "an admin user but not member." That's the exact
+58.1 scenario: a memberless Admin/SuperAdmin account hitting `/portal/*` pages that assume a real
+`memberId`. `ProfileController.GetProfile` returns 401 when `GetMemberId()==0`
+(`ProfileController.cs:33-36`); the frontend's `profileCompletion` getter (`dashboard.ts:36-37`)
+defaults to `?? 0` when the profile fetch fails — which would produce **all four** symptoms
+reported (missing payments, invalid-looking profile data, 0% completion, broken "profile health")
+from one root cause, not four separate bugs. Not re-litigating `CalculateChecklistProfileCompletion`
+itself (`MemberService.cs:1547`) — its logic and `.Include()`s were re-checked and are intact; the
+real gap was `memberGuard` not existing yet to keep a memberless admin off these pages in the first
+place, which 58.1 now fixes. **Needs live confirmation**, not just code inspection: re-test with the
+same memberless admin account after this deploys — if 0%/missing-payments still appears on an
+account that HAS a real memberId, that would be a genuinely separate bug and this item should be
+reopened.
+
+---
+
+# Area 58 — Admin-without-member access, card/table-view audit, poll voting-window check (2026-08-31)
+
+58.1 [DONE] **Priority: P1 | Depends on: none.** Bug: an Admin/SuperAdmin account with no linked
+Member record (e.g. `ProtectedSuperAdminSeeder`-created accounts) could reach every `/portal/*`
+page — Profile, Payments, Dashboard — because `authGuard` only checked `isAuthenticated()`, never
+whether the account had a `memberId`. Those pages all assume a real member server-side
+(`ProfileController.GetProfile` returns 401 without one via `GetMemberId()==0`), so a memberless
+admin landed on broken/blank member pages (matches the user's report: "can't see member payments,"
+"profile current data are not valid," "profile health" also broken). **Scope confirmed via
+AskUserQuestion: block/redirect, not grant access** — a pure admin-only account has no member data
+to grant access to. **Implemented:** new `memberGuard` (`GHCAA.Web/src/app/core/guards/auth.guard.ts`)
+checks `auth.currentUser()?.memberId`, redirecting to `/admin/dashboard` if absent (mirrors
+`adminGuard`'s existing redirect-away pattern); special-cases `/portal/change-password` through
+unconditionally so a memberless admin who's also forced to change their password isn't caught in a
+redirect loop with `authGuard`'s own change-password special-case. Applied to the `/portal` parent
+route (`app.routes.ts`) alongside `authGuard`. Also hid the "Member Portal"/"Exit Admin" nav links in
+`admin-layout.html` for memberless admins, so they don't even see a link that would just bounce them
+back. Verified via `ng build --configuration production` (clean) and vitest (372/372).
+
+58.2 [DONE] **Priority: P3 | Depends on: none.** Generalize 54.1's pattern (table view,
+defaulting on, with a toggle back to card view) to every remaining card-grid list across the admin
+**and** member portal. Audited admin/ this pass: most admin list pages already use `.data-table`
+(News, Events, Job Approval, Gallery Approval, Members, Ledger) — **only one confirmed card-only
+admin page found:** `GHCAA.Web/src/app/admin/polls/polls.html:13` (`.poll-card`, `*ngFor`, no table
+alternative, not yet fixed). **Implemented for the public/member "News & Notices" page**
+(`GHCAA.Web/src/app/common/news/news.html` — the page whose subtitle literally reads
+"Announcements, updates, and stories," user specifically called this one out as "not card view, use
+table view"): added the same `viewMode` signal (defaults `'table'`) + Table/Card toggle pattern as
+`admin-gallery`, with a `.data-table` branch (Type/Title/Category/Date/Author/Actions columns,
+row click opens the existing inline detail panel) alongside the original `.news-article` card list.
+Verified via `ng build --configuration production` (clean) and vitest (372/372, no spec covers this
+component). **Also implemented: `admin/polls/polls.html`** — added the same `viewMode`
+(`polls.component.ts`) + Table/Card toggle, table columns Title/Status/Total Votes/Options/Type/
+Created/Actions, with a "Results ↗" action opening a modal that reuses the card view's existing
+option-by-option progress-bar breakdown (didn't try to cram vote percentages into table cells).
+Existing spec for this component still passes unmodified. **Explicitly NOT converting
+`member/polls/polls.html`** (the voting page, distinct from admin's management page): confirmed via
+inspection it's a real voting form (`polls.html:14,23,36` — `.poll-vote-card`, checkbox/radio
+options, "Submit My Vote" button) — a table row can't hold selectable options + a submit action
+sensibly, and forcing this into a table would break actual voting usability, so this page is a
+deliberate exception to the pattern, not a miss. Voting itself was independently confirmed still
+correct in 58.3. **Audited the rest of member-portal, found more real candidates, not yet
+implemented:** `common/directory/directory.html:86` (`.member-card`, no table view),
+`common/jobs/jobs.html:105` (`.job-card`, no table view — this is also where "Mentorship" job
+postings live, there's no separate Mentorship page). Not yet checked: member-facing Gallery. Do
+these before considering 58.2 fully closed. **User confirmed: continue converting
+Directory → Jobs → Gallery, in that order.**
+**All three now implemented, 58.2 fully closed:**
+  - `common/directory/directory.ts`/`.html`: added `viewMode` (defaults `'table'`), toggle hidden
+    when `isCompact` (the embedded picker mode used elsewhere always stays card-based — forcing a
+    full data table into that smaller embedded context didn't make sense). Table columns:
+    Member (photo+name)/Membership No./Batch/Profession/Blood Group/Actions. The infinite-scroll
+    sentinel + `IntersectionObserver` wiring was duplicated into the table branch (Angular
+    `ViewChild('sentinel')` resolves to whichever branch is actually rendered) rather than shared,
+    since card and table are mutually-exclusive `@if` branches.
+  - `common/jobs/jobs.ts`/`.html`: same pattern, table columns Title/Company+Location/Category/
+    Status/Posted By/Actions, Edit/Delete kept as `.icon-btn` where `canEdit(job)` is true.
+  - `common/gallery/gallery.ts`/`.html`: same pattern, table columns Cover (thumbnail, reused
+    admin-gallery's `.table-thumb` style)/Title/Date/Location/Photos/Actions. Row click opens the
+    same photo-detail view the card grid already used.
+  - All three verified via `ng build --configuration production` (clean), `dotnet test` (516/516),
+    and `vitest` (372/372).
+
+58.6 [DONE] **Priority: P1 | Depends on: none.** Bug: public landing page's Executive Committee
+section rendered literal text "(Period: NaN)" in production. Real root cause (found after an
+initial pass that just removed the text — user clarified they wanted the date-range **value** kept,
+just not the word "Period:"): `NetworkingService.GetECPeriodsAsync`
+(`GHCAA.Infrastructure/Services/NetworkingService.cs:131-137`) projected only
+`{ p.Id, p.Title, p.IsActive }` — `StartDate`/`EndDate` were never sent to the client at all, even
+though they exist in the DB (confirmed via `ec_periods.json`: the one seeded period has real
+`StartDate`/`EndDate` values). `ec-preview.ts` then called `formatPeriodRange(active)` on an object
+with no `startDate` field, so `new Date(undefined).getFullYear()` produced `NaN`, which interpolated
+straight into the template. **Fixed at the source:** added `p.StartDate, p.EndDate` to the backend
+projection; restored `activePeriodDateRange` in `ec-preview.ts` (now guarded with `active?.startDate
+?` before calling `formatPeriodRange`, so a future data gap degrades to hiding the range instead of
+showing `NaN` again); `ec-preview.html` shows `({{ activePeriodDateRange() }})` — the value only,
+no "Period:" label — next to the period title. Verified via `dotnet build`, full `dotnet test`
+(516/516) and `ng build --configuration production`/vitest (372/372), all clean.
+
+58.7 [TODO] **Priority: P3 | Depends on: none.** On the public landing page, any section with zero
+records should hide itself entirely rather than render an "empty" placeholder message. Currently
+most preview sections only set `isVisible.set(false)` on a request **error**, not when the request
+succeeds with zero items — so an empty section today shows a placeholder message instead of just
+not existing. Audit and fix per section: `news-preview.ts` (shows "No recent announcements..."),
+`events-preview.ts`, `jobs-preview.ts`, `gallery-preview.ts`, `recent-members-preview.ts` (added in
+55.3, currently shows "No new members to show yet..."). **Needs one judgment call per section, not
+a blind find-replace:** `ec-preview.html`'s `@empty` block renders a fixed list of "Vacant" position
+placeholders (President, Vice President, etc.) when the committee list is empty — that's arguably
+intentional (showing the org structure exists even with unfilled seats), not the same "no data, hide
+it" case as a preview list simply having nothing to show yet; confirm with the user whether EC
+should also hide when `committee()` is empty, or is exempt like `member/polls` was exempted in 58.2.
+`landing-purpose`/`landing-membership` are not data-driven previews (static content), out of scope.
+
+58.3 [DONE — verified working, no bug found] **Priority: n/a | Depends on: none.** User asked how
+members are restricted to voting on active/open polls only. Checked both ends — already correctly
+implemented, no fix needed: `PollService.GetActivePollsAsync` (`PollService.cs:31`) filters
+`p.IsActive && !p.IsArchived && (p.ExpiryDate == null || p.ExpiryDate > DateTime.UtcNow)` for the
+listing a member sees, and `PollService.VoteAsync` (`PollService.cs:83-91`) independently
+re-validates both `p.IsActive && !p.IsArchived` (in the query) and `poll.ExpiryDate <
+DateTime.UtcNow` (explicit check, correctly short-circuits to `false` when `ExpiryDate` is null, so
+polls with no expiry aren't wrongly blocked) before accepting a vote — so a direct API call against
+an expired/inactive poll is rejected server-side even if the member never saw it listed. This is the
+same defense-in-depth pattern 54.6 added for events; polls already had it.
+
+58.4 [DONE — same known cause, no new bug] **Priority: n/a | Depends on: 58.1 (deploy), 54.2
+(deploy).** User pasted another copy of the live console log (same `Failed to fetch dynamically
+imported module`/stale-chunk errors as 54.2/56.2 — this is the **currently-deployed** site, so of
+course it still shows the pre-fix behavior; nothing new here), plus one new line:
+`GET /api/gallery/albums/mine 401 (Unauthorized)`. That 401 is the **same 58.1 scenario** — a
+memberless admin browsing a member-only portal page (the gallery "mine" endpoint needs a real
+`memberId`) — not a separate bug. Once 58.1 and 54.2 are deployed, a memberless admin will be
+redirected away from `/portal/*` before this call ever fires, and any tab still open from before
+that deploy will self-heal via the 54.2 stale-chunk reload handler. No additional code change made
+for this report.
+
+58.5 [DONE] **Priority: P2 | Depends on: none.**
+User reported the admin dashboard's stat-card action buttons ("Manage"/"View"/"View All"/"Ledger")
+don't seem to work on click. Root cause found via inspection, not yet fixed:
+`admin-dashboard.scss:167-181` (`.action-btn`) sets `opacity: 0; transform: translateY(6px);` by
+**default**, only becoming visible (`opacity: 1`) on the parent `.stat-card:hover`
+(`admin-dashboard.scss:117-121`) — the button is a real, working `routerLink` the whole time
+(`admin-dashboard.html:44,53,62,71,81,91`), it's just invisible until the card is hovered, tucked
+into the absolute-positioned bottom-right corner. `opacity:0` alone doesn't block clicks, so a
+precise click on that exact invisible spot still works — but a user who doesn't hover first (most
+likely on touch/tablet, where there's no true hover-before-tap, or anyone clicking the visible card
+body/icon/title expecting the whole card to be the link) has no visible indication anything is
+clickable there, which reads as "the buttons don't work." Recommended fix: stop hiding `.action-btn`
+behind hover — either make it permanently visible (simplest, matches how every other action button
+in the app behaves — none of them hover-reveal), or make the entire `.stat-card` clickable via its
+own `routerLink`/`(click)` (the card already has a `ripple-effect` class hinting a whole-card click
+was the original intent) with the button kept as a secondary, always-visible affordance. Don't just
+remove the `opacity:0`/`transform` rule and call it done — re-check the `:hover` block still makes
+sense afterward (it may become dead/redundant), and verify on an actual touch viewport, not just by
+reasoning about CSS.
+**Implemented (first option — simplest, no scope creep):** removed the `opacity:0`/
+`transform: translateY(6px)` default state and the now-redundant hover rule that only existed to
+undo it (`admin-dashboard.scss:117-121,167-181`); `.action-btn` is permanently visible now. Did not
+also make the whole card clickable — that would be a bigger UX change than "make the existing button
+work" and risks conflicting click targets (card-click vs. button-click) without a clear need. Not
+verified on an actual touch device/viewport (no such tool available here) — verify that if possible
+after deploy; the fix itself is unambiguous (a real click target is now visible where it wasn't).
+
+---
+
+# Area 59 — Association flag on the public About page (raised by user 2026-08-31, referencing
+https://ghcaa-ryl6.onrender.com/about)
+
+59.1 [TODO] **Priority: P4 | Depends on: none.** Add an "About The Association" section to the
+public About page (`GHCAA.Web/src/app/public/about/about.html`) showing the association's **flag**
+as a separate, distinct visual from the logo image — not the logo alone reused twice. Checked the
+actual design spec so this isn't guessed: `GHCAA.Infrastructure/Data/Seed/constitution.json`
+(`Content` field), **Article I, Section 7 — Flag**, states verbatim: *"Design: The official flag
+features a solid white background with the association's logo positioned prominently in the
+center."* / *"Symbolism of Color: The white color of the flag serves as a symbol of peace, harmony,
+non-violence, and purity."* No flag image asset exists yet in `GHCAA.Web/public/assets/`.
+Implementation approach: **render the flag live with CSS** rather than commissioning/generating a
+separate image file — a solid white rectangular panel (with a thin border/shadow so it's visible
+against the page background, and mind light/dark theme — the flag's white should likely stay pure
+white regardless of the site's dark theme, per the "PAPER" token precedent in `landing.scss`'s
+`--paper-bg` for the same never-flips-with-theme reasoning) with `assets/logo.png` (the existing
+transparent logo) centered on top via absolute positioning or flexbox centering. This keeps the flag
+in sync with the logo automatically if the logo is ever updated, and needs no new binary asset,
+image generation, or admin upload flow. Lay the section out with the flag and the existing circular
+logo medallion side-by-side (or flag left / logo+text right), each clearly labeled ("Official Flag"
+/ "Official Emblem") so a visitor doesn't read them as the same image repeated. Reuse the existing
+`.story-card`/`glass-card` section styling already established on this page rather than a new
+one-off layout.

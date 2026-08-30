@@ -43,6 +43,31 @@ export function formatPeriodRange(period: { startDate: string | Date; endDate?: 
   return startYear === endYear ? `${startYear}` : `${startYear} - ${endYear}`;
 }
 
+/** An event's lifecycle state computed from its own dates, independent of the admin's manual
+ *  IsActive publish flag (which only controls whether it's hidden). 'Unpublished' always wins —
+ *  an admin who's hidden an event doesn't want it showing as Upcoming/Ongoing/Ended anywhere. */
+export type EventLifecycleStatus = 'Unpublished' | 'Upcoming' | 'Ongoing' | 'Ended';
+
+export function getEventStatus(event: { isActive: boolean; startDate: string | Date; endDate: string | Date }): EventLifecycleStatus {
+  if (!event.isActive) return 'Unpublished';
+  const now = new Date();
+  const start = new Date(event.startDate);
+  const end = new Date(event.endDate);
+  if (now < start) return 'Upcoming';
+  if (now > end) return 'Ended';
+  return 'Ongoing';
+}
+
+/** Label + `.status-badge` state class (styles.scss) for getEventStatus's result. */
+export function getEventStatusMeta(event: { isActive: boolean; startDate: string | Date; endDate: string | Date }): { label: string; class: string } {
+  switch (getEventStatus(event)) {
+    case 'Unpublished': return { label: 'Unpublished', class: 'inactive' };
+    case 'Upcoming': return { label: 'Upcoming', class: 'pending' };
+    case 'Ongoing': return { label: 'Ongoing', class: 'active' };
+    case 'Ended': return { label: 'Ended', class: 'terminated' };
+  }
+}
+
 /** dd-MM-yyyy (or ISO) -> Date for validation/comparison. null if unparseable. */
 export function parseDisplayDate(value: any): Date | null {
   if (!value) return null;

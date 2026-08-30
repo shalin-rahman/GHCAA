@@ -1,0 +1,34 @@
+@if (isVisible()) {
+<section id="recent-members" class="recent-members-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Recently Joined Haragangians</h2>
+            <p>Welcoming the newest members of our alumni family.</p>
+            <div class="underline"></div>
+        </div>
+
+        <div class="recent-members-grid">
+            @for (member of members(); track member.id) {
+            <div class="recent-member-card glass-card">
+                <div class="rm-photo">
+                    @if (member.photoPath) {
+                    <img [src]="'/' + member.photoPath" [alt]="member.fullName" appImgFallback="/assets/placeholders/avatar-placeholder.svg">
+                    } @else {
+                    <div class="rm-avatar-ph">{{ member.fullName?.[0] || '?' }}</div>
+                    }
+                </div>
+                <h4>{{ member.fullName }}</h4>
+                @if (member.passingYear || member.degree) {
+                <small>{{ member.degree }}{{ member.degree && member.passingYear ? ' • ' : '' }}{{ member.passingYear }}</small>
+                }
+            </div>
+            } @empty {
+            <div class="empty-placeholder dark">
+                <span class="pulse-dot gold"></span>
+                <p>No new members to show yet. Check back soon.</p>
+            </div>
+            }
+        </div>
+    </div>
+</section>
+}

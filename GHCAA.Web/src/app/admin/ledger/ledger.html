@@ -29,6 +29,18 @@
         </div>
     </div>
 
+    <!-- 54.3: income-by-category breakdown, using the same server-computed grouping the
+         balance cards above already rely on. -->
+    <div class="glass-card income-breakdown mb-4" *ngIf="!showForm() && incomeByCategory().length > 0">
+        <h4>Income by Category</h4>
+        <div class="income-breakdown-list">
+            <div class="income-breakdown-item" *ngFor="let d of incomeByCategory()">
+                <span class="category-name">{{ getCategoryName(d.financialCategory) }}</span>
+                <span class="category-total">৳ {{ d.total | number }}</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Record Form -->
     <div class="glass-card form-box" *ngIf="showForm()">
         <h3>Add New Transaction</h3>

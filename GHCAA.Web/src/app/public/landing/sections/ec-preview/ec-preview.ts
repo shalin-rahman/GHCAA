@@ -39,7 +39,7 @@ export class LandingEcPreview implements OnInit {
             next: (periods) => {
                 const active = (periods || []).find((p: any) => p.isActive);
                 this.activePeriodTitle.set(active?.title ?? null);
-                this.activePeriodDateRange.set(active ? formatPeriodRange(active) : null);
+                this.activePeriodDateRange.set(active?.startDate ? formatPeriodRange(active) : null);
             },
             error: () => {
                 this.activePeriodTitle.set(null);

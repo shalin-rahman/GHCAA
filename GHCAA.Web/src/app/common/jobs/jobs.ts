@@ -23,6 +23,8 @@ export class Jobs implements OnInit {
   jobs = signal<Job[]>([]);
   loading = signal(true);
   showForm = signal(false);
+  // 58.2: table is the default view; card view stays available via a toggle.
+  viewMode = signal<'table' | 'card'>('table');
   submitting = signal(false);
   selectedJob = signal<Job | null>(null);
   searchQuery = '';

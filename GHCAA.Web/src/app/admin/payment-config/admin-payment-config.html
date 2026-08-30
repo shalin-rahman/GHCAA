@@ -54,10 +54,8 @@
                       </span>
                   </td>
                   <td class="actions-cell">
-                      <button class="action-btn edit" (click)="openEditForm(config)">
-                          <span>✏️</span> Edit
-                      </button>
-                      <button class="action-btn delete" [class.text-red-500]="config.isEnabled" [class.text-green-500]="!config.isEnabled" (click)="toggleStatus(config.id)" [title]="config.isEnabled ? 'Deactivate' : 'Enable'">
+                      <button class="icon-btn" (click)="openEditForm(config)" title="Edit">✏️</button>
+                      <button class="icon-btn" [class.delete]="config.isEnabled" (click)="toggleStatus(config.id)" [title]="config.isEnabled ? 'Deactivate' : 'Enable'">
                           {{ config.isEnabled ? '⏳' : '✅' }}
                       </button>
                   </td>

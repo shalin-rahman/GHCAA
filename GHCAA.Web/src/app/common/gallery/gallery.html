@@ -151,6 +151,46 @@
     </div>
     } @else {
     @if (!selectedGallery()) {
+    <div class="tabs tab-nav view-toggle mb-6">
+        <button type="button" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">☰ Table</button>
+        <button type="button" [class.active]="viewMode() === 'card'" (click)="viewMode.set('card')">▦ Card</button>
+    </div>
+    @if (viewMode() === 'table') {
+    <div class="glass-card table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Cover</th>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Photos</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (g of galleries(); track g.id) {
+                <tr (click)="selectedGallery.set(g)">
+                    <td>
+                        <div class="table-thumb" [style.background-image]="'url(' + validImg(g.photos[0]?.photoPath) + ')'"></div>
+                    </td>
+                    <td class="title-cell">{{ g.title }}</td>
+                    <td>{{ g.eventDate | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ g.location || '—' }}</td>
+                    <td>{{ g.photos.length }}</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-outline btn-sm" (click)="$event.stopPropagation(); selectedGallery.set(g)">View ↗</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr class="empty-row">
+                    <td colspan="6" class="text-center py-20 italic opacity-50">No event galleries published yet. Check back soon for reunion photos!</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    } @else {
     <div class="gallery-grid">
         @for (g of galleries(); track g.id) {
         <div class="gallery-card glass-card reveal-card" (click)="selectedGallery.set(g)">
@@ -172,6 +212,7 @@
         </div>
         }
     </div>
+    }
     } @else {
     @let gallery = selectedGallery();
     <div class="gallery-detail-container reveal-top">

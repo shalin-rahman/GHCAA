@@ -4,12 +4,56 @@
             <h1>Member Polls</h1>
             <p>Manage feedback and association decisions</p>
         </div>
+        <div class="tabs tab-nav view-toggle">
+            <button type="button" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">☰ Table</button>
+            <button type="button" [class.active]="viewMode() === 'card'" (click)="viewMode.set('card')">▦ Card</button>
+        </div>
         <button class="btn btn-accent" (click)="showCreateModal.set(true)">
             <app-icon name="plus" [size]="16"></app-icon> Create New Poll
         </button>
     </div>
 
-    <div class="polls-grid" *ngIf="!loading(); else loader">
+    <ng-container *ngIf="!loading(); else loader">
+    <div class="glass-card table-wrap" *ngIf="viewMode() === 'table'">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Total Votes</th>
+                    <th>Options</th>
+                    <th>Type</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let poll of polls()">
+                    <td class="title-cell">{{ poll.title }}</td>
+                    <td>
+                        <span class="status-badge" [class.active]="poll.isActive" [class.pending]="!poll.isActive">
+                            {{ poll.isActive ? 'Active' : 'Inactive' }}
+                        </span>
+                    </td>
+                    <td>{{ poll.totalVotes }}</td>
+                    <td>{{ poll.options.length }}</td>
+                    <td>{{ poll.allowMultipleChoice ? 'Multiple Choice' : 'Single Choice' }}</td>
+                    <td>{{ poll.createdAt | date:'dd-MM-yyyy' }}</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-outline btn-sm" (click)="selectedPoll.set(poll)">Results ↗</button>
+                        <button class="icon-btn" (click)="toggleStatus(poll)" [title]="poll.isActive ? 'Deactivate' : 'Activate'">
+                            <app-icon [name]="poll.isActive ? 'pause' : 'play'" [size]="16"></app-icon>
+                        </button>
+                        <button class="icon-btn delete" (click)="deletePoll(poll.id)" title="Delete">
+                            <app-icon name="trash" [size]="16"></app-icon>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="polls-grid" *ngIf="viewMode() === 'card'">
         <div class="glass-card poll-card" *ngFor="let poll of polls()" [class.inactive]="!poll.isActive">
             <div class="poll-header">
                 <span class="status-badge" [class.active]="poll.isActive" [class.pending]="!poll.isActive">
@@ -57,6 +101,7 @@
             </div>
         </div>
     </div>
+    </ng-container>
 
     <ng-template #loader>
         <div class="loader-container">
@@ -64,6 +109,38 @@
             <p>Syncing polls...</p>
         </div>
     </ng-template>
+
+    <!-- Results Modal (table view's "Results" action reuses the card view's option breakdown) -->
+    <div class="modal-overlay" *ngIf="selectedPoll(); let poll" (click)="selectedPoll.set(null)">
+        <div class="modal-card glass-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2>{{ poll.title }}</h2>
+                <button class="close-btn" (click)="selectedPoll.set(null)">&times;</button>
+            </div>
+            <p class="description">{{ poll.description }}</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="value">{{ poll.totalVotes }}</span>
+                    <span class="label">Total Votes</span>
+                </div>
+                <div class="stat">
+                    <span class="value">{{ poll.options.length }}</span>
+                    <span class="label">Options</span>
+                </div>
+            </div>
+            <div class="options-summary">
+                <div class="option-row" *ngFor="let opt of poll.options">
+                    <div class="opt-info">
+                        <span>{{ opt.text }}</span>
+                        <span>{{ opt.voteCount }} ({{ opt.percentage }}%)</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="fill" [style.width.%]="opt.percentage"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Create Modal -->
     <div class="modal-overlay" *ngIf="showCreateModal()" (click)="showCreateModal.set(false)">

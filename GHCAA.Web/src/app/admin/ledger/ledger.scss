@@ -29,6 +29,49 @@
     color: var(--text-main);
 }
 
+.income-breakdown {
+    padding: 1.5rem 2rem;
+
+    h4 {
+        margin: 0 0 1rem;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+    }
+}
+
+.income-breakdown-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.income-breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    background: rgba(var(--primary-rgb), 0.04);
+    border: 1px solid var(--border-color);
+
+    .category-name {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .category-total {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--success-color);
+    }
+}
+
 .form-box {
     padding: 3rem;
     margin-bottom: 3rem;
