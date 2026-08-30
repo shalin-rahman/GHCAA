@@ -140,6 +140,26 @@ class GalleryService {
     }
   }
 
+  Future<bool?> toggleActive(int id) async {
+    try {
+      final response = await _dio.patch('/gallery/admin/$id/toggle-active');
+      return response.data['isActive'] as bool?;
+    } catch (e) {
+      debugPrint('GalleryService.toggleActive failed: $e');
+      return null;
+    }
+  }
+
+  Future<bool?> toggleFeatured(int id) async {
+    try {
+      final response = await _dio.patch('/gallery/admin/$id/toggle-featured');
+      return response.data['isFeatured'] as bool?;
+    } catch (e) {
+      debugPrint('GalleryService.toggleFeatured failed: $e');
+      return null;
+    }
+  }
+
   Future<String?> uploadPhoto(String filePath) async {
     try {
       final formData = FormData.fromMap({

@@ -253,6 +253,10 @@ class FakeGalleryService implements GalleryService {
   @override
   Future<bool> deleteGallery(int id) async => true;
   @override
+  Future<bool?> toggleActive(int id) async => true;
+  @override
+  Future<bool?> toggleFeatured(int id) async => true;
+  @override
   Future<String?> uploadPhoto(String filePath) async => 'mock/photo.jpg';
   @override
   Future<bool> addPhotosToGallery(int galleryId, List<String> paths) async => true;
@@ -270,6 +274,42 @@ class FakeGalleryService implements GalleryService {
   Future<bool> resolveGalleryApproval(int id, bool approve, {String? reason}) async => true;
   @override
   Future<bool> resolvePhotoApproval(int photoId, bool approve, {String? reason}) async => true;
+}
+
+/// Returns one gallery with photos and captures toggle-call arguments, so the
+/// admin active/featured/edit controls in [GalleryScreen] have something to
+/// render against and can be asserted on without hitting a real Dio client.
+class FakeAdminGalleryService extends FakeGalleryService {
+  int? toggleActiveCalledWith;
+  int? toggleFeaturedCalledWith;
+
+  @override
+  Future<List<dynamic>> getGalleries({bool onlyActive = true}) async => [
+        {
+          'id': 1,
+          'title': 'Annual Picnic',
+          'description': 'A day at the campus grounds.',
+          'eventDate': '2026-01-01T00:00:00Z',
+          'location': 'Campus Grounds',
+          'isActive': true,
+          'isFeatured': false,
+          'photos': [
+            {'id': 1, 'photoPath': '/assets/gallery/annual-picnic/01.jpg', 'uploadedAt': '2026-01-01T00:00:00Z'},
+          ],
+        },
+      ];
+
+  @override
+  Future<bool?> toggleActive(int id) async {
+    toggleActiveCalledWith = id;
+    return false;
+  }
+
+  @override
+  Future<bool?> toggleFeatured(int id) async {
+    toggleFeaturedCalledWith = id;
+    return true;
+  }
 }
 
 class FakeJobService implements JobService {
@@ -598,6 +638,30 @@ void main() {
     testGoldens('Member: Gallery Hub', (tester) async {
       await tester.pumpWidgetBuilder(wrapInApp(const GalleryScreen()));
       await screenMatchesGolden(tester, 'member_gallery', customPump: _pump);
+    });
+
+    testWidgets('Admin: Gallery Hub shows active/featured toggles and wires them to the service', (tester) async {
+      final gallery = FakeAdminGalleryService();
+      await tester.pumpWidget(wrapInApp(
+        const GalleryScreen(),
+        overrides: [
+          roleProvider.overrideWith((ref) => Future.value('Admin')),
+          galleryServiceProvider.overrideWith((ref) => gallery),
+        ],
+      ));
+      await _pump(tester);
+
+      expect(find.byIcon(Icons.visibility_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.star_border_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.edit_rounded), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.visibility_rounded));
+      await _pump(tester);
+      expect(gallery.toggleActiveCalledWith, 1);
+
+      await tester.tap(find.byIcon(Icons.star_border_rounded));
+      await _pump(tester);
+      expect(gallery.toggleFeaturedCalledWith, 1);
     });
 
     testGoldens('Member: Job Hub', (tester) async {

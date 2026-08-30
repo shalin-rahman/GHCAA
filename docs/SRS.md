@@ -118,7 +118,7 @@ Fostering professional and personal growth within the network.
 
 ### 4.2 Performance & UI/UX
 
-* **Server-Side Optimization**: Automatic image compression (< 350KB) and SVG-first document generation.
+* **Server-Side Optimization**: Automatic image compression (< 350KB) for member photos, gallery album photos, and news/event images (payment proofs, signatures, and certificates/documents are intentionally excluded for evidentiary/fidelity reasons); SVG-first document generation.
 * **Midnight Gold Aesthetic**: A premium design system with Glassmorphism, smooth micro-animations, and fast LCP (Largest Contentful Paint).
 * **Resiliency**: Frontend interceptors to handle partial API failures gracefully without crashing user sessions.
 

@@ -48,6 +48,17 @@ namespace GHCAA.Infrastructure.Services
                 || type == Enums.FileUploadType.Signature;
         }
 
+        // Only types that are always a plain display image get recompressed. Certificate/
+        // NoticeDocument are frequently PDFs, and PaymentProof/Signature must keep pixel-for-pixel
+        // fidelity (evidentiary receipt, legal signature) even when the upload happens to be a JPEG
+        // — so those are never touched here regardless of file content.
+        private bool IsCompressibleImageType(Enums.FileUploadType type)
+        {
+            return type == Enums.FileUploadType.Photo
+                || type == Enums.FileUploadType.GalleryPhoto
+                || type == Enums.FileUploadType.NewsImage;
+        }
+
         public string GetRelativeFilePath(int memberId, Enums.FileUploadType uploadType, string fileName)
         {
             var safeFileName = Path.GetFileName(fileName);
@@ -79,15 +90,16 @@ namespace GHCAA.Infrastructure.Services
             Directory.CreateDirectory(targetDir);
 
             var uniqueName = $"{Guid.NewGuid():N}_{safeFileName}";
-            // Ensure .jpg extension for photos if we compress them
-            if (uploadType == Enums.FileUploadType.Photo)
+            var willCompress = IsCompressibleImageType(uploadType) && IsCompressionEnabled;
+            // Ensure .jpg extension for images we compress, since they're always re-encoded as JPEG
+            if (willCompress)
             {
                 uniqueName = Path.ChangeExtension(uniqueName, ".jpg");
             }
 
             var diskPath = Path.Combine(targetDir, uniqueName);
 
-            if (uploadType == Enums.FileUploadType.Photo && IsCompressionEnabled)
+            if (willCompress)
             {
                 try
                 {

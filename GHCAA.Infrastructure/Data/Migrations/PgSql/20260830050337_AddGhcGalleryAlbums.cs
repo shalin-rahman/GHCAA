@@ -1,4 +1,5 @@
 using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -51,13 +52,23 @@ VALUES
     (26, 7, '/assets/gallery/principal-abul-kasem-kulkharni/album_principal-abul-kasem-kulkharni_02.jpeg', NULL, '2026-08-30T00:00:00Z', NULL, 2, NULL),
     (27, 7, '/assets/gallery/principal-abul-kasem-kulkharni/album_principal-abul-kasem-kulkharni_03.jpeg', NULL, '2026-08-30T00:00:00Z', NULL, 2, NULL)
 ON CONFLICT (""Id"") DO NOTHING;
+");
 
--- Explicit-Id inserts above don't advance the identity sequence backing these columns, so the
--- next admin-created album/photo would collide on nextval() until the sequence walks past these
--- rows on its own. Force it forward now.
+            // Everything above is plain ANSI SQL (double-quoted identifiers, ON CONFLICT DO NOTHING)
+            // and runs unchanged on Postgres or SQLite alike. Only Postgres decouples an identity
+            // column from a separate sequence object, so only Postgres needs this explicit-Id
+            // inserts don't advance nextval() — the next admin-created album/photo would collide
+            // until the sequence walks past these rows on its own, so force it forward now. SQLite's
+            // rowid-based autoincrement and MySQL's AUTO_INCREMENT both self-adjust to MAX(Id) on
+            // their own and need no equivalent step, so this stays Postgres-only rather than
+            // guessing at untested syntax for providers nothing in this repo currently runs against.
+            if (migrationBuilder.IsNpgsql())
+            {
+                migrationBuilder.Sql(@"
 SELECT setval(pg_get_serial_sequence('""EventGalleries""', 'Id'), GREATEST((SELECT MAX(""Id"") FROM ""EventGalleries""), 1));
 SELECT setval(pg_get_serial_sequence('""EventPhotos""', 'Id'), GREATEST((SELECT MAX(""Id"") FROM ""EventPhotos""), 1));
 ");
+            }
         }
 
         /// <inheritdoc />

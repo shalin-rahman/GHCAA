@@ -1,5 +1,61 @@
 # GHCAA PLATFORM TASK TRACKER
 
+## PRIORITY INDEX (triaged 2026-08-30 — re-triage when this drifts, don't trust it blind per `gotcha_todo_status_drift`)
+
+Every open `[TODO]` item as of this date, grouped by severity/urgency. This index is a pointer, not a
+duplicate — the full item text with context stays at its Area location; update both when an item's
+status changes.
+
+### P0 — CRITICAL (blocked on the user; cannot be closed from a coding session)
+- **48.2** — Live production secrets committed to git (JWT signing key, DB passwords, Gmail app
+  password, Render deploy-hook URL) in `docs/deploy_connection.txt`, `.env.remote`,
+  `build_output/appsettings*.json`, `docs/RENDER_DEPLOYMENT.md`. Needs the user to rotate every
+  credential via the relevant dashboards, then `git rm --cached` + `.gitignore` + a history purge
+  (`git filter-repo`). No coding-session action can close this.
+- **48.13** — The live SuperAdmin password sat in git history (`docs/BUSINESS_FUNCTIONALITY_REVIEW_PLAN.md`)
+  since before it was even set as the live password. Doc text is redacted, but the password itself
+  still needs an independent rotation — redacting the doc doesn't undo the history exposure.
+- **48.12** — Remaining unfixed Low findings from the Area 48 security audit: `MessagingController.MarkAsRead`
+  missing ownership check; `FinancialsController.RecordPayment` trusts a client-supplied `MemberId`;
+  refresh-token replay isn't detected/revoked; `MemberImportController` upload skips file validation;
+  raw `FullName` interpolated into an HTML email body (XSS-adjacent).
+
+### P1 — HIGH (security surface / explicitly time-sensitive / blocking other work)
+- **47.13.1–47.13.7** — Mutation-coverage remediation (~35% of POST/PUT/DELETE still untested). Start
+  with **47.13.1** (`AuthController` non-Login actions, including this project's own untested step-up
+  endpoints) and **47.13.2** (`LookupsController` full CRUD, zero coverage).
+- **48.18 / 48.19** — Dependency/CI supply-chain hardening: EF Core/Npgsql pinned to exact `9.0.0` GA
+  with no patch tracking; CI Actions pinned to mutable tags with access to the Render deploy-hook
+  secret in the same workflow; no NuGet lockfile; no Docker base-image digest pin.
+- **49.1–49.3** — Custom roles grant zero actual permissions (label-only — misleads admins); no
+  disable/enable for system-admin accounts; no admin-initiated password reset for system admins. Each
+  has a "DECISION NEEDED" gate before work starts (see Area 49 for the actual questions).
+- **46.5** — Org-wide Financial Ledger has zero rows post-import; aggregate income/expense view doesn't
+  reflect the ~৳47,000 in per-member fees that ARE recorded correctly.
+- **34.D10** — Likely already superseded by `MigrationBootstrapper` (see `gotcha_ensurecreated_no_op_existing_db`)
+  — verify against current `Program.cs` before treating this as still open; don't just re-do it.
+
+### P2 — MEDIUM (real, no urgency signal)
+- **45.1–45.7** — Admin error-log viewer, fully planned, nothing built.
+- **42.1–42.5** — Admin-manageable elections forms/docs, plan only.
+- **49.4 / 49.5** — Grid/row-control consistency cleanup + tests for the new 49.x endpoints once built.
+- **51.2–51.5** — File-storage hardening: no real hard-cap on image size, opaque filenames, missing
+  tests, compression settings not admin-configurable yet.
+- **47.10** — Missing profile photos for most of the 631 bulk-imported alumni (data gap, not a bug).
+- **43.4** — Live/manual verification that the Area 43 exception-handling/logging sweep actually fires.
+- **27.8** — No enforced ≥80%/file coverage threshold (would fail today if enforced).
+- **28.32 / 28.33 / 8.8** — i18n (English+Bengali): dependencies present, extraction not started.
+- **34.D7** — 21 stale mobile golden baselines need regenerating (unrelated housekeeping).
+- **44.16** — Three unrelated Flutter classes all named `FamilyService` (deferred rename risk).
+- **7.16, 8.3–8.7** — Mobile hardening/perf backlog (SSL pinning, pagination, background threading, etc.).
+- **12.1–12.6** — Process items (API-change checklist, contract registry, mobile log capture).
+- **52.5** — Mobile's separate "quick create gallery" dialog — left as-is, a future cleanup decision.
+
+### P3 — LOW / PLAN-ONLY (large unbuilt features, no current pressure)
+- **Area 37** (37.2–37.10) — scholarships, fundraising, cohorts/reunions, oral-history archive,
+  bilingual UI, credential verification, geographic chapters, annual impact report.
+- **6.2** — Alumni referral system for jobs/internships.
+
 ## AREA 1: MOBILE PLATFORM STABILITY & PARITY
 
 1.1  [DONE] Fix AdminLedgerScreen class name mismatch in app_router.dart
@@ -2257,21 +2313,21 @@ lightweight, error free, 100% workable" — server-side, applies to all photo up
 strategy)
 
 `LocalFileStorageService.SaveFileAsync` already has a compression path (`SixLabors.ImageSharp`,
-quality 85→70 fallback, target 350KB) but it only fires for `FileUploadType.Photo` (member profile
-photos). Every other image-bearing upload type bypasses it entirely and does a raw stream copy:
-`GalleryPhoto` (gallery/album photos — incl. admin `admin-gallery`, member `common/gallery`,
-`GalleryController` upload endpoints), `PaymentProof` (`EventService`, `FinancialService`,
-`MemberService`), `NewsImage` (`NewsController`, `EventService` event logo). There's also no hard
-size guarantee today: if an image is still over target even at fallback quality, it's saved anyway —
-"not more than 512kb" is not actually enforced, only aimed for.
+quality 85→70 fallback, target 350KB). There's no hard size guarantee today: if an image is still
+over target even at fallback quality, it's saved anyway — "not more than 512kb" is not actually
+enforced, only aimed for.
 
-51.1 [TODO] `LocalFileStorageService.SaveFileAsync`: widen the compression branch from
-`uploadType == Photo` to every image-bearing type (`Photo`, `GalleryPhoto`, `PaymentProof`,
-`NewsImage`) — the existing try/catch already falls back to a raw copy on decode failure, so a
-non-image file under one of these types (e.g. a PDF payment proof) degrades safely with no extra
-guarding needed. Only rename the output extension to `.jpg` when compression actually succeeds
-(don't force `.jpg` upfront by type — that's currently wrong for any non-Photo type that might
-legitimately be a PDF).
+51.1 [DONE 2026-08-30] `LocalFileStorageService.SaveFileAsync`: widened the compression branch (via
+`IsCompressibleImageType`) from `uploadType == Photo` to every type that is *always* a plain display
+image: `Photo`, `GalleryPhoto` (gallery/album uploads — `GalleryController`), `NewsImage`
+(`NewsController`, `EventService` event logo). Deliberately left uncompressed, per explicit user
+direction ("compress images only, not files") plus fidelity/evidentiary concerns: `Certificate` and
+`NoticeDocument` (frequently PDFs, not images at all), `PaymentProof` (financial evidence — lossy
+re-encoding of a receipt is undesirable even when it happens to be a photo), `Signature` (must stay
+pixel-exact, forgery/legal-fidelity risk). The existing try/catch already falls back to a raw copy on
+decode failure, so a non-image file mistakenly tagged with a compressible type degrades safely. The
+output extension is only forced to `.jpg` for the three compressible types (`willCompress` flag),
+never for the excluded types.
 51.2 [TODO] Add a real hard-cap enforcement step: after the existing quality-drop (85%→70%) still
 exceeds the target, downscale image dimensions (e.g. `Mutate(x => x.Resize(...))`, stepping the max
 dimension down, not just quality) and re-encode, looping until under the cap or a sane minimum
@@ -2282,12 +2338,61 @@ hard cap).
 51.3 [TODO] File naming: give saved files a type-prefixed name (per user's explicit ask — "event_",
 "album_", "member_" or similarly descriptive, not an opaque GUID) instead of today's
 `{Guid}_{originalFileName}` in `SaveFileAsync`'s `uniqueName` — e.g. `photo_`, `galleryphoto_`,
-`paymentproof_`, `newsimage_` prefixes keyed off `uploadType`, still GUID-suffixed for uniqueness.
+`newsimage_` prefixes keyed off `uploadType`, still GUID-suffixed for uniqueness.
 Note: this is about the live upload pipeline going forward; the 6 gallery albums manually imported
 from `GHC\images\albums\` this session already use a hand-applied `album_<slug>_NN.ext` convention
 under `GHCAA.Web/public/assets/gallery/` (bundled web assets, not this upload pipeline) and don't need
 touching for this.
-51.4 [TODO] Tests: extend `LocalFileStorageService` coverage (no dedicated unit test file exists for
-it today — check `GHCAA.Tests` before assuming) for: compression firing on each newly-covered
-`FileUploadType`, the hard-cap resize loop actually converging under 512KB on a large fixture image,
-graceful fallback on a non-image input, and the new filename prefix per type.
+51.4 [TODO] Tests: extend `LocalFileStorageService` coverage (`LocalFileStorageServiceTests.cs` exists
+today but only ever exercises `FileUploadType.Photo` with compression disabled) for: compression
+actually firing on `GalleryPhoto`/`NewsImage`, confirming it still does NOT fire on
+`PaymentProof`/`Certificate`/`Signature`/`NoticeDocument`, the hard-cap resize loop (51.2) actually
+converging under 512KB on a large fixture image, graceful fallback on a non-image input tagged with a
+compressible type, and the new filename prefix per type (51.3).
+51.5 [TODO] Admin-configurable file storage settings — today `ImageCompressionEnabled` /
+`ImageCompressionQuality` / `ImageCompressionFallbackQuality` / `ImageCompressionTargetSizeKB` /
+`MaxFileSizeBytes` only live in `appsettings.json` (`Constants.ConfigKeys`), so tuning them needs a
+redeploy. Move them into the existing admin-editable `OrganizationConfig` row (single-row
+`ConfigJson` blob already used for org-wide feature flags, loaded client-side via `OrgConfigService`
++ `APP_INITIALIZER` — same mechanism as `enableGallery` etc.) under a `fileStorage` section: enable
+toggle, target/hard-cap sizes in KB, and quality/fallback-quality knobs, editable from an admin
+settings screen the same way other org config sections are. `LocalFileStorageService` should read
+current values from `IOrganizationConfigService`/equivalent (falling back to the existing
+`Constants.Defaults` if the org row has no `fileStorage` section yet, e.g. right after this ships)
+instead of `IConfiguration` directly, so a change takes effect immediately without a restart.
+
+---
+
+# Area 52 — Public landing gallery carousel (web-only) + mobile admin gallery active/featured/edit
+parity (raised by user 2026-08-30: audit gallery work already on web, close the mobile gap, add
+missing tests)
+
+52.1 [DONE] Web: reworked `landing-gallery-preview` ("Campus Moments" section on the public landing
+page, `GHCAA.Web/src/app/public/landing/sections/gallery-preview/`) to show every active album with
+at least one photo (capped at 8), each cycling through its own photos on a shared 3s timer, instead
+of a flat list of photos from only `isFeatured` albums. Web-only by design — mobile has no public
+landing page (it's an authenticated member app), so there is no mobile equivalent to build here.
+52.2 [DONE] Test coverage gap closed: no unit test existed for `LandingGalleryPreview` despite real
+branching logic (`albums()` filtering/cap, `currentPhoto()` indexing, the cycling timer,
+error-clears-state path). Added `gallery-preview.spec.ts` following the existing
+`events-preview.spec.ts` mock pattern.
+52.3 [DONE] Mobile parity gap found and closed: the web admin gallery screen
+(`admin-gallery.ts`/`.html`) already let admins toggle an album's `isActive` (Public/Hidden) and
+`isFeatured` (★ Featured) status and edit an existing album's title/date/location/description — all
+backed by existing `GalleryController` endpoints (`toggle-active`, `toggle-featured`, `PUT
+admin/{id}`). Mobile's `gallery_screen.dart` (member + admin album screen) only had Upload/Delete for
+admins. Added `GalleryService.toggleActive`/`toggleFeatured` (`content_service.dart`, mirroring the
+existing `deleteGallery`/`updateGallery` call style), wired them plus a reusable edit-capable
+`_createGallery({existing})` dialog into the admin action-circle row, and added a static "★ FEATURED"
+chip on the card (mirrors web's `admin-gallery.html` badge).
+52.4 [DONE] Tests: extended `comprehensive_visual_freeze_test.dart`'s `FakeGalleryService` with the 2
+new methods (required to keep implementing the interface) and added a plain `testWidgets` (not
+`testGoldens`, per this repo's golden-fragility convention) asserting the new active/featured/edit
+icons render for an admin role and that tapping them calls through to the service. The existing
+`member_gallery` golden is unaffected — it renders as role `'Member'`, and the new controls are
+admin-only.
+52.5 [TODO] Not addressed here (out of scope): mobile's `admin_modules.dart` has a separate, simpler
+"quick create gallery" dialog (posts straight to `/gallery/admin` with `isFeatured` hardcoded
+`false`) — a duplicate, lighter-weight creation shortcut on the admin dashboard tile grid, distinct
+from `gallery_screen.dart`'s own create flow. Left as-is; consolidating the two creation entry points
+was not part of this ask and is a separate cleanup decision.

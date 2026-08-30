@@ -1290,7 +1290,7 @@ All in `GHCAA.Web/src/app/core/services/`. `@Injectable({ providedIn: 'root' })`
 ### Public Components (`src/app/public/`)
 | Component | Folder | Key Services |
 |---|---|---|
-| `LandingComponent` | `landing/` | `EventsService`, `NewsService`, `NetworkingService`, `ThemeService` |
+| `LandingComponent` | `landing/` | `EventsService`, `NewsService`, `NetworkingService`, `ThemeService`, `GalleryService` (via `sections/gallery-preview` — renders every active album, each auto-cycling its own photos) |
 | `LoginComponent` | `login/` | `AuthService`, `AlertService` |
 | `RegisterComponent` | `register/` | `RegistrationService`, `LookupService` |
 | `ResetPasswordComponent` | `reset-password/` | `AuthService` |

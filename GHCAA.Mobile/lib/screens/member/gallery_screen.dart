@@ -85,12 +85,13 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     );
   }
  
-  Future<void> _createGallery() async {
-    final titleCtrl = TextEditingController();
-    final descCtrl = TextEditingController();
-    final locCtrl = TextEditingController();
-    DateTime selectedDate = DateTime.now();
- 
+  Future<void> _createGallery({Map<String, dynamic>? existing}) async {
+    final isEditing = existing != null;
+    final titleCtrl = TextEditingController(text: existing?['title'] ?? '');
+    final descCtrl = TextEditingController(text: existing?['description'] ?? '');
+    final locCtrl = TextEditingController(text: existing?['location'] ?? '');
+    DateTime selectedDate = existing?['eventDate'] != null ? DateTime.parse(existing!['eventDate']) : DateTime.now();
+
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -98,7 +99,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           backgroundColor: AppTheme.deepCharcoal,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppTheme.glassBorder)),
-          title: Center(child: Text('CREATE NEW GALLERY', style: Theme.of(context).textTheme.labelLarge?.copyWith(letterSpacing: 2))),
+          title: Center(child: Text(isEditing ? 'EDIT ALBUM INFO' : 'CREATE NEW GALLERY', style: Theme.of(context).textTheme.labelLarge?.copyWith(letterSpacing: 2))),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -148,25 +149,47 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
             TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL', style: TextStyle(color: Colors.white38))),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('CREATE GALLERY'),
+              child: Text(isEditing ? 'SAVE CHANGES' : 'CREATE GALLERY'),
             ),
           ],
         ),
       ),
     );
- 
+
     if (result == true && titleCtrl.text.isNotEmpty) {
-      final success = await ref.read(galleryServiceProvider).createGallery({
+      final payload = {
         'title': titleCtrl.text,
         'description': descCtrl.text,
         'location': locCtrl.text,
         'eventDate': AppUtils.formatDate(selectedDate),
-        'isActive': true,
-      });
+        'isActive': existing?['isActive'] ?? true,
+        'isFeatured': existing?['isFeatured'] ?? false,
+      };
+      final success = isEditing
+          ? await ref.read(galleryServiceProvider).updateGallery(existing['id'], payload)
+          : await ref.read(galleryServiceProvider).createGallery(payload);
       if (success) {
         ref.invalidate(galleryItemsProvider);
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gallery created successfully.')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(isEditing ? 'Album updated successfully.' : 'Gallery created successfully.')));
+        }
       }
+    }
+  }
+
+  Future<void> _toggleActive(int id) async {
+    final result = await ref.read(galleryServiceProvider).toggleActive(id);
+    if (result != null) {
+      ref.invalidate(galleryItemsProvider);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Album is now ${result ? 'Public' : 'Hidden'}.')));
+    }
+  }
+
+  Future<void> _toggleFeatured(int id) async {
+    final result = await ref.read(galleryServiceProvider).toggleFeatured(id);
+    if (result != null) {
+      ref.invalidate(galleryItemsProvider);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Album is now ${result ? 'Featured' : 'Regular'}.')));
     }
   }
  
@@ -445,10 +468,25 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                   if (isAdmin)
                                     Positioned(
                                       top: AppTheme.spaceS + 4, right: AppTheme.spaceS + 4,
-                                      child: Row(
+                                      child: Wrap(
+                                        spacing: AppTheme.spaceS,
+                                        runSpacing: AppTheme.spaceS,
+                                        alignment: WrapAlignment.end,
                                         children: [
+                                          AdminActionCircle(
+                                            icon: (gallery['isActive'] ?? true) ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                                            color: (gallery['isActive'] ?? true) ? AppTheme.royalGold : Colors.white38,
+                                            tooltip: (gallery['isActive'] ?? true) ? 'Hide Album' : 'Publish Album',
+                                            onTap: () => _toggleActive(gallery['id']),
+                                          ),
+                                          AdminActionCircle(
+                                            icon: (gallery['isFeatured'] ?? false) ? Icons.star_rounded : Icons.star_border_rounded,
+                                            color: (gallery['isFeatured'] ?? false) ? AppTheme.royalGold : Colors.white38,
+                                            tooltip: (gallery['isFeatured'] ?? false) ? 'Unfeature Album' : 'Feature Album',
+                                            onTap: () => _toggleFeatured(gallery['id']),
+                                          ),
+                                          AdminActionCircle(icon: Icons.edit_rounded, color: AppTheme.royalGold, tooltip: 'Edit Album Info', onTap: () => _createGallery(existing: gallery)),
                                           AdminActionCircle(icon: Icons.upload_file_rounded, color: AppTheme.royalGold, tooltip: 'Upload Photos', onTap: () => _uploadPhotos(gallery['id'])),
-                                          const SizedBox(width: AppTheme.spaceS),
                                           AdminActionCircle(icon: Icons.delete_sweep_rounded, color: Colors.redAccent, tooltip: 'Delete Gallery', onTap: () => _confirmDeleteGallery(gallery['id'])),
                                         ],
                                       ),
@@ -468,6 +506,14 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                       Text(AppUtils.formatDate(gallery['eventDate']), style: Theme.of(context).textTheme.labelLarge),
                                     ],
                                   ),
+                                  if (gallery['isFeatured'] == true) ...[
+                                    const SizedBox(height: AppTheme.spaceS),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(color: AppTheme.royalGold.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20), border: Border.all(color: AppTheme.royalGold.withValues(alpha: 0.4))),
+                                      child: const Text('★ FEATURED', style: TextStyle(color: AppTheme.royalGold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 0.8)),
+                                    ),
+                                  ],
                                   const SizedBox(height: AppTheme.spaceS),
                                   Text(gallery['description'] ?? 'No description available.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5)),
                                   const SizedBox(height: AppTheme.spaceL),
