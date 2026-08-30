@@ -2248,3 +2248,46 @@ DOM-structure assertions against `admin-comm.html` are not possible in this harn
 Not done (explicitly out of scope this round, per user's channel-scope decision): no SMS send method
 was wired — `ISmsService`/`GreenwebSmsService` remain untouched and still have zero callers anywhere
 in the codebase.
+
+---
+
+# Area 51 — Universal photo-upload compression hard-cap (raised by user 2026-08-30: "photo_name should
+be compressed by size with maximum quality not more than 512 kb, by internal compressed functionalities,
+lightweight, error free, 100% workable" — server-side, applies to all photo uploads, resize+fixed-quality
+strategy)
+
+`LocalFileStorageService.SaveFileAsync` already has a compression path (`SixLabors.ImageSharp`,
+quality 85→70 fallback, target 350KB) but it only fires for `FileUploadType.Photo` (member profile
+photos). Every other image-bearing upload type bypasses it entirely and does a raw stream copy:
+`GalleryPhoto` (gallery/album photos — incl. admin `admin-gallery`, member `common/gallery`,
+`GalleryController` upload endpoints), `PaymentProof` (`EventService`, `FinancialService`,
+`MemberService`), `NewsImage` (`NewsController`, `EventService` event logo). There's also no hard
+size guarantee today: if an image is still over target even at fallback quality, it's saved anyway —
+"not more than 512kb" is not actually enforced, only aimed for.
+
+51.1 [TODO] `LocalFileStorageService.SaveFileAsync`: widen the compression branch from
+`uploadType == Photo` to every image-bearing type (`Photo`, `GalleryPhoto`, `PaymentProof`,
+`NewsImage`) — the existing try/catch already falls back to a raw copy on decode failure, so a
+non-image file under one of these types (e.g. a PDF payment proof) degrades safely with no extra
+guarding needed. Only rename the output extension to `.jpg` when compression actually succeeds
+(don't force `.jpg` upfront by type — that's currently wrong for any non-Photo type that might
+legitimately be a PDF).
+51.2 [TODO] Add a real hard-cap enforcement step: after the existing quality-drop (85%→70%) still
+exceeds the target, downscale image dimensions (e.g. `Mutate(x => x.Resize(...))`, stepping the max
+dimension down, not just quality) and re-encode, looping until under the cap or a sane minimum
+dimension floor is hit — so "512kb max" is an actual guarantee, not best-effort. Introduce a distinct
+hard-cap constant (`Constants.Defaults`: e.g. `MaxImageSizeKB = 512`) separate from the existing
+"aim for good quality" `TargetImageSizeKB` (currently 350, keep as the first-pass target below the
+hard cap).
+51.3 [TODO] File naming: give saved files a type-prefixed name (per user's explicit ask — "event_",
+"album_", "member_" or similarly descriptive, not an opaque GUID) instead of today's
+`{Guid}_{originalFileName}` in `SaveFileAsync`'s `uniqueName` — e.g. `photo_`, `galleryphoto_`,
+`paymentproof_`, `newsimage_` prefixes keyed off `uploadType`, still GUID-suffixed for uniqueness.
+Note: this is about the live upload pipeline going forward; the 6 gallery albums manually imported
+from `GHC\images\albums\` this session already use a hand-applied `album_<slug>_NN.ext` convention
+under `GHCAA.Web/public/assets/gallery/` (bundled web assets, not this upload pipeline) and don't need
+touching for this.
+51.4 [TODO] Tests: extend `LocalFileStorageService` coverage (no dedicated unit test file exists for
+it today — check `GHCAA.Tests` before assuming) for: compression firing on each newly-covered
+`FileUploadType`, the hard-cap resize loop actually converging under 512KB on a large fixture image,
+graceful fallback on a non-image input, and the new filename prefix per type.

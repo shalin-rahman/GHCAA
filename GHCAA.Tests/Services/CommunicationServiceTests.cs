@@ -152,9 +152,17 @@ public class CommunicationServiceTests : TestBase
         // not just the fuller SendTemplatedEmailAsync path — both now share BuildTemplateVariables.
         var member = new Member
         {
-            FullName = "Org Var Tester", Email = "orgvar@e.com", NID = "1", MobileNo = "0",
-            FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A",
-            EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0"
+            FullName = "Org Var Tester",
+            Email = "orgvar@e.com",
+            NID = "1",
+            MobileNo = "0",
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0"
         };
         _context.Members.Add(member);
         _context.EmailTemplates.Add(new EmailTemplate
@@ -182,9 +190,17 @@ public class CommunicationServiceTests : TestBase
         var year = 1999;
         var member = new Member
         {
-            FullName = "<script>alert(1)</script>", Email = "xss@e.com", NID = "1", MobileNo = "0",
-            FatherName = "F", MotherName = "M", PresentAddress = "A", PermanentAddress = "A",
-            EmergencyContactName = "E", EmergencyContactRelation = "R", EmergencyContactPhone = "0",
+            FullName = "<script>alert(1)</script>",
+            Email = "xss@e.com",
+            NID = "1",
+            MobileNo = "0",
+            FatherName = "F",
+            MotherName = "M",
+            PresentAddress = "A",
+            PermanentAddress = "A",
+            EmergencyContactName = "E",
+            EmergencyContactRelation = "R",
+            EmergencyContactPhone = "0",
             AcademicHistory = new List<AcademicRecord> { new AcademicRecord { IsGHC = true, PassingYear = year, InstitutionName = "GHC", Degree = "HSC", Subject = "Science" } }
         };
         _context.Members.Add(member);

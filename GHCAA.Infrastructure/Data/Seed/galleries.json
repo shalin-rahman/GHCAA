@@ -9,5 +9,71 @@
     "IsActive": true,
     "IsFeatured": true,
     "Location": null
+  },
+  {
+    "Id": 2,
+    "Title": "GHC 1st Grand Reunion",
+    "Description": "Photo memories from the first grand reunion of GHC alumni.",
+    "EventDate": "2026-01-24T09:00:00Z",
+    "CreatedAt": "2026-08-30T00:00:00Z",
+    "CreatedByAdminId": 1,
+    "IsActive": true,
+    "IsFeatured": false,
+    "Location": "College Campus Ground"
+  },
+  {
+    "Id": 3,
+    "Title": "Bangla New Year",
+    "Description": "Celebrating Pohela Boishakh with the GHC alumni community.",
+    "EventDate": "2026-04-14T00:00:00Z",
+    "CreatedAt": "2026-08-30T00:00:00Z",
+    "CreatedByAdminId": 1,
+    "IsActive": true,
+    "IsFeatured": false,
+    "Location": null
+  },
+  {
+    "Id": 4,
+    "Title": "Campus",
+    "Description": "Scenes from the Gyaneswari High College campus.",
+    "EventDate": "2026-08-29T00:00:00Z",
+    "CreatedAt": "2026-08-30T00:00:00Z",
+    "CreatedByAdminId": 1,
+    "IsActive": true,
+    "IsFeatured": false,
+    "Location": null
+  },
+  {
+    "Id": 5,
+    "Title": "Iftar 2026",
+    "Description": "Iftar gathering with GHC alumni and guests.",
+    "EventDate": "2026-03-14T07:21:00Z",
+    "CreatedAt": "2026-08-30T00:00:00Z",
+    "CreatedByAdminId": 1,
+    "IsActive": true,
+    "IsFeatured": false,
+    "Location": "Darbar Party Center"
+  },
+  {
+    "Id": 6,
+    "Title": "New Principal",
+    "Description": "Welcoming the new principal of Gyaneswari High College.",
+    "EventDate": "2026-08-26T00:00:00Z",
+    "CreatedAt": "2026-08-30T00:00:00Z",
+    "CreatedByAdminId": 1,
+    "IsActive": true,
+    "IsFeatured": false,
+    "Location": null
+  },
+  {
+    "Id": 7,
+    "Title": "Principal Abul Kasem Kulkharni",
+    "Description": "Tribute photos of Principal Abul Kasem Kulkharni.",
+    "EventDate": "2026-08-16T00:00:00Z",
+    "CreatedAt": "2026-08-30T00:00:00Z",
+    "CreatedByAdminId": 1,
+    "IsActive": true,
+    "IsFeatured": false,
+    "Location": null
   }
 ]
