@@ -42,12 +42,16 @@ RUN dotnet restore "GHCAA.API/GHCAA.API.csproj"
 
 # Copy all source code
 COPY . .
-
-# --- BUILD API ---
 WORKDIR "/src"
-RUN dotnet build "GHCAA.API/GHCAA.API.csproj" -c $BUILD_CONFIGURATION --no-restore
 
 # --- PUBLISH STAGE ---
+# `dotnet publish` already compiles the project itself, so a separate `dotnet build` step before
+# it (as this Dockerfile used to have) makes the compiler — and ASP.NET Core's static web assets
+# pipeline, which fingerprints every file under wwwroot — run twice over the same project for zero
+# benefit once the Tests project isn't built here to justify an earlier error-surfacing pass (see
+# the restore comment above). With wwwroot still carrying thousands of committed member-photo
+# files at the time of the 2026-08-30 OOM investigation, doubling that pass was real, avoidable
+# memory pressure on Render's build machine — publish directly instead of build-then-publish.
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 WORKDIR "/src"
