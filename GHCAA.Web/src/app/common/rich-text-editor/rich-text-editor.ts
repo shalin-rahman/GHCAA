@@ -67,6 +67,13 @@ export class RichTextEditor implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        // Quill 1.3.6 has no public destroy(). Its Scroll blot keeps a MutationObserver on the
+        // container running after we drop our reference; on the next Angular-driven DOM mutation
+        // (e.g. this form closing) its queued callback can fire against a Quill instance mid-
+        // teardown and throw on `this.emitter.emit` inside Quill's own scroll.js. Disconnecting
+        // it here is the documented workaround for this Quill version — optional-chained since
+        // `scroll`/`observer` are undocumented internals that could change between builds.
+        (this.quill as any)?.scroll?.observer?.disconnect?.();
         this.quill = null;
     }
 
@@ -90,7 +97,7 @@ export class RichTextEditor implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     private initQuill(): void {
-        if (!this.editorContainer) {
+        if (!this.editorContainer || this.quill) {
             return;
         }
 
