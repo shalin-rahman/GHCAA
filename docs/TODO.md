@@ -50,11 +50,14 @@ status changes.
 - **7.16, 8.3–8.7** — Mobile hardening/perf backlog (SSL pinning, pagination, background threading, etc.).
 - **12.1–12.6** — Process items (API-change checklist, contract registry, mobile log capture).
 - **52.5** — Mobile's separate "quick create gallery" dialog — left as-is, a future cleanup decision.
+- **61.1 / 61.2** — Dynamic/runtime dead-code scan (unused services/classes/widgets) + follow-up
+  refactor pass, run module-by-module via graphify rather than one blind full-repo sweep.
 
 ### P3 — LOW / PLAN-ONLY (large unbuilt features, no current pressure)
 - **Area 37** (37.2–37.10) — scholarships, fundraising, cohorts/reunions, oral-history archive,
   bilingual UI, credential verification, geographic chapters, annual impact report.
 - **6.2** — Alumni referral system for jobs/internships.
+- **61.3** — Drop the `Summary:`-style comment banner in `GHCAA.Tools/db_diag.cs` next time that file is touched.
 
 ## AREA 1: MOBILE PLATFORM STABILITY & PARITY
 
@@ -2991,3 +2994,61 @@ confirmed whether these map to the same backend feature/data model or web's Mess
 mobile's split model doesn't (e.g. direct 1:1 alumni messaging vs. threaded forum discussion) —
 needs a closer read of both the web and mobile networking/messaging services before concluding
 anything is actually missing; flagged as needs-verification, not a confirmed gap.
+
+## AREA 61: CODE COMMENT/DOC TONE + REFACTOR SWEEP (raised by "prepare a plan for human-toned comments/docs/TODOs, refactor review, token usage", 2026-09-01)
+
+A repo-wide `git diff` came back empty (working tree clean, no unmerged upstream commits), so there
+was nothing to run a bug-hunting diff review against this session. Scope was refactor/tone/plan work
+instead: a global rule was added and a light scan was run to size the actual cleanup, rather than
+guessing at it.
+
+**Done this session:**
+- Root `CLAUDE.md` now has a "Comment, Doc & TODO Tone" section: plain sentences, no AI filler
+  openers ("This function is responsible for...", "It's important to note..."), no comment banners,
+  no restating-the-obvious comments, TODOs must name the real gap.
+- `.claude/skills/ghcaa-standards/SKILL.md` Style section now points at that rule so it surfaces
+  whenever the standards skill loads.
+- Scanned `*.cs`/`*.ts`/`*.dart` for AI-tell comment patterns (filler openers, `=== SECTION ===`
+  banners, `Summary:`/`Purpose:`/`Overview:` headers, vague `TODO: improve/fix this`). Only one hit:
+  a `Summary:`-style banner in `GHCAA.Tools/db_diag.cs` (a standalone diagnostic script, not part of
+  the shipped app) — not worth a dedicated pass. TODO/FIXME/HACK markers total 15 across 12 files,
+  small enough to review inline next time each file is touched rather than as a separate sweep.
+- 2026-09-01 follow-up: scope widened on request — the tone rule now applies retroactively (touch a
+  file for any reason, clean up what you pass over in it), and a full repo-wide sweep was requested
+  ("nothing should be missed"), not just the light grep above. See 61.4.
+
+61.4 [DONE 2026-09-01] Full repo-wide human-tone pass, run as 4 parallel grep-driven sweeps
+(backend/web/mobile/docs) instead of one blind full-repo read:
+- **Backend** (`GHCAA.Api`/`Application`/`Domain`/`Infrastructure`/`Tools`/`Tests`): 6 files fixed.
+  Worst finds were leftover first-person AI reasoning traces left in as comments
+  (`// I'll fix service next`, `// Actually... Better approach... No.`) in `NewsController.cs` and
+  `GatewaysController.cs` — replaced with one factual comment / a TODO naming the real gap
+  (webhook can't thread the transaction ID back to `HandleSuccessfulPayment`). Also trimmed a
+  filler `/// <summary>` in `VisualTestAuthMiddleware.cs`, an obvious `// Increment view count`
+  in `ForumService.cs`, and the `Summary:` banner in `GHCAA.Tools/db_diag.cs` (closes 61.3).
+  `dotnet build` clean on GHCAA.Api and GHCAA.Tests.
+- **Web** (`GHCAA.Web/src`): 0 files changed — already clean, no genuine AI-tell comments found.
+- **Mobile** (`GHCAA.Mobile/lib`): 8 files fixed. Marketing-flavored comment fluff ("World-Class",
+  "Industry Standard", "Majestic", "Dynamic ... Framework") layered on otherwise fine code, plus one
+  rambling draft-style comment in `submit_article_screen.dart` replaced with a plain sentence.
+  `dart analyze lib` clean.
+- **Docs** (`docs/*.md`, root `README.md`): 3 files fixed (`SRS.md`, `FEATURES.md`, `README.md`) —
+  stripped brochure adjectives ("enterprise-grade", "intelligent", "comprehensive") that didn't
+  match what the described feature actually does (e.g. "Intelligent Support Chat" is a plain
+  rule-based chat, not AI). ~25 docs checked, rest already plain.
+
+Root `CLAUDE.md`'s tone rule is now retroactive (applies whenever a file is touched, not just new
+edits), per this session's explicit ask.
+
+61.1 [TODO] **Priority: P3 | Depends on: none.** No dedicated dynamic/runtime code-analysis pass has
+been run against this app (dead-route detection, unused Angular providers/services, unreferenced
+.NET classes, unused Flutter widgets). `graphify query`/`graphify explain` can narrow this cheaply
+per-module instead of a blind full-repo sweep — run it module by module next time this is picked up,
+not as one pass, to keep token usage down.
+
+61.2 [TODO] **Priority: P3 | Depends on: 61.1.** Once dead/unused code is identified, do the actual
+refactor pass (remove or consolidate) — deferred until 61.1 gives real targets instead of guessing.
+
+61.3 [TODO] **Priority: P4 | Depends on: none.** Spot-check `GHCAA.Tools/db_diag.cs` next time it's
+touched and drop the `Summary:`-style banner comment for a plain one-line comment, matching the new
+tone rule. Not worth a standalone edit today — it's a diagnostic script, not shipped app code.

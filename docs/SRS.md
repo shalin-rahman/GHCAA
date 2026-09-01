@@ -2,7 +2,7 @@
 
 **Version:** 2.6
 **Date:** 2026-04-24
-**Status:** Comprehensive System Definition
+**Status:** Full system definition
 
 ---
 
@@ -10,15 +10,15 @@
 
 ### 1.1 Purpose
 
-The GHCAA (Govt. Haraganga College Alumni Association) Platform is an enterprise-grade digital ecosystem designed to unify the alumni network. It serves as the authoritative system for membership management, financial transparency, event orchestration, and professional networking.
+The GHCAA (Govt. Haraganga College Alumni Association) Platform is the system of record for the alumni network: membership management, financial transparency, event coordination, and professional networking.
 
 ### 1.2 Scope
 
-The system encompasses a high-performance **REST API (ASP.NET Core)**, a feature-rich **Web Portal (Angular)**, and a native-feel **Mobile Application (Flutter)**. It manages the entire member lifecycle from registration to career-long engagement.
+The system consists of a **REST API (ASP.NET Core)**, a **Web Portal (Angular)**, and a **Mobile Application (Flutter)**, covering the full member lifecycle from registration through ongoing engagement.
 
 ### 1.3 Vision
 
-To create a "Midnight Gold" branded experience that evokes prestige and legacy, providing alumni with secure, intelligent, and real-time tools to connect and contribute to their alma mater.
+A "Midnight Gold" branded experience that reflects the association's prestige and legacy, giving alumni secure, real-time tools to connect and contribute to their alma mater.
 
 ---
 
@@ -63,27 +63,27 @@ The core of the system is a high-integrity registration and verification workflo
 
 ### 3.2 Event Management & Participation
 
-A centralized hub for physical and virtual gathering orchestration.
+A central hub for organizing physical and virtual gatherings.
 
-* **3.2.1 Intelligent Catalog**: Discovery hub with capacity capping, deadlines, and guest entry policies.
+* **3.2.1 Event Catalog**: Discovery hub with capacity capping, deadlines, and guest entry policies.
 * **3.2.2 Registration & Waitlisting**: Automated handling of participant limits and waitlist transitions.
 * **3.2.3 QR Attendance Tracking**: Coordinators use the Mobile App to scan Member ID QR codes for real-time attendance logging.
 * **3.2.4 Administrative Controls**: Management of event tasks, budgets, expenses, and gallery documentation.
 
 ### 3.3 Financial Governance & Payments
 
-Ensuring absolute transparency and automated revenue collection.
+Transparent, automated revenue collection.
 
 * **3.3.1 Immutable Ledger**: Tracking all income (Dues, Donations, Fees) and expenses with audit-ready records.
 * **3.3.2 Automated Dues**: Generation and notification of annual membership fees based on configurable types (General, Life, etc.).
 * **3.3.3 Manual, Admin-Configurable Payments**: The platform operates without live payment-gateway credentials. Administrators configure wallet, bank, and mobile-financial-service (**bKash**, **Nagad**, bank transfer) instructions; members pay through the displayed channel and upload proof of payment, which an administrator verifies and approves. Automated gateway callback handling (**SSLCommerz**, **bKash**, **Nagad** webhooks) exists in the codebase and can be enabled later by supplying gateway keys, but is not required for operation.
 * **3.3.4 Digital Receipts**: Instant generation of PDF tax receipts for all successful contributions.
 
-### 3.4 Networking & Social Ecosystem
+### 3.4 Networking & Social
 
-Fostering professional and personal growth within the network.
+Supporting professional and personal connections within the network.
 
-* **3.4.1 Smart Directory**: High-performance "Infinite Scroll" directory with batch, department, and professional filtering.
+* **3.4.1 Alumni Directory**: "Infinite Scroll" directory with batch, department, and professional filtering.
 * **3.4.2 Peer-to-Peer Messaging**: Real-time SignalR-powered chat between members without exposing private contact info.
 * **3.4.3 Job & Mentorship Hub**: Internal boards for sharing career opportunities and requesting formal mentorship.
 * **3.4.4 Gamification**: "Contribution Points" and "Badges" (Legend, Elite, Active) awarded for engagement and attendance.

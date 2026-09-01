@@ -280,22 +280,10 @@ namespace GHCAA.API.Controllers
 
             if (isValid)
             {
-                // Note: ProcessWebhookAsync might need to return the transactionId or we need to extract it again.
-                // For simplicity in this common pattern, we might need a way to get the TrxID from the raw body.
-                // I'll update IPaymentGatewayService to return a result object instead of bool if needed,
-                // but for now, I'll assume SSL/bKash implementations might handle the DB update internally OR 
-                // we'll need to parse the body here.
-
-                // Let's parse the body into a string to get the TrxId if needed for HandleSuccessfulPayment
-                // Actually, I'll update ProcessWebhookAsync to handle the internal logic if possible, 
-                // but HandleSuccessfulPayment is in the controller.
-
-                // Better approach: Have ProcessWebhookAsync return a 'WebhookResult' with TrxId.
-                // But given the current structure, I'll just LOG and ensure the 'Validity' was checked.
-
-                // I'll make a minor update to HandleSuccessfulPayment to be callable from within gateways? No.
-                // I'll parse the TransactionId from the body if possible here.
-
+                // TODO: ProcessWebhookAsync returns only a bool, not the transaction ID, so we can't call
+                // HandleSuccessfulPayment from here. Each gateway implementation currently updates the DB
+                // itself; change ProcessWebhookAsync to return a result with TrxId so this controller can
+                // drive that update centrally instead.
                 return Ok(new { status = "success" });
             }
 

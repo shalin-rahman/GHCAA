@@ -111,13 +111,12 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppTheme.spaceL),
                       
-                      // Majestic Profile Banner (More compact version)
+                      // Compact variant of the profile banner.
                       _buildMajesticBanner(fullName, profile, photoUrl),
                       const SizedBox(height: AppTheme.spaceM),
                       _buildCompletenessCheck(context, profile),
                       const SizedBox(height: AppTheme.spaceL),
 
-                      // ----- ADMIN SECTION -----
                       if (isAdmin) ...[
                         _buildCategoryHeader('ADMINISTRATIVE CONTROLS', Colors.redAccent),
                         _buildAdminAnalyticsCluster(ref),
@@ -127,7 +126,6 @@ class DashboardScreen extends ConsumerWidget {
                         const Divider(color: Colors.white10),
                         const SizedBox(height: AppTheme.spaceL),
                       ],
-                      // ------------------------------------
 
                       _buildCategoryHeader('DASHBOARD NAVIGATION', AppTheme.royalGold),
                         _buildResponsiveGrid(context, isCompact, [

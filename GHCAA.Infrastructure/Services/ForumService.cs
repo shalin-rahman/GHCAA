@@ -77,7 +77,6 @@ namespace GHCAA.Infrastructure.Services
 
             if (topic == null) return null;
 
-            // Increment view count
             topic.ViewCount++;
             await _context.SaveChangesAsync();
 

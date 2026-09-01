@@ -102,13 +102,13 @@ final dioProvider = Provider<Dio>((ref) {
 
         String message = 'The GHCAA portal encountered a connection hiccup.';
 
-        // 1. Check for Backend Error Message (High Priority)
+        // Prefer the backend's own error message when present.
         if (e.response?.data is Map && e.response?.data['message'] != null) {
           message = e.response?.data['message'];
         } else if (e.response?.data is String && (e.response?.data as String).isNotEmpty) {
           message = e.response?.data;
         } else {
-          // 2. Fallback to World-Class Status Messages
+          // Otherwise map common Dio/HTTP failures to a friendly message.
           if (e.type == DioExceptionType.connectionTimeout ||
               e.type == DioExceptionType.receiveTimeout) {
             message = 'The server is taking too long to respond. Please check your internet.';

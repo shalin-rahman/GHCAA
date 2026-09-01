@@ -17,10 +17,9 @@ import 'core/services/app_localizations.dart';
 import 'core/services/org_config_service.dart';
 
 void main() async {
-  // 1. Ensure Flutter binding is valid
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1b. Global Error UI (World-Class Redirection)
+  // Fallback UI shown when a widget throws during build/layout/paint.
   ErrorWidget.builder = (details) => Directionality(
     textDirection: TextDirection.ltr,
     child: Material(
@@ -61,49 +60,43 @@ void main() async {
     ),
   );
   
-  // 2b. Catch background/untracked errors. Installed BEFORE SentryFlutter.init below —
-  // sentry_flutter's OnErrorIntegration/FlutterErrorIntegration CHAIN to whatever handler is
-  // already installed at init time rather than replacing it, so installing after init would
-  // silently detach Sentry's own crash classification (unhandled vs handled), silent-error
-  // filtering, and context collection, on top of firing once per frame for a persistent error.
+  // Installed before SentryFlutter.init below. sentry_flutter's error integrations chain
+  // to whatever handler is already installed at init time instead of replacing it, so
+  // installing after init would silently drop Sentry's crash classification and filtering.
   PlatformDispatcher.instance.onError = (error, stack) {
     debugPrint('Uncaught platform error: $error');
     return false; // let Sentry's chained default handler (installed by init, below) also run
   };
 
-  // 2c. Catch framework errors (build/layout/paint) automatically instead of relying
-  // on the user tapping "DIAGNOSE & REPORT" on the ErrorWidget fallback screen. Also installed
-  // before init, for the same chaining reason.
+  // Reports framework errors automatically instead of relying on the user tapping
+  // "DIAGNOSE & REPORT". Also installed before init, for the same chaining reason as above.
   final defaultFlutterOnError = FlutterError.onError;
   FlutterError.onError = (FlutterErrorDetails details) {
     debugPrint('Uncaught Flutter framework error: ${details.exceptionAsString()}');
     defaultFlutterOnError?.call(details);
   };
 
-  // 3. Load Environment Config
   await dotenv.load(fileName: ".env");
 
   final dsn = dotenv.env['SENTRY_DSN'];
 
   if (dsn != null && dsn.isNotEmpty && dsn != 'https://example@sentry.io/project') {
-    // 4. Initialize Sentry Observability (Industry Standard)
     await SentryFlutter.init(
       (options) {
         options.dsn = dsn;
-        options.tracesSampleRate = 1.0; // Captures all performance traces for development
+        options.tracesSampleRate = 1.0; // trace every transaction; fine for our volume
         options.environment = AppConfig.environment;
       },
       appRunner: () => _initAndRunApp(),
     );
   } else {
-    // Graceful fallback for local development or missing config
+    // No DSN configured (e.g. local dev) — run without Sentry.
     debugPrint('Sentry Observability Offline: No valid DSN provided.');
     _initAndRunApp();
   }
 }
 
 Future<void> _initAndRunApp() async {
-  // 4. Initialize Cloud Infrastructure (Firebase)
   // 29E.5: kIsWeb is the real compile-time web flag. bool.fromEnvironment('dart.library.js_util')
   // is NOT set by the toolchain, so it was always false — meaning Firebase init would still run
   // (and crash) on web builds. kIsWeb (from foundation, re-exported by material) is correct.
@@ -179,7 +172,7 @@ class _HaragangianAppState extends ConsumerState<HaragangianApp> with WidgetsBin
     final branding = ref.watch(orgBrandingProvider);
     final theme = AppTheme.buildTheme(branding);
 
-    // 5. Initialize Push Notifications on startup (Defensive check)
+    // Firebase.apps can be empty if init above failed; guard before touching push setup.
     try {
       if (Firebase.apps.isNotEmpty) {
         ref.read(pushNotificationServiceProvider).initialize();

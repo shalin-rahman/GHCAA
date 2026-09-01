@@ -100,18 +100,8 @@ namespace GHCAA.API.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(userIdClaim, out var userId)) return Unauthorized();
 
-            // We need to find the member ID for this user to call the service
-            // Or we could update the service to accept userId. 
-            // The service already uses user.MemberId if needed, but here it wants memberId.
-            // Actually, I'll update the service to take userId directly or handle it there.
-            // For now, I'll just pass the userId if it's the authorId.
-
-            // Re-evaluating GetMySubmissionsAsync logic in NewsService:
-            // It searches for user by memberId. 
-            // Let's just bypass and use the authorId directly in a new service method or update it.
-            // I'll update the service method to take userId.
-
-            var news = await _newsService.GetMySubmissionsAsync(userId, cancellationToken); // I'll fix service next
+            // GetMySubmissionsAsync takes the user ID directly, not memberId.
+            var news = await _newsService.GetMySubmissionsAsync(userId, cancellationToken);
             return Ok(news);
         }
 

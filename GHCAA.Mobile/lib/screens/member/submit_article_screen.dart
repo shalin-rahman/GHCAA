@@ -148,11 +148,7 @@ class _SubmitArticleScreenState extends ConsumerState<SubmitArticleScreen> {
         onTap: () async {
           final file = await ref.read(fileServiceProvider).pickImage();
           if (file != null) {
-            // In a real scenario, you'd upload now or send the file path
-            // For news, let's assume we upload it via a dedicated endpoint if available
-            // but for now we'll just show the user it's selected.
-            // Actually, usually we'd upload to get a temp URL or multipart post later.
-            // Let's assume we have an upload endpoint like the profile one.
+            // Upload right away so we have a server URL to submit with the article.
             final uploadedPath = await ref.read(fileServiceProvider).uploadArticleImage(file);
             if (uploadedPath != null) {
               setState(() => _imageUrl = uploadedPath);

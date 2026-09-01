@@ -172,7 +172,6 @@ class _DirectoryScreenState extends ConsumerState<DirectoryScreen> {
                 ),
               ),
             const SizedBox(height: AppTheme.spaceM),
-            // Dynamic Filtering Framework
             Column(
               children: [
                 Row(

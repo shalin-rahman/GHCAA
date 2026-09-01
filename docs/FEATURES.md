@@ -81,7 +81,7 @@ A granular, module-by-module breakdown of the platform's features — including 
 - **Inputs / outputs**: Screen `/events`; API `GET /api/events`.
 - **Dependencies**: Events service.
 
-### 2.2 Intelligent Event Registration
+### 2.2 Event Registration
 - **Business description**: Members and guests register for events with integrated payment tracking.
 - **User roles**: Member, Guest (if allowed) — here "Guest" means an *unregistered event
   attendee* (see the `GuestName` / `GuestEmail` / `GuestMobile` fields on the registration
@@ -260,7 +260,7 @@ The assistant runs entirely on internal data with a rule-based engine — it has
 - **Validations & rules**: Intent/keyword classification for years, sectors, and help topics (no generative model call).
 - **Dependencies**: Assistant service, Networking service (directory data).
 
-### 6.2 Intelligent Support Chat
+### 6.2 Support Chat
 - **Business description**: Real-time support for common queries and system navigation.
 - **User roles**: Public, Member.
 - **Inputs / outputs**: Screen — floating chat widget; API `POST /api/chat/message`.

@@ -11,10 +11,7 @@ namespace GHCAA.API.Middleware
     // admin access on any deployment. Wrap Program.cs registration in:
     //   if (env.IsDevelopment() && Configuration["ASP_SEED_PROFILE"] == "Visual")
     // Also reject any "Bearer visual_*" token outside the Visual profile to prevent accidental exposure.
-    /// <summary>
-    /// This middleware provides a backdoor for Playwright visual tests.
-    /// It detects the 'visual_*_token' and automatically authenticates the request.
-    /// </summary>
+    /// <summary>Backdoor for Playwright visual tests: authenticates requests carrying a 'visual_*_token'.</summary>
     public class VisualTestAuthMiddleware
     {
         private readonly RequestDelegate _next;

@@ -102,7 +102,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppTheme.spaceHUGE),
-                // Branded Logo Integration
                 Center(
                   // Transparent crest, no black disc or ring behind it (matches web).
                   child: Padding(

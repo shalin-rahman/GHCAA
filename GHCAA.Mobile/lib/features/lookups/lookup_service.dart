@@ -26,9 +26,8 @@ class LookupService {
   Future<Map<String, List<dynamic>>> getAllLookups() async {
     try {
       final response = await _dio.get('/lookups');
-      // If the backend returns a List of items with a 'lookupGroup' field, 
-      // we might need to group them ourselves.
-      // But if it returns a Map, this is fine.
+      // Only the Map shape is handled; a List response (e.g. flat items with a
+      // 'lookupGroup' field) falls through to the empty map below, ungrouped.
       if (response.data is Map) {
          return Map<String, List<dynamic>>.from(response.data);
       }

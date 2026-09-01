@@ -1,6 +1,6 @@
 # GHCAA Alumni Association Platform
 
-A comprehensive digital ecosystem for the Govt. Haraganga College Alumni Association (GHCAA), connecting alumni through secure membership, an intelligent directory, event participation, and transparent financial governance. The platform spans a REST API, an Angular web application, and a Flutter mobile app sharing a single backend.
+A digital platform for the Govt. Haraganga College Alumni Association (GHCAA), connecting alumni through secure membership, a searchable directory, event participation, and transparent financial governance. It spans a REST API, an Angular web application, and a Flutter mobile app sharing a single backend.
 
 ## Documentation
 

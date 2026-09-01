@@ -21,7 +21,7 @@ namespace GHCAA.Infrastructure.Data
             var profile = Environment.GetEnvironmentVariable("ASP_SEED_PROFILE");
 
             // SECURITY GATE: Never allow 'Visual' profile during migration generation or if not explicitly requested.
-            // This ensures test data (Shalin Rahman, etc.) never ends up in the production database snapshot.
+            // Keeps test data (Shalin Rahman, etc.) out of the production database snapshot.
             var isDesign = AppDomain.CurrentDomain.FriendlyName.Contains("ef") ||
                            AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName?.Contains("Microsoft.EntityFrameworkCore.Design") == true);
 

@@ -8,3 +8,25 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+# Comment, Doc & TODO Tone
+
+All code comments, doc-comments, markdown docs, and TODO entries in this repo must read like a person
+wrote them, not a model. This applies to every new or edited comment/doc/TODO, in every language
+(C#, TypeScript, Dart, SQL, markdown).
+
+- Plain, short sentences. Say what the code does or why, nothing more.
+- No filler openers ("This function is responsible for...", "Note that...", "It's important to...",
+  "This method serves to...").
+- No restating the obvious (`// increment i`, `// constructor`). A comment earns its place by
+  explaining something the code itself doesn't already say — a gotcha, a non-obvious reason, a
+  workaround, a caller assumption.
+- No em dashes, no bullet-lists-inside-comments, no heading-style comment banners
+  (`// ===== SECTION =====`) unless the surrounding file already uses that convention.
+- TODOs name the actual gap and, where known, why it's not done yet — not a vague "TODO: improve this".
+- Don't add a comment just to prove a change was made ("// updated per review", "// fixed bug here").
+- This applies retroactively too: when a file is touched for any reason, clean up any AI-sounding
+  comments/docs/TODOs you pass over in it, not just the lines you're actively changing.
+  Git history already carries that.
+- When editing a file, match whatever comment style already exists there before applying this rule to
+  new lines — don't rewrite untouched comments just to align tone.

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using GHCAA.Infrastructure.Data;
 using GHCAA.Domain;
 
-// Purpose: Diagnostic script to check Member statuses
+// Reports Member counts by status; force-activates 10 Applied members if none are Active yet.
 public static class DbDiagnostics 
 {
     public static async Task Run(ApplicationDbContext db)

@@ -95,7 +95,7 @@ namespace GHCAA.Tests.Services
             await _context.SaveChangesAsync();
 
             var updateDto = CreateUpdateDto(member);
-            updateDto.ECHistory = new List<ECHistoryDto>(); // EMPTY history essentially removes current role if the logic wipes and replaces.
+            updateDto.ECHistory = new List<ECHistoryDto>(); // Empty history removes the current role when the logic wipes and replaces it.
 
             updateDto.ECHistory.Add(new ECHistoryDto
             {
