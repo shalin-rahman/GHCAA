@@ -7,10 +7,44 @@ reviewed and approved before writing begins. It is not the book itself.
 **Scale.** Four parts, thirteen chapters, front and back matter, eighty-two catalogued diagram and
 chart types, sixteen appendices.
 
+**Page budget.** Chapters 1 to 6 are written and measured; the rest is estimated from this outline at
+the rate those chapters actually print at, which is a little over one page per numbered section once
+figures and tables are counted.
+
+| Part | State | Pages |
+|---|---|---|
+| Front matter | written; grows as the contents grow | 10–14 |
+| Part I and Part II, chapters 1–6 | written, measured on 2 September 2026 | 72 |
+| Part III, chapters 7–11 | estimated from section, figure and table counts | 62–72 |
+| Part IV, chapters 12–13 | estimated | 19–24 |
+| References | written; grows with Part III | 5–8 |
+| Index | not started | 4–8 |
+| **Body and front matter, no appendices** | | **173–201** |
+| Appendices A–P as specified below | not started | 231–357 |
+| **Total as specified** | | **404–558** |
+
+The appendix figure is not a padding estimate. It follows from what the appendices promise against
+counts taken from the repository: 276 endpoints in Appendix F, 49 tables and their DDL in Appendix E,
+898 automated tests in Appendix G, and roughly forty-four remaining use cases in Appendix B. As
+specified, the appendices are longer than the dissertation they support, and the total sits well past
+the three hundred pages the house style in `docs/book/README.md` assumes. That is a decision to take
+deliberately, not to discover at binding: either the appendices print in full and the volume is what
+it is, or the exhaustive ones cite a generated artefact in the repository and print a representative
+extract, which is what Tables 6.2 and 6.3 already do in the body. Until that decision is recorded
+here, treat the appendix list as a superset rather than a commitment.
+
+**Status of the figure and table numbers in this document.** The numbers used in the "Figures and
+tables" list under each chapter below are the *plan*. The book itself numbers in bound order, which
+`docs/book/build/renumber.py` assigns and maintains, so a figure planned here as 6.14 carries whatever
+number its position gives it once written, and a planned figure that ends up in an appendix or is set
+as a table takes no figure number at all. Read this document for what the chapter should cover, and
+the book's own List of Figures for what it contains. Where the two disagree, the book is right.
+
 **Conventions applied throughout the book**
 
 - Front matter numbered in lower-case Roman; the body restarts at Arabic 1.
-- Figures numbered `Figure <chapter>.<n>`, tables `Table <chapter>.<n>`, code listings `Listing <chapter>.<n>`; each of the three carries its own list in the front matter.
+- Figures numbered `Figure <chapter>.<n>` in bound order, tables `Table <chapter>.<n>`, code listings `Listing <chapter>.<n>`; each of the three carries its own list in the front matter, rebuilt from the captions at build time.
+- Every figure is drawn to print on one A4 page at a label size of at least 7pt, which the build measures and enforces; `docs/book/README.md` states how a diagram that does not meet that is fixed.
 - Every figure caption states what the figure shows and the project artefact it was derived from, for example: *"Figure 6.3 — Entity–Relationship model of the 40 mapped entities; derived from `GHCAA.Infrastructure/Data/ApplicationDbContext.cs`."*
 - Citations in IEEE numeric style; every non-obvious claim carries a citation.
 - Code in the body appears as short illustrative extracts of no more than thirty lines, each discussed in the text; complete listings are in Appendix D.
@@ -24,7 +58,7 @@ chart types, sixteen appendices.
 - ii. Declaration of Originality / Authorship
 - iii. Certificate of Approval (Supervisor / Examiner)
 - iv. Acknowledgements
-- v. Abstract — 250–350 words: context, problem, method, artefact, evaluation, finding
+- v. Abstract — 250–350 words: context, problem, method, artefact, evaluation, finding. The written abstract states its own word count, and the build checks the statement against the text
 - vi. Keywords
 - vii. Table of Contents
 - viii. List of Figures
@@ -116,7 +150,8 @@ followed is stated in §2.2.
   - **3.3.6** Governance — Executive Committee terms, Constitution Hub, elections, polls and voting
   - **3.3.7** Administration, Configuration and Site Content
   - **3.3.8** Mobile Application Requirements
-- **3.4** Non-Functional Requirements, classified by ISO/IEC 25010 characteristic — functional suitability, performance efficiency, compatibility, usability, reliability, security, maintainability, portability — cross-referenced to the FURPS+ model
+  - **3.3.9** Job Board — added after the elicitation of §3.1 closed, on a dated request recorded in the tracker; the Source column carries R for requirements of that provenance
+- **3.4** Non-Functional Requirements, classified by ISO/IEC 25010:2011 characteristic — functional suitability, performance efficiency, compatibility, usability, reliability, security, maintainability, portability — cross-referenced to the FURPS+ model. The 2011 edition is named deliberately: 25010:2023 renames usability as interaction capability and portability as flexibility and adds safety, and the written §3.4 states why the identifiers were not reclassified
 - **3.5** Quality-Attribute Scenarios — each non-functional requirement expressed as source, stimulus, artefact, response and response measure
 - **3.6** Use-Case Modelling
 - **3.7** User Stories, Acceptance Criteria and the Definition of Done
@@ -201,7 +236,7 @@ followed is stated in §2.2.
 
 - Figure 5.1 — DFD Level 0 (context)
 - Figure 5.2 — DFD Level 1: Manage Membership, Authenticate, Manage Events, Process Payments, Publish Content, Govern, Administer, with data stores
-- Figures 5.3–5.7 — DFD Level 2 for payment processing, membership approval, authentication and OTP, constitution publication, election administration
+- Figures 5.3–5.5 — DFD Level 2 for payment processing, membership approval and constitution publication. Authentication and OTP, and election administration, were planned here as Level-2 DFDs and are deliberately not drawn that way: in both the property that matters is the ordering of an interaction across roles, not the transformation of data, so they appear as the OTP sequence diagram and the election BPMN diagram instead. §5.2.3 of the written chapter states the reasoning
 - Figure 5.8 — CRC card set
 - Figure 5.9 — Activity diagram: member registration and administrative approval
 - Figure 5.10 — Activity diagram: payment submission and manual verification
@@ -244,7 +279,7 @@ followed is stated in §2.2.
   - **6.5.3** Indexing strategy
   - **6.5.4** Multi-provider portability (PostgreSQL, MySQL, SQLite) and its design cost
   - **6.5.5** Data dictionary
-  - **6.5.6** Seeding and runtime data-synchronisation strategy, and the `EnsureCreated()` constraint that made it necessary
+  - **6.5.6** Schema and reference data at boot: migration bootstrapping, the legacy `EnsureCreated()`-built database that had no migration history, the false-baseline self-heal, and why revisable reference data is synchronised separately from schema
 - **6.6** Interface Design — API resource model, error contract, status-code discipline, versioning
 - **6.7** Security Architecture, summarised here as a design view and detailed in Chapter 9
 - **6.8** User-Interface Design
@@ -284,9 +319,8 @@ followed is stated in §2.2.
 
 - Figure 6.1 — High-level architecture diagram: clients, API, services, stores, external services
 - Figure 6.2 — Layered / clean architecture diagram with inward dependency arrows and the dependency-inversion boundary marked
-- Figure 6.3 — Entity–relationship diagram, full schema (fold-out; also in Appendix H)
-- Figures 6.4–6.7 — ER sub-models: membership, events, finance, governance
-- Figure 6.8 — Design class diagram: domain model, with attributes, operations, visibility and multiplicities
+- Figures 6.3–6.6 — ER sub-models: identity and records, standing and money, events and participation, governance. Written as four diagrams rather than one full-schema fold-out, because one diagram of forty-nine tables cannot be printed at a readable size; the remaining tables are Appendix H
+- Figure 6.7 — Design class diagram: domain model, with attributes, operations, visibility and multiplicities
 - Figure 6.9 — Design class diagram: application interfaces and infrastructure services
 - Figure 6.10 — Design class diagram: client-side services and models
 - Figure 6.11 — Package diagram with permitted dependency directions
@@ -297,11 +331,11 @@ followed is stated in §2.2.
 - Figure 6.16 — Authentication and token-refresh design flow
 - Figure 6.17 — Navigation and route map: public, portal and admin trees with guards
 - Figure 6.18 — Site map and information architecture of the public site
-- Figures 6.19–6.26 — Wireframes and high-fidelity mockups for landing, registration, portal dashboard, payment, admin member list, constitution reader, mobile home, mobile login
+- Wireframes and high-fidelity mockups for landing, registration, portal dashboard, payment, admin member list, constitution reader, mobile home and mobile login. Not in Chapter 6 as written, and not numbered as figures there: the system is built, so a wireframe drawn now would document the result rather than the intent. Annotated screenshots of the delivered screens are Figures 12.1–12.20, and any wireframe retained for the design record belongs in an appendix
 - Figure 6.27 — Design-token derivation diagram: light and dark theme token resolution
 - Figure 6.28 — Mobile screen-flow diagram
 - Figure 6.29 — Architectural trade-off radar chart: the candidate architectures of §6.2 scored across the quality attributes
-- Figure 6.30 — UML profile diagram for the project's stereotypes, where custom stereotypes are used
+- UML profile diagram for the project's stereotypes: omitted, because the project defines no custom stereotypes. The condition "where custom stereotypes are used" is not met, and an empty profile diagram would be padding
 - Table 6.1 — Data dictionary: table, column, type, constraint, description, source
 - Table 6.2 — API endpoint catalogue: method, route, authorisation level, request, response, errors
 - Table 6.3 — Design pattern catalogue: pattern, category, problem and forces, participants in this system, consequences observed, alternative rejected
@@ -490,11 +524,20 @@ followed is stated in §2.2.
 
 ## Chapter 11 — Project Management
 
+This chapter follows Pressman and Maxim's project-management apparatus, which is the framework the
+course material uses and the one an examiner will read it against: the four P's as the framing, then
+metrics, estimation, scheduling and risk. Only the parts that this project actually has evidence for
+are written. Where a technique was not used — and a single unpaid maintainer did not run earned-value
+analysis week by week — the chapter says so and reports what was done instead, rather than
+reconstructing a plan after the fact. The RMMM plan is already in §4.8; §11.8 reports its execution
+rather than restating it.
+
+- **11.0** The Four P's Applied — People, Product, Process, Project, with the single-maintainer case stated plainly against each
 - **11.1** Process Model in Practice and its Deviations from Plan
 - **11.2** Work Breakdown Structure
-- **11.3** Scheduling, Task Network and Critical Path
+- **11.3** Scheduling, Task Network and Critical Path — activity-on-node network by the precedence diagram method, with task duration, float, early and late start and finish, and the critical path identified
 - **11.4** Effort Estimation — function-point count, lines-of-code estimate and COCOMO II applied, compared against actual effort with the variance analysed
-- **11.5** Progress Tracking and Earned Value Analysis — planned value, earned value, actual cost, SPI, CPI
+- **11.5** Progress Tracking and Earned Value Analysis — planned value, earned value, actual cost, SPI, CPI. Reconstructed from the dated work items in `docs/TODO.md` and the commit record, which is the only effort evidence this project has; the reconstruction and its limits are stated as such
 - **11.6** Team Structure and Responsibilities
 - **11.7** Configuration and Change Management in Practice
 - **11.8** Risk Monitoring Record — the RMMM plan of §4.8 as it was executed
@@ -635,18 +678,18 @@ The complete set of diagram and chart types the book contains, and the chapter e
 | 27 | Timing diagram | 5 | Token lifetime, refresh window, session expiry |
 | 28 | High-level architecture | 6 | Clients, API, stores, external services |
 | 29 | Layered / clean architecture | 6 | Dependency rule and inversion boundary |
-| 30 | Entity–relationship diagram | 6 | Full schema plus readable sub-models |
+| 30 | Entity–relationship diagram | 6 | Four readable sub-models; no full-schema plate, which cannot print legibly |
 | 31 | Design class diagram | 6 | Domain, services, client |
 | 32 | Package diagram | 6 | Assemblies and permitted dependencies |
 | 33 | Component diagram | 6 | Provided and required interfaces |
 | 34 | Composite structure diagram | 6 | Parts, ports, connectors |
 | 35 | Object diagram | 6 | Populated runtime snapshot |
-| 36 | Profile diagram | 6 | Custom stereotypes, where used |
+| 36 | Profile diagram | omitted | No custom stereotypes are defined |
 | 37 | Middleware pipeline | 6 | Ordered request path and ordering constraints |
 | 38 | Navigation / route map | 6 | Route trees with guards |
 | 39 | Site map | 6 | Public information architecture |
-| 40 | Wireframes | 6 | Layout intent before styling |
-| 41 | UI mockups | 6 | Final visual design |
+| 40 | Wireframes | appendix, if retained | Layout intent before styling; not in Chapter 6 as written |
+| 41 | UI mockups | 12 | Delivered screens, as annotated screenshots |
 | 42 | Screen-flow diagram | 6 | Mobile navigation |
 | 43 | Design-token derivation | 6 | Theme resolution |
 | 44 | Architecture trade-off radar | 6 | Candidate architectures scored |
@@ -712,7 +755,7 @@ The complete set of diagram and chart types the book contains, and the chapter e
 | Architecture evaluation | Bass, Clements & Kazman, *Software Architecture in Practice* (ATAM, utility trees) |
 | Design patterns | Gamma et al.; Fowler, *Patterns of Enterprise Application Architecture*; Evans, *Domain-Driven Design* |
 | Clean and hexagonal architecture | Martin, *Clean Architecture*; Cockburn, hexagonal architecture |
-| Software engineering process, metrics, estimation and testing technique | Pressman & Maxim, *Software Engineering: A Practitioner's Approach* |
+| Software engineering process, metrics, estimation, scheduling, risk and testing technique | Pressman & Maxim, *Software Engineering: A Practitioner's Approach*, 8th ed., reference [54] of the book. Chapters 24 to 28 of the 7th-edition slide set (project management concepts, process and project metrics, estimation, project scheduling, risk analysis) and a precedence-diagram-method exercise are held locally under `docs/materials/`, which is git-ignored: they are third-party copyrighted teaching material, for reading rather than redistribution, and nothing is quoted from them in the book |
 | Estimation models | Boehm, COCOMO II; IFPUG function-point counting practices |
 | Project management | PMBOK Guide |
 

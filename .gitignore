@@ -403,3 +403,8 @@ build_output/
 # Claude memory is per-machine/session scratch state (canonical store lives outside the repo at
 # ~/.claude/projects/.../memory/) — never check it into git, it only goes stale and diverges.
 .claude/memory/
+
+# Course materials copied in for reference while writing docs/book (Pressman chapters and
+# project-management handouts). Third-party copyrighted PDFs — read them, never redistribute them,
+# and never commit them.
+docs/materials/

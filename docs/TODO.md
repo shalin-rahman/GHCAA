@@ -3370,3 +3370,196 @@ filler openers, `Summary:`/`Purpose:`/`Overview:` headers, banner comments, vagu
 this`), and confirm the removals in 62.48 left no dangling references (`dotnet build`, `vitest`,
 `dart analyze` all clean). Record the file counts here the way 61.4 did, so the sweep is provable
 rather than asserted.
+
+---
+
+# Area 63 — Documentation book: implementation alignment, A4-safe figures, automated PDF
+
+Raised by user 2026-09-01: "I want docs books contents to be aligned with latest implementation, IEEE
+styled, all drawing, diagrams are designed and formatted thus nothing breaks on a4 sized paper print,
+mechanism of latest content to be pdf as described. no contents should look like ai generated, always
+in plain simple words and human tone. applied for current and futures", then "make sure diagrams and
+figures are well fit not overlapped, clearly visible in to a4 page considering position, should not
+break single diagrams/figures into multiple page", and "make contents as the way to be ready to
+deliver always".
+
+The rule this area establishes: `python docs/book/build/build.py --pdf --strict` is the gate. It fails
+on a stale caption, a numbering gap, a figure the body never names, a front-matter list that has
+drifted, a banned-vocabulary hit, a diagram that will not print legibly on A4, and an open placeholder.
+Anything that is not enforced there will drift again.
+
+63.1 [DONE 2026-09-01] **Priority: P2.** Repository figures in the book brought back in line with the
+tree: 260 endpoints to 276, 23 enums to 28, 34 service interfaces to 40 (37 implementations), 352-case
+backend suite to 517 (and the 381-case web suite named), `styles.scss` 3,354 lines to 3,366, 49
+components to 80, "each entity has a Fluent API configuration" to the 37 of 49 that actually do, MoSCoW
+counts to 38/9/7/8 over FR-01 to FR-54, NFR count to 34, and three wrong routes in the endpoint
+catalogue. Counting commands and the date they were taken are recorded in `docs/book/README.md` so the
+next pass is a re-run rather than a re-derivation.
+
+63.2 [DONE 2026-09-01] **Priority: P1.** §6.5.6 and ADR-03 rewritten: the book described
+`EnsureCreated()` as the schema mechanism in force, which stopped being true on 2026-08-27. It now
+describes `MigrationBootstrapper.EnsureMigratedAsync`, the twenty-one migrations, the legacy-database
+baseline, the false-baseline self-heal, and why `ConstitutionSeeder.SyncAsync` is still separate. The
+Chapter 4 risk register entry was re-rated High/High to match what actually happened.
+
+63.3 [DONE 2026-09-01] **Priority: P2.** Every figure and table renumbered into bound order, gaps
+closed (Chapter 5 had five, Chapter 6 twenty-one), and `docs/book/build/renumber.py` added to keep it
+that way: it relabels captions, rewrites every mention, rebuilds the List of Figures and List of
+Tables, and refuses to run while two captions share a label.
+
+63.4 [DONE 2026-09-01] **Priority: P2.** Seven references to figures, tables and sections that do not
+exist removed or redirected to the chapter, and two figures the prose promised actually drawn (design
+class diagram of the domain model, site map of the public site). Forty-five figures and tables that
+were printed without the body ever naming them now have a sentence that names them, which is the IEEE
+requirement and is checked on every build.
+
+63.5 [DONE 2026-09-01] **Priority: P1.** Three diagrams had Mermaid syntax errors and were printing as
+boxes of source: a semicolon cutting a sequence-diagram note in half, an unquoted `/` in a node label,
+and a colon in a quadrant label. Diagrams are now rendered one at a time so one bad diagram costs one
+figure and is reported by caption, instead of dropping every diagram in the book back to source.
+
+63.6 [DONE 2026-09-01] **Priority: P1.** Every diagram is now fitted to one A4 page at view time
+(portrait 174x224mm, landscape 257x148mm), so no figure splits across a page break. Twenty-nine
+diagrams that would have overflowed or printed below 6.5pt were redesigned rather than shrunk: fan-out
+trees turned `LR`, step chains turned `TB`, the ERD split into four sub-models, the CRC card set set as
+a table, the onion diagram nested, the analysis class model stripped of attributes, labels shortened,
+and one genuinely wide figure (high-level architecture) given the landscape page. Verified: 100
+measured artefacts, zero overflows, 83 pages, 82 portrait and 1 landscape.
+
+63.7 [DONE 2026-09-01] **Priority: P2.** `--pdf` added: it serves the built HTML on localhost, drives
+headless Chrome or Edge, refuses to print if any diagram failed to draw, and writes the A4 PDF. No
+manual print dialog, no forgotten setting.
+
+63.8 [TODO] **Priority: P3 | Depends on: nothing.** Re-take the repository figures listed in
+`docs/book/README.md` under "Keeping the numbers true" immediately before any submission, and correct
+the sentences that carry them. They were taken on 2026-09-01 and go stale with every feature.
+
+63.9 [TODO] **Priority: P2 | Depends on: user.** Two placeholders remain open, both needing the
+author: the Acknowledgements wording, and the elicitation interview period, session duration and
+recruitment route (§3.1.2 — the count of ten, the three officer roles and the author's own position
+among them are stated). The build lists both after every run.
+
+63.19 [DONE 2026-09-01] **Priority: P2.** Commercial pricing in §2.9 checked against vendor pages
+rather than left as unsourced bands. Findings: Hivebrite now publishes prices (Core from US$895/month
+billed annually, Flex from US$1,995/month), which contradicted the section's own claim that this
+segment does not publish; Zoho CRM and Paid Memberships Pro publish per-seat and per-year prices;
+Salesforce's ten free licences carry a 501(c)(3)-or-equivalent condition this Association may not
+meet, so its band is now "low if eligible"; Almabase and Anthology publish nothing, and the US$8,000
+figure that circulates for Almabase is marked as secondary reporting and not relied on. Table 2.2's
+C3 row now reports whether the vendor publishes as well as the band. References [69] to [73], all with
+access dates.
+
+63.20 [DONE 2026-09-01] **Priority: P2.** The five dagger-marked references now carry access dates,
+and two standards were found to have been revised since the work was done: ISO/IEC 25010:2011 by
+25010:2023 [74] (usability becomes interaction capability, portability becomes flexibility, safety
+added) and OWASP ASVS 4.0.3 by 5.0.0 [75], with OWASP Top Ten 2021 by the 2025 edition [76]. Each is
+cited by the edition the work was carried out against, with the successor named and the consequence
+stated in §3.4 and §4.5. The NFR taxonomy was NOT reclassified: the identifiers run through the whole
+book and the argument does not turn on the revision. Do not "modernise" these citations without
+redoing the classification.
+
+63.13 [DONE 2026-09-01] **Priority: P1.** Ethics and participants written from what the author
+supplied: no ethics committee reviewed the study, the Association gave verbal permission with no
+reference number and no recorded date, and consent from both interview participants and the members
+whose live records the system holds was verbal and undocumented. §3.1.3 states the three consequences
+that follow rather than presenting the position as equivalent to institutional review, and the
+front-matter ethics statement was corrected — it had claimed a participant information sheet and
+signed consent form that do not exist. Participants are counted and described by role but not named:
+they are identifiable members of a small association who agreed verbally.
+
+63.11 [DONE 2026-09-01] **Priority: P3.** The placeholder check only looked at the first two characters
+of a paragraph, so an inline `*[` inside a sentence or a table cell was never reported: the submission
+date and FR-54's source had both been sitting open unnoticed. It now matches anywhere in a line
+outside a code fence, which is why the open count went from five to eight without anything new being
+added.
+
+63.10 [TODO] **Priority: P3 | Depends on: 63.6.** When Chapters 7-13 are written, every new figure
+goes through the same gate: draw it, run `--audit`, fix the shape rather than marking `{landscape}`,
+then `renumber.py --apply`. The fix order is in `docs/book/README.md` under "Fitting A4". Do not add a
+figure to a chapter without a sentence in the body that names it, or the build will fail.
+
+63.12 [DONE 2026-09-01] **Priority: P3.** FR-54's source attribution closed from the repository instead
+of being left to the author: its provenance is the dated request at `docs/TODO.md` Area 40 ("raised by
+user 2026-08-26"), which is also FR-53's origin. Both now carry a new Source code R, defined in §3.3 as
+a stakeholder request recorded in the tracker after the elicitation of §3.1 closed, which is a weaker
+record than an interview and is marked as such rather than dressed up as one.
+
+63.14 [DONE 2026-09-01] **Priority: P1.** The PDF had no page numbers at all. Chrome's
+`--print-to-pdf` switch cannot add a folio and silently drops background graphics, and Chrome still
+does not implement CSS margin boxes, so `docs/book/build/devtools.py` now drives the print over the
+DevTools protocol instead (a stdlib WebSocket client) with `printBackground`, `preferCSSPageSize` and
+a footer template. Every page now carries "N of M". No running head: Chrome applies one header
+template to every page, so it cannot carry a chapter name and a constant one would print across the
+title page.
+
+63.15 [DONE 2026-09-01] **Priority: P1.** The Table of Contents was a one-line stub reading "generated
+at typesetting". It is now generated from the headings by `renumber.py`, with every part, chapter and
+numbered section.
+
+63.16 [DONE 2026-09-01] **Priority: P2.** The Page columns of the contents, List of Figures and List of
+Tables were empty. `docs/book/build/folios.py` reads the printed PDF back, finds the page each heading
+and caption landed on, writes the folios into the front matter and reprints, then verifies that
+nothing moved. 159 of 159 rows filled and independently re-checked. This is the one optional
+dependency in the build (`pypdf` or `PyMuPDF`): without either, the book still builds and the report
+says the columns were left empty.
+
+63.17 [DONE 2026-09-01] **Priority: P2.** Layout bug found while chasing a wrong folio: the print
+stylesheet's `h1:first-of-type { break-before: avoid }` was intended for the document title but in the
+flow it matched the PART I heading, so Part I had no title page and ran on from the front matter.
+Removed; the title page's own rule already covers the intended case.
+
+63.18 [TODO] **Priority: P3 | Depends on: 63.14.** Front matter is numbered in Arabic with the body,
+not lower-case Roman as `DOCUMENTATION_BOOK_OUTLINE.md` specifies, and the title page carries a folio.
+Chrome's footer template is one template for every page, so neither can be varied. Closing this needs
+two prints (front matter and body, each with its own template) merged into one file, which needs a PDF
+library beyond the standard library. Worth doing only if a supervisor asks for it.
+
+63.21 [DONE 2026-09-01] **Priority: P3.** `docs/materials/` added to `.gitignore`. It holds Pressman
+7th-edition slide sets (Ch. 24 project management concepts, Ch. 25-26 process and project metrics and
+estimation, Ch. 27 project scheduling, Ch. 28 risk analysis) and a precedence-diagram-method exercise,
+copied in for reference while writing the book. Third-party copyrighted teaching material: read it,
+never commit it, never quote it in the book. Cite Pressman and Maxim 8th ed., which is reference [54].
+
+63.22 [DONE 2026-09-01] **Priority: P3.** Pressman alignment applied where the written chapters
+already use his apparatus rather than retrofitted everywhere: §4.8 now cites [54] for the RMMM
+structure it was already following, and the outline's Chapter 11 gains the four P's as its framing,
+names the precedence diagram method for §11.3, and records that earned value in §11.5 can only be
+reconstructed from the dated work items and the commit record. The outline also states that a
+technique the project did not use is reported as not used, not reconstructed to look complete.
+
+63.23 [DONE 2026-09-01] **Priority: P2.** All author placeholders closed. Acknowledgements written
+from the three officers the author named (President, Member Secretary, Law Secretary), by office
+rather than by name for the reason §3.1.3 gives. §3.1.2 now states thirty-to-forty-minute sessions and
+direct member-to-member recruitment, with the selection bias that carries, and records that the period
+was not logged rather than reconstructing a date range from memory.
+`build.py --pdf --strict --no-placeholders` passes.
+
+63.24 [DONE 2026-09-01] **Priority: P3.** The submission gate was conflating two conditions: open
+placeholders and references not yet cited. `--no-placeholders` now covers the first, and a new
+`--final` covers both. The second cannot pass until Part III and IV exist, so folding it into the
+first made the gate unreachable.
+
+63.25 [DONE 2026-09-02] **Priority: P2.** Page budget measured and added to
+`docs/DOCUMENTATION_BOOK_OUTLINE.md`, which had a "Scale" line with no page figure at all. Chapters 1
+to 6 print in 72 pages; chapters 7 to 13 estimate at 82 to 99 from their section, figure and table
+counts at the rate the written chapters actually print. Body plus front matter lands at 173 to 201
+pages. The appendices as specified come to 231 to 357, which follows from what they promise against
+real counts: 276 endpoints in Appendix F, 49 tables plus DDL in Appendix E, 898 tests in Appendix G,
+about forty-four remaining use cases in Appendix B. Total as specified: 404 to 558 pages, against the
+three hundred the house style assumes.
+
+63.26 [TODO] **Priority: P1 | Depends on: user.** Decide the appendix policy, because as specified the
+appendices are longer than the dissertation. Two options recorded in the outline: print them in full
+and accept the volume, or have the exhaustive ones (E data dictionary, F API reference, G test suite,
+B use cases) print a representative extract and cite a generated artefact in the repository, which is
+what Tables 6.2 and 6.3 already do in the body. Needs the institution's page limit, which no coding
+session can find out. Until it is decided the appendix list is a superset, not a commitment.
+
+63.27 [DONE 2026-09-02] **Priority: P2.** Outline drift against the written book corrected: §6.5.6 no
+longer describes `EnsureCreated()` as the constraint in force; §3.3.9 Job Board added with its R
+provenance; §3.4 names the 25010:2011 edition and why it was not reclassified; Chapter 5's figure list
+records that the authentication and election Level-2 DFDs are deliberately drawn as a sequence diagram
+and a BPMN diagram instead; Chapter 6's list drops the wireframes and mockups (the system is built, so
+Figures 12.1-12.20 screenshots carry that evidence) and the UML profile diagram (no custom stereotypes
+exist); the diagram inventory rows for the ERD, wireframes, mockups and profile diagram now match.
+The abstract was 363 words against the outline's own 250-350 range and is now 349.

@@ -68,6 +68,10 @@ A caution the reader is entitled to: these counts describe a search conducted by
 bounded period, and the review is best read as an argued positioning of the work rather than as an
 exhaustive account of the field.
 
+Figure 2.2 groups the sources that survived selection into the five bodies of literature the rest of
+this chapter works through, with the citation numbers carried by each, so that the sections which
+follow can be read against the shape of the whole.
+
 ## 2.3 Alumni Relations and Engagement: the Institutional Literature
 
 The institutional literature on alumni relations is dominated by the advancement question, meaning
@@ -257,7 +261,10 @@ appeal for a single practitioner is that it is a checklist over structure rather
 imagination.
 
 For verification requirements the project uses the OWASP Application Security Verification Standard
-as its requirement catalogue and the OWASP Top Ten as a coverage cross-check [7], [25]. ASVS is used
+as its requirement catalogue and the OWASP Top Ten as a coverage cross-check [7], [25]. Both have
+since been revised, ASVS to version 5.0.0 in May 2025 [75] and the Top Ten to its 2025 edition [76];
+the work reported here was carried out against the editions cited, and §4.5 states why a conformance
+claim is not carried across a revision. ASVS is used
 at level 2, on the grounds that the system holds identity documents and financial evidence but is
 not itself a payment processor. Section 9.4 gives the level-2 control mapping and, more usefully,
 records the requirements the project does not meet.
@@ -280,12 +287,32 @@ claim it cannot support.
 
 ## 2.9 Survey of Existing Systems and Products
 
-A note on evidence before the survey. Commercial alumni platforms in this segment do not publish
-prices; they quote. The figures in Table 2.2 for those products are therefore given as bands with
-their basis stated, and where a band rests on secondary reporting rather than a vendor page it is
-marked. *[Verification note: the pricing bands for the commercial products in Table 2.2 should be
-re-checked against current vendor quotations before final submission, and any band that cannot be
-sourced should be reported as unavailable rather than estimated.]*
+A note on evidence before the survey, because cost is one of the two criteria that decide the
+outcome in §2.10 and it would be easy to assert rather than check. The prices below were read from
+the vendors' own pages on 1 September 2026. They divide into three kinds, and the C3 row of Table 2.2
+reports the kind as well as the band.
+
+Published, so quotable. Hivebrite lists a Core plan from US$895 per month billed annually and a Flex
+plan from US$1,995 per month, with its two upper tiers by quotation [69]; the entry plan is therefore
+of the order of US$10,700 a year before any commission. Zoho CRM lists US$14 per user per month on
+annual billing at its Standard tier, rising to US$52 at Ultimate [71]. Paid Memberships Pro lists a
+free tier and paid tiers at US$499, US$999 and US$2,999 a year [73]. CiviCRM's licence cost is zero,
+which is a property of its licence rather than a price.
+
+Published as a donation, with an eligibility condition this Association may not meet. Salesforce's
+Power of Us programme grants ten free Enterprise Edition licences to eligible non-profits, where
+eligibility requires 501(c)(3) status or a documented local equivalent [72]. Whether a registered
+alumni association in Bangladesh qualifies is not established here, and the C3 band for Salesforce is
+read as "low if eligible" rather than as low.
+
+Not published at all. Almabase and Anthology's Encompass quote rather than publish; no plan tiers or
+figures appear on their own pages [70]. Secondary listings circulate a figure of roughly US$8,000 a
+year for Almabase, which is recorded here as secondary reporting and is not relied on. Where a price
+could not be sourced from the vendor, the band in Table 2.2 says so instead of estimating.
+
+The argument of §2.11 does not turn on the exact figure. It turns on the comparison between the
+Association's annual income and the cheapest published entry price in the dedicated-platform class,
+and Hivebrite's own page settles that comparison without a quotation being needed.
 
 ### 2.9.1 Commercial alumni platforms
 
@@ -293,8 +320,8 @@ Dedicated alumni engagement platforms, of which Hivebrite, Almabase, Graduway an
 representative, and institutional advancement suites such as Anthology's Encompass, are the closest
 functional match to the requirement. They provide directories, event management, giving campaigns,
 email, mentoring and mobile access, generally at a standard well above what this project achieves in
-those areas. Three properties make them unsuitable here. They are sold on annual subscription in a
-band that exceeds the Association's entire annual income; they assume a payment gateway and a
+those areas. Three properties make them unsuitable here. They are sold on annual subscription at a price which, where it is
+published at all, exceeds the Association's entire annual income; they assume a payment gateway and a
 merchant relationship for the giving module, which the Association cannot obtain; and their data
 model is the institutional advancement model, with constituents, gift records and campaigns, in
 which a five-tier constitutional membership with different voting rights, a fifteen-position
@@ -333,7 +360,9 @@ this project in the first place applies equally to whoever holds the administrat
 ## 2.10 Comparative Analysis and Evaluation Criteria
 
 The comparison in Table 2.2 uses eight criteria, each derived from a requirement or constraint
-established in Chapter 1 rather than chosen to favour the outcome.
+established in Chapter 1 rather than chosen to favour the outcome. Figure 2.4 plots the surveyed
+products on the two criteria that decide the outcome between them, governance depth against annual
+operating cost, with this platform's position marked.
 
 - **C1 Governance depth.** Are constitutional membership tiers with differentiated rights,
   fixed-term officer positions, a versioned governing instrument and amendment voting representable
@@ -368,6 +397,10 @@ establishes clearly what software must not claim about a ballot, and rather less
 usefully do around one (§2.7). The products either cost more than the Association earns, or assume a
 payment gateway it cannot obtain, or represent constitutional rules as configuration that cannot be
 audited against the instrument (§2.9).
+
+Figure 2.3 draws the manual practice that gap sits against, abstracted from the treasurer's ledger
+pages and the paper application forms described in §3.1.1, so that the claims made about what the
+platform replaces can be checked against a stated process rather than an impression of one.
 
 The gap this work addresses is therefore the conjunction: an alumni platform in which constitutional
 governance rules are first-class, traceable and testable; in which manual, evidence-based payment is
@@ -416,8 +449,8 @@ flowchart TB
 ### Figure 2.2 — Concept map of the reviewed literature
 
 ```mermaid
-flowchart TB
-    ROOT[Reviewed literature]
+flowchart LR
+    ROOT[Reviewed<br/>literature]
     ROOT --> D1[Alumni and membership domain]
     ROOT --> D2[Architecture and sustainability]
     ROOT --> D3[Governance and voting]
@@ -510,7 +543,7 @@ Legend: ● full, ◐ partial or by configuration, ○ absent.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | C1 Governance depth: constitutional tiers, officer terms, versioned instrument, amendment vote | ● | ○ | ○ | ◐ | ◐ | ○ | ◐ | ○ |
 | C2 Manual payment with proof and officer verification as primary path | ● | ○ | ○ | ◐ | ◐ | ◐ | ◐ | ○ |
-| C3 Annual recurring cost at this scale | very low | high | high | very high | low to moderate | moderate | low | low |
+| C3 Annual recurring cost at this scale, and whether the vendor publishes it | very low, self-hosted | published, from ~US$10.7k/yr [69] | not published; quoted [70] | not published; quoted | low if eligible for the donation [72] | published, per seat [71] | zero licence cost | published, free to US$2,999/yr [73] |
 | C4 Single-maintainer feasibility | ● | ◐ | ◐ | ○ | ◐ | ◐ | ◐ | ◐ |
 | C5 Data sovereignty and clean exit | ● | ○ | ○ | ○ | ◐ | ◐ | ● | ● |
 | C6 Mobile fitness on mid-range handsets over mobile data | ● | ● | ● | ◐ | ◐ | ● | ◐ | ◐ |

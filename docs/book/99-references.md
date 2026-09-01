@@ -6,9 +6,9 @@ therefore the running bibliography and includes entries first cited after Part I
 cited by designation and year of the edition consulted. Where an online source is cited, the access
 date is given.
 
-*[Note for the author: entries marked with a dagger (†) require a final check of edition, year, page
-range or DOI against the copy actually consulted before submission. Nothing in the text depends on a
-page number that is not present here.]*
+Online sources carry the date they were accessed. Where a standard cited here has since been
+revised, the entry names the superseding edition and §3.4 or §4.5 states which edition the work was
+carried out against; no conformance claim is transferred across editions.
 
 [1] R. C. Martin, *Clean Architecture: A Craftsman's Guide to Software Structure and Design*.
 Boston, MA, USA: Prentice Hall, 2017.
@@ -27,11 +27,14 @@ methodology for information systems research," *Journal of Management Informatio
 no. 3, pp. 45–77, 2007.
 
 [6] *Systems and Software Engineering — Systems and Software Quality Requirements and Evaluation
-(SQuaRE) — System and Software Quality Models*, ISO/IEC 25010:2011.
+(SQuaRE) — System and Software Quality Models*, ISO/IEC 25010:2011. Superseded by ISO/IEC
+25010:2023 [74]; the 2011 edition is the one this dissertation's requirement classification was built
+against, as §3.4 states.
 
 [7] OWASP Foundation, *OWASP Application Security Verification Standard*, version 4.0.3, 2021.
-[Online]. Available: https://owasp.org/www-project-application-security-verification-standard/
-†
+[Online]. Available: https://owasp.org/www-project-application-security-verification-standard/.
+Accessed: 1 Sep. 2026. This is the edition the security work was carried out against; superseded by
+version 5.0.0 [75].
 
 [8] J. Monks, "Patterns of giving to one's alma mater among young graduates from selective
 institutions," *Economics of Education Review*, vol. 22, no. 2, pp. 121–130, 2003.
@@ -52,13 +55,13 @@ reviews," *BMJ*, vol. 372, art. n71, 2021.
 USA: Addison-Wesley, 2021.
 
 [14] A. Cockburn, "Hexagonal architecture," 2005. [Online]. Available:
-https://alistair.cockburn.us/hexagonal-architecture/ †
+https://alistair.cockburn.us/hexagonal-architecture/. Accessed: 1 Sep. 2026.
 
 [15] J. Palermo, "The onion architecture," 2008. [Online]. Available:
-https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/ †
+https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/. Accessed: 1 Sep. 2026.
 
 [16] M. Fowler, "MonolithFirst," 2015. [Online]. Available:
-https://martinfowler.com/bliki/MonolithFirst.html †
+https://martinfowler.com/bliki/MonolithFirst.html. Accessed: 1 Sep. 2026.
 
 [17] S. Newman, *Building Microservices: Designing Fine-Grained Systems*, 2nd ed. Sebastopol, CA,
 USA: O'Reilly Media, 2021.
@@ -82,7 +85,8 @@ Englewood Cliffs, NJ, USA: Prentice Hall, 1992.
 [24] *Web Content Accessibility Guidelines (WCAG) 2.1*, W3C Recommendation, 5 June 2018. [Online].
 Available: https://www.w3.org/TR/WCAG21/
 
-[25] OWASP Foundation, "OWASP Top Ten 2021." [Online]. Available: https://owasp.org/Top10/ †
+[25] OWASP Foundation, "OWASP Top Ten 2021." [Online]. Available: https://owasp.org/Top10/.
+Accessed: 1 Sep. 2026. Superseded by the 2025 edition [76].
 
 [26] A. Shostack, *Threat Modeling: Designing for Security*. Indianapolis, IN, USA: Wiley, 2014.
 
@@ -203,6 +207,30 @@ live digital-era governance," *Journal of Public Administration Research and The
 
 [68] D. A. Norman, *The Design of Everyday Things*, revised and expanded ed. New York, NY, USA:
 Basic Books, 2013.
+
+[69] Hivebrite, "Hivebrite plans." [Online]. Available: https://hivebrite.io/pricing/. Accessed:
+1 Sep. 2026.
+
+[70] Almabase, "Pricing." Quoted rather than published; no plan tiers or figures are given on the
+vendor's own pages. [Online]. Available: https://www.almabase.com/. Accessed: 1 Sep. 2026.
+
+[71] Zoho Corporation, "Zoho CRM pricing." [Online]. Available:
+https://www.zoho.com/crm/pricing/. Accessed: 1 Sep. 2026.
+
+[72] Salesforce, "Power of Us program." [Online]. Available:
+https://www.salesforce.com/company/power-of-us/. Accessed: 1 Sep. 2026.
+
+[73] Paid Memberships Pro, "Pricing and plans." [Online]. Available:
+https://www.paidmembershipspro.com/pricing/. Accessed: 1 Sep. 2026.
+
+[74] *Systems and Software Engineering — Systems and Software Quality Requirements and Evaluation
+(SQuaRE) — Product Quality Model*, ISO/IEC 25010:2023.
+
+[75] OWASP Foundation, *OWASP Application Security Verification Standard*, version 5.0.0, 2025.
+[Online]. Available: https://asvs.dev/. Accessed: 1 Sep. 2026.
+
+[76] OWASP Foundation, "OWASP Top 10:2025." [Online]. Available: https://owasp.org/Top10/2025/.
+Accessed: 1 Sep. 2026.
 
 ---
 

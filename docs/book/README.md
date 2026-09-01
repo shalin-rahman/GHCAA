@@ -5,6 +5,10 @@ into the sources: IEEE conventions (caption above tables, caption below figures,
 figure and table numbering labels) are applied at build time by `build/build.py`, so the Markdown
 stays readable and diffable.
 
+The rule this directory is maintained under is that **the book is deliverable at every commit**. A
+build either reports `status : clean, ready to deliver` or names what is wrong. Nothing is left in a
+state that only the author knows how to finish.
+
 ## Contents
 
 | File | Part |
@@ -19,66 +23,177 @@ stays readable and diffable.
 | `99-references.md` | IEEE numbered bibliography and the Association's governing documents |
 
 Chapters 7-13 (Part III construction/validation and Part IV evaluation/closure) are not yet written;
-see `docs/DOCUMENTATION_BOOK_OUTLINE.md` for their planned structure.
+see `docs/DOCUMENTATION_BOOK_OUTLINE.md` for their planned structure. Nothing in the written chapters
+points at a figure, table or section number inside an unwritten chapter: forward pointers are to the
+chapter, never to a numbered artefact that does not exist yet.
 
 The bound order is fixed by the `CHAPTERS` list at the top of `build/build.py`. Adding a chapter means
 adding its filename there; the builder does not glob the directory, so a stray draft cannot wander
 into the book by accident.
 
-## Building
+## The three tools
 
-Requires Python 3 only — no pandoc, no Node packages, no `node_modules`.
+| Command | What it does |
+|---|---|
+| `python docs/book/build/build.py` | builds the HTML and runs every source check |
+| `python docs/book/build/build.py --pdf` | the same, then measures A4 fit, prints the PDF with page numbers, and fills the Page columns from it |
+| `python docs/book/build/renumber.py --apply` | renumbers figures and tables into bound order and rebuilds the contents and the front-matter lists |
+
+Python 3 only — no pandoc, no Node packages, no `node_modules`. The PDF step additionally needs
+Chrome or Edge, which it finds by itself (override with the `BOOK_BROWSER` environment variable).
+
+One optional package: `pypdf` (or `PyMuPDF`) lets the build read page numbers back out of the printed
+PDF and fill the Page columns of the contents and the two lists. Without it everything else still
+works and the report says the columns were left empty — it never guesses a page number.
+
+### What the PDF carries
+
+- a folio on every page, "N of M", printed over the DevTools protocol because Chrome's
+  `--print-to-pdf` switch cannot add one and quietly drops background graphics
+- background graphics, so table rules and shaded cells print as designed
+- one A4 landscape page for the figure that needs it, the rest portrait
+- page numbers in the Table of Contents, List of Figures and List of Tables, read back from the
+  printed copy and re-verified after the reprint
+
+Two deviations from the outline's front-matter convention, both forced by the print engine and both
+recorded rather than hidden: the front matter is numbered in Arabic with the body rather than in
+lower-case Roman, and the title page carries a folio. Chrome applies one footer template to every
+page, so neither can vary. There is no running head for the same reason — a constant one would print
+the title across the title page. TODO 63.18 records what closing this would take.
+
+## Building
 
 ```
 python docs/book/build/build.py                    # single-column manuscript (default)
 python docs/book/build/build.py --two-column       # IEEE Transactions two-column layout
 python docs/book/build/build.py -o path/out.html   # choose the output path
+python docs/book/build/build.py --audit            # measure A4 fit, do not print
+python docs/book/build/build.py --pdf              # HTML, A4 audit, then the PDF
+python docs/book/build/build.py --pdf --strict     # the same, non-zero exit on any defect
+python docs/book/build/build.py --pdf --strict --no-placeholders   # the submission gate
 ```
 
-Output defaults to `docs/book/GHCAA-Documentation-Book.html`, a single self-contained file with the
-stylesheet embedded.
+Output defaults to `docs/book/GHCAA-Documentation-Book.html` (self-contained, stylesheet embedded)
+and `docs/book/GHCAA-Documentation-Book.pdf`.
 
-The builder prints a short report after each run:
+A clean run reports:
 
 ```
   layout    : single-column
-  figures   : 18 captioned, 18 diagrams
-  tables    : 5 captioned
-  captions with no artefact beneath them ...: Table 3.1, Table 3.2, Table 3.3, Table 3.5, Table 3.6
+  figures   : 56 captioned, 56 diagrams
+  tables    : 19 captioned
+  captions with no artefact beneath them: Table 3.1, Table 3.2, Table 3.3, Table 3.5, Table 3.6
+  placeholders still open: 5
+  measured  : 101 figures and tables laid out
+  pdf       : ...GHCAA-Documentation-Book.pdf (2.4 MB, 83 pages)
+  status    : clean, ready to deliver
 ```
 
-That last line is a sanity check, not an error. A caption is expected to sit directly above a table or
-directly below a diagram; if it does not, the builder says so. Tables 3.1, 3.2, 3.3, 3.5 and 3.6 are
-deliberate pointer entries — the List of Tables names them, but the material itself is set as prose or
-lives in the section the entry points to. Any *new* name appearing on that line means a caption has
-drifted away from its artefact and should be fixed in the Markdown.
+The orphan-caption line is a sanity check, not an error. Tables 3.1, 3.2, 3.3, 3.5 and 3.6 are
+deliberate pointer entries: the List of Tables names them, but the material is set as prose or lives
+in the section the entry points to. Any *other* name on that line is a caption that has drifted away
+from its artefact, and the build reports it as a defect. The allowed set lives in
+`build/lint.py:ALLOWED_ORPHANS`.
 
-## Printing to PDF
+`--strict` is the gate to run after every edit: it fails on any lint finding, any drifted caption
+and any figure that will not print on A4. Open placeholders and not-yet-cited references are always
+listed but do not fail it, because a chapter in progress legitimately carries both. Add
+`--no-placeholders` for the copy being handed in, which must carry neither.
 
-Open the generated HTML in Chrome or Edge and print. The settings that matter:
+## Making the PDF
 
-- Destination: **Save as PDF**
-- Paper size: **A4**
-- Margins: **Default** (the stylesheet sets its own via `@page`)
-- Scale: **100%** — do not use "Fit to page width"
-- **Background graphics: on** (table shading and the placeholder highlights depend on it)
-- **Headers and footers: off** — the browser's own header would collide with the page margins
+`--pdf` does what the manual route did, without the manual steps. It serves the built HTML from
+`http://127.0.0.1` on a spare port, drives headless Chrome or Edge over it, and prints A4 with the
+browser's own headers and footers off. The local server exists because Chrome refuses ES-module
+imports from `file://` and Mermaid is an ES module.
 
-Wait for the diagrams to finish drawing before printing. When they are done the document root carries
-`data-diagrams="rendered"`; if the renderer could not run, it carries `data-diagrams="source"` and
-every diagram is replaced by its source in a dashed box, which is still legible but is not what should
-be submitted.
+Before printing, the same browser measures the page and refuses to print if the diagrams did not all
+draw, naming the ones that failed. That check exists because a Mermaid syntax error used to leave a
+figure printed as a box of source, which is easy to miss in an eighty-page document.
 
-Firefox and Safari will produce a readable document but honour `break-inside` and `column-span` less
-faithfully, so figures and wide tables may split across pages. Use Chrome or Edge for the final copy.
+To print by hand instead — open the HTML in Chrome or Edge and use Save as PDF, paper size A4,
+margins Default, scale 100%, headers and footers off. Wait for the diagrams to draw first: the body
+carries `data-diagrams="rendered"` when they are done, `partial` if some failed, `source` if Mermaid
+could not load at all. Firefox and Safari honour `break-inside` and `column-span` less faithfully, so
+figures and wide tables may split across pages; use Chrome or Edge for a copy that will be submitted.
+
+## Fitting A4
+
+Every diagram is scaled at view time to fit inside one page, which is why no figure splits across a
+page break. The fit is computed in JavaScript rather than left to CSS because the landscape page is
+wider than anything the screen preview can show, so its scale has to be calculated:
+
+- portrait figures fit 174 x 224 mm (the A4 text block, less room for the caption)
+- landscape figures fit 257 x 148 mm
+- a diagram smaller than its box is enlarged, but never by more than half again
+
+`--audit` then reports any figure or table that still does not work on paper, in three kinds:
+
+- **too wide** — it runs past the text block, so the edge would be cut
+- **too tall** — it cannot fit a page and is not marked breakable
+- **labels too small** — it fits, but only by shrinking its labels below 7pt
+
+The last one is the common one, and marking it `{landscape}` is usually the wrong fix. A diagram is
+too small because its shape does not match the page: a fan-out tree drawn `TB` grows sideways, a
+process chain drawn `LR` grows sideways, and either way the page has to shrink it to fit the width
+while most of the page height goes unused. The fixes, in the order to try them:
+
+1. **Turn it.** A fan-out tree wants `flowchart LR`; a step chain or pipeline wants `flowchart TB`.
+   The audit prints the diagram's wide-to-tall ratio against the ~0.78 the portrait page wants and
+   the ~1.74 the landscape page wants.
+2. **Shorten the labels.** Diagram width is set by the longest label, not by the node count. Break
+   labels with `<br/>` and cut words that carry nothing.
+3. **Stack what sits side by side.** `direction TB` inside a subgraph, or invisible links (`~~~`)
+   between nodes, turn a row into a column. Mermaid ignores `direction` on a subgraph that has edges
+   crossing its boundary, so check the result rather than assuming.
+4. **Split it.** Four entity-relationship sub-models print better than one diagram of forty-nine
+   tables. Splitting is not a compromise; a diagram nobody can read conveys nothing.
+5. **Set it as a table.** Some artefacts are tabular in the first place — the CRC card set is now
+   Table 5.2 for exactly this reason.
+6. **Only then, `{landscape}`.** It buys 257mm of width and costs a page of its own. It is the right
+   answer for a genuinely wide diagram, such as the high-level architecture of Figure 6.1.
+
+After a figure is added, dropped, moved or turned into a table, run
+`python docs/book/build/renumber.py --apply`. It relabels captions in bound order, rewrites every
+mention in the body, and rebuilds the List of Figures and List of Tables from the captions, so the
+front matter cannot drift from the book. It refuses to run while two captions share a label, because
+a mention of that label would be ambiguous.
+
+## What the build checks
+
+`build/lint.py` runs on every build. All of it reports a file and a line.
+
+| Check | What fails it |
+|---|---|
+| tone | a word or opener the house style rules out (the list is `BANNED` in `lint.py`) |
+| numbering | a figure or table number used twice, or a chapter's numbering with a gap in it |
+| forward references | an artefact printed before the body has named it, which IEEE does not allow |
+| front-matter lists | a figure or table missing from the List of Figures or List of Tables |
+| abstract length | the stated word count no longer matching the abstract |
+| citations | a `[n]` marker with no entry in `99-references.md` |
+| uncited references | an entry nothing cites yet; expected while Part III and IV are unwritten, a defect for a finished copy |
+| placeholders | every `*[` paragraph still open, listed with its line |
+| drifted captions | a caption with no artefact under it that is not in the allowed set |
+
+The reference list is exempt from the tone check: it is titles and journal names, not the author's
+prose. Headings, tables and code fences are exempt too.
 
 ## Diagrams
 
-Diagrams are Mermaid, written as fenced ` ```mermaid ` blocks in the Markdown. The builder emits them
-as `<pre class="mermaid">` and loads Mermaid 11 as an ES module from jsDelivr at view time. This keeps
-the repository free of a rendering toolchain, at the cost of needing a network connection the first
-time a build is opened. If the module fails to load, the page falls back to showing the diagram source
-rather than a blank space.
+Diagrams are Mermaid, written as fenced ` ```mermaid ` blocks. The builder emits them as
+`<pre class="mermaid">` and loads Mermaid 11 as an ES module from jsDelivr at view time, so the
+repository carries no rendering toolchain and needs a network connection the first time a build is
+opened.
+
+Each diagram is rendered on its own rather than in one batch call, so a syntax error in one costs one
+figure and is reported by caption, instead of silently dropping every diagram in the book back to
+source. Diagram type settings (font size, spacing, ER layout direction) are set once in `build.py`
+so every figure comes out at one scale.
+
+Two Mermaid traps worth knowing, both of which have already cost a figure here:
+
+- a semicolon ends a statement, so a note or label containing one is cut in half
+- an unquoted `/` or `:` in a label is read as syntax; quote any label with punctuation in it
 
 ## Markdown conventions the builder understands
 
@@ -86,14 +201,13 @@ rather than a blank space.
 - A heading of the form `### Figure 3.1 — Caption text` or `### Table 3.1 — Caption text` becomes a
   caption. The builder attaches it to the Mermaid block or table that follows, placing it below a
   figure and above a table, and will absorb one intervening lead-in paragraph as a note.
-- A figure caption ending `{landscape}` (e.g. `### Figure 6.4 — Design class diagram {landscape}`)
-  is set on its own A4 landscape page instead of being shrunk to the 174mm portrait width. Every
-  diagram scales to fit its column by default (`max-width: 100%` on the rendered SVG), which is
-  enough for most figures; reserve `{landscape}` for the few that stay illegible even after that —
-  the ERD, the design class diagram, the dependency structure matrix — consistent with Appendix H's
-  "full-page fold-out" treatment for those three. The marker is stripped from the printed caption.
+- A figure caption ending `{landscape}` (e.g. `### Figure 6.1 — High-level architecture {landscape}`)
+  is set on its own A4 landscape page. See "Fitting A4" above for when that is the right call.
 - A paragraph beginning `*[` is treated as an author placeholder and rendered highlighted, so that
-  nothing provisional can reach a printed copy unnoticed.
+  nothing provisional can reach a printed copy unnoticed. `*[` anywhere else in a line, including
+  inside a table cell, is reported by the build even though it is not highlighted.
+- `{{build-month-year}}` and `{{build-date}}` are filled in at build time, so the title page carries
+  the date the copy was printed rather than one nobody remembered to update.
 - Tables longer than fourteen rows are allowed to break across pages; shorter ones are kept whole.
 - Blockquotes are used for user stories and acceptance criteria.
 
@@ -106,41 +220,61 @@ keeps a 300-page document reading as one document.
 book-wide list in `99-references.md` — numbers are assigned in order of first appearance across the
 whole book and are never renumbered to suit one chapter, so append new entries at the end. Standards
 cited by designation and year of the edition consulted. Figures numbered per chapter with the caption
-below; tables numbered per chapter with the caption above; every figure and table referred to by
-number in the body before it appears, and listed in the front matter. Cross-references by section
-number (§9.4), never by page or by "the section above".
+below; tables numbered per chapter with the caption above; every figure and table named in the body
+before it appears, and listed in the front matter. Both of those last two are enforced by the build,
+not left to attention. Cross-references by section number (§9.4), never by page or by "the section
+above".
 
 **Tone.** Plain declarative English, British spelling, first person singular where the author is the
 one who did the thing. Vary sentence length. State what was done and what happened; do not editorialise
-about how significant it was. Prefer a concrete figure from the repository over a general claim — 260
+about how significant it was. Prefer a concrete figure from the repository over a general claim — 276
 endpoints, not "a comprehensive API". Name the limits explicitly: where something was not measured,
 not tested, or not achieved, say so in the sentence rather than in a hedge. No bullet lists standing in
-for argument, no three-adjective build-ups, no "leverage", "robust", "seamless", "comprehensive",
-"delve", "landscape" or "it is important to note".
+for argument, no three-adjective build-ups, and none of the vocabulary in `lint.py:BANNED`. Nothing in
+this book should read as though it were generated: no filler openers, no restating the obvious, no
+sentence whose only work is to announce that the next sentence is important.
 
 **Honesty rule.** Nothing enters the text that is not in the repository, the governing documents, or a
 cited source. Anything else is a bracketed placeholder beginning `*[`, which the builder renders
-highlighted so it cannot reach a printed copy unnoticed. Where a number is reported, name the artefact
-it came from — a log file, a test run, a commit range — so an examiner can check it.
+highlighted and lists after every build. Where a number is reported, name the artefact it came from —
+a log file, a test run, a commit range — so an examiner can check it. Figures included: a diagram
+states what the code does, and where the two disagree the code is right.
 
-**Printing.** Every chapter must build clean through `build/build.py` and be checked in the browser
-before it is considered done. New figures go in as Mermaid; new tables use the caption-heading form so
-IEEE placement is applied automatically. Read the builder's orphan-caption line after each build: any
-name on it other than Tables 3.1, 3.2, 3.3, 3.5 and 3.6 is a real defect.
+**Keeping the numbers true.** Repository figures quoted in the text go stale as the code moves. The
+ones in the book now were taken on 1 September 2026: 276 endpoint attributes across 37 controllers,
+49 `DbSet` properties, 28 enumerations, 40 service interfaces with 37 implementations, 21 migrations,
+517 passing backend tests, 381 passing web tests, 3,366 lines of `styles.scss`. Re-take them before
+submission with the commands in `docs/project_map.md` and the two test suites, and correct the
+sentences that carry them.
 
 ## Before submission
 
-Search the built document for the highlighted placeholders and resolve each one. Three remain in
-Part I, and none can be answered from the repository:
+Every author placeholder is closed. The build reports none, and
+`python docs/book/build/build.py --pdf --strict --no-placeholders` passes.
 
-- the supervisor's name and designation, and the month and year of submission, on the title page
-- participant counts, sampling and session dates for the elicitation study (§3.1.2)
-- the ethical approval reference and consent procedure (§3.1.3)
+Two gates, because they are reached at different times:
 
-Two Part I placeholders have been closed: the author identity on the title page, and the review defect
-counts in §3.12, which are now taken from the findings log at `docs/BUSINESS_FINDINGS.md` and set out
-in Table 3.8.
+| Gate | Adds |
+|---|---|
+| `--strict` | fails on any defect: lint finding, drifted caption, A4 problem. Run after every edit |
+| `--strict --no-placeholders` | also fails while any `*[` placeholder is open. Passes now |
+| `--strict --final` | also fails while any reference in the list is uncited. Not reachable until Part III and IV are written |
 
-References marked with a dagger in `99-references.md` need their edition, year, page range or DOI
-checked against the copy actually consulted, and the commercial pricing bands in §2.9 carry an inline
-note asking for the same.
+Seventeen references are numbered but not yet cited. That is by design: numbering is book-wide and
+assigned in order of first appearance, so entries first cited in Part III already sit in the list.
+
+Two standards in use have been revised since the work was done: ISO/IEC 25010:2011 by the 2023
+edition, which renames usability and portability and adds safety, and OWASP ASVS 4.0.3 by 5.0.0. Both
+are cited by the edition the work was carried out against, with the successor named and the
+consequence stated in §3.4 and §4.5. Do not restate a conformance claim under a newer edition, and do
+not reclassify the NFR taxonomy to the 2023 model — the identifiers run through the whole book.
+
+Participants and officers are identified by office, never by name. They are identifiable members of a
+small association who agreed verbally; §3.1.3 gives the reasoning.
+
+`docs/materials/` holds the Pressman slide sets and a precedence-diagram exercise used while writing.
+It is git-ignored, being third-party copyrighted teaching material. Cite Pressman and Maxim's 8th
+edition, reference [54]; nothing is quoted from the slides.
+
+Then run `python docs/book/build/build.py --pdf --strict --no-placeholders` and hand over the PDF it
+writes.

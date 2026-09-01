@@ -16,13 +16,13 @@
 
 **Artefact under study.** A three-client platform comprising an ASP.NET Core 9 REST API, an Angular 21 web application and a Flutter mobile application, deployed on a free-tier managed host.
 
-**Author.** Md Habibur Rahman, Roll 220, 7th Batch, Evening Master's in Information Technology (EMIT)
+**Author.** Md Habibur Rahman, Roll 220, 7th Batch, Executive Master's in Information Technology (EMIT)
 
 **Supervisor.** Dr. Kazi Muheymin-Us-Sakib, Professor, Institute of Information Technology, University of Dhaka
 
-**Department and institution.** Executive Masters in Information and Technology Program, Batch-7, Institute of Information Technology (IIT), University of Dhaka, Dhaka, Bangladesh
+**Department and institution.** Executive Master's in Information Technology (EMIT) programme, Batch 7, Institute of Information Technology (IIT), University of Dhaka, Dhaka, Bangladesh
 
-**Submitted.** *[month, year of submission]*
+**Submitted.** {{build-month-year}}
 
 ---
 
@@ -31,7 +31,7 @@
 I declare that this dissertation and the software artefact it describes are my own work. Where the
 work of others has been used it is cited in the text and listed in the References. The platform
 described in Part III was written by me as sole maintainer; third-party libraries are catalogued
-with their licences in Table 7.1, and no part of the codebase has been submitted for any other
+with their licences in Chapter 7, and no part of the codebase has been submitted for any other
 award.
 
 The governing documents of the Association reproduced or summarised in this dissertation, that is
@@ -57,47 +57,59 @@ Examiner: ______________________   Date: ____________
 
 ## iv. Acknowledgements
 
-*[To be written last. Should name: the supervisor; the Association officers who gave time to the
-requirements work and the acceptance testing; the college administration for permission to use the
-institutional name and crest; and the members who tested the registration and payment paths on
-their own devices.]*
+I thank Dr. Kazi Muheymin-Us-Sakib, Professor at the Institute of Information Technology, University
+of Dhaka, who supervised this work.
+
+Three officers of the Association gave time this project could not have done without. The President
+made the case for it to the Executive Committee and settled the questions only the chair could
+settle. The Member Secretary sat through the sessions that turned the membership rules into
+requirements, and corrected me on how the roll is actually kept rather than how the constitution
+describes it. The Law Secretary read the constitutional articles against the rules I had encoded from
+them, and found the two places where my reading was wrong before any of it reached a member.
+
+I thank the college administration for permission to use the institutional name and crest under
+Article I Section 5, and the members who tested registration and payment on their own handsets, over
+their own mobile data, and reported what did not work.
+
+Officers and members are identified here by office rather than by name, for the reason given in
+§3.1.3.
 
 ---
 
 ## v. Abstract
 
-Alumni associations at public colleges in Bangladesh run on paper. Membership rolls live in
-spreadsheets or ledgers, subscriptions are collected in cash at reunions, and the constitution that
-governs the body exists as a printed document whose current version is known reliably only to the
-officers who hold it. The Govt. Haraganga College Alumni Association is representative. Founded in
-2025 with a written constitution, an elected fifteen-position Executive Committee and a three-year
-election cycle, it had no digital record of who its members were.
+Alumni associations at public colleges in Bangladesh run on paper. Rolls live in spreadsheets or
+ledgers, subscriptions are collected in cash at reunions, and the constitution exists as a printed
+document whose current version is known reliably only to the officers holding it. The Govt. Haraganga
+College Alumni Association is representative: founded in 2025 with a written constitution, an elected
+fifteen-position Executive Committee and a three-year election cycle, it had no digital record of who
+its members were.
 
 This dissertation reports the design, construction and evaluation of a platform for that
 association, conducted as a design science research study. The problem is not an absence of alumni
-software, since commercial products exist, but the mismatch between what those products assume and
-what this institution can supply: no payment gateway credentials, no recurring licence budget, no
-technical staff, a mobile-first and bandwidth-constrained membership, and a written constitution
-whose provisions the software is obliged to respect rather than reinterpret.
+software but the mismatch between what commercial products assume and what this institution can
+supply: no payment gateway credentials, no licence budget, no technical staff, a mobile-first and
+bandwidth-constrained membership, and a written constitution whose provisions the software must
+respect rather than reinterpret.
 
-The artefact is a clean-architecture ASP.NET Core 9 API exposing 260 endpoints across 37
+The artefact is a clean-architecture ASP.NET Core 9 API exposing 276 endpoints across 37
 controllers over 49 persisted entity sets, with an Angular 21 web client and a Flutter mobile
 client. Three design positions distinguish it. Constitutional rules are encoded as testable
 business rules traced to the article that mandates them, so that voting rights, committee
 composition and membership tiers cannot drift from the governing document. Payment is deliberately
 manual: members pay through a displayed wallet or bank channel and upload proof, which removes the
 gateway-credential dependency and any custody of card data at the cost of an administrative
-verification step. Reference data is synchronised at application boot rather than by migration,
-because the deployment target creates its schema with `EnsureCreated()`, which is inert against a
-populated database.
+verification step. Schema is applied by migration at boot, and revisable reference data such as the
+constitution is synchronised separately at the same point, because seed data carried by a migration
+would pin amendable text to whichever migration shipped it.
 
 Evaluation follows the plan declared in Chapter 4 and covers requirement coverage, ISO/IEC 25010
-product quality, static product metrics over the 352-case backend suite and the client suites,
+product quality, static product metrics over the 517-case backend suite and the 381-case web suite,
 security conformance against OWASP ASVS, and usability. The finding of interest is that procedural
 legitimacy, rather than technical capability, is what bounds how much institutional governance can
 be moved into software.
 
-**Word count:** 334.
+**Word count:** 349.
 
 ---
 
@@ -111,8 +123,94 @@ Core; Angular; Flutter.
 
 ## vii. Table of Contents
 
-*Generated at typesetting. Part I covers Chapters 1 to 3; Part II, Chapters 4 to 6; Part III,
-Chapters 7 to 11; Part IV, Chapters 12 and 13.*
+
+
+
+
+
+Section numbers are as printed in the body. Page numbers are the folios the PDF carries; a rebuild renumbers them, so they are filled in from the printed copy rather than kept by hand.
+
+| Part, chapter and section | Page |
+| --- | --- |
+| **PART I — PROBLEM AND CONTEXT** | 9 |
+| **Chapter 1 — Introduction** | 10 |
+| §1.1 Research Context: Alumni Relations as an Institutional Function | 10 |
+| §1.2 Problem Domain: the Govt. Haraganga College Alumni Association | 10 |
+| §1.3 Problem Statement | 10 |
+| §1.4 Research Questions | 10 |
+| §1.5 Aims and Objectives | 11 |
+| §1.6 Scope, Delimitations and Assumptions | 11 |
+| §1.7 Research Method in Brief | 11 |
+| §1.8 Contributions of this Work | 11 |
+| §1.9 Stakeholders and Beneficiaries | 12 |
+| §1.10 Structure of the Dissertation | 12 |
+| **Chapter 2 — Literature Review and Related Work** | 15 |
+| §2.1 Review Objectives and Questions | 15 |
+| §2.2 Review Protocol | 15 |
+| §2.3 Alumni Relations and Engagement: the Institutional Literature | 15 |
+| §2.4 Community and Membership Platforms: Academic Treatment | 16 |
+| §2.5 Architectural Literature | 16 |
+| §2.6 Web and Mobile Engineering Literature | 16 |
+| §2.7 Digital Governance, Electronic Voting and Procedural Legitimacy | 16 |
+| §2.8 Security and Privacy Engineering Baselines | 17 |
+| §2.9 Survey of Existing Systems and Products | 17 |
+| §2.10 Comparative Analysis and Evaluation Criteria | 18 |
+| §2.11 Research Gap | 18 |
+| §2.12 Summary | 19 |
+| **Chapter 3 — Requirements Engineering** | 24 |
+| §3.1 Requirements Elicitation | 24 |
+| §3.2 Requirements Analysis and Negotiation | 25 |
+| §3.3 Requirements Specification | 25 |
+| §3.4 Non-Functional Requirements | 28 |
+| §3.5 Quality-Attribute Scenarios | 29 |
+| §3.6 Use-Case Modelling | 30 |
+| §3.7 User Stories, Acceptance Criteria and the Definition of Done | 30 |
+| §3.8 Requirements Prioritisation | 30 |
+| §3.9 Requirements Traceability | 31 |
+| §3.10 Domain Constraints | 31 |
+| §3.11 Feasibility Analysis | 31 |
+| §3.12 Requirements Validation and Formal Technical Review | 32 |
+| §3.13 Summary | 32 |
+| **PART II — METHOD AND DESIGN** | 43 |
+| **Chapter 4 — Research Methodology** | 44 |
+| §4.1 Research Paradigm and Philosophical Position | 44 |
+| §4.2 Design Science Research as the Governing Method | 44 |
+| §4.3 Mapping Design Science Activities to the Work Performed | 44 |
+| §4.4 Software Process Model and its Justification | 44 |
+| §4.5 Evaluation Strategy | 45 |
+| §4.6 Metrics Definition | 45 |
+| §4.7 Data Collection and Analysis Procedures | 46 |
+| §4.8 Risk Management: the RMMM Plan | 46 |
+| §4.9 Research Ethics | 47 |
+| §4.10 Limitations of the Chosen Method | 47 |
+| §4.11 Summary | 48 |
+| **Chapter 5 — System Analysis and Behavioural Modelling** | 53 |
+| §5.1 Analysis Approach | 53 |
+| §5.2 Structured Analysis: Data-Flow Modelling | 53 |
+| §5.3 Object-Oriented Analysis | 53 |
+| §5.4 Behavioural Modelling | 53 |
+| §5.5 State Modelling of Long-Lived Entities | 54 |
+| §5.6 Business Rules Catalogue | 54 |
+| §5.7 Data Modelling | 55 |
+| §5.8 Analysis Model Review and Validation | 55 |
+| §5.9 Summary | 55 |
+| **Chapter 6 — System Architecture and Design** | 68 |
+| §6.1 Design Goals, Principles and Constraints | 68 |
+| §6.2 Architectural Alternatives Considered and the Decision Taken | 68 |
+| §6.3 Architectural Design — Clean Architecture | 68 |
+| §6.4 Component-Level Design | 69 |
+| §6.5 Data Design | 69 |
+| §6.6 Interface Design | 70 |
+| §6.7 Security Architecture | 70 |
+| §6.8 User-Interface Design | 70 |
+| §6.9 Mobile Application Design and Platform-Specific Concerns | 71 |
+| §6.10 Configuration-Driven Design | 71 |
+| §6.11 Design Principles: Claim, Mechanism and Evidence | 71 |
+| §6.12 Design Patterns Applied | 72 |
+| §6.13 Architecture Decision Records | 73 |
+| §6.14 Design Verification | 73 |
+| §6.15 Summary | 74 |
+| **References** | 83 |
 
 ---
 
@@ -120,24 +218,62 @@ Chapters 7 to 11; Part IV, Chapters 12 and 13.*
 
 | Figure | Title | Page |
 | --- | --- | --- |
-| 1.1 | Context diagram: platform boundary and external entities | |
-| 1.2 | Stakeholder onion diagram | |
-| 1.3 | Research question, objective and chapter map | |
-| 2.1 | Study-selection flow with counts at each stage | |
-| 2.2 | Concept map of the reviewed literature | |
-| 2.3 | As-is process model of current manual practice (BPMN) | |
-| 2.4 | Positioning chart: governance depth against operating cost | |
-| 3.1 | System-level use-case diagram | |
-| 3.2 | Use-case diagram: Membership subsystem | |
-| 3.3 | Use-case diagram: Events subsystem | |
-| 3.4 | Use-case diagram: Payments subsystem | |
-| 3.5 | Use-case diagram: Governance subsystem | |
-| 3.6 | Use-case diagram: Administration subsystem | |
-| 3.7 | Actor generalisation hierarchy | |
-| 3.8 | Domain model, analysis level | |
-| 3.9 | Quality-attribute utility tree | |
-| 3.10 | Requirements classification tree, FURPS+ | |
-| 3.11 | Goal model | |
+| 1.1 | Context diagram (DFD Level 0): platform boundary and external entities | 12 |
+| 1.2 | Stakeholder onion diagram | 13 |
+| 1.3 | Research question, objective and chapter map | 14 |
+| 2.1 | Study selection flow | 19 |
+| 2.2 | Concept map of the reviewed literature | 20 |
+| 2.3 | As-is process model of current manual practice (BPMN, abstracted) | 21 |
+| 2.4 | Positioning chart: governance depth against annual operating cost | 22 |
+| 3.1 | System-level use-case diagram, packaged | 33 |
+| 3.2 | Membership subsystem use cases | 34 |
+| 3.3 | Events subsystem use cases | 35 |
+| 3.4 | Payments subsystem use cases | 35 |
+| 3.5 | Governance subsystem use cases | 36 |
+| 3.6 | Administration subsystem use cases | 37 |
+| 3.7 | Actor generalisation hierarchy | 37 |
+| 3.8 | Domain model, analysis level: membership, obligations and payment | 38 |
+| 3.9 | Domain model, analysis level: participation, governance and content | 38 |
+| 3.10 | Quality-attribute utility tree | 39 |
+| 3.11 | Requirements classification, FURPS+ | 40 |
+| 3.12 | Goal model | 40 |
+| 4.1 | Design Science Research framework with this project's instantiation labelled | 48 |
+| 4.2 | Design Science process model as executed | 49 |
+| 4.3 | Research design overview: phases, inputs, outputs, evaluation points | 50 |
+| 4.4 | Process model diagram of the adopted incremental lifecycle | 51 |
+| 4.5 | Risk exposure matrix | 52 |
+| 5.1 | DFD Level 0 (context) | 55 |
+| 5.2 | DFD Level 1 | 56 |
+| 5.3 | DFD Level 2: Payment processing | 56 |
+| 5.4 | DFD Level 2: Membership approval | 57 |
+| 5.5 | DFD Level 2: Constitution publication | 58 |
+| 5.6 | Activity diagram: registration and administrative approval | 59 |
+| 5.7 | Activity diagram: payment declaration and verification | 60 |
+| 5.8 | Activity diagram: event registration with waitlist | 61 |
+| 5.9 | Swimlane activity diagram: constitution amendment vote | 62 |
+| 5.10 | BPMN process diagram of the election cycle | 63 |
+| 5.11 | State-machine diagram: member lifecycle | 63 |
+| 5.12 | State-machine diagram: payment and declaration | 64 |
+| 5.13 | State-machine diagram: constitution version | 64 |
+| 5.14 | State-machine diagram: event lifecycle | 65 |
+| 5.15 | Sequence diagram: login with OTP, token issue | 65 |
+| 5.16 | Sequence diagram: event registration | 66 |
+| 5.17 | Sequence diagram: payment declaration and verification | 66 |
+| 5.18 | Sequence diagram: real-time notification over SignalR | 66 |
+| 5.19 | Timing diagram: token lifetime and refresh window | 67 |
+| 6.1 | High-level architecture diagram | 75 |
+| 6.2 | Layered / clean architecture diagram with the dependency-inversion boundary marked | 76 |
+| 6.3 | Entity–relationship diagram, identity and records sub-model | 76 |
+| 6.4 | Entity–relationship diagram, standing and money sub-model | 77 |
+| 6.5 | Entity–relationship diagram, events and participation sub-model | 77 |
+| 6.6 | Entity–relationship diagram, governance sub-model | 78 |
+| 6.7 | Design class diagram: domain model | 78 |
+| 6.8 | Design class diagram: application interfaces and infrastructure services | 79 |
+| 6.9 | Component diagram with provided and required interfaces | 79 |
+| 6.10 | Middleware pipeline diagram | 80 |
+| 6.11 | Navigation and route map | 80 |
+| 6.12 | Site map and information architecture of the public site | 81 |
+| 6.13 | Architectural trade-off radar | 81 |
 
 *Figures for Chapters 4 to 13 are listed as those chapters are written.*
 
@@ -147,17 +283,30 @@ Chapters 7 to 11; Part IV, Chapters 12 and 13.*
 
 | Table | Title | Page |
 | --- | --- | --- |
-| 2.1 | Review protocol summary | |
-| 2.2 | Feature and capability comparison matrix | |
-| 2.3 | Gap table | |
-| 3.1 | Functional requirement catalogue | |
-| 3.2 | Non-functional requirement catalogue by ISO/IEC 25010 characteristic | |
-| 3.3 | Use-case descriptions for the ten highest-value cases | |
-| 3.4 | Requirements traceability matrix, opened | |
-| 3.5 | MoSCoW prioritisation and negotiation outcome | |
-| 3.6 | Domain constraints traced to constitutional article | |
-| 3.7 | Feasibility summary | |
-| 3.8 | Specification defects found by the formal technical review | |
+| 2.1 | Review protocol summary | 22 |
+| 2.2 | Feature and capability comparison | 23 |
+| 2.3 | Gap table | 23 |
+| 3.1 | Functional requirement catalogue | 40 |
+| 3.2 | Non-functional requirement catalogue | 40 |
+| 3.3 | Use-case descriptions, ten highest-value cases | 41 |
+| 3.4 | Requirements traceability matrix | 42 |
+| 3.5 | MoSCoW prioritisation and negotiation outcome | 42 |
+| 3.6 | Domain constraints traced to constitutional article | 42 |
+| 3.7 | Feasibility summary | 42 |
+| 3.8 | Specification defects found by the formal technical review | 42 |
+| 4.1 | Metric definitions | 46 |
+| 4.2 | RMMM table | 47 |
+| 4.3 | Evaluation plan | 52 |
+| 5.1 | Business rules catalogue | 54 |
+| 5.2 | CRC card set for the analysis classes with the widest collaboration surface | 58 |
+| 5.3 | Process specifications for the Level-2 processes | 67 |
+| 5.4 | Data-store definitions (analysis level) | 67 |
+| 6.1 | ADR index | 73 |
+| 6.2 | Data dictionary (representative slice; full dictionary in Appendix E) | 82 |
+| 6.3 | API endpoint catalogue (by controller; full catalogue in Appendix F) | 82 |
+| 6.4 | Design pattern catalogue (selected entries; full catalogue is §6.12 in full) | 82 |
+| 6.5 | Quality-attribute scenario to architectural tactic mapping | 82 |
+| 6.6 | Anti-patterns detected and remediated | 82 |
 
 ---
 
@@ -271,14 +420,14 @@ reused, because the distinction changes how Chapter 12 should be read.
    single-maintainer, zero-licence-budget constraint, with the architectural decision recorded
    against those constraints instead of against a hypothetical growth curve (Chapter 6).
 
-**Engineering rather than research contribution.** The three clients, the 260-endpoint API surface,
+**Engineering rather than research contribution.** The three clients, the 276-endpoint API surface,
 the 49-entity schema, the CI pipeline, the document-generation subsystem and the shared control
 library are engineering. They are the artefact the research is about, and their quality is measured
 in Chapter 12, but no novelty is claimed for the techniques used to build them.
 
 **Reused.** Clean architecture as a layering scheme [1]; the enterprise patterns catalogued by
 Fowler [2]; the design patterns of Gamma et al. [3]; ASP.NET Core, Entity Framework Core, Angular,
-Flutter and the libraries in Table 7.1; the design science framework of Hevner et al. [4] and the
+Flutter and the libraries catalogued in Chapter 7; the design science framework of Hevner et al. [4] and the
 process model of Peffers et al. [5]; the ISO/IEC 25010 quality model [6]; the OWASP ASVS checklist
 [7].
 
@@ -301,13 +450,17 @@ the personal-data inventory. Where a field was requested during elicitation but 
 justified against a specific requirement, it was dropped; the negotiation record is in §3.2.
 
 **Research data.** Interview material, usability session records and acceptance-test observations
-were collected under the participant information sheet and consent form reproduced in Appendix A.
-Participants are identified in the dissertation by role and never by name. Recordings, where taken,
-are held on encrypted local storage and destroyed once the award is conferred.
+were collected with verbal consent and no written consent form. Participants were told what the
+material would be used for. Participants are identified in this dissertation by role and never by
+name. The absence of a documented consent procedure is a limitation of the study, set out with its
+consequences in §3.1.3, not an omission from this statement.
 
 **Live data in the dissertation.** Every screenshot in Chapter 12 uses seeded or anonymised records.
 No real member's identity number, address, telephone number or photograph appears anywhere in this
 document.
 
-**Approval.** *[Institutional ethics reference and date of approval to be inserted. The approval
-letter is Appendix A.]*
+**Approval.** No institutional ethics committee reviewed this study. Permission to conduct it, and
+to use the Association's records, governing documents and membership data, was given by the
+Government Haraganga College Alumni Association. That permission was verbal: no approval letter was
+issued, no reference number exists, and no date was recorded. Section 3.1.3 states what follows from
+that.

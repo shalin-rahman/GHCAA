@@ -84,6 +84,9 @@ documents and processes visible to the membership without letting software silen
 procedures the constitution mandates, and (d) can be operated and maintained indefinitely by one
 volunteer maintainer with no licence budget.
 
+Figure 1.1 draws the boundary this statement implies: who the system deals with, and what crosses
+the line in each direction.
+
 No off-the-shelf product satisfies that conjunction, as Chapter 2 argues in detail. Commercial
 alumni platforms assume a recurring licence and an advancement office. Open-source membership
 systems assume a payment gateway and treat governance as a plugin concern at best. General-purpose
@@ -211,7 +214,7 @@ themselves.
 
 | Stakeholder | Interest | Where their requirements appear |
 | --- | --- | --- |
-| Ordinary member | Join, pay, be visible in the directory, attend events, see the constitution, vote where entitled | FR-01 to FR-22, FR-32 to FR-40, FR-48 to FR-52 |
+| Ordinary member | Join, pay, be visible in the directory, attend events, see the constitution, vote where entitled | FR-01 to FR-22, FR-32 to FR-40, FR-48 to FR-54 |
 | Executive Committee officer | Approve applications, verify payments, publish notices, run events, manage the committee record | FR-13, FR-23 to FR-31, FR-41 to FR-47 |
 | Treasurer | An auditable ledger and evidence for every receipt | FR-19 to FR-25 |
 | General Secretary | Minutes, correspondence, notices, AGM circulation | FR-26 to FR-31, FR-35 |
@@ -223,7 +226,9 @@ themselves.
 
 The primary beneficiaries are the members, who gain a record of their own standing that does not
 depend on an officer's memory, and the officers, who gain the ability to answer questions about the
-roll and the money without reconstructing them by hand.
+roll and the money without reconstructing them by hand. Figure 1.2 places the same
+stakeholders by distance from the system, from the officers who operate it daily out to the college
+administration and the general public.
 
 ## 1.10 Structure of the Dissertation
 
@@ -253,29 +258,28 @@ Chapter 13 concludes and sets out future work.
 *Derived from `docs/architecture_data_flow.md` and the controller inventory in `GHCAA.API/Controllers`.*
 
 ```mermaid
-flowchart TB
-    G([Guest / prospective member]):::ext
+flowchart LR
+    G([Guest]):::ext
     M([Member]):::ext
-    A([EC officer / Admin]):::ext
+    A([Officer / Admin]):::ext
     SA([SuperAdmin]):::ext
-    EMAIL([Email / SMS provider]):::ext
-    SOCIAL([Google / Facebook identity]):::ext
-    MFS([bKash / Nagad / bank channel]):::ext
+    P((GHCAA<br/>Platform)):::sys
+    EMAIL([Email / SMS<br/>provider]):::ext
+    SOCIAL([Google / Facebook<br/>identity]):::ext
+    MFS([bKash / Nagad /<br/>bank channel]):::ext
 
-    P((GHCAA Platform)):::sys
-
-    G -->|application, public content requests| P
-    P -->|public content, application status| G
-    M -->|profile, dues proof, event registration, votes| P
-    P -->|ID card, receipt, notices, results| M
-    A -->|approvals, verifications, publications| P
-    P -->|work queues, ledger, reports| A
-    SA -->|organisation config, roles| P
+    G -->|application,<br/>content requests| P
+    P -->|public content,<br/>application status| G
+    M -->|profile, dues proof,<br/>registration, votes| P
+    P -->|ID card, receipt,<br/>notices, results| M
+    A -->|approvals,<br/>verifications| P
+    P -->|work queues,<br/>ledger, reports| A
+    SA -->|config, roles| P
     P -->|audit records| SA
-    P -->|verification codes, notices, bulk mail| EMAIL
-    SOCIAL -->|federated identity assertion| P
-    M -.->|payment made outside the platform| MFS
-    MFS -.->|transaction reference quoted as proof| M
+    P -->|codes, notices,<br/>bulk mail| EMAIL
+    SOCIAL -->|identity<br/>assertion| P
+    M -.->|payment made<br/>outside the platform| MFS
+    MFS -.->|reference quoted<br/>as proof| M
 
     classDef ext fill:#eef,stroke:#446,stroke-width:1px
     classDef sys fill:#ffe9b3,stroke:#8a6d1f,stroke-width:2px
@@ -290,32 +294,29 @@ evidence, which an officer then verifies. The platform never holds a payment cre
 ```mermaid
 flowchart TB
     subgraph REG["Regulatory and institutional ring"]
-      direction LR
-      R1[College administration<br/>name and crest, Art. I §5]
-      R2[Constitution and election documents<br/>as governing authority]
-      R3[Personal-data expectations]
+      subgraph IND["Indirect ring"]
+        subgraph DIR["Direct ring"]
+          subgraph CORE["Core"]
+            C1[Maintainer / IT Secretary]
+            C2[Treasurer and<br/>General Secretary]
+            C1 ~~~ C2
+          end
+          D1[Members, six tiers]
+          D2[EC officers:<br/>13 elected, 2 ex-officio]
+          D3[Election Commission]
+          D1 ~~~ D2 ~~~ D3
+        end
+        I1[Prospective members,<br/>visitors and event guests]
+        I2[Donors and sponsors]
+        I1 ~~~ I2
+      end
+      R1[College administration:<br/>name and crest]
+      R2[Constitution and election<br/>documents; personal-data expectations]
+      R1 ~~~ R2
     end
-    subgraph IND["Indirect ring"]
-      direction LR
-      I1[Prospective members]
-      I2[Public visitors]
-      I3[Event guests]
-      I4[Donors and sponsors]
-    end
-    subgraph DIR["Direct ring"]
-      direction LR
-      D1[Members: Founding, Executive, General, Associate, Honorary, Advisory]
-      D2[EC officers: 13 elected, 2 ex-officio]
-      D3[Election Commission]
-    end
-    subgraph CORE["Core"]
-      direction LR
-      C1[Maintainer / IT Secretary]
-      C2[Treasurer]
-      C3[General Secretary]
-    end
-    REG --> IND --> DIR --> CORE
 ```
+
+
 
 ### Figure 1.3 — Research question, objective and chapter map
 

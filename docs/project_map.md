@@ -1861,6 +1861,19 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `LiveSyncTest` | `LiveSyncTest.cs` | Integration with live DB |
 | `ARCH.md` | `VisualTests/ARCH.md` | Visual test architecture doc |
 
+### Documentation Book Build (`docs/book/build/`)
+
+| Script | Path | Purpose |
+|---|---|---|
+| `build.py` | `docs/book/build/build.py` | Builds the dissertation to print-ready HTML; `--pdf` also prints A4 through headless Chrome/Edge, `--audit` measures A4 fit, `--strict` fails on any defect |
+| `lint.py` | `docs/book/build/lint.py` | Source checks run on every build: house tone, figure/table numbering, forward references, front-matter lists, abstract length, open placeholders |
+| `printer.py` | `docs/book/build/printer.py` | Browser discovery, the localhost server the page is served from, the A4 measurement pass, and print-to-PDF |
+| `renumber.py` | `docs/book/build/renumber.py` | Renumbers figures and tables into bound order, rewrites every mention, rebuilds the List of Figures and List of Tables |
+| `ieee-print.css` | `docs/book/build/ieee-print.css` | IEEE print stylesheet: A4 `@page` rules, the landscape page, caption placement, two-column option |
+
+Rules for touching the book are in `docs/book/README.md`; the short version is in the root
+`CLAUDE.md`.
+
 ### Visual & E2E Testing (Playwright / Flutter Integration)
 
 | Test / Script | Path | Purpose |
@@ -1875,7 +1888,7 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 
 ## Web (Angular) — Test Specs
 
-All test files run on **Vitest** (`npx vitest run` — 64 files / 306 tests), not Jasmine/Karma.
+All test files run on **Vitest** (`npx vitest run` — 74 files / 381 tests as of 2026-09-01), not Jasmine/Karma.
 File pattern: `*.spec.ts`. Note that Vitest does not resolve `templateUrl`, so component specs
 assert on exported pure functions rather than rendered templates.
 

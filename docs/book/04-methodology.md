@@ -37,7 +37,9 @@ the work is complete [4].
 
 The **relevance cycle** connects the environment, meaning the Association, its constitution and its
 current practice, to the research. It supplies the requirements of Chapter 3 and receives the
-artefact back for field testing; the formal technical review sessions of 3 and 29 July 2026, recorded
+artefact back for field testing; Figure 4.1 labels the three cycles with what each carried in this
+project, and Figure 4.2 shows the process as it was actually executed rather than as the model
+prescribes it; the formal technical review sessions of 3 and 29 July 2026, recorded
 in §3.12 with an officer of the Association acting as domain reviewer, are this cycle closing partway
 through the project rather than only at the end.
 
@@ -63,7 +65,7 @@ document.
 | --- | --- | --- |
 | Problem identification and motivation | Observation of the paper-based application, cash-and-ledger collection and Facebook-circulated constitution described in §1.2 | §1.2, §1.3 |
 | Definition of objectives for a solution | The eight objectives of §1.5, each traced to a research question | §1.5 |
-| Design and development | Forty-six numbered work areas recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-seven API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
+| Design and development | Sixty-two numbered work areas recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-seven API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
 | Demonstration | The artefact running against a seeded database, exercised in the formal technical review sessions of §3.12 and deployed to the pre-production environment of Chapter 10 | §3.12, Ch. 10 |
 | Evaluation | Executed against the plan declared in §4.5 | Ch. 8, Ch. 12 |
 | Communication | This dissertation, and the documentation corpus in `docs/` that a successor maintainer would read first | Whole document |
@@ -76,7 +78,8 @@ cycle kept running throughout construction rather than only at the requirements 
 ## 4.4 Software Process Model and its Justification
 
 Three conventional alternatives were considered and rejected, each for a reason specific to this
-project's constraints rather than as a general criticism of the alternative.
+project's constraints rather than as a general criticism of the alternative. Figure 4.3 sets out the
+research design that resulted, phase by phase, with its inputs, outputs and evaluation points.
 
 **Waterfall** requires a requirements specification to be frozen before design begins. Section 3.12
 shows that the specification itself changed on formal technical review, after code already existed
@@ -119,7 +122,8 @@ it bought in resilience to interruption.
 
 This is the point of the chapter. Everything below is a commitment made before any measurement in
 Chapters 8 and 12 was taken, so that a result reported later can be checked against what was promised
-here rather than against a criterion chosen to fit the result.
+here rather than against a criterion chosen to fit the result. Table 4.3 collects the commitments in
+one place: instrument, what it measures, and where the result is reported.
 
 ### 4.5.1 Functional evaluation
 
@@ -147,8 +151,11 @@ has been run would commit this section to a choice that has not yet been tested 
 ### 4.5.4 Security evaluation
 
 Two instruments, run together rather than as alternatives. The threat model of Chapter 9, built by
-STRIDE walk-through of the data-flow diagram in Figure 9.1, gives coverage of *attack classes*. The
-OWASP ASVS level 2 checklist [7] gives coverage of *control families*. Section 9.13 reports both, and
+STRIDE walk-through of the data-flow diagrams of §5.2, gives coverage of *attack classes*. The
+OWASP ASVS level 2 checklist [7] gives coverage of *control families*. The edition used is 4.0.3 of
+2021, which is the edition the security work of Chapter 9 was carried out against; ASVS 5.0.0 was
+released in May 2025 [75] and restructures the standard into seventeen chapters, so a conformance
+claim under 4.0.3 does not transfer to it and is not presented as though it did. Section 9.13 reports both, and
 a control is scored conformant only where a specific code location or configuration enforces it, in
 the same style as the design-principle evidence table of §6.11.
 
@@ -171,10 +178,11 @@ software professional, is unchanged between the two readings.
 
 ## 4.6 Metrics Definition
 
-Each metric is given here with its formula, the tool that computes it and the threshold that will be
-compared against it, so that §8.14 and Chapter 12 apply rather than choose these numbers.
+Each metric is given here in Table 4.1 with its formula, the tool that computes it and the threshold
+that will be compared against it, so that §8.14 and Chapter 12 apply rather than choose these
+numbers.
 
-### Table 4.2 — Metric definitions
+### Table 4.1 — Metric definitions
 
 | Metric | Formula / method | Tool | Target |
 | --- | --- | --- | --- |
@@ -205,13 +213,19 @@ supports.
 
 ## 4.8 Risk Management: the RMMM Plan
 
+The structure of this section, being risk identification, projection by probability and impact,
+mitigation, monitoring and management, follows Pressman and Maxim's RMMM plan [54], and Table 4.2
+uses their columns.
+
 Risk was not managed through a separate formal apparatus running alongside development. It was
 managed through the same mechanism that managed everything else: a numbered, dated work item in
-`docs/TODO.md`, closed against a test. That is disclosed here rather than dressed up, and the risk
-table below is built from the actual severity classifications the project used at the time, not
-reconstructed after the fact to look tidier than the record.
+`docs/TODO.md`, closed against a test. That is disclosed here rather than dressed up, and Table 4.2
+is built from the actual severity classifications the project used at the time, not reconstructed
+after the fact to look tidier than the record. Figure 4.5 plots the same risks by probability against
+impact. The two the project scored at high probability, date-format drift and stale schema and seed
+data, are also the two that went on to happen.
 
-### Table 4.3 — RMMM table
+### Table 4.2 — RMMM table
 
 | Risk | Category | Probability | Impact | Mitigation | Monitoring signal | Outcome |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -220,7 +234,7 @@ reconstructed after the fact to look tidier than the record.
 | Administrative action attributed to a hardcoded admin identifier rather than the acting user (TODO 29-F.1) | Technical, audit integrity | Medium | High | Acting admin read from the JWT `MemberId` claim on every approval and rejection path | Code review; audit-log spot check | Closed, Phase 2 |
 | Event capacity exceeded under concurrent registration (TODO 29-A.4) | Technical | Medium | Medium | Occupying-status count corrected to include all statuses that hold a place, cap enforced even when waitlisting is off, insert guarded against concurrent overfill | Concurrent-registration test | Closed, Phase 1 |
 | Date format inconsistency between `dd-MM-yyyy` display and ISO-8601 wire format risking silent data corruption across clients (TODO Area 23, 29-F.3) | Technical | High (had already caused defects) | High | ISO-8601 fixed as the canonical wire format; `DateFormatConverter` and client parsers reconciled to it | `DateFormatConverterTests.cs`, 20 pinning tests | Closed and test-pinned, 2026-08-22 |
-| `Database.EnsureCreated()` no-op on a non-empty database leaving seeded configuration and constitution data stale after a schema change | Technical | High | Medium | `ConstitutionSeeder.SyncAsync` runs at boot, inserts unknown versions, refreshes changed text in place, supersedes rather than deletes | Boot log; constitution version shown in the public reader | Closed; mechanism is now load-bearing, §6.5.6 |
+| `Database.EnsureCreated()` no-op on a non-empty database leaving seeded data, and later the schema itself, stale after a change | Technical | High | High | Two mechanisms, added a year apart: `ConstitutionSeeder.SyncAsync` at boot for revisable data, and `MigrationBootstrapper.EnsureMigratedAsync` for the schema once the same no-op was found to have withheld twenty-one migrations from preprod | Boot log; constitution version shown in the public reader; HTTP 500 rate on newly shipped endpoints | Closed twice, §6.5.6. The impact rating was raised from Medium to High after 27 August 2026, when the schema half surfaced as 500s from `/api/jobs` and `/api/gallery` |
 | Manual payment verification backlog exceeding officer capacity as membership grows | Operational | Medium | Medium | Administrative queue ordered by age with a thirty-day flag (FR-23, DC-08); workload quantified rather than assumed away | Age of oldest unverified item in the queue | Open; monitored, not solved, §12.6 |
 | Volunteer officer turnover losing institutional knowledge of platform operation | Organisational | Medium | Medium | Administration console designed to be operable without developer involvement (NFR-M4); documentation corpus | Handover interval, three-year committee term (DC-09) | Open; structural mitigation only |
 
@@ -289,8 +303,9 @@ system itself, modelling its behaviour and extracting the business rules the con
 ### Figure 4.1 — Design Science Research framework with this project's instantiation labelled
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph ENV["Environment"]
+      direction LR
       E1[Govt. Haraganga College<br/>Alumni Association]
       E2[Constitution v4.2<br/>and election documents]
       E3[Manual practice:<br/>paper, cash, ledger]
@@ -302,6 +317,7 @@ flowchart LR
       B --> E --> B
     end
     subgraph KB["Knowledge base"]
+      direction LR
       K1[Architecture and<br/>requirements literature, Ch. 2]
       K2[Standards: ISO/IEC 25010,<br/>29148, 42010, ASVS]
     end
@@ -314,7 +330,7 @@ flowchart LR
 ### Figure 4.2 — Design Science process model as executed
 
 ```mermaid
-flowchart LR
+flowchart TB
     A1[1. Identify problem<br/>§1.2, §1.3] --> A2[2. Define objectives<br/>§1.5]
     A2 --> A3[3. Design and develop<br/>Chs. 5-7]
     A3 --> A4[4. Demonstrate<br/>§3.12, Ch. 10]
@@ -348,7 +364,7 @@ flowchart TB
 ### Figure 4.4 — Process model diagram of the adopted incremental lifecycle
 
 ```mermaid
-flowchart LR
+flowchart TB
     S([Work item opened:<br/>defect, request or finding]) --> D[Design the change<br/>against existing architecture]
     D --> C[Construct and<br/>self-test]
     C --> G{{Definition of done:<br/>§3.7 checklist}}
@@ -363,7 +379,7 @@ flowchart LR
 
 ```mermaid
 quadrantChart
-    title Risk probability against impact, Table 4.3
+    title Risk probability against impact, Table 4.2
     x-axis Low Probability --> High Probability
     y-axis Low Impact --> High Impact
     quadrant-1 Monitor closely
@@ -375,16 +391,16 @@ quadrantChart
     Admin attribution: [0.45, 0.85]
     Event capacity race: [0.45, 0.55]
     Date format drift: [0.85, 0.85]
-    EnsureCreated seed drift: [0.85, 0.55]
+    Stale schema and seed data: [0.85, 0.85]
     Verification backlog: [0.45, 0.55]
     Officer turnover: [0.45, 0.55]
 ```
 
-### Table 4.1 — Evaluation plan
+### Table 4.3 — Evaluation plan
 
 | Research question | Criterion | Metric | Instrument | Threshold |
 | --- | --- | --- | --- | --- |
 | RQ1 | Requirement set fit for the domain | Requirement coverage; FTR defect count | Traceability matrix, Table 3.4; findings log | 100% of Must traced; FTR defects resolved or recorded |
-| RQ2 | Architecture satisfies quality-attribute scenarios at bounded cost | Coupling, cohesion, maintainability index; operating cost | Static analysis, §8.14; cost model, §10.10 | Thresholds of Table 4.2; cost within Association's stated means |
+| RQ2 | Architecture satisfies quality-attribute scenarios at bounded cost | Coupling, cohesion, maintainability index; operating cost | Static analysis, §8.14; cost model, §10.10 | Thresholds of Table 4.1; cost within Association's stated means |
 | RQ3 | Governance rules encoded without loss of procedural legitimacy | DC-to-code trace completeness; ASVS conformance on governance endpoints | Table 3.4 DC column; §9.13 | Every DC of priority M traced and enforced |
-| RQ4 | Measured quality against ISO/IEC 25010 | All metrics of Table 4.2 | As listed | As listed |
+| RQ4 | Measured quality against ISO/IEC 25010 | All metrics of Table 4.1 | As listed | As listed |

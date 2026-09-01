@@ -75,7 +75,10 @@ h1 {
   letter-spacing: 0.01em;
 }
 
-h1:first-of-type { break-before: avoid; page-break-before: auto; }
+/* The document title must not force a break, but it is the h1 inside
+   .title-page, which already says so below. The old rule here matched
+   h1:first-of-type, which in the flow is the PART I heading — so Part I had no
+   title page of its own and ran on from the front matter. */
 
 h2 {
   font-size: 11.5pt;
@@ -373,6 +376,16 @@ body.two-col figure.fig {
     box-shadow: none;
   }
   a[href^="http"] { text-decoration: none; }
+
+  /* Row shading is a screen aid. IEEE tables are ruled, not shaded, and a
+     headless print does not always carry background graphics, so the printed
+     table is ruled either way rather than depending on that setting. */
+  table tbody tr:nth-child(even) { background: transparent; }
+  table tbody td { border-bottom: 0.25pt solid #bbb; }
+  table tbody tr:last-child td { border-bottom: 1pt solid var(--rule); }
+
+  /* A figure or table caption never prints away from its artefact. */
+  figure, figure > figcaption { break-inside: avoid; page-break-inside: avoid; }
 }
 
 /* ---------- caption headings whose artefact lives elsewhere ---------- */

@@ -20,6 +20,7 @@ attribute the Association does not need at the cost of one it does, the textbook
 
 ## 6.2 Architectural Alternatives Considered and the Decision Taken
 
+Figure 6.13 scores the four candidates below across the quality attributes that decided between them.
 Four alternatives were assessed against the quality-attribute scenarios of §3.5 and the sustainability
 constraint of §6.1: a conventional layered architecture without an explicit dependency rule, clean
 architecture with the dependency rule enforced [1], a modular monolith with service-style internal
@@ -54,14 +55,17 @@ Figure 6.2 draws the four layers and the single direction dependencies are permi
 
 ### 6.3.1 Domain layer
 
-`GHCAA.Domain` holds the forty-nine entities enumerated in §5.7, the twenty-three enumerations of
-`Enums.cs`, and constants. It references nothing else in the solution, which is the dependency rule's
+`GHCAA.Domain` holds the forty-nine entity sets enumerated in §5.7, the twenty-eight enumerations
+of `Enums.cs`, and constants. Figure 6.7 draws the membership, payment, event and governance
+classes at design level, with the attributes and multiplicities the analysis model of Figure 3.8
+left out. It references nothing else in the solution, which is the dependency rule's
 starting point: if the domain depended on anything, the rule would already be broken at its centre.
 
 ### 6.3.2 Application layer
 
-`GHCAA.Application` holds the service interfaces (thirty-four are registered through the DI
-mechanism of §6.11.9) and the data transfer objects that cross the API boundary. It depends only on
+`GHCAA.Application` holds the service interfaces (forty are declared, and the thirty-seven
+implementations in `GHCAA.Infrastructure/Services` are bound to them by the assembly-scanning
+registration of §6.11.9) and the data transfer objects that cross the API boundary. It depends only on
 `GHCAA.Domain`.
 
 ### 6.3.3 Infrastructure layer
@@ -69,11 +73,12 @@ mechanism of §6.11.9) and the data transfer objects that cross the API boundary
 `GHCAA.Infrastructure` holds the service implementations, the three EF Core provider shims described
 in §6.5.4, the payment gateway adapters, and `ApplicationDbContext`. It depends on `GHCAA.Application`
 and `GHCAA.Domain`, and is the only layer that depends on Entity Framework Core, on `HttpClient`, and
-on the file system.
+on the file system. Figure 6.8 draws the interface-to-implementation pairs across that boundary,
+which is where the dependency rule is either kept or broken.
 
 ### 6.3.4 API layer
 
-`GHCAA.API` holds the thirty-seven controllers of Table 6.2, the two SignalR hubs, and the middleware
+`GHCAA.API` holds the thirty-seven controllers of Table 6.3, the two SignalR hubs, and the middleware
 pipeline of §6.4. It composes the other three layers at startup through `Program.cs` and the
 `AddInfrastructure` extension method, and depends on all of them.
 
@@ -95,10 +100,10 @@ is the evidence that this holds for the delivered solution, not only for its int
 
 ## 6.4 Component-Level Design
 
-Figure 6.12 draws the request path as a component diagram: a controller depends on a service
+Figure 6.9 draws the request path as a component diagram: a controller depends on a service
 interface it does not implement, the concrete service is supplied by the DI container built in
 §6.11.9, and the service depends on `ApplicationDbContext` as its persistence port. The middleware
-pipeline, drawn in Figure 6.15, is the component boundary a request crosses before it reaches a
+pipeline, drawn in Figure 6.10, is the component boundary a request crosses before it reaches a
 controller at all, and its order is significant: `ExceptionMiddleware` wraps everything so that no
 unhandled exception below it reaches the client as anything other than a JSON error; rate limiting
 runs before authentication so that an unauthenticated flood is rejected before the cost of verifying
@@ -110,11 +115,15 @@ stamp can be checked, and must be checked before authorisation decides what it m
 
 ### 6.5.1 Conceptual, logical and physical progression
 
-The conceptual model is Figure 3.8; the logical model is the forty-nine mapped entities of §5.7,
-each with a `Fluent API` configuration class under `GHCAA.Infrastructure/Data/Configurations/`
-rather than attribute-only mapping, which keeps persistence concerns out of the domain classes
-themselves; the physical model is whichever of the three schemas in §6.5.4 the running environment
-selects.
+The conceptual model is Figure 3.8; the logical model is the forty-nine mapped entity sets of §5.7,
+thirty-seven of which have a Fluent API configuration class under
+`GHCAA.Infrastructure/Data/Configurations/` rather than attribute-only mapping, which keeps
+persistence concerns out of the domain classes themselves; the remaining twelve are mapped by EF
+Core's conventions alone, which is a gap rather than a decision and is recorded as such; the physical model is whichever of the three schemas in §6.5.4 the running environment
+selects. Figures 6.3 to 6.8 draw that schema as four sub-models, being identity and records, standing and
+money, events and participation, and governance, each with its keys and cardinalities. They are split
+this way rather than drawn as one diagram because one diagram of forty-nine tables cannot be printed
+at a size anyone can read; the content, communication and configuration tables are Appendix H.
 
 ### 6.5.2 Normalisation and its deliberate exceptions
 
@@ -168,19 +177,38 @@ retrospective claim would be.
 
 ### 6.5.5 Data dictionary
 
-Table 6.1 gives a representative slice of the forty-nine mapped entities; the full dictionary is
+Table 6.2 gives a representative slice of the forty-nine mapped entities; the full dictionary is
 Appendix E.
 
 ### 6.5.6 Seeding and runtime data-synchronisation strategy
 
-`Database.EnsureCreated()` creates a schema on an empty database and does nothing on a non-empty one,
-which means any seed expressed through EF Core's `HasData` mechanism is invisible to every
-environment after the first. That constraint is what makes `ConstitutionSeeder.SyncAsync`
-load-bearing rather than a convenience: it runs at every boot, from `Program.cs`, and inserts a
-version it has not seen before, refreshes the text of a version whose content changed, and
-supersedes, without deleting, a version a newer one has replaced, precisely so that a
-production database that was created months earlier still receives a constitution amendment shipped
-today.
+Schema and reference data are handled by two separate mechanisms at boot, for reasons that only
+became clear after the first one failed in production.
+
+Schema first. `Database.EnsureCreated()` creates a schema on an empty database and does nothing at
+all on a non-empty one, and preprod was built that way, so it had no `__EFMigrationsHistory` table
+and every migration added after its first successful boot was silently never applied. The failure
+was not visible as an error; it surfaced on 27 August 2026 as HTTP 500 from `/api/jobs` and
+`/api/gallery`, because the columns those endpoints read had never been created. Schema management is
+now `MigrationBootstrapper.EnsureMigratedAsync`, called from `Program.cs` before anything else
+touches the database, and the twenty-one migrations of `GHCAA.Infrastructure/Data/Migrations` are the
+authority on the schema. On a database with no migration history it walks every migration in order
+and applies it for real; where the database reports that the object a migration creates already
+exists, that migration's effect predates migration tracking and it is marked applied without being
+re-run; any other failure aborts the boot rather than being swallowed. It also re-checks migrations
+already recorded as applied whose `Up()` mixes a schema change with a data seed, because EF runs a
+migration's operations in one transaction: a colliding seed insert rolls the schema change back with
+it, while the "object already exists" test still reports success, which is how the same 500s were
+reintroduced by the fix for them. Where a migration is recorded as applied but the column or table it
+creates is absent, its history row is dropped so the next `MigrateAsync` applies it properly.
+
+Reference data second, and separately, because a migration is the wrong tool for content that is
+revised rather than structured. `ConstitutionSeeder.SyncAsync` runs at every boot, from `Program.cs`,
+and inserts a version it has not seen before, refreshes the text of a version whose content changed,
+and supersedes, without deleting, a version a newer one has replaced, so that a production database
+created months earlier still receives a constitution amendment shipped today. `HasData` would not do
+this: on a populated database it is applied only through a migration, and the amendment text would
+then be pinned to whichever migration happened to carry it.
 
 A separate risk sits in `LoadSeed<T>`'s deserialisation step itself rather than in when it runs:
 `System.Text.Json.JsonSerializer.Deserialize<List<T>>` silently discards any JSON key that does not
@@ -202,7 +230,7 @@ alphanumeric character — since a correct key name is not by itself evidence of
 The API resource model follows a `/api/[controller]` convention with sub-resources expressed as path
 segments, for example `/api/events/{id}/register`. Errors are returned as JSON with a consistent
 shape from `ExceptionMiddleware` rather than as provider stack traces, which is NFR-U4's requirement
-enforced at the one place that can guarantee it for every unhandled case. Table 6.2 catalogues every
+enforced at the one place that can guarantee it for every unhandled case. Table 6.3 catalogues every
 controller with its route and authorisation level; the full request and response shapes are
 Appendix F.
 
@@ -213,7 +241,7 @@ subject. Four mechanisms are worth naming as architecture rather than as detail,
 structural decision rather than a local check: `SecurityStampMiddleware`, which makes a credential or
 role change take effect within one request rather than at token expiry; the query-string token
 allowance in the middleware pipeline, which exists only to let a file download authenticate without a
-custom header and is scoped, in the pipeline order of Figure 6.15, to run before the ordinary
+custom header and is scoped, in the pipeline order of Figure 6.10, to run before the ordinary
 authentication step rather than replacing it; the payment-gateway posture of §9.9, under which the
 platform never stores a payment credential of its own; and step-up authentication for destructive,
 financial and identity-changing admin actions, which re-verifies an already-authenticated Admin or
@@ -245,18 +273,17 @@ independent controls share one upstream dependency, and only one of them names i
 The public site, the member portal and the admin console are three route trees within one Angular
 application, separated by `PublicLayoutComponent`, `PortalLayoutComponent` and
 `AdminLayoutComponent` and by the `authGuard` and `adminGuard`/`superAdminGuard` route guards listed
-in Table 6.2's companion, the route map of Figure 6.17. A visitor never crosses from the public tree
+in Table 6.3's companion, the route map of Figure 6.11. A visitor never crosses from the public tree
 into a guarded one without authenticating, and the admin tree is itself split by guard between
-`Admin` and `SuperAdmin`, matching the role distinction Table 9.2 defines.
+`Admin` and `SuperAdmin`, matching the role distinction §6.7 sets out.
 
 ### 6.8.2 Design-token system, theming and the single-stylesheet decision
 
-Presentation is governed by one stylesheet, `GHCAA.Web/src/styles.scss`, running to 3,354 lines at
-the time of writing. The decision to keep one file rather than a stylesheet per component was made
+Presentation is governed by one stylesheet, `GHCAA.Web/src/styles.scss`, running to 3,366 lines on 1 September 2026. The decision to keep one file rather than a stylesheet per component was made
 for a reason specific to this project's constraint of one maintainer: a shared design-token set for
 colour, spacing and typography, resolved once and consumed everywhere, is the only way one person can
 change a brand colour in one place and have it apply to three route trees without hunting through
-forty-nine components. §6.12.7 records what this decision cost as well as what it bought.
+the eighty components that declare one. §6.12.7 records what this decision cost as well as what it bought.
 
 ### 6.8.3 Shared control library and the duplication it eliminates, and where it does not yet
 
@@ -288,7 +315,7 @@ Reading the site against Pressman and Maxim's design pyramid [54]: interface des
 separated route trees of §6.8.1; aesthetic design is the token system of §6.8.2; content design is
 the admin-editable `SiteContent` blocks described in §5.2.3's public-content data flow, which let an
 officer change wording without a deployment (FR-45); navigation design is the route map of Figure
-6.17 and the site map of Figure 6.18; architecture design is Figure 6.1; and component design is the
+6.17 and the site map of Figure 6.12; architecture design is Figure 6.1; and component design is the
 shared control library of §6.8.3, with the gap just recorded.
 
 ## 6.9 Mobile Application Design and Platform-Specific Concerns
@@ -332,7 +359,7 @@ class containing an HTTP call, would be the violation, and none exists in the so
 
 The domain depends on abstractions only, in the strong sense that it depends on nothing at all;
 `GHCAA.Application` defines the interfaces `GHCAA.Infrastructure` implements. Enforced by the project
-reference graph of §6.3.6 and demonstrated in the dependency structure matrix of Figure 7.2.
+reference graph of §6.3.6 and reported numerically by the dependency structure matrix planned for Chapter 7.
 
 ### 6.11.3 Single responsibility
 
@@ -363,7 +390,7 @@ neither interface forces a caller to depend on methods it does not use.
 
 ### 6.11.6 Information hiding and encapsulation
 
-A controller never queries `ApplicationDbContext` directly except in the four cases Table 6.2 marks
+A controller never queries `ApplicationDbContext` directly except in the four cases Table 6.3 marks
 as depending on it directly, being `AdminSocialAuthController`, `PaymentConfigController`,
 `HealthController` and part of `GatewaysController`'s webhook path; those are named rather than
 hidden, because a principle applied with undisclosed exceptions is not a principle a reader can trust
@@ -427,6 +454,9 @@ provider-specific attribute needed adding.
 
 ### 6.12.1 Creational
 
+Table 6.4 lists the patterns applied, with the alternative rejected in each case; the subsections
+below give the reasoning for the entries where the choice was not obvious.
+
 **Factory.** `PaymentGatewayFactory` resolves an `IPaymentGatewayService` by `Enums.PaymentGateway`
 key at the point a payment is initiated, so the caller never names a concrete gateway type. Forces:
 the number of gateways was known to grow (four exist; a fifth was added during the project without
@@ -451,7 +481,7 @@ gateway except in its routing.
 change-tracking, so that a controller never composes a LINQ query itself; the exceptions are the four
 controllers named in §6.11.6.
 
-**Decorator.** The middleware pipeline of Figure 6.15 is ASP.NET Core's own decorator chain: each
+**Decorator.** The middleware pipeline of Figure 6.10 is ASP.NET Core's own decorator chain: each
 middleware wraps the next and can act before and after it without the inner stages knowing the outer
 ones exist.
 
@@ -483,7 +513,7 @@ ceremony for a project of this size.
 than uniformly across every entity; every other service reaches `ApplicationDbContext` directly.
 **Unit of Work.** Not hand-written, because EF Core's `DbContext` already is one: `SaveChangesAsync`
 commits every tracked change in a single transaction, which is the property a hand-rolled Unit of
-Work would exist to provide. **Service Layer.** The thirty-four services of Table 6.2's companion DI
+Work would exist to provide. **Service Layer.** The thirty-seven services of Table 6.3's companion DI
 map are this pattern, named and applied consistently. **Data Transfer Object.** Applied at every
 controller boundary, discussed in §6.11.12. **Domain Model.** Present but anaemic in Fowler's sense
 [2], as §5.3.1 already noted: state lives on the entity, behaviour that changes it lives on the
@@ -505,9 +535,12 @@ presentational examples; the profile and admin-member components of §6.8.3 are 
 split has been designed but not yet built. Reactive state uses Angular signals on the web side and
 Riverpod providers on the mobile side, both observer-pattern variants. `authGuard` and its
 `adminGuard`/`superAdminGuard` companions are the guard pattern; an HTTP interceptor attaches the
-bearer token and reacts to a 401 by attempting the refresh flow of Figure 5.19 before failing.
+bearer token and reacts to a 401 by attempting the refresh flow of Figure 5.15 before failing.
 
 ### 6.12.7 Anti-patterns identified and remediated during development
+
+Table 6.6 records each one as symptom, diagnosis and what was done. One is remediated, one is designed
+against but not yet built, and one is accepted as it stands with the reason given.
 
 **God service, avoided by decomposition rather than discovered as a defect.** Splitting
 `FinancialService` from `FinancialLedgerService`, and `IFamilyLinkService` from `IFamilyService`
@@ -524,20 +557,23 @@ where the anti-pattern is named, designed against, and still present in the ship
 
 ## 6.13 Architecture Decision Records
 
-### Table 6.5 — ADR index
+Table 6.1 indexes the six decisions this chapter treats as architectural, in the sense that reversing
+one would change the shape of the system rather than the contents of a file.
+
+### Table 6.1 — ADR index
 
 | ADR | Decision | Context | Consequence |
 | --- | --- | --- | --- |
 | ADR-01 | Adopt clean architecture with a compiler-enforced dependency rule | §6.2: layering by convention had already once failed silently | NFR-M1 becomes checkable; four-assembly ceremony for a single-maintainer project |
 | ADR-02 | Pool provider-specific `ApplicationDbContext` shim types, not the base type | EF's `IMigrationsAssembly` matches migrations to the pooled context's exact runtime type; pooling the base type made `GetMigrations()` return zero migrations on every provider, so the self-healing boot logic was a silent no-op everywhere | Migrations apply correctly on boot across PostgreSQL, MySQL and SQLite |
-| ADR-03 | Never write live constitution publication through `EnsureCreated`/`HasData` | `EnsureCreated()` is a no-op on a non-empty database; a seed-only constitution update would never reach a running production database | `ConstitutionSeeder.SyncAsync` runs at every boot instead |
+| ADR-03 | Never write live constitution publication through `HasData` | Seed data expressed as `HasData` reaches a populated database only through a migration, which pins revisable text to whichever migration carried it; the `EnsureCreated()`-built preprod database never received it at all | `ConstitutionSeeder.SyncAsync` runs at every boot; schema is handled separately by `MigrationBootstrapper` |
 | ADR-04 | Keep the manual payment path primary and leave gateway integration optional | §3.2, §9.9: the Association holds no merchant account and no gateway credentials | Permanent officer verification workload, quantified in §12.6, in exchange for holding no payment credential |
 | ADR-05 | Merge news and notices into one table discriminated by `PostType` | §6.5.2: identical shape apart from authorship rule | BR-03 enforced at the controller rather than by two schemas |
 | ADR-06 | Defer a second `IFileStorageService` implementation | §6.11.4: no second storage requirement exists yet | Interface segregation is structural, not yet demonstrated |
 
 ## 6.14 Design Verification
 
-Table 6.6 checks the architecture against the utility tree of Figure 3.9 by mapping each
+Table 6.5 checks the architecture against the utility tree of Figure 3.10 by mapping each
 quality-attribute scenario to the tactic that addresses it: QAS-01's directory latency to indexed
 queries (§6.5.3) and the cache in front of configuration reads (§6.10); QAS-03's session
 invalidation to `SecurityStampMiddleware`; QAS-06's maintainability scenario to the dependency rule
@@ -561,31 +597,35 @@ design was actually built.
 
 ## Figures and Tables
 
-### Figure 6.1 — High-level architecture diagram
+### Figure 6.1 — High-level architecture diagram {landscape}
 
 ```mermaid
 flowchart TB
     subgraph Clients
+      direction TB
       WEB[Angular 21 Web<br/>public + portal + admin]
       MOB[Flutter Mobile<br/>Android + iOS]
     end
     subgraph API_L["GHCAA.API"]
+      direction TB
       MW[Middleware pipeline]
       CTRL[37 Controllers]
       HUB[2 SignalR hubs]
     end
     subgraph APP_L["GHCAA.Application"]
-      IFACE[34 service interfaces + DTOs]
+      IFACE[40 service interfaces + DTOs]
     end
     subgraph INF_L["GHCAA.Infrastructure"]
+      direction TB
       SVC[Service implementations]
       GW[4 payment gateway adapters]
       DBC[3 DbContext provider shims]
     end
     subgraph DOM_L["GHCAA.Domain"]
-      ENT[49 entities, 23 enums]
+      ENT[49 entity sets, 28 enums]
     end
     subgraph STORE["Storage"]
+      direction TB
       DB[(PostgreSQL /<br/>MySQL / SQLite)]
       FS[(wwwroot/uploads)]
       EXT[bKash / Nagad /<br/>SSLCommerz / DGePay]
@@ -615,27 +655,212 @@ flowchart TB
     style DOM fill:#ffe9b3,stroke:#8a6d1f
 ```
 
-### Figure 6.3 — Entity–relationship diagram, membership sub-model {landscape}
+### Figure 6.3 — Entity–relationship diagram, identity and records sub-model
 
 ```mermaid
 erDiagram
-    MEMBER ||--o| USER : "has one"
+    MEMBER {
+        int Id PK
+        string MembershipNumber UK
+        string Email UK
+        int MembershipType
+        int Status
+    }
+    USER {
+        int Id PK
+        int MemberId FK
+        string PasswordHash
+    }
+    ACADEMIC_RECORD {
+        int Id PK
+        int MemberId FK
+        string Institution
+    }
+    PROFESSIONAL_RECORD {
+        int Id PK
+        int MemberId FK
+        string Employer
+    }
+    MEMBER ||--o| USER : "signs in as"
     MEMBER ||--o{ ACADEMIC_RECORD : "has"
     MEMBER ||--o{ PROFESSIONAL_RECORD : "has"
-    MEMBER ||--o{ MEMBERSHIP_HISTORY : "changes recorded in"
-    MEMBER ||--o{ EC_MEMBER : "may hold"
-    EC_PERIOD ||--o{ EC_MEMBER : "for"
-    MEMBER ||--o{ PAYMENT_HISTORY : "declares"
-    MEMBER ||--o{ EVENT_REGISTRATION : "registers"
-    MEMBER ||--o{ AMENDMENT_VOTE : "casts"
-    CONSTITUTION ||--o{ AMENDMENT_VOTE : "receives"
-    MEMBER ||--o{ FAMILY_LINK_REQUEST : "sends/receives"
 ```
 
-### Figure 6.9 — Design class diagram: application interfaces and infrastructure services
+### Figure 6.4 — Entity–relationship diagram, standing and money sub-model
+
+```mermaid
+erDiagram
+    MEMBER {
+        int Id PK
+        int Status
+    }
+    MEMBERSHIP_HISTORY {
+        int Id PK
+        int MemberId FK
+        string ChangedFrom
+        string ChangedTo
+        string Reason
+    }
+    MEMBERSHIP_DUE {
+        int Id PK
+        int MemberId FK
+        int Year
+        decimal Amount
+        bool IsPaid
+    }
+    PAYMENT_HISTORY {
+        int Id PK
+        int MemberId FK
+        string TransactionId UK
+        decimal Amount
+        int Status
+    }
+    MEMBER ||--o{ MEMBERSHIP_HISTORY : "changes recorded in"
+    MEMBER ||--o{ MEMBERSHIP_DUE : "owes"
+    MEMBER ||--o{ PAYMENT_HISTORY : "declares"
+    MEMBERSHIP_DUE }o--o| PAYMENT_HISTORY : "settled by"
+```
+
+### Figure 6.5 — Entity–relationship diagram, events and participation sub-model
+
+```mermaid
+erDiagram
+    MEMBER {
+        int Id PK
+        int Status
+    }
+    ALUMNI_EVENT {
+        int Id PK
+        string Title
+        int ParticipantLimit
+        bool HasWaitlist
+    }
+    EVENT_REGISTRATION {
+        int Id PK
+        int EventId FK
+        int MemberId FK
+        string TicketCode
+        int Status
+    }
+    FAMILY_LINK_REQUEST {
+        int Id PK
+        int RequesterId FK
+        int TargetMemberId FK
+        int Status
+    }
+    ALUMNI_EVENT ||--o{ EVENT_REGISTRATION : "receives"
+    MEMBER ||--o{ EVENT_REGISTRATION : "registers"
+    MEMBER ||--o{ FAMILY_LINK_REQUEST : "sends or receives"
+```
+
+### Figure 6.6 — Entity–relationship diagram, governance sub-model
+
+```mermaid
+erDiagram
+    MEMBER {
+        int Id PK
+        int MembershipType
+        int Status
+    }
+    CONSTITUTION {
+        int Id PK
+        string Version
+        bool IsActive
+        datetime SupersededDate
+    }
+    AMENDMENT_VOTE {
+        int Id PK
+        int ConstitutionId FK
+        int MemberId FK
+        bool IsFor
+    }
+    EC_PERIOD {
+        int Id PK
+        datetime StartDate
+        datetime EndDate
+    }
+    EC_MEMBER {
+        int Id PK
+        int ECPeriodId FK
+        int MemberId FK
+        string Position
+    }
+    CONSTITUTION ||--o{ AMENDMENT_VOTE : "receives"
+    MEMBER ||--o{ AMENDMENT_VOTE : "casts"
+    EC_PERIOD ||--o{ EC_MEMBER : "seats"
+    MEMBER ||--o{ EC_MEMBER : "may hold"
+```
+
+### Figure 6.7 — Design class diagram: domain model
 
 ```mermaid
 classDiagram
+    direction LR
+    class Member {
+        +int Id
+        +string FullName
+        +string Email
+        +MembershipType MembershipType
+        +MemberStatus Status
+        +bool IsVerified
+    }
+    class MembershipDue {
+        +int Year
+        +decimal Amount
+        +DateTime DueDate
+        +bool IsPaid
+    }
+    class PaymentHistory {
+        +string TransactionId
+        +decimal Amount
+        +PaymentStatus Status
+        +PaymentMethod PaymentMethod
+        +string ReceiptPath
+    }
+    class MembershipHistory {
+        +string ChangedFrom
+        +string ChangedTo
+        +string Reason
+        +DateTime ChangedAt
+    }
+    class AlumniEvent {
+        +string Title
+        +DateTime StartDate
+        +decimal RegistrationFee
+        +int ParticipantLimit
+        +EventStatus Status
+    }
+    class EventRegistration {
+        +bool IsNonMember
+        +string TicketCode
+        +RegistrationStatus Status
+        +DateTime RegisteredAt
+    }
+    class Constitution {
+        +string Version
+        +DateTime EffectiveDate
+        +DateTime SupersededDate
+        +bool IsActive
+    }
+    class AmendmentVote {
+        +bool IsFor
+        +DateTime VotedAt
+    }
+    Member "1" --> "0..*" MembershipDue
+    Member "1" --> "0..*" PaymentHistory
+    Member "1" --> "0..*" MembershipHistory
+    MembershipDue "0..1" --> "1" PaymentHistory : settled by
+    AlumniEvent "1" --> "0..*" EventRegistration
+    Member "0..1" --> "0..*" EventRegistration
+    Constitution "1" --> "0..*" AmendmentVote
+    Member "1" --> "0..*" AmendmentVote
+```
+
+### Figure 6.8 — Design class diagram: application interfaces and infrastructure services
+
+```mermaid
+classDiagram
+    direction LR
     class IMemberService {
         <<interface>>
         +ApplyAsync()
@@ -669,10 +894,10 @@ classDiagram
     PaymentGatewayFactory --> IPaymentGatewayService : resolves
 ```
 
-### Figure 6.12 — Component diagram with provided and required interfaces
+### Figure 6.9 — Component diagram with provided and required interfaces
 
 ```mermaid
-flowchart LR
+flowchart TB
     C[EventsController] -->|requires| IES[IEventService]
     IES -.->|provided by| ES[EventService]
     ES -->|requires| DBC[ApplicationDbContext]
@@ -680,10 +905,10 @@ flowchart LR
     IFS -.->|provided by| LFS[LocalFileStorageService]
 ```
 
-### Figure 6.15 — Middleware pipeline diagram
+### Figure 6.10 — Middleware pipeline diagram
 
 ```mermaid
-flowchart LR
+flowchart TB
     R([Request]) --> M1[ExceptionMiddleware]
     M1 --> M2[SecurityHeadersMiddleware]
     M2 --> M3[AuditLogMiddleware]
@@ -697,11 +922,11 @@ flowchart LR
     M10 --> M11[Controllers / Hubs]
 ```
 
-### Figure 6.17 — Navigation and route map
+### Figure 6.11 — Navigation and route map
 
 ```mermaid
 flowchart TB
-    ROOT[/] --> PUB[Public tree:<br/>landing, login, register,<br/>directory, constitution, elections]
+    ROOT["/"] --> PUB[Public tree:<br/>landing, login, register,<br/>directory, constitution, elections]
     ROOT --> PORTAL{authGuard}
     PORTAL --> MEM[Member tree:<br/>dashboard, profile, payments,<br/>id-card, messages, assistant]
     ROOT --> ADMINROOT{authGuard + adminGuard}
@@ -710,31 +935,57 @@ flowchart TB
     SUPER --> SADM[SuperAdmin tree:<br/>ledger, fee config,<br/>payment config, roles, audit]
 ```
 
-### Figure 6.29 — Architectural trade-off radar
+### Figure 6.12 — Site map and information architecture of the public site
+
+```mermaid
+flowchart LR
+    HOME["/ landing"]
+    HOME --> ABOUT["/about"]
+    HOME --> CONTACT["/contact"]
+    HOME --> GOV["Governance"]
+    GOV --> CONST["/constitution"]
+    GOV --> ELEC["/elections"]
+    HOME --> LIFE["Association life"]
+    LIFE --> NEWS["/news"]
+    LIFE --> EVENTS["/events, /events/:id"]
+    LIFE --> GAL["/gallery"]
+    LIFE --> MAG["/magazine"]
+    HOME --> PEOPLE["People and opportunities"]
+    PEOPLE --> DIR["/directory"]
+    PEOPLE --> JOBS["/jobs"]
+    HOME --> ACCESS["Account"]
+    ACCESS --> LOGIN["/login"]
+    ACCESS --> REG["/register"]
+    ACCESS --> RESET["/reset-password"]
+    ACCESS --> PAY["/payment/success, /payment/failed"]
+    LOGIN -.-> PORTAL["/portal, guarded (Figure 6.11)"]
+```
+
+### Figure 6.13 — Architectural trade-off radar
 
 ```mermaid
 quadrantChart
-    title Candidate architectures against operability and scaling headroom
-    x-axis Low operability by one maintainer --> High operability by one maintainer
-    y-axis Low independent scaling --> High independent scaling
-    quadrant-1 Over-engineered for this project
-    quadrant-2 Good fit if scaling mattered
-    quadrant-3 Poor fit
-    quadrant-4 Chosen: clean architecture, modular monolith
-    Layered, no dependency rule: [0.55, 0.2]
-    Clean architecture, enforced: [0.8, 0.25]
-    Modular monolith, convention only: [0.6, 0.3]
-    Microservices: [0.25, 0.85]
+    title Candidate architectures: operability by one maintainer against independent scaling
+    x-axis "Hard for one maintainer to operate" --> "Easy for one maintainer to operate"
+    y-axis "No independent scaling" --> "Independent scaling"
+    quadrant-1 "Scaling this project does not need"
+    quadrant-2 "Would suit a larger team"
+    quadrant-3 "Poor fit"
+    quadrant-4 "Chosen quadrant"
+    "Layered, no dependency rule": [0.55, 0.2]
+    "Clean architecture, enforced": [0.8, 0.25]
+    "Modular monolith, convention only": [0.6, 0.3]
+    "Microservices": [0.25, 0.85]
 ```
 
-### Table 6.1 — Data dictionary (representative slice; full dictionary in Appendix E)
+### Table 6.2 — Data dictionary (representative slice; full dictionary in Appendix E)
 
 | Table | Column | Type | Constraint | Description |
 | --- | --- | --- | --- | --- |
 | Members | Email | string | Unique index | Login identifier alongside membership number |
 | Members | NID | string | Unique index | National identity number, 10/13/17 digits |
 | Members | MobileNo | string | Unique index | 11-digit mobile number |
-| Members | Status | MembershipStatus enum | Composite index with IsArchived | Drives the state machine of Figure 5.15 |
+| Members | Status | MembershipStatus enum | Composite index with IsArchived | Drives the state machine of Figure 5.11 |
 | AmendmentVotes | (ConstitutionId, MemberId) | composite | Unique index | Enforces BR-02, one vote per member per version |
 | EventRegistrations | (EventId, MemberId) | composite | Unique index | Prevents duplicate registration |
 | PaymentHistories | TransactionId | string | Unique index | Prevents duplicate crediting of one declared payment |
@@ -743,22 +994,22 @@ quadrantChart
 | OrganizationConfigs | ConfigJson | text/JSONB | — | Whole configuration document, §6.5.2 |
 | Constitutions | IsActive | bool | Not database-enforced | Exactly-one invariant maintained procedurally, §6.5.2 |
 
-### Table 6.2 — API endpoint catalogue (by controller; full catalogue in Appendix F)
+### Table 6.3 — API endpoint catalogue (by controller; full catalogue in Appendix F)
 
 | Controller | Route | Authorisation | Notes |
 | --- | --- | --- | --- |
 | AuthController | /api/auth | Public | Login, social login |
 | RegistrationController | /api/registration | Public, rate-limited | Registration wizard, OTP |
-| MemberImportController | /api/import | SuperAdmin | Bulk import |
+| MemberImportController | /api/admin/members/import | SuperAdmin | Bulk import |
 | EventsController | /api/events | Public read, Auth register, Admin manage | Capacity and waitlist logic |
-| FinancialLedgerController | /api/ledger | SuperAdmin | Append-only ledger |
+| FinancialLedgerController | /api/ledger and /api/financial/ledger | SuperAdmin | Append-only ledger; the controller carries both route attributes, with no comment recording why |
 | GatewaysController | /api/gateways | Auth + public webhook | Callback verification |
 | PaymentConfigController | /api/payment-config | SuperAdmin write, Auth read | Depends on ApplicationDbContext directly |
 | GovernanceController | /api/governance | Public read, Admin write | Constitution, EC record |
 | AdminGovernanceController | /api/admin/governance | Admin | Committee and amendment administration |
-| HealthController | /api/health | Public | Depends on ApplicationDbContext directly |
+| HealthController | /healthz | Public | Depends on ApplicationDbContext directly |
 
-### Table 6.3 — Design pattern catalogue (selected entries; full catalogue is §6.12 in full)
+### Table 6.4 — Design pattern catalogue (selected entries; full catalogue is §6.12 in full)
 
 | Pattern | Category | Problem and forces | Participants here | Alternative rejected |
 | --- | --- | --- | --- | --- |
@@ -766,7 +1017,7 @@ quadrantChart
 | Strategy | Behavioural | Same operation, several incompatible implementations | The four gateway classes; the three DbContext shims | A single class with provider-conditional branches |
 | Repository | Enterprise | Isolate persistence detail from a caller | IFileUploadRepository only | Uniform repository per entity, rejected as unneeded ceremony given EF Core's own abstraction |
 
-### Table 6.6 — Quality-attribute scenario to architectural tactic mapping
+### Table 6.5 — Quality-attribute scenario to architectural tactic mapping
 
 | Scenario | Tactic |
 | --- | --- |
@@ -776,7 +1027,7 @@ quadrantChart
 | QAS-07 (dependency-rule violation caught at build) | Project-reference enforcement of the dependency rule, §6.3.6 |
 | QAS-08 (auditability of the vote-eligibility rule) | Business rules catalogue, §5.6, naming the exact method for every constitutional rule |
 
-### Table 6.7 — Anti-patterns detected and remediated
+### Table 6.6 — Anti-patterns detected and remediated
 
 | Symptom | Diagnosis | Refactoring applied | Status |
 | --- | --- | --- | --- |

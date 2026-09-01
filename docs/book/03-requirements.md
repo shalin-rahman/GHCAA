@@ -57,14 +57,28 @@ knowledge of the Association's processes is small and largely identified by offi
 frame was the office holders themselves plus a convenience sample of ordinary members drawn from
 those attending the reunion at which registration was being collected.
 
-*[Placeholder — no participant record was kept in the project repository, so these figures must be
-reconstructed from the author's own notes before submission. State: the number of participants
-in each role, namely Executive Committee officers, ordinary members, and prospective members; the
-number of interview sessions and their approximate duration; the period over which they were
-conducted; and the recruitment route. The interview guides for each role should be reproduced in
-Appendix A, and the observation protocol summarised there as well. No participant-derived figure is
-quoted anywhere in this dissertation, so nothing downstream depends on these numbers; they are
-required for methodological completeness.]*
+Ten people were interviewed. They included all three of the officers whose work the platform most
+directly changes, being the President, the Treasurer and the General Secretary, with the remainder
+ordinary members. Participants are not named here. They are identifiable members of a small
+association, they agreed to take part verbally rather than in writing, and naming them would put
+identifiable personal information into a public document to no analytical purpose; §3.1.3 states the
+consent position in full.
+
+The author is one of the ten. He is also the Association's Information and Technology Secretary and
+the platform's sole maintainer, so his own account of current practice is not independent evidence,
+and it is not treated as such: every requirement traced to interview in the Source column of §3.3 was
+stated by at least one participant other than the author.
+
+Sessions ran thirty to forty minutes each. Recruitment was direct: every participant was already a
+member of the Association, and each was approached as one member to another rather than through any
+formal call for volunteers. That is the recruitment route a single-maintainer study in a small
+association actually has, and it carries the selection bias that goes with it, since the people
+easiest to approach are the people already engaged.
+
+The period over which the sessions ran was not recorded, and is not reconstructed here. No
+participant-derived figure is quoted anywhere in this dissertation, so nothing downstream depends on
+it; saying that it was not recorded is preferable to producing a date range from memory. The
+interview guides per role belong in Appendix A with the observation protocol.
 
 Instruments used: an interview guide per role, with an opening account of current task flow, a
 probe set on failure and workaround, and a closing prioritisation exercise; an observation checklist
@@ -73,13 +87,27 @@ each constitutional clause to its classification and to the identifier it produc
 
 ### 3.1.3 Ethical approval and informed consent
 
-*[Placeholder — to be completed by the author. Record the approving body and the reference number
-of the approval, the date granted, and the consent procedure followed. The following statements
-should be confirmed and retained if accurate: participation was voluntary and unpaid; written
-informed consent was obtained before each session; participants were told the purpose, the intended
-use of the material and their right to withdraw; no personally identifying participant data appears
-in this dissertation or its appendices; interview notes are held encrypted and will be destroyed on
-the schedule stated in the approval.]*
+This study was not reviewed by a university ethics committee. Permission to conduct it, to use the
+Association's records and governing documents, and to work with its members was given by the
+Government Haraganga College Alumni Association itself. No written approval was issued, no reference
+number exists, and no date of approval was recorded. That is stated rather than presented as an
+equivalent to institutional review, because it is not one.
+
+Consent from interview participants was verbal and was not documented. Participation was voluntary
+and unpaid, and participants were told what the material would be used for. No written consent form
+was signed, no consent record was retained, and no participant is named in this dissertation or its
+appendices. Consent from the members whose real records the live system holds was obtained the same
+way, verbally, at Association gatherings, with no written record and no formal notice.
+
+Three consequences follow, and they are limitations of this work rather than features of it. A
+participant who wished to withdraw consent has no documented statement to withdraw. Because consent
+was never recorded, its scope cannot be demonstrated to a reader, only asserted by the author. And a
+future study reusing this material could not establish that the people concerned had agreed to that
+reuse. Section 9.8 sets out what was done to limit the exposure this leaves: no production member
+data appears in this dissertation, every example and test fixture uses synthesised records, and
+personal data in the running system is held under the access controls of Chapter 9. The
+recommendation in §13.4 that the Association adopt a written consent line in its registration form
+comes directly from this gap.
 
 Separately from participant ethics, the project handles live personal data of real members,
 including national identity numbers, dates of birth and photographs. The declaration governing that
@@ -131,9 +159,16 @@ carry items that were never going to be built.
 
 ## 3.3 Requirements Specification
 
+The requirement catalogue is Table 3.1 and the non-functional catalogue Table 3.2; both are set as
+the tables of §3.3 and §3.4 rather than repeated at the end of the chapter.
 Priorities use MoSCoW as in §3.8: M must, S should, C could, W won't in this release. The Source
 column records D for document analysis with the clause cited where applicable, I for interview, O for
-observation, C for competitor analysis.
+observation, C for competitor analysis, and R for a dated stakeholder request recorded in the project
+tracker `docs/TODO.md` after the original elicitation had closed.
+
+Figures 3.8 and 3.9 draw the analysis-level domain model these requirements imply, before any
+persistence or transport concern is added to it. It is drawn in two halves, membership and money then
+participation and governance, because one diagram of all seventeen classes prints too small to follow.
 
 ### 3.3.1 Membership, Registration and Profile
 
@@ -181,10 +216,11 @@ mechanism is described in §7.4 and its threat rationale in §9.5.
 | FR-16 | The system shall record attendance by scanning the member's identity code at the venue, and shall reject a code that does not correspond to a valid registration for that event. | I, C | S |
 | FR-17 | The system shall maintain a per-event photograph gallery, uploaded by administrators, visible according to the event's publication setting. | I | C |
 | FR-18 | The system shall report per event the registered count, the waitlisted count, the attended count and the fee collected. | I | S |
-| FR-53 | The system shall permit a member to submit a photograph or album to an event's gallery, and shall hold the submission unpublished until an administrator approves or rejects it, with a recorded reason on rejection. | I | C |
+| FR-53 | The system shall permit a member to submit a photograph or album to an event's gallery, and shall hold the submission unpublished until an administrator approves or rejects it, with a recorded reason on rejection. | R | C |
 
 FR-53 extends FR-17 on the same reasoning as FR-27 for news: a submission from a member is content
-until an officer has looked at it, not a publication in its own right.
+until an officer has looked at it, not a publication in its own right. Like FR-54 in §3.3.9, it
+arrived after the elicitation closed, as the tracker request cited there.
 
 ### 3.3.4 Payments, Dues and Financial Records
 
@@ -277,18 +313,32 @@ had tried.
 
 | ID | Requirement | Source | Pri |
 | --- | --- | --- | --- |
-| FR-54 | The system shall permit a member to post a job or career opportunity, and shall hold the posting unpublished until an administrator approves or rejects it, with a recorded reason on rejection. | *[Placeholder — source to be confirmed by the author]* | C |
+| FR-54 | The system shall permit a member to post a job or career opportunity, and shall hold the posting unpublished until an administrator approves or rejects it, with a recorded reason on rejection. | R | C |
 
-*[Placeholder — to be completed by the author. The Job Board was not part of the original
-elicitation and has no interview, document, observation or competitor-analysis record behind it;
-FR-54 is stated provisionally from the shipped behaviour alone and the Source column above should
-be replaced once genuine provenance (or a documented decision to add the feature outside the
-original study) is recorded.]*
+FR-54 came after the elicitation of §3.1 had closed. Its provenance is a dated stakeholder request
+logged in the project tracker: `docs/TODO.md`, Area 40, "Member albums with admin approval,
+job-posting approval, events without registration (raised by user 2026-08-26)", which is also the
+origin of FR-53. That is a weaker record than an interview transcript, and it is marked R rather than
+I for that reason: what survives is the request and the date, not the discussion behind it. Both
+requirements were specified from the request and then implemented, rather than reconstructed from the
+shipped code afterwards.
 
 ## 3.4 Non-Functional Requirements
 
-Classified by ISO/IEC 25010 characteristic [6], with the FURPS+ category in brackets for
-cross-reference [23]. Every entry has a measurable acceptance criterion; entries that could not be
+Classified by ISO/IEC 25010:2011 characteristic [6], with the FURPS+ category in brackets for
+cross-reference [23]; Figure 3.11 shows the classification as a tree, and Figure 3.12 the goal model
+from which the quality requirements were derived.
+
+The edition matters, and the choice is deliberate. ISO/IEC 25010:2023 [74] supersedes the 2011
+edition and is not a cosmetic revision: it renames usability as interaction capability and
+portability as flexibility, adds safety as a ninth characteristic, and reorganises several
+subcharacteristics. This requirement set was classified against the 2011 edition before that revision
+was consulted, and the NFR identifiers, the utility tree of Figure 3.10 and the evaluation plan of
+§4.5 all carry that structure. Reclassifying against the 2023 edition would change identifiers used
+throughout the book for no gain in the argument, so the 2011 edition is retained and named
+explicitly wherever it is cited. A reader working from the 2023 edition should read NFR-U* as
+interaction capability and NFR-Po* as flexibility; nothing in this dissertation makes a safety claim,
+which is the one characteristic the older model has no place for. Every entry has a measurable acceptance criterion; entries that could not be
 given one were rejected rather than weakened, which is why there is no requirement here about the
 system being "intuitive".
 
@@ -370,7 +420,7 @@ system being "intuitive".
 
 Each scenario is stated in the six-part form of Bass, Clements and Kazman: source, stimulus,
 artefact, environment, response, response measure [13]. These are the scenarios carried into the
-utility tree of Figure 3.9 and into the architectural evaluation of §6.12. Ten are given here; the
+utility tree of Figure 3.10 and into the architectural evaluation of §6.12. Ten are given here; the
 remainder are in Appendix B.
 
 | ID | NFR | Source | Stimulus | Artefact | Environment | Response | Response measure |
@@ -392,7 +442,8 @@ distinguishes this artefact from the configured alternatives assessed in §2.10.
 
 ## 3.6 Use-Case Modelling
 
-The system-level model is Figure 3.1, decomposed by subsystem in Figures 3.2 to 3.6. The actor
+The system-level model is Figure 3.1, decomposed by subsystem into membership (Figure 3.2), events
+(Figure 3.3), payments (Figure 3.4), governance (Figure 3.5) and administration (Figure 3.6). The actor
 hierarchy in Figure 3.7 matters because it is the model the authorisation policy implements: Guest
 is unauthenticated; Member is an authenticated member in any tier; Voting Member is the subset
 admitted by DC-03; EC Member holds a position under Article IV; Admin exercises administrative
@@ -434,11 +485,14 @@ the documentation affected is updated in the same change rather than later.
 
 ## 3.8 Requirements Prioritisation
 
+Table 3.5 records the prioritisation and what was negotiated to reach it. The counts are over
+FR-01 to FR-54 as they stand at the time of writing:
+
 | Priority | Count | Basis |
 | --- | --- | --- |
-| Must | 31 | Either constitutionally mandated, or the Association cannot operate without it |
-| Should | 12 | Substantial value; deferrable by one increment without operational failure |
-| Could | 6 | Desirable; first to be dropped under schedule pressure |
+| Must | 38 | Either constitutionally mandated, or the Association cannot operate without it |
+| Should | 9 | Substantial value; deferrable by one increment without operational failure |
+| Could | 7 | Desirable; first to be dropped under schedule pressure |
 | Won't (this release) | 8 | Explicitly excluded, recorded so that the exclusion is a decision rather than an omission |
 
 Constitutional mandate was treated as automatically Must, which removed a third of the
@@ -471,8 +525,8 @@ the tree.
 
 ## 3.10 Domain Constraints
 
-These are the rules the software may not violate. They derive from the constitution at version 4.2
-and from the election documents, and each cites its source. Where the wording below abbreviates the
+These are the rules the software may not violate, listed in Table 3.6. They derive from the
+constitution at version 4.2 and from the election documents, and each cites its source. Where the wording below abbreviates the
 clause, the clause governs.
 
 | ID | Constraint | Source | Enforced by |
@@ -506,6 +560,8 @@ the version in force, so a page cannot become stale by pointing at a superseded 
 one of the observed failures of the Facebook-attachment era.
 
 ## 3.11 Feasibility Analysis
+
+Table 3.7 summarises the four dimensions assessed below.
 
 **Technical.** The maintainer already held working competence in the server platform, the web
 framework and the mobile framework selected, which was itself a selection criterion rather than a
@@ -598,10 +654,10 @@ unknown at specification time, which was itself one of the problems the project 
 
 ## 3.13 Summary
 
-Fifty-two functional requirements, thirty non-functional requirements across the eight ISO/IEC 25010
-characteristics, sixteen domain constraints traced to constitutional and electoral sources, and ten
-quality-attribute scenarios carried forward for architectural evaluation. Thirty-one requirements are
-Must, of which a substantial proportion are constitutionally mandated and were therefore not open to
+Fifty-four functional requirements, thirty-four non-functional requirements across the eight ISO/IEC
+25010 characteristics, sixteen domain constraints traced to constitutional and electoral sources, and
+ten quality-attribute scenarios carried forward for architectural evaluation. Thirty-eight
+requirements are Must, of which a substantial proportion are constitutionally mandated and were therefore not open to
 negotiation. Three stakeholder conflicts were resolved and recorded, in each case against the
 convenient option and in favour of the constitution or the member. The line the specification draws
 between what the software decides and what a human must decide, visible in DC-04, DC-07 and DC-15,
@@ -836,116 +892,44 @@ flowchart BT
 Administrative capability attaches to Admin by role assignment, not to EC Member by virtue of
 position. The two are drawn as separate specialisations of Member for exactly that reason.
 
-### Figure 3.8 — Domain model, analysis level
+### Figure 3.8 — Domain model, analysis level: membership, obligations and payment
 
 ```mermaid
 classDiagram
-    class Member {
-      membershipNumber
-      fullName
-      dateOfBirth
-      nationalId
-      status
-      tier
-      joinedOn
-    }
-    class AcademicRecord {
-      institution
-      programme
-      session
-      completedOn
-    }
-    class ProfessionalRecord {
-      employer
-      designation
-      from
-      to
-    }
-    class FieldVisibility {
-      fieldName
-      disclosed
-    }
-    class Obligation {
-      category
-      amount
-      raisedOn
-      dueOn
-    }
-    class PaymentDeclaration {
-      amount
-      channel
-      reference
-      evidence
-      declaredOn
-    }
-    class Verification {
-      verifiedBy
-      verifiedOn
-      outcome
-      note
-    }
-    class Receipt {
-      number
-      issuedOn
-    }
-    class Event {
-      title
-      venue
-      startsAt
-      capacity
-      fee
-    }
-    class EventRegistration {
-      state
-      position
-      registeredOn
-    }
-    class Attendance {
-      scannedAt
-    }
-    class Post {
-      kind
-      title
-      body
-      publishedOn
-      pinned
-    }
-    class ConstitutionVersion {
-      version
-      effectiveOn
-      changeSummary
-      isActive
-    }
-    class AmendmentProposal {
-      title
-      proposingRoute
-      circulatedOn
-      opensOn
-      closesOn
-    }
-    class AmendmentVote {
-      choice
-      castOn
-      eligibilityBasis
-    }
-    class CommitteePosition {
-      title
-      isElected
-      hasVote
-    }
-    class CommitteeTerm {
-      startsOn
-      endsOn
-    }
-
+    direction LR
+    class Member
+    class AcademicRecord
+    class ProfessionalRecord
+    class FieldVisibility
+    class Obligation
+    class PaymentDeclaration
+    class Verification
+    class Receipt
     Member "1" -- "1..*" AcademicRecord
     Member "1" -- "0..*" ProfessionalRecord
     Member "1" -- "0..*" FieldVisibility
     Member "1" -- "0..*" Obligation
     Member "1" -- "0..*" PaymentDeclaration
+    Obligation "0..*" -- "0..*" PaymentDeclaration : settles
     PaymentDeclaration "1" -- "0..1" Verification
     Verification "1" -- "0..1" Receipt
-    Obligation "0..*" -- "0..*" PaymentDeclaration : settles
+```
+
+### Figure 3.9 — Domain model, analysis level: participation, governance and content
+
+```mermaid
+classDiagram
+    direction LR
+    class Member
+    class Event
+    class EventRegistration
+    class Attendance
+    class Post
+    class ConstitutionVersion
+    class AmendmentProposal
+    class AmendmentVote
+    class CommitteePosition
+    class CommitteeTerm
     Member "1" -- "0..*" EventRegistration
     Event "1" -- "0..*" EventRegistration
     EventRegistration "1" -- "0..1" Attendance
@@ -957,6 +941,12 @@ classDiagram
     Member "1" -- "0..*" CommitteeTerm : holds
 ```
 
+
+Attributes are omitted from both halves so the classes and their multiplicities print legibly; they are
+given per class in the data dictionary of Table 6.2 and, for the classes that survive into the design
+model, in Figure 6.8.
+
+
 This is an analysis model and deliberately omits identity, authentication, notification,
 configuration and content concerns, all of which appear in the design class diagram of Chapter 6. Two
 modelling decisions are worth stating. `Obligation` and `PaymentDeclaration` are separate classes
@@ -966,7 +956,7 @@ arrears unanswerable. `AmendmentVote` carries `eligibilityBasis`, recording why 
 admitted at the moment of voting, so that a later change in the member's standing cannot retroactively
 call the count into question.
 
-### Figure 3.9 — Quality-attribute utility tree
+### Figure 3.10 — Quality-attribute utility tree
 
 ```mermaid
 flowchart LR
@@ -993,12 +983,12 @@ Annotations are (business value, technical risk) on a high, medium, low scale, i
 [34]. The four (H, H) and (H, M) items with highest combined weight, being QAS-02, QAS-04, QAS-08 and
 QAS-09, are the scenarios the architectural evaluation of §6.12 examines in detail.
 
-### Figure 3.10 — Requirements classification, FURPS+
+### Figure 3.11 — Requirements classification, FURPS+
 
 ```mermaid
-flowchart TB
+flowchart LR
     R[Requirements]
-    R --> F["Functionality<br/>FR-01…FR-52, NFR-F1…F2, NFR-S1…S8"]
+    R --> F["Functionality<br/>FR-01…FR-54, NFR-F1…F2, NFR-S1…S8"]
     R --> Us["Usability<br/>NFR-U1…U5"]
     R --> Re["Reliability<br/>NFR-R1…R4"]
     R --> Pe["Performance<br/>NFR-P1…P5"]
@@ -1010,10 +1000,10 @@ flowchart TB
     Plus --> Ph["Physical constraints<br/>single hosted deployment tier"]
 ```
 
-### Figure 3.11 — Goal model
+### Figure 3.12 — Goal model
 
 ```mermaid
-flowchart TB
+flowchart LR
     G1["Stakeholder goal:<br/>the Association knows who its members are"]
     G2["Stakeholder goal:<br/>money is accounted for without personal trust"]
     G3["Stakeholder goal:<br/>governance is visible and procedurally sound"]
@@ -1041,15 +1031,15 @@ flowchart TB
 ### Table 3.1 — Functional requirement catalogue
 
 The catalogue is given in full in the tables of §3.3, which carry the ID, statement, source and
-priority for each of FR-01 to FR-52 grouped by subsystem, and is not repeated here. The RQ linkage
-is as follows: FR-01 to FR-31 and FR-41 to FR-52 answer RQ1 as the characterisation of the
+priority for each of FR-01 to FR-54 grouped by subsystem, and is not repeated here. The RQ linkage
+is as follows: FR-01 to FR-31 and FR-41 to FR-54 answer RQ1 as the characterisation of the
 requirement set; FR-19 to FR-25 additionally bear on RQ2 through the manual-payment design position;
 FR-32 to FR-40 answer RQ3.
 
 ### Table 3.2 — Non-functional requirement catalogue
 
 Given in full in §3.4, organised by ISO/IEC 25010 characteristic with the measurable acceptance
-criterion stated for each of the thirty entries.
+criterion stated for each of the thirty-four entries.
 
 ### Table 3.3 — Use-case descriptions, ten highest-value cases
 

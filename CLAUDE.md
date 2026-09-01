@@ -30,3 +30,20 @@ wrote them, not a model. This applies to every new or edited comment/doc/TODO, i
   Git history already carries that.
 - When editing a file, match whatever comment style already exists there before applying this rule to
   new lines — don't rewrite untouched comments just to align tone.
+
+# Documentation book (docs/book/)
+
+The dissertation in `docs/book/` is held to a stricter standard than the rest of the docs, and the
+standard is enforced by its build rather than by attention.
+
+- Before editing a chapter, read `docs/book/README.md`. It carries the house style, the IEEE
+  conventions, the A4 figure rules and the fix order for a diagram that will not print.
+- After editing, run `python docs/book/build/build.py --pdf --strict`. It must end with
+  `status : clean, ready to deliver`. Add `--no-placeholders` only for a copy being handed in. It fails on a numbering gap, a figure the body never names, a
+  drifted front-matter list, banned vocabulary, a diagram that cannot print legibly on A4, and an open
+  placeholder. Do not silence a check to get a green run; fix what it names.
+- After adding, removing or moving a figure or table, run `python docs/book/build/renumber.py --apply`.
+- Every diagram must print inside one A4 page with labels at 7pt or larger. Reshape the diagram
+  (turn it, shorten labels, split it, or set it as a table) before reaching for `{landscape}`.
+- Repository numbers quoted in the text must come from a command run against the tree, with the date
+  recorded. Anything that cannot be sourced that way is a `*[` placeholder, never a plausible guess.

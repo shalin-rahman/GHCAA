@@ -44,13 +44,14 @@ unit.
 
 ### 5.2.3 Level 2 decompositions of the critical processes
 
-Three processes are decomposed to Level 2 here: payment processing, membership approval, and
-constitution publication. These were chosen because each hides a decision inside it that the Level 1
+Three processes are decomposed to Level 2 here: payment processing in Figure 5.3, membership
+approval in Figure 5.4, and constitution publication in Figure 5.5. These were chosen because each hides a decision inside it that the Level 1
 diagram cannot show and that later chapters depend on. Authentication and OTP verification is
-represented instead as the sequence diagram of Figure 5.19, and the election-administration process
-as the BPMN diagram of Figure 5.14, because in both cases the property that matters is the ordering
+represented instead as the sequence diagram of Figure 5.15, and the election-administration process
+as the BPMN diagram of Figure 5.10, because in both cases the property that matters is the ordering
 and timing of an interaction across roles rather than the transformation of data, which a data-flow
-diagram is not the right notation to carry.
+diagram is not the right notation to carry. Table 5.3 gives the process specification for each
+numbered process in those three diagrams, and Table 5.4 the data stores they read and write.
 
 ## 5.3 Object-Oriented Analysis
 
@@ -70,7 +71,7 @@ uniformly.
 
 ### 5.3.2 CRC Modelling
 
-Figure 5.8 gives the CRC card set for the analysis classes with the widest collaboration surface.
+Table 5.2 gives the CRC card set for the analysis classes with the widest collaboration surface.
 `Member` collaborates with almost everything, which is expected of the entity the whole domain
 orbits; `GovernanceService`'s collaborator list is the direct analysis-level evidence for the
 DC-03 enforcement discussed in §5.6.
@@ -78,14 +79,22 @@ DC-03 enforcement discussed in §5.6.
 ### 5.3.3 Analysis class relationships
 
 The relationships among these classes, at the level appropriate to analysis rather than to design,
-are drawn in Figure 3.8 already and are not repeated here; §6.3 and Figure 6.8 give the design-level
+are drawn in Figure 3.8 already and are not repeated here; §6.3 and Figure 6.7 give the design-level
 version once persistence and DTO boundaries are added.
 
 ## 5.4 Behavioural Modelling
 
-Three activity diagrams, one swimlane diagram and four sequence diagrams are given in the figures at
-the end of this chapter. Each is discussed at the point it is first needed in §5.5 and §5.6 rather
-than gathered into a separate narrative here, so that a diagram sits next to the rule it illustrates.
+Three activity diagrams cover the flows where a decision is taken by a person rather than by code:
+registration and administrative approval in Figure 5.6, payment declaration and verification in
+Figure 5.7, and event registration with its waitlist in Figure 5.8. Figure 5.9 redraws the amendment
+vote as a swimlane diagram, because there the interesting property is which role may act at which
+point rather than the sequence itself, and Figure 5.10 gives the election cycle in BPMN, whose
+audience is the Association's officers rather than engineers. Four sequence diagrams follow: login
+with one-time password and token issue in Figure 5.15, event registration in Figure 5.16, payment
+declaration and verification in Figure 5.17, and real-time notification over SignalR in Figure 5.18.
+Figure 5.19 draws token lifetime and the refresh window to scale. Each is discussed at the point it
+is first needed in §5.5 and §5.6 rather than in a separate narrative here, so that a diagram sits
+next to the rule it illustrates.
 
 ## 5.5 State Modelling of Long-Lived Entities
 
@@ -93,7 +102,7 @@ Four state machines are drawn, and all four are read directly from an enumeratio
 the code rather than invented for the diagram; `Enums.cs` is authoritative and the diagrams follow
 it, not the reverse.
 
-**Member** (Figure 5.15) moves through `MembershipStatus`: `Applied`, `Active`,
+**Member** (Figure 5.11) moves through `MembershipStatus`: `Applied`, `Active`,
 `InactivePayment`, `InactiveResigned`, `Terminated`, `Rejected`. Every transition away from `Applied`
 or `Active` is guarded, and DC-07's disciplinary procedure means the transition to `Terminated`
 carries a reason recorded in `MembershipHistory`, whose `ChangedFrom`, `ChangedTo`, `ChangedByAdminId`
@@ -102,13 +111,13 @@ and `Reason` fields exist for exactly this purpose. There is no transition direc
 `Terminated`, and the two are kept distinct because DC-07's appeal right attaches to the second and
 not obviously to the first.
 
-**Event registration** (a due, not a member, but modelled alongside because the transition rule is
-identical in shape) moves through `EventRegistrationStatus`: `Pending`, `Approved`, `Rejected`,
+**Event lifecycle and registration** (Figure 5.14 draws the event's own states; the registration
+states below are modelled alongside because the transition rule is identical in shape) moves through `EventRegistrationStatus`: `Pending`, `Approved`, `Rejected`,
 `Waitlisted`. The waitlist promotion this diagram implies is FIFO by registration time, read directly
 from `EventService`'s `.OrderBy(r => r.RegisteredAt)` when a place is released, which is FR-15 as
 executable code rather than as a description of intended behaviour.
 
-**Constitution** (Figure 5.17) has only two states in the persisted model, `IsActive = true` and
+**Constitution** (Figure 5.13) has only two states in the persisted model, `IsActive = true` and
 `IsActive = false` with a `SupersededDate` set, but the invariant DC-16 depends on, that exactly one
 row is active at any time, is not a state a diagram can show by itself; it is enforced procedurally
 by `ConstitutionSeeder.SyncAsync` at boot, which supersedes rather than deletes a prior version so
@@ -120,17 +129,17 @@ left implicit.
 **Payment** moves through `PaymentStatus`: `Pending`, `Completed`, `Failed`, `Refunded`, which is the
 gateway-facing state; the member-facing declaration described in FR-22 is a separate, simpler
 unverified-to-verified transition recorded on `PaymentHistory` rather than on this enumeration, and
-Figure 5.16 draws both because the two are easy to conflate and the ledger rule of FR-25 depends on
+Figure 5.12 draws both because the two are easy to conflate and the ledger rule of FR-25 depends on
 keeping them apart: an unverified declaration is not yet a `FinancialRecord`, and once a
 `FinancialRecord` exists it is not edited, only corrected by a compensating entry.
 
 ## 5.6 Business Rules Catalogue
 
-This is the same sixteen domain constraints Table 3.10 stated, restated here with the actual
+Table 5.1 is the same sixteen domain constraints Table 3.6 stated, restated here with the actual
 enforcement location rather than the requirement identifier, because a rule catalogue that a reviewer
 cannot use to find the code is not doing the job the honesty rule in the front matter requires.
 
-### Table 5.2 — Business rules catalogue
+### Table 5.1 — Business rules catalogue
 
 | Rule | Statement | Source | Enforcement point |
 | --- | --- | --- | --- |
@@ -167,7 +176,8 @@ the shipped code actually checks.
 ### 5.7.1 Conceptual to logical progression
 
 The conceptual model is the domain class diagram of Figure 3.8; the logical model is the
-forty-nine `DbSet` properties on `ApplicationDbContext`, one per mapped entity, which Chapter 6's
+forty-nine `DbSet` properties on `ApplicationDbContext`, one per mapped entity, defined at analysis
+level in Table 5.4, which Chapter 6's
 data design and entity-relationship diagram take as their starting point. Nothing in that progression
 introduces a table that does not correspond to an analysis-level noun from §5.3.1; the nearest
 exceptions are the join and history tables, being `AmendmentVote`, `MembershipHistory`,
@@ -320,46 +330,20 @@ flowchart TB
     classDef ext fill:#eef,stroke:#446
 ```
 
-### Figure 5.8 — CRC card set
+### Table 5.2 — CRC card set for the analysis classes with the widest collaboration surface
 
-```mermaid
-classDiagram
-    class Member {
-        Responsibility: hold identity, standing, disclosure settings
-        Collaborator: User
-        Collaborator: AcademicRecord, ProfessionalRecord
-        Collaborator: PaymentHistory
-        Collaborator: ECMember
-        Collaborator: EventRegistration
-    }
-    class MemberService {
-        Responsibility: apply, approve, reject, change status with reason
-        Collaborator: Member
-        Collaborator: MembershipHistory
-        Collaborator: IFileStorageService
-    }
-    class FinancialService {
-        Responsibility: raise dues, record declarations, post verified entries
-        Collaborator: PaymentHistory
-        Collaborator: FinancialRecord
-        Collaborator: Member
-    }
-    class GovernanceService {
-        Responsibility: publish constitution, admit eligible votes, maintain EC record
-        Collaborator: Constitution
-        Collaborator: AmendmentVote
-        Collaborator: ECMember, ECPeriod
-        Collaborator: Member
-    }
-    class EventService {
-        Responsibility: publish events, register, waitlist, promote, check in
-        Collaborator: AlumniEvent
-        Collaborator: EventRegistration
-        Collaborator: Member
-    }
-```
+| Class | Responsibilities | Collaborators |
+| --- | --- | --- |
+| `Member` | Hold identity, standing and per-field disclosure settings | `User`, `AcademicRecord`, `ProfessionalRecord`, `PaymentHistory`, `ECMember`, `EventRegistration` |
+| `MemberService` | Apply, approve, reject, and change status with a recorded reason | `Member`, `MembershipHistory`, `IFileStorageService` |
+| `FinancialService` | Raise dues, record declarations, post verified entries | `PaymentHistory`, `FinancialRecord`, `Member` |
+| `GovernanceService` | Publish the constitution, admit eligible votes, keep the committee record | `Constitution`, `AmendmentVote`, `ECMember`, `ECPeriod`, `Member` |
+| `EventService` | Publish events, register, waitlist, promote from the waitlist, check in | `AlumniEvent`, `EventRegistration`, `Member` |
 
-### Figure 5.9 — Activity diagram: registration and administrative approval
+
+
+
+### Figure 5.6 — Activity diagram: registration and administrative approval
 
 ```mermaid
 flowchart TB
@@ -376,7 +360,7 @@ flowchart TB
     A8 --> E
 ```
 
-### Figure 5.10 — Activity diagram: payment declaration and verification
+### Figure 5.7 — Activity diagram: payment declaration and verification
 
 ```mermaid
 flowchart TB
@@ -391,7 +375,7 @@ flowchart TB
     B7 --> E
 ```
 
-### Figure 5.11 — Activity diagram: event registration with waitlist
+### Figure 5.8 — Activity diagram: event registration with waitlist
 
 ```mermaid
 flowchart TB
@@ -406,7 +390,7 @@ flowchart TB
     C5 --> E
 ```
 
-### Figure 5.13 — Swimlane activity diagram: constitution amendment vote
+### Figure 5.9 — Swimlane activity diagram: constitution amendment vote
 
 ```mermaid
 flowchart TB
@@ -431,17 +415,19 @@ flowchart TB
     L6 -->|pass| L7 --> L8
 ```
 
-### Figure 5.14 — BPMN process diagram of the election cycle
+### Figure 5.10 — BPMN process diagram of the election cycle
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph EComm["Election Commission"]
+      direction TB
       B1([Open cycle]) --> B2[Request voter roll]
       B2 --> B5[Publish candidates]
       B5 --> B6[Conduct ballot,<br/>outside the platform]
       B6 --> B7[Publish results]
     end
     subgraph Sys["GHCAA Platform"]
+      direction TB
       B3[Derive roll from<br/>tier and standing]
       B4[Make roll available,<br/>challengeable]
       B8[Publish results<br/>supplied by EC]
@@ -450,7 +436,7 @@ flowchart LR
     B7 --> B8
 ```
 
-### Figure 5.15 — State-machine diagram: member lifecycle
+### Figure 5.11 — State-machine diagram: member lifecycle
 
 ```mermaid
 stateDiagram-v2
@@ -466,7 +452,7 @@ stateDiagram-v2
     Rejected --> [*]
 ```
 
-### Figure 5.16 — State-machine diagram: payment and declaration
+### Figure 5.12 — State-machine diagram: payment and declaration
 
 ```mermaid
 stateDiagram-v2
@@ -485,7 +471,7 @@ stateDiagram-v2
     }
 ```
 
-### Figure 5.17 — State-machine diagram: constitution version
+### Figure 5.13 — State-machine diagram: constitution version
 
 ```mermaid
 stateDiagram-v2
@@ -501,7 +487,7 @@ stateDiagram-v2
     end note
 ```
 
-### Figure 5.18 — State-machine diagram: event lifecycle
+### Figure 5.14 — State-machine diagram: event lifecycle
 
 ```mermaid
 stateDiagram-v2
@@ -511,7 +497,7 @@ stateDiagram-v2
     Archived --> [*]
 ```
 
-### Figure 5.19 — Sequence diagram: login with OTP, token issue
+### Figure 5.15 — Sequence diagram: login with OTP, token issue
 
 ```mermaid
 sequenceDiagram
@@ -528,17 +514,17 @@ sequenceDiagram
     Note over M,API: Registration/reset path instead calls OtpService,<br/>which issues a single-use, time-limited code
 ```
 
-### Figure 5.20 — Sequence diagram: event registration
+### Figure 5.16 — Sequence diagram: event registration
 
 ```mermaid
 sequenceDiagram
     participant M as Member
     participant C as EventsController
     participant S as EventService
-    participant DB as ApplicationDbContext
-    M->>C: POST /api/events/{id}/register
-    C->>S: RegisterAsync(eventId, memberId)
-    S->>DB: count occupying registrations
+    participant DB as DbContext
+    M->>C: POST /api/events/(id)/register
+    C->>S: RegisterAsync(event, member)
+    S->>DB: count occupying<br/>registrations
     alt capacity available
         S->>DB: insert Approved registration
     else capacity reached, HasWaitlist
@@ -550,27 +536,26 @@ sequenceDiagram
     C-->>M: 200 / 409
 ```
 
-### Figure 5.21 — Sequence diagram: payment declaration and verification
+### Figure 5.17 — Sequence diagram: payment declaration and verification
 
 ```mermaid
 sequenceDiagram
     participant M as Member
-    participant C as FinancialsController
-    participant S as FinancialService
     participant A as Officer
-    participant L as FinancialLedgerController
-    M->>C: POST /api/financials/declare (reference, evidence)
+    participant C as API
+    participant S as FinancialService
+    M->>C: POST declare<br/>(reference, evidence)
     C->>S: RecordDeclarationAsync
-    S-->>M: 201, status unverified
-    A->>C: GET verification queue, ordered by age
-    A->>C: POST verify(paymentId)
+    S-->>M: 201, unverified
+    A->>C: GET queue,<br/>oldest first
+    A->>C: POST verify(id)
     C->>S: VerifyAsync
-    S->>S: compare amount to originating due
-    S->>L: post FinancialRecord (append-only)
-    L-->>A: 200, receipt issued
+    S->>S: amount vs<br/>originating due
+    S->>S: post FinancialRecord,<br/>append-only
+    S-->>A: 200, receipt
 ```
 
-### Figure 5.22 — Sequence diagram: real-time notification over SignalR
+### Figure 5.18 — Sequence diagram: real-time notification over SignalR
 
 ```mermaid
 sequenceDiagram
@@ -580,10 +565,10 @@ sequenceDiagram
     C->>H: connect, auto-join User_{id}
     S->>H: Clients.Group(User_{id}).SendAsync(event)
     H-->>C: push notification
-    Note over S,H: Admin broadcast uses the Admins group;<br/>batch and department targeting use Batch_{name} / Dept_{name}
+    Note over S,H: Admin broadcast uses the Admins group.<br/>Batch and department targeting use Batch_(name) and Dept_(name)
 ```
 
-### Figure 5.25 — Timing diagram: token lifetime and refresh window
+### Figure 5.19 — Timing diagram: token lifetime and refresh window
 
 ```mermaid
 sequenceDiagram
@@ -595,7 +580,7 @@ sequenceDiagram
     Note over U: any credential/role/status change:<br/>SecurityStampMiddleware invalidates<br/>immediately, before natural expiry
 ```
 
-### Table 5.1 — Process specifications for the Level-2 processes
+### Table 5.3 — Process specifications for the Level-2 processes
 
 | Process | Input | Logic | Output |
 | --- | --- | --- | --- |
@@ -604,7 +589,7 @@ sequenceDiagram
 | 1.2 Review application | Application record, `AppliedDate` | Flag if `AppliedDate` older than 30 days (DC-08) | Prioritised review queue |
 | 6.2 Sync constitution | `Seed/constitution.json`, current `Constitutions` table | Insert unknown version; refresh changed text; supersede prior | Exactly one `IsActive` row |
 
-### Table 5.3 — Data-store definitions (analysis level)
+### Table 5.4 — Data-store definitions (analysis level)
 
 | Store | Represents | Backing entities |
 | --- | --- | --- |
