@@ -282,7 +282,7 @@ per-field visibility control of FR-03 and the masking protocol in §8.7, under w
 returns a masked projection unless the owning member has opted otherwise. Bangladesh's data
 protection framework was still in draft at the time of writing, so the project treats the principles
 of purpose limitation, minimisation and retention as design obligations rather than as compliance
-with a specific statute, and §8.8 states that position explicitly rather than implying a compliance
+with a specific statute, and §8.11 states that position explicitly rather than implying a compliance
 claim it cannot support.
 
 ## 2.9 Survey of Existing Systems and Products
@@ -399,7 +399,7 @@ payment gateway it cannot obtain, or represent constitutional rules as configura
 audited against the instrument (§2.9).
 
 Figure 2.3 draws the manual practice that gap sits against, abstracted from the treasurer's ledger
-pages and the paper application forms described in §3.1.1, so that the claims made about what the
+pages and the paper application forms described in §4.7.1, so that the claims made about what the
 platform replaces can be checked against a stated process rather than an impression of one.
 
 The gap this work addresses is therefore the conjunction: an alumni platform in which constitutional

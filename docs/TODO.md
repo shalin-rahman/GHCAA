@@ -3704,22 +3704,48 @@ where persistence concerns begin, and §6.5.1 takes that model as input rather t
 and §4.9. §4.9 now owns the research-ethics account; the front matter states the position; §3.1.3
 points to §4.9 rather than repeating it.
 
-65.4 [TODO] **Priority: P2 | Depends on: user.** The expensive one, deliberately not done. §3.1
-describes elicitation techniques, purposive sampling, instruments and ethics — that is methodology,
-sitting in the requirements chapter, *before* the methodology chapter explains the research paradigm.
-It also overlaps §4.7 Data Collection and Analysis Procedures. Two ways to fix it:
+65.4 [DONE 2026-09-02] **Priority: P2.** §3.1 described elicitation techniques, purposive sampling,
+instruments and ethics — methodology, sitting in the requirements chapter *before* the methodology
+chapter explains the research paradigm, and overlapping §4.7 Data Collection and Analysis Procedures.
+Option (b) taken, on the user's decision: the order of the chapters is unchanged and the method
+content moved to Chapter 4 instead.
 
-  (a) Move Research Methodology to Chapter 3 and Requirements to Chapter 4. Conventional order, and it
-      resolves the overlap at the root. Cost: 85 §3 references and 29 §4 references rewritten in
-      **written** prose, plus headings, the generated contents and every folio. Mechanical but not
-      free, and the renumber/folio scripts would carry it.
+  - §3.1 is now **Sources of the Requirements**: it names the four sources, says what the Source
+    column of §3.3 records, and points to §4.7 for procedure and §4.9 for ethics. Chapter 3 is the
+    specification and nothing else.
+  - §4.7 gained **4.7.1 Elicitation techniques** and **4.7.2 Participants, sampling and instruments**,
+    with the existing prose as **4.7.3 Analysis procedures**. The duplication between §3.1.1 and §4.7
+    is gone, not moved.
+  - §4.9 Research Ethics now carries the participant account it previously described as an
+    "unresolved placeholder", which had gone stale when 63.9 closed the gap. Its live-member-data
+    half was already there; the duplicated paragraph from §3.1.3 was dropped rather than copied.
+  - Refs repointed: §3.1.1 → §4.7.1 in Chapter 2; §3.1.3 → §4.9 in the front matter (three places)
+    and `docs/book/README.md`; the outline's Chapter 3 and Chapter 4 blocks and its Appendix A note.
 
-  (b) Keep the order and move §3.1's method content into Chapter 4 beside §4.7, leaving Chapter 3 as
-      the specification with a pointer. Cheaper, resolves the duplication, and arguably better: the
-      requirements chapter becomes purely the specification.
+Option (a), swapping the two chapters outright, stays available and is not blocked by this. It was
+priced at 85 §3 and 29 §4 references in written prose plus the generated contents and every folio.
 
-Recommendation: (b). It fixes the same two problems for a fraction of the churn, and a supervisor who
-expects methodology at Chapter 3 can still be satisfied by (a) later, since (b) does not block it.
+65.4a [DONE 2026-09-02] **Priority: P1.** Fallout from 65.1 found while doing 65.4, and worth
+recording because a blanket renumber sweep will do this again. The §8.x ↔ §9.x swap was applied to
+prose refs, which was right, but it also hit strings that were not prose refs:
+
+  - The outline's own bullet numbers (`**9.1**` … `**9.15**`) never matched the `§` pattern, so the
+    blocks were physically reordered while their bullets stayed put: the Chapter 8 heading sat above
+    a 9.1–9.15 list. Both blocks renumbered to match their chapter, figures and tables included.
+  - The Diagram Inventory's leftmost `#` column was swapped along with the chapter column, so
+    diagrams 8 and 9 traded identifiers. Restored.
+  - Short forms escaped the sweep because they are not written `Chapter N`: `Ch. 8` in the objective
+    table of §1.6, the traceability matrix header of §3.9 and two Chapter 4 diagram node labels all
+    meant verification and now read `Ch. 9`; Figure 1.3 had a node reading `Ch 9 §8.10`.
+
+The lesson for the next sweep: a chapter renumber has to cover `§N.`, `Chapter N`, `Ch. N`, `Ch N`,
+bare numbering in list markup, and identifier columns that happen to hold the same digits.
+
+65.4b [DONE 2026-09-02] **Priority: P2.** Four references to the data-protection position pointed at
+§8.8, which is Rate Limiting and Abuse Prevention; one pointed at §9.8, System and End-to-End
+Testing. All five meant §8.11 Personal Data, and predate the chapter swap — the swap only moved a
+wrong number to a different wrong number. Corrected in §2.8, §3.11 and Table 3.7, and in the §3.1.3
+text as it moved into §4.9.
 
 65.5 [TODO] **Priority: P3.** Within Chapter 6, §6.11 Design Principles (twelve subsections) and §6.12
 Patterns (seven) come after §6.8 to §6.10 on user interface, mobile and configuration. Principles are

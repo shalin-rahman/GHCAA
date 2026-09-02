@@ -271,7 +271,7 @@ consequence stated in §3.4 and §4.5. Do not restate a conformance claim under 
 not reclassify the NFR taxonomy to the 2023 model — the identifiers run through the whole book.
 
 Participants and officers are identified by office, never by name. They are identifiable members of a
-small association who agreed verbally; §3.1.3 gives the reasoning.
+small association who agreed verbally; §4.9 gives the reasoning.
 
 `docs/materials/` holds the Pressman slide sets and a precedence-diagram exercise used while writing.
 It is git-ignored, being third-party copyrighted teaching material. Cite Pressman and Maxim's 8th

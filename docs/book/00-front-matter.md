@@ -72,7 +72,7 @@ Article I Section 5, and the members who tested registration and payment on thei
 their own mobile data, and reported what did not work.
 
 Officers and members are identified here by office rather than by name, for the reason given in
-§3.1.3.
+§4.9.
 
 ---
 
@@ -128,6 +128,7 @@ Core; Angular; Flutter.
 
 
 
+
 Section numbers are as printed in the body. Page numbers are the folios the PDF carries; a rebuild renumbers them, so they are filled in from the printed copy rather than kept by hand.
 
 | Part, chapter and section | Page |
@@ -158,32 +159,32 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | §2.11 Research Gap | 18 |
 | §2.12 Summary | 19 |
 | **Chapter 3 — Requirements Engineering** | 24 |
-| §3.1 Requirements Elicitation | 24 |
-| §3.2 Requirements Analysis and Negotiation | 25 |
-| §3.3 Requirements Specification | 25 |
-| §3.4 Non-Functional Requirements | 28 |
+| §3.1 Sources of the Requirements | 24 |
+| §3.2 Requirements Analysis and Negotiation | 24 |
+| §3.3 Requirements Specification | 24 |
+| §3.4 Non-Functional Requirements | 27 |
 | §3.5 Quality-Attribute Scenarios | 29 |
-| §3.6 Use-Case Modelling | 30 |
-| §3.7 User Stories, Acceptance Criteria and the Definition of Done | 30 |
+| §3.6 Use-Case Modelling | 29 |
+| §3.7 User Stories, Acceptance Criteria and the Definition of Done | 29 |
 | §3.8 Requirements Prioritisation | 30 |
-| §3.9 Requirements Traceability | 31 |
-| §3.10 Domain Constraints | 31 |
+| §3.9 Requirements Traceability | 30 |
+| §3.10 Domain Constraints | 30 |
 | §3.11 Feasibility Analysis | 31 |
-| §3.12 Requirements Validation and Formal Technical Review | 32 |
+| §3.12 Requirements Validation and Formal Technical Review | 31 |
 | §3.13 Summary | 32 |
-| **PART II — METHOD AND DESIGN** | 43 |
-| **Chapter 4 — Research Methodology** | 44 |
-| §4.1 Research Paradigm and Philosophical Position | 44 |
-| §4.2 Design Science Research as the Governing Method | 44 |
-| §4.3 Mapping Design Science Activities to the Work Performed | 44 |
-| §4.4 Software Process Model and its Justification | 44 |
-| §4.5 Evaluation Strategy | 45 |
-| §4.6 Metrics Definition | 45 |
-| §4.7 Data Collection and Analysis Procedures | 46 |
+| **PART II — METHOD AND DESIGN** | 42 |
+| **Chapter 4 — Research Methodology** | 43 |
+| §4.1 Research Paradigm and Philosophical Position | 43 |
+| §4.2 Design Science Research as the Governing Method | 43 |
+| §4.3 Mapping Design Science Activities to the Work Performed | 43 |
+| §4.4 Software Process Model and its Justification | 43 |
+| §4.5 Evaluation Strategy | 44 |
+| §4.6 Metrics Definition | 44 |
+| §4.7 Data Collection and Analysis Procedures | 45 |
 | §4.8 Risk Management: the RMMM Plan | 46 |
-| §4.9 Research Ethics | 47 |
+| §4.9 Research Ethics | 46 |
 | §4.10 Limitations of the Chosen Method | 47 |
-| §4.11 Summary | 48 |
+| §4.11 Summary | 47 |
 | **Chapter 5 — System Analysis and Behavioural Modelling** | 53 |
 | §5.1 Analysis Approach | 53 |
 | §5.2 Structured Analysis: Data-Flow Modelling | 53 |
@@ -225,18 +226,18 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 2.2 | Concept map of the reviewed literature | 20 |
 | 2.3 | As-is process model of current manual practice (BPMN, abstracted) | 21 |
 | 2.4 | Positioning chart: governance depth against annual operating cost | 22 |
-| 3.1 | System-level use-case diagram, packaged | 33 |
-| 3.2 | Membership subsystem use cases | 34 |
-| 3.3 | Events subsystem use cases | 35 |
-| 3.4 | Payments subsystem use cases | 35 |
-| 3.5 | Governance subsystem use cases | 36 |
-| 3.6 | Administration subsystem use cases | 37 |
-| 3.7 | Actor generalisation hierarchy | 37 |
-| 3.8 | Domain model, analysis level: membership, obligations and payment | 38 |
-| 3.9 | Domain model, analysis level: participation, governance and content | 38 |
-| 3.10 | Quality-attribute utility tree | 39 |
-| 3.11 | Requirements classification, FURPS+ | 40 |
-| 3.12 | Goal model | 40 |
+| 3.1 | System-level use-case diagram, packaged | 32 |
+| 3.2 | Membership subsystem use cases | 33 |
+| 3.3 | Events subsystem use cases | 34 |
+| 3.4 | Payments subsystem use cases | 34 |
+| 3.5 | Governance subsystem use cases | 35 |
+| 3.6 | Administration subsystem use cases | 36 |
+| 3.7 | Actor generalisation hierarchy | 36 |
+| 3.8 | Domain model, analysis level: membership, obligations and payment | 37 |
+| 3.9 | Domain model, analysis level: participation, governance and content | 37 |
+| 3.10 | Quality-attribute utility tree | 38 |
+| 3.11 | Requirements classification, FURPS+ | 39 |
+| 3.12 | Goal model | 39 |
 | 4.1 | Design Science Research framework with this project's instantiation labelled | 48 |
 | 4.2 | Design Science process model as executed | 49 |
 | 4.3 | Research design overview: phases, inputs, outputs, evaluation points | 50 |
@@ -286,16 +287,16 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 2.1 | Review protocol summary | 22 |
 | 2.2 | Feature and capability comparison | 23 |
 | 2.3 | Gap table | 23 |
-| 3.1 | Functional requirement catalogue | 40 |
-| 3.2 | Non-functional requirement catalogue | 40 |
-| 3.3 | Use-case descriptions, ten highest-value cases | 41 |
-| 3.4 | Requirements traceability matrix | 42 |
-| 3.5 | MoSCoW prioritisation and negotiation outcome | 42 |
-| 3.6 | Domain constraints traced to constitutional article | 42 |
-| 3.7 | Feasibility summary | 42 |
-| 3.8 | Specification defects found by the formal technical review | 42 |
-| 4.1 | Metric definitions | 46 |
-| 4.2 | RMMM table | 47 |
+| 3.1 | Functional requirement catalogue | 39 |
+| 3.2 | Non-functional requirement catalogue | 39 |
+| 3.3 | Use-case descriptions, ten highest-value cases | 40 |
+| 3.4 | Requirements traceability matrix | 41 |
+| 3.5 | MoSCoW prioritisation and negotiation outcome | 41 |
+| 3.6 | Domain constraints traced to constitutional article | 41 |
+| 3.7 | Feasibility summary | 41 |
+| 3.8 | Specification defects found by the formal technical review | 41 |
+| 4.1 | Metric definitions | 45 |
+| 4.2 | RMMM table | 46 |
 | 4.3 | Evaluation plan | 52 |
 | 5.1 | Business rules catalogue | 54 |
 | 5.2 | CRC card set for the analysis classes with the widest collaboration surface | 58 |
@@ -453,7 +454,7 @@ justified against a specific requirement, it was dropped; the negotiation record
 were collected with verbal consent and no written consent form. Participants were told what the
 material would be used for. Participants are identified in this dissertation by role and never by
 name. The absence of a documented consent procedure is a limitation of the study, set out with its
-consequences in §3.1.3, not an omission from this statement.
+consequences in §4.9, not an omission from this statement.
 
 **Live data in the dissertation.** Every screenshot in Chapter 12 uses seeded or anonymised records.
 No real member's identity number, address, telephone number or photograph appears anywhere in this
@@ -462,5 +463,5 @@ document.
 **Approval.** No institutional ethics committee reviewed this study. Permission to conduct it, and
 to use the Association's records, governing documents and membership data, was given by the
 Government Haraganga College Alumni Association. That permission was verbal: no approval letter was
-issued, no reference number exists, and no date was recorded. Section 3.1.3 states what follows from
+issued, no reference number exists, and no date was recorded. Section 4.9 states what follows from
 that.

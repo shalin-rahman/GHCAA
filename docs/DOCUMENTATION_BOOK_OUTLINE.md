@@ -166,10 +166,7 @@ followed is stated in §2.2.
 
 ## Chapter 3 — Requirements Engineering
 
-- **3.1** Requirements Elicitation
-  - **3.1.1** Techniques applied — stakeholder interviews, document analysis of the constitution and election rules, observation of current practice, competitor analysis
-  - **3.1.2** Participants, sampling and instruments
-  - **3.1.3** Ethical approval and informed consent
+- **3.1** Sources of the Requirements — the four sources named, and what the Source column of §3.3 records. How each was worked, who took part and the ethical position belong to the method and are in §4.7 and §4.9; this chapter specifies from the output rather than restating the procedure
 - **3.2** Requirements Analysis and Negotiation
 - **3.3** Requirements Specification, structured to ISO/IEC/IEEE 29148
   - **3.3.1** Membership, Registration and Profile
@@ -225,8 +222,11 @@ followed is stated in §2.2.
   - **4.5.6** Expert and stakeholder evaluation — protocol and participants
 - **4.6** Metrics Definition — formula, tool and interpretation threshold for each metric, stated in advance of measurement
 - **4.7** Data Collection and Analysis Procedures
+  - **4.7.1** Elicitation techniques — document analysis of the constitution and election rules, stakeholder interviews, observation of current practice, competitor analysis, in the order applied and each chosen for what the previous one could not reach
+  - **4.7.2** Participants, sampling and instruments — purposive sampling, the ten participants by role, the author's own position among them, and the interview, observation and coding instruments
+  - **4.7.3** Analysis procedures — the four kinds of data collected and the analysis treatment each receives
 - **4.8** Risk Management: the RMMM plan — risk identification, projection by probability and impact, the RMMM table, and the risk-monitoring record kept during the project
-- **4.9** Research Ethics — consent, anonymisation, personal-data handling, storage and retention. This section owns the research-ethics account; the front-matter declaration states the position and §3.1.3 points here rather than repeating it
+- **4.9** Research Ethics — consent, anonymisation, personal-data handling, storage and retention. This section owns the research-ethics account, both the participant question and the live-member-data question; the front-matter declaration states the position and Chapter 3 does not repeat it
 - **4.10** Limitations of the Chosen Method
 - **4.11** Summary
 
@@ -416,43 +416,43 @@ followed is stated in §2.2.
 
 ## Chapter 8 — Security, Privacy and Trust
 
-- **9.1** Security Objectives and Assumptions
-- **9.2** Threat Modelling (STRIDE) — assets, entry points, trust boundaries, enumerated threats
-- **9.3** Authentication and Session Security
-- **9.4** Authorisation Model and the Role–Permission Matrix
-- **9.5** Input Validation and Output Sanitisation
-- **9.6** File Upload Security
-- **9.7** Transport, Header and Browser-Policy Security
-- **9.8** Rate Limiting and Abuse Prevention
-- **9.9** Payment-Related Risk and the No-Gateway-Keys Posture — the security rationale for manual verification and its accepted operational cost
-- **9.10** Governance Integrity — the scope of the voting features as sentiment and internal decision-making rather than as a secure-election system, with reference to §2.7
-- **9.11** Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights
-- **9.12** Audit Logging and Non-Repudiation
-- **9.13** Conformance Assessment against OWASP ASVS
-- **9.14** Residual Risks and Recommendations
-- **9.15** Summary
+- **8.1** Security Objectives and Assumptions
+- **8.2** Threat Modelling (STRIDE) — assets, entry points, trust boundaries, enumerated threats
+- **8.3** Authentication and Session Security
+- **8.4** Authorisation Model and the Role–Permission Matrix
+- **8.5** Input Validation and Output Sanitisation
+- **8.6** File Upload Security
+- **8.7** Transport, Header and Browser-Policy Security
+- **8.8** Rate Limiting and Abuse Prevention
+- **8.9** Payment-Related Risk and the No-Gateway-Keys Posture — the security rationale for manual verification and its accepted operational cost
+- **8.10** Governance Integrity — the scope of the voting features as sentiment and internal decision-making rather than as a secure-election system, with reference to §2.7
+- **8.11** Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights
+- **8.12** Audit Logging and Non-Repudiation
+- **8.13** Conformance Assessment against OWASP ASVS
+- **8.14** Residual Risks and Recommendations
+- **8.15** Summary
 
 **Figures and tables**
 
-- Figure 9.1 — Threat model data-flow diagram with trust boundaries, STRIDE-annotated
-- Figure 9.2 — Attack tree for the highest-value asset: member account takeover or fraudulent payment credit
-- Figure 9.3 — Role–permission matrix diagram
-- Figure 9.4 — Personal-data classification and flow diagram, with retention points
-- Figure 9.5 — Sequence diagram: an unauthorised request rejected through the middleware chain
-- Figure 9.6 — Defence-in-depth layer diagram
-- Table 9.1 — STRIDE threat enumeration with mitigations and their implementation location
-- Table 9.2 — Role × capability matrix
-- Table 9.3 — OWASP ASVS conformance checklist with verdicts
-- Table 9.4 — Personal-data inventory: element, purpose, lawful basis, retention
-- Table 9.5 — Residual risk register
+- Figure 8.1 — Threat model data-flow diagram with trust boundaries, STRIDE-annotated
+- Figure 8.2 — Attack tree for the highest-value asset: member account takeover or fraudulent payment credit
+- Figure 8.3 — Role–permission matrix diagram
+- Figure 8.4 — Personal-data classification and flow diagram, with retention points
+- Figure 8.5 — Sequence diagram: an unauthorised request rejected through the middleware chain
+- Figure 8.6 — Defence-in-depth layer diagram
+- Table 8.1 — STRIDE threat enumeration with mitigations and their implementation location
+- Table 8.2 — Role × capability matrix
+- Table 8.3 — OWASP ASVS conformance checklist with verdicts
+- Table 8.4 — Personal-data inventory: element, purpose, lawful basis, retention
+- Table 8.5 — Residual risk register
 
 ---
 
 ## Chapter 9 — Verification, Validation and Quality Assurance
 
-- **8.1** Verification and Validation Strategy and Test Levels
-- **8.2** Software Quality Assurance Plan — reviews, standards conformance, defect prevention, and the role of formal technical reviews in this project
-- **8.3** Test-Case Design Techniques Applied
+- **9.1** Verification and Validation Strategy and Test Levels
+- **9.2** Software Quality Assurance Plan — reviews, standards conformance, defect prevention, and the role of formal technical reviews in this project
+- **9.3** Test-Case Design Techniques Applied
   - **8.3.1** Equivalence partitioning
   - **8.3.2** Boundary value analysis
   - **8.3.3** Decision-table testing for the dues and eligibility rules
@@ -460,7 +460,7 @@ followed is stated in §2.2.
   - **8.3.5** Basis-path testing using the control-flow graph and cyclomatic complexity of §7.8
   - **8.3.6** Use-case and scenario-based testing
   - **8.3.7** Exploratory testing and its recorded charters
-- **8.4** Unit Testing — Backend
+- **9.4** Unit Testing — Backend
   - **8.4.1** Framework, runner and project layout
   - **8.4.2** The definition of a unit in this system, and the reasoning for testing at the service boundary rather than at the controller or the repository
   - **8.4.3** Test doubles — stubs, mocks, fakes and the in-memory provider; where each is appropriate and the fidelity each sacrifices
@@ -468,22 +468,22 @@ followed is stated in §2.2.
   - **8.4.5** Testing the business rules that carry constitutional force — dues, eligibility, committee terms, voting rights — traced back to the rule catalogue of §5.6
   - **8.4.6** Testing of failure and exception paths
   - **8.4.7** Test independence, determinism and the elimination of order dependence
-- **8.5** Unit and Component Testing — Web Client
+- **9.5** Unit and Component Testing — Web Client
   - **8.5.1** Runner, harness and component-testing strategy
   - **8.5.2** Testing signals, computed state and change propagation
   - **8.5.3** Testing guards, interceptors and the token-refresh queue
   - **8.5.4** HTTP mocking and contract fidelity against the live API
-- **8.6** Widget and Golden Testing — Mobile Client
+- **9.6** Widget and Golden Testing — Mobile Client
   - **8.6.1** Widget-test scope
   - **8.6.2** Golden (snapshot) testing: what it catches, what it cannot, and the platform-rendering problem that requires it to be skipped in continuous integration
-- **8.7** Integration Testing Strategy, and the reasoning for rejecting big-bang integration
-- **8.8** System and End-to-End Testing
-- **8.9** Regression Testing and Test Selection
-- **8.10** Security Testing, mapped to the threat model of Chapter 8 and to OWASP ASVS
-- **8.11** Performance and Load Testing — workload model, environment, results
-- **8.12** Usability and Accessibility Testing — task success, time on task, System Usability Scale scores, WCAG audit
-- **8.13** User Acceptance Testing — participants, protocol, results, sign-off
-- **8.14** Product Metrics and Static Analysis
+- **9.7** Integration Testing Strategy, and the reasoning for rejecting big-bang integration
+- **9.8** System and End-to-End Testing
+- **9.9** Regression Testing and Test Selection
+- **9.10** Security Testing, mapped to the threat model of Chapter 8 and to OWASP ASVS
+- **9.11** Performance and Load Testing — workload model, environment, results
+- **9.12** Usability and Accessibility Testing — task success, time on task, System Usability Scale scores, WCAG audit
+- **9.13** User Acceptance Testing — participants, protocol, results, sign-off
+- **9.14** Product Metrics and Static Analysis
   - **8.14.1** Size — lines of code and function points
   - **8.14.2** Complexity — cyclomatic complexity distribution and the worst offenders
   - **8.14.3** Coupling and cohesion — CBO, LCOM, afferent and efferent coupling, instability
@@ -494,31 +494,31 @@ followed is stated in §2.2.
     - Risk-weighted targets: coverage thresholds set by module criticality, with payment, authentication and governance held to a higher bar than presentation code, declared in §4.6 in advance of measurement
     - Analysis of the uncovered residue — which code is untested, whether by decision or by omission, and the risk each case carries
     - Coverage trend across increments rather than a single end-state snapshot
-- **8.15** Defect Analysis — density, distribution, removal efficiency, root-cause categories
-- **8.16** Threats to the Validity of the Evaluation, with forward reference to §12.11
-- **8.17** Summary
+- **9.15** Defect Analysis — density, distribution, removal efficiency, root-cause categories
+- **9.16** Threats to the Validity of the Evaluation, with forward reference to §12.11
+- **9.17** Summary
 
 **Figures and tables**
 
-- Figure 8.1 — Test pyramid as realised, with counts
-- Figure 8.2 — V-model mapping of each development artefact to its verifying activity
-- Figure 8.3 — Continuous-integration quality-gate pipeline
-- Figure 8.4 — Control-flow graph with basis paths enumerated for the worked example
-- Figure 8.5 — Coverage by layer
-- Figure 8.6 — Cyclomatic complexity distribution
-- Figure 8.7 — Coupling and instability scatter: the main sequence with the modules plotted
-- Figure 8.8 — Defect distribution by severity, module and injection phase
-- Figure 8.9 — Defect-removal efficiency by phase
-- Figure 8.10 — Performance results: latency distribution by endpoint, throughput under load
-- Figure 8.11 — System Usability Scale score distribution with the 68-point benchmark line
-- Table 8.1 — Equivalence classes and boundary values for a representative input domain
-- Table 8.2 — Decision table for dues and eligibility
-- Table 8.3 — State-transition test table
-- Table 8.4 — Test-case catalogue: ID, technique, requirement, input, expected, actual, status; full set in the test-runner output committed per release
-- Table 8.5 — Product metrics summary against the thresholds declared in §4.6
-- Table 8.6 — Coverage by module against its risk-weighted target: module, criticality, target, statement percentage, branch percentage, mutation score, verdict, and the justification for any shortfall
-- Table 8.7 — Defect log
-- Table 8.8 — User acceptance test results and sign-off
+- Figure 9.1 — Test pyramid as realised, with counts
+- Figure 9.2 — V-model mapping of each development artefact to its verifying activity
+- Figure 9.3 — Continuous-integration quality-gate pipeline
+- Figure 9.4 — Control-flow graph with basis paths enumerated for the worked example
+- Figure 9.5 — Coverage by layer
+- Figure 9.6 — Cyclomatic complexity distribution
+- Figure 9.7 — Coupling and instability scatter: the main sequence with the modules plotted
+- Figure 9.8 — Defect distribution by severity, module and injection phase
+- Figure 9.9 — Defect-removal efficiency by phase
+- Figure 9.10 — Performance results: latency distribution by endpoint, throughput under load
+- Figure 9.11 — System Usability Scale score distribution with the 68-point benchmark line
+- Table 9.1 — Equivalence classes and boundary values for a representative input domain
+- Table 9.2 — Decision table for dues and eligibility
+- Table 9.3 — State-transition test table
+- Table 9.4 — Test-case catalogue: ID, technique, requirement, input, expected, actual, status; full set in the test-runner output committed per release
+- Table 9.5 — Product metrics summary against the thresholds declared in §4.6
+- Table 9.6 — Coverage by module against its risk-weighted target: module, criticality, target, statement percentage, branch percentage, mutation score, verdict, and the justification for any shortfall
+- Table 9.7 — Defect log
+- Table 9.8 — User acceptance test results and sign-off
 
 ---
 
@@ -702,7 +702,7 @@ defined there.
 
 **Printed in the bound volume** (11–19 pages, per the appendix policy above):
 
-- Appendix A — Ethics: the permission obtained, and the absence of a written consent procedure, per §3.1.3. There is no participant information sheet or consent form to reproduce; consent was verbal. 2–4 pp
+- Appendix A — Ethics: the permission obtained, and the absence of a written consent procedure, per §4.9. There is no participant information sheet or consent form to reproduce; consent was verbal. 2–4 pp
 - Appendix B — Closed requirements traceability matrix: requirement → design → code → test → result, for all of FR-01 to FR-54 and the NFR set. This is the appendix an examiner actually uses. 4–6 pp
 - Appendix C — Full-page fold-out plates: the four ER sub-models and the design class diagram, at landscape size. 3–5 pp
 - Appendix D — Originality / similarity report: tool output. 2–4 pp
@@ -740,8 +740,8 @@ The complete set of diagram and chart types the book contains, and the chapter e
 | 5 | RQ ↔ objective ↔ chapter map | 1 | Navigation key |
 | 6 | Study-selection flow diagram | 2 | Literature screening with counts |
 | 7 | Concept map / taxonomy | 2 | Structure of the reviewed field |
-| 9 | As-is process model (BPMN) | 2 | Current manual practice |
-| 8 | Positioning chart | 2 | Existing systems on two decisive axes |
+| 8 | As-is process model (BPMN) | 2 | Current manual practice |
+| 9 | Positioning chart | 2 | Existing systems on two decisive axes |
 | 10 | Use-case diagram | 3 | System level and per subsystem |
 | 11 | Actor generalisation hierarchy | 3 | Role inheritance |
 | 12 | Domain / conceptual class model | 3 | Analysis-level classes, no implementation |

@@ -67,7 +67,7 @@ document.
 | Definition of objectives for a solution | The eight objectives of §1.5, each traced to a research question | §1.5 |
 | Design and development | Sixty-two numbered work areas recorded as they were opened, most of them triggered by a stakeholder request rather than by the author's own plan; forty-nine mapped entities, thirty-seven API controllers and two client applications delivered across them | `docs/TODO.md`; Chs. 5–7 |
 | Demonstration | The artefact running against a seeded database, exercised in the formal technical review sessions of §3.12 and deployed to the pre-production environment of Chapter 10 | §3.12, Ch. 10 |
-| Evaluation | Executed against the plan declared in §4.5 | Ch. 8, Ch. 12 |
+| Evaluation | Executed against the plan declared in §4.5 | Ch. 9, Ch. 12 |
 | Communication | This dissertation, and the documentation corpus in `docs/` that a successor maintainer would read first | Whole document |
 
 The "design and development" row understates nothing by omission and nothing by exaggeration: the
@@ -198,6 +198,83 @@ numbers.
 
 ## 4.7 Data Collection and Analysis Procedures
 
+Elicitation is reported here rather than in Chapter 3 because it is method: Chapter 3 states what
+the requirements are, and this section states how they were obtained and how each kind of data
+gathered during the project was analysed.
+
+### 4.7.1 Elicitation techniques
+
+Four techniques were used, in the order given, each chosen for what the previous one could not
+reach.
+
+**Document analysis** came first and carried the most weight, which is unusual and is a consequence
+of the domain. The Association had already written down most of its rules before any software
+existed. The corpus analysed comprised the constitution at version 4.2, effective 1 July 2026,
+consisting of twelve articles; the seven documents of the election code, namely the election
+regulations, the operational manual, the code of conduct, the manual balloting procedure, the forms
+set, the ballot-box sealing and poll-integrity certificate, and the counting authorisation; and such
+records of prior practice as existed, principally the treasurer's ledger pages and the paper
+application forms. Analysis proceeded clause by clause. Each normative clause was classified as
+imposing a domain constraint, implying a functional requirement, implying a quality requirement, or
+having no software consequence. That pass produced the DC set of §3.10 and seeded roughly a third of
+the functional requirements directly.
+
+**Stakeholder interviews** were used second, to establish current practice, pain and priority, since
+the documents state what should happen rather than what does. Interviews were semi-structured, with
+an instrument organised around the respondent's own tasks rather than around candidate features, on
+the reasoning that asking a volunteer treasurer what functions he wants tends to produce a
+description of whatever software he has last used.
+
+**Observation of current practice** followed, because two of the most consequential findings could
+not have been obtained by asking. The first was that application forms were routinely accepted with
+the certificate field unfilled, on the strength of an officer recognising the applicant, which is the
+recognition gateway visible in Figure 2.3 and the origin of the thirty-day verification requirement
+in FR-23. The second was that the treasurer's ledger recorded receipts but not the identity of the
+receiving officer, so a discrepancy could not be attributed. That produced FR-21 and the
+separation-of-duty property in §8.9.
+
+**Competitor analysis**, reported in §2.9, closed the set by surfacing capabilities nobody thought
+to ask for, of which the waitlist behaviour in FR-15 and the bulk communication segmentation in
+FR-29 are the two that survived prioritisation.
+
+### 4.7.2 Participants, sampling and instruments
+
+Sampling was purposive rather than representative. The population of people who hold operational
+knowledge of the Association's processes is small and largely identified by office, so the sampling
+frame was the office holders themselves plus a convenience sample of ordinary members drawn from
+those attending the reunion at which registration was being collected.
+
+Ten people were interviewed. They included all three of the officers whose work the platform most
+directly changes, being the President, the Treasurer and the General Secretary, with the remainder
+ordinary members. Participants are not named here. They are identifiable members of a small
+association, they agreed to take part verbally rather than in writing, and naming them would put
+identifiable personal information into a public document to no analytical purpose; §4.9 states the
+consent position in full.
+
+The author is one of the ten. He is also the Association's Information and Technology Secretary and
+the platform's sole maintainer, so his own account of current practice is not independent evidence,
+and it is not treated as such: every requirement traced to interview in the Source column of §3.3 was
+stated by at least one participant other than the author.
+
+Sessions ran thirty to forty minutes each. Recruitment was direct: every participant was already a
+member of the Association, and each was approached as one member to another rather than through any
+formal call for volunteers. That is the recruitment route a single-maintainer study in a small
+association actually has, and it carries the selection bias that goes with it, since the people
+easiest to approach are the people already engaged.
+
+The period over which the sessions ran was not recorded, and is not reconstructed here. No
+participant-derived figure is quoted anywhere in this dissertation, so nothing downstream depends on
+it; saying that it was not recorded is preferable to producing a date range from memory. The
+interview guides per role are held with the evaluation instruments delivered beside this
+dissertation, not bound into it.
+
+Instruments used: an interview guide per role, with an opening account of current task flow, a
+probe set on failure and workaround, and a closing prioritisation exercise; an observation checklist
+covering the application, payment and recording steps; and a document-analysis coding sheet mapping
+each constitutional clause to its classification and to the identifier it produced.
+
+### 4.7.3 Analysis procedures
+
 Four kinds of data are collected, and each has a different analysis treatment. Automated test results
 and coverage reports are quantitative and are aggregated directly; no sampling is involved since the
 population is the whole test run. Static-analysis output, being complexity and coupling figures, is
@@ -249,10 +326,26 @@ Association's size and volunteer structure rather than of the software.
 Two distinct ethical questions arise in this project, and they are kept separate rather than
 answered by one paragraph that quietly covers both.
 
-The first concerns the human participants of the elicitation study reported in §3.1. Their approval
-reference, consent procedure and the safeguards applied to their material are recorded in §3.1.3 as
-an unresolved placeholder, and this chapter does not repeat or attempt to answer it; there is exactly
-one place in the document where that gap is recorded, so that it can be found and closed once.
+The first concerns the people who took part in the elicitation reported in §4.7. That study was not
+reviewed by a university ethics committee. Permission to conduct it, to use the
+Association's records and governing documents, and to work with its members was given by the
+Government Haraganga College Alumni Association itself. No written approval was issued, no reference
+number exists, and no date of approval was recorded. That is stated rather than presented as an
+equivalent to institutional review, because it is not one.
+
+Consent from interview participants was verbal and was not documented. Participation was voluntary
+and unpaid, and participants were told what the material would be used for. No written consent form
+was signed, no consent record was retained, and no participant is named in this dissertation or its
+appendices. Consent from the members whose real records the live system holds was obtained the same
+way, verbally, at Association gatherings, with no written record and no formal notice.
+
+Three consequences follow, and they are limitations of this work rather than features of it. A
+participant who wished to withdraw consent has no documented statement to withdraw. Because consent
+was never recorded, its scope cannot be demonstrated to a reader, only asserted by the author. And a
+future study reusing this material could not establish that the people concerned had agreed to that
+reuse. §4.10 carries this forward as a limitation of the method, and the recommendation in §13.4
+that the Association adopt a written consent line in its registration form comes directly from this
+gap.
 
 The second concerns the personal data of the Association's real members, which the platform holds in
 production and which the maintainer necessarily saw during development and testing. That question is
@@ -262,7 +355,8 @@ non-disclosure and a stated retention position, applied because Bangladesh's dat
 was in draft rather than in force at the time of writing, and because no third-party ethics body
 governs a single volunteer's handling of his own association's data. No production member data
 appears anywhere in this dissertation; every figure, screenshot and test fixture quoted from this
-point forward is synthesised.
+point forward is synthesised. In the running system that data sits behind the access controls of
+§8.4.
 
 ## 4.10 Limitations of the Chosen Method
 
@@ -313,7 +407,7 @@ flowchart TB
     subgraph DSR["Design Science Research"]
       direction TB
       B[Build:<br/>Ch. 5-7 artefact]
-      E[Evaluate:<br/>Ch. 8, 12]
+      E[Evaluate:<br/>Ch. 9, 12]
       B --> E --> B
     end
     subgraph KB["Knowledge base"]
@@ -356,7 +450,7 @@ flowchart TB
       V1 -->|no| O3
     end
     subgraph P4["Phase: Evaluation"]
-      V1 -->|yes| O4[Verification and validation,<br/>Ch. 8]
+      V1 -->|yes| O4[Verification and validation,<br/>Ch. 9]
       O4 --> O5[Evaluation against RQs,<br/>Ch. 12]
     end
 ```

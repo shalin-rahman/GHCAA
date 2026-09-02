@@ -13,109 +13,18 @@ carry DC identifiers, and every functional requirement they govern cites the art
 concerned. Where a stakeholder wish conflicted with a constitutional clause, the clause won; §3.2
 records the three occasions on which that happened.
 
-## 3.1 Requirements Elicitation
+## 3.1 Sources of the Requirements
 
-### 3.1.1 Techniques applied
+Requirements came from four sources: analysis of the Association's governing documents, interviews
+with office holders and ordinary members, observation of current practice, and the survey of existing
+products in §2.9. The Source column of §3.3 names one of the four for every requirement, and the
+value R marks the few that arrived after elicitation had closed, as dated requests rather than from
+any of them.
 
-Four techniques were used, in the order given, each chosen for what the previous one could not
-reach.
-
-**Document analysis** came first and carried the most weight, which is unusual and is a consequence
-of the domain. The Association had already written down most of its rules before any software
-existed. The corpus analysed comprised the constitution at version 4.2, effective 1 July 2026,
-consisting of twelve articles; the seven documents of the election code, namely the election
-regulations, the operational manual, the code of conduct, the manual balloting procedure, the forms
-set, the ballot-box sealing and poll-integrity certificate, and the counting authorisation; and such
-records of prior practice as existed, principally the treasurer's ledger pages and the paper
-application forms. Analysis proceeded clause by clause. Each normative clause was classified as
-imposing a domain constraint, implying a functional requirement, implying a quality requirement, or
-having no software consequence. That pass produced the DC set of §3.10 and seeded roughly a third of
-the functional requirements directly.
-
-**Stakeholder interviews** were used second, to establish current practice, pain and priority, since
-the documents state what should happen rather than what does. Interviews were semi-structured, with
-an instrument organised around the respondent's own tasks rather than around candidate features, on
-the reasoning that asking a volunteer treasurer what functions he wants tends to produce a
-description of whatever software he has last used.
-
-**Observation of current practice** followed, because two of the most consequential findings could
-not have been obtained by asking. The first was that application forms were routinely accepted with
-the certificate field unfilled, on the strength of an officer recognising the applicant, which is the
-recognition gateway visible in Figure 2.3 and the origin of the thirty-day verification requirement
-in FR-23. The second was that the treasurer's ledger recorded receipts but not the identity of the
-receiving officer, so a discrepancy could not be attributed. That produced FR-21 and the
-separation-of-duty property in §8.9.
-
-**Competitor analysis**, reported in §2.9, closed the set by surfacing capabilities nobody thought
-to ask for, of which the waitlist behaviour in FR-15 and the bulk communication segmentation in
-FR-29 are the two that survived prioritisation.
-
-### 3.1.2 Participants, sampling and instruments
-
-Sampling was purposive rather than representative. The population of people who hold operational
-knowledge of the Association's processes is small and largely identified by office, so the sampling
-frame was the office holders themselves plus a convenience sample of ordinary members drawn from
-those attending the reunion at which registration was being collected.
-
-Ten people were interviewed. They included all three of the officers whose work the platform most
-directly changes, being the President, the Treasurer and the General Secretary, with the remainder
-ordinary members. Participants are not named here. They are identifiable members of a small
-association, they agreed to take part verbally rather than in writing, and naming them would put
-identifiable personal information into a public document to no analytical purpose; §3.1.3 states the
-consent position in full.
-
-The author is one of the ten. He is also the Association's Information and Technology Secretary and
-the platform's sole maintainer, so his own account of current practice is not independent evidence,
-and it is not treated as such: every requirement traced to interview in the Source column of §3.3 was
-stated by at least one participant other than the author.
-
-Sessions ran thirty to forty minutes each. Recruitment was direct: every participant was already a
-member of the Association, and each was approached as one member to another rather than through any
-formal call for volunteers. That is the recruitment route a single-maintainer study in a small
-association actually has, and it carries the selection bias that goes with it, since the people
-easiest to approach are the people already engaged.
-
-The period over which the sessions ran was not recorded, and is not reconstructed here. No
-participant-derived figure is quoted anywhere in this dissertation, so nothing downstream depends on
-it; saying that it was not recorded is preferable to producing a date range from memory. The
-interview guides per role are held with the evaluation instruments delivered beside this
-dissertation, not bound into it.
-
-Instruments used: an interview guide per role, with an opening account of current task flow, a
-probe set on failure and workaround, and a closing prioritisation exercise; an observation checklist
-covering the application, payment and recording steps; and a document-analysis coding sheet mapping
-each constitutional clause to its classification and to the identifier it produced.
-
-### 3.1.3 Ethical approval and informed consent
-
-This study was not reviewed by a university ethics committee. Permission to conduct it, to use the
-Association's records and governing documents, and to work with its members was given by the
-Government Haraganga College Alumni Association itself. No written approval was issued, no reference
-number exists, and no date of approval was recorded. That is stated rather than presented as an
-equivalent to institutional review, because it is not one.
-
-Consent from interview participants was verbal and was not documented. Participation was voluntary
-and unpaid, and participants were told what the material would be used for. No written consent form
-was signed, no consent record was retained, and no participant is named in this dissertation or its
-appendices. Consent from the members whose real records the live system holds was obtained the same
-way, verbally, at Association gatherings, with no written record and no formal notice.
-
-Three consequences follow, and they are limitations of this work rather than features of it. A
-participant who wished to withdraw consent has no documented statement to withdraw. Because consent
-was never recorded, its scope cannot be demonstrated to a reader, only asserted by the author. And a
-future study reusing this material could not establish that the people concerned had agreed to that
-reuse. Section 9.8 sets out what was done to limit the exposure this leaves: no production member
-data appears in this dissertation, every example and test fixture uses synthesised records, and
-personal data in the running system is held under the access controls of Chapter 8. The
-recommendation in §13.4 that the Association adopt a written consent line in its registration form
-comes directly from this gap.
-
-Separately from participant ethics, the project handles live personal data of real members,
-including national identity numbers, dates of birth and photographs. The declaration governing that
-material, including the basis on which development and testing were conducted, is given in the front
-matter under Ethics Statement and Data-Protection Declaration and expanded in §8.8. No production
-member data appears in this dissertation. Every example, screenshot and test fixture uses synthesised
-records.
+How each source was worked, who took part, how they were chosen and what instruments were used are
+part of the research method, and are set out in §4.7. The ethical position, both on the people who
+took part and on the live member data the platform holds, is in §4.9. This chapter takes the
+elicitation output as given and specifies from it.
 
 ## 3.2 Requirements Analysis and Negotiation
 
@@ -588,7 +497,7 @@ increments that slipped. Feasible.
 
 **Legal and ethical.** The system holds national identity numbers, dates of birth, photographs and
 financial evidence for real people. Bangladesh's data protection statute was in draft at the time of
-writing, so the project cannot claim compliance with it and does not; instead §8.8 records the
+writing, so the project cannot claim compliance with it and does not; instead §8.11 records the
 principles applied, being purpose limitation, minimisation, default non-disclosure and stated
 retention, and the front-matter declaration records the basis on which live data was handled during
 development. Use of the college's name and crest is governed by DC-01. Feasible, with the
@@ -1143,7 +1052,7 @@ tree. The columns are requirement, constitutional source where applicable, use c
 implementation artefact and test case. A representative extract follows; the full matrix appears as
 Appendix B and is closed in §12.2.
 
-| Req | DC / clause | Use case | Design element (Ch. 5–6) | Implementation artefact (Ch. 7) | Test (Ch. 8) |
+| Req | DC / clause | Use case | Design element (Ch. 5–6) | Implementation artefact (Ch. 7) | Test (Ch. 9) |
 | --- | --- | --- | --- | --- | --- |
 | FR-01 | — | UC-01 | Registration sequence, §5.5 | Registration endpoint and application service | Wizard validation and duplicate-identity tests |
 | FR-02 | DC-08 | UC-01, UC-02 | Membership state machine, §5.3 | Membership status transitions | State-transition suite |
@@ -1179,8 +1088,8 @@ section, and the requirement or design element by which it is enforced.
 | Economic | Operating cost of the order of tens of dollars a year against a commercial licence exceeding the Association's annual income | Feasible | Cost is borne personally until the Association holds an account | §10.10 |
 | Operational | The binding constraint is officer time spent verifying payments, not the software | Feasible with reservation | Permanent administrative burden, quantified rather than assumed | §12.6, §13.4 |
 | Schedule | Incremental delivery, so schedule risk reduces scope rather than removing the system | Feasible | Two increments slipped | Ch. 11 |
-| Legal | Bangladesh's data protection statute was in draft; no compliance claim is made | Feasible | Obligations may change on enactment | §8.8 |
-| Ethical | Live personal data handled under a stated declaration; college identity used per DC-01 | Feasible | Sole-maintainer access to production data is an unresolved structural risk | Front matter, §8.8, §13.4 |
+| Legal | Bangladesh's data protection statute was in draft; no compliance claim is made | Feasible | Obligations may change on enactment | §8.11 |
+| Ethical | Live personal data handled under a stated declaration; college identity used per DC-01 | Feasible | Sole-maintainer access to production data is an unresolved structural risk | Front matter, §8.11, §13.4 |
 
 ### Table 3.8 — Specification defects found by the formal technical review
 

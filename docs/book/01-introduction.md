@@ -141,7 +141,7 @@ encoded in software before procedural legitimacy is damaged.
 | O3 | Select and justify an architecture against the quality-attribute scenarios and the sustainability constraint, recording the trade-offs | RQ2 | Ch. 6 |
 | O4 | Model the system's behaviour and encode the constitutional rules as traceable, testable business rules | RQ3 | Ch. 5 |
 | O5 | Implement the API, web and mobile clients, including membership, payments, events, communication and governance | RQ1, RQ2 | Ch. 7 |
-| O6 | Verify and validate the artefact at unit, integration, system, security, performance and acceptance levels | RQ4 | Ch. 8 |
+| O6 | Verify and validate the artefact at unit, integration, system, security, performance and acceptance levels | RQ4 | Ch. 9 |
 | O7 | Design and operate a deployment that a single volunteer can sustain, and cost it | RQ2 | Ch. 10 |
 | O8 | Evaluate the artefact against ISO/IEC 25010, against the manual process it replaces, and against the four research questions | RQ4, RQ3 | Ch. 12 |
 
@@ -329,8 +329,8 @@ flowchart LR
     RQ2[RQ2 Architecture and cost] --> O3[O3 Architect] --> C6[Ch 6]
     RQ2 --> O7[O7 Operate and cost] --> C10[Ch 10]
     RQ3[RQ3 Governance in software] --> O4[O4 Model rules] --> C5[Ch 5]
-    RQ3 --> C9[Ch 9 §8.10]
-    RQ4[RQ4 Measured quality] --> O6[O6 Verify] --> C8[Ch 8]
+    RQ3 --> C8[Ch 8 §8.10]
+    RQ4[RQ4 Measured quality] --> O6[O6 Verify] --> C9[Ch 9]
     O5[O5 Implement] --> C7[Ch 7]
     RQ2 --> O5
     O8[O8 Evaluate] --> C12[Ch 12]
