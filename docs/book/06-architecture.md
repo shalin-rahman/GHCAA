@@ -123,7 +123,8 @@ Core's conventions alone, which is a gap rather than a decision and is recorded 
 selects. Figures 6.3 to 6.8 draw that schema as four sub-models, being identity and records, standing and
 money, events and participation, and governance, each with its keys and cardinalities. They are split
 this way rather than drawn as one diagram because one diagram of forty-nine tables cannot be printed
-at a size anyone can read; the content, communication and configuration tables are Appendix H.
+at a size anyone can read; the content, communication and configuration tables are in the generated
+schema documentation.
 
 ### 6.5.2 Normalisation and its deliberate exceptions
 
@@ -178,7 +179,7 @@ retrospective claim would be.
 ### 6.5.5 Data dictionary
 
 Table 6.2 gives a representative slice of the forty-nine mapped entities; the full dictionary is
-Appendix E.
+generated from the schema and delivered beside this dissertation.
 
 ### 6.5.6 Seeding and runtime data-synchronisation strategy
 
@@ -231,18 +232,18 @@ The API resource model follows a `/api/[controller]` convention with sub-resourc
 segments, for example `/api/events/{id}/register`. Errors are returned as JSON with a consistent
 shape from `ExceptionMiddleware` rather than as provider stack traces, which is NFR-U4's requirement
 enforced at the one place that can guarantee it for every unhandled case. Table 6.3 catalogues every
-controller with its route and authorisation level; the full request and response shapes are
-Appendix F.
+controller with its route and authorisation level; the full request and response shapes are in the
+generated OpenAPI document.
 
 ## 6.7 Security Architecture
 
-Summarised here as a design view; the threat model, control mapping and residual risk are Chapter 9's
+Summarised here as a design view; the threat model, control mapping and residual risk are Chapter 8's
 subject. Four mechanisms are worth naming as architecture rather than as detail, because each is a
 structural decision rather than a local check: `SecurityStampMiddleware`, which makes a credential or
 role change take effect within one request rather than at token expiry; the query-string token
 allowance in the middleware pipeline, which exists only to let a file download authenticate without a
 custom header and is scoped, in the pipeline order of Figure 6.10, to run before the ordinary
-authentication step rather than replacing it; the payment-gateway posture of §9.9, under which the
+authentication step rather than replacing it; the payment-gateway posture of §8.9, under which the
 platform never stores a payment credential of its own; and step-up authentication for destructive,
 financial and identity-changing admin actions, which re-verifies an already-authenticated Admin or
 SuperAdmin session by email OTP before it may reach one of five gated endpoints. The verification
@@ -304,7 +305,7 @@ completed piece of design, and §13.6.2 carries it forward as a named item of te
 
 ### 6.8.4 Responsive design and accessibility strategy
 
-Accessibility is targeted at WCAG 2.1 level AA per NFR-U1, verified by the audit reported in §8.12
+Accessibility is targeted at WCAG 2.1 level AA per NFR-U1, verified by the audit reported in §9.12
 rather than asserted here. Responsive layout follows Marcotte's approach of a fluid grid over fixed
 breakpoints [36], necessary because NFR-P3 and the assumption of §1.6 both treat a mobile browser,
 not a desktop one, as the primary surface for a member.
@@ -367,7 +368,7 @@ Service decomposition follows the subsystem boundaries of §3.6: `MemberService`
 lifecycle, `FinancialService` and `FinancialLedgerService` are split apart from each other
 specifically so that raising and recording a due is a different responsibility from posting an
 append-only ledger entry, which is the separation BR-07 depends on. The cohesion evidence for this
-claim is measured, not asserted, in §8.14.3.
+claim is measured, not asserted, in §9.14.3.
 
 ### 6.11.4 Open/closed
 
@@ -398,9 +399,9 @@ elsewhere in the same table.
 
 ### 6.11.7 Coupling and cohesion
 
-Measured in §8.14.3 as CBO, afferent and efferent coupling and instability, and plotted against
+Measured in §9.14.3 as CBO, afferent and efferent coupling and instability, and plotted against
 Martin's main sequence; this section states the claim, that layer boundaries keep coupling
-directional, and §8.14.3 is where the claim is checked rather than assumed.
+directional, and §9.14.3 is where the claim is checked rather than assumed.
 
 ### 6.11.8 Elimination of duplication
 
@@ -549,7 +550,7 @@ that owned both a business workflow and its append-only record of consequence.
 
 **Anaemic domain drift, noticed and knowingly not corrected.** §5.3.1 and §6.12.4 both record this:
 correcting it would have moved authorisation logic out of the service layer where every access-control
-test of §8.9 currently finds it uniformly.
+test of §9.9 currently finds it uniformly.
 
 **Raw-control styling leak, partially remediated.** The shared control library of §6.8.3 remediates
 this for cross-cutting UI elements; the member-record duplication in the same section is the instance
@@ -567,7 +568,7 @@ one would change the shape of the system rather than the contents of a file.
 | ADR-01 | Adopt clean architecture with a compiler-enforced dependency rule | §6.2: layering by convention had already once failed silently | NFR-M1 becomes checkable; four-assembly ceremony for a single-maintainer project |
 | ADR-02 | Pool provider-specific `ApplicationDbContext` shim types, not the base type | EF's `IMigrationsAssembly` matches migrations to the pooled context's exact runtime type; pooling the base type made `GetMigrations()` return zero migrations on every provider, so the self-healing boot logic was a silent no-op everywhere | Migrations apply correctly on boot across PostgreSQL, MySQL and SQLite |
 | ADR-03 | Never write live constitution publication through `HasData` | Seed data expressed as `HasData` reaches a populated database only through a migration, which pins revisable text to whichever migration carried it; the `EnsureCreated()`-built preprod database never received it at all | `ConstitutionSeeder.SyncAsync` runs at every boot; schema is handled separately by `MigrationBootstrapper` |
-| ADR-04 | Keep the manual payment path primary and leave gateway integration optional | §3.2, §9.9: the Association holds no merchant account and no gateway credentials | Permanent officer verification workload, quantified in §12.6, in exchange for holding no payment credential |
+| ADR-04 | Keep the manual payment path primary and leave gateway integration optional | §3.2, §8.9: the Association holds no merchant account and no gateway credentials | Permanent officer verification workload, quantified in §12.6, in exchange for holding no payment credential |
 | ADR-05 | Merge news and notices into one table discriminated by `PostType` | §6.5.2: identical shape apart from authorship rule | BR-03 enforced at the controller rather than by two schemas |
 | ADR-06 | Defer a second `IFileStorageService` implementation | §6.11.4: no second storage requirement exists yet | Interface segregation is structural, not yet demonstrated |
 
@@ -577,10 +578,10 @@ Table 6.5 checks the architecture against the utility tree of Figure 3.10 by map
 quality-attribute scenario to the tactic that addresses it: QAS-01's directory latency to indexed
 queries (§6.5.3) and the cache in front of configuration reads (§6.10); QAS-03's session
 invalidation to `SecurityStampMiddleware`; QAS-06's maintainability scenario to the dependency rule
-and the risk-weighted coverage of §8.14.5; QAS-08's auditability scenario to the business rules
+and the risk-weighted coverage of §9.14.5; QAS-08's auditability scenario to the business rules
 catalogue of §5.6 itself, which is as much an architectural artefact as a requirements one. Nothing
 in this verification is new measurement; it is a cross-check that the design of this chapter actually
-answers the scenarios Chapter 3 set, which Chapter 8 then measures.
+answers the scenarios Chapter 3 set, which Chapter 9 then measures.
 
 ## 6.15 Summary
 
@@ -978,7 +979,7 @@ quadrantChart
     "Microservices": [0.25, 0.85]
 ```
 
-### Table 6.2 — Data dictionary (representative slice; full dictionary in Appendix E)
+### Table 6.2 — Data dictionary (representative slice; the full dictionary is generated from the schema)
 
 | Table | Column | Type | Constraint | Description |
 | --- | --- | --- | --- | --- |
@@ -994,7 +995,7 @@ quadrantChart
 | OrganizationConfigs | ConfigJson | text/JSONB | — | Whole configuration document, §6.5.2 |
 | Constitutions | IsActive | bool | Not database-enforced | Exactly-one invariant maintained procedurally, §6.5.2 |
 
-### Table 6.3 — API endpoint catalogue (by controller; full catalogue in Appendix F)
+### Table 6.3 — API endpoint catalogue (by controller; the full catalogue is the generated OpenAPI document)
 
 | Controller | Route | Authorisation | Notes |
 | --- | --- | --- | --- |

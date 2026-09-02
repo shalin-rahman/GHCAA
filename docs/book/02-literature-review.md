@@ -12,7 +12,7 @@ on, and to stop when it has established them.
   literature say it costs? (Feeds RQ2 and §6.2.)
 - **RvQ3.** What does the digital-governance and electronic-voting literature establish about the
   conditions under which software may legitimately mediate a collective decision? (Feeds RQ3, and is
-  the reason for the boundary drawn in §2.7 and defended in §9.10.)
+  the reason for the boundary drawn in §2.7 and defended in §8.10.)
 - **RvQ4.** Which existing systems address the Association's problem, on what terms, and what
   remains uncovered? (Feeds RQ1, RQ2 and §2.11.)
 
@@ -172,7 +172,7 @@ control-flow measure of testability [57]; Chidamber and Kemerer's suite gives co
 inheritance measures for object-oriented designs [56]; Oman and Hagemeister's maintainability index
 aggregates volume, complexity and comment density into a single trackable figure [58]. Each is
 imperfect and each is criticised, but they are the measures for which thresholds and comparative
-data exist, and §8.14 reports them with their limits stated.
+data exist, and §9.14 reports them with their limits stated.
 
 ## 2.6 Web and Mobile Engineering Literature
 
@@ -251,7 +251,7 @@ prevents it from proving it did so honestly.
 
 ## 2.8 Security and Privacy Engineering Baselines
 
-The security work of Chapter 9 is not original research and does not claim to be. It applies
+The security work of Chapter 8 is not original research and does not claim to be. It applies
 established baselines, and this section records which and why.
 
 For threat identification the project uses STRIDE as Shostack presents it, that is a
@@ -272,17 +272,17 @@ records the requirements the project does not meet.
 For the cryptographic primitives the choices follow published specifications rather than invention:
 bcrypt for password storage, with its adaptive cost parameter [49]; JSON Web Tokens as specified in
 RFC 7519 for bearer authentication [50], with the caveat that the specification's flexibility is
-itself a hazard, addressed in §9.5; OAuth 2.0 as specified in RFC 6749 for federated sign-in [51];
+itself a hazard, addressed in §8.5; OAuth 2.0 as specified in RFC 6749 for federated sign-in [51];
 and time-based one-time passwords per RFC 6238 as the model for the verification codes described in
 §3.3.2 [52].
 
 For privacy the operative principle is Cavoukian's privacy by design, in particular default
 protection and end-to-end lifecycle management [41]. Its concrete expression in this system is the
-per-field visibility control of FR-03 and the masking protocol in §9.7, under which the directory
+per-field visibility control of FR-03 and the masking protocol in §8.7, under which the directory
 returns a masked projection unless the owning member has opted otherwise. Bangladesh's data
 protection framework was still in draft at the time of writing, so the project treats the principles
 of purpose limitation, minimisation and retention as design obligations rather than as compliance
-with a specific statute, and §9.8 states that position explicitly rather than implying a compliance
+with a specific statute, and §8.8 states that position explicitly rather than implying a compliance
 claim it cannot support.
 
 ## 2.9 Survey of Existing Systems and Products
@@ -562,6 +562,6 @@ better than the artefact produced here, and the comparison would be dishonest wi
 | Fixed-term officer positions with succession | Salesforce NPSP (custom object) | No term, quorum or ex-officio semantics; no institutional record independent of user accounts | §3.3.6, §5.4 |
 | Versioned governing instrument with an always-current reader | None | No product treats the governing document as versioned data with an effective date | §3.3.6, §7.9 |
 | Amendment voting at a constitutional threshold | None | Poll features exist; the two-thirds-at-AGM rule and eligibility gate do not | §3.3.6, §5.6 |
-| Payment without a gateway, evidenced and officer-verified | CiviCRM (offline contributions) | Secondary path; no proof-upload and verification workflow with an audit trail | §3.3.4, §9.9 |
+| Payment without a gateway, evidenced and officer-verified | CiviCRM (offline contributions) | Secondary path; no proof-upload and verification workflow with an audit trail | §3.3.4, §8.9 |
 | Auditable trace from enforced rule to constitutional clause | None | Configuration produces behaviour, not a trace a reviewer can follow | §3.10, Table 3.4 |
 | Operation at tens of dollars per year by one volunteer | WordPress + plugin | Achievable only by abandoning C1, C2 and C8 | Ch. 10 |

@@ -302,8 +302,8 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 | 5.3 | Process specifications for the Level-2 processes | 67 |
 | 5.4 | Data-store definitions (analysis level) | 67 |
 | 6.1 | ADR index | 73 |
-| 6.2 | Data dictionary (representative slice; full dictionary in Appendix E) | 82 |
-| 6.3 | API endpoint catalogue (by controller; full catalogue in Appendix F) | 82 |
+| 6.2 | Data dictionary (representative slice; the full dictionary is generated from the schema) | 82 |
+| 6.3 | API endpoint catalogue (by controller; the full catalogue is the generated OpenAPI document) | 82 |
 | 6.4 | Design pattern catalogue (selected entries; full catalogue is §6.12 in full) | 82 |
 | 6.5 | Quality-attribute scenario to architectural tactic mapping | 82 |
 | 6.6 | Anti-patterns detected and remediated | 82 |
@@ -313,7 +313,7 @@ Section numbers are as printed in the body. Page numbers are the folios the PDF 
 ## x. List of Listings
 
 *None in Part I. Code extracts begin in Chapter 6 and are concentrated in Chapter 7. Complete
-listings are in Appendix D.*
+listings are in the repository at the commit named in §7.1.*
 
 ---
 
@@ -412,10 +412,10 @@ reused, because the distinction changes how Chapter 12 should be read.
 1. A method for encoding the written constitution of a voluntary association as traceable software
    business rules, in which every rule carries the article that mandates it, and the boundary
    between rules that may be automated and decisions that must stay with the officers is argued
-   rather than assumed (§3.10, §5.6, §8.4.5).
+   rather than assumed (§3.10, §5.6, §9.4.5).
 2. An account of what an alumni platform becomes when payment gateway credentials are unavailable
    by policy rather than by oversight, together with the security and operational consequences of
-   displaying manual payment instructions and verifying uploaded proof (§9.9).
+   displaying manual payment instructions and verifying uploaded proof (§8.9).
 3. A characterisation of the requirements of an alumni association operating under a
    single-maintainer, zero-licence-budget constraint, with the architectural decision recorded
    against those constraints instead of against a hypothetical growth curve (Chapter 6).

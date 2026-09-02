@@ -7,31 +7,61 @@ reviewed and approved before writing begins. It is not the book itself.
 **Scale.** Four parts, thirteen chapters, front and back matter, eighty-two catalogued diagram and
 chart types, sixteen appendices.
 
-**Page budget.** Chapters 1 to 6 are written and measured; the rest is estimated from this outline at
-the rate those chapters actually print at, which is a little over one page per numbered section once
-figures and tables are counted.
+**Page budget: 150 to 200 pages for the whole volume.** Decided 2 September 2026. This is a
+constraint on how the remaining chapters are written, not a target to trim towards afterwards.
+Cutting finished prose costs several times what writing to length costs, and it removes the
+qualifications and the negative findings first, which are the parts of this book that make it
+credible.
+
+Chapters 1 to 6 are written and measured. The rest is budgeted, not estimated: the figures below are
+what each chapter is allowed, rather than what it would run to at the density Part I and Part II
+actually print at.
 
 | Part | State | Pages |
 |---|---|---|
 | Front matter | written; grows as the contents grow | 10–14 |
-| Part I and Part II, chapters 1–6 | written, measured on 2 September 2026 | 72 |
-| Part III, chapters 7–11 | estimated from section, figure and table counts | 62–72 |
-| Part IV, chapters 12–13 | estimated | 19–24 |
+| Part I and Part II, chapters 1–6 | written, measured 2 September 2026 | 72 |
+| Part III, chapters 7–11 | budgeted | 55 |
+| Part IV, chapters 12–13 | budgeted | 19 |
 | References | written; grows with Part III | 5–8 |
-| Index | not started | 4–8 |
-| **Body and front matter, no appendices** | | **173–201** |
-| Appendices A–P as specified below | not started | 231–357 |
-| **Total as specified** | | **404–558** |
+| Appendices carried in print | see the back matter below | 11–19 |
+| Index, if the programme requires one | not started | 0–6 |
+| **Total** | | **172–198** |
 
-The appendix figure is not a padding estimate. It follows from what the appendices promise against
-counts taken from the repository: 276 endpoints in Appendix F, 49 tables and their DDL in Appendix E,
-898 automated tests in Appendix G, and roughly forty-four remaining use cases in Appendix B. As
-specified, the appendices are longer than the dissertation they support, and the total sits well past
-the three hundred pages the house style in `docs/book/README.md` assumes. That is a decision to take
-deliberately, not to discover at binding: either the appendices print in full and the volume is what
-it is, or the exhaustive ones cite a generated artefact in the repository and print a representative
-extract, which is what Tables 6.2 and 6.3 already do in the body. Until that decision is recorded
-here, treat the appendix list as a superset rather than a commitment.
+Per-chapter budget for the unwritten chapters. At the density of the written chapters these would
+run to 82–99 pages, so each is roughly two pages tighter than it would otherwise be:
+
+| Chapter | Pages |
+|---|---|
+| 7 Implementation | 12 |
+| 8 Verification, validation and quality assurance | 14 |
+| 9 Security, privacy and trust | 11 |
+| 10 Deployment and operations | 9 |
+| 11 Project management | 9 |
+| 12 Results, evaluation and discussion | 14 |
+| 13 Conclusion and future work | 5 |
+
+Where a chapter cannot make its budget without dropping evidence, the evidence stays and the budget
+is renegotiated here in writing. What must not happen is a chapter quietly running to twenty pages
+and the total being discovered at binding.
+
+**Appendix policy.** The appendices as originally specified came to 231–357 pages, which is longer
+than the dissertation they support. That figure was not padding: it followed from what they promised
+against real counts, being 276 endpoints for the API reference, 49 tables and their DDL for the data
+dictionary, 898 automated tests for the test-case suite, and about forty-four remaining use-case
+descriptions. Printing them
+in full would have put the volume past 400 pages.
+
+The decision is that only appendices an examiner needs in the bound copy are printed. Everything
+exhaustive is a generated artefact in the repository, or a document delivered beside the
+dissertation, and the book cites it precisely enough to be checked. This is the pattern the body
+already uses: Tables 6.2 and 6.3 print a representative slice and name where the full catalogue
+lives. Nothing is lost that a reader could not open; a sixty-page printed API reference is not read
+by anyone.
+
+**Front matter to state the length.** The abstract already states its own word count and the build
+checks it. The same should hold for the volume: state the page count on the title page or in the
+contents, so a reader knows what they are holding.
 
 **Status of the figure and table numbers in this document.** The numbers used in the "Figures and
 tables" list under each chapter below are the *plan*. The book itself numbers in bound order, which
@@ -47,7 +77,7 @@ the book's own List of Figures for what it contains. Where the two disagree, the
 - Every figure is drawn to print on one A4 page at a label size of at least 7pt, which the build measures and enforces; `docs/book/README.md` states how a diagram that does not meet that is fixed.
 - Every figure caption states what the figure shows and the project artefact it was derived from, for example: *"Figure 6.3 — Entity–Relationship model of the 40 mapped entities; derived from `GHCAA.Infrastructure/Data/ApplicationDbContext.cs`."*
 - Citations in IEEE numeric style; every non-obvious claim carries a citation.
-- Code in the body appears as short illustrative extracts of no more than thirty lines, each discussed in the text; complete listings are in Appendix D.
+- Code in the body appears as short illustrative extracts of no more than thirty lines, each discussed in the text; complete listings stay in the repository at the commit §7.1 names.
 - UML 2.5 notation for all object-oriented models.
 
 ---
@@ -173,7 +203,7 @@ followed is stated in §2.2.
 - Figure 3.11 — Goal model linking stakeholder goals to system requirements
 - Table 3.1 — Functional requirement catalogue: ID, statement, source, priority, RQ link
 - Table 3.2 — Non-functional requirement catalogue by ISO 25010 characteristic, with measurable acceptance criteria
-- Table 3.3 — Use-case descriptions (actor, preconditions, main flow, alternates, exceptions, postconditions) for the ten highest-value cases; the remainder in Appendix B
+- Table 3.3 — Use-case descriptions (actor, preconditions, main flow, alternates, exceptions, postconditions) for the ten highest-value cases; the remainder in `docs/SRS.md`
 - Table 3.4 — Requirements Traceability Matrix: requirement → use case → design element → implementation artefact → test case, carried forward and closed in Chapter 12
 
 ---
@@ -196,7 +226,7 @@ followed is stated in §2.2.
 - **4.6** Metrics Definition — formula, tool and interpretation threshold for each metric, stated in advance of measurement
 - **4.7** Data Collection and Analysis Procedures
 - **4.8** Risk Management: the RMMM plan — risk identification, projection by probability and impact, the RMMM table, and the risk-monitoring record kept during the project
-- **4.9** Research Ethics — consent, anonymisation, personal-data handling, storage and retention
+- **4.9** Research Ethics — consent, anonymisation, personal-data handling, storage and retention. This section owns the research-ethics account; the front-matter declaration states the position and §3.1.3 points here rather than repeating it
 - **4.10** Limitations of the Chosen Method
 - **4.11** Summary
 
@@ -228,7 +258,7 @@ followed is stated in §2.2.
 - **5.4** Behavioural Modelling — activity, sequence and interaction views
 - **5.5** State Modelling of Long-Lived Entities
 - **5.6** Business Rules Catalogue — including the rules imported from the association's constitution and election code, each tagged with the article that mandates it
-- **5.7** Data Modelling — conceptual to logical
+- **5.7** Data Modelling — conceptual only. The logical and physical progression belongs to §6.5.1 and is not repeated here; §5.7 stops where persistence concerns begin
 - **5.8** Analysis Model Review and Validation
 - **5.9** Summary
 
@@ -274,14 +304,14 @@ followed is stated in §2.2.
   - **6.3.6** The dependency rule and the mechanism that enforces it
 - **6.4** Component-Level Design
 - **6.5** Data Design
-  - **6.5.1** Conceptual, logical and physical progression
+  - **6.5.1** Logical and physical progression, taking the conceptual model of §5.7 as its input rather than restating it
   - **6.5.2** Normalisation to third normal form and the deliberate denormalisations, each justified
   - **6.5.3** Indexing strategy
   - **6.5.4** Multi-provider portability (PostgreSQL, MySQL, SQLite) and its design cost
   - **6.5.5** Data dictionary
   - **6.5.6** Schema and reference data at boot: migration bootstrapping, the legacy `EnsureCreated()`-built database that had no migration history, the false-baseline self-heal, and why revisable reference data is synchronised separately from schema
 - **6.6** Interface Design — API resource model, error contract, status-code discipline, versioning
-- **6.7** Security Architecture, summarised here as a design view and detailed in Chapter 9
+- **6.7** Security Architecture, summarised here as a design view and detailed in Chapter 8
 - **6.8** User-Interface Design
   - **6.8.1** Design principles and information architecture
   - **6.8.2** Design-token system, theming and the single-stylesheet decision
@@ -293,7 +323,7 @@ followed is stated in §2.2.
 - **6.11** Design Principles: Claim, Mechanism and Evidence — each principle stated with the mechanism that enforces it, the code location that demonstrates it, and the measurement or test that would detect its violation
   - **6.11.1** Separation of concerns and the layer boundary
   - **6.11.2** Dependency inversion — the domain depends on abstractions only; enforced by project references and demonstrated by the dependency structure matrix of Figure 7.2
-  - **6.11.3** Single responsibility — service decomposition, evidenced by the LCOM cohesion figures of §8.14.3
+  - **6.11.3** Single responsibility — service decomposition, evidenced by the LCOM cohesion figures of §9.14.3
   - **6.11.4** Open/closed — where extension without modification is achieved (payment providers, database providers, storage providers) and where it is not
   - **6.11.5** Liskov substitution and interface segregation across the service interfaces
   - **6.11.6** Information hiding and encapsulation — internal versus public surface
@@ -319,7 +349,7 @@ followed is stated in §2.2.
 
 - Figure 6.1 — High-level architecture diagram: clients, API, services, stores, external services
 - Figure 6.2 — Layered / clean architecture diagram with inward dependency arrows and the dependency-inversion boundary marked
-- Figures 6.3–6.6 — ER sub-models: identity and records, standing and money, events and participation, governance. Written as four diagrams rather than one full-schema fold-out, because one diagram of forty-nine tables cannot be printed at a readable size; the remaining tables are Appendix H
+- Figures 6.3–6.6 — ER sub-models: identity and records, standing and money, events and participation, governance. Written as four diagrams rather than one full-schema fold-out, because one diagram of forty-nine tables cannot be printed at a readable size; the remaining tables are in the generated schema documentation
 - Figure 6.7 — Design class diagram: domain model, with attributes, operations, visibility and multiplicities
 - Figure 6.9 — Design class diagram: application interfaces and infrastructure services
 - Figure 6.10 — Design class diagram: client-side services and models
@@ -376,7 +406,7 @@ followed is stated in §2.2.
 - Figure 7.5 — Flowchart: constitution publication from ratified PDF to every surface
 - Figure 7.6 — Flowchart: file upload, validation and storage
 - Figure 7.7 — Algorithm flowchart: membership-due calculation
-- Figure 7.8 — Control-flow graph of a representative complex method, annotated with its cyclomatic complexity, feeding the basis-path testing of Chapter 8
+- Figure 7.8 — Control-flow graph of a representative complex method, annotated with its cyclomatic complexity, feeding the basis-path testing of Chapter 9
 - Listings 7.1–7.n — representative implementation extracts, each discussed in the text
 - Table 7.1 — Third-party dependencies: library, version, purpose, licence, alternative considered
 - Table 7.2 — Module implementation status matrix
@@ -384,7 +414,41 @@ followed is stated in §2.2.
 
 ---
 
-## Chapter 8 — Verification, Validation and Quality Assurance
+## Chapter 8 — Security, Privacy and Trust
+
+- **9.1** Security Objectives and Assumptions
+- **9.2** Threat Modelling (STRIDE) — assets, entry points, trust boundaries, enumerated threats
+- **9.3** Authentication and Session Security
+- **9.4** Authorisation Model and the Role–Permission Matrix
+- **9.5** Input Validation and Output Sanitisation
+- **9.6** File Upload Security
+- **9.7** Transport, Header and Browser-Policy Security
+- **9.8** Rate Limiting and Abuse Prevention
+- **9.9** Payment-Related Risk and the No-Gateway-Keys Posture — the security rationale for manual verification and its accepted operational cost
+- **9.10** Governance Integrity — the scope of the voting features as sentiment and internal decision-making rather than as a secure-election system, with reference to §2.7
+- **9.11** Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights
+- **9.12** Audit Logging and Non-Repudiation
+- **9.13** Conformance Assessment against OWASP ASVS
+- **9.14** Residual Risks and Recommendations
+- **9.15** Summary
+
+**Figures and tables**
+
+- Figure 9.1 — Threat model data-flow diagram with trust boundaries, STRIDE-annotated
+- Figure 9.2 — Attack tree for the highest-value asset: member account takeover or fraudulent payment credit
+- Figure 9.3 — Role–permission matrix diagram
+- Figure 9.4 — Personal-data classification and flow diagram, with retention points
+- Figure 9.5 — Sequence diagram: an unauthorised request rejected through the middleware chain
+- Figure 9.6 — Defence-in-depth layer diagram
+- Table 9.1 — STRIDE threat enumeration with mitigations and their implementation location
+- Table 9.2 — Role × capability matrix
+- Table 9.3 — OWASP ASVS conformance checklist with verdicts
+- Table 9.4 — Personal-data inventory: element, purpose, lawful basis, retention
+- Table 9.5 — Residual risk register
+
+---
+
+## Chapter 9 — Verification, Validation and Quality Assurance
 
 - **8.1** Verification and Validation Strategy and Test Levels
 - **8.2** Software Quality Assurance Plan — reviews, standards conformance, defect prevention, and the role of formal technical reviews in this project
@@ -415,7 +479,7 @@ followed is stated in §2.2.
 - **8.7** Integration Testing Strategy, and the reasoning for rejecting big-bang integration
 - **8.8** System and End-to-End Testing
 - **8.9** Regression Testing and Test Selection
-- **8.10** Security Testing, mapped to the threat model of Chapter 9 and to OWASP ASVS
+- **8.10** Security Testing, mapped to the threat model of Chapter 8 and to OWASP ASVS
 - **8.11** Performance and Load Testing — workload model, environment, results
 - **8.12** Usability and Accessibility Testing — task success, time on task, System Usability Scale scores, WCAG audit
 - **8.13** User Acceptance Testing — participants, protocol, results, sign-off
@@ -450,45 +514,11 @@ followed is stated in §2.2.
 - Table 8.1 — Equivalence classes and boundary values for a representative input domain
 - Table 8.2 — Decision table for dues and eligibility
 - Table 8.3 — State-transition test table
-- Table 8.4 — Test-case catalogue: ID, technique, requirement, input, expected, actual, status; full set in Appendix G
+- Table 8.4 — Test-case catalogue: ID, technique, requirement, input, expected, actual, status; full set in the test-runner output committed per release
 - Table 8.5 — Product metrics summary against the thresholds declared in §4.6
 - Table 8.6 — Coverage by module against its risk-weighted target: module, criticality, target, statement percentage, branch percentage, mutation score, verdict, and the justification for any shortfall
 - Table 8.7 — Defect log
 - Table 8.8 — User acceptance test results and sign-off
-
----
-
-## Chapter 9 — Security, Privacy and Trust
-
-- **9.1** Security Objectives and Assumptions
-- **9.2** Threat Modelling (STRIDE) — assets, entry points, trust boundaries, enumerated threats
-- **9.3** Authentication and Session Security
-- **9.4** Authorisation Model and the Role–Permission Matrix
-- **9.5** Input Validation and Output Sanitisation
-- **9.6** File Upload Security
-- **9.7** Transport, Header and Browser-Policy Security
-- **9.8** Rate Limiting and Abuse Prevention
-- **9.9** Payment-Related Risk and the No-Gateway-Keys Posture — the security rationale for manual verification and its accepted operational cost
-- **9.10** Governance Integrity — the scope of the voting features as sentiment and internal decision-making rather than as a secure-election system, with reference to §2.7
-- **9.11** Personal Data: Lawful Basis, Minimisation, Consent, Retention and Subject Rights
-- **9.12** Audit Logging and Non-Repudiation
-- **9.13** Conformance Assessment against OWASP ASVS
-- **9.14** Residual Risks and Recommendations
-- **9.15** Summary
-
-**Figures and tables**
-
-- Figure 9.1 — Threat model data-flow diagram with trust boundaries, STRIDE-annotated
-- Figure 9.2 — Attack tree for the highest-value asset: member account takeover or fraudulent payment credit
-- Figure 9.3 — Role–permission matrix diagram
-- Figure 9.4 — Personal-data classification and flow diagram, with retention points
-- Figure 9.5 — Sequence diagram: an unauthorised request rejected through the middleware chain
-- Figure 9.6 — Defence-in-depth layer diagram
-- Table 9.1 — STRIDE threat enumeration with mitigations and their implementation location
-- Table 9.2 — Role × capability matrix
-- Table 9.3 — OWASP ASVS conformance checklist with verdicts
-- Table 9.4 — Personal-data inventory: element, purpose, lawful basis, retention
-- Table 9.5 — Residual risk register
 
 ---
 
@@ -526,40 +556,86 @@ followed is stated in §2.2.
 
 This chapter follows Pressman and Maxim's project-management apparatus, which is the framework the
 course material uses and the one an examiner will read it against: the four P's as the framing, then
-metrics, estimation, scheduling and risk. Only the parts that this project actually has evidence for
-are written. Where a technique was not used — and a single unpaid maintainer did not run earned-value
-analysis week by week — the chapter says so and reports what was done instead, rather than
-reconstructing a plan after the fact. The RMMM plan is already in §4.8; §11.8 reports its execution
-rather than restating it.
+metrics, estimation, scheduling and risk. Only the parts this project has evidence for are written.
+Where a technique was not used — and a single unpaid maintainer did not run earned-value analysis week
+by week — the chapter says so and reports what was done instead, rather than reconstructing a plan
+after the fact. The RMMM plan is already in §4.8; §11.8 reports its execution rather than restating it.
 
-- **11.0** The Four P's Applied — People, Product, Process, Project, with the single-maintainer case stated plainly against each
-- **11.1** Process Model in Practice and its Deviations from Plan
-- **11.2** Work Breakdown Structure
-- **11.3** Scheduling, Task Network and Critical Path — activity-on-node network by the precedence diagram method, with task duration, float, early and late start and finish, and the critical path identified
-- **11.4** Effort Estimation — function-point count, lines-of-code estimate and COCOMO II applied, compared against actual effort with the variance analysed
-- **11.5** Progress Tracking and Earned Value Analysis — planned value, earned value, actual cost, SPI, CPI. Reconstructed from the dated work items in `docs/TODO.md` and the commit record, which is the only effort evidence this project has; the reconstruction and its limits are stated as such
-- **11.6** Team Structure and Responsibilities
-- **11.7** Configuration and Change Management in Practice
-- **11.8** Risk Monitoring Record — the RMMM plan of §4.8 as it was executed
-- **11.9** Quality Assurance Activities Performed
+**Every figure in this chapter is regenerated, not typed.** `python docs/book/build/wbs.py` derives the
+durations, the task counts and the arrival profile from git history and `docs/TODO.md`. Re-run it
+before submission; where a number in the text disagrees with the script, the script is right.
+
+**Four work streams, and each activity states which class of evidence its duration rests on.** That
+matters more than the numbers themselves:
+
+| Class | Covers | What it can support |
+|---|---|---|
+| Git-dated | 17 code components, 8 documentation deliverables | dated and verifiable; a commit-day is a *lower bound* on effort, since reading, debugging and thinking leave no commit |
+| Tracker-dated | 63 areas, 590 tasks, the arrival profile | dated in `docs/TODO.md` |
+| Not yet written | installation, user and administrator manuals | future effort under the page budget, not completed work |
+| Calculated assumption | elicitation, interviews, review sessions, stakeholder discussion, incident response | **no commits exist**, so the duration is calculated from a stated rate and a measured quantity, and the arithmetic is printed with it. A reader who rejects the rate can redo the sum. These are labelled as assumptions everywhere they appear and are never presented as measurements |
+
+The fourth class is the one that would be easiest to fabricate, so its arithmetic is shown rather
+than its conclusion:
+
+| ID | Activity | Basis | Hours | Days | Additive |
+|---|---|---|---|---|---|
+| U1 | Elicitation interviews | 10 participants × 35 min contact, 3 role guides at 1h, write-up at 1× contact | 14.6 | 2 | yes |
+| U2 | Governing-document analysis | 43,000 words (constitution 5,239 + eight election documents ≈38,000) at 1,500 words/h for clause-by-clause classification, plus 16 domain-constraint entries at 15 min | 32.7 | 5 | yes |
+| U3 | Formal technical review | 2 sessions × (2h preparation + 2h session + 1h logging); output was the 5 defects of Table 3.8 | 10.0 | 2 | yes |
+| U4 | Stakeholder discussion | 18 feedback areas × 30 min; triage into tracker items excluded, already counted under D4 | 9.0 | 2 | yes |
+| U5 | Incident response | 4 incidents × 2h diagnosis before the first fix commit | 8.0 | 1 | **no** |
+
+U5 is deliberately not added. Those four dates carry 9, 7, 10 and 2 commits, among the busiest in the
+project, so the fix work already sits inside the measured commit-days; only the diagnosis before the
+first commit is invisible, and double-counting it would inflate the total.
+
+That gives the project's total effort: **63 measured code commit-days, 23 measured document
+commit-days and 11 assumed days, being 97 days, about 4.4 person-months at 22 days to the month.**
+Every rate above is a judgement and is stated as one. The reading rate of 1,500 words an hour for
+normative text and the write-up ratio of 1× contact time are the two most open to challenge, and §11.4
+says so.
+
+Git also *misdates* the research stream: the requirements documents were committed from July 2026,
+five months after the elicitation they record and after the code they governed was already written.
+For code that gap is small; for research it inverts the schedule, and §11.2 states it.
+
+- **11.0** The Four P's Applied — People, Product, Process, Project, with the single-maintainer case stated plainly against each. None of Pressman's four organisational paradigms (closed, random, open, synchronous) describes one unpaid maintainer; saying so is the finding, not forcing a label
+- **11.1** Process Model in Practice and its Deviations from Plan — led by the arrival profile: **65% of delivered tasks were not planned**, arriving as stakeholder feedback (32%), review findings (19%) or defects (14%), and 26 of the dated areas landed in August 2026 alone. A critical path over an up-front work breakdown would be fiction, because two thirds of the work did not exist when that breakdown would have been drawn
+- **11.2** Work Breakdown Structure — the four streams above; the 17 code components each tied to the tracker areas that produced them, so the activity list and the tracker are one list read two ways
+- **11.3** Scheduling, Task Network and Critical Path — activity-on-node by the precedence diagram method, with duration, float, early and late start and finish. Reported as a **retrospective** network: critical path 48 working days against 63 worked and 206 elapsed. The gap is availability, not dependency, and that is the section's point. Persistence and security behave as **hammock activities**, touched on 42 and 33 separate days across the whole span, and are drawn as such rather than as boxes at day zero
+  - **11.3.1** CPM summary ordered by float, so the schedule can be read by slack rather than by sequence
+  - **11.3.2** Crashing analysis, and the honest result: the single resource on the critical path cannot be crashed, so every classical crashing lever is unavailable. What shortened the schedule instead was scope deferral, recorded in the Won't set of §3.8
+- **11.4** Effort Estimation — the function-point chain, computed from the delivered system: EI, EO and EQ from the 276 endpoint attributes, ILF from the 49 `DbSet` properties, EIF from the four payment gateways plus email, SMS and social identity. UFP, then TDI over the fourteen general system characteristics, **VAF = 0.65 + 0.01 × TDI**, AFP, effort at a stated productivity factor, LOC via the language factor, and cost in BDT. **COCOMO II is dropped**: its five scale factors and seventeen effort multipliers cannot be justified here, and a model nobody can defend adds no evidence
+  - **11.4.1** Two estimates compared — apportioned commit-days against completed-task counts, on a common base. Eight of the seventeen components disagree by more than twofold: authentication, governance, gallery and security look heavy by task count because the tracker holds many small items there; persistence, events and the job board look heavy by commit-day because a handful of items each took days. **Task granularity varies by an order of magnitude between components, so any estimate built on task counts inherits that noise** — a stronger result than either estimate alone
+  - **11.4.2** The estimate against the actual — 97 days, about 4.4 person-months across all four streams, against the function-point model's prediction at the standard productivity factor. The model over-predicts by roughly two orders of magnitude, and the reasons are stated: framework scaffolding, no coordination overhead, no separate quality-assurance or project-management roles, and generated code counted as delivered function. The productivity factor assumes a team; there is no team
+- **11.5** Progress Tracking and Earned Value — BCWS, BCWP, BAC and ACWP, with **SPI = BCWP/BCWS** and **CPI = BCWP/ACWP**, reconstructed from the dated tracker items and the commit record, which is the only effort evidence this project has. The reconstruction and its limits are stated as such; no weekly earned-value record was kept, and the chapter does not pretend one was
+- **11.6** Team Structure and Responsibilities — one maintainer holding every role the four P's assign to different people, and what that costs: no independent review, and no separation between the person who declares a payment rule and the person who tests it. The mitigation was mechanical, being the tracker and the test suite, and §12.11 treats it as a validity threat
+- **11.7** Configuration and Change Management in Practice — there was no change-control board. There was one file: `docs/TODO.md`, 3,589 lines, simultaneously the project plan, the change log, the defect log and the decision record. The 384 reactive tasks *are* the change log, and Table 11.5 is generated from them rather than reconstructed
+- **11.8** Risk Monitoring Record — the RMMM plan of §4.8 as it was executed, with **risk exposure RE = P × C** computed per risk and impact on the 1–5 scale, plus one worked Risk Information Sheet. §4.8 needs revising to carry RE; the impact costs are author-stated and have to be supplied
+- **11.9** Quality Assurance Activities Performed — against Pressman's 40‑20‑40 allocation, this project spent roughly a third of its evidenced effort on feature code and about 15% on testing, well under the 40% prescribed. Data-backed self-criticism, with **DRE = E / (E + D)** computed from the findings log as E and live defects as D, and **MTTC** named as what QAS-06 already measures
 - **11.10** Lessons in Project Management
 - **11.11** Summary
 
 **Figures and tables**
 
-- Figure 11.1 — Work breakdown structure
-- Figure 11.2 — Gantt chart: planned versus actual
-- Figure 11.3 — PERT / activity-on-node network with the critical path highlighted
-- Figure 11.4 — Milestone timeline
-- Figure 11.5 — Earned value chart over time
-- Figure 11.6 — Effort distribution by phase and by module
-- Figure 11.7 — Burndown and velocity across increments
-- Figure 11.8 — Estimated versus actual effort with variance
-- Table 11.1 — Milestone and deliverable schedule
-- Table 11.2 — Function point count: EI, EO, EQ, ILF, EIF with complexity weighting
-- Table 11.3 — COCOMO II parameters and result
-- Table 11.4 — Cost model
-- Table 11.5 — Change log: significant scope changes with cause and impact
+One activity diagram per component, not a single module-level network. Seventeen small figures each
+print legibly at the 7pt floor and sit beside the prose for their own component; one network of
+seventeen nodes with nine edges converging on the web client would print at about 4pt and be useless.
+
+- Figures 11.1–11.17 — Activity diagram per component, C1 to C17, each with its entry and exit conditions, and its tracker areas named in the caption
+- Figure 11.18 — Chapter-level dependency graph, critical-path components only: C1 → C2 → C3 → C5 → C8 → C13 → C15 → C17
+- Figure 11.19 — Work breakdown structure across the four streams
+- Figure 11.20 — Arrival profile over time: planned, feedback, defect and review work by month
+- Figure 11.21 — Float distribution across the seventeen components
+- Figure 11.22 — Two estimates compared per component: commit-days against task counts
+- Figure 11.23 — Effort distribution by stream and component, against the 40‑20‑40 allocation
+- Table 11.1 — Activity list: ID, activity, duration, ES, EF, LS, LF, float, predecessors, tracker areas, evidence class
+- Table 11.2 — Function-point count: EI, EO, EQ, ILF and EIF with complexity weighting, from the delivered system
+- Table 11.3 — TDI over the fourteen general system characteristics, and the VAF it yields
+- Table 11.4 — Cost model: effort, rate and total, by both the function-point and the lines-of-code route
+- Table 11.5 — Change log generated from the 384 reactive tracker tasks: area, arrival class, date, cause, impact
+- Table 11.6 — Documentation deliverables: document, artefact, lines, active days, status
 
 ---
 
@@ -623,23 +699,31 @@ defined there.
 ## Back Matter
 
 - References — IEEE numeric style, every entry cited in the body
-- Appendix A — Ethics Approval, Participant Information Sheet and Consent Form
-- Appendix B — Complete Use-Case Descriptions
-- Appendix C — Complete Requirements Specification and Traceability Matrix
-- Appendix D — Selected Source-Code Listings
-- Appendix E — Complete Data Dictionary and Schema DDL
-- Appendix F — Complete API Reference
-- Appendix G — Complete Test-Case Suite and Execution Results
-- Appendix H — Full-Page Fold-Out Diagrams: ERD, design class diagram, system use-case diagram
-- Appendix I — Literature Review Protocol, Search Strings and Screening Log
-- Appendix J — Evaluation Instruments: interview schedule, usability task script, SUS questionnaire, expert-review form
-- Appendix K — Raw Evaluation Data and Statistical Working
-- Appendix L — Installation and Deployment Manual
-- Appendix M — User Manual
-- Appendix N — Administrator Manual
-- Appendix O — Architecture Decision Records, in full
-- Appendix P — Originality / Similarity Report
-- Index
+
+**Printed in the bound volume** (11–19 pages, per the appendix policy above):
+
+- Appendix A — Ethics: the permission obtained, and the absence of a written consent procedure, per §3.1.3. There is no participant information sheet or consent form to reproduce; consent was verbal. 2–4 pp
+- Appendix B — Closed requirements traceability matrix: requirement → design → code → test → result, for all of FR-01 to FR-54 and the NFR set. This is the appendix an examiner actually uses. 4–6 pp
+- Appendix C — Full-page fold-out plates: the four ER sub-models and the design class diagram, at landscape size. 3–5 pp
+- Appendix D — Originality / similarity report: tool output. 2–4 pp
+
+**Delivered beside the dissertation, not bound into it.** Each is cited in the body precisely enough
+to be checked, and each is a generated artefact or a standalone document rather than typeset prose:
+
+| Material | Where it lives | Why it is not printed |
+|---|---|---|
+| Complete use-case descriptions | repository, `docs/SRS.md` and Appendix B's matrix | ~44 remaining cases at two per page is 20–26 pages of near-identical structure |
+| Complete requirements specification | repository, `docs/SRS.md`; §3.3 and §3.4 carry the catalogue in full already | printing it twice adds pages, not evidence |
+| Data dictionary and schema DDL | generated from `ApplicationDbContext` and the migrations | 49 tables is 35–50 pages; Table 6.2 prints the representative slice |
+| Complete API reference | generated OpenAPI document | 276 endpoints is 46–60 pages; Table 6.3 prints the catalogue by controller |
+| Complete test-case suite and results | test-runner output, committed per release | 898 tests is 36–45 pages; §9.14 reports the figures that matter |
+| Source-code listings | the repository itself, at a named commit | the book quotes the extracts it discusses, in place, per the thirty-line rule |
+| Literature review protocol, search strings, screening log | separate document | 4–6 pages read by nobody once §2.2 states the protocol |
+| Evaluation instruments and raw evaluation data | separate document | needed for scrutiny, not for reading; cite and supply on request |
+| Installation, user and administrator manuals | separate documents, versioned with the product | operational documents with their own lifecycle; a two-paragraph summary each sits in §10.11 |
+| Architecture decision records in full | repository, `docs/` | Table 6.1 indexes them; the full text is a living record, not a snapshot |
+
+- Index — only if the programme requires one. It costs 4–6 pages and a full-text PDF is searchable.
 
 ---
 
@@ -656,8 +740,8 @@ The complete set of diagram and chart types the book contains, and the chapter e
 | 5 | RQ ↔ objective ↔ chapter map | 1 | Navigation key |
 | 6 | Study-selection flow diagram | 2 | Literature screening with counts |
 | 7 | Concept map / taxonomy | 2 | Structure of the reviewed field |
-| 8 | As-is process model (BPMN) | 2 | Current manual practice |
-| 9 | Positioning chart | 2 | Existing systems on two decisive axes |
+| 9 | As-is process model (BPMN) | 2 | Current manual practice |
+| 8 | Positioning chart | 2 | Existing systems on two decisive axes |
 | 10 | Use-case diagram | 3 | System level and per subsystem |
 | 11 | Actor generalisation hierarchy | 3 | Role inheritance |
 | 12 | Domain / conceptual class model | 3 | Analysis-level classes, no implementation |
@@ -672,7 +756,7 @@ The complete set of diagram and chart types the book contains, and the chapter e
 | 21 | Swimlane activity diagram | 5 | Cross-role responsibility |
 | 22 | BPMN process diagram | 5 | Election cycle, for a non-engineer audience |
 | 23 | State-machine diagram | 5 | Member, payment, constitution, event lifecycles |
-| 24 | Sequence diagram | 5, 9, 10 | Authentication, registration, payment, SignalR, denial, boot |
+| 24 | Sequence diagram | 5, 8, 10 | Authentication, registration, payment, SignalR, denial, boot |
 | 25 | Communication diagram | 5 | Payment collaboration, structural view |
 | 26 | Interaction overview diagram | 5 | Composition of interactions across a year |
 | 27 | Timing diagram | 5 | Token lifetime, refresh window, session expiry |
@@ -698,20 +782,20 @@ The complete set of diagram and chart types the book contains, and the chapter e
 | 47 | Build / bundle pipeline | 7 | Client build stages |
 | 48 | Git branching model | 7 | Configuration management strategy |
 | 49 | Flowchart | 7 | Publication, upload, due calculation |
-| 50 | Control-flow graph | 7, 8 | Complexity and basis-path derivation |
-| 51 | Test pyramid | 8 | Realised test-level distribution |
-| 52 | V-model mapping | 8 | Artefact to verifying activity |
-| 53 | CI quality-gate diagram | 8, 10 | Pipeline stages |
-| 54 | Metric charts | 8 | Coverage, complexity, coupling, defects |
-| 55 | Coupling / instability scatter | 8 | Modules against the main sequence |
-| 56 | Defect-removal efficiency chart | 8 | Phase containment |
-| 57 | Performance / latency charts | 8, 12 | Endpoint latency and throughput |
-| 58 | SUS score distribution | 8, 12 | Usability benchmark |
-| 59 | Threat model DFD (STRIDE) | 9 | Attack surface and trust boundaries |
-| 60 | Attack tree | 9 | Highest-value asset compromise paths |
-| 61 | Role–permission matrix | 9 | Authorisation model |
-| 62 | Data-classification flow | 9 | Personal-data movement and retention |
-| 63 | Defence-in-depth layers | 9 | Control stacking |
+| 50 | Control-flow graph | 7, 9 | Complexity and basis-path derivation |
+| 51 | Test pyramid | 9 | Realised test-level distribution |
+| 52 | V-model mapping | 9 | Artefact to verifying activity |
+| 53 | CI quality-gate diagram | 9, 10 | Pipeline stages |
+| 54 | Metric charts | 9 | Coverage, complexity, coupling, defects |
+| 55 | Coupling / instability scatter | 9 | Modules against the main sequence |
+| 56 | Defect-removal efficiency chart | 9 | Phase containment |
+| 57 | Performance / latency charts | 9, 12 | Endpoint latency and throughput |
+| 58 | SUS score distribution | 9, 12 | Usability benchmark |
+| 59 | Threat model DFD (STRIDE) | 8 | Attack surface and trust boundaries |
+| 60 | Attack tree | 8 | Highest-value asset compromise paths |
+| 61 | Role–permission matrix | 8 | Authorisation model |
+| 62 | Data-classification flow | 8 | Personal-data movement and retention |
+| 63 | Defence-in-depth layers | 8 | Control stacking |
 | 64 | Deployment diagram | 10 | Nodes, artifacts, protocols |
 | 65 | Network / infrastructure diagram | 10 | Hosts and boundaries |
 | 66 | Environment promotion | 10 | Local, pre-production, production |
@@ -778,5 +862,5 @@ evaluation data and literature are the material that must be produced.
 | User-interface design, tokens, shared controls | `docs/UI_UX_REMEDIATION_PLAN.md`, `docs/PROFILE_SHARED_COMPONENT_DESIGN.md`, `GHCAA.Web/src/styles.scss` |
 | Governance, constitution and election processes | `docs/CONSTITUTION_PUBLISHING.md`, `docs/Elections/`, the ratified constitution |
 | Schedule, work breakdown, change log, decision records | `docs/TODO.md`, `docs/PLAN.md`, the version-control history |
-| Product metrics — complexity, coupling, size | Static analysis over the solution, generated for §8.14 |
+| Product metrics — complexity, coupling, size | Static analysis over the solution, generated for §9.14 |
 | Literature, evaluation data, validity analysis | Produced during the research; not present in the repository |

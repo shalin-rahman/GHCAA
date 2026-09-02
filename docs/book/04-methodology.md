@@ -145,15 +145,15 @@ The workload model is the one implied by the quality-attribute scenarios QAS-01 
 concurrent reads against the directory and event listings, and a cold page load on a mid-range
 handset profile. Measurement is taken against the pre-production deployment described in Chapter 10,
 which runs the same container image as production on a smaller instance tier; the instrument used to
-generate concurrent load, and the results, are recorded in §8.11, since naming a tool here before it
+generate concurrent load, and the results, are recorded in §9.11, since naming a tool here before it
 has been run would commit this section to a choice that has not yet been tested for suitability.
 
 ### 4.5.4 Security evaluation
 
-Two instruments, run together rather than as alternatives. The threat model of Chapter 9, built by
+Two instruments, run together rather than as alternatives. The threat model of Chapter 8, built by
 STRIDE walk-through of the data-flow diagrams of §5.2, gives coverage of *attack classes*. The
 OWASP ASVS level 2 checklist [7] gives coverage of *control families*. The edition used is 4.0.3 of
-2021, which is the edition the security work of Chapter 9 was carried out against; ASVS 5.0.0 was
+2021, which is the edition the security work of Chapter 8 was carried out against; ASVS 5.0.0 was
 released in May 2025 [75] and restructures the standard into seventeen chapters, so a conformance
 claim under 4.0.3 does not transfer to it and is not presented as though it did. Section 9.13 reports both, and
 a control is scored conformant only where a specific code location or configuration enforces it, in
@@ -165,7 +165,7 @@ Three instruments: task-based testing of the registration and payment-declaratio
 completion criterion of NFR-U2, the System Usability Scale against the published benchmark of 68
 [33] per NFR-U3, and a heuristic walkthrough against Nielsen's heuristics [35] for the flows the
 task-based test does not reach. The instruments themselves, being the task script and the SUS
-questionnaire, are reproduced in Appendix J so that the criterion can be checked against what
+questionnaire, are delivered beside this dissertation so that the criterion can be checked against what
 participants actually saw.
 
 ### 4.5.6 Expert and stakeholder evaluation
@@ -179,20 +179,20 @@ software professional, is unchanged between the two readings.
 ## 4.6 Metrics Definition
 
 Each metric is given here in Table 4.1 with its formula, the tool that computes it and the threshold
-that will be compared against it, so that §8.14 and Chapter 12 apply rather than choose these
+that will be compared against it, so that §9.14 and Chapter 12 apply rather than choose these
 numbers.
 
 ### Table 4.1 — Metric definitions
 
 | Metric | Formula / method | Tool | Target |
 | --- | --- | --- | --- |
-| Statement and branch coverage | Lines and branches exercised ÷ total, per test run | `coverlet.collector` 6.0.2 via `dotnet test`, per NUnit 4.2.2 project | Risk-weighted by module criticality; see §8.14.5 |
-| Mutation score | Mutants killed ÷ mutants generated | Recorded where run; §8.14.5 states where it was not | Corrective measure against coverage alone |
+| Statement and branch coverage | Lines and branches exercised ÷ total, per test run | `coverlet.collector` 6.0.2 via `dotnet test`, per NUnit 4.2.2 project | Risk-weighted by module criticality; see §9.14.5 |
+| Mutation score | Mutants killed ÷ mutants generated | Recorded where run; §9.14.5 states where it was not | Corrective measure against coverage alone |
 | Cyclomatic complexity | McCabe's independent-path count per method [57] | Static analysis over the solution | Flagged above 10 per method |
-| Coupling between objects (CBO), afferent/efferent coupling, instability | Chidamber and Kemerer's suite [56]; instability = efferent ÷ (afferent + efferent) | Static analysis over the solution | Plotted against Martin's main sequence, §8.14.3 |
+| Coupling between objects (CBO), afferent/efferent coupling, instability | Chidamber and Kemerer's suite [56]; instability = efferent ÷ (afferent + efferent) | Static analysis over the solution | Plotted against Martin's main sequence, §9.14.3 |
 | Maintainability index | Oman and Hagemeister's composite of volume, complexity and comment ratio [58] | Static analysis over the solution | No fixed target; trended across the increments recorded in `docs/TODO.md` |
-| Response latency | Wall-clock time from request to first byte, 95th percentile | Concurrent-request harness against pre-production; instrument named in §8.11 | Per NFR-P1, NFR-P2, NFR-P5 |
-| System Usability Scale | Ten-item questionnaire, Brooke's scoring [33] | Paper or digital form, Appendix J | ≥ 68 |
+| Response latency | Wall-clock time from request to first byte, 95th percentile | Concurrent-request harness against pre-production; instrument named in §9.11 | Per NFR-P1, NFR-P2, NFR-P5 |
+| System Usability Scale | Ten-item questionnaire, Brooke's scoring [33] | Paper or digital form, delivered with the evaluation instruments | ≥ 68 |
 | ASVS conformance | Control satisfied / not satisfied / not applicable, by control family | Manual checklist against ASVS 4.0.3 [7] | Full level 2 coverage of applicable families |
 | Requirement coverage | Requirements traced to a passing test ÷ total Must requirements | Traceability matrix, Table 3.4 | 100% of Must |
 
@@ -201,7 +201,7 @@ numbers.
 Four kinds of data are collected, and each has a different analysis treatment. Automated test results
 and coverage reports are quantitative and are aggregated directly; no sampling is involved since the
 population is the whole test run. Static-analysis output, being complexity and coupling figures, is
-quantitative and is analysed by threshold and by distribution, per §8.14.2 and §8.14.3, rather than by
+quantitative and is analysed by threshold and by distribution, per §9.14.2 and §9.14.3, rather than by
 a single mean that would hide the worst offenders the maintainability argument actually depends on.
 Formal-technical-review findings, held in `docs/BUSINESS_FINDINGS.md`, are qualitative records
 classified by module, layer and severity as the log itself already tags them; §3.12 and §12.7 read
@@ -257,7 +257,7 @@ one place in the document where that gap is recorded, so that it can be found an
 The second concerns the personal data of the Association's real members, which the platform holds in
 production and which the maintainer necessarily saw during development and testing. That question is
 answered, not deferred, in the front matter's Ethics Statement and Data-Protection Declaration and
-expanded in §9.11: the principles applied are purpose limitation, minimisation, default
+expanded in §8.11: the principles applied are purpose limitation, minimisation, default
 non-disclosure and a stated retention position, applied because Bangladesh's data-protection statute
 was in draft rather than in force at the time of writing, and because no third-party ethics body
 governs a single volunteer's handling of his own association's data. No production member data
@@ -267,7 +267,7 @@ point forward is synthesised.
 ## 4.10 Limitations of the Chosen Method
 
 The dual role of researcher and sole developer is the limitation that most affects how the rest of
-this document should be read. Every finding in Chapter 8, and every judgement in §12.9 about whether
+this document should be read. Every finding in Chapter 9, and every judgement in §12.9 about whether
 this project's answer to RQ3 is the right one, was reached by the same person who wrote the code
 being judged. The formal technical review of §3.12 is the one point at which an independent party,
 an officer of the Association, checked the work against something other than the author's own
@@ -290,7 +290,7 @@ the argument of §12.13 about what transfers, not an assumption that it transfer
 The method is design science research, run as Hevner's three cycles and Peffers' six activities,
 delivered through forty-six incrementally opened work areas gated by an automated test rather than by
 a calendar date. The evaluation plan is fixed in this chapter across six dimensions, each with a
-named metric, tool and threshold, before Chapter 8 measures anything. Risk was managed through the
+named metric, tool and threshold, before Chapter 9 measures anything. Risk was managed through the
 same gated work-item mechanism as everything else, and the RMMM table of §4.8 is built from the
 project's own severity record rather than reconstructed for presentation. Two ethical questions are
 kept distinct, one of them still open and recorded as such. Chapter 5 now turns from method to the
@@ -401,6 +401,6 @@ quadrantChart
 | Research question | Criterion | Metric | Instrument | Threshold |
 | --- | --- | --- | --- | --- |
 | RQ1 | Requirement set fit for the domain | Requirement coverage; FTR defect count | Traceability matrix, Table 3.4; findings log | 100% of Must traced; FTR defects resolved or recorded |
-| RQ2 | Architecture satisfies quality-attribute scenarios at bounded cost | Coupling, cohesion, maintainability index; operating cost | Static analysis, §8.14; cost model, §10.10 | Thresholds of Table 4.1; cost within Association's stated means |
-| RQ3 | Governance rules encoded without loss of procedural legitimacy | DC-to-code trace completeness; ASVS conformance on governance endpoints | Table 3.4 DC column; §9.13 | Every DC of priority M traced and enforced |
+| RQ2 | Architecture satisfies quality-attribute scenarios at bounded cost | Coupling, cohesion, maintainability index; operating cost | Static analysis, §9.14; cost model, §10.10 | Thresholds of Table 4.1; cost within Association's stated means |
+| RQ3 | Governance rules encoded without loss of procedural legitimacy | DC-to-code trace completeness; ASVS conformance on governance endpoints | Table 3.4 DC column; §8.13 | Every DC of priority M traced and enforced |
 | RQ4 | Measured quality against ISO/IEC 25010 | All metrics of Table 4.1 | As listed | As listed |

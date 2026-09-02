@@ -4,7 +4,7 @@ Chapter 3 said what the system must do and what it must not violate. This chapte
 statements turn into a model that can be built from. Two notations are used side by side rather than
 one being chosen over the other, and §5.1 explains why. The chapter's centre of gravity is §5.6: the
 business rules catalogue is where the constitution's clauses stop being prose and become named,
-locatable checks in the code, and it is the artefact Chapter 8 tests against and Chapter 9 audits.
+locatable checks in the code, and it is the artefact Chapter 9 tests against and Chapter 8 audits.
 
 ## 5.1 Analysis Approach
 
@@ -153,7 +153,7 @@ cannot use to find the code is not doing the job the honesty rule in the front m
 | BR-08 | Event capacity is enforced across every status that occupies a place, not only Approved | Constitution silent; officer requirement, §3.2 | `EventService`, occupying-status count corrected under TODO 29-A.4 |
 | BR-09 | Waitlist promotion is first-in, first-out by registration time | Officer requirement, FR-15 | `EventService`, `.OrderBy(r => r.RegisteredAt)` |
 | BR-10 | A public directory entry discloses a field only if the owning member has opted in | Officer/member negotiation, §3.2 | `MemberService` masking projection; unmasked only through privileged `admin/members/{id}` |
-| BR-11 | A change of credentials, role or status invalidates every outstanding session immediately | Design position, §9.5 | `SecurityStampMiddleware` |
+| BR-11 | A change of credentials, role or status invalidates every outstanding session immediately | Design position, §8.5 | `SecurityStampMiddleware` |
 | BR-12 | Every mutating request is attributed to the acting user, not to a default identifier | Audit integrity, TODO 29-F.1 | Acting admin id read from the JWT `MemberId` claim in every approval and rejection path |
 | BR-13 | A payment declaration is not credited until the callback or officer-verified amount matches the originating record | Financial integrity, TODO 29-B.2 | Amount comparison against the originating `PaymentHistory` row before crediting |
 | BR-14 | Advisory members are excluded from the Executive Committee quorum computation | Art. IV, Art. III | Formal-technical-review finding, §3.12; enforcement recorded against `GovernanceService`'s committee-membership query |
@@ -167,7 +167,7 @@ only from "a voting member in good standing". `GovernanceService.VoteOnConstitut
 arrears status before admitting the vote. A voting member with an outstanding subscription can
 therefore still vote on an amendment, which BR-01 as coded does not prevent. This is the same class
 of finding as the idle-timeout gap recorded in §3.12: a requirement the specification stated
-correctly and the implementation only partially closed. It is carried forward to §8.9 as an open
+correctly and the implementation only partially closed. It is carried forward to §9.9 as an open
 item rather than corrected in this chapter, since correcting the prose here would misrepresent what
 the shipped code actually checks.
 
@@ -201,7 +201,7 @@ is the source of BR-14 above, an enforcement gap the specification review had al
 rule-by-rule pass against the code is the source of the FR-36 gap recorded in §5.6, which the
 specification review did not surface because §3.12 checked the specification's wording, not the
 implementation's behaviour; finding it required reading `GovernanceService` directly. Both gaps are
-carried forward rather than resolved in this document, and both are named again in §8.9 and §9.14 so
+carried forward rather than resolved in this document, and both are named again in §9.9 and §8.14 so
 that a reader working from either chapter alone still encounters them.
 
 ## 5.9 Summary

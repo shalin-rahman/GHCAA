@@ -110,13 +110,13 @@ delivered artefact in §12.2.
 low-budget sustainability constraint, and at what cost?
 
 *Answered by:* the alternatives assessment of §6.2, the decision records of §6.13, the operational
-cost model of §10.10, and the maintainability metrics of §8.14.
+cost model of §10.10, and the maintainability metrics of §9.14.
 
 **RQ3.** To what extent can institutional governance processes, meaning the constitution, elections,
 committee terms and member voting, be encoded as software without loss of procedural legitimacy?
 
 *Answered by:* the domain constraints of §3.10, the business rules catalogue of §5.6, the governance
-integrity discussion of §9.10, and the argument in §12.8 that draws the boundary the project
+integrity discussion of §8.10, and the argument in §12.8 that draws the boundary the project
 actually settled on.
 
 **RQ4.** What measurable quality is achieved by the resulting artefact against ISO/IEC 25010
@@ -160,11 +160,11 @@ public web site, a member portal and admin console in the same Angular applicati
 mobile application for members.
 
 **Out of scope, by decision.** Live payment gateway integration is present in the codebase but
-deliberately unconfigured; §9.9 gives the reasoning. Statutory accounting and audit filing are not
+deliberately unconfigured; §8.9 gives the reasoning. Statutory accounting and audit filing are not
 attempted; the ledger is a record, not an accounting package. The platform does not run binding
 Executive Committee elections. It supports the process around them, including the voter roll,
 candidate information and result publication, but the ballot itself remains under the election
-documents, and §9.10 explains why that separation is deliberate rather than an omission. There is
+documents, and §8.10 explains why that separation is deliberate rather than an omission. There is
 no offline-first mobile synchronisation, no native desktop client, no machine-learning
 recommendation, and no external large language model; the in-app assistant is a rule-based intent
 classifier over the Association's own data.
@@ -186,7 +186,7 @@ activities of Peffers et al. [5]: problem identification, definition of objectiv
 design and development, demonstration, evaluation, and communication. The relevance cycle is the
 Association's own process and documents; the rigour cycle is the architecture, requirements,
 security and quality literature of Chapter 2 together with the standards listed in the front matter;
-the design cycle is the increments of Chapter 7 and their verification in Chapter 8.
+the design cycle is the increments of Chapter 7 and their verification in Chapter 9.
 
 Delivery followed an incremental and iterative lifecycle rather than a single pass, for the reason
 given in §4.4: a single unpaid maintainer working in irregular hours cannot hold a long
@@ -219,7 +219,7 @@ themselves.
 | Treasurer | An auditable ledger and evidence for every receipt | FR-19 to FR-25 |
 | General Secretary | Minutes, correspondence, notices, AGM circulation | FR-26 to FR-31, FR-35 |
 | Information and Technology Secretary | A platform maintainable by one person; the constitutional office responsible for it | NFR-M1 to NFR-M4 |
-| Election Commission | A defensible voter roll and published results, with the ballot itself under the election documents | FR-38 to FR-40, §9.10 |
+| Election Commission | A defensible voter roll and published results, with the ballot itself under the election documents | FR-38 to FR-40, §8.10 |
 | College administration | Correct use of the institutional name and crest, per Article I Section 5 | §3.10, DC-01 |
 | Prospective member and general public | Public information, a route to apply, published governance documents | FR-01, FR-32, FR-46, FR-47 |
 | Maintainer as researcher | An artefact whose quality can be measured and reported honestly | Ch. 4, Ch. 12 |
@@ -242,9 +242,11 @@ business rules. Chapter 6 records the architecture, the design, the patterns app
 decisions taken.
 
 Part III covers construction and validation. Chapter 7 reports the implementation and the notable
-problems solved along the way. Chapter 8 reports verification, validation and the product metrics.
-Chapter 9 covers security, privacy and trust. Chapter 10 covers deployment and operations, including
-the cost model. Chapter 11 reports project management.
+problems solved along the way. Chapter 8 covers security, privacy and trust, and states the threat
+model. Chapter 9 then reports verification, validation and the product metrics, including the security
+testing derived from that threat model, which is why it follows Chapter 8 rather than preceding it.
+Chapter 10 covers deployment and operations, including the cost model. Chapter 11 reports project
+management.
 
 Part IV closes. Chapter 12 executes the evaluation plan and answers the research questions.
 Chapter 13 concludes and sets out future work.
@@ -285,7 +287,7 @@ flowchart LR
     classDef sys fill:#ffe9b3,stroke:#8a6d1f,stroke-width:2px
 ```
 
-The dashed path carries the design position of §9.9. Money moves between the member and the
+The dashed path carries the design position of §8.9. Money moves between the member and the
 financial channel outside the platform boundary. What crosses into the platform is a claim plus
 evidence, which an officer then verifies. The platform never holds a payment credential.
 
@@ -327,7 +329,7 @@ flowchart LR
     RQ2[RQ2 Architecture and cost] --> O3[O3 Architect] --> C6[Ch 6]
     RQ2 --> O7[O7 Operate and cost] --> C10[Ch 10]
     RQ3[RQ3 Governance in software] --> O4[O4 Model rules] --> C5[Ch 5]
-    RQ3 --> C9[Ch 9 §9.10]
+    RQ3 --> C9[Ch 9 §8.10]
     RQ4[RQ4 Measured quality] --> O6[O6 Verify] --> C8[Ch 8]
     O5[O5 Implement] --> C7[Ch 7]
     RQ2 --> O5

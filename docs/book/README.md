@@ -38,6 +38,7 @@ into the book by accident.
 | `python docs/book/build/build.py` | builds the HTML and runs every source check |
 | `python docs/book/build/build.py --pdf` | the same, then measures A4 fit, prints the PDF with page numbers, and fills the Page columns from it |
 | `python docs/book/build/renumber.py --apply` | renumbers figures and tables into bound order and rebuilds the contents and the front-matter lists |
+| `python docs/book/build/wbs.py` | regenerates Chapter 11 evidence from git and `docs/TODO.md`: component durations, the critical path, task counts, and how the work arrived. `--check` fails if a component has no commits or no tracker areas |
 
 Python 3 only — no pandoc, no Node packages, no `node_modules`. The PDF step additionally needs
 Chrome or Edge, which it finds by itself (override with the `BOOK_BROWSER` environment variable).

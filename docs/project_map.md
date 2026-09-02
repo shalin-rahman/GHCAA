@@ -1869,6 +1869,7 @@ All services use `Dio` via `dioProvider`. Listed with their **Riverpod providers
 | `lint.py` | `docs/book/build/lint.py` | Source checks run on every build: house tone, figure/table numbering, forward references, front-matter lists, abstract length, open placeholders |
 | `printer.py` | `docs/book/build/printer.py` | Browser discovery, the localhost server the page is served from, the A4 measurement pass, and print-to-PDF |
 | `renumber.py` | `docs/book/build/renumber.py` | Renumbers figures and tables into bound order, rewrites every mention, rebuilds the List of Figures and List of Tables |
+| `wbs.py` | `docs/book/build/wbs.py` | Derives Chapter 11 project-management evidence from git history and `docs/TODO.md`: apportioned commit-days per component, critical path, task counts per component, planned-versus-reactive arrival profile |
 | `ieee-print.css` | `docs/book/build/ieee-print.css` | IEEE print stylesheet: A4 `@page` rules, the landscape page, caption placement, two-column option |
 
 Rules for touching the book are in `docs/book/README.md`; the short version is in the root

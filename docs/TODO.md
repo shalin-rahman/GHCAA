@@ -6,6 +6,28 @@ Every open `[TODO]` item as of this date, grouped by severity/urgency. This inde
 duplicate — the full item text with context stays at its Area location; update both when an item's
 status changes.
 
+### ACTION NOW — confirm or correct the Chapter 11 duration assumptions (64.7)
+
+Five activities left no commit, so `docs/book/build/wbs.py` now carries a **calculated assumption** for
+each, with the arithmetic printed beside it. Run `python docs/book/build/wbs.py` and either confirm
+each rate or give a better one. Nothing else in Chapter 11 can be finished until these are settled,
+because the project's total effort figure (97 days, about 4.4 person-months) rests on them.
+
+| ID | Activity | Assumed | Rate to confirm |
+|---|---|---|---|
+| U1 | Elicitation interviews | 2 days | 35 min contact per participant; write-up at 1× contact time |
+| U2 | Governing-document analysis | 5 days | 1,500 words/hour for clause-by-clause classification of 43,000 words |
+| U3 | Formal technical review | 2 days | 2h preparation + 2h session + 1h logging, per session |
+| U4 | Stakeholder discussion | 2 days | 30 min of discussion per feedback area, 18 areas |
+| U5 | Incident response | 1 day, **not added** | 2h diagnosis per incident, before the first fix commit |
+
+The two most open to challenge are U2's reading rate and U1's write-up ratio. U5 is deliberately not
+added to the total: those four incident dates carry 9, 7, 10 and 2 commits, so the fix work is already
+inside the measured days and counting it twice would inflate the figure.
+
+Answer the five and 64.8 unblocks too, since risk exposure RE = P × C in §4.8 needs an impact cost per
+risk on the same basis.
+
 ### P0 — CRITICAL (blocked on the user; cannot be closed from a coding session)
 - **48.2** — Live production secrets committed to git (JWT signing key, DB passwords, Gmail app
   password, Render deploy-hook URL) in `docs/deploy_connection.txt`, `.env.remote`,
@@ -3563,3 +3585,144 @@ and a BPMN diagram instead; Chapter 6's list drops the wireframes and mockups (t
 Figures 12.1-12.20 screenshots carry that evidence) and the UML profile diagram (no custom stereotypes
 exist); the diagram inventory rows for the ERD, wireframes, mockups and profile diagram now match.
 The abstract was 363 words against the outline's own 250-350 range and is now 349.
+
+63.26 [DONE 2026-09-02] **Priority: P1.** Page budget decided by the user: **150 to 200 pages for the
+whole volume.** It cannot be met by cutting appendices alone, because the body plus front matter,
+references and index already comes to 173-201 on its own, so the decision carries two commitments,
+both now recorded in `docs/DOCUMENTATION_BOOK_OUTLINE.md`.
+
+First, chapters 7 to 13 are written to a per-chapter page budget rather than trimmed afterwards: 12,
+14, 11, 9, 9, 14 and 5 pages, totalling 74 against the 82-99 they would run to at the density the
+written chapters print at. Where a chapter cannot make its budget without dropping evidence, the
+evidence stays and the budget is renegotiated in the outline in writing. Do not write a chapter long
+and cut it: cutting finished prose removes the qualifications and the negative findings first, which
+are the parts of this book that make it credible.
+
+Second, only the appendices an examiner needs in the bound copy are printed, and the set is
+re-lettered to four: A ethics, B closed traceability matrix, C full-page fold-out plates, D
+originality report, 11-19 pages together. Everything exhaustive is a generated artefact in the
+repository or a document delivered beside the dissertation, cited precisely enough to be checked —
+the pattern Tables 6.2 and 6.3 already use in the body. Projected total: 172-198 pages.
+
+The re-lettering broke every appendix cross-reference in the written chapters and in the outline
+itself; all were remapped in the same change. A reference to material that left the volume now names
+where it actually lives (`docs/SRS.md`, the generated OpenAPI document, the generated schema
+documentation, the test-runner output) rather than pointing at an appendix letter that no longer
+exists. Check this again if the appendix set changes.
+
+---
+
+# Area 64 — Chapter 11 evidence: activity list, durations, and how the work actually arrived
+
+Raised by user 2026-09-02 while checking `docs/materials/` for content the book should cover. The
+three assignment PDFs there are the author's own group submissions for MITM 301, and they are for the
+**DU Estate Office** scenario, not GHCAA — four authors, submitted 16 June and 5 May 2026. Their
+numbers cannot enter the dissertation; their method and coverage can. `docs/materials/` is git-ignored.
+
+64.1 [DONE 2026-09-02] **Priority: P2.** `docs/book/build/wbs.py` added. It derives every Chapter 11
+figure from git history and `docs/TODO.md` rather than from anyone's memory: apportioned commit-days
+per component, the CPM forward and backward pass, task counts per component, and the arrival profile.
+`--check` fails if a component matches no commits, has no tracker areas, or if a tracker area belongs
+to no component. Re-run it before submission; where the text and the script disagree, the script wins.
+
+64.2 [DONE 2026-09-02] **Priority: P2.** Seventeen code components defined, each tied to the tracker
+areas that produced it, so the activity list and `docs/TODO.md` are one list read two ways. All 63
+areas and all 590 items map to a component with none left over. Durations are apportioned commit-days,
+rounded up: a day touching five components contributes a fifth to each, so the parts sum to the 63 days
+actually worked instead of counting one day five times.
+
+64.3 [DONE 2026-09-02] **Priority: P1.** Critical path computed: C1 persistence → C2 auth → C3 registry
+→ C5 events → C8 gallery → C13 web → C15 testing → C17 docs, **48 working days against 63 worked and
+206 elapsed**. The gap is availability, not dependency. Largest float: security 18 days, mobile 16.
+Two activities behave as hammocks rather than discrete boxes — persistence touched on 42 separate days,
+security on 33 — and Chapter 11 must draw them that way.
+
+64.4 [DONE 2026-09-02] **Priority: P1.** Planned-versus-reactive measured: **65% of delivered tasks
+were never planned** — 32% stakeholder feedback, 19% review findings, 14% defects — and 26 of the dated
+areas arrived in August 2026 alone. This is the framing for §11.1: a critical path over an up-front WBS
+would be fiction, because two thirds of the work did not exist when that WBS would have been drawn.
+
+64.5 [DONE 2026-09-02] **Priority: P2.** Two estimation methods compared on a common base, commit-days
+against completed-task counts. Eight of seventeen components disagree by more than twofold. Task
+granularity varies by an order of magnitude between components, so any estimate built on task counts
+inherits that noise — reported as the finding rather than hidden by picking one method.
+
+64.6 [DONE 2026-09-02] **Priority: P2.** Documentation counted as a work stream: 39 documents, 19,136
+lines, 26 apportioned days across eight deliverables. `docs/TODO.md` at 3,589 lines is the largest
+single document in the project and serves as plan, change log, defect log and decision record at once.
+The Elections set is 4,320 lines of the Association's own operative documents — transcription, and
+labelled as such rather than counted as authored content.
+
+64.7 [TODO] **Priority: P1 | Depends on: user.** *Listed at the head of the priority index above.*
+Five activities produced no commits, so each now carries a calculated assumption in
+`docs/book/build/wbs.py` with its arithmetic printed beside it, rather than being left blank: U1
+interviews 2 days, U2 governing-document analysis 5 days, U3 review sessions 2 days, U4 stakeholder
+discussion 2 days, U5 incident response 1 day and deliberately not added to the total. Project effort
+across all four streams therefore stands at **97 days, about 4.4 person-months**. Confirm or correct
+each rate — the reading rate of 1,500 words an hour and the write-up ratio of 1x contact time are the
+two most open to challenge. The underlying figures still wanted: (a) elicitation interviews beyond the 10 participants at 30–40 minutes each already given —
+when, and how much preparation and write-up; (b) analysis of 12 constitutional articles and 7 election
+documents clause by clause, which produced the 16 domain constraints; (c) the two formal technical
+review sessions of 3 and 29 July 2026, their duration and preparation; (d) the stakeholder exchanges
+behind 18 feedback areas, and whether they were meetings, calls or messages; (e) response time for the
+four dated deployment incidents. Do not estimate these.
+
+64.8 [TODO] **Priority: P2 | Depends on: 64.7.** Revise §4.8 to carry risk exposure **RE = P × C** and
+impact on the 1–5 scale, which is the convention the course material uses. The probabilities are
+already there; the impact costs are author-stated and blocked on 64.7.
+
+64.9 [TODO] **Priority: P2.** Chapter 11 figure set is seventeen per-component activity diagrams plus
+six chapter-level charts, not one module network. A seventeen-node network with nine edges converging
+on the web client prints at about 4pt, well under the enforced 7pt floor. Per-component diagrams also
+sit beside the prose for their own component, which is where a reader wants them.
+
+64.10 [DONE 2026-09-02] **Priority: P3.** COCOMO II dropped from §11.4 in favour of the function-point
+chain the course material teaches (UFP → TDI → VAF → AFP → effort → LOC → BDT), computed from the
+delivered system: 276 endpoint attributes as EI/EO/EQ, 49 `DbSet` properties as ILF, four gateways plus
+email, SMS and social identity as EIF. COCOMO II's five scale factors and seventeen effort multipliers
+cannot be justified for a single-maintainer project, and an indefensible model adds no evidence.
+
+# Area 65 — Chapter and content sequence revision
+
+Raised by user 2026-09-02: "revise chapters and content sequences".
+
+65.1 [DONE 2026-09-02] **Priority: P1.** Security and verification were in the wrong order. §9.10
+security testing was specified as "mapped to the threat model of Chapter 9" — verification
+forward-referenced the threat model it derives from, so §9.10 could not be written until the chapter
+after it existed. Security is now **Chapter 8** and Verification, Validation and Quality Assurance is
+**Chapter 9**. Cheap to do now and expensive later: both chapters are unwritten, so only the 80
+references from Part I and Part II moved, all mechanically (§8.x ↔ §9.x is a bijection; internal
+numbering untouched). Verified: 80 references found, 80 after. The outline blocks were physically
+reordered, §1.10's structure paragraph now states the order **and the reason**, and the diagram
+inventory's chapter column was swapped.
+
+65.2 [DONE 2026-09-02] **Priority: P2.** Data modelling was claimed twice: §5.7 "conceptual to
+logical" and §6.5.1 "conceptual, logical and physical progression". §5.7 now stops at conceptual,
+where persistence concerns begin, and §6.5.1 takes that model as input rather than restating it.
+
+65.3 [DONE 2026-09-02] **Priority: P3.** Ethics had three homes: the front-matter declaration, §3.1.3
+and §4.9. §4.9 now owns the research-ethics account; the front matter states the position; §3.1.3
+points to §4.9 rather than repeating it.
+
+65.4 [TODO] **Priority: P2 | Depends on: user.** The expensive one, deliberately not done. §3.1
+describes elicitation techniques, purposive sampling, instruments and ethics — that is methodology,
+sitting in the requirements chapter, *before* the methodology chapter explains the research paradigm.
+It also overlaps §4.7 Data Collection and Analysis Procedures. Two ways to fix it:
+
+  (a) Move Research Methodology to Chapter 3 and Requirements to Chapter 4. Conventional order, and it
+      resolves the overlap at the root. Cost: 85 §3 references and 29 §4 references rewritten in
+      **written** prose, plus headings, the generated contents and every folio. Mechanical but not
+      free, and the renumber/folio scripts would carry it.
+
+  (b) Keep the order and move §3.1's method content into Chapter 4 beside §4.7, leaving Chapter 3 as
+      the specification with a pointer. Cheaper, resolves the duplication, and arguably better: the
+      requirements chapter becomes purely the specification.
+
+Recommendation: (b). It fixes the same two problems for a fraction of the churn, and a supervisor who
+expects methodology at Chapter 3 can still be satisfied by (a) later, since (b) does not block it.
+
+65.5 [TODO] **Priority: P3.** Within Chapter 6, §6.11 Design Principles (twelve subsections) and §6.12
+Patterns (seven) come after §6.8 to §6.10 on user interface, mobile and configuration. Principles are
+more fundamental than the specific designs that apply them, so the conventional order would put them
+first. Not done: reordering sections inside a written chapter renumbers a large share of the 84 §6
+references for a modest gain. Worth doing only if the chapter is revised for another reason anyway.

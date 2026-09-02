@@ -44,7 +44,7 @@ the certificate field unfilled, on the strength of an officer recognising the ap
 recognition gateway visible in Figure 2.3 and the origin of the thirty-day verification requirement
 in FR-23. The second was that the treasurer's ledger recorded receipts but not the identity of the
 receiving officer, so a discrepancy could not be attributed. That produced FR-21 and the
-separation-of-duty property in §9.9.
+separation-of-duty property in §8.9.
 
 **Competitor analysis**, reported in §2.9, closed the set by surfacing capabilities nobody thought
 to ask for, of which the waitlist behaviour in FR-15 and the bulk communication segmentation in
@@ -78,7 +78,8 @@ easiest to approach are the people already engaged.
 The period over which the sessions ran was not recorded, and is not reconstructed here. No
 participant-derived figure is quoted anywhere in this dissertation, so nothing downstream depends on
 it; saying that it was not recorded is preferable to producing a date range from memory. The
-interview guides per role belong in Appendix A with the observation protocol.
+interview guides per role are held with the evaluation instruments delivered beside this
+dissertation, not bound into it.
 
 Instruments used: an interview guide per role, with an opening account of current task flow, a
 probe set on failure and workaround, and a closing prioritisation exercise; an observation checklist
@@ -105,14 +106,14 @@ was never recorded, its scope cannot be demonstrated to a reader, only asserted 
 future study reusing this material could not establish that the people concerned had agreed to that
 reuse. Section 9.8 sets out what was done to limit the exposure this leaves: no production member
 data appears in this dissertation, every example and test fixture uses synthesised records, and
-personal data in the running system is held under the access controls of Chapter 9. The
+personal data in the running system is held under the access controls of Chapter 8. The
 recommendation in §13.4 that the Association adopt a written consent line in its registration form
 comes directly from this gap.
 
 Separately from participant ethics, the project handles live personal data of real members,
 including national identity numbers, dates of birth and photographs. The declaration governing that
 material, including the basis on which development and testing were conducted, is given in the front
-matter under Ethics Statement and Data-Protection Declaration and expanded in §9.8. No production
+matter under Ethics Statement and Data-Protection Declaration and expanded in §8.8. No production
 member data appears in this dissertation. Every example, screenshot and test fixture uses synthesised
 records.
 
@@ -127,7 +128,7 @@ contact details, on the reasonable argument that a directory nobody can use is n
 Several members, asked directly, objected to their mobile number being visible to a membership of
 several hundred people they do not all know. The resolution was a masked projection by default with
 per-field opt-in disclosure controlled by the owning member, specified in FR-03 and FR-05 and
-implemented as the masking protocol in §9.7. Officers retain unmasked access for administrative
+implemented as the masking protocol in §8.7. Officers retain unmasked access for administrative
 purposes, which is itself logged. This satisfies neither party completely and is recorded as such.
 
 **Automatic termination for non-payment against Article X.** An early requirement, offered by an
@@ -147,7 +148,7 @@ banking relationship it has not yet established, and would in the interim have h
 collections through an individual's personal account, which is the arrangement the project exists to
 end. The resolution was to design the manual path as primary, with proof upload and officer
 verification, and to leave the gateway abstraction in place but unconfigured so that adoption later
-is a configuration change and not a redesign. The reasoning is set out in full in §9.9, and the
+is a configuration change and not a redesign. The reasoning is set out in full in §8.9, and the
 consequence, which is a permanent administrative burden of some minutes per payment, is quantified
 in §12.6 rather than glossed.
 
@@ -204,7 +205,7 @@ appear on an identity card the Association had not authorised.
 FR-11 states the security-stamp requirement in requirement form. A change of role, a password reset
 or a change of membership status must take effect immediately rather than at token expiry, because
 the alternative is a window in which a terminated member retains the rights of an active one. The
-mechanism is described in §7.4 and its threat rationale in §9.5.
+mechanism is described in §7.4 and its threat rationale in §8.5.
 
 ### 3.3.3 Events, Registration, Attendance and Gallery
 
@@ -241,7 +242,7 @@ paper ledger lacked.
 The payment channels the Association actually uses are mobile financial services, principally bKash
 and Nagad, bank transfer, and cash received by an officer. In every case the money moves outside the
 platform. What the platform holds is the member's claim, the evidence and the officer's verification.
-It holds no payment credential of any kind, and §9.9 argues that this is a security position and not
+It holds no payment credential of any kind, and §8.9 argues that this is a security position and not
 only a limitation.
 
 ### 3.3.5 News, Notices and Communication
@@ -279,7 +280,7 @@ The relationship between FR-36, FR-37 and FR-39 is the substance of this project
 The system decides eligibility, which is a question of fact traceable to Article III Section B and to
 the standing computation of FR-24, and it records the count. It does not declare adoption, and it
 does not touch the ballot for office at all. The reasoning is in §2.7, the mechanism in §5.6, and
-the defence in §9.10.
+the defence in §8.10.
 
 ### 3.3.7 Administration, Configuration and Site Content
 
@@ -371,7 +372,7 @@ system being "intuitive".
 
 | ID | Requirement and acceptance criterion |
 | --- | --- |
-| NFR-U1 | The system shall meet WCAG 2.1 level AA for all member-facing pages [24]. Criterion: automated audit clean, plus manual keyboard and contrast checks recorded in §8.11. |
+| NFR-U1 | The system shall meet WCAG 2.1 level AA for all member-facing pages [24]. Criterion: automated audit clean, plus manual keyboard and contrast checks recorded in §9.11. |
 | NFR-U2 | Registration shall be completable on a handset in a single sitting by a member without assistance. Criterion: task completion rate and time reported in §12.5. |
 | NFR-U3 | The system shall obtain a System Usability Scale score of at least 68, the published average, from member participants [33]. |
 | NFR-U4 | Every error presented to a user shall state what happened and what to do next, and shall not expose an internal identifier, stack trace or provider message. |
@@ -390,12 +391,12 @@ system being "intuitive".
 
 | ID | Requirement and acceptance criterion |
 | --- | --- |
-| NFR-S1 | The system shall satisfy OWASP ASVS level 2 for the control families applicable to it [7], with every non-conformance recorded rather than omitted (§9.4). |
+| NFR-S1 | The system shall satisfy OWASP ASVS level 2 for the control families applicable to it [7], with every non-conformance recorded rather than omitted (§8.4). |
 | NFR-S2 | Passwords shall be stored using an adaptive hash with a cost parameter reviewed annually [49]. |
 | NFR-S3 | Authentication attempts shall be limited to 5 per minute per source, registration to 10 per 5 minutes, and general API access to 100 per minute. |
 | NFR-S4 | National identity number, mobile number and email address shall each be unique across members, enforced in the database and not only in application code. |
 | NFR-S5 | A change of a member's credentials, roles or status shall invalidate all outstanding sessions for that member within one request. |
-| NFR-S6 | No resource shall be retrievable by a user not entitled to it by role or ownership. Criterion: the authorisation test suite of §8.9 exercises each protected endpoint with an unentitled principal. |
+| NFR-S6 | No resource shall be retrievable by a user not entitled to it by role or ownership. Criterion: the authorisation test suite of §9.9 exercises each protected endpoint with an unentitled principal. |
 | NFR-S7 | Uploaded files shall be validated by declared type, actual content signature and size, stored outside the web root, and served only through an authorising endpoint. |
 | NFR-S8 | Member-supplied rich text shall be sanitised on the server before storage. |
 
@@ -403,8 +404,8 @@ system being "intuitive".
 
 | ID | Requirement and acceptance criterion |
 | --- | --- |
-| NFR-M1 | The dependency rule shall hold: no compile-time dependency shall point from an inner layer to an outer one. Criterion: architecture test in §8.4 fails the build on violation. |
-| NFR-M2 | A routine change of the kind catalogued in §8.14, being the addition of a field to an existing entity end to end, shall be completable by the maintainer within one working session. |
+| NFR-M1 | The dependency rule shall hold: no compile-time dependency shall point from an inner layer to an outer one. Criterion: architecture test in §9.4 fails the build on violation. |
+| NFR-M2 | A routine change of the kind catalogued in §9.14, being the addition of a field to an existing entity end to end, shall be completable by the maintainer within one working session. |
 | NFR-M3 | The automated suite shall run to completion in under 10 minutes on the integration runner, so that it is actually run. |
 | NFR-M4 | The system shall be operable by one maintainer with no on-call obligation, and shall require no scheduled manual intervention more often than monthly. |
 
@@ -421,7 +422,7 @@ system being "intuitive".
 Each scenario is stated in the six-part form of Bass, Clements and Kazman: source, stimulus,
 artefact, environment, response, response measure [13]. These are the scenarios carried into the
 utility tree of Figure 3.10 and into the architectural evaluation of §6.12. Ten are given here; the
-remainder are in Appendix B.
+remainder are in `docs/SRS.md`.
 
 | ID | NFR | Source | Stimulus | Artefact | Environment | Response | Response measure |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -430,7 +431,7 @@ remainder are in Appendix B.
 | QAS-03 | NFR-S5 | Administrator | Terminates a membership while that member holds a valid access token | API, session store | Normal operation | The member's next request is rejected | Within one request; no successful authenticated call after the act |
 | QAS-04 | NFR-S6 | Authenticated member | Requests another member's payment record by identifier | API authorisation | Normal operation | Access refused, attempt recorded | 0 unauthorised disclosures across the enumerated protected endpoints |
 | QAS-05 | NFR-R4 | Mail provider | Becomes unavailable for 30 minutes | Notification component | Production | Authentication and reads continue; queued mail is retried or reported | 0 failed sign-ins attributable to the outage |
-| QAS-06 | NFR-M2 | Maintainer | Adds one field to an existing entity through to both clients | Whole stack | Development | Change completed with the suite green | ≤ 1 working session; file-touch count reported in §8.14 |
+| QAS-06 | NFR-M2 | Maintainer | Adds one field to an existing entity through to both clients | Whole stack | Development | Change completed with the suite green | ≤ 1 working session; file-touch count reported in §9.14 |
 | QAS-07 | NFR-M1 | Maintainer | Introduces a dependency from the domain layer onto the persistence layer | Build | Continuous integration | Build fails with the violation named | Detected on the first run, before merge |
 | QAS-08 | NFR-F2 | Examiner | Asks which code enforces the constitutional restriction on who may vote | Source and specification | Review | A single traced location is produced | Trace from Art. III §B to DC-03 to FR-36 to a named test |
 | QAS-09 | NFR-R2 | Maintainer | Loses the production database | Backup and restore procedure | Disaster | Service restored from backup | ≤ 4 hours; ≤ 24 hours of data lost |
@@ -452,7 +453,7 @@ inheritance of capability, with one deliberate exception noted in §5.3: an EC M
 capability derives from an assigned role and not from the position itself, so that a committee
 position can exist in the record without conferring system access.
 
-Table 3.3 gives the ten highest-value use cases in full. The remainder are in Appendix B.
+Table 3.3 gives the ten highest-value use cases in full. The remainder are in `docs/SRS.md`.
 
 ## 3.7 User Stories, Acceptance Criteria and the Definition of Done
 
@@ -545,7 +546,7 @@ clause, the clause governs.
 | DC-12 | Elections for all voting members in good standing shall be held every three years, conducted under the authority of Article V and the election documents. | Art. V | FR-38, FR-39 |
 | DC-13 | An amendment may be proposed by the Executive Committee or by a petition of twenty percent of Voting Members, shall be circulated at least fourteen days before the Annual General Meeting, and requires a two-thirds majority at that meeting. | Art. VIII | FR-35, FR-37 |
 | DC-14 | Financial records shall be maintained and reported to the membership; the Treasurer is accountable for receipts and disbursements. | Art. VI | FR-21, FR-25, FR-44 |
-| DC-15 | The conduct of a ballot, its sealing, counting and the declaration of result rest with the Election Commission under the election documents, and not with the platform. | Art. V, election regulations, ballot sealing certificate, counting authorisation | FR-39, §9.10 |
+| DC-15 | The conduct of a ballot, its sealing, counting and the declaration of result rest with the Election Commission under the election documents, and not with the platform. | Art. V, election regulations, ballot sealing certificate, counting authorisation | FR-39, §8.10 |
 | DC-16 | The constitution in force is the latest ratified version by effective date; earlier versions are superseded and retained, not destroyed. | Art. VIII | FR-32, FR-33 |
 
 DC-04 and DC-05 deserve a note, because they are the clearest boundary of what software can do. The
@@ -587,7 +588,7 @@ increments that slipped. Feasible.
 
 **Legal and ethical.** The system holds national identity numbers, dates of birth, photographs and
 financial evidence for real people. Bangladesh's data protection statute was in draft at the time of
-writing, so the project cannot claim compliance with it and does not; instead §9.8 records the
+writing, so the project cannot claim compliance with it and does not; instead §8.8 records the
 principles applied, being purpose limitation, minimisation, default non-disclosure and stated
 retention, and the front-matter declaration records the basis on which live data was handled during
 development. Use of the college's name and crest is governed by DC-01. Feasible, with the
@@ -642,7 +643,7 @@ One finding was recorded and deliberately not resolved. Entry P3-F2 observes tha
 enforce a ten-minute idle timeout while the API enforces none, so a captured token remains valid
 until it expires on its own schedule. The specification never stated an idle-expiry requirement, and
 adding one at this stage would have meant server-side session state that the stateless token design
-of §9.5 was chosen to avoid. It is carried as a known gap rather than closed, and it is the reason
+of §8.5 was chosen to avoid. It is carried as a known gap rather than closed, and it is the reason
 NFR-S5 is worded around credential change rather than around inactivity.
 
 Residual risks carried forward: the participant sample is small and purposive, so the requirement
@@ -1133,20 +1134,20 @@ correcting the underlying membership or payment record and reissuing the roll, w
 retained. *Exceptions:* none. *Postconditions:* a published roll; the ballot itself proceeds under
 the election documents and outside this system.
 
-The remaining use cases are in Appendix B.
+The remaining use cases are in `docs/SRS.md`.
 
 ### Table 3.4 — Requirements traceability matrix
 
 The matrix is established here and maintained in the repository so that it can be checked against the
 tree. The columns are requirement, constitutional source where applicable, use case, design element,
 implementation artefact and test case. A representative extract follows; the full matrix appears as
-Appendix C and is closed in §12.2.
+Appendix B and is closed in §12.2.
 
 | Req | DC / clause | Use case | Design element (Ch. 5–6) | Implementation artefact (Ch. 7) | Test (Ch. 8) |
 | --- | --- | --- | --- | --- | --- |
 | FR-01 | — | UC-01 | Registration sequence, §5.5 | Registration endpoint and application service | Wizard validation and duplicate-identity tests |
 | FR-02 | DC-08 | UC-01, UC-02 | Membership state machine, §5.3 | Membership status transitions | State-transition suite |
-| FR-03 | — | UC-04 (profile) | Masking projection, §9.7 | Field-visibility model and directory projection | Masked-projection tests |
+| FR-03 | — | UC-04 (profile) | Masking projection, §8.7 | Field-visibility model and directory projection | Masked-projection tests |
 | FR-19 | DC-14 | UC-02 | Approval flow, §5.5 | Obligation raising on approval | Approval-side-effect tests |
 | FR-21 | DC-14 | UC-04 | Ledger model, §5.4 | Payment and verification records | Attribution and immutability tests |
 | FR-25 | DC-14 | UC-04 | Append-only rule, §5.6 | Receipt generation; amendment refusal | Compensating-entry tests |
@@ -1156,8 +1157,8 @@ Appendix C and is closed in §12.2.
 | FR-37 | DC-13 | UC-08, UC-09 | Threshold reporting, §5.6 | Count and threshold report | Two-thirds computation tests |
 | FR-38 | DC-03, DC-12 | UC-10 | Roll derivation, §5.4 | Voter-roll query | Roll composition tests |
 | FR-44 | DC-14 | UC-02, UC-04 | Archival deletion, §6.9 | Global filter on archived records | Exclusion and recovery tests |
-| NFR-M1 | — | — | Dependency rule, §6.4 | Layer boundaries | Architecture test, §8.4 |
-| NFR-S5 | DC-07 | UC-02 | Session invalidation, §9.5 | Security-stamp check per request | Revocation timing test |
+| NFR-M1 | — | — | Dependency rule, §6.4 | Layer boundaries | Architecture test, §9.4 |
+| NFR-S5 | DC-07 | UC-02 | Session invalidation, §8.5 | Security-stamp check per request | Revocation timing test |
 
 ### Table 3.5 — MoSCoW prioritisation and negotiation outcome
 
@@ -1178,8 +1179,8 @@ section, and the requirement or design element by which it is enforced.
 | Economic | Operating cost of the order of tens of dollars a year against a commercial licence exceeding the Association's annual income | Feasible | Cost is borne personally until the Association holds an account | §10.10 |
 | Operational | The binding constraint is officer time spent verifying payments, not the software | Feasible with reservation | Permanent administrative burden, quantified rather than assumed | §12.6, §13.4 |
 | Schedule | Incremental delivery, so schedule risk reduces scope rather than removing the system | Feasible | Two increments slipped | Ch. 11 |
-| Legal | Bangladesh's data protection statute was in draft; no compliance claim is made | Feasible | Obligations may change on enactment | §9.8 |
-| Ethical | Live personal data handled under a stated declaration; college identity used per DC-01 | Feasible | Sole-maintainer access to production data is an unresolved structural risk | Front matter, §9.8, §13.4 |
+| Legal | Bangladesh's data protection statute was in draft; no compliance claim is made | Feasible | Obligations may change on enactment | §8.8 |
+| Ethical | Live personal data handled under a stated declaration; college identity used per DC-01 | Feasible | Sole-maintainer access to production data is an unresolved structural risk | Front matter, §8.8, §13.4 |
 
 ### Table 3.8 — Specification defects found by the formal technical review
 
